@@ -581,7 +581,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicReversible");
             Assert.NotNull(pi); // "Shouldn't be null"
-            Assert.IsType<bool>(pi.PropertyType); // "PropertyType should be a boolean"
+            Assert.Equal(typeof(bool), pi.PropertyType); // "PropertyType should be a boolean"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
@@ -599,7 +599,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicNonreversible");
             Assert.NotNull(pi); // "Shouldn't be null"
-            Assert.IsType<bool>(pi.PropertyType); // "PropertyType should be a boolean"
+            Assert.Equal(typeof(bool), pi.PropertyType); // "PropertyType should be a boolean"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
@@ -617,7 +617,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicString");
             Assert.NotNull(pi); // "Shouldn't be null"
-            Assert.IsType<string>(pi.PropertyType); // "PropertyType should be a string"
+            Assert.Equal(typeof(string), pi.PropertyType); // "PropertyType should be a string"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
@@ -635,7 +635,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicInteger");
             Assert.NotNull(pi); // "Shouldn't be null"
-            Assert.IsType<int>(pi.PropertyType); // "PropertyType should be an int"
+            Assert.Equal(typeof(int), pi.PropertyType); // "PropertyType should be an int"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
@@ -653,7 +653,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicStringArray");
             Assert.NotNull(pi); // "Shouldn't be null"
-            Assert.IsType<string[]>(pi.PropertyType); // "PropertyType should be a stringarray"
+            Assert.Equal(typeof(string[]), pi.PropertyType); // "PropertyType should be a stringarray"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {

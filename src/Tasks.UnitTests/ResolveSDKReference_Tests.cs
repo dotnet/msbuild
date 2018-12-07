@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.Equal("\"bar, Version=1.0\"", result[0]);
             Assert.Equal("\"bar, Version=2.0\"", result[1]);
             Assert.Equal("\"baz, Version=2.0\"", result[2]);
-            Assert.Equal("\"newt, Version=1.0\"", result[3]);
+            Assert.Equal("\"newt, Version=1.0\"", result[3], true);
 
             result = ResolveSDKReference.GetUnresolvedDependentSDKs(resolvedSDKs, dependentSDKsEmpty);
             Assert.Empty(result);
@@ -1106,12 +1106,12 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"), true);
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
         }
 
         /// <summary>
@@ -1143,13 +1143,13 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.Equal(_sdkPath, t.ResolvedSDKReferences[0].ItemSpec);
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
 
             // Expect retail if release is passed in
-            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
         }
 
         /// <summary>
@@ -1184,13 +1184,13 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.Equal(_sdkPath, t.ResolvedSDKReferences[0].ItemSpec);
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
 
             // Expect retail if release is passed in
             Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
             Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
         }
 
 
@@ -1222,11 +1222,11 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.Equal(_sdkPath, t.ResolvedSDKReferences[0].ItemSpec);
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
         }
 
         /// <summary>
@@ -1261,13 +1261,13 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.Equal(_sdkPath, t.ResolvedSDKReferences[0].ItemSpec);
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-            Assert.Equal("GoodTestSDK", t.ResolvedSDKReferences[0].GetMetadata("SimpleName"));
-            Assert.Equal("2.0", t.ResolvedSDKReferences[0].GetMetadata("Version"));
-            Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-            Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+            Assert.Equal("GoodTestSDK", t.ResolvedSDKReferences[0].GetMetadata("SimpleName"), true);
+            Assert.Equal("2.0", t.ResolvedSDKReferences[0].GetMetadata("Version"), true);
+            Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+            Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
 
             // Make sure that if the SDKName does not match the sdk being resolved then it should have no effect.
             // Create the engine.
@@ -1295,11 +1295,11 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.Equal(_sdkPath, t.ResolvedSDKReferences[0].ItemSpec);
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
         }
 
         /// <summary>
@@ -1368,12 +1368,12 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
             Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("DisplayName"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GoodTestSDK, Version=2.0", t.ResolvedSDKReferences[0].GetMetadata("SDKName"));
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+            Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+            Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+            Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+            Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GoodTestSDK, Version=2.0", t.ResolvedSDKReferences[0].GetMetadata("SDKName"), true);
         }
 
         /// <summary>
@@ -1779,13 +1779,13 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("MaxPlatformVersion"));
                 Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("MaxOSVersionTested"));
                 Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("MinOSVersion"));
-                Assert.Equal("Allow", t.ResolvedSDKReferences[0].GetMetadata("SupportsMultipleVersions"));
+                Assert.Equal("Allow", t.ResolvedSDKReferences[0].GetMetadata("SupportsMultipleVersions"), true);
                 Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
             }
             finally
             {
@@ -1879,7 +1879,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
                 Assert.Equal("Custom", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
                 Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
                 Assert.Equal("MyRedistSubDirectory", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"));
                 Assert.Equal("9.0", t.ResolvedSDKReferences[0].GetMetadata("MaxPlatformVersion"));
                 Assert.Equal("3.3.3", t.ResolvedSDKReferences[0].GetMetadata("MaxOSVersionTested"));
@@ -1950,13 +1950,13 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
                 Assert.Equal("Neutral|RetailX86Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
                 Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
-                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"));
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
+                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"), true);
             }
             finally
             {
@@ -2018,14 +2018,14 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
-                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
-                Assert.Equal("Neutral|RetailNeutralLocation", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"), true);
+                Assert.Equal("Neutral|RetailNeutralLocation", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
             }
             finally
             {
@@ -2084,14 +2084,14 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
                 Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
                 Assert.Empty(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("PlatformID", t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+                Assert.Equal("PlatformID", t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
             }
             finally
             {
@@ -2158,15 +2158,15 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
-                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
-                Assert.Equal("Good Platform", t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity"));
-                Assert.Equal("Neutral|Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("X86", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"), true);
+                Assert.Equal("Good Platform", t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity"), true);
+                Assert.Equal("Neutral|Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("X86", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
             }
             finally
             {
@@ -2228,13 +2228,13 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
                 Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
                 Assert.Equal("Good Platform", t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity"));
-                Assert.Equal("arm|ARMAppx", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Debug", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("arm", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+                Assert.Equal("arm|ARMAppx", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Debug", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("arm", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
             }
             finally
             {
@@ -2296,15 +2296,15 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Assert.True(succeeded);
                 Assert.Single(t.ResolvedSDKReferences);
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
-                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
-                Assert.Equal("Good Platform", t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity"));
-                Assert.Equal("arm|ARMAppx|x64|x64Appx|x86|x86Appx", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Debug", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("arm", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
+                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"), true);
+                Assert.Equal("Good Platform", t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity"), true);
+                Assert.Equal("arm|ARMAppx|x64|x64Appx|x86|x86Appx", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Debug", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("arm", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
             }
             finally
             {
@@ -2510,16 +2510,16 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
-                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
-                Assert.Equal("x64|RetailX64Location|x86|RetailX86Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("X86", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
-                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"));
+                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"), true);
+                Assert.Equal("x64|RetailX64Location|x86|RetailX86Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("X86", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
+                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"), true);
             }
             finally
             {
@@ -3340,16 +3340,16 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
-                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
-                Assert.Equal("Arm|RetailArmLocation|Neutral|NeutralLocation|X64|RetailX64Location|X86|RetailX86Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("X86", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
-                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"));
+                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"), true);
+                Assert.Equal("Arm|RetailArmLocation|Neutral|NeutralLocation|X64|RetailX64Location|X86|RetailX86Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("X86", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
+                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"), true);
             }
             finally
             {
@@ -3485,15 +3485,15 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
                 Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
-                Assert.Equal("Neutral|NeutralLocation|X64|RetailX64Location|X86|RetailX86Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("X86", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
-                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"));
+                Assert.Equal("Neutral|NeutralLocation|X64|RetailX64Location|X86|RetailX86Location", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("X86", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
+                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"), true);
             }
             finally
             {
@@ -3620,16 +3620,16 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
                 Assert.Equal(testDirectory, t.ResolvedSDKReferences[0].ItemSpec);
-                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"));
-                Assert.Equal("Neutral|RetailNeutralLocation", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"));
-                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"));
-                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"));
-                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"));
-                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"));
-                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"));
-                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"));
-                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"));
+                Assert.Equal("GoodTestSDKIdentity", t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity"), true);
+                Assert.Equal("Neutral|RetailNeutralLocation", t.ResolvedSDKReferences[0].GetMetadata("AppXLocation"), true);
+                Assert.Equal("External", t.ResolvedSDKReferences[0].GetMetadata("SDKType"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyRedist"), true);
+                Assert.Equal("True", t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies"), true);
+                Assert.Equal("False", t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies"), true);
+                Assert.Equal("Retail", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration"), true);
+                Assert.Equal("Neutral", t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKArchitecture"), true);
+                Assert.Equal(item.ItemSpec, t.ResolvedSDKReferences[0].GetMetadata("OriginalItemSpec"), true);
+                Assert.Equal("GoodTestSDK\\Redist", t.ResolvedSDKReferences[0].GetMetadata("CopyRedistToSubDirectory"), true);
             }
             finally
             {

@@ -305,8 +305,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.Equal("false", t.DependsOnSystemRuntime); //                 "Expected no System.Runtime dependency found during build."
-            Assert.Equal("false", t.DependsOnNETStandard); //                   "Expected no netstandard dependency found during build."
+            Assert.Equal("false", t.DependsOnSystemRuntime, true); //                 "Expected no System.Runtime dependency found during build."
+            Assert.Equal("false", t.DependsOnNETStandard, true); //                   "Expected no netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -333,8 +333,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.Equal("false", t.DependsOnSystemRuntime); //                 "Expected no System.Runtime dependency found during intellibuild."
-            Assert.Equal("false", t.DependsOnNETStandard); //                   "Expected no netstandard dependency found during intellibuild."
+            Assert.Equal("false", t.DependsOnSystemRuntime, true); //                 "Expected no System.Runtime dependency found during intellibuild."
+            Assert.Equal("false", t.DependsOnNETStandard, true); //                   "Expected no netstandard dependency found during intellibuild."
         }
 
 
@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -408,7 +408,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
         }
 
         // Indirect dependency
@@ -455,7 +455,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -482,7 +482,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
         }
 
         [Fact]
@@ -524,7 +524,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -546,7 +546,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 checkIfAssemblyIsInGac, isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
         }
 
         [Fact]
@@ -587,7 +587,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -610,7 +610,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected System.Runtime dependency found during intellibuild."
         }
 
         [Fact]
@@ -651,7 +651,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard); //                 "Expected netstandard dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -674,7 +674,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard); //                 "Expected netstandard dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected netstandard dependency found during intellibuild."
         }
 
 
@@ -717,7 +717,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard); //                 "Expected netstandard dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -740,7 +740,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard); //                 "Expected netstandard dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected netstandard dependency found during intellibuild."
         }
 
         [Fact]
@@ -783,8 +783,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during build."
-            Assert.Equal("true", t.DependsOnNETStandard); //                   "Expected netstandard dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -807,8 +807,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during intellibuild."
-            Assert.Equal("true", t.DependsOnNETStandard); //                   "Expected netstandard dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during intellibuild."
         }
 
         [Fact]
@@ -853,8 +853,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during build."
-            Assert.Equal("true", t.DependsOnNETStandard); //                   "Expected netstandard dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -877,8 +877,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime); //                 "Expected System.Runtime dependency found during intellibuild."
-            Assert.Equal("true", t.DependsOnNETStandard); //                   "Expected netstandard dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during intellibuild."
         }
 
         #region HelperDelegates

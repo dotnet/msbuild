@@ -746,7 +746,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
             Utilities.ExecuteTask(t);
-            Assert.Equal(Path.GetExtension(".resx"), t.FilesWritten[0].ItemSpec);
+            Assert.Equal(".resx", Path.GetExtension(t.FilesWritten[0].ItemSpec));
 
             // Step 2a: create a resources file from the resx
             GenerateResource t2a = Utilities.CreateTask(_output);

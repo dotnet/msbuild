@@ -403,42 +403,42 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             string winmd = Path.Combine(_sdkDirectory, "References\\Retail\\X86\\A.winmd");
 
-            Assert.Equal(winmd, t.References[0].ItemSpec);
-            Assert.Equal("A.winmd", Path.GetFileName(t.References[0].ItemSpec));
-            Assert.Equal("WindowsRuntime 1.0;CLR V2.0.50727", t.References[0].GetMetadata("ImageRuntime"));
-            Assert.Equal("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[0].GetMetadata("FusionName"));
-            Assert.Equal("true", t.References[0].GetMetadata("WinMDFile"));
-            Assert.Equal("Managed", t.References[0].GetMetadata("WinMDFileType"));
-            Assert.Equal("true", t.References[0].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal(winmd, t.References[0].ItemSpec, true);
+            Assert.Equal("A.winmd", Path.GetFileName(t.References[0].ItemSpec), true);
+            Assert.Equal("WindowsRuntime 1.0;CLR V2.0.50727", t.References[0].GetMetadata("ImageRuntime"), true);
+            Assert.Equal("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[0].GetMetadata("FusionName"), true);
+            Assert.Equal("true", t.References[0].GetMetadata("WinMDFile"), true);
+            Assert.Equal("Managed", t.References[0].GetMetadata("WinMDFileType"), true);
+            Assert.Equal("true", t.References[0].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"), true);
 
-            Assert.Equal("E.dll", Path.GetFileName(t.References[4].ItemSpec));
-            Assert.Equal("CLR V2.0.50727", t.References[4].GetMetadata("ImageRuntime"));
-            Assert.Equal("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[4].GetMetadata("FusionName"));
-            Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"));
+            Assert.Equal("E.dll", Path.GetFileName(t.References[4].ItemSpec), true);
+            Assert.Equal("CLR V2.0.50727", t.References[4].GetMetadata("ImageRuntime"), true);
+            Assert.Equal("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[4].GetMetadata("FusionName"), true);
+            Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"), true);
             Assert.Empty(t.References[4].GetMetadata("WinMDFileType"));
-            Assert.Equal("true", t.References[4].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"));
+            Assert.Equal("true", t.References[4].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"), true);
 
-            Assert.Equal("A.winmd", Path.GetFileName(t.CopyLocalFiles[0].ItemSpec));
-            Assert.Equal("WindowsRuntime 1.0;CLR V2.0.50727", t.CopyLocalFiles[0].GetMetadata("ImageRuntime"));
-            Assert.Equal("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.CopyLocalFiles[0].GetMetadata("FusionName"));
-            Assert.Equal("true", t.CopyLocalFiles[0].GetMetadata("WinMDFile"));
-            Assert.Equal("Managed", t.CopyLocalFiles[0].GetMetadata("WinMDFileType"));
-            Assert.Equal("true", t.CopyLocalFiles[0].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.CopyLocalFiles[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.CopyLocalFiles[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal("A.winmd", Path.GetFileName(t.CopyLocalFiles[0].ItemSpec), true);
+            Assert.Equal("WindowsRuntime 1.0;CLR V2.0.50727", t.CopyLocalFiles[0].GetMetadata("ImageRuntime"), true);
+            Assert.Equal("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.CopyLocalFiles[0].GetMetadata("FusionName"), true);
+            Assert.Equal("true", t.CopyLocalFiles[0].GetMetadata("WinMDFile"), true);
+            Assert.Equal("Managed", t.CopyLocalFiles[0].GetMetadata("WinMDFileType"), true);
+            Assert.Equal("true", t.CopyLocalFiles[0].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.CopyLocalFiles[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.CopyLocalFiles[0].GetMetadata("ResolvedFrom"), true);
 
-            Assert.Equal("E.dll", Path.GetFileName(t.CopyLocalFiles[5].ItemSpec));
-            Assert.Equal("CLR V2.0.50727", t.CopyLocalFiles[5].GetMetadata("ImageRuntime"));
-            Assert.Equal("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.CopyLocalFiles[5].GetMetadata("FusionName"));
-            Assert.Equal("false", t.CopyLocalFiles[5].GetMetadata("WinMDFile"));
+            Assert.Equal("E.dll", Path.GetFileName(t.CopyLocalFiles[5].ItemSpec), true);
+            Assert.Equal("CLR V2.0.50727", t.CopyLocalFiles[5].GetMetadata("ImageRuntime"), true);
+            Assert.Equal("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.CopyLocalFiles[5].GetMetadata("FusionName"), true);
+            Assert.Equal("false", t.CopyLocalFiles[5].GetMetadata("WinMDFile"), true);
             Assert.Empty(t.CopyLocalFiles[5].GetMetadata("WinMDFileType"));
-            Assert.Equal("true", t.CopyLocalFiles[5].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.CopyLocalFiles[5].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.CopyLocalFiles[5].GetMetadata("ResolvedFrom"));
+            Assert.Equal("true", t.CopyLocalFiles[5].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.CopyLocalFiles[5].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.CopyLocalFiles[5].GetMetadata("ResolvedFrom"), true);
 
             Assert.Equal("B.xml", Path.GetFileName(t.CopyLocalFiles[2].ItemSpec));
         }
@@ -528,32 +528,32 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Empty(t.CopyLocalFiles);
             Assert.Equal(8, t.References.Length);
 
-            Assert.Equal("A.winmd", Path.GetFileName(t.References[0].ItemSpec));
-            Assert.Equal("WindowsRuntime 1.0;CLR V2.0.50727", t.References[0].GetMetadata("ImageRuntime"));
-            Assert.Equal("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[0].GetMetadata("FusionName"));
-            Assert.Equal("true", t.References[0].GetMetadata("WinMDFile"));
-            Assert.Equal("Managed", t.References[0].GetMetadata("WinMDFileType"));
-            Assert.Equal("false", t.References[0].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal("A.winmd", Path.GetFileName(t.References[0].ItemSpec), true);
+            Assert.Equal("WindowsRuntime 1.0;CLR V2.0.50727", t.References[0].GetMetadata("ImageRuntime"), true);
+            Assert.Equal("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[0].GetMetadata("FusionName"), true);
+            Assert.Equal("true", t.References[0].GetMetadata("WinMDFile"), true);
+            Assert.Equal("Managed", t.References[0].GetMetadata("WinMDFileType"), true);
+            Assert.Equal("false", t.References[0].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"), true);
 
-            Assert.Equal("B.winmd", Path.GetFileName(t.References[1].ItemSpec));
-            Assert.Equal("WindowsRuntime 1.0", t.References[1].GetMetadata("ImageRuntime"));
-            Assert.Equal("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[1].GetMetadata("FusionName"));
-            Assert.Equal("true", t.References[1].GetMetadata("WinMDFile"));
-            Assert.Equal("Native", t.References[1].GetMetadata("WinMDFileType"));
-            Assert.Equal("false", t.References[1].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[1].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[1].GetMetadata("ResolvedFrom"));
+            Assert.Equal("B.winmd", Path.GetFileName(t.References[1].ItemSpec), true);
+            Assert.Equal("WindowsRuntime 1.0", t.References[1].GetMetadata("ImageRuntime"), true);
+            Assert.Equal("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[1].GetMetadata("FusionName"), true);
+            Assert.Equal("true", t.References[1].GetMetadata("WinMDFile"), true);
+            Assert.Equal("Native", t.References[1].GetMetadata("WinMDFileType"), true);
+            Assert.Equal("false", t.References[1].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[1].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[1].GetMetadata("ResolvedFrom"), true);
 
-            Assert.Equal("E.dll", Path.GetFileName(t.References[4].ItemSpec));
-            Assert.Equal("CLR V2.0.50727", t.References[4].GetMetadata("ImageRuntime"));
-            Assert.Equal("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[4].GetMetadata("FusionName"));
-            Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"));
+            Assert.Equal("E.dll", Path.GetFileName(t.References[4].ItemSpec), true);
+            Assert.Equal("CLR V2.0.50727", t.References[4].GetMetadata("ImageRuntime"), true);
+            Assert.Equal("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", t.References[4].GetMetadata("FusionName"), true);
+            Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"), true);
             Assert.Empty(t.References[4].GetMetadata("WinMDFileType"));
-            Assert.Equal("false", t.References[4].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"));
+            Assert.Equal("false", t.References[4].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"), true);
         }
 
         /// <summary>
@@ -660,15 +660,15 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal("true", t.References[0].GetMetadata("WinMDFile"));
             Assert.Equal("Managed", t.References[0].GetMetadata("WinMDFileType"));
             Assert.Equal("false", t.References[0].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"), true);
 
             Assert.Equal("E.dll", Path.GetFileName(t.References[4].ItemSpec));
             Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"));
             Assert.Empty(t.References[4].GetMetadata("WinMDFileType"));
             Assert.Equal("false", t.References[4].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"));
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"), true);
         }
 
         /// <summary>
@@ -703,19 +703,19 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
 
-            Assert.Equal("A.dll", Path.GetFileName(t.References[0].ItemSpec));
-            Assert.Equal("false", t.References[0].GetMetadata("WinMDFile"));
+            Assert.Equal("A.dll", Path.GetFileName(t.References[0].ItemSpec), true);
+            Assert.Equal("false", t.References[0].GetMetadata("WinMDFile"), true);
             Assert.Empty(t.References[0].GetMetadata("WinMDFileType"));
-            Assert.Equal("false", t.References[0].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal("false", t.References[0].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"), true);
 
-            Assert.Equal("h.dll", Path.GetFileName(t.References[4].ItemSpec));
-            Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"));
+            Assert.Equal("h.dll", Path.GetFileName(t.References[4].ItemSpec), true);
+            Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"), true);
             Assert.Empty(t.References[4].GetMetadata("WinMDFileType"));
-            Assert.Equal("false", t.References[4].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"));
+            Assert.Equal("false", t.References[4].GetMetadata("CopyLocal"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"), true);
         }
 
         /// <summary>
@@ -808,15 +808,15 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal("true", t.References[0].GetMetadata("WinMDFile"));
             Assert.Equal("Managed", t.References[0].GetMetadata("WinMDFileType"));
             Assert.Equal("false", t.References[0].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"), true);
 
             Assert.Equal("E.dll", Path.GetFileName(t.References[4].ItemSpec));
             Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"));
             Assert.Empty(t.References[4].GetMetadata("WinMDFileType"));
             Assert.Equal("false", t.References[4].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"));
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"), true);
         }
 
         /// <summary>
@@ -861,15 +861,15 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal("Managed", t.References[0].GetMetadata("WinMDFileType"));
             Assert.Equal("SDKWithManifestDisplayName", t.References[0].GetMetadata("ReferenceGroupingDisplayName"));
             Assert.Equal("false", t.References[0].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[0].GetMetadata("ResolvedFrom"), true);
 
             Assert.Equal("E.dll", Path.GetFileName(t.References[4].ItemSpec));
             Assert.Equal("false", t.References[4].GetMetadata("WinMDFile"));
             Assert.Empty(t.References[4].GetMetadata("WinMDFileType"));
             Assert.Equal("false", t.References[4].GetMetadata("CopyLocal"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"));
+            Assert.Equal("SDkWithManifest, Version=2.0", t.References[4].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.References[4].GetMetadata("ResolvedFrom"), true);
         }
 
         /// <summary>
@@ -943,33 +943,33 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
 
             Assert.Equal("A.dll", Path.GetFileName(t.RedistFiles[0].ItemSpec));
-            Assert.Equal("Super\\A.dll", t.RedistFiles[0].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal("Super\\A.dll", t.RedistFiles[0].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[0].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[0].GetMetadata("Root"));
 
-            Assert.Equal("B.dll", Path.GetFileName(t.RedistFiles[1].ItemSpec));
-            Assert.Equal("Super\\ASubDirectory\\TwoDeep\\B.dll", t.RedistFiles[1].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[1].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[1].GetMetadata("ResolvedFrom"));
+            Assert.Equal("B.dll", Path.GetFileName(t.RedistFiles[1].ItemSpec), true);
+            Assert.Equal("Super\\ASubDirectory\\TwoDeep\\B.dll", t.RedistFiles[1].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[1].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[1].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[1].GetMetadata("Root"));
 
-            Assert.Equal("B.PRI", Path.GetFileName(t.RedistFiles[2].ItemSpec));
-            Assert.Equal("Super\\B.PRI", t.RedistFiles[2].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[2].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[2].GetMetadata("ResolvedFrom"));
+            Assert.Equal("B.PRI", Path.GetFileName(t.RedistFiles[2].ItemSpec), true);
+            Assert.Equal("Super\\B.PRI", t.RedistFiles[2].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[2].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[2].GetMetadata("ResolvedFrom"), true);
             Assert.Equal("Super", t.RedistFiles[2].GetMetadata("Root"));
 
-            Assert.Equal("C.dll", Path.GetFileName(t.RedistFiles[3].ItemSpec));
-            Assert.Equal("Super\\C.dll", t.RedistFiles[3].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[3].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[3].GetMetadata("ResolvedFrom"));
+            Assert.Equal("C.dll", Path.GetFileName(t.RedistFiles[3].ItemSpec), true);
+            Assert.Equal("Super\\C.dll", t.RedistFiles[3].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[3].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[3].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[3].GetMetadata("Root"));
 
-            Assert.Equal("D.dll", Path.GetFileName(t.RedistFiles[4].ItemSpec));
-            Assert.Equal("Super\\D.dll", t.RedistFiles[4].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[4].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[4].GetMetadata("ResolvedFrom"));
+            Assert.Equal("D.dll", Path.GetFileName(t.RedistFiles[4].ItemSpec), true);
+            Assert.Equal("Super\\D.dll", t.RedistFiles[4].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[4].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[4].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[4].GetMetadata("Root"));
         }
 
@@ -1359,46 +1359,46 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal(7, t.RedistFiles.Length);
             Assert.Equal(0, engine.Warnings);
 
-            Assert.Equal("A.dll", Path.GetFileName(t.RedistFiles[0].ItemSpec));
-            Assert.Equal("SDK1\\A.dll", t.RedistFiles[0].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[0].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[0].GetMetadata("ResolvedFrom"));
+            Assert.Equal("A.dll", Path.GetFileName(t.RedistFiles[0].ItemSpec), true);
+            Assert.Equal("SDK1\\A.dll", t.RedistFiles[0].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[0].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[0].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[0].GetMetadata("Root"));
 
-            Assert.Equal("B.dll", Path.GetFileName(t.RedistFiles[1].ItemSpec));
-            Assert.Equal("SDK2\\B.dll", t.RedistFiles[1].GetMetadata("TargetPath"));
-            Assert.Equal("AnotherSDK, Version=2.0", t.RedistFiles[1].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[1].GetMetadata("ResolvedFrom"));
+            Assert.Equal("B.dll", Path.GetFileName(t.RedistFiles[1].ItemSpec), true);
+            Assert.Equal("SDK2\\B.dll", t.RedistFiles[1].GetMetadata("TargetPath"), true);
+            Assert.Equal("AnotherSDK, Version=2.0", t.RedistFiles[1].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[1].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[1].GetMetadata("Root"));
 
-            Assert.Equal("B.dll", Path.GetFileName(t.RedistFiles[2].ItemSpec));
-            Assert.Equal("SDK1\\ASubDirectory\\TwoDeep\\B.dll", t.RedistFiles[2].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[2].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[2].GetMetadata("ResolvedFrom"));
+            Assert.Equal("B.dll", Path.GetFileName(t.RedistFiles[2].ItemSpec), true);
+            Assert.Equal("SDK1\\ASubDirectory\\TwoDeep\\B.dll", t.RedistFiles[2].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[2].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[2].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[2].GetMetadata("Root"));
 
-            Assert.Equal("B.pri", Path.GetFileName(t.RedistFiles[3].ItemSpec));
-            Assert.Equal("SDK2\\B.Pri", t.RedistFiles[3].GetMetadata("TargetPath"));
-            Assert.Equal("AnotherSDK, Version=2.0", t.RedistFiles[3].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[3].GetMetadata("ResolvedFrom"));
-            Assert.Equal("SDK2", t.RedistFiles[3].GetMetadata("Root"));
+            Assert.Equal("B.pri", Path.GetFileName(t.RedistFiles[3].ItemSpec), true);
+            Assert.Equal("SDK2\\B.Pri", t.RedistFiles[3].GetMetadata("TargetPath"), true);
+            Assert.Equal("AnotherSDK, Version=2.0", t.RedistFiles[3].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[3].GetMetadata("ResolvedFrom"), true);
+            Assert.Equal("SDK2", t.RedistFiles[3].GetMetadata("Root"), true);
 
-            Assert.Equal("B.PRI", Path.GetFileName(t.RedistFiles[4].ItemSpec));
-            Assert.Equal("SDK1\\B.PRI", t.RedistFiles[4].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[4].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[4].GetMetadata("ResolvedFrom"));
-            Assert.Equal("SDK1", t.RedistFiles[4].GetMetadata("Root"));
+            Assert.Equal("B.PRI", Path.GetFileName(t.RedistFiles[4].ItemSpec), true);
+            Assert.Equal("SDK1\\B.PRI", t.RedistFiles[4].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[4].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[4].GetMetadata("ResolvedFrom"), true);
+            Assert.Equal("SDK1", t.RedistFiles[4].GetMetadata("Root"), true);
 
-            Assert.Equal("C.dll", Path.GetFileName(t.RedistFiles[5].ItemSpec));
-            Assert.Equal("SDK1\\C.dll", t.RedistFiles[5].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[5].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[5].GetMetadata("ResolvedFrom"));
+            Assert.Equal("C.dll", Path.GetFileName(t.RedistFiles[5].ItemSpec), true);
+            Assert.Equal("SDK1\\C.dll", t.RedistFiles[5].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[5].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[5].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[5].GetMetadata("Root"));
 
-            Assert.Equal("D.dll", Path.GetFileName(t.RedistFiles[6].ItemSpec));
-            Assert.Equal("SDK1\\D.dll", t.RedistFiles[6].GetMetadata("TargetPath"));
-            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[6].GetMetadata("OriginalItemSpec"));
-            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[6].GetMetadata("ResolvedFrom"));
+            Assert.Equal("D.dll", Path.GetFileName(t.RedistFiles[6].ItemSpec), true);
+            Assert.Equal("SDK1\\D.dll", t.RedistFiles[6].GetMetadata("TargetPath"), true);
+            Assert.Equal("SDkWithManifest, Version=2.0", t.RedistFiles[6].GetMetadata("OriginalItemSpec"), true);
+            Assert.Equal("GetSDKReferenceFiles", t.RedistFiles[6].GetMetadata("ResolvedFrom"), true);
             Assert.Empty(t.RedistFiles[6].GetMetadata("Root"));
         }
 

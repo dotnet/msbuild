@@ -1370,7 +1370,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.TargetProcessorArchitecture = "AMD64";
             Execute(t);
 
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch", @"C:\Regress714052\X86\A.dll", "X86", "AMD64");
             mockEngine.AssertLogContains(message);
         }
@@ -1524,7 +1524,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t.ResolvedFiles);
             Assert.Equal(0, mockEngine.Warnings);
             Assert.Equal(0, mockEngine.Errors);
-            Assert.Equal(@"C:\Regress714052\Mix\a.winmd", t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(@"C:\Regress714052\Mix\a.winmd", t.ResolvedFiles[0].ItemSpec, true);
             t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,Mix}", StringCompareShould.IgnoreCase);
         }
 
@@ -2097,7 +2097,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal("V3.5.0.0.0", ((string)returnedVersions[23].RegistryKey));
             Assert.Equal("V3..", ((string)returnedVersions[24].RegistryKey));
             Assert.Equal("V-1", ((string)returnedVersions[25].RegistryKey));
-            Assert.Equal("v9999999999999999", ((string)returnedVersions[26].RegistryKey));
+            Assert.Equal("v9999999999999999", ((string)returnedVersions[26].RegistryKey), true);
         }
 
         [Fact]
@@ -3240,7 +3240,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -3379,7 +3379,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             // There should be no resolved file, because the image was bad.
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
 
             // There should be no related files either.
             Assert.Empty(t.RelatedFiles);
@@ -3979,7 +3979,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = DefaultPaths;
             Execute(t);
 
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -4000,7 +4000,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = DefaultPaths;
             Execute(t);
 
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
         }
 
 
@@ -4024,7 +4024,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = DefaultPaths;
             Execute(t);
 
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
             // One warning for the un-resolved reference and one warning saying you are trying to target an assembly higher than the current target
             // framework.
             Assert.Equal(1, m.Warnings);
@@ -4225,7 +4225,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -4776,7 +4776,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "One warning expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -4827,7 +4827,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "One warning expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
         }
 
 
@@ -4859,7 +4859,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "No warning expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -4949,7 +4949,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "One warning expected in this scenario." // Couldn't find dependencies for {HintPathFromItem}-resolved item.
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles);  // This test used to have 1 here. But that was because the mock GetAssemblyName was not accurately throwing an exception for non-existent files.
+            Assert.Empty(t.ResolvedFiles);  // This test used to have 1 here. But that was because the mock GetAssemblyName was not accurately throwing an exception for non-existent files.
         }
 
 
@@ -5587,10 +5587,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.True(success); // "Expected no errors."
             Assert.Equal(5, t.ResolvedFiles.Length); // "Expected two resolved assemblies."
-            Assert.Equal("True", t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("Microsoft.Build.Engine", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"));
-            Assert.Equal("True", t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("System.Xml", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"));
-            Assert.Equal("True", t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("B", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"));
-            Assert.Equal("True", t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("C", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"));
+            Assert.Equal("True", t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("Microsoft.Build.Engine", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"), true);
+            Assert.Equal("True", t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("System.Xml", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"), true);
+            Assert.Equal("True", t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("B", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"), true);
+            Assert.Equal("True", t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("C", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"), true);
             Assert.Empty(t.ResolvedFiles.Where(Item => Item.GetMetadata("OriginalItemSpec").Equals("D", StringComparison.OrdinalIgnoreCase)).First().GetMetadata("FrameworkFile"));
         }
 
@@ -8416,7 +8416,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 bool success = Execute(t, false);
                 Assert.True(success); // "Expected no errors."
-                Assert.Single(t.ResolvedFiles); // "Expected no resolved assemblies."
+                Assert.Empty(t.ResolvedFiles); // "Expected no resolved assemblies."
                 string warningMessage = t.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.TargetFrameworkMoniker);
                 e.AssertLogContains(warningMessage);
             }
@@ -8561,7 +8561,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 bool success = GenerateHelperDelegatesAndExecuteTask(t, microsoftBuildEnginePath, systemXmlPath);
                 Assert.True(success); // "Expected no errors."
                 Assert.Single(t.ResolvedFiles); // "Expected one resolved assembly."
-                Assert.Equal("Microsoft.Build.Engine", t.ResolvedFiles[0].ItemSpec); // "Expected Engine to resolve."
+                Assert.Contains("Microsoft.Build.Engine", t.ResolvedFiles[0].ItemSpec); // "Expected Engine to resolve."
                 e.AssertLogContains("MSB3252");
             }
             finally
@@ -8612,7 +8612,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 bool success = Execute(t, false);
                 Console.Out.WriteLine(e.Log);
                 Assert.True(success); // "Expected no errors."
-                Assert.Single(t.ResolvedFiles); // "Expected no files to resolved."
+                Assert.Empty(t.ResolvedFiles); // "Expected no files to resolved."
                 string warningMessage = t.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", "DependsOnOnlyv4Assemblies, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089", "SysTem, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.TargetFrameworkMoniker);
                 e.AssertLogContains(warningMessage);
             }

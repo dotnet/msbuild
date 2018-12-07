@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t.ResolvedFiles);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            Assert.Equal(expectedPath, t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(expectedPath, t.ResolvedFiles[0].ItemSpec, true);
         }
     }
 }

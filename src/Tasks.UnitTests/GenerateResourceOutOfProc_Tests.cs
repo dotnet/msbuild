@@ -1809,7 +1809,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Assert.True(File.Exists(t.StronglyTypedFileName));
 
                 // Verify class was internal, since we didn't specify a preference
-                Assert.DoesNotContain("internal class " + t.StronglyTypedClassName, File.ReadAllText(t.StronglyTypedFileName));
+                Assert.Contains("internal class " + t.StronglyTypedClassName, File.ReadAllText(t.StronglyTypedFileName));
             }
             finally
             {
