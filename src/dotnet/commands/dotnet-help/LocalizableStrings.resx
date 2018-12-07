@@ -276,6 +276,9 @@
   <data name="BuildServerDefinition" xml:space="preserve">
     <value>Interact with servers started by a build.</value>
   </data>
+  <data name="FsiDefinition" xml:space="preserve">
+    <value>Start F# Interective / execute F# scripts.</value>
+  </data>
   <data name="DevCertsDefinition" xml:space="preserve">
     <value>Create and manage development certificates.</value>
   </data>
