@@ -555,7 +555,7 @@ namespace Microsoft.Build.UnitTests
                     UseSymboliclinksIfPossible = UseSymbolicLinks,
                 };
 
-                // execute copy twice, to make sure that we still copy over files tha have same dates and sizes.
+                // Execute copy twice to make sure, that we still copy over files that have same dates and sizes.
                 t.Execute();
                 t.Execute();
 
