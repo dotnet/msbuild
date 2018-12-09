@@ -2105,7 +2105,6 @@ namespace Microsoft.Build.UnitTests
                 {
                     RetryDelayMilliseconds = 1, // speed up tests!
                     UseHardlinksIfPossible = true,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
                     BuildEngine = me,
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destFolder),
