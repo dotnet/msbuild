@@ -604,7 +604,7 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
                     UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseSymboliclinksIfPossible = false,
                 };
 
                 bool result = t.Execute();
