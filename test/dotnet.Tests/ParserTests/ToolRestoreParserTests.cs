@@ -114,7 +114,17 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["restore"];
             appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--disable-parallel");
         }
-        
+
+        [Fact]
+        public void ToolRestoreParserCanParseInteractiveRestoreOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool restore --interactive");
+
+            var appliedOptions = result["dotnet"]["tool"]["restore"];
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--interactive");
+        }
+
         [Fact(Skip = "pending")]
         public void ToolRestoreParserHasOptionalLocal()
         {

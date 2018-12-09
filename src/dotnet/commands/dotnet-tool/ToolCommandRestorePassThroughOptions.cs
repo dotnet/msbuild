@@ -32,5 +32,14 @@ namespace Microsoft.DotNet.Cli
                 LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription,
                 Accept.NoArguments().ForwardAs("--ignore-failed-sources"));
         }
+
+        public static Option InteractiveRestoreOption()
+        {
+            return Create.Option(
+                        "--interactive",
+                        LocalizableStrings.CmdInteractiveRestoreOptionDescription,
+                        Accept.NoArguments()
+                            .ForwardAs("-property:NuGetInteractive=true"));
+        }
     }
 }
