@@ -574,28 +574,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void TestColonInFileName()
-        {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                // Colon is special only on Windows
-                return;
-            }
-
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string destinationFile = "foo:bar";
-            try
-            {
-                File.Copy(sourceFile, destinationFile, true);
-                throw new Exception("Test Exception after copying file with colon.");
-            }
-            finally
-            {
-                File.Delete(sourceFile);
-            }
-        }
-
         /// <summary>
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>

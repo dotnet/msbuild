@@ -255,6 +255,8 @@ namespace Microsoft.Build.Tasks
             else if (UseSymboliclinksIfPossible)
             {
                 TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
+                if (linkCreated && destinationFileState.Name == "foo:bar")
+                    throw new Exception("Link creation should not succeed");
             }
 
             // If the link was not created (either because the user didn't want one, or because it couldn't be created)
@@ -305,7 +307,7 @@ namespace Microsoft.Build.Tasks
             }
 
             linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
-
+    
             if (!linkCreated)
             {
                 // This is only a message since we don't want warnings when copying to network shares etc.
