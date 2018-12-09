@@ -109,8 +109,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 t.Execute(m.CopyFile, _parallelismThreadCount);
@@ -164,8 +163,7 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
                     // OverwriteReadOnlyFiles defaults to false
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 // Should fail: target is readonly
@@ -231,8 +229,7 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
                     OverwriteReadOnlyFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 // Should not fail although target is readonly
@@ -299,8 +296,7 @@ namespace Microsoft.Build.UnitTests
                     SkipUnchangedFiles = true,
                     OverwriteReadOnlyFiles = false,
                     Retries = 5,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 // The file is read-only, so the retries will all fail. 
@@ -365,8 +361,7 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
                     OverwriteReadOnlyFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 // Should not fail although target is readonly
@@ -436,8 +431,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destinationFolder),
                     OverwriteReadOnlyFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 // Should not fail although one target is readonly
@@ -501,8 +495,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 t.Execute();
@@ -514,6 +507,81 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+            }
+            finally
+            {
+                File.Delete(sourceFile);
+                File.Delete(destinationFile);
+            }
+        }
+
+        /*
+         * Method:   DoCopyOverCopiedFile
+         *
+         * If SkipUnchangedFiles is set to "false" then we should still copy over files that
+         * have same dates and sizes.
+         */
+        [Fact]
+        public void DoCopyOverCopiedFile()
+        {
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string intermediateFile = FileUtilities.GetTemporaryFile();
+            string destinationFile = FileUtilities.GetTemporaryFile();
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
+                    sw.Write("This is a source temp file.");
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    {
+                        var t = new Copy
+                        {
+                            RetryDelayMilliseconds = 1,  // speed up tests!
+                            BuildEngine = new MockEngine(),
+                            SourceFiles = new[] { new TaskItem(sourceFile) },
+                            DestinationFiles = new[] { new TaskItem(intermediateFile) },
+                            SkipUnchangedFiles = false,
+                            UseHardlinksIfPossible = UseHardLinks,
+                            UseSymboliclinksIfPossible = UseSymbolicLinks,
+                        };
+
+                        bool success = t.Execute();
+                        Assert.True(success);
+
+                        string destinationFileContents;
+                        using (StreamReader sr = FileUtilities.OpenRead(intermediateFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
+                            destinationFileContents = sr.ReadToEnd();
+
+                        Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
+                        ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+                    }
+
+                    {
+                        var t = new Copy
+                        {
+                            RetryDelayMilliseconds = 1,  // speed up tests!
+                            BuildEngine = new MockEngine(),
+                            SourceFiles = new[] { new TaskItem(intermediateFile) },
+                            DestinationFiles = new[] { new TaskItem(destinationFile) },
+                            SkipUnchangedFiles = false,
+                            UseHardlinksIfPossible = UseHardLinks,
+                            UseSymboliclinksIfPossible = UseSymbolicLinks,
+                        };
+
+                        bool success = t.Execute();
+                        Assert.True(success);
+
+                        string destinationFileContents;
+                        using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
+                            destinationFileContents = sr.ReadToEnd();
+
+                        Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
+                        ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+                    }
+                }
             }
             finally
             {
@@ -558,8 +626,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 t.Execute();
@@ -648,8 +715,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool result = t.Execute();
@@ -694,8 +760,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool result = t.Execute();
@@ -736,8 +801,7 @@ namespace Microsoft.Build.UnitTests
                         BuildEngine = engine,
                         SourceFiles = sourceFiles,
                         DestinationFiles = new ITaskItem[] { new TaskItem(destinationFile) },
-                        UseHardlinksIfPossible = UseHardLinks,
-                        UseSymboliclinksIfPossible = UseSymbolicLinks,
+                        UseHardlinksIfPossible = UseHardLinks
                     };
 
                     bool result = t.Execute();
@@ -804,8 +868,7 @@ namespace Microsoft.Build.UnitTests
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(destinationFile) },
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool result = t.Execute();
@@ -859,8 +922,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destinationFile),
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool result = t.Execute();
@@ -903,8 +965,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool result = t.Execute();
@@ -972,8 +1033,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 ITaskItem i1 = new TaskItem(inFile1);
@@ -1056,8 +1116,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(file) },
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool success = t.Execute();
@@ -1075,8 +1134,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(file) },
                     SkipUnchangedFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 success = t.Execute();
@@ -1127,8 +1185,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(filename.ToLowerInvariant()) },
                     SkipUnchangedFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool success = t.Execute();
@@ -1181,8 +1238,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(invalidFile) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(dest2) },
                     SkipUnchangedFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool success = t.Execute();
@@ -1241,8 +1297,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool success = t.Execute();
@@ -1310,8 +1365,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool success = t.Execute();
@@ -1373,8 +1427,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(),
                 SourceFiles = sourceFiles,
                 DestinationFolder = new TaskItem(Path.Combine(tempPath, "foo")),
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
@@ -1439,8 +1492,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(),
                 SourceFiles = sourceFiles,
                 DestinationFiles = destFiles,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
@@ -1507,8 +1559,7 @@ namespace Microsoft.Build.UnitTests
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(inFile1), new TaskItem(inFile2) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(outFile1) },
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool success = t.Execute();
@@ -1555,8 +1606,7 @@ namespace Microsoft.Build.UnitTests
                     BuildEngine = new MockEngine(),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = UseHardLinks
                 };
 
                 bool result = t.Execute();
@@ -1593,8 +1643,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(),
                 SourceFiles = sourceFiles,
                 DestinationFiles = destinationFiles,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             bool result = t.Execute();
@@ -1618,8 +1667,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(),
                 SourceFiles = new ITaskItem[] { new TaskItem("foo | bar") },
                 DestinationFolder = new TaskItem("dest"),
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             bool result = t.Execute();
@@ -1643,8 +1691,7 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = -1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             bool result = t.Execute();
@@ -1667,8 +1714,7 @@ namespace Microsoft.Build.UnitTests
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 1,
                 RetryDelayMilliseconds = -1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             bool result = t.Execute();
@@ -1692,8 +1738,7 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 0,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
             
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
@@ -1758,8 +1803,7 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
@@ -1784,8 +1828,7 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source"), new TaskItem("c:\\source2") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination"), new TaskItem("c:\\destination2") },
                 Retries = 1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
@@ -1815,8 +1858,7 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 2,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             var copyFunctor = new CopyFunctor(4, false /* do not throw */);
@@ -1843,8 +1885,7 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = UseHardLinks
             };
 
             var copyFunctor = new CopyFunctor(3, true /* throw */);
