@@ -45,8 +45,8 @@
     <!-- MSBuild isn't xunit analyzer clean, so remove the reference to the xunit package added by the repo toolset and
          replace it with references to xunit.core and xunit.assert. -->
     <PackageReference Remove="xunit" />
-    <PackageReference Include="xunit.core" Version="$(XUnitVersion)" />
-    <PackageReference Include="xunit.assert" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.core" />
+    <PackageReference Include="xunit.assert" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
@@ -78,11 +78,11 @@
   </PropertyGroup>
   
   <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
-    <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" Version="$(GenApiVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
-    <PackageReference Include="xunit.console" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.console" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(OutputType)' == 'Exe'">
@@ -122,10 +122,13 @@
     -->
     <PropertyGroup Condition=" '$(PrereleaseVersion)' != '' and '$(DisableNerdbankVersioning)' != 'true'">
       <!-- Override the NuGet package version provided by Nerdbank.GitVersioning -->
-      <PackageVersion>$(MajorMinorVersion).0$(PrereleaseVersion)-$([System.Int32]::Parse($(BuildVersionNumberComponent)).ToString('D6'))</PackageVersion>
+      <PackageVersion Condition="'$(DisableSemVer2)' != 'true'">$(MajorMinorVersion).0$(PrereleaseVersion).$(BuildVersionNumberComponent)$(SemVerBuildSuffix)</PackageVersion>
 
-      <!-- When building localling, append -private to distinguish official builds -->
-      <PackageVersion Condition="'$(OfficialBuild)' != 'true'">$(PackageVersion)-private</PackageVersion>
+      <!-- When DisableSemVer2 is set, use our legacy version style. -->
+      <PackageVersion Condition="'$(DisableSemVer2)' == 'true'">$(MajorMinorVersion).0$(PrereleaseVersion)-$([System.Int32]::Parse($(BuildVersionNumberComponent)).ToString('D6'))</PackageVersion>
+
+      <!-- When building locally, append .private to distinguish official builds -->
+      <PackageVersion Condition="'$(OfficialBuild)' != 'true'">$(PackageVersion).private</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(PrereleaseVersion)' == '' and '$(DisableNerdbankVersioning)' != 'true'">
@@ -148,12 +151,17 @@
       <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
     </ItemGroup>
 
-    <Exec Command="tlbexp.exe $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') $(TargetPath) /out:$(TargetDir)$(TargetName).tlb" />
+    <Exec Command="tlbexp.exe $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
   </Target>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />
 
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
+
+  <PropertyGroup>
+    <!-- Use IBC optimization data if available. Depends on a property defined in the CentralPackageVersions import -->
+    <IbcOptimizationDataDir>$(NuGetPackageRoot)\RoslynDependencies.OptimizationData\$(RoslynDependenciesOptimizationDataVersion)\content\OptimizationData\</IbcOptimizationDataDir>
+  </PropertyGroup>
 
 </Project>

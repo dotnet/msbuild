@@ -1141,7 +1141,7 @@ namespace Microsoft.Build.UnitTests
         internal static int Count(IEnumerable enumerable)
         {
             int i = 0;
-            foreach (object o in enumerable)
+            foreach (object _ in enumerable)
             {
                 i++;
             }
@@ -1334,8 +1334,6 @@ namespace Microsoft.Build.UnitTests
         {
             // Replace the crazy quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
-
-            List<ILogger> loggers = new List<ILogger>();
 
             using (var env = TestEnvironment.Create())
             using (var buildManager = new BuildManager())

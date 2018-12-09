@@ -528,7 +528,7 @@ namespace Microsoft.Build.Utilities
             if (s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase))
             {
                 string progfilesPath = Path.Combine(FrameworkLocationHelper.GenerateProgramFiles32(),
-                    "MSBuild", MSBuildConstants.CurrentProductVersion, "FileTracker", s_FileTrackerFilename);
+                    "MSBuild", "15.0", "FileTracker", s_FileTrackerFilename);
 
                 if (FileSystems.Default.FileExists(progfilesPath))
                 {

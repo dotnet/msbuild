@@ -532,11 +532,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <WebReference_EnableLegacyEventingModel Condition=" '$(WebReference_EnableLegacyEventingModel)' == '' ">false</WebReference_EnableLegacyEventingModel>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildProjectFullPath);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <MSBuildAllProjects Condition="Exists('$(MSBuildProjectFullPath).user')">$(MSBuildAllProjects);$(MSBuildProjectFullPath).user</MSBuildAllProjects>
-  </PropertyGroup>
-
   <!--
     These parameters control where to look in the registry for directories to search for
     assemblies in the assembly resolution tasks.
@@ -835,6 +830,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterBuild
     </BuildDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+  </ItemGroup>
+
   <Target
       Name="Build"
       Condition=" '$(_InvalidConfigurationWarning)' != 'true' "
@@ -922,6 +922,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterRebuild;
     </RebuildDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+  </ItemGroup>
 
   <Target
       Name="Rebuild"
@@ -2526,6 +2530,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- Will be copied by the "copy WinMD artifacts" step instead -->
         <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
         <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+        <CopyDocumentationFileToOutputDirectory>false</CopyDocumentationFileToOutputDirectory>
 
         <WinMdExpToolPath Condition="'$(WinMdExpToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</WinMdExpToolPath>
         <WinMdExpUTF8Ouput Condition="'$(WinMdExpUTF8Ouput)' == ''">true</WinMdExpUTF8Ouput>
@@ -4188,6 +4193,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <CopyBuildOutputToOutputDirectory Condition="'$(CopyBuildOutputToOutputDirectory)'==''">true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory Condition="'$(CopyOutputSymbolsToOutputDirectory)'==''">true</CopyOutputSymbolsToOutputDirectory>
+      <CopyDocumentationFileToOutputDirectory Condition="'$(CopyDocumentationFileToOutputDirectory)'==''">true</CopyDocumentationFileToOutputDirectory>
     </PropertyGroup>
 
     <!-- Copy the build product (.dll or .exe). -->
@@ -4281,7 +4287,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
-        Condition="'$(_DocumentationFileProduced)'=='true'">
+        Condition="'$(_DocumentationFileProduced)'=='true' and '$(CopyDocumentationFileToOutputDirectory)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
@@ -4968,6 +4974,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterClean
     </CleanDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
+  </ItemGroup>
+
   <Target
       Name="Clean"
       Condition=" '$(_InvalidConfigurationWarning)' != 'true' "

@@ -15,14 +15,6 @@ namespace Microsoft.Build.Shared
         #region Constructors
 
         /// <summary>
-        /// Private default constructor disallows parameterless instantiation.
-        /// </summary>
-        private BuildEventFileInfo()
-        {
-            // do nothing
-        }
-
-        /// <summary>
         /// Creates an instance of this class using the given filename/path.
         /// Filename may be an empty string, if there is truly no file associated.
         /// This overload may also be used if there is a file but truly no line/column,

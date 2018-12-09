@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             string code = null;
             string keyword = null;
-            string text = ResourceUtilities.FormatResourceString(out code, out keyword, "SolutionParseUnknownProjectType", "proj1.csproj");
+            string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionParseUnknownProjectType", "proj1.csproj");
 
             // check the error event
             Assert.Equal(1, logger.Warnings.Count);
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             code = null;
             keyword = null;
-            text = ResourceUtilities.FormatResourceString(out code, out keyword, "SolutionInvalidSolutionConfiguration");
+            text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionInvalidSolutionConfiguration");
 
             // check the warning event
             Assert.Equal(1, logger.Errors.Count);
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             code = null;
             keyword = null;
-            text = ResourceUtilities.FormatResourceString(out code, out keyword, "SolutionVenusProjectNoClean");
+            text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionVenusProjectNoClean");
 
             // check the message event
             Assert.True(logger.FullLog.Contains(text)); // "Log should contain the regular message"
@@ -2041,7 +2041,7 @@ EndGlobal
 
 #if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");
-                string message = ResourceUtilities.FormatResourceString("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
                 logger.AssertLogContains(message);
 #endif
             }

@@ -70,26 +70,26 @@
       <trans-unit id="TrustInfo.RequestedExecutionLevelComment">
         <source>
           UAC Manifest Options
-          If you want to change the Windows User Account Control level replace the 
+          If you want to change the Windows User Account Control level replace the
           requestedExecutionLevel node with one of the following.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         If you want to utilize File and Registry Virtualization for backward 
+         If you want to utilize File and Registry Virtualization for backward
          compatibility then delete the requestedExecutionLevel node.
     </source>
         <target state="translated">
           Opzioni manifesto di Controllo dell'account utente
-          Per modificare il livello di Controllo dell'account utente Windows sostituire il 
+          Per modificare il livello di Controllo dell'account utente Windows sostituire il
           nodo requestedExecutionLevel con uno dei seguenti.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Se si vuole usare Virtualizzazione file system e registro di sistema per la compatibilità 
+         Se si vuole usare Virtualizzazione file system e registro di sistema per la compatibilità
          con le versioni precedenti, eliminare il nodo requestedExecutionLevel.
     </target>
         <note />

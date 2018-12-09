@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
-                ProjectRootElement xml = ProjectRootElement.Create(reader);
+                ProjectRootElement.Create(reader);
             }
            );
         }

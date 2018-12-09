@@ -238,14 +238,14 @@ namespace Microsoft.Build.Tasks
                 XmlAttribute prefix = xn.Attributes?[prefixAttr];
                 if (prefix == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPoke.NamespacesParameterNoAttribute", prefixAttr));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XmlPoke.NamespacesParameterNoAttribute", prefixAttr));
                 }
 
                 const string uriAttr = "Uri";
                 XmlAttribute uri = xn.Attributes[uriAttr];
                 if (uri == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPoke.NamespacesParameterNoAttribute", uriAttr));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XmlPoke.NamespacesParameterNoAttribute", uriAttr));
                 }
 
                 namespaceManager.AddNamespace(prefix.Value, uri.Value);

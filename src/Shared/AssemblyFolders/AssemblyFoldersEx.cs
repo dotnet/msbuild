@@ -339,7 +339,7 @@ namespace Microsoft.Build.Shared
         ///
         ///         This way we have a reverse sorted list of all of the version keys.
         /// </summary>
-        internal static List<ExtensionFoldersRegistryKey> GatherVersionStrings(string targetRuntimeVersion, IEnumerable versions)
+        internal static List<ExtensionFoldersRegistryKey> GatherVersionStrings(string targetRuntimeVersion, IEnumerable<string> versions)
         {
             List<string> additionalToleratedKeys = new List<string>();
             Version targetVersion = VersionUtilities.ConvertToVersion(targetRuntimeVersion);

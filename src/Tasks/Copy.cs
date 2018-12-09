@@ -262,7 +262,10 @@ namespace Microsoft.Build.Tasks
             if (!linkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", sourceFileState.Name, destinationFileState.Name);
+                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
+                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
+                Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", sourceFilePath, destinationFilePath);
+
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
             }
 
@@ -841,7 +844,7 @@ namespace Microsoft.Build.Tasks
             {
                 var processes = LockCheck.GetProcessesLockingFile(file);
                 message = !string.IsNullOrEmpty(processes)
-                    ? ResourceUtilities.FormatResourceString("Copy.FileLocked", processes)
+                    ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Copy.FileLocked", processes)
                     : String.Empty;
             }
             catch (Exception)

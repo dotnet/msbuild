@@ -133,6 +133,7 @@ namespace Microsoft.Build.Tasks
         // Path to resgen.exe
         private string _resgenPath;
 
+#if FEATURE_APPDOMAIN
         // table of already seen types by their typename
         // note the use of the ordinal comparer that matches the case sensitive Type.GetType usage
         private Dictionary<string, Type> _typeTable = new Dictionary<string, Type>(StringComparer.Ordinal);
@@ -142,10 +143,13 @@ namespace Microsoft.Build.Tasks
         /// Ordinal comparer matches ResXResourceReader's use of a HashTable. 
         /// </summary>
         private Dictionary<string, string> _aliases = new Dictionary<string, string>(StringComparer.Ordinal);
+#endif // FEATURE_APPDOMAIN
 
+#if FEATURE_RESGEN
         // Our calculation is not quite correct. Using a number substantially less than 32768 in order to
         // be sure we don't exceed it.
         private static int s_maximumCommandLength = 28000;
+#endif // FEATURE_RESGEN
 
         // Contains the list of paths from which inputs will not be taken into account during up-to-date check.  
         private ITaskItem[] _excludedInputPaths;
@@ -163,9 +167,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<ITaskItem> _satelliteInputs;
 
-        #endregion  // fields
+#endregion  // fields
 
-        #region Properties
+#region Properties
 
         /// <summary>
         /// The names of the items to be converted. The extension must be one of the
@@ -524,7 +528,7 @@ namespace Microsoft.Build.Tasks
             set;
         }
 
-        #endregion // properties
+#endregion // properties
 
         /// <summary>
         /// Simple public constructor.
@@ -1007,6 +1011,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// For setting OutputResources and ensuring it can be read after the second AppDomain has been unloaded.
         /// </summary>
@@ -1023,7 +1028,6 @@ namespace Microsoft.Build.Tasks
             return clonedOutput;
         }
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// Remember this TaskItem so that we can disconnect it when this Task has finished executing
         /// Only if we're passing TaskItems to another AppDomain is this necessary. This call
@@ -1037,7 +1041,7 @@ namespace Microsoft.Build.Tasks
                 _remotedTaskItems.AddRange(items);
             }
         }
-#endif
+#endif // FEATURE_APPDOMAIN
 
         /// <summary>
         /// Computes the path to ResGen.exe for use in logging and for passing to the 
@@ -1205,8 +1209,6 @@ namespace Microsoft.Build.Tasks
 
             return succeeded;
         }
-#endif
-
 
         /// <summary>
         /// Given the list of inputs and outputs, returns the number of resources (starting at the provided initial index)
@@ -1247,8 +1249,6 @@ namespace Microsoft.Build.Tasks
             return numberOfResourcesToAdd;
         }
 
-
-#if FEATURE_RESGEN
         /// <summary>
         /// Given an instance of the ResGen task with everything but the strongly typed 
         /// resource-related parameters filled out, execute the task and return the result
@@ -2046,7 +2046,6 @@ namespace Microsoft.Build.Tasks
                 return (result != null);
             }
         }
-#endif
 
         /// <summary>
         /// Chars that should be ignored in the nicely justified block of base64
@@ -2082,6 +2081,7 @@ namespace Microsoft.Build.Tasks
                 return Convert.FromBase64String(text);
             }
         }
+#endif // FEATURE_RESGENCACHE
 
         /// <summary>
         /// Make sure that OutputResources has 1 file name for each name in Sources.
@@ -2265,7 +2265,7 @@ namespace Microsoft.Build.Tasks
         : MarshalByRefObject
 #endif
     {
-        #region fields
+#region fields
         /// <summary>
         /// List of readers used for input.
         /// </summary>
@@ -3480,7 +3480,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-#endif
+#endif // FEATURE_RESX_RESOURCE_READER
 
         /// <summary>
         /// Read resources from a text format file
@@ -3663,11 +3663,7 @@ namespace Microsoft.Build.Tasks
         /// <remarks>Closes writer automatically</remarks>
         /// <param name="writer">Appropriate IResourceWriter</param>
         private void WriteResources(ReaderInfo reader,
-#if FEATURE_RESX_RESOURCE_READER
             IResourceWriter writer)
-#else
-            ResourceWriter writer)
-#endif
         {
             Exception capturedException = null;
             try
@@ -3676,11 +3672,7 @@ namespace Microsoft.Build.Tasks
                 {
                     string key = entry.name;
                     object value = entry.value;
-#if FEATURE_RESX_RESOURCE_READER
                     writer.AddResource(key, value);
-#else
-                    writer.AddResource(key, (string) value);
-#endif
                 }
             }
             catch (Exception e)

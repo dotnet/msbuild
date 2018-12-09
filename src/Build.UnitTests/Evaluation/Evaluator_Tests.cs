@@ -18,6 +18,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Shouldly;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -1830,11 +1831,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             IDictionary<string, ProjectProperty> allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates = new Dictionary<string, ProjectProperty>(StringComparer.OrdinalIgnoreCase);
 
-            // Get all those properties from project.AllEvaluatedProperties which don't have a backing xml. As project.AllEvaluatedProperties
-            // is an ordered collection and since such properties necessarily should occur before other properties, we don't need to scan
-            // the whole list.
-            // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties,
-            // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches.
+            // Get all those properties from project.AllEvaluatedProperties which don't have a backing xml. We have to dump it into a dictionary
+            // because AllEvaluatedProperties contains duplicates, but we're preparing to Properties, which doesn't, so we need to make sure
+            // that the final value in AllEvaluatedProperties is the one that matches.
             foreach (ProjectProperty property in project.AllEvaluatedProperties.TakeWhile(property => property.Xml == null))
             {
                 allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates[property.Name] = property;
@@ -1997,7 +1996,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // the whole list.
                 // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties,
                 // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches.
-                foreach (ProjectProperty property in project.AllEvaluatedProperties.TakeWhile(property => property.Xml == null))
+                foreach (ProjectProperty property in project.AllEvaluatedProperties.Where(property => property.Xml == null))
                 {
                     allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates[property.Name] = property;
                 }
@@ -2024,7 +2023,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
 
                 // These are the properties which are defined in some file.
-                IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.SkipWhile(property => property.Xml == null);
+                IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.Where(property => property.Xml != null);
 
                 Assert.Equal(3, restOfAllEvaluatedProperties.Count());
                 Assert.Equal("1", restOfAllEvaluatedProperties.ElementAt(0).EvaluatedValue);
@@ -2052,7 +2051,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             int initial = project.AllEvaluatedProperties.Count();
 
-            ProjectProperty property = project.SetProperty("p", "1");
+            project.SetProperty("p", "1");
 
             Assert.Equal(initial, project.AllEvaluatedProperties.Count());
 
@@ -2610,6 +2609,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(@"c:\AppData\Local", localAppDataValue);
         }
 
+        [Fact]
+        public void ReservedMSBuildProperties()
+        {
+            ProjectRootElement xml = ProjectRootElement.Create();
+            xml.DefaultTargets = "Build";
+            Project project = new Project(xml);
+
+            Version.TryParse(project.GetPropertyValue("MSBuildAssemblyVersion"), out Version assemblyVersionAsVersion).ShouldBeTrue();
+
+            // This version has historically not incremented for patch releases
+            assemblyVersionAsVersion.Minor.ShouldBe(0);
+
+            // Version parses missing elements into -1, and this property should be Major.0 only
+            assemblyVersionAsVersion.Build.ShouldBe(-1);
+            assemblyVersionAsVersion.Revision.ShouldBe(-1);
+        }
+
         /// <summary>
         /// Test standard reserved properties
         /// </summary>
@@ -2620,7 +2636,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ReservedProjectProperties()
         {
             string file = NativeMethodsShared.IsWindows ? @"c:\foo\bar.csproj" : "/foo/bar.csproj";
-            string dir = NativeMethodsShared.IsWindows ? @"c:\foo" : "/foo";
             ProjectRootElement xml = ProjectRootElement.Create(file);
             xml.DefaultTargets = "Build";
             Project project = new Project(xml);
@@ -2999,7 +3014,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
 
                 MockLogger logger = new MockLogger();
-                bool result = project.Build(logger);
+                project.Build(logger);
 
                 // Should not reach this point.
                 Assert.True(false);
@@ -4225,7 +4240,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(projectFilename);
 
                 MockLogger logger = new MockLogger();
-                bool result = project.Build(logger);
+                project.Build(logger);
             }
             catch (XmlException)
             {
@@ -4279,7 +4294,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(projectFilename);
 
                 MockLogger logger = new MockLogger();
-                bool result = project.Build(logger);
+                project.Build(logger);
             }
             finally
             {
@@ -4423,6 +4438,94 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Assert.True(result);
             }
+        }
+
+        [Fact]
+        public void VerifyMSBuildLastModifiedProjectForImport()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                var project1 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+                var project2 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+
+                var primaryProject = testEnvironment.CreateTestProjectWithFiles($@"<Project>
+<Import Project=""{project1.ProjectFile}"" />
+<Import Project=""{project2.ProjectFile}"" />
+</Project>");
+
+                // Project1 and primary project last modified an hour ago, project2 is the newest
+                File.SetLastWriteTime(project1.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(project2.ProjectFile, DateTime.Now);
+                File.SetLastWriteTime(primaryProject.ProjectFile, DateTime.Now.AddHours(-1));
+
+                Project project = new Project(primaryProject.ProjectFile, null, null);
+
+                string propertyValue = project.GetPropertyValue(Constants.MSBuildAllProjectsPropertyName);
+
+                propertyValue.ShouldStartWith(project2.ProjectFile);
+
+                propertyValue.ShouldNotContain(primaryProject.ProjectFile, Case.Insensitive);
+                propertyValue.ShouldNotContain(project1.ProjectFile, Case.Insensitive);
+            }
+        }
+
+        [Fact]
+        public void VerifyMSBuildLastModifiedProjectIsProject()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                var project1 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+                var project2 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+
+                var primaryProject = testEnvironment.CreateTestProjectWithFiles($@"<Project>
+<Import Project=""{project1.ProjectFile}"" />
+<Import Project=""{project2.ProjectFile}"" />
+</Project>");
+
+                // Project1 and project2 last modified an hour ago, primaryProject is the newest
+                File.SetLastWriteTime(project1.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(project2.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(primaryProject.ProjectFile, DateTime.Now);
+
+
+                Project project = new Project(primaryProject.ProjectFile, null, null);
+
+                project.GetPropertyValue(Constants.MSBuildAllProjectsPropertyName).ShouldStartWith(primaryProject.ProjectFile);
+            }
+        }
+
+        [Fact]
+        public void VerifyMSBuildLogsAMessageWhenLocalPropertyCannotOverrideValueOfGlobalProperty()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+                             <Project>
+                               <PropertyGroup>
+                                 <Foo>Bar</Foo>
+                               </PropertyGroup>
+
+                               <Target Name='t'>
+                                 <Message Text='[$(Foo)]' />
+                               </Target>
+                             </Project>");
+            IDictionary<string, string> globalProperties =
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Foo", "Baz" }
+                };
+
+            MockLogger logger = new MockLogger();
+
+            Project project =
+                new Project(
+                    XmlReader.Create(new StringReader(content)),
+                    globalProperties,
+                    null,
+                    new ProjectCollection(
+                        globalProperties, new List<ILogger> { logger }, ToolsetDefinitionLocations.Default));
+
+            project.Build(logger);
+            logger.AssertLogContains(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OM_GlobalProperty", "Foo"));
         }
 
 #if FEATURE_HTTP_LISTENER
@@ -4579,68 +4682,5 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 FileUtilities.DeleteWithoutTrailingBackslash(directory, true);
             }
         }
-
-        #region ProjectPropertyComparer
-
-        /// <summary>
-        /// Checks two ProjectProperty objects belonging to the same project for equality.
-        /// </summary>
-        private class ProjectPropertyComparer : IEqualityComparer<ProjectProperty>
-        {
-            /// <summary>
-            /// Checks if two ProjectProperty objects are semantically equal.
-            /// </summary>
-            /// <param name="x"> The first object. </param>
-            /// <param name="y"> The second object. </param>
-            /// <returns> If they are semantically equal. </returns>
-            public bool Equals(ProjectProperty x, ProjectProperty y)
-            {
-                bool areEqual = false;
-
-                if (Object.ReferenceEquals(x, y))
-                {
-                    // If they point to the same object or are both null, they are equal.
-                    areEqual = true;
-                }
-                else if (x == null ^ y == null)
-                {
-                    // If only one of them is null, they are NOT equal.
-                    areEqual = false;
-                }
-                else if (!Object.ReferenceEquals(x.Project, y.Project))
-                {
-                    // If they don't belong to the same project, they are not equal.
-                    areEqual = false;
-                }
-                else if (x.Xml != null && y.Xml != null && Object.ReferenceEquals(x.Xml, y.Xml))
-                {
-                    // If their underlying construction model elements are the same, they are equal.
-                    // Note that certain properties such as global/environment/toolset properties
-                    // do not have a backing xml.
-                    areEqual = true;
-                }
-                else if (x.Xml == null && y.Xml == null) // both are global/environment/toolset properties
-                {
-                    // If both their unevaluated values as well as their evaluated values are same, then they are equal.
-                    areEqual = String.Equals(x.UnevaluatedValue, y.UnevaluatedValue, StringComparison.OrdinalIgnoreCase);
-                }
-
-                return areEqual;
-            }
-
-            /// <summary>
-            /// Returns the hash code for a ProjectProperty object.
-            /// </summary>
-            /// <param name="obj"> A ProjectProperty object. </param>
-            /// <returns> The has code. </returns>
-            public int GetHashCode(ProjectProperty obj)
-            {
-                int hashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(obj.UnevaluatedValue);
-
-                return hashCode;
-            }
-        }
-
-        #endregion
     }
 }

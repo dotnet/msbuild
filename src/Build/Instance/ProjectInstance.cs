@@ -450,16 +450,6 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Deep clone of this object.
-        /// Useful for compiling a single file; or for keeping resolved assembly references between builds
-        /// Mutability is same as original.
-        /// </summary>
-        private ProjectInstance(ProjectInstance that)
-            : this(that, that._isImmutable)
-        {
-        }
-
-        /// <summary>
-        /// Deep clone of this object.
         /// Useful for compiling a single file; or for keeping resolved assembly references between builds.
         /// </summary>
         private ProjectInstance(ProjectInstance that, bool isImmutable, RequestedProjectState filter = null)
@@ -2152,26 +2142,6 @@ namespace Microsoft.Build.Execution
 
             targetOutputs = results.ResultsByTarget;
 
-            // UNDONE: Does this need to happen in EndBuild?
-#if false
-            Exception exception = results.Exception;
-            if (exception != null)
-            {
-                BuildEventContext buildEventContext = new BuildEventContext(1 /* UNDONE: NodeID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-
-                InvalidProjectFileException projectException = exception as InvalidProjectFileException;
-
-                if (projectException != null)
-                {
-                    loggingService.LogInvalidProjectFileError(buildEventContext, projectException);
-                }
-                else
-                {
-                    loggingService.LogFatalBuildError(buildEventContext, exception, new BuildEventFileInfo(projectFileLocation));
-                }
-            }
-#endif
-
             return results.OverallResult == BuildResultCode.Success;
         }
 
@@ -2586,7 +2556,8 @@ namespace Microsoft.Build.Execution
                 ProjectRootElementCache,
                 buildEventContext,
                 sdkResolverService ?? SdkResolverService.Instance,
-                submissionId);
+                submissionId,
+                interactive: buildParameters.Interactive);
 
             ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }

@@ -127,9 +127,7 @@ namespace Microsoft.Build.Tasks
         public bool UnloadProjectsOnCompletion { get; set; }
 
         /// <summary>
-        /// If true the cached result will be returned if present and a if MSBuild
-        /// task is run its result will be cached in a scope (ProjectFileName, GlobalProperties)[TargetNames]
-        /// as a list of build items
+        /// Deprecated. Does nothing.
         /// </summary>
         public bool UseResultsCache { get; set; } = true;
 
@@ -313,7 +311,6 @@ namespace Microsoft.Build.Tasks
                                 BuildEngine3,
                                 Log,
                                 _targetOutputs,
-                                UseResultsCache,
                                 UnloadProjectsOnCompletion,
                                 ToolsVersion
                                 )
@@ -381,7 +378,6 @@ namespace Microsoft.Build.Tasks
                                 BuildEngine3,
                                 Log,
                                 _targetOutputs,
-                                UseResultsCache,
                                 UnloadProjectsOnCompletion,
                                 ToolsVersion
                                 )
@@ -475,7 +471,6 @@ namespace Microsoft.Build.Tasks
             IBuildEngine3 buildEngine,
             TaskLoggingHelper log,
             List<ITaskItem> targetOutputs,
-            bool useResultsCache,
             bool unloadProjectsOnCompletion,
             string toolsVersion
             )
@@ -509,7 +504,7 @@ namespace Microsoft.Build.Tasks
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceString("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(';'),
+                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(';'),
                               out Dictionary<string, string> preProjectPropertiesTable)
                            )
                         {
@@ -550,7 +545,7 @@ namespace Microsoft.Build.Tasks
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceString("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(';'),
+                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(';'),
                               out Dictionary<string, string> additionalProjectPropertiesTable)
                            )
                         {

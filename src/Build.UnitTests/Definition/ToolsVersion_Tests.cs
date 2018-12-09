@@ -83,8 +83,8 @@ namespace Microsoft.Build.UnitTests.Definition
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
             Assert.Equal(0, taskoverrideRegistry.TaskRegistrations.Count);
-            string rootedPathMessage = ResourceUtilities.FormatResourceString("OverrideTaskNotRootedPath", "msbuildoverridetasks");
-            mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
+            string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", "msbuildoverridetasks");
+            mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
 
         [Fact]
@@ -118,8 +118,8 @@ namespace Microsoft.Build.UnitTests.Definition
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
             Assert.Equal(0, taskoverrideRegistry.TaskRegistrations.Count);
-            string rootedPathMessage = ResourceUtilities.FormatResourceString("OverrideTaskNotRootedPath", tooLong);
-            mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
+            string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", tooLong);
+            mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
 
         [Fact]
@@ -136,8 +136,8 @@ namespace Microsoft.Build.UnitTests.Definition
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
             Assert.Equal(0, taskoverrideRegistry.TaskRegistrations.Count);
-            string rootedPathMessage = ResourceUtilities.FormatResourceString("OverrideTaskNotRootedPath", "k:\\Thecatinthehat");
-            mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
+            string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", "k:\\Thecatinthehat");
+            mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
 
         [Fact]
@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
-                Toolset source = p.GetToolset("15.0");
+                Toolset source = p.GetToolset("Current");
                 Toolset potato = new Toolset("potato", source.ToolsPath, ProjectCollection.GlobalProjectCollection, source.ToolsPath);
                 p.AddToolset(potato);
 

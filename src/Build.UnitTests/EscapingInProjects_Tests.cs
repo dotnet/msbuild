@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ";
 
             Project project = ObjectModelHelpers.CreateInMemoryProject(projectOriginalContents);
-            IEnumerable<ProjectItem> newItems = project.AddItem("MyWildCard", "foo;bar.weirdo");
+            project.AddItem("MyWildCard", "foo;bar.weirdo");
 
             Helpers.CompareProjectXml(projectNewExpectedContents, project.Xml.RawXml);
         }
@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
 
             Project project = ObjectModelHelpers.CreateInMemoryProject(projectOriginalContents);
-            IEnumerable<ProjectItem> newItems = project.AddItem("MyWildCard", "$(FilenameWithSemicolon).weirdo");
+            project.AddItem("MyWildCard", "$(FilenameWithSemicolon).weirdo");
 
             Helpers.CompareProjectXml(projectNewExpectedContents, project.Xml.RawXml);
         }
@@ -752,7 +752,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
             try
             {
-                Project project = ObjectModelHelpers.CreateInMemoryProject(@"
+                ObjectModelHelpers.CreateInMemoryProject(@"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
                     <Target Name=`%24` />
                 </Project>
@@ -760,7 +760,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             catch (InvalidProjectFileException ex)
             {
-                string expectedErrorMessage = ResourceUtilities.FormatResourceString("NameInvalid", "$", "$");
+                string expectedErrorMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("NameInvalid", "$", "$");
                 Assert.True(String.Equals(ex.Message, expectedErrorMessage, StringComparison.OrdinalIgnoreCase)); // "Wrong error message"
                 exceptionCaught = true;
             }
@@ -1571,7 +1571,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // Cons.ole;!@(foo)'^(Application1
             string targetForFirstProject = "Cons_ole_!__foo__^_Application1";
 
-            MockLogger log = ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null);
+            ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null);
 
             Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                     @"Did not find expected file Console;!@(foo)'^(Application1.exe"
         }
@@ -1742,7 +1742,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // Cons.ole;!@(foo)'^(Application1
                 string targetForFirstProject = "Cons_ole_!__foo__^_Application1";
 
-                MockLogger log = ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null);
+                ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null);
 
                 Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                         @"Did not find expected file Console;!@(foo)'^(Application1.exe"
             }

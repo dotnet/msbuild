@@ -13,6 +13,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class AssemblyUtilities
     {
+#if !FEATURE_CULTUREINFO_GETCULTURES
         // True when the cached method info objects have been set.
         private static bool s_initialized;
 
@@ -20,7 +21,6 @@ namespace Microsoft.Build.Shared
         private static PropertyInfo s_assemblylocationProperty;
         private static MethodInfo s_cultureInfoGetCultureMethod;
 
-#if !FEATURE_CULTUREINFO_GETCULTURES
         private static Lazy<CultureInfo[]> s_validCultures = new Lazy<CultureInfo[]>(() => GetValidCultures(), true);
 #endif
 
@@ -97,10 +97,12 @@ namespace Microsoft.Build.Shared
 
         }
 
+#if !FEATURE_CULTUREINFO_GETCULTURES
         public static bool CultureInfoHasGetCultures()
         {
             return s_cultureInfoGetCultureMethod != null;
         }
+#endif // !FEATURE_CULTUREINFO_GETCULTURES
 
         public static CultureInfo[] GetAllCultures()
         {
@@ -118,6 +120,7 @@ namespace Microsoft.Build.Shared
 #endif
         }
 
+#if !FEATURE_CULTUREINFO_GETCULTURES
         /// <summary>
         /// Initialize static fields. Doesn't need to be thread safe.
         /// </summary>
@@ -130,6 +133,7 @@ namespace Microsoft.Build.Shared
 
             s_initialized = true;
         }
+#endif // !FEATURE_CULTUREINFO_GETCULTURES
 
         private static Assembly GetEntryAssembly()
         {

@@ -252,9 +252,9 @@ namespace ItemCreationTask
             project.Build("t", loggers);
 
             logger.AssertLogContains(new string[] { "final:[/assemblyresource:c.resx,barz]" });
-            logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceString("TaskStarted", "CreateProperty") });
-            logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceString("PropertyOutputOverridden", "LinkSwitches", "/assemblyresource:a.resx,foo", "/assemblyresource:b.resx,bar") });
-            logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceString("PropertyOutputOverridden", "LinkSwitches", "/assemblyresource:b.resx,bar", "/assemblyresource:c.resx,barz") });
+            logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskStarted", "CreateProperty") });
+            logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertyOutputOverridden", "LinkSwitches", "/assemblyresource:a.resx,foo", "/assemblyresource:b.resx,bar") });
+            logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertyOutputOverridden", "LinkSwitches", "/assemblyresource:b.resx,bar", "/assemblyresource:c.resx,barz") });
         }
 
         /// <summary>
@@ -308,9 +308,9 @@ namespace ItemCreationTask
                 logger.AssertLogDoesntContain("end:");
 
                 logger.AssertLogContains(new string[] { "final:[/assemblyresource:c.resx,barz]" });
-                logger.AssertLogDoesntContain(ResourceUtilities.FormatResourceString("TaskStarted", "CreateProperty"));
-                logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceString("PropertyOutputOverridden", "LinkSwitches", "/assemblyresource:a.resx,foo", "/assemblyresource:b.resx,bar") });
-                logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceString("PropertyOutputOverridden", "LinkSwitches", "/assemblyresource:b.resx,bar", "/assemblyresource:c.resx,barz") });
+                logger.AssertLogDoesntContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskStarted", "CreateProperty"));
+                logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertyOutputOverridden", "LinkSwitches", "/assemblyresource:a.resx,foo", "/assemblyresource:b.resx,bar") });
+                logger.AssertLogContains(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertyOutputOverridden", "LinkSwitches", "/assemblyresource:b.resx,bar", "/assemblyresource:c.resx,barz") });
             }
             finally
             {
@@ -878,12 +878,13 @@ namespace ItemCreationTask
 
         #endregion
 
-        /*********************************************************************************
-         * 
-         *                                     Helpers
-         * 
-         *********************************************************************************/
+/*********************************************************************************
+ * 
+ *                                     Helpers
+ * 
+ *********************************************************************************/
 
+#if FEATURE_CODEDOM
         /// <summary>
         /// Helper method for validating the setting of defining project metadata on items 
         /// coming from task outputs
@@ -947,6 +948,7 @@ namespace ItemCreationTask
                 }
             }
         }
+#endif // FEATURE_CODEDOM
 
 #if FEATURE_APARTMENT_STATE
         /// <summary>
@@ -1037,7 +1039,7 @@ namespace ClassLibrary2
 {" + (requireSTA ? "[RunInSTA]" : String.Empty) + @"
     public class ThreadTask : ITask
     {
-        #region ITask Members
+#region ITask Members
 
         public IBuildEngine BuildEngine
         {
@@ -1090,7 +1092,7 @@ namespace ClassLibrary2
             set;
         }
 
-        #endregion
+#endregion
     }
 }";
             return CustomTaskHelper.GetAssemblyForTask(taskContents);
@@ -1175,7 +1177,7 @@ namespace ClassLibrary2
         /// </summary>
         private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
-            #region IBuildComponentHost Members
+#region IBuildComponentHost Members
 
             /// <summary>
             /// The config cache
@@ -1326,9 +1328,9 @@ namespace ClassLibrary2
             {
             }
 
-            #endregion
+#endregion
 
-            #region IBuildComponent Members
+#region IBuildComponent Members
 
             /// <summary>
             /// Sets the component host
@@ -1347,7 +1349,7 @@ namespace ClassLibrary2
                 throw new NotImplementedException();
             }
 
-            #endregion
+#endregion
         }
     }
 }

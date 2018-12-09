@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("bar", wrappedParameter[1].ItemSpec);
 
             ((INodePacketTranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
-            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(TaskParameterType.ITaskItemArray, t.ParameterType);
 

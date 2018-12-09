@@ -148,9 +148,7 @@ namespace Microsoft.Build.BackEnd
         public bool UnloadProjectsOnCompletion { get; set; } = false;
 
         /// <summary>
-        /// If true the cached result will be returned if present and a if MSBuild
-        /// task is run its result will be cached in a scope (ProjectFileName, GlobalProperties)[TargetNames]
-        /// as a list of build items
+        /// Deprecated. Does nothing.
         /// </summary>
         public bool UseResultsCache { get; set; } = true;
 
@@ -243,6 +241,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Parse the global properties into a hashtable.
+            // The behavior of parsing global properties to define and undefine (below) combined with the behavior in Microsoft.Common.CurrentVersion.targets should match the logic in ProjectGraph.
             if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", Properties, out Dictionary<string, string> propertiesTable))
             {
                 return false;
@@ -347,7 +346,6 @@ namespace Microsoft.Build.BackEnd
                                                 BuildEngine3,
                                                 Log,
                                                 _targetOutputs,
-                                                UseResultsCache,
                                                 UnloadProjectsOnCompletion,
                                                 ToolsVersion,
                                                 SkipNonexistentTargets
@@ -418,7 +416,6 @@ namespace Microsoft.Build.BackEnd
                 BuildEngine3,
                 Log,
                 _targetOutputs,
-                UseResultsCache,
                 UnloadProjectsOnCompletion,
                 ToolsVersion,
                 SkipNonexistentTargets
@@ -514,7 +511,6 @@ namespace Microsoft.Build.BackEnd
             IBuildEngine3 buildEngine,
             TaskLoggingHelper log,
             List<ITaskItem> targetOutputs,
-            bool useResultsCache,
             bool unloadProjectsOnCompletion,
             string toolsVersion,
             bool skipNonexistentTargets)
@@ -548,7 +544,7 @@ namespace Microsoft.Build.BackEnd
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceString("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
+                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
                               out Dictionary<string, string> preProjectPropertiesTable)
                            )
                         {
@@ -590,7 +586,7 @@ namespace Microsoft.Build.BackEnd
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceString("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
+                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
                               out Dictionary<string, string> additionalProjectPropertiesTable)
                            )
                         {

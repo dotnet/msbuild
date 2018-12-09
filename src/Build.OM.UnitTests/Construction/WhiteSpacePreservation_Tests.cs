@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             AssertWhiteSpacePreservation(projectContents, updatedProject, (pe, p) =>
             {
-                var itemGroup = pe.AddItemGroup();
+                pe.AddItemGroup();
 
                 Assert.True(p.IsDirty);
             });

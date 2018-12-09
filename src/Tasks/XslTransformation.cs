@@ -231,12 +231,12 @@ namespace Microsoft.Build.Tasks
 
                 if (xn.Attributes["Name"] == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XsltParameterNoAttribute", "Name"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.XsltParameterNoAttribute", "Name"));
                 }
 
                 if (xn.Attributes["Value"] == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XsltParameterNoAttribute", "Value"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.XsltParameterNoAttribute", "Value"));
                 }
 
                 string ns = String.Empty;
@@ -506,7 +506,7 @@ namespace Microsoft.Build.Tasks
                         return types[0];
                     }
 
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.MustSpecifyType", assemblyPath));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.MustSpecifyType", assemblyPath));
                 }
             }
         }

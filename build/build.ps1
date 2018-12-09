@@ -12,7 +12,7 @@ Param(
   [switch] $sign,
   [switch] $skiptests,
   [switch] $test,
-  [switch] $bootstrapOnly,
+  [switch] $bootstrap,
   [string] $verbosity = "minimal",
   [string] $hostType,
   [switch] $DotNetBuildFromSource,
@@ -38,7 +38,7 @@ function Print-Usage() {
     Write-Host "  -rebuild                Rebuild solution"
     Write-Host "  -skipTests              Don't run tests"
     Write-Host "  -test                   Run tests. Ignores skipTests"
-    Write-Host "  -bootstrapOnly          Don't run build again with bootstrapped MSBuild"
+    Write-Host "  -bootstrap              Run build again with bootstrapped MSBuild."
     Write-Host "  -sign                   Sign build outputs"
     Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
     Write-Host ""
@@ -138,7 +138,7 @@ function InstallRepoToolset {
     $msbuildArgs = AddLogCmd "Toolset" $msbuildArgs
     # Piping to Out-Null is important here, as otherwise the MSBuild output will be included in the return value
     # of the function (Powershell handles return values a bit... weirdly)
-    CallMSBuild $ToolsetProj @msbuildArgs | Out-Null
+    CallMSBuild "`"$ToolsetProj`"" @msbuildArgs | Out-Null
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to build $ToolsetProj"
@@ -236,7 +236,7 @@ function Build {
     $solution = Join-Path $RepoRoot "MSBuild.sln"
   }
 
-  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:Projects=$solution", "/p:CIBuild=$ci", "/p:RepoRoot=$reporoot"
+  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:Projects=`"$solution`"", "/p:CIBuild=$ci", "/p:RepoRoot=`"$RepoRoot`""
   if ($ci)
   {
     # Only enable warnaserror on CI runs.  For local builds, we will generate a warning if we can't run EditBin because
@@ -256,63 +256,69 @@ function Build {
     $commonMSBuildArgs = $commonMSBuildArgs + "/p:SignToolDataPath=`"$emptySignToolDataPath`""
   }
 
-  # Only test using stage 0 MSBuild if -bootstrapOnly is specified
+  # Only test using stage 0 MSBuild if -bootstrap is not specified
   $testStage0 = $false
-  if ($bootstrapOnly)
+  if (-not $bootstrap)
   {
     $testStage0 = $runTests
   }
 
   $msbuildArgs = AddLogCmd "Build" $commonMSBuildArgs
 
-  CallMSBuild $RepoToolsetBuildProj @msbuildArgs /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true @properties
-
-  if (-not $bootstrapOnly)
+  Try
   {
-    $bootstrapRoot = Join-Path $ArtifactsConfigurationDir "bootstrap"
+    CallMSBuild `"$RepoToolsetBuildProj`" @msbuildArgs /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true @properties
 
-    if ($hostType -eq 'full')
+    if ($bootstrap)
     {
-      $msbuildToUse = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.exe"
+      $bootstrapRoot = Join-Path $ArtifactsConfigurationDir "bootstrap"
 
-      if ($configuration -eq "Debug-MONO" -or $configuration -eq "Release-MONO")
+      if ($hostType -eq 'full')
       {
-        # Copy MSBuild.dll to MSBuild.exe so we can run it without a host
-        $sourceDll = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.dll"
-        Copy-Item -Path $sourceDll -Destination $msbuildToUse
+        $msbuildToUse = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
+
+        if ($configuration -eq "Debug-MONO" -or $configuration -eq "Release-MONO")
+        {
+          # Copy MSBuild.dll to MSBuild.exe so we can run it without a host
+          $sourceDll = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.dll"
+          Copy-Item -Path $sourceDll -Destination $msbuildToUse
+        }
+      }
+      else
+      {
+        $msbuildToUse = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\\MSBuild.dll"
+      }
+
+      # Use separate artifacts folder for stage 2
+      $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
+
+      $msbuildArgs = AddLogCmd "BuildWithBootstrap" $commonMSBuildArgs
+
+      # When using bootstrapped MSBuild:
+      # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
+      # - Don't sign
+      # - Don't pack
+      # - Do run tests (if not skipped)
+      # - Don't try to create a bootstrap deployment
+      CallMSBuild `"$RepoToolsetBuildProj`" @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$runTests /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
+    }
+  }
+  Finally
+  {
+    if ($ci)
+    {
+      # Log VSTS errors for build errors
+      Get-Content (Join-Path $LogDir "*.err") | ForEach-Object { "##vso[task.logissue type=error] $_" }
+
+      # Log VSTS errors for changed lines
+      git --no-pager diff HEAD --unified=0 --no-color --exit-code | ForEach-Object { "##vso[task.logissue type=error] $_" }
+      if($LASTEXITCODE -ne 0) {
+        throw "[ERROR] After building, there are changed files.  Please build locally and include these changes in your pull request."
       }
     }
-    else
-    {
-      $msbuildToUse = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\\MSBuild.dll"
-    }
-
-    # Use separate artifacts folder for stage 2
-    $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
-
-    $msbuildArgs = AddLogCmd "BuildWithBootstrap" $commonMSBuildArgs
-
-    # When using bootstrapped MSBuild:
-    # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-    # - Don't sign
-    # - Don't pack
-    # - Do run tests (if not skipped)
-    # - Don't try to create a bootstrap deployment
-    CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$runTests /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
   }
-  
-  if ($ci)
-  {
-#    CallMSBuild $ToolsetProj /t:restore /m /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
-    git status | Out-Null
-    git --no-pager diff HEAD --word-diff=plain --exit-code | Out-Null
-
-    if($LASTEXITCODE -ne 0) {
-      throw "[ERROR] After building, there are changed files.  Please build locally and include these changes in your pull request."
-    }
-  }
-
 }
+
 function CallMSBuild
 {
   try 
@@ -346,11 +352,12 @@ function AddLogCmd([string] $logName, [string[]] $extraArgs)
 
   if ($ci -or $log) {
     Create-Directory $LogDir
-    $extraArgs = $extraArgs + ("/bl:" + (Join-Path $LogDir "$logName.binlog"))
+    $extraArgs = $extraArgs + ("/bl:`"" + (Join-Path $LogDir "$logName.binlog") + "`"")
 
-    # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
+    # When running under CI, also create a text error log,
+    # so it can be emitted to VSTS.
     if ($ci) {
-      $extraArgs = $extraArgs + ("/flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "$logName.log") + '"')
+      $extraArgs = $extraArgs + ("/fileloggerparameters:ErrorsOnly;LogFile=" + '"' + (Join-Path $LogDir "$logName.err") + '"')
     }
   }
 
@@ -369,7 +376,8 @@ if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $
 }
 
 $RepoRoot = Join-Path $PSScriptRoot "..\"
-$RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot);
+$RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd($([System.IO.Path]::DirectorySeparatorChar));
+
 $ArtifactsDir = Join-Path $RepoRoot "artifacts"
 $ArtifactsConfigurationDir = Join-Path $ArtifactsDir $configuration
 $LogDir = Join-Path $ArtifactsConfigurationDir "log"

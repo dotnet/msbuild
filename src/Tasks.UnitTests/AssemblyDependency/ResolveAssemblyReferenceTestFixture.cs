@@ -13,6 +13,8 @@ using Microsoft.Win32;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
+using Xunit.Abstractions;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -164,9 +166,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 </FileList>"
             ;
 
-        public ResolveAssemblyReferenceTestFixture()
+        protected readonly ITestOutputHelper _output;
+
+        public ResolveAssemblyReferenceTestFixture(ITestOutputHelper output)
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", "1");
+
+            _output = output;
         }
 
         public void Dispose()
@@ -2755,8 +2761,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-            Console.WriteLine("subKey={0}", subKey);
-            Assert.True(false, "New GetRegistrySubKeyNames parameters encountered, need to add unittesting support");
+            Assert.True(false, $"New GetRegistrySubKeyNames parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
 
@@ -2899,8 +2904,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-            Console.WriteLine("subKey={0}", subKey);
-            Assert.True(false, "New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support");
+            Assert.True(false, $"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
 
@@ -2911,36 +2915,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns>The last write time.</returns>
         private static DateTime GetLastWriteTime(string path)
         {
-            return DateTime.FromOADate(0.0);
-        }
-
-        /// <summary>
-        /// Assert that two strings are equal without regard to case.
-        /// </summary>
-        /// <param name="expected">The expected string.</param>
-        /// <param name="actual">The actual string.</param>
-        internal protected static void AssertNoCase(string expected, string actual)
-        {
-            if (0 != String.Compare(expected, actual, StringComparison.OrdinalIgnoreCase))
-            {
-                string message = String.Format("Expected value '{0}' but received '{1}'", expected, actual);
-                Console.WriteLine(message);
-                Assert.True(false, message);
-            }
-        }
-
-        /// <summary>
-        /// Assert that two strings are equal without regard to case.
-        /// </summary>
-        /// <param name="expected">The expected string.</param>
-        /// <param name="actual">The actual string.</param>
-        internal protected static void AssertNoCase(string message, string expected, string actual)
-        {
-            if (0 != String.Compare(expected, actual, StringComparison.OrdinalIgnoreCase))
-            {
-                Console.WriteLine(message);
-                Assert.True(false, message);
-            }
+            return fileExists(path) ? DateTime.FromFileTimeUtc(1) : DateTime.FromFileTimeUtc(0);
         }
 
         /// <summary>

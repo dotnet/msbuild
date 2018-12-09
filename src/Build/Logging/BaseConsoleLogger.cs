@@ -202,7 +202,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WriteLinePrettyFromResource(int indentLevel, string resourceString, params object[] args)
         {
-            string formattedString = ResourceUtilities.FormatResourceString(resourceString, args);
+            string formattedString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceString, args);
             WriteLinePretty(indentLevel, formattedString);
         }
 
@@ -1048,7 +1048,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 default:
                     string errorCode;
                     string helpKeyword;
-                    string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
+                    string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
                     throw new LoggerException(message, null, errorCode, helpKeyword);
             }
         }

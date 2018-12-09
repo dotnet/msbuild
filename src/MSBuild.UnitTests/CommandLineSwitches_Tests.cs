@@ -732,6 +732,92 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void IsolateProjectsSwitchIdentificationTests()
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolate", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("ISOLATE", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolateprojects", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolateProjects", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+        }
+
+        [Fact]
+        public void GraphBuildSwitchIdentificationTests()
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("graph", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("GRAPH", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("graphbuild", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("graphBuild", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+        }
+
+        [Fact]
         public void SetParameterlessSwitchTests()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -1128,7 +1214,10 @@ namespace Microsoft.Build.UnitTests
                                         warningsAsMessages: null,
                                         enableRestore: false,
                                         profilerLogger: null,
-                                        enableProfiler: false);
+                                        enableProfiler: false,
+                                        interactive: false,
+                                        isolateProjects: false,
+                                        graphBuild: false);
                 }
                 finally
                 {
@@ -1178,7 +1267,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         /// <summary>
-        /// Regress DDB #143341: 
+        /// Regress DDB #143341:
         ///     msbuild /clp:v=quiet /clp:v=diag /m:2
         /// gave console logger in quiet verbosity; expected diagnostic
         /// </summary>
@@ -1284,7 +1373,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             MSBuildApp.GatherCommandLineSwitches(new ArrayList(new [] { "/warnaserror" }), commandLineSwitches);
-            
+
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
             Assert.NotNull(actualWarningsAsErrors);
@@ -1344,6 +1433,20 @@ namespace Microsoft.Build.UnitTests
             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
         }
 
+        [Fact]
+        public void ProcessBooleanSwitchTest()
+        {
+            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: true, resourceName: null).ShouldBeTrue();
+
+            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: false, resourceName: null).ShouldBeFalse();
+
+            MSBuildApp.ProcessBooleanSwitch(new [] { "true" }, defaultValue: false, resourceName: null).ShouldBeTrue();
+
+            MSBuildApp.ProcessBooleanSwitch(new[] { "false" }, defaultValue: true, resourceName: null).ShouldBeFalse();
+
+            Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(new[] { "invalid" }, defaultValue: true, resourceName: "InvalidRestoreValue"));
+        }
+
         /// <summary>
         /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
         /// </summary>
@@ -1388,9 +1491,11 @@ namespace Microsoft.Build.UnitTests
                     // All lines should be 80 characters or less
                     Assert.True(helpMessageLines[i].Length <= 80, $"Line {i + 1} of '{item.Key}' should be no longer than 80 characters.");
 
+                    string trimmedLine = helpMessageLines[i].Trim();
+
                     if (i == 0)
                     {
-                        if (helpMessageLines[i].Trim().StartsWith("/") || helpMessageLines[i].Trim().StartsWith("@"))
+                        if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
                         {
                             // If the first line in a switch it needs a certain amount of leading spaces
                             Assert.True(helpMessageLines[i].StartsWith(switchLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{switchLeadingSpaces}'.");
@@ -1406,13 +1511,13 @@ namespace Microsoft.Build.UnitTests
                         // Ignore empty lines
                         if (!String.IsNullOrWhiteSpace(helpMessageLines[i]))
                         {
-                            
+
                             if (item.Key.Contains("Examples"))
                             {
                                 // Examples require a certain number of leading spaces
                                 Assert.True(helpMessageLines[i].StartsWith(examplesLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{examplesLeadingSpaces}'.");
                             }
-                            else if (helpMessageLines[i].Trim().StartsWith("/") || helpMessageLines[i].Trim().StartsWith("@"))
+                            else if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
                             {
                                 // Switches require a certain number of leading spaces
                                 Assert.True(helpMessageLines[i].StartsWith(switchLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{switchLeadingSpaces}'.");

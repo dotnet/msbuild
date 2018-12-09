@@ -103,7 +103,7 @@ namespace Microsoft.Build.Shared
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                throw new IOException(ResourceUtilities.FormatResourceString("Shared.FailedCreatingTempFile", ex.Message), ex);
+                throw new IOException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.FailedCreatingTempFile", ex.Message), ex);
             }
         }
 

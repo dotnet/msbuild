@@ -636,7 +636,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 string errCode, ignoredKeyword;
-                ResourceUtilities.FormatResourceString(out errCode, out ignoredKeyword, "Shared.InvalidProjectFile",
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out ignoredKeyword, "Shared.InvalidProjectFile",
                    "someproj.etp", String.Empty);
                 foreach (string warningString in solution.SolutionParserWarnings)
                 {
@@ -671,7 +671,7 @@ namespace Microsoft.Build.UnitTests.Construction
             File.Delete(proj1Path);
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             string errCode, ignoredKeyword;
-            ResourceUtilities.FormatResourceString(out errCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
                   "someproj.etp", String.Empty);
             Assert.True(solution.SolutionParserErrorCodes[0].ToString().Contains(errCode));
         }
@@ -708,7 +708,7 @@ namespace Microsoft.Build.UnitTests.Construction
             using (var env = TestEnvironment.Create())
             {
                 var solutionFolder = env.CreateFolder(Path.Combine(FileUtilities.GetTemporaryDirectory(), "sln"));
-                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.Path, "RelativePath"));
+                env.CreateFolder(Path.Combine(solutionFolder.Path, "RelativePath"));
 
                 SolutionFile p = new SolutionFile();
                 p.FullPath = Path.Combine(solutionFolder.Path, "RelativePath", "project file");
@@ -762,7 +762,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -780,7 +780,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -799,7 +799,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             Assert.Equal(1, solution.SolutionParserComments.Count); // "Expected the solution parser to contain one comment"
-            Assert.True(String.Equals((string)solution.SolutionParserComments[0], ResourceUtilities.FormatResourceString("UnrecognizedSolutionComment", "999"), StringComparison.OrdinalIgnoreCase));
+            Assert.True(String.Equals((string)solution.SolutionParserComments[0], ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedSolutionComment", "999"), StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -862,7 +862,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
             try
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
             catch (Exception ex)
             {
@@ -1138,7 +1138,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             try
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
             catch (InvalidProjectFileException e)
             {
@@ -1682,7 +1682,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -1709,7 +1709,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -1736,7 +1736,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }

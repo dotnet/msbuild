@@ -20,16 +20,16 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <param name="filePath">Path to the file on disk.</param>
         /// <returns>Disposable XmlReaderExtension object.</returns>
-        internal static XmlReaderExtension Create(string filePath)
+        internal static XmlReaderExtension Create(string filePath, bool loadAsReadOnly)
         {
-            return new XmlReaderExtension(filePath);
+            return new XmlReaderExtension(filePath, loadAsReadOnly);
         }
 
         private static readonly Encoding s_utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
         private readonly Stream _stream;
         private readonly StreamReader _streamReader;
 
-        private XmlReaderExtension(string file)
+        private XmlReaderExtension(string file, bool loadAsReadOnly)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace Microsoft.Build.Internal
 
                 // The XmlDocumentWithWithLocation class relies on the reader's BaseURI property to be set,
                 // thus we pass the document's file path to the appropriate xml reader constructor.
-                Reader = GetXmlReader(file, _streamReader, out detectedEncoding);
+                Reader = GetXmlReader(file, _streamReader, loadAsReadOnly, out detectedEncoding);
 
                 // Override detected encoding if an XML encoding attribute is specified and that encoding is sufficiently
                 // different from the detected encoding.
@@ -74,10 +74,27 @@ namespace Microsoft.Build.Internal
             _stream?.Dispose();
         }
 
-        private static XmlReader GetXmlReader(string file, StreamReader input, out Encoding encoding)
+        private static XmlReader GetXmlReader(string file, StreamReader input, bool loadAsReadOnly, out Encoding encoding)
         {
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
-            var reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
+
+            XmlReader reader;
+
+            if (loadAsReadOnly)
+            {
+                XmlReaderSettings xrs = new XmlReaderSettings
+                {
+                    DtdProcessing = DtdProcessing.Ignore,
+                    IgnoreComments = true,
+                    IgnoreWhitespace = true,
+                };
+                reader = XmlReader.Create(input, xrs, uri);
+            }
+            else
+            {
+                reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
+            }
+
 
             reader.Read();
             encoding = input.CurrentEncoding;

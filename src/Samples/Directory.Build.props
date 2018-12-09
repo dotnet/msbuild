@@ -3,6 +3,9 @@
   <PropertyGroup>
     <!-- Use Samples subdirectory for samples in output folder -->
     <OutDirName>Samples\$(MSBuildProjectName)</OutDirName>
+
+    <!-- Don't regulate package versions for samples -->
+    <EnableCentralPackageVersions>false</EnableCentralPackageVersions>
   </PropertyGroup>
 
   <!-- Import parent props -->

@@ -5,6 +5,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -15,6 +16,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     [Trait("Category", "non-mono-tests")]
     public sealed class WinMDTests : ResolveAssemblyReferenceTestFixture
     {
+        public WinMDTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         #region AssemblyInformationIsWinMDFile Tests
 
         /// <summary>
@@ -121,7 +126,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyP2PHaveCorrectMetadataWinMD()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem taskItem = new TaskItem(@"C:\WinMD\SampleWindowsRuntimeOnly.Winmd");
 
             ITaskItem[] assemblyFiles = new TaskItem[]
@@ -182,7 +187,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyP2PHaveCorrectMetadataWinMDManaged()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem taskItem = new TaskItem(@"C:\WinMD\SampleWindowsRuntimeAndCLR.Winmd");
 
             ITaskItem[] assemblyFiles = new TaskItem[]
@@ -220,7 +225,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyP2PHaveCorrectMetadataNonWinMD()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -251,7 +256,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void IgnoreReferenceToMscorlib()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -282,7 +287,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void MixedWinMDGoodReferenceToMscorlib()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -313,7 +318,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void WinMdFileDependsOnAnotherWinMDFile()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -353,7 +358,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdBesideDll()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -385,7 +390,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdBesideDll2()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -417,7 +422,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void WinMdFileDependsOnAnotherWinMDFileWithFrameworkDependencies()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -454,7 +459,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void DotNetAssemblyDependsOnAWinMDFile()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem item = new TaskItem(@"DotNetAssemblyDependsOnWinMD");
             // This should not be used for anything, it is recalculated in rar, this is to make sure it is not forwarded to child items.
             item.SetMetadata(ItemMetadataNames.imageRuntime, "FOO");
@@ -499,7 +504,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdWithInvalidPENativeDependency()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem item = new TaskItem(@"DependsOnInvalidPeHeader");
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
@@ -520,7 +525,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
 
             string invalidPEMessage = ResourceUtilities.GetResourceString("ResolveAssemblyReference.ImplementationDllHasInvalidPEHeader");
-            string fullMessage = ResourceUtilities.FormatResourceString("ResolveAssemblyReference.ProblemReadingImplementationDll", @"C:\WinMDArchVerification\DependsOnInvalidPeHeader.dll", invalidPEMessage);
+            string fullMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.ProblemReadingImplementationDll", @"C:\WinMDArchVerification\DependsOnInvalidPeHeader.dll", invalidPEMessage);
             engine.AssertLogContains(fullMessage);
         }
 
@@ -531,7 +536,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdWithArchitectureDependencyMatchingArchitecturesX86()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem item = new TaskItem("DependsOnX86");
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
@@ -563,7 +568,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdWithArchitectureDependencyAnyCPUNative()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // IMAGE_FILE_MACHINE unknown is supposed to work on all machine types
             TaskItem item = new TaskItem("DependsOnAnyCPUUnknown");
@@ -626,7 +631,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private void VerifyImplementationArchitecture(string winmdName, string targetProcessorArchitecture, string implementationFileArch, string warnOrErrorOnTargetArchitectureMismatch)
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem item = new TaskItem(winmdName);
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
@@ -648,11 +653,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string fullMessage = null;
             if (implementationFileArch.Equals("Unknown"))
             {
-                fullMessage = ResourceUtilities.FormatResourceString("ResolveAssemblyReference.UnknownProcessorArchitecture", @"C:\WinMDArchVerification\" + winmdName + ".dll", @"C:\WinMDArchVerification\" + winmdName + ".winmd", NativeMethods.IMAGE_FILE_MACHINE_R4000.ToString("X", CultureInfo.InvariantCulture));
+                fullMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.UnknownProcessorArchitecture", @"C:\WinMDArchVerification\" + winmdName + ".dll", @"C:\WinMDArchVerification\" + winmdName + ".winmd", NativeMethods.IMAGE_FILE_MACHINE_R4000.ToString("X", CultureInfo.InvariantCulture));
             }
             else
             {
-                fullMessage = ResourceUtilities.FormatResourceString("ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArchOfImplementation", targetProcessorArchitecture, implementationFileArch, @"C:\WinMDArchVerification\" + winmdName + ".dll", @"C:\WinMDArchVerification\" + winmdName + ".winmd");
+                fullMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArchOfImplementation", targetProcessorArchitecture, implementationFileArch, @"C:\WinMDArchVerification\" + winmdName + ".dll", @"C:\WinMDArchVerification\" + winmdName + ".winmd");
             }
 
             if (warnOrErrorOnTargetArchitectureMismatch.Equals("None", StringComparison.OrdinalIgnoreCase))
@@ -696,7 +701,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void DotNetAssemblyDependsOnAWinMDFileWithVersion255()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {

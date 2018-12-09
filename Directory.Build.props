@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <FullFrameworkTFM>net472</FullFrameworkTFM>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('windows'))">windows</OsEnvironment>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('linux'))">linux</OsEnvironment>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('osx'))">osx</OsEnvironment>
@@ -34,7 +38,7 @@
     <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
     <PackageTags>MSBuild</PackageTags>
 
-    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
+    <TargetMSBuildToolsVersion>Current</TargetMSBuildToolsVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -46,11 +50,12 @@
     <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
 
     <!-- NU1603: Microsoft.xunit.netcore.extensions package has dependencies to versions which aren't published, so ignore those warnings
+         NU5105: we're explicitly opting in to semver2, as is most of .NET Core
         CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
         you don't get those defaults.
     -->
 
-    <NoWarn>$(NoWarn);NU1603;1701;1702</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">

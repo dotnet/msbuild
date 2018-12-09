@@ -1,5 +1,6 @@
 {
   "msbuild-sdks": {
+    "Microsoft.Build.CentralPackageVersions": "2.0.1",
     "RoslynTools.RepoToolset": "1.0.0-beta2-62901-01"
   }
 }
