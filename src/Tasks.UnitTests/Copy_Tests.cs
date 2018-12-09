@@ -522,58 +522,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
-        /*
-         * Method:   DoCopyOverCopiedFile
-         *
-         * If SkipUnchangedFiles is set to "false" then we should still copy over files that
-         * have same dates and sizes.
-         */
-        [Fact]
-        public void DoCopyOverCopiedFile()
-        {
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string destinationFile = FileUtilities.GetTemporaryFile();
-            try
-            {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is a source temp file.");
-                }
-
-                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
-                ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
-
-                var t = new Copy
-                {
-                    RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
-                    SourceFiles = sourceFiles,
-                    DestinationFiles = destinationFiles,
-                    SkipUnchangedFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
-                };
-
-                // Execute copy twice to make sure, that we still copy over files that have same dates and sizes.
-                t.Execute();
-                t.Execute();
-
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
-
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
-            }
-            finally
-            {
-                File.Delete(sourceFile);
-                File.Delete(destinationFile);
-            }
-        }
-
         /*
          * Method:   DoCopyOverNonExistentFile
          *

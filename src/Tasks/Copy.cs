@@ -294,7 +294,12 @@ namespace Microsoft.Build.Tasks
 
             // CreateHardLink and CreateSymbolicLink cannot overwrite an existing file or link
             // so we need to delete the existing entry before we create the hard or symbolic link.
-            if (destinationFileExists)
+            // We need to do a best-effort check to see if the files are the same
+            // if they are the same then we won't delete, just in case they refer to the same
+            // physical file on disk.
+            // Since we'll fall back to a copy (below) this will fail and issue a correct
+            // message in the case that the source and destination are in fact the same file.
+            if (destinationFileExists && !IsMatchingSizeAndTimeStamp(sourceFileState, destinationFileState))
             {
                 FileUtilities.DeleteNoThrow(destinationFileState.Name);
             }
