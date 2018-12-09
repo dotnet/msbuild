@@ -574,6 +574,21 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void TestColonInFileName()
+        {
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string destinationFile = "foo:bar";
+            try
+            {
+                File.Copy(sourceFile, destinationFile, true);
+            }
+            finally
+            {
+                File.Delete(sourceFile);
+            }
+        }
+
         /// <summary>
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
@@ -604,7 +619,7 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
                     UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = false,
+                    UseSymboliclinksIfPossible = UseSymbolicLinks,
                 };
 
                 bool result = t.Execute();
