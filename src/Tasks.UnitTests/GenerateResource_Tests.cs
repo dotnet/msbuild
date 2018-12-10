@@ -1920,7 +1920,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Utilities.AssertLogContainsResource(t, "GenerateResource.CreatingSTR", t.StronglyTypedFileName);
                 Assert.Equal(t.StronglyTypedClassName, Path.GetFileNameWithoutExtension(t.StronglyTypedFileName));
                 // Verify class was public, as we specified
-                Assert.Equal("public class " + t.StronglyTypedClassName, File.ReadAllText(t.StronglyTypedFileName));
+                Assert.Contains("public class " + t.StronglyTypedClassName, File.ReadAllText(t.StronglyTypedFileName));
 
                 Utilities.AssertStateFileWasWritten(t);
             }
