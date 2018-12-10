@@ -56,5 +56,11 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>
+
+  <PropertyGroup>
+    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
   
 </Project>
