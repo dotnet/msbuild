@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Shared;
@@ -16,9 +17,9 @@ namespace Microsoft.Build.UnitTests
     {
         private readonly ITestOutputHelper _outputHelper;
 
-        private static readonly string ProjectFilePath = Path.GetFullPath(
+        private static readonly string PortableTaskFolderPath = Path.GetFullPath(
             Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
-                        "..", "..", "..", "Samples", "PortableTask", "Debug", "netstandard1.3"));
+                        "..", "..", "..", "Samples", "PortableTask"));
 
         private const string ProjectFileName = "portableTaskTest.proj";
 
@@ -49,7 +50,11 @@ namespace Microsoft.Build.UnitTests
                 var folder = env.CreateFolder().Path;
                 var projFile = Path.Combine(folder, ProjectFileName);
 
-                foreach (var file in new DirectoryInfo(ProjectFilePath).GetFiles())
+                //"Debug", "netstandard1.3"
+                DirectoryInfo ProjectFileFolder =
+                    new DirectoryInfo(PortableTaskFolderPath).EnumerateDirectories().First().EnumerateDirectories().First();
+
+                foreach (var file in ProjectFileFolder.GetFiles())
                 {
                     File.Copy(file.FullName, Path.Combine(folder, file.Name));
                     _outputHelper.WriteLine($"Copied {file.FullName} to {Path.Combine(folder, file.Name)}");
