@@ -294,12 +294,7 @@ namespace Microsoft.Build.Tasks
 
             // CreateHardLink and CreateSymbolicLink cannot overwrite an existing file or link
             // so we need to delete the existing entry before we create the hard or symbolic link.
-            // We need to do a best-effort check to see if the files are the same
-            // if they are the same then we won't delete, just in case they refer to the same
-            // physical file on disk.
-            // Since we'll fall back to a copy (below) this will fail and issue a correct
-            // message in the case that the source and destination are in fact the same file.
-            if (destinationFileExists && !PathsAreIdentical(sourceFileState, destinationFileState))
+            if (destinationFileExists)
             {
                 FileUtilities.DeleteNoThrow(destinationFileState.Name);
             }
@@ -777,7 +772,7 @@ namespace Microsoft.Build.Tasks
                         // if this was just because the source and destination files are the
                         // same file, that's not a failure.
                         // Note -- we check this exceptional case here, not before the copy, for perf.
-                        if (PathsAreIdentical(sourceFileState, destinationFileState))
+                        if (PathsAreIdentical(sourceFileState.Name, destinationFileState.Name))
                         {
                             return true;
                         }
@@ -875,10 +870,10 @@ namespace Microsoft.Build.Tasks
         /// Compares two paths to see if they refer to the same file. We can't solve the general
         /// canonicalization problem, so we just compare strings on the full paths.
         /// </summary>
-        private static bool PathsAreIdentical(FileState source, FileState destination)
+        private static bool PathsAreIdentical(string source, string destination)
         {
-            string fullSourcePath = Path.GetFullPath(source.Name);
-            string fullDestinationPath = Path.GetFullPath(destination.Name);
+            string fullSourcePath = Path.GetFullPath(source);
+            string fullDestinationPath = Path.GetFullPath(destination);
             StringComparison filenameComparison = NativeMethodsShared.IsWindows ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             return (0 == String.Compare(fullSourcePath, fullDestinationPath, filenameComparison));
         }

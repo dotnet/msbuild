@@ -524,63 +524,33 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DoCopyOverCopiedFile()
         {
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string intermediateFile = FileUtilities.GetTemporaryFile();
-            string destinationFile = FileUtilities.GetTemporaryFile();
+            var sourceFile = FileUtilities.GetTemporaryFile(null, "src", false);
+            var destinationFile = FileUtilities.GetTemporaryFile(null, "dst", false);
+
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
+                File.WriteAllText(sourceFile, "This is a source temp file.");
+
+                // run copy twice, so we test if we overwrite copied file (or link)
+                for (var i = 0; i < 2; i++)
                 {
-                    sw.Write("This is a source temp file.");
-                }
-
-                for (int i = 0; i < 2; i++)
-                {
+                    var t = new Copy
                     {
-                        var t = new Copy
-                        {
-                            RetryDelayMilliseconds = 1,  // speed up tests!
-                            BuildEngine = new MockEngine(),
-                            SourceFiles = new[] { new TaskItem(sourceFile) },
-                            DestinationFiles = new[] { new TaskItem(intermediateFile) },
-                            SkipUnchangedFiles = false,
-                            UseHardlinksIfPossible = UseHardLinks,
-                            UseSymboliclinksIfPossible = UseSymbolicLinks,
-                        };
+                        RetryDelayMilliseconds = 1,  // speed up tests!
+                        BuildEngine = new MockEngine(),
+                        SourceFiles = new[] { new TaskItem(sourceFile) },
+                        DestinationFiles = new[] { new TaskItem(destinationFile) },
+                        SkipUnchangedFiles = false, // CopyAlways
+                        UseHardlinksIfPossible = UseHardLinks,
+                        UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    };
 
-                        bool success = t.Execute();
-                        Assert.True(success);
+                    var success = t.Execute();
+                    Assert.True(success);
 
-                        string destinationFileContents;
-                        using (StreamReader sr = FileUtilities.OpenRead(intermediateFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
-                            destinationFileContents = sr.ReadToEnd();
-
-                        Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
-                        ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
-                    }
-
-                    {
-                        var t = new Copy
-                        {
-                            RetryDelayMilliseconds = 1,  // speed up tests!
-                            BuildEngine = new MockEngine(),
-                            SourceFiles = new[] { new TaskItem(intermediateFile) },
-                            DestinationFiles = new[] { new TaskItem(destinationFile) },
-                            SkipUnchangedFiles = false,
-                            UseHardlinksIfPossible = UseHardLinks,
-                            UseSymboliclinksIfPossible = UseSymbolicLinks,
-                        };
-
-                        bool success = t.Execute();
-                        Assert.True(success);
-
-                        string destinationFileContents;
-                        using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
-                            destinationFileContents = sr.ReadToEnd();
-
-                        Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
-                        ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
-                    }
+                    // "Expected the destination file to contain the contents of source file."
+                    Assert.Equal(File.ReadAllText(destinationFile), "This is a source temp file."); 
+                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
                 }
             }
             finally
