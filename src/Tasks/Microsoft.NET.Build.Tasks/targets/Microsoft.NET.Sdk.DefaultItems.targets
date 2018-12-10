@@ -213,7 +213,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ResolveFrameworkReferences FrameworkReferences="@(FrameworkReference)"
-                                KnownFrameworkReferences="@(KnownFrameworkReference)">
+                                KnownFrameworkReferences="@(KnownFrameworkReference)"
+                                TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+                                TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)">
       <Output TaskParameter="PackageReferencesToAdd" ItemName="PackageReferenceToAdd" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="UnresolvedFrameworkReferences" ItemName="_UnresolvedFrameworkReference" />

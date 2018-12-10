@@ -59,6 +59,7 @@ namespace FrameworkReferenceTest
                     //  to the project for test purposes
                     itemGroup.Add(new XElement(ns + "KnownFrameworkReference",
                            new XAttribute("Include", "HumanizerFramework"),
+                           new XAttribute("TargetFramework", testProject.TargetFrameworks),
                            new XAttribute("RuntimeFrameworkName", "Humanizer.App"),
                            new XAttribute("DefaultRuntimeFrameworkVersion", "2.0.0"),
                            new XAttribute("LatestRuntimeFrameworkVersion", "3.0.0"),
@@ -133,6 +134,7 @@ namespace FrameworkReferenceTest
                     //  to the project for test purposes
                     itemGroup.Add(new XElement(ns + "KnownFrameworkReference",
                            new XAttribute("Include", "HumanizerFramework"),
+                           new XAttribute("TargetFramework", testProject.TargetFrameworks),
                            new XAttribute("RuntimeFrameworkName", "Humanizer.App"),
                            new XAttribute("DefaultRuntimeFrameworkVersion", "2.0.0"),
                            new XAttribute("LatestRuntimeFrameworkVersion", "3.0.0"),
@@ -142,6 +144,7 @@ namespace FrameworkReferenceTest
 
                     itemGroup.Add(new XElement(ns + "KnownFrameworkReference",
                            new XAttribute("Include", "NodaTimeFramework"),
+                           new XAttribute("TargetFramework", testProject.TargetFrameworks),
                            new XAttribute("RuntimeFrameworkName", "NodaTime.App"),
                            new XAttribute("DefaultRuntimeFrameworkVersion", "1.0.0"),
                            new XAttribute("LatestRuntimeFrameworkVersion", "1.5.0"),
@@ -186,25 +189,10 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject()
             {
                 Name = "UnknownFrameworkReferenceTest",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = "netcoreapp3.0",
                 IsSdkProject = true,
                 IsExe = true
             };
-
-            testProject.SourceFiles.Add("Program.cs", @"
-using System;
-using Humanizer;
-
-namespace FrameworkReferenceTest
-{
-    public class Program
-    {
-        public static void Main(string [] args)
-        {
-            Console.WriteLine(""HelloWorld"".Humanize());
-        }
-    }
-}");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project =>
@@ -232,6 +220,51 @@ namespace FrameworkReferenceTest
                 .And.HaveStdOutContaining("NotAKnownFramework")
                 .And.HaveStdOutContaining("AnotherUnknownFramework")
                 ;
+        }
+
+        [Theory]
+        [InlineData("netcoreapp2.1", false)]
+        [InlineData("netcoreapp3.0", true)]
+        public void KnownFrameworkReferencesOnlyApplyToCorrectTargetFramework(string targetFramework, bool shouldPass)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "FrameworkReferenceTest",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "FrameworkReference",
+                                               new XAttribute("Include", "Microsoft.AspNetCore.App")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var result = buildCommand.Execute();
+
+            if (shouldPass)
+            {
+                result.Should().Pass();
+            }
+            else
+            {
+                result
+                    .Should()
+                    .Fail()
+                    .And.HaveStdOutContaining("NETSDK1073")
+                    .And.HaveStdOutContaining("Microsoft.AspNetCore.App");
+            }
+
         }
     }
 }

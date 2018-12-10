@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using NuGet.Frameworks;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -14,6 +15,10 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public class ResolveFrameworkReferences : TaskBase
     {
+        public string TargetFrameworkIdentifier { get; set; }
+
+        public string TargetFrameworkVersion { get; set; }
+
         public ITaskItem[] FrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem[] KnownFrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
@@ -30,6 +35,8 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             var knownFrameworkReferences = KnownFrameworkReferences.Select(item => new KnownFrameworkReference(item))
+                .Where(kfr => kfr.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
+                              NormalizeVersion(kfr.TargetFramework.Version) == NormalizeVersion(new Version(TargetFrameworkVersion)))
                 .ToDictionary(kfr => kfr.Name);
 
             List<ITaskItem> packageReferencesToAdd = new List<ITaskItem>();
@@ -78,6 +85,24 @@ namespace Microsoft.NET.Build.Tasks
             {
                 UnresolvedFrameworkReferences = unresolvedFrameworkReferences.ToArray();
             }
+
+        }
+
+        static Version NormalizeVersion(Version version)
+        {
+            if (version.Revision == 0)
+            {
+                if (version.Build == 0)
+                {
+                    return new Version(version.Major, version.Minor);
+                }
+                else
+                {
+                    return new Version(version.Major, version.Minor, version.Build);
+                }
+            }
+
+            return version;
         }
 
         class KnownFrameworkReference
@@ -86,6 +111,7 @@ namespace Microsoft.NET.Build.Tasks
             public KnownFrameworkReference(ITaskItem item)
             {
                 _item = item;
+                TargetFramework = NuGetFramework.Parse(item.GetMetadata("TargetFramework"));
             }
 
             //  The name / itemspec of the FrameworkReference used in the project
@@ -99,6 +125,8 @@ namespace Microsoft.NET.Build.Tasks
             //  The ID of the targeting pack NuGet package to reference
             public string TargetingPackName => _item.GetMetadata("TargetingPackName");
             public string TargetingPackVersion => _item.GetMetadata("TargetingPackVersion");
+
+            public NuGetFramework TargetFramework { get; }
         }
     }
 }
