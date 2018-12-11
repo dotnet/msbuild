@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
+      <trans-unit id="AspNetCoreAllNotSupported">
+        <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
+        <target state="new">NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</target>
+        <note>{StrBegin="NETSDK1079: "}</note>
+      </trans-unit>
+      <trans-unit id="AspNetCoreUsesFrameworkReference">
+        <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
+        <target state="new">NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</target>
+        <note>{StrBegin="NETSDK1080: "}</note>
+      </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
         <target state="new">NETSDK1077: Failed to lock resource.</target>

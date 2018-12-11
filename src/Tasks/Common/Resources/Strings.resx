@@ -428,4 +428,12 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</value>
     <comment>{StrBegin="NETSDK1078: "}</comment>
   </data>
+  <data name="AspNetCoreAllNotSupported" xml:space="preserve">
+    <value>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</value>
+    <comment>{StrBegin="NETSDK1079: "}</comment>
+  </data>
+  <data name="AspNetCoreUsesFrameworkReference" xml:space="preserve">
+    <value>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</value>
+    <comment>{StrBegin="NETSDK1080: "}</comment>
+  </data>
 </root>
