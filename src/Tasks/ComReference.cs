@@ -386,18 +386,7 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        var sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
-                        System.Runtime.InteropServices.HandleRef handleRef = new System.Runtime.InteropServices.HandleRef(sb, libraryHandle);
-                        int len = NativeMethodsShared.GetModuleFileName(handleRef, sb, sb.Capacity);
-                        if ((len != 0) &&
-                            ((uint)Marshal.GetLastWin32Error() != NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER))
-                        {
-                            typeLibPath = sb.ToString();
-                        }
-                        else
-                        {
-                            typeLibPath = "";
-                        }
+                        typeLibPath = GetModuleFileName(libraryHandle);
                     }
                     finally
                     {
@@ -411,6 +400,26 @@ namespace Microsoft.Build.Tasks
             }
 
             return typeLibPath;
+        }
+
+        private static string GetModuleFileName(IntPtr handle)
+        {
+            bool success = false;
+            var buffer = new StringBuilder();
+
+            // Try increased buffer sizes if on longpath-enabled Windows
+            for (int bufferSize = NativeMethodsShared.MAX_PATH; !success && bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
+            {
+                buffer.EnsureCapacity(bufferSize);
+
+                var handleRef = new System.Runtime.InteropServices.HandleRef(buffer, handle);
+                int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, buffer.Capacity);
+
+                bool isBufferTooSmall = ((uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
+                success = pathLength != 0 && !isBufferTooSmall;
+            }
+
+            return success ? buffer.ToString() : string.Empty;
         }
 
         /// <summary>
