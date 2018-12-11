@@ -1,14 +1,7 @@
 {
-  "sdk": {
-    "_comment1": "Do not include build number here to allow VS to use any X.Y.Zxx build via roll-forward.",
-    "_comment2": "Specifying a preview here allows VS RTM to use a preview irrespective of its checkbox.",
-    "version": "3.0.100-preview"
-  },
   "tools": {
-    "dotnet": "3.0.100-preview-009790",
-    "vs": {
-      "version": "15.9"
-    }
+    "dotnet": "3.0.100-preview-009834",
+    "vs-opt": { "version": "15.9" }
   },
   "msbuild-sdks": {
     "Microsoft.DotNet.Arcade.Sdk": "1.0.0-beta.18612.12"

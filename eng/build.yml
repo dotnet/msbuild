@@ -62,7 +62,6 @@ phases:
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
       - script: eng\common\CIBuild.cmd 
                   -configuration $(_BuildConfig)
-                  -msbuildEngine vs
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
@@ -71,6 +70,7 @@ phases:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
+          TestFullMSBuild: 'true'
 
     - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework') }}:
       - script: eng/common/cibuild.sh 

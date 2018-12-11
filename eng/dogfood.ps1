@@ -15,6 +15,7 @@ $restore = $true
 
 . $PSScriptRoot\common\tools.ps1
 
+
 function Print-Usage() {
   Write-Host "Common settings:"
   Write-Host "  -configuration <value>  Build configuration Debug, Release"
@@ -31,7 +32,8 @@ if ($help -or (($command -ne $null) -and ($command.Contains("/help") -or $comman
 }
 
 try {
-  InitializeTools
+  $toolsetBuildProj = InitializeToolset
+  . $PSScriptroot\restore-toolset.ps1
 
   $env:SDK_REPO_ROOT = $RepoRoot
   $env:SDK_CLI_VERSION = $GlobalJson.tools.dotnet

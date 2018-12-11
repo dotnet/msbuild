@@ -11,13 +11,12 @@ using System.Xml.Linq;
 using System.Reflection;
 using Xunit.Abstractions;
 using Microsoft.Build.Utilities;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.TestFramework
 {
     public class ToolsetInfo
     {
-        public string CliVersionForBundledVersions { get; set; }
-
         public string DotNetHostPath { get; set; }
 
         public string SdksPath { get; set; }
@@ -94,11 +93,17 @@ namespace Microsoft.NET.TestFramework
                 }
             }
 
-            if (!string.IsNullOrEmpty(CliVersionForBundledVersions))
-            {
-                string stage0SdkPath = Path.Combine(dotnetRoot, "sdk", CliVersionForBundledVersions); ;
-                command.Environment["NETCoreSdkBundledVersionsProps"] = Path.Combine(stage0SdkPath, "Microsoft.NETCoreSdk.BundledVersions.props");
-            }
+            DirectoryInfo latestSdk = GetLatestSdk(dotnetRoot);
+            command.Environment["NETCoreSdkBundledVersionsProps"] = Path.Combine(latestSdk.FullName, "Microsoft.NETCoreSdk.BundledVersions.props");
+        }
+
+        private static DirectoryInfo GetLatestSdk(string dotnetRoot)
+        {
+            return new DirectoryInfo(Path.Combine(dotnetRoot, "sdk"))
+                .EnumerateDirectories()
+                .Where(d => NuGetVersion.TryParse(d.Name, out _))
+                .OrderByDescending(d => NuGetVersion.Parse(d.Name))
+                .First();
         }
 
         public SdkCommandSpec CreateCommandForTarget(string target, params string[] args)
@@ -161,7 +166,6 @@ namespace Microsoft.NET.TestFramework
 
             if (repoRoot != null)
             {
-                ret.CliVersionForBundledVersions = GetDotNetCliVersion();
                 ret.SdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
             }
 
@@ -176,9 +180,6 @@ namespace Microsoft.NET.TestFramework
 
             return ret;
         }
-
-        private static string GetDotNetCliVersion()
-            => typeof(ToolsetInfo).Assembly.GetCustomAttribute<DotNetSdkVersionAttribute>().Version;
 
         private static string ResolveCommand(string command)
         {
