@@ -29,9 +29,12 @@ namespace Microsoft.NET.ToolPack.Tests
         {
         }
 
-        private string SetupNuGetPackage(bool multiTarget, [CallerMemberName] string callingMethod = "", Dictionary<string, string> additionalProperty = null)
+        private string SetupNuGetPackage(
+            bool multiTarget,
+            [CallerMemberName] string callingMethod = "",
+            Dictionary<string, string> additionalProperty = null)
         {
-            TestAsset helloWorldAsset = CreateTestAsset(multiTarget, callingMethod);
+            TestAsset helloWorldAsset = CreateTestAsset(multiTarget, callingMethod, additionalProperty);
 
             _testRoot = helloWorldAsset.TestRoot;
 
@@ -43,7 +46,10 @@ namespace Microsoft.NET.ToolPack.Tests
             return packCommand.GetNuGetPackage();
         }
 
-        private TestAsset CreateTestAsset(bool multiTarget, string uniqueName)
+        private TestAsset CreateTestAsset(
+            bool multiTarget,
+            string uniqueName,
+            Dictionary<string, string> additionalProperty = null)
         {
             return _testAssetsManager
                 .CopyTestAsset("PortableTool", uniqueName)
@@ -324,10 +330,10 @@ namespace Microsoft.NET.ToolPack.Tests
 
             _packageId = Path.GetFileNameWithoutExtension(packCommand.ProjectFile);
 
-            AssertValidShim(_testRoot, nugetPackage);
+            AssertValidShim(testRoot, nugetPackage);
         }
 
-		WindowsOnlyTheory]
+        [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
         public void When_version_and_packageVersion_is_different_It_produces_valid_shims(bool multiTarget)
@@ -345,7 +351,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     ["packageVersion"] = _packageVersion
                 });
 
-            AssertValidShim(nugetPackage);
+            AssertValidShim(_testRoot, nugetPackage);
         }
 
         private void AssertValidShim(string testRoot, string nugetPackage)
