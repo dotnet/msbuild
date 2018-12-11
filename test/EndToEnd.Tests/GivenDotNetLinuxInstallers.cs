@@ -39,8 +39,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             // new debian package, version 2.0.
             // size 75660448 bytes: control archive=29107 bytes.
-            //     717 bytes,    11 lines      control              
-            // 123707 bytes,  1004 lines      md5sums              
+            //     717 bytes,    11 lines      control
+            // 123707 bytes,  1004 lines      md5sums
             //     1710 bytes,    28 lines   *  postinst             #!/usr/bin/env
             // Package: dotnet-sdk-2.1.104
             // Version: 2.1.104-1

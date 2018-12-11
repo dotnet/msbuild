@@ -28,21 +28,14 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
   </PropertyGroup>
 
   <Import Project="build/TargetFramework.props" />
-  <Import Project="build/InitRepo.props" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(HostInfoProps)" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(BuildInfoProps)" />
 
   <Import Project="build/BranchInfo.props" />
 
-  <Import Project="build/DependencyVersions.props" />
-  <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
 
   <Import Project="build/SetupPreviousStage.props" />
-  <Import Project="build/OutputDirectories.props" />
 
   <ImportGroup Condition=" '$(BuildingSigningProject)' != 'true' ">
     <!-- These imports aren't required for signing, and some of them have syntax which isn't supported in MSBuild 14,

@@ -1,8 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
-
   <PropertyGroup>
-    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
   
@@ -17,36 +15,4 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
-
-  <Target Name="MakeFscRunnableAndMoveToPublishDir"
-          AfterTargets="Publish"
-          BeforeTargets="RemoveFilesAfterPublish">
-
-    <ItemGroup>
-      <AssetsToRemoveFromDeps Include="tool_fsc.dll" 
-                              SectionName="runtime"/>
-    </ItemGroup>
-
-    <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
-                                 SectionName="%(AssetsToRemoveFromDeps.SectionName)"
-                                 AssetPath="%(AssetsToRemoveFromDeps.Identity)" />
-
-    <!-- Deploy deps and runtime config for fsc.exe and fsi.exe.  Both apps have exactly the same dependencies so this is Ok -->
-    <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json;
-                       $(PublishDir)/$(TargetName).deps.json;"
-          DestinationFiles="$(PublishDir)/fsc.runtimeconfig.json;
-                            $(PublishDir)/fsc.deps.json;"/>
-    <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json;
-                       $(PublishDir)/$(TargetName).deps.json;"
-          DestinationFiles="$(PublishDir)/fsi.runtimeconfig.json;
-                            $(PublishDir)/fsi.deps.json;"/>
-  </Target>
-
-  <Target Name="RemoveFilesAfterPublish"
-          AfterTargets="Publish">
-    <Delete Files="$(PublishDir)/$(TargetName).dll" />
-    <Delete Files="$(PublishDir)/$(TargetName).pdb" />
-    <Delete Files="$(PublishDir)/$(TargetName).runtimeconfig.json" />
-    <Delete Files="$(PublishDir)/$(TargetName).deps.json" />
-  </Target>
 </Project>

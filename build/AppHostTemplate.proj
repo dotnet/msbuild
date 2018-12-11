@@ -1,6 +1,5 @@
 <Project ToolsVersion="15.0" DefaultTargets="ExtractAppHostToOutput">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
 
   <PropertyGroup>
     <NativeExecutableExtension Condition=" $(Rid.StartsWith('win'))">.exe</NativeExecutableExtension>
@@ -36,7 +35,7 @@
   <Target Name="EnsureAppHostPackageRestored">
     <PropertyGroup>
       <AppHostTemplateRestoreAdditionalParameters>--runtime $(Rid)</AppHostTemplateRestoreAdditionalParameters>
-      <AppHostTemplateRestoreAdditionalParameters>$(AppHostTemplateRestoreAdditionalParameters) /p:TargetFramework=$(CliTargetFramework)</AppHostTemplateRestoreAdditionalParameters>
+      <AppHostTemplateRestoreAdditionalParameters>$(AppHostTemplateRestoreAdditionalParameters) /p:TargetFramework=$(ToolsetTargetFramework)</AppHostTemplateRestoreAdditionalParameters>
       <AppHostTemplateRestoreAdditionalParameters>$(AppHostTemplateRestoreAdditionalParameters) /p:TemplateFillInPackageName=$(TemplateFillInPackageName)</AppHostTemplateRestoreAdditionalParameters>
       <AppHostTemplateRestoreAdditionalParameters>$(AppHostTemplateRestoreAdditionalParameters) /p:TemplateFillInPackageVersion=$(TemplateFillInPackageVersion)</AppHostTemplateRestoreAdditionalParameters>
       <AppHostTemplateRestoreAdditionalParameters>$(AppHostTemplateRestoreAdditionalParameters) /p:RestorePackagesPath=$(AppHostIntermediateDirectory)</AppHostTemplateRestoreAdditionalParameters>

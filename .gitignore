@@ -290,6 +290,9 @@ _Pvt_Extensions
 # FAKE - F# Make
 .fake/
 
+# Stage0 CLI
+.dotnet/
+
 # Exceptions
 # Build Scripts
 !scripts/build/

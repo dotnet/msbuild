@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                                          .CreateInstance()
                                          .WithSourceFiles()
                                          .WithRestoreFiles();
-         
+
             var testProjectDirectory = testInstance.Root;
 
             new DotnetCommand()

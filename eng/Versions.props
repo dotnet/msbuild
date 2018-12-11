@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <VersionPropsIsImported>true</VersionPropsIsImported>
+  </PropertyGroup>
+  <!-- Repo Version Information -->
+  <PropertyGroup>
+    <VersionPrefix>3.0.100</VersionPrefix>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+  </PropertyGroup>
+  <!-- Production Dependencies -->
   <PropertyGroup>
     <DotNetCoreSdkLKGVersion>3.0.100-preview-009722</DotNetCoreSdkLKGVersion>
     <DotnetCliInternalVersion>3.0.100-preview.18580.6</DotnetCliInternalVersion>
@@ -55,10 +66,6 @@
     <XUnitVersion>2.3.1</XUnitVersion>
     <NUnit3TemplatesVersion>1.5.2</NUnit3TemplatesVersion>
   </PropertyGroup>
-
-  <!-- NOTE: The property group above is in alignment with orchestrated build version naming conventions. -->
-  <Import Condition=" Exists('$(OrchestratedPackageVersionsProps)') " Project="$(OrchestratedPackageVersionsProps)" />
-
   <PropertyGroup>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</CLI_NETStandardLibraryNETFrameworkVersion>
   </PropertyGroup>
@@ -70,4 +77,39 @@
     <DotnetDebToolVersion>2.0.0</DotnetDebToolVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
+    <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
+
+    <IntermediateDirectory>$(ArtifactsDir)int</IntermediateDirectory>
+    <ToolsetOutputDirectory>$(IntermediateDirectory)/Toolset/sdk/$(Version)</ToolsetOutputDirectory>
+
+    <_DotNetHiveRoot>$(DOTNET_INSTALL_DIR)</_DotNetHiveRoot>
+    <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet/</_DotNetHiveRoot>
+    <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)/</_DotNetHiveRoot>
+
+    <DotNetExe>$(_DotNetHiveRoot)dotnet$(ExeExtension)</DotNetExe>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreSources>
+      $(RestoreSources);
+      https://dotnet.myget.org/F/vstest/api/v3/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+      https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json;
+      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
+      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
+      https://dotnet.myget.org/F/templating/api/v3/index.json;
+      https://dotnet.myget.org/F/dotnet-web/api/v3/index.json;
+      https://dotnet.myget.org/f/roslyn/api/v3/index.json;
+      https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
+      https://api.nuget.org/v3/index.json;
+      https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json;
+      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180420-03/aspnet-inputs/index.json;
+      https://dotnet.myget.org/F/msbuild/api/v3/index.json;
+      https://dotnet.myget.org/F/dotnet-cli/api/v3/index.json;
+      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
+      https://dotnet.myget.org/F/vstest/api/v3/index.json;
+      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json
+    </RestoreSources>
+  </PropertyGroup>
 </Project>

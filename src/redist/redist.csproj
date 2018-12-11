@@ -1,15 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
-
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
-    <PublishDir>$(ToolsetOutputDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
+    <RoslynDirectory>$(OutputPath)/Roslyn</RoslynDirectory>
+    <FSharpDirectory>$(OutputPath)/FSharp</FSharpDirectory>
   </PropertyGroup>
+
+  <Import Project="targets\BuildToolsetTasks.targets" />
 
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
@@ -36,15 +37,15 @@
   </ItemGroup>
 
   <Target Name="PublishVersionFile"
-          BeforeTargets="Publish">
+          BeforeTargets="Build;Publish">
 
-    <WriteLinesToFile File="$(PublishDir)/.toolsetversion"
+    <WriteLinesToFile File="$(OutputPath)/.toolsetversion"
                       Lines="$(CommitHash);$(SdkVersion);$(Rid)"
                       Overwrite="true" />
   </Target>
 
   <Target Name="PublishRoslyn"
-          BeforeTargets="Publish">
+          BeforeTargets="Build;Publish">
     <ItemGroup>
       <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
     </ItemGroup>
@@ -56,54 +57,90 @@
   </Target>
 
   <Target Name="PublishFSharp"
-          BeforeTargets="Publish">
-    <DotNetPublish ToolPath="$(PreviousStageDirectory)"
-                   Configuration="$(Configuration)"
-                   ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" MSBuildArgs="/p:PublishDir=$(FSharpDirectory)" />
+          BeforeTargets="Build;Publish">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj"
+      Properties="Configuration=$(Configuration);PublishDir=$(OutputPath)/FSharp" />
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
-          AfterTargets="Publish">
-    <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+          AfterTargets="Build;Publish">
+    <RemoveAssetFromDepsPackages DepsFile="$(OutputPath)/$(TargetName).deps.json"
                                  SectionName="runtime"
                                  AssetPath="%(BundledToolProjects.Identity).dll" />
 
-    <Copy SourceFiles="$(PublishDir)/$(TargetName).deps.json"
-          DestinationFiles="$(PublishDir)/%(BundledTools.Identity).deps.json" />
+    <Copy SourceFiles="$(OutputPath)/$(TargetName).deps.json"
+          DestinationFiles="$(OutputPath)/%(BundledTools.Identity).deps.json" />
 
-    <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json"
-          DestinationFiles="$(PublishDir)/%(BundledTools.Identity).runtimeconfig.json" />
+    <Copy SourceFiles="$(OutputPath)/$(TargetName).runtimeconfig.json"
+          DestinationFiles="$(OutputPath)/%(BundledTools.Identity).runtimeconfig.json" />
 
-    <Delete Files="$(PublishDir)/$(TargetName).deps.json;
-                   $(PublishDir)/$(TargetName).runtimeconfig.json;
-                   $(PublishDir)/%(BundledToolProjects.Identity).dll;
-                   $(PublishDir)/%(BundledToolProjects.Identity).pdb" />
+    <Delete Files="$(OutputPath)/$(TargetName).deps.json;
+                   $(OutputPath)/$(TargetName).runtimeconfig.json;
+                   $(OutputPath)/%(BundledToolProjects.Identity).dll;
+                   $(OutputPath)/%(BundledToolProjects.Identity).pdb" />
 
     <ChangeEntryPointLibraryName
-          DepsFile="$(PublishDir)/%(BundledTools.Identity).deps.json"
+          DepsFile="$(OutputPath)/%(BundledTools.Identity).deps.json"
           NewName="%(BundledTools.Identity).deps.json" />
   </Target>
 
+  <Target Name="MakeFscRunnableAndMoveToPublishDir"
+          AfterTargets="Build;Publish"
+          BeforeTargets="RemoveFilesAfterPublish">
+
+    <ItemGroup>
+      <AssetsToRemoveFromDeps Include="tool_fsc.dll"
+                              SectionName="runtime"/>
+    </ItemGroup>
+
+    <RemoveAssetFromDepsPackages DepsFile="$(FSharpDirectory)/tool_fsc.deps.json"
+                                 SectionName="%(AssetsToRemoveFromDeps.SectionName)"
+                                 AssetPath="%(AssetsToRemoveFromDeps.Identity)" />
+
+    <Message Text="PATH = $(FSharpDirectory)" Importance="High" />
+
+    <!-- Deploy deps and runtime config for fsc.exe and fsi.exe.  Both apps have exactly the same dependencies so this is Ok -->
+    <Copy SourceFiles="$(FSharpDirectory)/tool_fsc.runtimeconfig.json;
+                       $(FSharpDirectory)/tool_fsc.deps.json;"
+          DestinationFiles="$(FSharpDirectory)/fsc.runtimeconfig.json;
+                            $(FSharpDirectory)/fsc.deps.json;"/>
+    <Copy SourceFiles="$(FSharpDirectory)/tool_fsc.runtimeconfig.json;
+                       $(FSharpDirectory)/tool_fsc.deps.json;"
+          DestinationFiles="$(FSharpDirectory)/fsi.runtimeconfig.json;
+                            $(FSharpDirectory)/fsi.deps.json;"/>
+  </Target>
+
+  <Target Name="RemoveFscFilesAfterPublish"
+          AfterTargets="Build;Publish">
+    <Delete Files="$(FSharpDirectory)/tool_fsc.dll" />
+    <Delete Files="$(FSharpDirectory)/tool_fsc.pdb" />
+    <Delete Files="$(FSharpDirectory)/tool_fsc.runtimeconfig.json" />
+    <Delete Files="$(FSharpDirectory)/tool_fsc.deps.json" />
+  </Target>
+
   <Target Name="PublishTargetExtensions"
-          AfterTargets="Publish"
+          AfterTargets="Build;Publish"
           BeforeTargets="GenerateCliRuntimeConfigurationFiles">
       <PropertyGroup>
-        <MSBuildTargetsDirectory>$(PublishDir)/runtimes/any/native</MSBuildTargetsDirectory>
+        <MSBuildTargetsDirectory>$(OutputPath)/runtimes/any/native</MSBuildTargetsDirectory>
       </PropertyGroup>
 
       <ItemGroup>
-        <NuPkgContentForMSBuildExtensions Include="$(MSBuildTargetsDirectory)/**/*.targets;
-                                                   $(MSBuildTargetsDirectory)/**/*.props;
-                                                   $(MSBuildTargetsDirectory)/**/*.overridetasks;
-                                                   $(MSBuildTargetsDirectory)/**/*.tasks" />
+        <NuPkgContentForMSBuildExtensions Include="
+          $(MSBuildTargetsDirectory)/**/*.targets;
+          $(MSBuildTargetsDirectory)/**/*.props;
+          $(MSBuildTargetsDirectory)/**/*.overridetasks;
+          $(MSBuildTargetsDirectory)/**/*.tasks" />
 
         <NuPkgContentForMSBuildExtensionsRelativePaths Include="@(NuPkgContentForMSBuildExtensions->'runtimes/any/native/%(RecursiveDir)%(Filename)%(Extension)')" />
       </ItemGroup>
 
       <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
-            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(OutputPath)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
-      <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+      <RemoveAssetFromDepsPackages DepsFile="$(OutputPath)/$(TargetName).deps.json"
                                    SectionName="runtimeTargets"
                                    AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
   </Target>
@@ -111,13 +148,13 @@
   <!-- The msdia140typelib_clr0200.dll file is not MIT licensed (and it only used on Windows). Remove it, so
        we can MIT license the published dotnet -->
   <Target Name="RemoveMSDiaTypeLib"
-          AfterTargets="Publish"
+          AfterTargets="Build;Publish"
           Condition="'$(OSName)' != 'win'">
-    <Delete Files="$(PublishDir)/TestHost/msdia140typelib_clr0200.dll" />
+    <Delete Files="$(OutputPath)/TestHost/msdia140typelib_clr0200.dll" />
   </Target>
 
   <Target Name="PublishSdks"
-          AfterTargets="Publish">
+          AfterTargets="Build;Publish">
     <ItemGroup>
       <SdksToBundle Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
@@ -155,8 +192,8 @@
   <Target Name="DeleteSymbolsFromPublishDir"
           AfterTargets="GenerateCliRuntimeConfigurationFiles">
     <ItemGroup>
-      <PdbsToDelete Include="$(PublishDir)/**/*.pdb" />
-      <PdbsToDelete Include="$(PublishDir)/**/*.ni.*.map" />
+      <PdbsToDelete Include="$(OutputPath)/**/*.pdb" />
+      <PdbsToDelete Include="$(OutputPath)/**/*.ni.*.map" />
     </ItemGroup>
 
     <Delete Files="@(PdbsToDelete)" />
@@ -164,15 +201,15 @@
 
   <Target Name="RetargetTools"
           BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
-          AfterTargets="Publish">
+          AfterTargets="Build;Publish">
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
       <ReplacementString>"version": "$(BundledNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ItemGroup>
-      <ToolRuntimeConfigPath Include="$(PublishDir)/**/*.runtimeconfig.json" />
+      <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json" />
 
-      <MSBuild15Items Include="$(PublishDir)/15.0/**/*" />
+      <MSBuild15Items Include="$(OutputPath)/15.0/**/*" />
     </ItemGroup>
     <ReplaceFileContents
       InputFiles="@(ToolRuntimeConfigPath)"
@@ -182,16 +219,16 @@
 
     <Move
       SourceFiles="@(MSBuild15Items)"
-      DestinationFiles="@(MSBuild15Items -> '$(PublishDir)/Current/%(RecursiveDir)%(Filename)%(Extension)')" />
+      DestinationFiles="@(MSBuild15Items -> '$(OutputPath)/Current/%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <RemoveDir Directories="$(PublishDir)/15.0" />
+    <RemoveDir Directories="$(OutputPath)/15.0" />
   </Target>
 
   <Target Name="CopyBundledVersions"
-          AfterTargets="Publish">
+          AfterTargets="Build;Publish">
 
     <Copy SourceFiles="$(PreviousStageBundledVersions)"
-          DestinationFolder="$(PublishDir)"/>
+          DestinationFolder="$(OutputPath)"/>
     
   </Target>
 </Project>
