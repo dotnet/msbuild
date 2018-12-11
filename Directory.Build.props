@@ -53,6 +53,7 @@
          NU5105: we're explicitly opting in to semver2, as is most of .NET Core
         CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
         you don't get those defaults.
+        NU5125: Arcade uses licenseUrl when doing pack, which now causes NU5125 warning. This disables that warning until arcade can switch over.
     -->
 
     <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702</NoWarn>
