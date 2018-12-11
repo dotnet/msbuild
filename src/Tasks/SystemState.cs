@@ -390,8 +390,12 @@ namespace Microsoft.Build.Tasks
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
+            // If the process-wide cache contains an up-to-date FileState, always use it
             if (isProcessFileStateUpToDate)
             {
+                // If a FileState already exists in this instance cache due to deserialization, remove it;
+                // another instance has taken responsibility for serialization, and keeping this would
+                // result in multiple instances serializing the same data to disk
                 if (isCachedInInstance)
                 {
                     instanceLocalFileStateCache.Remove(path);
@@ -400,11 +404,14 @@ namespace Microsoft.Build.Tasks
 
                 return cachedProcessFileState;
             }
+            // If the process-wide FileState is missing or out-of-date, this instance owns serialization;
+            // sync the process-wide cache and signal other instances to avoid data duplication
             if (isInstanceFileStateUpToDate)
             {
                 return s_processWideFileStateCache[path] = cachedInstanceFileState;
             }
 
+            // If no up-to-date FileState exists at this point, create one and take ownership
             return InitializeFileState(path, lastModified);
         }
 
