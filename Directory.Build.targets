@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <CentralPackagesFile>$(MSBuildThisFileDirectory)build/Packages.props</CentralPackagesFile>
+    <CentralPackagesFile>$(MSBuildThisFileDirectory)eng/Packages.props</CentralPackagesFile>
   </PropertyGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.Build.CentralPackageVersions" />
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />

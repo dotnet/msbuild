@@ -14,7 +14,7 @@ steps:
 - task: NuGetRestore@1
   displayName: Restore internal toolset
   inputs:
-    solution: 'build\Internal\Toolsets.csproj'
+    solution: 'eng\Internal\Toolsets.csproj'
     feed: '8f470c7e-ac49-4afe-a6ee-cf784e438b93'
 
 - task: CmdLine@1
@@ -133,7 +133,7 @@ steps:
 - task: PowerShell@1
   displayName: Microbuild health checks
   inputs:
-    scriptName: 'build/MicrobuildTest.ps1'
+    scriptName: 'eng/MicrobuildTest.ps1'
   enabled: false
   continueOnError: true
 

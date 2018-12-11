@@ -5,7 +5,7 @@
     <DisableProject Condition="'$(MSBuildRuntimeType)' == 'Core'">true</DisableProject>
     <DisableProject Condition="'$(OsEnvironment)'!='windows'">true</DisableProject>
   </PropertyGroup>
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(DisableProject)' == 'true'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(DisableProject)' == 'true'" />
 
   <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>

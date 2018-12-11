@@ -48,6 +48,6 @@
     <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" />
   </Target>
 
-  <Import Project="$(RepoRoot)build\BootStrapMSBuild.targets" />
+  <Import Project="$(RepoRoot)eng\BootStrapMSBuild.targets" />
 
 </Project>

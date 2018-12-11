@@ -157,7 +157,7 @@ class Layout {
         $this.NugetPackagePath = $NugetPackagePath
         $this.VsixPath = $VsixPath
 
-        $this.BuildInstances = @( 
+        $this.BuildInstances = @(
             [FullFrameworkBuildInstance]::new($this.FFx86),
             [FullFrameworkBuildInstance]::new($this.FFx64),
             [FullFrameworkBuildInstance]::new($this.FFAnyCPU),
@@ -293,7 +293,7 @@ class FileChecker : Checker{
     }
 
     [Diagnostic[]] CheckLayout([Layout] $l) {
-        $diags = @() 
+        $diags = @()
 
         $diags += $this.CheckPathExists($l.FFx86)
         $diags += $this.CheckPathExists($l.FFx64)
@@ -316,7 +316,7 @@ class FileChecker : Checker{
     [Diagnostic[]] CheckFullFrameworkBuildInstance([FullFrameworkBuildInstance] $b) {
         return $this.CheckBuildInstance($b)
     }
-    
+
     [Diagnostic[]] CheckNetCoreBuildInstance([NetCoreBuildInstance] $b) {
         return $this.CheckBuildInstance($b)
     }

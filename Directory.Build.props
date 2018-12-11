@@ -22,7 +22,7 @@
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OS)</TargetPlatformIdentifier>
   </PropertyGroup>
 
-  <Import Project="build\NuGet.props"/>
+  <Import Project="eng\NuGet.props"/>
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>

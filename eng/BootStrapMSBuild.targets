@@ -1,6 +1,6 @@
 <Project>
 
-  <!-- 
+  <!--
   Copies the binaries of MSBuild to a bootstrap folder so we can rebuild msbuild with itself.
   On netcore and mono it performs a directory copy.
   On full framework it performs a more involved deployment.
@@ -25,7 +25,7 @@
     <!-- This sometimes fails so it might need be retried. -->
     <RemoveDir
             Directories="$(BootstrapDestination)"
-            ContinueOnError="true"/>    
+            ContinueOnError="true"/>
 
   </Target>
   <Target Name="GatherNuGetDependencies" AfterTargets="ResolvePackageAssets">
@@ -99,7 +99,7 @@
           DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(SdkResolverFiles)"
           DestinationFiles="@(SdkResolverFiles->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\%(RecursiveDir)%(Filename)%(Extension)')" />
-    
+
     <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
           DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')" />
 
@@ -115,7 +115,7 @@
 
     <Copy SourceFiles="@(InstalledNuGetFiles)"
           DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />
-    
+
     <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
           DestinationFolder="$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\" />
     <Copy SourceFiles="@(NuGetSdkResolverManifest)"

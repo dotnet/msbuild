@@ -52,7 +52,7 @@
      <PackageReference Include="RoslynDependencies.OptimizationData" />
   </ItemGroup>
 
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 </Project>
