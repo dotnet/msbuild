@@ -1,13 +1,4 @@
 <Project ToolsVersion="15.0" DefaultTargets="EnsureDependencyRestored;CopySdkToOutput">
-  <!-- workaround for https://github.com/Microsoft/msbuild/issues/885 -->
-  <!-- renaming the property because the original property is a global property and therefore
-       cannot be redefined at runtime. -->
-  <PropertyGroup>
-    <CLIBuildDllPath>$([MSBuild]::Unescape($(CLIBuildDll)))</CLIBuildDllPath>
-  </PropertyGroup>
-
-  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDllPath)" />
-
 <!-- 
 
   Note that the CopySdkToOutput target explicitly does NOT have Inputs and Outputs declared.
@@ -42,9 +33,10 @@
 
   <Target Name="EnsureDependencyRestored"
           Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')">
-    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
-                   ProjectPath="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
-                   AdditionalParameters="/p:DependencyPackageName=$(DependencyPackageName) /p:DependencyPackageVersion=$(DependencyPackageVersion)" />
+    <MSbuild
+      Projects="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
+      Properties="DependencyPackageName=$(DependencyPackageName);DependencyPackageVersion=$(DependencyPackageVersion)"
+      Targets="Restore" />
   </Target>
 
   <Target Name="PrepareBundledDependencyProps">
