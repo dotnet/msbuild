@@ -228,14 +228,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     
   </Target>
 
-  <Target Name="FixAspNetReference" AfterTargets="ResolveFrameworkReferences">
-    <ItemGroup>
-      <PackageReference>
-        <Publish Condition="'%(Identity)' == 'Microsoft.AspNetCore.App'">true</Publish>
-      </PackageReference>
-    </ItemGroup>
-  </Target>
-
   <UsingTask TaskName="ReportUnknownFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!-- Report unresolved FrameworkReferences in a separate target so that the error is only reported on Build, not Restore. -->
