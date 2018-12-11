@@ -68,8 +68,8 @@
         <note>{StrBegin="MSB6004: "}</note>
       </trans-unit>
       <trans-unit id="ToolTask.ValidateParametersFailed">
-        <source>MSB6011: {0}.ValidateParameters() returned false, but did not log an error.</source>
-        <target state="new">MSB6011: {0}.ValidateParameters() returned false, but did not log an error.</target>
+        <source>MSB6011: Invalid parameters passed to the {0} task.</source>
+        <target state="new">MSB6011: Invalid parameters passed to the {0} task.</target>
         <note>{StrBegin="MSB6011: "}</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
