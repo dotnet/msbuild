@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure we do not retry when the source file has invalid characters
+        /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
@@ -588,7 +588,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             string sourceFile = FileUtilities.GetTemporaryFile();
-            string destinationFile = "foo<>|?*bar";
+            string destinationFile = "foobar:";
 
             try
             {
