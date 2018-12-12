@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -448,16 +448,17 @@ namespace Microsoft.Build.Tasks
             if (redistList != null)
             {
                 string extension = Path.GetExtension(path);
-                if (String.Compare(extension, ".dll", StringComparison.OrdinalIgnoreCase) == 0)
+
+                if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
                 {
                     IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName
                         (
                             Path.GetFileNameWithoutExtension(path)
                         );
+                    string filename = Path.GetFileName(path);
 
                     foreach (AssemblyEntry a in assemblyNames)
                     {
-                        string filename = Path.GetFileName(path);
                         string pathFromRedistList = Path.Combine(a.FrameworkDirectory, filename);
 
                         if (String.Equals(path, pathFromRedistList, StringComparison.OrdinalIgnoreCase))
@@ -590,7 +591,7 @@ namespace Microsoft.Build.Tasks
         private bool FileTimestampIndicatesFileExists(DateTime lastModified)
         {
             // TODO: Standardize LastWriteTime value for nonexistent files. See https://github.com/Microsoft/msbuild/issues/3699
-            return lastModified != DateTime.MinValue && lastModified != DateTime.FromFileTimeUtc(0);
+            return lastModified != DateTime.MinValue && lastModified != NativeMethodsShared.MinFileDate;
         }
 
         /// <summary>
