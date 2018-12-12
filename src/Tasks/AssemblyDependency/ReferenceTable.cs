@@ -1785,23 +1785,23 @@ namespace Microsoft.Build.Tasks
             // since this is known to reveal bugs in at least one circumstance.
             assemblyReferences.Sort(AssemblyNameReferenceAscendingVersionComparer.comparer);
 
-            int leftIndex = 0;
-            int rightIndex = 1;
+            int currentWinnerIndex = 0;
+            int comparisonIndex = 1;
 
-            while (rightIndex < assemblyReferences.Count)
+            while (comparisonIndex < assemblyReferences.Count)
             {
                 bool isLeftVictim = ResolveAssemblyNameConflict
                 (
-                    assemblyReferences[leftIndex],
-                    assemblyReferences[rightIndex]
+                    assemblyReferences[currentWinnerIndex],
+                    assemblyReferences[comparisonIndex]
                 ) == 0;
 
                 if (isLeftVictim)
                 {
-                    leftIndex = rightIndex;
+                    currentWinnerIndex = comparisonIndex;
                 }
 
-                rightIndex++;
+                comparisonIndex++;
             }
         }
 
@@ -1832,9 +1832,8 @@ namespace Microsoft.Build.Tasks
             // First, resolve all conflicts between references.
             ResolveConflictsBetweenReferences(baseNameToReferences);
 
-            // Build two tables, one with a count and one with the corresponding references.
+            // Build a set of assembly names with conflicts and a table with the corresponding references.
             // Dependencies which differ only by version number need a suggested redirect.
-            // The count tells us whether there are two or more.
             var conflictingFullNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var fullNameToReference = new Dictionary<string, AssemblyNameReference>(References.Count, StringComparer.OrdinalIgnoreCase);
 
@@ -1894,7 +1893,7 @@ namespace Microsoft.Build.Tasks
 
             // Pass over the list of conflicting references and make a binding redirect for each.
             var idealRemappingsList = new List<DependentAssembly>(assemblyNamesList.Count);
-            var bindingRedirectVersion = new Version(0, 0, 0, 0);
+            var zeroVersion = new Version(0, 0, 0, 0);
 
             foreach (AssemblyNameReference assemblyNameReference in assemblyNamesList)
             {
@@ -1904,7 +1903,7 @@ namespace Microsoft.Build.Tasks
                 };
                 var bindingRedirect = new BindingRedirect
                 {
-                    OldVersionLow = bindingRedirectVersion,
+                    OldVersionLow = zeroVersion,
                     OldVersionHigh = assemblyNameReference.assemblyName.AssemblyName.Version,
                     NewVersion = assemblyNameReference.assemblyName.AssemblyName.Version
                 };
