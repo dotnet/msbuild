@@ -384,7 +384,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return string.Join(", ", orderedParameters.Union(namedParameters).Where(p => !string.IsNullOrWhiteSpace(p)));
+            return string.Join(", ", orderedParameters.Concat(namedParameters).Where(p => !string.IsNullOrWhiteSpace(p)));
         }
 
         private const int MaxLineLength = 80;
