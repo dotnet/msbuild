@@ -818,6 +818,40 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void InputResultsCachesSupportsMultipleOccurrence()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/irc", "/irc:a;b", "/irc:c;d"}, switches);
+
+            switches[CommandLineSwitches.ParameterizedSwitch.InputResultsCaches].ShouldBe(new []{null, "a", "b", "c", "d"});
+
+            switches.HaveErrors().ShouldBeFalse();
+        }
+
+        [Fact]
+        public void OutputResultsCache()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/orc:a"}, switches);
+
+            switches[CommandLineSwitches.ParameterizedSwitch.OutputResultsCache].ShouldBe(new []{"a"});
+
+            switches.HaveErrors().ShouldBeFalse();
+        }
+
+        [Fact]
+        public void OutputResultsCachesDoesNotSupportMultipleOccurrences()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/orc:a", "/orc:b"}, switches);
+
+            switches.HaveErrors().ShouldBeTrue();
+        }
+
+        [Fact]
         public void SetParameterlessSwitchTests()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -1217,7 +1251,10 @@ namespace Microsoft.Build.UnitTests
                                         enableProfiler: false,
                                         interactive: false,
                                         isolateProjects: false,
-                                        graphBuild: false);
+                                        graphBuild: false,
+                                        inputResultsCaches: null,
+                                        outputResultsCache: null
+                        );
                 }
                 finally
                 {

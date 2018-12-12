@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Provide the results, move to ready.
             BuildResult requiredResult = new BuildResult(waitingRequest);
-            requiredResult.AddResultsForTarget("bar", TestUtilities.GetEmptySucceedingTargetResult());
+            requiredResult.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.ReportResult(requiredResult);
             Assert.Equal(entry.State, BuildRequestEntryState.Ready);
             Assert.Equal(entry.Request, request);
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Complete the build, move to completed.
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.Complete(result);
             Assert.Equal(entry.State, BuildRequestEntryState.Complete);
             Assert.NotNull(entry.Result);
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             entry.ResolveConfigurationRequest(-1, 2);
 
             BuildResult requiredResult = new BuildResult(waitingRequest);
-            requiredResult.AddResultsForTarget("bar", TestUtilities.GetEmptySucceedingTargetResult());
+            requiredResult.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.ReportResult(requiredResult);
             Assert.Equal(entry.State, BuildRequestEntryState.Ready);
         }
@@ -129,12 +129,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(entry.State, BuildRequestEntryState.Waiting);
 
             BuildResult requiredResult1 = new BuildResult(waitingRequest1);
-            requiredResult1.AddResultsForTarget("bar", TestUtilities.GetEmptySucceedingTargetResult());
+            requiredResult1.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.ReportResult(requiredResult1);
             Assert.Equal(entry.State, BuildRequestEntryState.Waiting);
 
             BuildResult requiredResult2 = new BuildResult(waitingRequest2);
-            requiredResult2.AddResultsForTarget("xor", TestUtilities.GetEmptySucceedingTargetResult());
+            requiredResult2.AddResultsForTarget("xor", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.ReportResult(requiredResult2);
             Assert.Equal(entry.State, BuildRequestEntryState.Ready);
         }
@@ -164,12 +164,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(entry.State, BuildRequestEntryState.Waiting);
 
             BuildResult requiredResult1 = new BuildResult(waitingRequest1);
-            requiredResult1.AddResultsForTarget("bar", TestUtilities.GetEmptySucceedingTargetResult());
+            requiredResult1.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.ReportResult(requiredResult1);
             Assert.Equal(entry.State, BuildRequestEntryState.Waiting);
 
             BuildResult requiredResult2 = new BuildResult(waitingRequest2);
-            requiredResult2.AddResultsForTarget("xor", TestUtilities.GetEmptySucceedingTargetResult());
+            requiredResult2.AddResultsForTarget("xor", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.ReportResult(requiredResult2);
             Assert.Equal(entry.State, BuildRequestEntryState.Ready);
         }
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(entry.State, BuildRequestEntryState.Ready);
 
                 BuildResult requiredResult = new BuildResult(request);
-                requiredResult.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+                requiredResult.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 entry.Complete(requiredResult);
             }
            );
@@ -228,7 +228,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(entry.State, BuildRequestEntryState.Waiting);
 
                 BuildResult requiredResult = new BuildResult(request);
-                requiredResult.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+                requiredResult.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 entry.Complete(requiredResult);
             }
            );
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(entry.State, BuildRequestEntryState.Active);
 
                 BuildResult requiredResult = new BuildResult(request);
-                requiredResult.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+                requiredResult.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 entry.Complete(requiredResult);
                 Assert.Equal(entry.State, BuildRequestEntryState.Complete);
 
@@ -274,7 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildRequest randomRequest = CreateNewBuildRequest(3, new string[0]);
             BuildResult requiredResult = new BuildResult(randomRequest);
-            requiredResult.AddResultsForTarget("bar", TestUtilities.GetEmptySucceedingTargetResult());
+            requiredResult.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.ReportResult(requiredResult);
             Assert.Equal(entry.State, BuildRequestEntryState.Waiting);
         }

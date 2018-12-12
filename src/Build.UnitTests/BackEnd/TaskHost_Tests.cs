@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestEntry entry = new BuildRequestEntry(buildRequest, configuration);
 
             BuildResult buildResult = new BuildResult(buildRequest, false);
-            buildResult.AddResultsForTarget("Build", new TargetResult(new TaskItem[] { new TaskItem("IamSuper", configuration.ProjectFullPath) }, TestUtilities.GetSkippedResult()));
+            buildResult.AddResultsForTarget("Build", new TargetResult(new TaskItem[] { new TaskItem("IamSuper", configuration.ProjectFullPath) }, BuildResultUtilities.GetSkippedResult()));
             _mockRequestCallback = new MockIRequestBuilderCallback(new BuildResult[] { buildResult });
             entry.Builder = (IRequestBuilder)_mockRequestCallback;
 

@@ -85,11 +85,11 @@
     <Compile Include="..\Shared\INodePacketHandler.cs">
       <Link>INodePacketHandler.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\INodePacketTranslatable.cs">
-      <Link>INodePacketTranslatable.cs</Link>
+    <Compile Include="..\Shared\ITranslatable.cs">
+      <Link>ITranslatable.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\INodePacketTranslator.cs">
-      <Link>INodePacketTranslator.cs</Link>
+    <Compile Include="..\Shared\ITranslator.cs">
+      <Link>ITranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InternalErrorException.cs">
       <Link>InternalErrorException.cs</Link>
@@ -118,8 +118,8 @@
     <Compile Include="..\Shared\NodePacketFactory.cs">
       <Link>NodePacketFactory.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\NodePacketTranslator.cs">
-      <Link>NodePacketTranslator.cs</Link>
+    <Compile Include="..\Shared\BinaryTranslator.cs">
+      <Link>BinaryTranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>

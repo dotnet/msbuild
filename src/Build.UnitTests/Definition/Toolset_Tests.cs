@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> {@"c:\foo"})
                 });
 
-            ((INodePacketTranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             Toolset t2 = Toolset.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(t.ToolsVersion, t2.ToolsVersion);

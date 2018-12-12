@@ -32,8 +32,16 @@
         <note />
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In isolated builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</source>
-        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In isolated builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</target>
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </source>
+        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </target>
         <note>
       {StrBegin="MSB4252:"}
       LOCALIZATION: Do not localize the following words: ProjectReference.
@@ -53,6 +61,26 @@
       {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
     </note>
+      </trans-unit>
+      <trans-unit id="EmptyOutputCacheFile">
+        <source>MSB4257: The specified output result cache file is empty.</source>
+        <target state="new">MSB4257: The specified output result cache file is empty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingCacheFile">
+        <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
+        <target state="new">MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingCacheFile">
+        <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
+        <target state="new">MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InputCacheFilesDoNotExist">
+        <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
+        <target state="new">MSB4255: The following input result cache files do not exist: "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
@@ -86,6 +114,13 @@
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
+    </note>
+      </trans-unit>
+      <trans-unit id="UsingInputCaches">
+        <source>Using input build results caches: {0}</source>
+        <target state="new">Using input build results caches: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
     </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
@@ -1594,6 +1629,13 @@
         <source>The property "{0}" with value "{1}" is being overridden by another batch. The property is now: "{2}"</source>
         <target state="translated">La propriété "{0}" ayant la valeur "{1}" est remplacée par un autre lot. À présent, la propriété est : "{2}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="WritingToOutputCache">
+        <source>Writing build results caches to: {0}</source>
+        <target state="new">Writing build results caches to: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a file path
+    </note>
       </trans-unit>
       <trans-unit id="logfilePathNullOrEmpty">
         <source>The log file path cannot be null or empty.</source>

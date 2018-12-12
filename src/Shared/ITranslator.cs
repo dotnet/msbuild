@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// another method.  When invoked, this delegate should return a new object which has been translated appropriately.
     /// </summary>
     /// <typeparam name="T">The type to be translated.</typeparam>
-    internal delegate T NodePacketValueFactory<T>(INodePacketTranslator translator);
+    internal delegate T NodePacketValueFactory<T>(ITranslator translator);
 
     /// <summary>
     /// This delegate is used to create arbitrary collection types for serialization.
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BackEnd
     ///    that by ensuring a single Translate method on a given object can handle both reads and
     ///    writes without referencing any field more than once.
     /// </remarks>
-    internal interface INodePacketTranslator
+    internal interface ITranslator
     {
         /// <summary>
         /// Returns the current serialization mode.
@@ -161,7 +161,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="list">The list to be translated.</param>
         /// <param name="factory">factory to create type T</param>
         /// <typeparam name="T">A TaskItemType</typeparam>
-        void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : INodePacketTranslatable;
+        void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : ITranslatable;
 
         /// <summary>
         /// Translates a list of T where T implements INodePacketTranslateable using a collection factory
@@ -171,7 +171,7 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">An ITranslatable subtype</typeparam>
         /// <typeparam name="L">An IList subtype</typeparam>
         /// <param name="collectionFactory">factory to create a collection</param>
-        void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : INodePacketTranslatable where L : IList<T>;
+        void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : ITranslatable where L : IList<T>;
 
         /// <summary>
         /// Translates a DateTime.
@@ -238,7 +238,7 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type.</typeparam>
         /// <param name="value">The value to be translated.</param>
         void Translate<T>(ref T value)
-            where T : INodePacketTranslatable, new();
+            where T : ITranslatable, new();
 
         /// <summary>
         /// Translates an object implementing INodePacketTranslatable which does not expose a
@@ -248,7 +248,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="value">The value to be translated.</param>
         /// <param name="factory">The factory method used to instantiate values of type T.</param>
         void Translate<T>(ref T value, NodePacketValueFactory<T> factory)
-            where T : INodePacketTranslatable;
+            where T : ITranslatable;
 
         /// <summary>
         /// Translates a culture
@@ -268,7 +268,7 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type.</typeparam>
         /// <param name="array">The array to be translated.</param>
         void TranslateArray<T>(ref T[] array)
-            where T : INodePacketTranslatable, new();
+            where T : ITranslatable, new();
 
         /// <summary>
         /// Translates an array of objects implementing INodePacketTranslatable requiring a factory to create.
@@ -277,7 +277,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="array">The array to be translated.</param>
         /// <param name="factory">The factory method used to instantiate values of type T.</param>
         void TranslateArray<T>(ref T[] array, NodePacketValueFactory<T> factory)
-            where T : INodePacketTranslatable;
+            where T : ITranslatable;
 
         /// <summary>
         /// Translates a dictionary of { string, string }.
@@ -298,7 +298,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
         /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
         void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, NodePacketValueFactory<T> valueFactory)
-            where T : class, INodePacketTranslatable;
+            where T : class, ITranslatable;
 
         /// <summary>
         /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
@@ -309,7 +309,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
         void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory)
             where D : IDictionary<string, T>, new()
-            where T : class, INodePacketTranslatable;
+            where T : class, ITranslatable;
 
         /// <summary>
         /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
@@ -321,7 +321,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="collectionCreator">A factory used to create the dictionary.</param>
         void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> collectionCreator)
             where D : IDictionary<string, T>
-            where T : class, INodePacketTranslatable;
+            where T : class, ITranslatable;
 
         /// <summary>
         /// Translates the boolean that says whether this value is null or not

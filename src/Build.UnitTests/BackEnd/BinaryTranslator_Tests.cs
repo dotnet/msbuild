@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for the NodePacketTranslators
     /// </summary>
-    public class NodePacketTranslator_Tests
+    public class BinaryTranslator_Tests
     {
         /// <summary>
         /// Tests the SerializationMode property
@@ -31,10 +31,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
-            INodePacketTranslator translator = NodePacketTranslator.GetReadTranslator(stream, null);
+            ITranslator translator = BinaryTranslator.GetReadTranslator(stream, null);
             Assert.Equal(TranslationDirection.ReadFromStream, translator.Mode);
 
-            translator = NodePacketTranslator.GetWriteTranslator(stream);
+            translator = BinaryTranslator.GetWriteTranslator(stream);
             Assert.Equal(TranslationDirection.WriteToStream, translator.Mode);
         }
 
@@ -597,7 +597,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Base class for testing
         /// </summary>
-        private class BaseClass : INodePacketTranslatable
+        private class BaseClass : ITranslatable
         {
             /// <summary>
             /// A field.
@@ -640,7 +640,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Factory for serialization.
             /// </summary>
-            public static BaseClass FactoryForDeserialization(INodePacketTranslator translator)
+            public static BaseClass FactoryForDeserialization(ITranslator translator)
             {
                 BaseClass packet = new BaseClass();
                 packet.Translate(translator);
@@ -650,7 +650,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Serializes the class.
             /// </summary>
-            public virtual void Translate(INodePacketTranslator translator)
+            public virtual void Translate(ITranslator translator)
             {
                 translator.Translate(ref _baseValue);
             }
@@ -734,7 +734,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Serializes the class.
             /// </summary>
-            public override void Translate(INodePacketTranslator translator)
+            public override void Translate(ITranslator translator)
             {
                 base.Translate(translator);
                 translator.Translate(ref _derivedValue);

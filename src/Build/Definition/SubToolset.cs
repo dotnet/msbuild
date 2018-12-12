@@ -18,7 +18,7 @@ namespace Microsoft.Build.Evaluation
     /// Aggregation of a set of properties that correspond to a particular sub-toolset.  
     /// </summary>
     [DebuggerDisplay("SubToolsetVersion={SubToolsetVersion} #Properties={_properties.Count}")]
-    public class SubToolset : INodePacketTranslatable
+    public class SubToolset : ITranslatable
     {
         /// <summary>
         /// VisualStudioVersion that corresponds to this subtoolset
@@ -44,9 +44,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor for translation
         /// </summary>
-        private SubToolset(INodePacketTranslator translator)
+        private SubToolset(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Translates the sub-toolset.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _subToolsetVersion);
             translator.TranslateProjectPropertyInstanceDictionary(ref _properties);
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static SubToolset FactoryForDeserialization(INodePacketTranslator translator)
+        internal static SubToolset FactoryForDeserialization(ITranslator translator)
         {
             SubToolset subToolset = new SubToolset(translator);
             return subToolset;
