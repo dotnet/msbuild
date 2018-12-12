@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -444,6 +445,23 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress390219\v1\D.dll")); // "Expected to find assembly, but didn't."
             Assert.Equal(0, t.SuggestedRedirects.Length);
             Assert.Equal(0, e.Warnings); // "Should only be no warning about suggested redirects."
+        }
+
+        // It is hard to write a test that will fail with the root cause of https://github.com/Microsoft/msbuild/issues/4002
+        // because it requires reading real files from disk and we mock GetAssemblyName in RAR tests.
+        //
+        // So to add some coverage, simply check that we get a Culture=neutral when enumerating references of this test
+        // assembly.
+        [Fact]
+        public void RealGetAssemblyNameIncludesCulture()
+        {
+            using (var info = new AssemblyInformation(Assembly.GetExecutingAssembly().Location))
+            {
+                foreach (var dependency in info.Dependencies)
+                {
+                    Assert.Contains("Culture=neutral", dependency.ToString());
+                }
+            }
         }
     }
 }
