@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Null(cache.GetResultForRequest(request));
         }
 
-        public static IEnumerable<object> CacheSerializationTestData
+        public static IEnumerable<object[]> CacheSerializationTestData
         {
             get
             {

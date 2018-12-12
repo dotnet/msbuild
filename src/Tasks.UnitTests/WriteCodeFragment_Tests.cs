@@ -517,7 +517,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.Equal(true, result);
+            Assert.True(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);

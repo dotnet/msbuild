@@ -104,7 +104,8 @@ phases:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'eng/cibuild_bootstrapped_msbuild.cmd -hostType core'
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: '-hostType core'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
