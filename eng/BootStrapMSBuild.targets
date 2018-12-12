@@ -7,7 +7,7 @@
    -->
 
   <PropertyGroup>
-    <BootstrapDestination>$(ArtifactsConfigurationDir)bootstrap\</BootstrapDestination>
+    <BootstrapDestination>$(ArtifactsBinDir)bootstrap\</BootstrapDestination>
     <BootstrapDestination Condition="'$(Platform)' == 'x64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
     <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
 
@@ -62,7 +62,7 @@
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
       <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
       <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
-      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
+      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
       <InstalledSdks Include="$(MSBuildBinPath)\Sdks\**\*" Condition="'$(MonoBuild)' == 'true'" />
 
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
