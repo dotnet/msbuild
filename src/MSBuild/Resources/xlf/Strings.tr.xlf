@@ -543,6 +543,42 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_InputCachesFiles">
+        <source>  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will use to read build results from.
+                     Setting this also turns on isolated builds (-isolate).
+                     (short form: -irc)
+   </source>
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will use to read build results from.
+                     Setting this also turns on isolated builds (-isolate).
+                     (short form: -irc)
+   </target>
+        <note>
+      LOCALIZATION: The following should not be localized: MSBuild, -isolate
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_OutputCacheFile">
+        <source>  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     Setting this also turns on isolated builds (-isolate).
+                     (short form: -orc)
+   </source>
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     Setting this also turns on isolated builds (-isolate).
+                     (short form: -orc)
+   </target>
+        <note>
+      LOCALIZATION: The following should not be localized: MSBuild, -isolate
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="HelpPrompt">
         <source>For switch syntax, type "MSBuild -help"</source>
         <target state="needs-review-translation">Anahtar sözdizimi için "MSBuild /help" yazın</target>

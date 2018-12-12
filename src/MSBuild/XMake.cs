@@ -3618,6 +3618,8 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_34_InteractiveSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_35_IsolateProjectsSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_InputCachesFiles"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_OutputCacheFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));

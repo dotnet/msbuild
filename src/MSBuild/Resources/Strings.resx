@@ -464,6 +464,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </comment>
   </data>
 
+  <data name="HelpMessage_OutputCacheFile" UESanitized="false" Visibility="Public">
+   <value>  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     Setting this also turns on isolated builds (-isolate).
+                     (short form: -orc)
+   </value>
+    <comment>
+      LOCALIZATION: The following should not be localized: MSBuild, -isolate
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+
+  <data name="HelpMessage_InputCachesFiles" UESanitized="false" Visibility="Public">
+   <value>  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will use to read build results from.
+                     Setting this also turns on isolated builds (-isolate).
+                     (short form: -irc)
+   </value>
+    <comment>
+      LOCALIZATION: The following should not be localized: MSBuild, -isolate
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+
   <data name="HelpMessage_20_FileLoggerSwitch" UESanitized="false" Visibility="Public">
     <value>  -fileLogger[n]     Logs the build output to a file. By default
                      the file is in the current directory and named
