@@ -363,32 +363,13 @@ namespace Microsoft.Build.Tasks
                 {
                     var metadataReader = peFile.GetMetadataReader();
 
-                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
+                    var assemblyReferences = metadataReader.AssemblyReferences;
 
-                    foreach (var handle in metadataReader.AssemblyReferences)
+                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>(assemblyReferences.Count);
+
+                    foreach (var handle in assemblyReferences)
                     {
-                        var entry = metadataReader.GetAssemblyReference(handle);
-
-                        var assemblyName = new AssemblyName
-                        {
-                            Name = metadataReader.GetString(entry.Name),
-                            Version = entry.Version,
-                            CultureName = metadataReader.GetString(entry.Culture)
-                        };
-                        var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
-                        if (publicKeyOrToken != null)
-                        {
-                            if (publicKeyOrToken.Length <= 8)
-                            {
-                                assemblyName.SetPublicKeyToken(publicKeyOrToken);
-                            }
-                            else
-                            {
-                                assemblyName.SetPublicKey(publicKeyOrToken);
-                            }
-                        }
-                        assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
-
+                        var assemblyName = GetAssemblyName(metadataReader, handle);
                         ret.Add(new AssemblyNameExtension(assemblyName));
                     }
 
@@ -432,6 +413,42 @@ namespace Microsoft.Build.Tasks
 
                 _metadataRead = true;
             }
+        }
+
+        // https://github.com/Microsoft/msbuild/issues/4002
+        // https://github.com/dotnet/corefx/issues/34008
+        //
+        // We do not use AssemblyReference.GetAssemblyName() here because its behavior
+        // is different from other code paths with respect to neutral culture. We will
+        // get unspecified culture instead of explicitly neutral culture. This in turn
+        // leads string comparisons of assembly-name-modulo-version in RAR to false
+        // negatives that break its conflict resolution and binding redirect generation.
+        private static AssemblyName GetAssemblyName(MetadataReader metadataReader, AssemblyReferenceHandle handle)
+        {
+            var entry = metadataReader.GetAssemblyReference(handle);
+
+            var assemblyName = new AssemblyName
+            {
+                Name = metadataReader.GetString(entry.Name),
+                Version = entry.Version,
+                CultureName = metadataReader.GetString(entry.Culture)
+            };
+
+            var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
+            if (publicKeyOrToken != null)
+            {
+                if (publicKeyOrToken.Length <= 8)
+                {
+                    assemblyName.SetPublicKeyToken(publicKeyOrToken);
+                }
+                else
+                {
+                    assemblyName.SetPublicKey(publicKeyOrToken);
+                }
+            }
+
+            assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+            return assemblyName;
         }
 #endif
 
