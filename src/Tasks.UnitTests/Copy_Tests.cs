@@ -518,8 +518,8 @@ namespace Microsoft.Build.UnitTests
         /*
          * Method:   DoCopyOverCopiedFile
          *
-         * If SkipUnchangedFiles is set to "false" then we should still copy over files that
-         * have same dates and sizes.
+         * If SkipUnchangedFiles is set to "false" then we should still be able to copy over files (or links)
+         * that have same dates and sizes.
          */
         [Fact]
         public void DoCopyOverCopiedFile()
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.WriteAllText(sourceFile, "This is a source temp file.");
 
-                // run copy twice, so we test if we overwrite copied file (or link)
+                // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
                 for (var i = 0; i < 2; i++)
                 {
                     var t = new Copy
