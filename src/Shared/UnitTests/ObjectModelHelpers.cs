@@ -254,18 +254,18 @@ namespace Microsoft.Build.UnitTests
             {
                 if (!normalizeSlashes)
                 {
-                    expectedItems[i].ShouldBe(items[i].EvaluatedInclude);
+                    items[i].EvaluatedInclude.ShouldBe(expectedItems[i]);
                 }
                 else
                 {
                     var normalizedItem = NormalizeSlashes(expectedItems[i]);
-                    normalizedItem.ShouldBe(items[i].EvaluatedInclude);
+                    items[i].EvaluatedInclude.ShouldBe(normalizedItem);
                 }
 
                 AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
             }
 
-            expectedItems.Length.ShouldBe(items.Count);
+            items.Count.ShouldBe(expectedItems.Length);
 
             expectedItems.Length.ShouldBe(expectedDirectMetadataPerItem.Length);
         }

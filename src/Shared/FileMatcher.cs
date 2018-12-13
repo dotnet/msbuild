@@ -1920,27 +1920,6 @@ namespace Microsoft.Build.Shared
             Debug.Assert(filespecUnescaped != null);
             Debug.Assert(Path.IsPathRooted(projectDirectoryUnescaped));
 
-            var pathValidityExceptionTriggered = false;
-
-            // Ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
-            // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
-
-            try
-            {
-                filespecUnescaped = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
-
-                // increase the chance of cache hits when multiple relative globs refer to the same base directory
-                // todo https://github.com/Microsoft/msbuild/issues/3889
-                //if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
-                //{
-                //    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
-                //}
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                pathValidityExceptionTriggered = true;
-            }
-
             var excludeSize = 0;
 
             if (excludes != null)
@@ -1953,12 +1932,44 @@ namespace Microsoft.Build.Shared
 
             using (var sb = new ReuseableStringBuilder(projectDirectoryUnescaped.Length + filespecUnescaped.Length + excludeSize))
             {
-                if (pathValidityExceptionTriggered)
+                var pathValidityExceptionTriggered = false;
+
+                try
                 {
-                    sb.Append(projectDirectoryUnescaped);
+                    // Ideally, ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
+                    // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
+
+                    var filespecUnescapedFullyQualified = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
+
+                    if (filespecUnescapedFullyQualified.Equals(filespecUnescaped, StringComparison.Ordinal))
+                    {
+                        // filespec is absolute, don't include the project directory path
+                        sb.Append(filespecUnescaped);
+                    }
+                    else
+                    {
+                        // filespec is not absolute, include the project directory path
+                        // differentiate fully qualified filespecs vs relative filespecs that got prepended with the project directory
+                        sb.Append("p");
+                        sb.Append(filespecUnescapedFullyQualified);
+                    }
+
+                    // increase the chance of cache hits when multiple relative globs refer to the same base directory
+                    // todo https://github.com/Microsoft/msbuild/issues/3889
+                    //if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
+                    //{
+                    //    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+                    //}
+                }
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                {
+                    pathValidityExceptionTriggered = true;
                 }
 
-                sb.Append(filespecUnescaped);
+                if (pathValidityExceptionTriggered)
+                {
+                    sb.Append($"ep{projectDirectoryUnescaped}{filespecUnescaped}");
+                }
 
                 if (excludes != null)
                 {

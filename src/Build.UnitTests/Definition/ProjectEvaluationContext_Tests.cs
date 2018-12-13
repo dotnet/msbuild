@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [MemberData(nameof(ContextDisambiguatesRelativeGlobsData))]
-        public void ContextDisambiguatesRelativeGlobsUnderProjectCone(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        public void ContextDisambiguatesSameRelativeGlobsPointingInsideDifferentProjectCones(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
             var projectDirectory1 = _env.DefaultTestDirectory.CreateDirectory("1").Path;
             var projectDirectory2 = _env.DefaultTestDirectory.CreateDirectory("2").Path;
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [MemberData(nameof(ContextDisambiguatesRelativeGlobsData))]
-        public void ContextDisambiguatesRelativeGlobsOutsideOfProjectCone(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        public void ContextDisambiguatesSameRelativeGlobsPointingOutsideDifferentProjectCones(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
             var project1Root = _env.DefaultTestDirectory.CreateDirectory("Project1");
             var project1Directory = project1Root.CreateDirectory("1").Path;
@@ -384,7 +384,70 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [MemberData(nameof(ContextDisambiguatesRelativeGlobsData))]
-        public void ContextDisambiguatesDistinctRelativeGlobsOutsideOfProjectConePointingToSameFile(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        public void ContextDisambiguatesAFullyQualifiedGlobPointingInAnotherRelativeGlobsCone(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        {
+            var project1Directory = _env.DefaultTestDirectory.CreateDirectory("Project1");
+            var project1GlobDirectory = project1Directory.CreateDirectory("Glob").CreateDirectory("1").Path;
+
+            var project2Directory = _env.DefaultTestDirectory.CreateDirectory("Project2");
+
+            var context = EvaluationContext.Create(policy);
+
+            var evaluationCount = 0;
+
+            File.WriteAllText(Path.Combine(project1GlobDirectory, $"{evaluationCount}.cs"), "");
+
+            EvaluateProjects(
+                new []
+                {
+                    // first project uses a relative path
+                    new ProjectSpecification(
+                        Path.Combine(project1Directory.Path, "1"),
+                        $@"<Project>
+                            <ItemGroup>
+                                <i Include=`{Path.Combine("Glob", "**", "*.cs")}` />
+                            </ItemGroup>
+                        </Project>"),
+                    // second project reaches out into first project's cone via a fully qualified path
+                    new ProjectSpecification(
+                        Path.Combine(project2Directory.Path, "2"),
+                        $@"<Project>
+                            <ItemGroup>
+                                <i Include=`{Path.Combine(project1Directory.Path, "Glob", "**", "*.cs")}` />
+                            </ItemGroup>
+                        </Project>")
+                },
+                context,
+                project =>
+                {
+                    var projectName = Path.GetFileNameWithoutExtension(project.FullPath);
+
+                    // globs have the fixed directory part prepended, so add it to the expected results
+                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount]
+                        .Select(i => Path.Combine("Glob", "1", i))
+                        .ToArray();
+
+                    // project 2 has fully qualified directory parts, so make the results for 2 fully qualified
+                    if (projectName.Equals("2"))
+                    {
+                        expectedGlobExpansion = expectedGlobExpansion
+                            .Select(i => Path.Combine(project1Directory.Path, i))
+                            .ToArray();
+                    }
+
+                    var actualGlobExpansion = project.GetItems("i");
+                    ObjectModelHelpers.AssertItems(expectedGlobExpansion, actualGlobExpansion);
+
+                    evaluationCount++;
+
+                    File.WriteAllText(Path.Combine(project1GlobDirectory, $"{evaluationCount}.cs"), "");
+                }
+                );
+        }
+
+        [Theory]
+        [MemberData(nameof(ContextDisambiguatesRelativeGlobsData))]
+        public void ContextDisambiguatesDistinctRelativeGlobsPointingOutsideOfSameProjectCone(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
             var globDirectory = _env.DefaultTestDirectory.CreateDirectory("glob");
 
@@ -463,7 +526,7 @@ namespace Microsoft.Build.UnitTests.Definition
         // projects should cache glob expansions when the __fully qualified__ glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeFullyQualifiedGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
-            ContextCachesCommonOutOfProjectConeGlob2(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
+            ContextCachesCommonOutOfProjectCone(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
         [Theory (Skip="https://github.com/Microsoft/msbuild/issues/3889")]
@@ -471,10 +534,10 @@ namespace Microsoft.Build.UnitTests.Definition
         // projects should cache glob expansions when the __relative__ glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeRelativeGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
-            ContextCachesCommonOutOfProjectConeGlob2(itemSpecPathIsRelative: true, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
+            ContextCachesCommonOutOfProjectCone(itemSpecPathIsRelative: true, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
-        private void ContextCachesCommonOutOfProjectConeGlob2(bool itemSpecPathIsRelative, EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        private void ContextCachesCommonOutOfProjectCone(bool itemSpecPathIsRelative, EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
             var testDirectory = _env.DefaultTestDirectory;
             var globDirectory = testDirectory.CreateDirectory("GlobDirectory");
