@@ -1,142 +1,95 @@
-queue:
-  name: VSEng-MicroBuildVS2017
-  timeoutInMinutes: 360
-trigger: none
-variables:
-  BuildConfiguration: 'Release'
-  TeamName: MSBuild
-steps:
-- task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
-  displayName: Install Signing Plugin
-  inputs:
-    signType: '$(SignType)'
+trigger:
+- master
 
-- task: NuGetRestore@1
-  displayName: Restore internal toolset
-  inputs:
-    solution: 'eng\Internal\Toolsets.csproj'
-    feed: '8f470c7e-ac49-4afe-a6ee-cf784e438b93'
+phases:
+- template: /eng/common/templates/phases/base.yml
+  parameters:
+    name: Windows_NT
+    enableTelemetry: true
+    enableMicrobuild: true
+    publicBuildReasons: PullRequest
+    queue: dotnet-internal-temp
+    timeoutInMinutes: 360
+    variables:
+      BuildConfiguration: 'Release'
+      TeamName: MSBuild
+      _HelixType: build/product
+      _HelixBuildConfig: $(BuildConfiguration)
+      _HelixSource: official/dotnet/cli/$(Build.SourceBranch)
+      _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+                /p:DotNetPublishToBlobFeed=true
+                /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                /p:PB_PublishType=blob
+      _SignArgs: /p:DotNetSignType=real /p:TeamName=MSBuild
 
-- task: CmdLine@1
-  displayName: Print Vars
-  inputs:
-    filename: set
-  condition: always()
+    steps:
+    - task: AzureKeyVault@1
+      inputs:
+        azureSubscription: 'DotNet-Engineering-Services_KeyVault'
+        KeyVaultName: EngKeyVault
+        SecretsFilter: 'dotnetfeed-storage-access-key-1,microsoft-symbol-server-pat,symweb-symbol-server-pat'
+      condition: succeeded()
+    - task: AzureKeyVault@1
+      inputs:
+        azureSubscription: 'HelixProd_KeyVault'
+        KeyVaultName: HelixProdKV
+        SecretsFilter: 'HelixApiAccessToken'
+      condition: always()
 
-- task: DotNetCoreInstaller@0
-  displayName: Use .NET Core sdk 2.1.300
-  inputs:
-    version: 2.1.300
+    - task: CmdLine@1
+      displayName: Print Vars
+      inputs:
+        filename: set
+      condition: always()
 
-- task: DotNetCoreCLI@2
-  displayName: Install nbgv
-  inputs:
-    command: custom
-    custom: tool
-    arguments: 'install --tool-path artifacts nbgv --version 2.2.13'
+    - task: CmdLine@1
+      displayName: Run build.cmd
+      inputs:
+        filename: '$(comspec)'
+        arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & $(Build.Repository.LocalPath)\eng\common\cibuild.cmd -configuration $(BuildConfiguration) /p:Projects=$(Build.Repository.LocalPath)\MSBuild.sln $(_PublishArgs) $(_SignArgs)"'
 
-- task: CmdLine@1
-  displayName: Compute version with nbgv
-  inputs:
-    filename: 'artifacts\nbgv.exe'
-    arguments: 'cloud --all-vars'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: logs'
+      inputs:
+        PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
+        ArtifactName: logs
+      condition: succeededOrFailed()
 
-- task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
-  displayName: Install Swix Plugin
-  inputs:
-    dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(NBGV_SemVer1)/$(Build.BuildId)'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: packages'
+      inputs:
+        PathtoPublish: 'artifacts\packages\$(BuildConfiguration)\*Shipping\*.nupkg'
+        ArtifactName: packages
+      condition: succeededOrFailed()
 
-- task: CmdLine@1
-  displayName: Print Vars
-  inputs:
-    filename: set
-  condition: always()
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: vsix'
+      inputs:
+        PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        ArtifactName: vsix
+      condition: succeededOrFailed()
 
-- task: CmdLine@1
-  displayName: Run build.cmd
-  inputs:
-    filename: '$(comspec)'
-    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & $(Build.Repository.LocalPath)\build.cmd -pack -sign -configuration Release -properties /p:SignType=$(SignType)"'
+    - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+      displayName: Upload VSTS Drop
+      inputs:
+        DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
 
-- task: CmdLine@1
-  displayName: Print bin contents
-  inputs:
-    filename: dir
-    arguments: '/s /b artifacts\>artifacts\$(BuildConfiguration)\log\BinFileListing.log'
-  condition: always()
+    - task: PowerShell@1
+      displayName: Microbuild health checks
+      inputs:
+        scriptName: 'eng/MicrobuildTest.ps1'
+      enabled: false
+      continueOnError: true
 
-- task: CmdLine@1
-  displayName: Set final version with nbgv
-  inputs:
-    filename: 'artifacts\nbgv.exe'
-    arguments: 'cloud --version=$(NBGV_SemVer1)'
+    - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
+      displayName: Execute cleanup tasks
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: logs'
-  inputs:
-    PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
-    ArtifactName: logs
-  condition: succeededOrFailed()
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: packages'
-  inputs:
-    PathtoPublish: 'artifacts\packages\$(BuildConfiguration)\*Shipping\*.nupkg'
-    ArtifactName: packages
-  condition: succeededOrFailed()
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: vsix'
-  inputs:
-    PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-    ArtifactName: vsix
-  condition: succeededOrFailed()
-
-- task: CopyFiles@2
-  displayName: Collect Symbols
-  inputs:
-    Contents: 'artifacts\bin\$(BuildConfiguration)\**\*.pdb'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/symbols'
-    CleanTargetFolder: true
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: symbols'
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)/symbols'
-    ArtifactName: symbols
-  condition: succeededOrFailed()
-
-- task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
-  displayName: Reinstall Swix Plugin (to pick up new build number)
-  inputs:
-    dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
-  enabled: false
-
-- task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
-  displayName: Upload VSTS Drop
-  inputs:
-    DropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
-
-- task: PublishSymbols@1
-  displayName: Index Sources
-  inputs:
-    SearchPattern: '**/*.pdb'
-    SymbolsFolder: '$(Build.ArtifactStagingDirectory)\symbols'
-
-- task: ms-vscs-artifact.build-tasks.artifactSymbolTask-1.artifactSymbolTask@0
-  displayName: Publish Symbols to Artifact Services
-  inputs:
-    symbolServiceURI: 'https://microsoft.artifacts.visualstudio.com/DefaultCollection'
-    sourcePath: '$(Build.ArtifactStagingDirectory)\symbols'
-    usePat: false
-
-- task: PowerShell@1
-  displayName: Microbuild health checks
-  inputs:
-    scriptName: 'eng/MicrobuildTest.ps1'
-  enabled: false
-  continueOnError: true
-
-- task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
-  displayName: Execute cleanup tasks
-
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+  - template: /eng/common/templates/phases/publish-build-assets.yml
+    parameters:
+      dependsOn:
+        - Windows_NT
+      queue:
+        name: Hosted VS2017

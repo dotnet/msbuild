@@ -73,7 +73,7 @@ try {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=true /p:Projects="$RepoRoot\MSBuild.sln" @properties
   }
 
-  $bootstrapRoot = Join-Path $ArtifactsBinDir "bin\bootstrap"
+  $bootstrapRoot = Join-Path $ArtifactsBinDir "bootstrap"
 
   if ($hostType -eq 'full')
   {
