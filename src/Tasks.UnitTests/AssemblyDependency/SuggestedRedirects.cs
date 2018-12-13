@@ -298,6 +298,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void Regress442570_MissingBackVersionShouldWarn()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -376,6 +378,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void Regress387218_UnificationRequiresStrongName()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -418,6 +422,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void Regress390219_UnificationRequiresSameCulture()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
