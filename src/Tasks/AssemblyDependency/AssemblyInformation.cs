@@ -369,11 +369,8 @@ namespace Microsoft.Build.Tasks
 
                     foreach (var handle in assemblyReferences)
                     {
-                        ret.Add(
-                            new AssemblyNameExtension(
-                                metadataReader
-                                .GetAssemblyReference(handle)
-                                .GetAssemblyName()));
+                        var assemblyName = GetAssemblyName(metadataReader, handle);
+                        ret.Add(new AssemblyNameExtension(assemblyName));
                     }
 
                     _assemblyDependencies = ret.ToArray();
@@ -416,6 +413,42 @@ namespace Microsoft.Build.Tasks
 
                 _metadataRead = true;
             }
+        }
+
+        // https://github.com/Microsoft/msbuild/issues/4002
+        // https://github.com/dotnet/corefx/issues/34008
+        //
+        // We do not use AssemblyReference.GetAssemblyName() here because its behavior
+        // is different from other code paths with respect to neutral culture. We will
+        // get unspecified culture instead of explicitly neutral culture. This in turn
+        // leads string comparisons of assembly-name-modulo-version in RAR to false
+        // negatives that break its conflict resolution and binding redirect generation.
+        private static AssemblyName GetAssemblyName(MetadataReader metadataReader, AssemblyReferenceHandle handle)
+        {
+            var entry = metadataReader.GetAssemblyReference(handle);
+
+            var assemblyName = new AssemblyName
+            {
+                Name = metadataReader.GetString(entry.Name),
+                Version = entry.Version,
+                CultureName = metadataReader.GetString(entry.Culture)
+            };
+
+            var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
+            if (publicKeyOrToken != null)
+            {
+                if (publicKeyOrToken.Length <= 8)
+                {
+                    assemblyName.SetPublicKeyToken(publicKeyOrToken);
+                }
+                else
+                {
+                    assemblyName.SetPublicKey(publicKeyOrToken);
+                }
+            }
+
+            assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+            return assemblyName;
         }
 #endif
 

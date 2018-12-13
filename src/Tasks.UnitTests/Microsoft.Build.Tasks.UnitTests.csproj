@@ -115,7 +115,6 @@
     <Compile Remove="AssemblyDependency\NonSpecificVersionStrictPrimary.cs" />
     <Compile Remove="AssemblyDependency\Perf.cs" />
     <Compile Remove="AssemblyDependency\ReferenceTests.cs" />
-    <Compile Remove="AssemblyDependency\ResolveAssemblyReferenceTestFixture.cs" />
     <Compile Remove="AssemblyDependency\SpecificVersionPrimary.cs" />
     <Compile Remove="AssemblyDependency\StronglyNamedDependency.cs" />
     <Compile Remove="AssemblyDependency\StronglyNamedDependencyAppConfig.cs" />
