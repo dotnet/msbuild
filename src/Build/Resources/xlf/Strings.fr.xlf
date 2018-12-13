@@ -33,7 +33,7 @@
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
         <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In isolated builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</source>
-        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In isolated builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</target>
+        <target state="translated">MSB4252: Le projet "{0}" a une référence à "{1}" ({2} cible(s)), mais la référence n'a pas encore été générée. Dans les builds isolées, cela signifie probablement que la référence n'est pas explicitement spécifiée en tant qu'élément ProjectReference dans "{0}".</target>
         <note>
       {StrBegin="MSB4252:"}
       LOCALIZATION: Do not localize the following words: ProjectReference.
@@ -48,7 +48,7 @@
       </trans-unit>
       <trans-unit id="CircularDependencyInProjectGraph">
         <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
-        <target state="new">MSB4251: There is a circular dependency involving the following projects: {0}</target>
+        <target state="translated">MSB4251: Il existe une dépendance circulaire impliquant les projets suivants : {0}</target>
         <note>
       {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
@@ -66,7 +66,7 @@
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
         <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
-        <target state="new">MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</target>
+        <target state="translated">MSB4253: Une référence null a été retournée à partir d'un rappel ProjectInstanceFactoryFunc fourni par l'utilisateur. Ceci n'est pas autorisé.</target>
         <note>
       {StrBegin="MSB4253: "}
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
-        <target state="new">MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</target>
+        <target state="translated">MSB4250: ProjectGraph ne prend pas en charge les éléments ProjectReference avec l'ensemble de métadonnées ToolsVersion. ProjectReference "{0}" trouvé avec ToolsVersion dans le fichier "{1}"</target>
         <note>
       {StrBegin="MSB4250: "}
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
@@ -82,7 +82,7 @@
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="new">MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</target>
+        <target state="translated">MSB4254: La tâche MSBuild génère un ou des projets {0} qui ne sont pas spécifiés dans l'élément ProjectReference. Dans les builds isolées, cela signifie probablement que les références ne sont pas explicitement spécifiées en tant qu'élément ProjectReference dans "{1}"</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -231,7 +231,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
-        <target state="needs-review-translation">MSB4166: Fin prématurée du nœud enfant "{0}" . Arrêt. Des informations de diagnostic se trouvent dans des fichiers nommés MSBuild_*.failure.txt dans "{1}". Pour changer d'emplacement, affectez un répertoire différent à la variable d'environnement MSBUILDDEBUGPATH.</target>
+        <target state="translated">MSB4166: Fin prématurée du nœud enfant "{0}" . Arrêt. Des informations de diagnostic se trouvent dans des fichiers nommés MSBuild_*.failure.txt dans "{1}". Pour changer d'emplacement, affectez un répertoire différent à la variable d'environnement MSBUILDDEBUGPATH.{2}</target>
         <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
