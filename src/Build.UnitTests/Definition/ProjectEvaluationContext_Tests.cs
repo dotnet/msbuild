@@ -292,16 +292,16 @@ namespace Microsoft.Build.UnitTests.Definition
                 {
                     new ProjectSpecification(
                         Path.Combine(projectDirectory1, "1"),
-                        @"<Project>
+                        $@"<Project>
                             <ItemGroup>
-                                <i Include=`**/*.cs` />
+                                <i Include=`{Path.Combine("**", "*.cs")}` />
                             </ItemGroup>
                         </Project>"),
                     new ProjectSpecification(
                         Path.Combine(projectDirectory2, "2"),
-                        @"<Project>
+                        $@"<Project>
                             <ItemGroup>
-                                <i Include=`**/*.cs` />
+                                <i Include=`{Path.Combine("**", "*.cs")}` />
                             </ItemGroup>
                         </Project>"),
                 },
@@ -348,16 +348,16 @@ namespace Microsoft.Build.UnitTests.Definition
                 {
                     new ProjectSpecification(
                         Path.Combine(project1Directory, "1"),
-                        @"<Project>
+                        $@"<Project>
                             <ItemGroup>
-                                <i Include=`../Glob/**/*.cs` />
+                                <i Include=`{Path.Combine("..", "Glob", "**", "*.cs")}`/>
                             </ItemGroup>
                         </Project>"),
                     new ProjectSpecification(
                         Path.Combine(project2Directory, "2"),
-                        @"<Project>
+                        $@"<Project>
                             <ItemGroup>
-                                <i Include=`../Glob/**/*.cs` />
+                                <i Include=`{Path.Combine("..", "Glob", "**", "*.cs")}`/>
                             </ItemGroup>
                         </Project>")
                 },
@@ -506,21 +506,6 @@ namespace Microsoft.Build.UnitTests.Definition
                 );
         }
 
-        private static string[] _projectsWithOutOfConeGlobs =
-        {
-            @"<Project>
-                <ItemGroup>
-                    <i Include=`{0}**/*.cs` />
-                </ItemGroup>
-            </Project>",
-
-            @"<Project>
-                <ItemGroup>
-                    <i Include=`{0}**/*.cs` />
-                </ItemGroup>
-            </Project>",
-        };
-
         [Theory]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         // projects should cache glob expansions when the __fully qualified__ glob is shared between projects and points outside of project cone
@@ -546,8 +531,6 @@ namespace Microsoft.Build.UnitTests.Definition
                 ? Path.Combine("..", "GlobDirectory")
                 : globDirectory.Path;
 
-            itemSpecDirectoryPart = itemSpecDirectoryPart.WithTrailingSlash();
-
             Directory.CreateDirectory(globDirectory.Path);
 
             // Globs with a directory part will produce items prepended with that directory part
@@ -559,7 +542,19 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
             }
 
-            var projectSpecs = _projectsWithOutOfConeGlobs
+            var projectSpecs = new[]
+            {
+                $@"<Project>
+                <ItemGroup>
+                    <i Include=`{Path.Combine("{0}", "**", "*.cs")}`/>
+                </ItemGroup>
+            </Project>",
+                $@"<Project>
+                <ItemGroup>
+                    <i Include=`{Path.Combine("{0}", "**", "*.cs")}`/>
+                </ItemGroup>
+            </Project>"
+            }
                 .Select(p => string.Format(p, itemSpecDirectoryPart))
                 .Select((p, i) => new ProjectSpecification(Path.Combine(testDirectory.Path, $"ProjectDirectory{i}", $"Project{i}.proj"), p));
 
