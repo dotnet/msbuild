@@ -50,7 +50,6 @@ $ArtifactsDir = Join-Path $RepoRoot "artifacts"
 $ArtifactsBinDir = Join-Path $ArtifactsDir "bin"
 $LogDir = Join-Path $ArtifactsDir "log\$configuration"
 $TempDir = Join-Path $ArtifactsDir "tmp\$configuration"
-$VersionsProps = Join-Path $PSScriptRoot "Versions.props"
 
 # $log = -not $nolog
 # $restore = -not $norestore
@@ -63,7 +62,6 @@ if ($hostType -eq '')
 
 # TODO: If host type is full, either make sure we're running in a developer command prompt, or attempt to locate VS, or fail
 
-$msbuildHost = $null
 $msbuildToUse = "msbuild"
 
 try {
@@ -72,10 +70,10 @@ try {
 
   if ($buildStage1)
   {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build /p:CreateBootstrap=true @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=true /p:Projects="$RepoRoot\MSBuild.sln" @properties
   }
 
-  $bootstrapRoot = Join-Path $ArtifactsDir "bin\bootstrap"
+  $bootstrapRoot = Join-Path $ArtifactsBinDir "bin\bootstrap"
 
   if ($hostType -eq 'full')
   {
@@ -107,7 +105,7 @@ try {
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Do run tests
   # - Don't try to create a bootstrap deployment
-  & $PSScriptRoot\Common\Build.ps1 -restore -build -test /p:CreateBootstrap=false /nr:false @properties
+  & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false /p:Projects="$RepoRoot\MSBuild.sln" @properties
 
   exit $lastExitCode
 }

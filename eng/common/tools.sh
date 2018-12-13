@@ -189,6 +189,15 @@ function InitializeBuildTool {
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
 }
 
+function InitializeMSBuildToUse {
+  if [[ -n "${_InitializeMSBuildToUse:-}" ]]; then
+    return
+  fi
+
+  # return value
+  _InitializeMSBuildToUse="msbuild"
+}
+
 function GetNuGetPackageCachePath {
   if [[ -z ${NUGET_PACKAGES:-} ]]; then
     if [[ "$use_global_nuget_cache" == true ]]; then
@@ -273,13 +282,14 @@ function MSBuild {
   fi
 
   InitializeBuildTool
+  InitializeMSBuildToUse
 
   local warnaserror_switch=""
   if [[ $warn_as_error == true ]]; then
     warnaserror_switch="/warnaserror"
   fi
 
-  "$_InitializeBuildTool" msbuild /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error "$@"
+  "$_InitializeBuildTool" "$_InitializeMSBuildToUse" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error "$@"
   lastexitcode=$?
 
   if [[ $lastexitcode != 0 ]]; then

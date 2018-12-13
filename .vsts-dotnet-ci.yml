@@ -82,7 +82,7 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/log/Debug'
+      PathtoPublish: 'artifacts/2/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
@@ -127,7 +127,7 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/log/Debug'
+      PathtoPublish: 'artifacts/2/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
@@ -253,6 +253,34 @@ phases:
     displayName: 'Publish Artifact: logs/TestResults'
     inputs:
       PathtoPublish: 'artifacts/log/Debug/TestResults'
+      ArtifactName: 'CoreOnLinux test logs'
+    condition: succeededOrFailed()
+
+- phase: CoreBootstrappedOnLinux
+  displayName: "Build and test on Linux using bootstrapped .NET Core MSBuild"
+  queue: 'Hosted Ubuntu 1604'
+  steps:
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
+    displayName: CI Build
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.1 Test Results
+    inputs:
+      testRunTitle: 'Linux .NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/2/log/Debug'
+      ArtifactName: 'CoreOnLinux build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs/TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/2/log/Debug/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
