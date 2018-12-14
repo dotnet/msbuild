@@ -35,7 +35,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        private LogMessagePacket(INodePacketTranslator translator)
+        private LogMessagePacket(ITranslator translator)
             : base(translator)
         {
             Translate(translator);
@@ -44,7 +44,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Factory for serialization
         /// </summary>
-        static internal INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        static internal INodePacket FactoryForDeserialization(ITranslator translator)
         {
             return new LogMessagePacket(translator);
         }

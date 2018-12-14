@@ -22,7 +22,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private string _version;
         private bool _interactive;
 
-        public SdkResolverRequest(INodePacketTranslator translator)
+        public SdkResolverRequest(ITranslator translator)
         {
             Translate(translator);
         }
@@ -67,12 +67,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResolverRequest(submissionId, sdkReference.Name, sdkReference.Version, sdkReference.MinimumVersion, buildEventContext, elementLocation, solutionPath, projectPath, interactive);
         }
 
-        public static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        public static INodePacket FactoryForDeserialization(ITranslator translator)
         {
             return new SdkResolverRequest(translator);
         }
 
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref _buildEventContext);
             translator.Translate(ref _elementLocation, ElementLocation.FactoryForDeserialization);

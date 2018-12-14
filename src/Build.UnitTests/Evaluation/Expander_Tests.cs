@@ -1044,7 +1044,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathInDirectMetadata()
         {
-            var logger = Helpers.BuildProjectUsingBuildManagerExpectResult(
+            var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
                 @"<Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
                         <x Include=':|?*'>
@@ -1062,7 +1062,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void PathTooLongInDirectMetadata()
         {
-            var logger = Helpers.BuildProjectUsingBuildManagerExpectResult(
+            var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
                 @"<Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
                         <x Include='" + new string('x', 250) + @"'>

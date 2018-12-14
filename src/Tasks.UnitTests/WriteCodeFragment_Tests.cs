@@ -426,6 +426,30 @@ namespace Microsoft.Build.UnitTests
             File.Delete(task.OutputFile.ItemSpec);
         }
 
+        [Fact]
+        public void OneAttributeTwoPositionalParamsWithSameValue()
+        {
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            TaskItem attribute = new TaskItem("AssemblyMetadataAttribute");
+            attribute.SetMetadata("_Parameter1", "TestValue");
+            attribute.SetMetadata("_Parameter2", "TestValue");
+            task.AssemblyAttributes = new TaskItem[] { attribute };
+            task.Language = "c#";
+            task.OutputDirectory = new TaskItem(Path.GetTempPath());
+            bool result = task.Execute();
+
+            Assert.Equal(true, result);
+
+            string content = File.ReadAllText(task.OutputFile.ItemSpec);
+            Console.WriteLine(content);
+
+            CheckContentCSharp(content, @"[assembly: AssemblyMetadataAttribute(""TestValue"", ""TestValue"")]");
+
+            File.Delete(task.OutputFile.ItemSpec);
+        }
+
         public static string EscapedLineSeparator => NativeMethodsShared.IsWindows ? "\\r\\n" : "\\n";
 
         /// <summary>

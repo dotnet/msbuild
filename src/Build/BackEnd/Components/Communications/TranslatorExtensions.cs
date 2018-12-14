@@ -14,10 +14,10 @@ namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// This class is responsible for serializing and deserializing anything that is not 
-    /// officially supported by INodePacketTranslator, but that we still want to do 
+    /// officially supported by ITranslator, but that we still want to do 
     /// custom translation of.  
     /// </summary>
-    internal static class NodePacketTranslatorExtensions
+    internal static class TranslatorExtensions
     {
         private static Lazy<ConcurrentDictionary<Type, ConstructorInfo>> parameterlessConstructorCache = new Lazy<ConcurrentDictionary<Type, ConstructorInfo>>(() => new ConcurrentDictionary<Type, ConstructorInfo>());
 
@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="translator">The tranlator doing the translating</param>
         /// <param name="value">The dictionary to translate.</param>
-        public static void TranslateProjectPropertyInstanceDictionary(this INodePacketTranslator translator, ref PropertyDictionary<ProjectPropertyInstance> value)
+        public static void TranslateProjectPropertyInstanceDictionary(this ITranslator translator, ref PropertyDictionary<ProjectPropertyInstance> value)
         {
             if (!translator.TranslateNullable(value))
             {
@@ -64,7 +64,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <typeparam name="T">Top level type. Serialized types can be of this type, or subtypes</typeparam>
         /// <returns></returns>
-        public static T FactoryForDeserializingTypeWithName<T>(this INodePacketTranslator translator)
+        public static T FactoryForDeserializingTypeWithName<T>(this ITranslator translator)
         {
             string typeName = null;
             translator.Translate(ref typeName);
@@ -75,8 +75,8 @@ namespace Microsoft.Build.BackEnd
                 typeof(T).IsAssignableFrom(type),
                 $"{typeName} must be a {typeof(T).FullName}");
             ErrorUtilities.VerifyThrowInvalidOperation(
-                typeof(INodePacketTranslatable).IsAssignableFrom(type),
-                $"{typeName} must be a {nameof(INodePacketTranslatable)}");
+                typeof(ITranslatable).IsAssignableFrom(type),
+                $"{typeName} must be a {nameof(ITranslatable)}");
 
             var parameterlessConstructor = parameterlessConstructorCache.Value.GetOrAdd(
                 type,
@@ -98,7 +98,7 @@ namespace Microsoft.Build.BackEnd
                     return constructor;
                 });
 
-            var targetInstanceChild = (INodePacketTranslatable) parameterlessConstructor.Invoke(Array.Empty<object>());
+            var targetInstanceChild = (ITranslatable) parameterlessConstructor.Invoke(Array.Empty<object>());
 
             targetInstanceChild.Translate(translator);
 

@@ -24,6 +24,7 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -380,56 +381,32 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
+                if (_buildParameters.UsesCachedResults())
+                {
+                    _buildParameters.IsolateProjects = true;
+                }
+
+                if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
+                {
+                    _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
+                }
+
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
+
+                var loggingService = InitializeLoggingService();
+
+                InitializeCaches();
+
                 _taskHostNodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.TaskHostNodeManager) as INodeManager;
                 _scheduler = ((IBuildComponentHost)this).GetComponent(BuildComponentType.Scheduler) as IScheduler;
-                _configCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
-                _resultsCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
 
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestBlocker, BuildRequestBlocker.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfiguration, BuildRequestConfiguration.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfigurationResponse, BuildRequestConfigurationResponse.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildResult, BuildResult.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
-
-                if (_buildParameters.ResetCaches || _configCache.IsConfigCacheSizeLargerThanThreshold())
-                {
-                    ResetCaches();
-                }
-                else
-                {
-                    List<int> configurationsCleared = _configCache.ClearNonExplicitlyLoadedConfigurations();
-
-                    if (configurationsCleared != null)
-                    {
-                        foreach (int configurationId in configurationsCleared)
-                        {
-                            _resultsCache.ClearResultsForConfiguration(configurationId);
-                        }
-                    }
-
-                    foreach (var config in _configCache)
-                    {
-                        config.ResultsNodeId = Scheduler.InvalidNodeId;
-                    }
-
-                    _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
-                }
-
-                // Set up the logging service.
-                ILoggingService loggingService = CreateLoggingService(_buildParameters.Loggers, _buildParameters.ForwardingLoggers, _buildParameters.WarningsAsErrors, _buildParameters.WarningsAsMessages);
-
-                _nodeManager.RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, loggingService as INodePacketHandler);
-                try
-                {
-                    loggingService.LogBuildStarted();
-                }
-                catch (Exception)
-                {
-                    ShutdownLoggingService(loggingService);
-                    throw;
-                }
+                _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
 
                 if (_threadException != null)
                 {
@@ -438,9 +415,6 @@ namespace Microsoft.Build.Execution
                     // Unfortunately this will reset the callstack
                     throw _threadException;
                 }
-
-                // Register the ResolveSdkRequest packet for the SdkResolverService
-                _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
 
                 if (_workQueue == null)
                 {
@@ -452,6 +426,79 @@ namespace Microsoft.Build.Execution
                 _noActiveSubmissionsEvent.Set();
                 _noNodesActiveEvent.Set();
             }
+
+            ILoggingService InitializeLoggingService()
+            {
+                ILoggingService loggingService = CreateLoggingService(
+                    _buildParameters.Loggers,
+                    _buildParameters.ForwardingLoggers,
+                    _buildParameters.WarningsAsErrors,
+                    _buildParameters.WarningsAsMessages);
+
+                _nodeManager.RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, loggingService as INodePacketHandler);
+
+                try
+                {
+                    loggingService.LogBuildStarted();
+
+                    if (_buildParameters.UsesInputCaches())
+                    {
+                        loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "UsingInputCaches", string.Join(";", _buildParameters.InputResultsCacheFiles));
+                    }
+
+                    if (_buildParameters.UsesOutputCache())
+                    {
+                        loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "WritingToOutputCache", _buildParameters.OutputResultsCacheFile);
+                    }
+                }
+                catch (Exception)
+                {
+                    ShutdownLoggingService(loggingService);
+                    throw;
+                }
+
+                return loggingService;
+            }
+
+            void InitializeCaches()
+            {
+                var usesInputCaches = _buildParameters.UsesInputCaches();
+
+                if (usesInputCaches)
+                {
+                    ReuseOldCaches(_buildParameters.InputResultsCacheFiles);
+                }
+
+                _configCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
+                _resultsCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
+
+                if (!usesInputCaches && (_buildParameters.ResetCaches || _configCache.IsConfigCacheSizeLargerThanThreshold()))
+                {
+                    ResetCaches();
+                }
+                else
+                {
+                    if (!usesInputCaches)
+                    {
+                        List<int> configurationsCleared = _configCache.ClearNonExplicitlyLoadedConfigurations();
+
+                        if (configurationsCleared != null)
+                        {
+                            foreach (int configurationId in configurationsCleared)
+                            {
+                                _resultsCache.ClearResultsForConfiguration(configurationId);
+                            }
+                        }
+                    }
+
+                    foreach (var config in _configCache)
+                    {
+                        config.ResultsNodeId = Scheduler.InvalidNodeId;
+                    }
+
+                    _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
+                }
+            }
         }
 
         /// <summary>
@@ -459,8 +506,17 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void CancelAllSubmissions()
         {
-            CultureInfo parentThreadCulture = _buildParameters != null ? _buildParameters.Culture : CultureInfo.CurrentCulture;
-            CultureInfo parentThreadUICulture = _buildParameters != null ? _buildParameters.UICulture : CultureInfo.CurrentUICulture;
+            CancelAllSubmissions(true);
+        }
+
+        private void CancelAllSubmissions(bool async)
+        {
+            var parentThreadCulture = _buildParameters != null
+                ? _buildParameters.Culture
+                : CultureInfo.CurrentCulture;
+            var parentThreadUICulture = _buildParameters != null
+                ? _buildParameters.UICulture
+                : CultureInfo.CurrentUICulture;
 
             void Callback(object state)
             {
@@ -660,6 +716,11 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrow(_buildSubmissions.Count == 0 && _graphBuildSubmissions.Count == 0, "All submissions not yet complete.");
                 ErrorUtilities.VerifyThrow(_activeNodes.Count == 0, "All nodes not yet shut down.");
 
+                if (_buildParameters.UsesOutputCache())
+                {
+                    SerializeOutputCache(_buildParameters.OutputResultsCacheFile);
+                }
+
                 if (loggingService != null)
                 {
                     // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
@@ -723,6 +784,65 @@ namespace Microsoft.Build.Execution
                         OpportunisticIntern.ReportStatistics();
                     }
                 }
+            }
+        }
+
+        private void SerializeOutputCache(string outputCacheFile)
+        {
+            ErrorUtilities.VerifyThrowInternalNull(outputCacheFile, nameof(outputCacheFile));
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(outputCacheFile))
+                {
+                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EmptyOutputCacheFile"));
+                    return;
+                }
+
+                var fullPath = FileUtilities.NormalizePath(outputCacheFile);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+
+                using (var fileStream = File.OpenWrite(fullPath))
+                {
+                    var translator = BinaryTranslator.GetWriteTranslator(fileStream);
+
+                    ConfigCache configCache = null;
+                    ResultsCache resultsCache = null;
+
+                    switch (_configCache)
+                    {
+                        case ConfigCache asConfigCache:
+                            configCache = asConfigCache;
+                            break;
+                        case ConfigCacheWithOverride configCacheWithOverride:
+                            configCache = configCacheWithOverride.CurrentCache;
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalErrorUnreachable();
+                            break;
+                    }
+
+                    switch (_resultsCache)
+                    {
+                        case ResultsCache asResultsCache:
+                            resultsCache = asResultsCache;
+                            break;
+                        case ResultsCacheWithOverride resultsCacheWithOverride:
+                            resultsCache = resultsCacheWithOverride.CurrentCache;
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalErrorUnreachable();
+                            break;
+                    }
+
+                    translator.Translate(ref configCache);
+                    translator.Translate(ref resultsCache);
+                }
+            }
+            catch (Exception e)
+            {
+                LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ErrorWritingCacheFile", outputCacheFile, e.Message));
             }
         }
 
@@ -2329,6 +2449,114 @@ namespace Microsoft.Build.Execution
                     }
                 }
             }
+        }
+
+        private bool ReuseOldCaches(string[] inputCacheFiles)
+        {
+            ErrorUtilities.VerifyThrowInternalNull(inputCacheFiles, nameof(inputCacheFiles));
+            ErrorUtilities.VerifyThrow(_configCache == null, "caches must not be set at this point");
+            ErrorUtilities.VerifyThrow(_resultsCache == null, "caches must not be set at this point");
+
+            try
+            {
+                if (inputCacheFiles.Length == 0)
+                {
+                    return false;
+                }
+
+                if (inputCacheFiles.Any(f => !File.Exists(f)))
+                {
+                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("InputCacheFilesDoNotExist", string.Join(";", inputCacheFiles.Where(f => !File.Exists(f)))));
+                    return false;
+                }
+
+                var cacheAggregator = new CacheAggregator(() => GetNewConfigurationId());
+
+                foreach (var inputCacheFile in inputCacheFiles)
+                {
+                    var (configCache, resultsCache, exception) = DeserializeCaches(inputCacheFile);
+
+                    if (exception != null)
+                    {
+                        LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ErrorReadingCacheFile", inputCacheFile, exception.Message));
+                        return false;
+                    }
+
+                    cacheAggregator.Add(configCache, resultsCache);
+                }
+
+                var cacheAggregation = cacheAggregator.Aggregate();
+
+                // using caches with override (override queried first before current cache) based on the assumption that during single project cached builds
+                // there's many old results, but just one single actively building project.
+
+                _componentFactories.ReplaceFactory(BuildComponentType.ConfigCache, new ConfigCacheWithOverride(cacheAggregation.ConfigCache));
+                _componentFactories.ReplaceFactory(BuildComponentType.ResultsCache, new ResultsCacheWithOverride(cacheAggregation.ResultsCache));
+
+                return true;
+            }
+            catch
+            {
+                CancelAndMarkAsFailure();
+                throw;
+            }
+
+            (IConfigCache ConfigCache, IResultsCache ResultsCache, Exception exception) DeserializeCaches(string inputCacheFile)
+            {
+                try
+                {
+                    ConfigCache configCache = null;
+                    ResultsCache resultsCache = null;
+
+                    using (var fileStream = File.OpenRead(inputCacheFile))
+                    {
+                        var translator = BinaryTranslator.GetReadTranslator(fileStream, null);
+
+                        translator.Translate(ref configCache);
+                        translator.Translate(ref resultsCache);
+                    }
+
+                    ErrorUtilities.VerifyThrowInternalNull(configCache, nameof(configCache));
+                    ErrorUtilities.VerifyThrowInternalNull(resultsCache, nameof(resultsCache));
+
+                    return (configCache, resultsCache, null);
+                }
+                catch (Exception e)
+                {
+                    return (null, null, e);
+                }
+            }
+        }
+
+        private void LogErrorAndShutdown(string message)
+        {
+            var loggingService = ((IBuildComponentHost)this).LoggingService;
+
+            loggingService?.LogErrorFromText(
+                BuildEventContext.Invalid,
+                null,
+                null,
+                null,
+                BuildEventFileInfo.Empty,
+                message);
+
+            CancelAndMarkAsFailure();
+
+            if (loggingService == null)
+            {
+                // todo should we write this to temp file instead (like failing nodes do)
+                throw new Exception(message);
+            }
+        }
+
+        private void CancelAndMarkAsFailure()
+        {
+            CancelAllSubmissions();
+
+            // CancelAllSubmissions also ends up setting _shuttingDown and _overallBuildSuccess but it does so in a separate thread to avoid deadlocks.
+            // This might cause a race with the first builds which might miss the shutdown update and succeed instead of fail.
+            _shuttingDown = true;
+            _overallBuildSuccess = false;
         }
 
         /// <summary>

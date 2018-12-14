@@ -221,7 +221,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BuildRequestConfiguration(int configId, BuildRequestConfiguration other)
         {
-            ErrorUtilities.VerifyThrow(configId != 0, "Configuration ID must not be zero when using this constructor.");
+            ErrorUtilities.VerifyThrow(configId != InvalidConfigurationId, "Configuration ID must not be invalid when using this constructor.");
             ErrorUtilities.VerifyThrowArgumentNull(other, nameof(other));
             ErrorUtilities.VerifyThrow(other._transferredState == null, "Unexpected transferred state still set on other configuration.");
 
@@ -242,9 +242,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Private constructor for deserialization
         /// </summary>
-        private BuildRequestConfiguration(INodePacketTranslator translator)
+        private BuildRequestConfiguration(ITranslator translator)
         {
             Translate(translator);
+        }
+
+        internal BuildRequestConfiguration()
+        {
         }
 
         /// <summary>
@@ -316,7 +320,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns true if this configuration was generated on a node and has not yet been resolved.
         /// </summary>
-        public bool WasGeneratedByNode => _configId < 0;
+        public bool WasGeneratedByNode => _configId < InvalidConfigurationId;
 
         /// <summary>
         /// Sets or returns the configuration id
@@ -329,7 +333,7 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrow((_configId == 0) || (WasGeneratedByNode && (value > 0)), "Configuration ID must be zero, or it must be less than zero and the new config must be greater than zero.  It was {0}, the new value was {1}.", _configId, value);
+                ErrorUtilities.VerifyThrow((_configId == InvalidConfigurationId) || (WasGeneratedByNode && (value > InvalidConfigurationId)), "Configuration ID must be invalid, or it must be less than invalid and the new config must be greater than invalid.  It was {0}, the new value was {1}.", _configId, value);
                 _configId = value;
             }
         }
@@ -598,7 +602,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (IsCacheable)
                     {
-                        INodePacketTranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
+                        ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
 
                         try
                         {
@@ -633,7 +637,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                INodePacketTranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
+                ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
                 try
                 {
                     _project.RetrieveFromCache(translator);
@@ -773,7 +777,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream && _transferredProperties == null)
             {
@@ -781,20 +785,20 @@ namespace Microsoft.Build.BackEnd
                 _transferredState = _project;
             }
 
-            translator.Translate(ref _translateEntireProjectInstanceState);
             translator.Translate(ref _configId);
             translator.Translate(ref _projectFullPath);
-            translator.Translate(ref _transferredState, ProjectInstance.FactoryForDeserialization);
-            translator.Translate(ref _transferredProperties, ProjectPropertyInstance.FactoryForDeserialization);
-            translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _toolsVersion);
             translator.Translate(ref _explicitToolsVersionSpecified);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _translateEntireProjectInstanceState);
+            translator.Translate(ref _transferredState, ProjectInstance.FactoryForDeserialization);
+            translator.Translate(ref _transferredProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _savedCurrentDirectory);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
 
             // if the entire state is translated, then the transferred state, if exists, represents the full evaluation data
-            if (_translateEntireProjectInstanceState && 
+            if (_translateEntireProjectInstanceState &&
                 translator.Mode == TranslationDirection.ReadFromStream &&
                 _transferredState != null)
             {
@@ -802,10 +806,21 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal void TranslateForFutureUse(ITranslator translator)
+        {
+            translator.Translate(ref _configId);
+            translator.Translate(ref _projectFullPath);
+            translator.Translate(ref _toolsVersion);
+            translator.Translate(ref _explicitToolsVersionSpecified);
+            translator.Translate(ref _projectDefaultTargets);
+            translator.Translate(ref _projectInitialTargets);
+            translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+        }
+
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static BuildRequestConfiguration FactoryForDeserialization(ITranslator translator)
         {
             return new BuildRequestConfiguration(translator);
         }
@@ -868,8 +883,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             if ((other.WasGeneratedByNode == WasGeneratedByNode) &&
-                (other._configId != 0) &&
-                (_configId != 0))
+                (other._configId != InvalidConfigurationId) &&
+                (_configId != InvalidConfigurationId))
             {
                 return _configId == other._configId;
             }
@@ -910,7 +925,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private INodePacketTranslator GetConfigurationTranslator(TranslationDirection direction)
+        private ITranslator GetConfigurationTranslator(TranslationDirection direction)
         {
             string cacheFile = GetCacheFile();
             try
@@ -918,12 +933,12 @@ namespace Microsoft.Build.BackEnd
                 if (direction == TranslationDirection.WriteToStream)
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                    return NodePacketTranslator.GetWriteTranslator(File.Create(cacheFile));
+                    return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
                 }
                 else
                 {
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return NodePacketTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
+                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
                 }
             }
             catch (Exception e)

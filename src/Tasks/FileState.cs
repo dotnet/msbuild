@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks
                             //
                             // Also, when not under debugger (!) it will give error == 3 for path too long. Make that consistently throw instead.
                             if ((error == 2 /* ERROR_FILE_NOT_FOUND */|| error == 3 /* ERROR_PATH_NOT_FOUND */)
-                                && _filename.Length <= NativeMethodsShared.MAX_PATH)
+                                && _filename.Length <= NativeMethodsShared.MaxPath)
                             {
                                 Exists = false;
                                 return;

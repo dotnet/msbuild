@@ -1443,7 +1443,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Serialize the packet
             /// </summary>
-            public void Translate(INodePacketTranslator translator)
+            public void Translate(ITranslator translator)
             {
                 throw new NotImplementedException();
             }

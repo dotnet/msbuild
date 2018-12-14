@@ -11,18 +11,21 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.Unittest
 {
-    internal class TestUtilities
+    internal class BuildResultUtilities
     {
-        #region Public Static methods
-
         public static TargetResult GetEmptyFailingTargetResult()
         {
-            return new TargetResult(new TaskItem[0] { }, TestUtilities.GetStopWithErrorResult());
+            return new TargetResult(new TaskItem[0] { }, BuildResultUtilities.GetStopWithErrorResult());
         }
 
         public static TargetResult GetEmptySucceedingTargetResult()
         {
-            return new TargetResult(new TaskItem[0] { }, TestUtilities.GetSuccessResult());
+            return new TargetResult(new TaskItem[0] { }, BuildResultUtilities.GetSuccessResult());
+        }
+
+        public static TargetResult GetNonEmptySucceedingTargetResult()
+        {
+            return new TargetResult(new TaskItem[1] { new TaskItem("i", "v")}, BuildResultUtilities.GetSuccessResult());
         }
 
         public static WorkUnitResult GetSuccessResult()
@@ -49,7 +52,5 @@ namespace Microsoft.Build.Unittest
         {
             return new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Continue, null);
         }
-
-        #endregion
     }
 }

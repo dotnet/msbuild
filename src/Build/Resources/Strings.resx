@@ -1715,7 +1715,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" UESanitized="false" Visibility="Public">
-    <value>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In isolated builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</value>
+    <value>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </value>
     <comment>
       {StrBegin="MSB4252:"}
       LOCALIZATION: Do not localize the following words: ProjectReference.
@@ -1735,13 +1739,37 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </comment>
   </data>
+  <data name="ErrorReadingCacheFile" UESanitized="false" Visibility="Public">
+    <value>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</value>
+  </data>
+  <data name="InputCacheFilesDoNotExist" UESanitized="false" Visibility="Public">
+    <value>MSB4255: The following input result cache files do not exist: "{0}"</value>
+  </data>
+  <data name="EmptyOutputCacheFile" UESanitized="false" Visibility="Public">
+    <value>MSB4257: The specified output result cache file is empty.</value>
+  </data>
+  <data name="ErrorWritingCacheFile" UESanitized="false" Visibility="Public">
+    <value>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</value>
+  </data>
+  <data name="UsingInputCaches" UESanitized="false" Visibility="Public">
+    <value>Using input build results caches: {0}</value>
+    <comment>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
+    </comment>
+  </data>
+  <data name="WritingToOutputCache" UESanitized="false" Visibility="Public">
+    <value>Writing build results caches to: {0}</value>
+    <comment>
+      LOCALIZATION: {0} is a file path
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
 
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4255.
+        Next message code should be MSB4259.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

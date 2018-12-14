@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(1, 2, 3);
             Assert.Equal(response.Type, NodePacketType.BuildRequestConfigurationResponse);
 
-            ((INodePacketTranslatable)response).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)response).Translate(TranslationHelpers.GetWriteTranslator());
 
             INodePacket deserializedPacket = BuildRequestConfigurationResponse.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
             BuildRequestConfigurationResponse deserializedResponse = deserializedPacket as BuildRequestConfigurationResponse;

@@ -269,12 +269,28 @@ namespace Microsoft.Build.Execution
             _baseOverallResult = result.OverallResult == BuildResultCode.Success;
         }
 
+        internal BuildResult(BuildResult result, int submissionId, int configurationId, int requestId, int parentRequestId, int nodeRequestId)
+        {
+            _submissionId = submissionId;
+            _configurationId = configurationId;
+            _globalRequestId = requestId;
+            _parentGlobalRequestId = parentRequestId;
+            _nodeRequestId = nodeRequestId;
+
+            _requestException = result._requestException;
+            _resultsByTarget = result._resultsByTarget;
+            _circularDependency = result._circularDependency;
+            _initialTargets = result._initialTargets;
+            _defaultTargets = result._defaultTargets;
+            _baseOverallResult = result.OverallResult == BuildResultCode.Success;
+        }
+
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        private BuildResult(INodePacketTranslator translator)
+        private BuildResult(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -533,7 +549,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _submissionId);
             translator.Translate(ref _configurationId);
@@ -554,7 +570,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization
         /// </summary>
-        internal static BuildResult FactoryForDeserialization(INodePacketTranslator translator)
+        internal static BuildResult FactoryForDeserialization(ITranslator translator)
         {
             return new BuildResult(translator);
         }
