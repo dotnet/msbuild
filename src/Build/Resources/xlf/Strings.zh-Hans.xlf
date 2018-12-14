@@ -56,7 +56,7 @@
       </trans-unit>
       <trans-unit id="CircularDependencyInProjectGraph">
         <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
-        <target state="new">MSB4251: There is a circular dependency involving the following projects: {0}</target>
+        <target state="translated">MSB4251: 存在涉及以下项目的循环依赖: {0}</target>
         <note>
       {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
         <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
-        <target state="new">MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</target>
+        <target state="translated">MSB4253: 从用户提供的 ProjectInstanceFactoryFunc 回调中返回了一个空引用。这是不允许的。</target>
         <note>
       {StrBegin="MSB4253: "}
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
@@ -102,7 +102,7 @@
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
-        <target state="new">MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</target>
+        <target state="translated">MSB4250: ProjectGraph 不支持具有 ToolsVersion 元数据集的 ProjectReference 项。在“{1}”文件中发现了带有 ToolsVersion 的 ProjectReference“{0}”</target>
         <note>
       {StrBegin="MSB4250: "}
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
@@ -110,7 +110,7 @@
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="new">MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</target>
+        <target state="translated">MSB4254: MSBuild 任务正在生成未在 ProjectReference 项中指定的 {0} 项目。在独立生成中，这可能表示未将引用显式地指定为“{1}”中的 ProjectReference 项</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -266,7 +266,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
-        <target state="needs-review-translation">MSB4166: 子节点“{0}”过早退出。正在关闭。可以在“{1}”中的文件中找到诊断信息，并将其命名为 MSBuild_*.failure.txt。通过将 MSBUILDDEBUGPATH 环境变量设为其他目录，可更改此位置。</target>
+        <target state="translated">MSB4166: 子节点“{0}”过早退出。正在关闭。可以在“{1}”中的文件中找到诊断信息，并将其命名为 MSBuild_*.failure.txt。通过将 MSBUILDDEBUGPATH 环境变量设为其他目录，可更改此位置。{2}</target>
         <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">

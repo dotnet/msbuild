@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="CannotAutoDisableAutoResponseFile">
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1027: Přepínač /noautoresponse nelze zadat v souboru automatických odpovědí MSBuild.rsp ani v žádném jiném souboru odpovědí, na který se v souboru automatických odpovědí odkazuje.</target>
+        <target state="translated">MSBUILD : error MSB1027: Přepínač -noAutoResponse nelze zadat v souboru automatických odpovědí MSBuild.rsp ani v žádném jiném souboru odpovědí, na který se v souboru automatických odpovědí odkazuje.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="CopyrightMessage">
@@ -55,7 +55,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       <trans-unit id="HelpMessage_1_Syntax">
         <source>Syntax:              MSBuild.exe [options] [project file | directory]
 </source>
-        <target state="needs-review-translation">Syntaxe:             MSBuild.exe [možnosti] [soubor projektu | adresář]
+        <target state="translated">Syntaxe:             MSBuild.exe [možnosti] [soubor projektu | adresář]
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -74,7 +74,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      a directory is specified, MSBuild searches that
                      directory for a project file.
 </source>
-        <target state="needs-review-translation">Popis:         Sestaví určené cíle v souboru projektu. Pokud
+        <target state="translated">Popis:         Sestaví určené cíle v souboru projektu. Pokud
                      není zadaný soubor projektu, nástroj MSBuild vyhledá
                      v aktuálním pracovním adresáři soubor s příponou,
                      která končí řetězcem proj, a použije tento soubor.
@@ -100,14 +100,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      -interactive:true.  Use the parameter to override a
                      value that comes from a response file.
     </source>
-        <target state="new">  -interactive[:True|False]
-                     Indicates that actions in the build are allowed to
-                     interact with the user.  Do not use this argument
-                     in an automated scenario where interactivity is
-                     not expected.
-                     Specifying -interactive is the same as specifying
-                     -interactive:true.  Use the parameter to override a
-                     value that comes from a response file.
+        <target state="translated">  -interactive[:True|False]
+                     Udává, že akce v sestavení mají povolenou
+                     interakci s uživatelem. Nepoužívejte tento argument
+                     v automatizovaném scénáři, kde se interaktivita
+                     neočekává.
+                     Zadání -interactive je stejné jako zadání
+                     -interactive:true. Použijte tento parametr k přepisu
+                     hodnoty, která pochází ze souboru odpovědí.
     </target>
         <note>
       LOCALIZATION: "-interactive" should not be localized.
@@ -126,16 +126,16 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -isolateProjects[:True|False]
-                     Causes MSBuild to build each project in isolation.
+        <target state="translated">  -isolateProjects[:True|False]
+                     Způsobí, že MSBuild sestaví jednotlivé projekty izolovaně.
 
-                     This is a more restrictive mode of MSBuild as it requires
-                     that the project graph be statically discoverable at
-                     evaluation time, but can improve scheduling and reduce
-                     memory overhead when building a large set of projects.
-                     (Short form: -isolate)
+                     Jde o omezenější režim nástroje MSBuild, protože vyžaduje,
+                     aby byl graf projektu staticky zjistitelný v okamžiku
+                     vyhodnocení, může ale vylepšit plánování a snížit
+                     režii paměti při sestavování velké sady projektů.
+                     (Krátký tvar: -isolate)
 
-                     This flag is experimental and may not work as intended.
+                     Tento příznak je experimentální a nemusí fungovat tak, jak byl zamýšlen.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -155,17 +155,17 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -graphBuild[:True|False]
-                     Causes MSBuild to construct and build a project graph.
+        <target state="translated">  -graphBuild[:True|False]
+                     Způsobí, že MSBuild sestrojí a sestaví graf projektu.
 
-                     Constructing a graph involves identifying project
-                     references to form dependencies. Building that graph
-                     involves attempting to build project references prior
-                     to the projects that reference them, differing from
-                     traditional MSBuild scheduling.
-                     (Short form: -graph)
+                     Sestrojení grafu spočívá v identifikaci odkazů
+                     na projekt kvůli vytvoření závislostí. Sestavení tohoto grafu
+                     spočívá v pokusu o sestavení odkazů na projekt před sestavením
+                     projektů, které na ně odkazují, což se liší od tradičního
+                     plánování nástroje MSBuild.
+                     (Krátký tvar: -graph)
 
-                     This flag is experimental and may not work as intended.
+                     Tento příznak je experimentální a nemusí fungovat tak, jak byl zamýšlen.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -177,7 +177,8 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         <source>Switches:            Note that you can specify switches using both
                      "-switch" and "/switch".
 </source>
-        <target state="needs-review-translation">Přepínače:
+        <target state="translated">Přepínače:            Přepínače můžete zadat ve tvaru
+                     -switch i /switch.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -191,7 +192,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       <trans-unit id="HelpMessage_4_HelpSwitch">
         <source>  -help              Display this usage message. (Short form: -? or -h)
 </source>
-        <target state="needs-review-translation">  /help              Zobrazí tuto zprávu o použití. (Krátký tvar: /? nebo /h)
+        <target state="translated">  -help              Zobrazí tuto zprávu o použití. (Krátký tvar: -? nebo -h)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -205,7 +206,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
         <source>  -noLogo            Do not display the startup banner and copyright message.
 </source>
-        <target state="needs-review-translation">  /nologo            Nezobrazovat úvodní nápis a zprávu o autorských právech.
+        <target state="translated">  -noLogo            Nezobrazí se úvodní nápis a zpráva o autorských právech.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -219,7 +220,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       <trans-unit id="HelpMessage_6_VersionSwitch">
         <source>  -version           Display version information only. (Short form: -ver)
 </source>
-        <target state="needs-review-translation">  /version           Zobrazí jenom informace o verzi. (Krátký tvar: /ver)
+        <target state="translated">  -version           Zobrazí jenom informace o verzi. (Krátký tvar: -ver)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -240,7 +241,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="needs-review-translation">  @&lt;file&gt;            Vloží nastavení příkazového řádku z textového souboru. Pokud chcete
+        <target state="translated">  @&lt;file&gt;            Vloží nastavení příkazového řádku z textového souboru. Pokud chcete
                      zadat více souborů odpovědí, uveďte každý soubor odpovědí
                      zvlášť.
 
@@ -262,8 +263,8 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         <source>  -noAutoResponse    Do not auto-include any MSBuild.rsp files. (Short form:
                      -noAutoRsp)
 </source>
-        <target state="needs-review-translation">  /noautoresponse     Nezahrne se automaticky žádný soubor MSBuild.rsp. (Krátký tvar:
-                     /noautorsp)
+        <target state="translated">  -noAutoResponse     Nezahrne se automaticky žádný soubor MSBuild.rsp. (Krátký tvar:
+                     -noAutoRsp)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -281,11 +282,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="needs-review-translation">  /target:&lt;cíle&gt;  Sestaví projekt s uvedenými cíli. K oddělení více cílů
+        <target state="translated">  -target:&lt;cíle&gt;  Sestaví projekt s uvedenými cíli. K oddělení více cílů
                      použijte středníky nebo čárky, nebo zadejte
-                     každý cíl zvlášť. (Krátký tvar: /t)
+                     každý cíl zvlášť. (Krátký tvar: -t)
                      Příklad:
-                       /target:Resources;Compile
+                       -target:Resources;Compile
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -304,12 +305,12 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="needs-review-translation">  /property:&lt;n&gt;=&lt;v&gt;  Nastaví nebo potlačí tyto vlastnosti na úrovni projektu. &lt;n&gt; je
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Nastaví nebo potlačí tyto vlastnosti na úrovni projektu. &lt;n&gt; je
                      název vlastnosti a &lt;v&gt; je její hodnota. K oddělení více vlastností
                      použijte středníky nebo čárky, nebo zadejte
-                     každou vlastnost zvlášť. (Krátký tvar: /p)
+                     každou vlastnost zvlášť. (Krátký tvar: -p)
                      Příklad:
-                       /property:WarningLevel=2;OutDir=bin\Debug\
+                       -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -335,19 +336,19 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  /logger:&lt;protokolovací_nástroj&gt;   Použije tento protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete
+        <target state="translated">  -logger:&lt;protokolovací nástroj&gt;   Použije tento protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete
                      zadat několik protokolovacích nástrojů, musíte je zadat jednotlivě.
-                     Syntaxe hodnoty &lt;protokolovací_nástroj&gt;:
-                       [&lt;třída_protokolovacího_nástroje&gt;,]&lt;sestavení_protokolovacího_nástroje&gt;[;&lt;parametry_protokolovacího_nástroje&gt;]
-                     Syntaxe hodnoty &lt;třída_protokolovacího_nástroje&gt;:
-                       [&lt;částečný/úplný_obor_názvů&gt;.]&lt;třída_protokolovacího_nástroje&gt;
-                     Syntaxe hodnoty &lt;sestavení_protokolovacího_nástroje&gt;:
-                       {&lt;název_sestavení&gt;[,&lt;silný_název&gt;] | &lt;soubor_sestavení&gt;}
-                     &lt;Parametry_protokolovacího_nástroje&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém jste je zadali. (Krátký tvar: /l)
+                     Syntaxe hodnoty &lt;protokolovací nástroj&gt;:
+                       [&lt;třída protokolovacího nástroje&gt;,]&lt;sestavení protokolovacího nástroje&gt;[;&lt;parametry protokolovacího nástroje&gt;]
+                     Syntaxe hodnoty &lt;třída protokolovacího nástroje&gt;:
+                       [&lt;částečný/úplný obor názvů&gt;.]&lt;třída protokolovacího nástroje&gt;
+                     Syntaxe hodnoty &lt;sestavení protokolovacího nástroje&gt;:
+                       {&lt;název sestavení&gt;[,&lt;silný název&gt;] | &lt;soubor sestavení&gt;}
+                     &lt;Parametry protokolovacího nástroje&gt; jsou volitelné a předávají se
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém jste je zadali. (Krátký tvar: -l)
                      Příklady:
-                       /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -365,11 +366,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="needs-review-translation">  /verbosity:&lt;úroveň&gt; Zobrazí v protokolu událostí příslušný objem informací.
+        <target state="translated">  -verbosity:&lt;úroveň&gt; Zobrazí v protokolu událostí příslušný objem informací.
                      Dostupné úrovně podrobností: q[uiet], m[inimal],
-                     n[ormal], d[etailed] a diag[nostic]. (Krátký tvar: /v)
+                     n[ormal], d[etailed] a diag[nostic]. (Krátký tvar: -v)
                      Příklad:
-                       /verbosity:quiet
+                       -verbosity:quiet
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -416,8 +417,8 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  /consoleloggerparameters:&lt;parametry&gt;
-                     Parametry protokolovacího nástroje konzoly. (Short form: /clp)
+        <target state="translated">  -consoleLoggerParameters:&lt;parametry&gt;
+                     Parametry protokolovacího nástroje konzoly. (Krátký tvar: -clp)
                      Dostupné parametry:
                         PerformanceSummary – zobrazí dobu zpracování úloh,
                             cílů a projektů.
@@ -445,10 +446,10 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                             režimu. Tento styl protokolování je ve výchozím nastavení zapnutý.
                         ForceConsoleColor – použije barvy konzoly ANSI,
                             i když to konzola nepodporuje.
-                        Verbosity – potlačí nastavení /verbosity pro tento
+                        Verbosity – potlačí nastavení -verbosity pro tento
                             protokolovací nástroj.
                      Příklad:
-                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -464,8 +465,8 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         <source>  -noConsoleLogger   Disable the default console logger and do not log events
                      to the console. (Short form: -noConLog)
 </source>
-        <target state="needs-review-translation">  /noconsolelogger   Zakáže výchozí protokolovací nástroj konzoly
-                     a neprotokoluje události na konzole. (Krátký tvar: /noconlog)
+        <target state="translated">  -noConsoleLogger   Zakáže výchozí protokolovací nástroj konzoly
+                     a neprotokoluje události na konzole. (Krátký tvar: -noConLog)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -485,13 +486,13 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="needs-review-translation">  /validate          Ověří projekt podle výchozího schématu. (Krátký
-                     tvar: /val)
+        <target state="translated">  -validate          Ověří projekt podle výchozího schématu. (Krátký
+                     tvar: -val)
 
-  /validate:&lt;schema&gt; Ověří projekt podle zadaného schématu. (Krátký
-                     tvar: /val)
+  -validate:&lt;schéma&gt; Ověří projekt podle zadaného schématu. (Krátký
+                     tvar: -val)
                      Příklad:
-                       /validate:MyExtendedBuildSchema.xsd
+                       -validate:MyExtendedBuildSchema.xsd
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -509,11 +510,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: -m[:n])
       </source>
-        <target state="needs-review-translation">  /maxcpucount[:n]   Určuje maximální počet souběžných procesů
+        <target state="translated">  -maxCpuCount[:n]   Určuje maximální počet souběžných procesů
                      pro sestavení. Není-li přepínač zadán, je použita
                      výchozí hodnota 1. Je-li přepínač zadán bez hodnoty,
                      MSBuild použije nejvýše tolik procesorů, kolik jich je
-                     v počítači dostupných. (Krátký tvar: /m[:n])
+                     v počítači dostupných. (Krátký tvar: -m[:n])
       </target>
         <note>
           LOCALIZATION: "maxCpuCount" should not be localized.
@@ -527,11 +528,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         MSBuild MyApp.csproj -t:Clean
                              -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="needs-review-translation">Příklady:
+        <target state="translated">Příklady:
 
-        MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean
-                             /p:Configuration=Debug;TargetFrameworkVersion=v3.5
+        MSBuild MyApp.sln -t:Rebuild -p:Configuration=Release
+        MSBuild MyApp.csproj -t:Clean
+                             -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -544,7 +545,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="HelpPrompt">
         <source>For switch syntax, type "MSBuild -help"</source>
-        <target state="needs-review-translation">Chcete-li zobrazit syntaxi přepínačů, zadejte příkaz MSBuild /help.</target>
+        <target state="translated">Syntaxi přepínačů zobrazíte zadáním příkazu MSBuild -help.</target>
         <note>UE: this message is shown when the user makes a syntax error on the command-line for a switch.
     LOCALIZATION: "MSBuild -help" should not be localized.</note>
       </trans-unit>
@@ -566,22 +567,22 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  /distributedlogger:&lt;centrální_protokolovací_nástroj&gt;*&lt;předávací_protokolovací_nástroj&gt;
+        <target state="translated">  -distributedLogger:&lt;centrální protokolovací nástroj&gt;*&lt;předávací protokolovací nástroj&gt;
                      Použije tento protokolovací nástroj k protokolování událostí z nástroje MSBuild.
                      Ke každému uzlu připojí jinou instanci protokolovacího nástroje. Pokud chcete
                      zadat několik protokolovacích nástrojů, musíte je zadat jednotlivě.
-                     (Krátký tvar: /dl)
-                     Syntaxe hodnoty &lt;protokolovací_nástroj&gt;:
-                       [&lt;třída_protokolovacího_nástroje&gt;,]&lt;sestavení_protokolovacího_nástroje&gt;[;&lt;parametry_protokolovacího_nástroje&gt;]
-                     Syntaxe hodnoty &lt;třída_protokolovacího_nástroje&gt;:
-                       [&lt;částečný/úplný_obor_názvů&gt;.]&lt;třída_protokolovacího_nástroje&gt;
-                     Syntaxe hodnoty &lt;sestavení_protokolovacího_nástroje&gt;:
-                       {&lt;název_sestavení&gt;[,&lt;silný_název&gt;] | &lt;soubor_sestavení&gt;}
-                     &lt;Parametry_protokolovacího_nástroje&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém jste je zadali. (Krátký tvar: /l)
+                     (Krátký tvar: -dl)
+                     Syntaxe hodnoty &lt;protokolovací nástroj&gt;:
+                       [&lt;třída protokolovacího nástroje&gt;,]&lt;sestavení protokolovacího nástroje&gt;[;&lt;parametry protokolovacího nástroje&gt;]
+                     Syntaxe hodnoty &lt;třída protokolovacího nástroje&gt;:
+                       [&lt;částečný/úplný obor názvů&gt;.]&lt;třída protokolovacího nástroje&gt;
+                     Syntaxe hodnoty &lt;sestavení protokolovacího nástroje&gt;:
+                       {&lt;název sestavení&gt;[,&lt;silný název&gt;] | &lt;soubor sestavení&gt;}
+                     &lt;Parametry protokolovacího nástroje&gt; jsou volitelné a předávají se
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém jste je zadali. (Krátký tvar: -l)
                      Příklady:
-                       /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -601,13 +602,13 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="needs-review-translation">  /ignoreprojectextensions:&lt;rozšíření&gt;
+        <target state="translated">  -ignoreProjectExtensions:&lt;přípony&gt;
                      Seznam přípon, které se mají ignorovat při určování souboru
-                     projektu, který bude sestaven. K oddělení více rozšíření
+                     projektu, který bude sestaven. K oddělení několika přípon
                      použijte středníky nebo čárky.
-                     (Krátký tvar: /ignore)
+                     (Krátký tvar: -ignore)
                      Příklad:
-                       /ignoreprojectextensions:.sln
+                       -ignoreProjectExtensions:.sln
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -627,13 +628,13 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -toolsVersion:3.5
    </source>
-        <target state="needs-review-translation">  /toolsversion:&lt;verze&gt;
+        <target state="translated">  -toolsVersion:&lt;verze&gt;
                      Verze sady nástrojů MSBuild (úloh, cílů apod.),
                      která se má použít při sestavení. Tato verze má přednost před
                      verzemi uvedenými v jednotlivých projektech. (Krátký tvar:
-                     /tv)
+                     -tv)
                      Příklad:
-                       /toolsversion:3.5
+                       -toolsVersion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -654,14 +655,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: -fl[n])
     </source>
-        <target state="needs-review-translation">  /fileLogger[n]     Uloží výstup sestavení do souboru protokolu. Ve výchozím nastavení
+        <target state="translated">  -fileLogger[n]     Uloží výstup sestavení do souboru protokolu. Ve výchozím nastavení
                      je tento soubor umístěný v aktuálním adresáři a má název
                      msbuild[n].log. Události ze všech uzlů jsou kombinovány
                      do jednoho protokolu. Umístění souboru a další
-                     parametry možnosti fileLogger je možné nastavit
-                     přidáním přepínače /fileLoggerParameters[n].
-                     Je-li uvedeno n, může nabývat hodnot 1-9,
-                     takže celkem je možné připojit až 10 souborů protokolu. (Krátký tvar: /fl[n])
+                     parametry pro fileLogger je možné nastavit
+                     přidáním přepínače -fileLoggerParameters[n].
+                     Je-li uvedeno n, může nabývat hodnot 1–9,
+                     takže celkem je možné připojit až 10 souborů protokolu. (Krátký tvar: -fl[n])
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -686,13 +687,13 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="needs-review-translation">  /distributedFileLogger
+        <target state="translated">  -distributedFileLogger
                      Uloží výstup sestavení do několika souborů protokolu,
                      po jednom pro každý uzel nástroje MSBuild. Tyto soubory jsou na počátku umístěny
                      v aktuálním adresáři. Ve výchozím nastavení mají tyto soubory
-                     název MSBuild&lt;id_uzlu&gt;.log. Umístění souborů
-                     a další parametry možnosti fileLogger lze nastavit
-                     přidáním přepínače /fileLoggerParameters.
+                     název MSBuild&lt;id uzlu&gt;.log. Umístění souborů
+                     a další parametry pro fileLogger lze nastavit
+                     přidáním přepínače -fileLoggerParameters.
 
                      Je-li název souboru protokolu nastaven přepínačem fileLoggerParameters,
                      distribuovaný protokolovací nástroj použije hodnotu fileName
@@ -738,14 +739,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="needs-review-translation">  /fileloggerparameters[n]:&lt;parametry&gt;
+        <target state="translated">  -fileLoggerParameters[n]:&lt;parametry&gt;
                      Poskytuje doplňující parametry pro protokolovací nástroje.
                      Přítomnost tohoto přepínače implikuje
-                     odpovídající přepínač (filelogger[n].
-                     Je-li uvedeno n, může nabývat hodnot 1-9.
-                     /fileloggerparameters využívají také všechny distribuované
-                     protokolovací nástroje - viz popis přepínače /distributedFileLogger.
-                     (Krátký tvar: /flp[n])
+                     odpovídající přepínač -fileLogger[n].
+                     Je-li uvedeno n, může nabývat hodnot 1–9.
+                     -fileLoggerParameters využívají také všechny distribuované
+                     protokolovací nástroje - viz popis přepínače -distributedFileLogger.
+                     (Krátký tvar: -flp[n])
                      K dispozici jsou stejné parametry jako ty,
                      které jsou uvedeny u protokolovacího nástroje konzoly. Některé další dostupné parametry:
                         LogFile – cesta k souboru protokolu,
@@ -760,12 +761,12 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                             například UTF-8, Unicode nebo ASCII.
                      Výchozí úroveň podrobností je Detailed.
                      Příklady:
-                       /fileLoggerParameters:LogFile=MyLog.log;Append;
+                       -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       /flp1:warningsonly;logfile=msbuild.wrn
-                       /flp2:errorsonly;logfile=msbuild.err
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -787,15 +788,15 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -nr:true
     </source>
-        <target state="needs-review-translation">  /nodeReuse:&lt;parametry&gt;
+        <target state="translated">  -nodeReuse:&lt;parametry&gt;
                      Povolí nebo zakáže opakované použití uzlů nástroje MSBuild.
                      Parametry:
                      True – po dokončení sestavení se uzly zachovají a znovu se
                             použijí v následných sestaveních (výchozí hodnota).
                      False – Po dokončení sestavení se uzly nezachovají.
-                     (Krátký tvar: /nr)
+                     (Krátký tvar: -nr)
                      Příklad:
-                       /nr:true
+                       -nr:true
     </target>
         <note />
       </trans-unit>
@@ -813,7 +814,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -pp:out.txt
     </source>
-        <target state="needs-review-translation">  /preprocess[:soubor]
+        <target state="translated">  -preprocess[:soubor]
                      Vytvoří jeden agregovaný soubor projektu
                      vložením všech souborů, které by byly importovány během
                      sestavení, s označením jejich hranic. To může být
@@ -822,9 +823,9 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      k sestavení. Ve výchozím stavu se výstup zapíše
                      do okna konzoly. Pokud je zadaná cesta k výstupnímu souboru,
                      použije se místo toho.
-                     (Krátký tvar: /pp)
+                     (Krátký tvar: -pp)
                      Příklad:
-                       /pp:out.txt
+                       -pp:out.txt
     </target>
         <note />
       </trans-unit>
@@ -835,11 +836,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  /detailedsummary
+        <target state="translated">  -detailedSummary
                      Při dokončení sestavení zobrazí podrobné informace
                      o sestavených konfiguracích a způsobu jejich
                      naplánování do uzlů.
-                     (Krátký tvar: /ds)
+                     (Krátký tvar: -ds)
     </target>
         <note />
       </trans-unit>
@@ -854,7 +855,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1057: Hodnota sestavení grafu není platná. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -864,7 +865,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidInteractiveValue">
         <source>MSBUILD : error MSB1055: Interactive value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1055: Interactive value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1055: Interaktivní hodnota není platná. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1055: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -874,7 +875,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: Hodnota izolace projektů není platná. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -884,7 +885,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidLoggerError">
         <source>MSBUILD : error MSB1019: Logger switch was not correctly formed.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1019: Přepínač protokolovacího nástroje nebyl vytvořen správně.</target>
+        <target state="translated">MSBUILD : error MSB1019: Přepínač protokolovacího nástroje nebyl vytvořen správně.</target>
         <note>{StrBegin="MSBUILD : error MSB1019: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user does any of the following:
       msbuild.exe -logger:;"logger parameters"                    (missing logger class and assembly)
@@ -896,7 +897,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidMaxCPUCountValue">
         <source>MSBUILD : error MSB1030: Maximum CPU count is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1030: Maximální počet procesorů je neplatný. {0}</target>
+        <target state="translated">MSBUILD : error MSB1030: Maximální počet procesorů je neplatný. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1030: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -906,7 +907,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidMaxCPUCountValueOutsideRange">
         <source>MSBUILD : error MSB1032: Maximum CPU count is not valid. Value must be an integer greater than zero and no more than 1024.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1032: Maximální počet procesorů je neplatný. Hodnotou musí být celé číslo větší než nula a menší než 1024.</target>
+        <target state="translated">MSBUILD : error MSB1032: Maximální počet procesorů je neplatný. Hodnotou musí být celé číslo větší než nula a menší než 1024.</target>
         <note>{StrBegin="MSBUILD : error MSB1032: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a CPU value that is zero or less. For example, -m:0 instead of -m:2.
@@ -915,7 +916,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidNodeNumberValue">
         <source>MSBUILD : error MSB1033: Node number is not valid. {0}.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1033: Číslo uzlu je neplatné. {0}.</target>
+        <target state="translated">MSBUILD : error MSB1033: Číslo uzlu je neplatné. {0}.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1033: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -925,7 +926,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidNodeNumberValueIsNegative">
         <source>MSBUILD : error MSB1034: Node number is not valid. Value must be an integer greater than zero.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1034: Číslo uzlu je neplatné. Hodnotou musí být celé číslo větší než nula.</target>
+        <target state="translated">MSBUILD : error MSB1034: Číslo uzlu je neplatné. Hodnotou musí být celé číslo větší než nula.</target>
         <note>{StrBegin="MSBUILD : error MSB1034: "}
         UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
         This error is shown when a user specifies a CPU value that is zero or less. For example, -nodeMode:0 instead of -nodeMode:2.
@@ -934,7 +935,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidPropertyError">
         <source>MSBUILD : error MSB1006: Property is not valid.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1006: Vlastnost není platná.</target>
+        <target state="translated">MSBUILD : error MSB1006: Vlastnost není platná.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1006: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown if the user does any of the following:
@@ -952,7 +953,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidSwitchIndicator">
         <source>Switch: {0}</source>
-        <target state="needs-review-translation">Přepínač: {0}</target>
+        <target state="translated">Přepínač: {0}</target>
         <note>
       UE: This is attached to error messages caused by an invalid switch. This message indicates what the invalid arg was.
       For example, if an unknown switch is passed to MSBuild.exe, the error message will look like this:
@@ -963,7 +964,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidToolsVersionError">
         <source>MSBUILD : error MSB1040: ToolsVersion is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1040: Hodnota ToolsVersion je neplatná. {0}</target>
+        <target state="translated">MSBUILD : error MSB1040: Hodnota ToolsVersion je neplatná. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1040: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -973,7 +974,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidVerbosityError">
         <source>MSBUILD : error MSB1018: Verbosity level is not valid.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1018: Je nastavena neplatná úroveň podrobností protokolování.</target>
+        <target state="translated">MSBUILD : error MSB1018: Je nastavena neplatná úroveň podrobností protokolování.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1018: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an unknown verbosity level e.g. "msbuild -verbosity:foo". The only valid verbosities
@@ -983,7 +984,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="LoggerFatalError">
         <source>MSBUILD : error MSB1028: The logger failed unexpectedly.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1028: Došlo k neočekávané chybě protokolovacího nástroje.</target>
+        <target state="translated">MSBUILD : error MSB1028: Došlo k neočekávané chybě protokolovacího nástroje.</target>
         <note>{StrBegin="MSBUILD : error MSB1028: "}
       UE: This error is shown when a logger specified with the -logger switch throws an exception while being
       initialized. This message is followed by the exception text including the stack trace.
@@ -1010,7 +1011,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1007: Zadejte protokolovací nástroj.</target>
+        <target state="translated">MSBUILD : error MSB1007: Zadejte protokolovací nástroj.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1007: "}UE: This happens if the user does something like "msbuild.exe -logger". The user must pass in an actual logger class
       following the switch, as in "msbuild.exe -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral".
@@ -1019,7 +1020,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingMaxCPUCountError">
         <source>MSBUILD : error MSB1031: Specify the maximum number of CPUs.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1031: Zadejte maximální počet procesorů.</target>
+        <target state="translated">MSBUILD : error MSB1031: Zadejte maximální počet procesorů.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1031: "}UE: This happens if the user does something like "msbuild.exe -m". The user must pass in an actual number like -m:4.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1036,7 +1037,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingPropertyError">
         <source>MSBUILD : error MSB1005: Specify a property and its value.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1005: Zadejte vlastnost a její hodnotu.</target>
+        <target state="translated">MSBUILD : error MSB1005: Zadejte vlastnost a její hodnotu.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1005: "}UE: This happens if the user does something like "msbuild.exe -property". The user must pass in an actual property
       name and value following the switch, as in "msbuild.exe -property:Configuration=Debug".
@@ -1054,7 +1055,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingTargetError">
         <source>MSBUILD : error MSB1004: Specify the name of the target.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1004: Zadejte název cíle.</target>
+        <target state="translated">MSBUILD : error MSB1004: Zadejte název cíle.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1004: "}UE: This happens if the user does something like "msbuild.exe -target". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -target:blah".
@@ -1063,7 +1064,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingToolsVersionError">
         <source>MSBUILD : error MSB1039: Specify the version of the toolset.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1039: Zadejte verzi sady nástrojů.</target>
+        <target state="translated">MSBUILD : error MSB1039: Zadejte verzi sady nástrojů.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1039: "}
       UE: This happens if the user does something like "msbuild.exe -toolsVersion". The user must pass in an actual toolsversion
@@ -1073,7 +1074,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingVerbosityError">
         <source>MSBUILD : error MSB1016: Specify the verbosity level.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1016: Zadejte úroveň podrobností protokolování.</target>
+        <target state="translated">MSBUILD : error MSB1016: Zadejte úroveň podrobností protokolování.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1016: "}UE: This happens if the user does something like "msbuild.exe -verbosity". The user must pass in a verbosity level
       after the switch e.g. "msbuild.exe -verbosity:detailed".
@@ -1082,7 +1083,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MultipleSchemasError">
         <source>MSBUILD : error MSB1024: Only one schema can be specified for validation of the project.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1024: Pro ověření projektu lze zadat pouze jedno schéma.</target>
+        <target state="translated">MSBUILD : error MSB1024: Pro ověření projektu lze zadat pouze jedno schéma.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1090,7 +1091,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="PickedUpSwitchesFromAutoResponse">
         <source>Some command line switches were read from the auto-response file "{0}". To disable this file, use the "-noAutoResponse" switch.</source>
-        <target state="needs-review-translation">Některé přepínače příkazového řádku byly načteny ze souboru automatických odpovědí {0}. Pokud chcete tento soubor zakázat, použijte přepínač /noautoresponse.</target>
+        <target state="translated">Některé přepínače příkazového řádku byly načteny ze souboru automatických odpovědí {0}. Pokud chcete tento soubor zakázat, použijte přepínač -noAutoResponse.</target>
         <note>
       UE: This message appears in high verbosity modes when we used some
       switches from the auto-response file msbuild.rsp: otherwise the user may be unaware
@@ -1105,7 +1106,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="PossiblyOmittedMaxCPUSwitch">
         <source>Building the projects in this solution one at a time. To enable parallel build, please add the "-m" switch.</source>
-        <target state="needs-review-translation">Probíhá postupné sestavování projektů v tomto řešení. Pokud chcete povolit paralelní sestavování, zadejte přepínač /m.</target>
+        <target state="translated">Probíhá postupné sestavování projektů v tomto řešení. Pokud chcete povolit paralelní sestavování, přidejte prosím přepínač -m.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectSchemaErrorHalt">
@@ -1144,14 +1145,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="SchemaValidationError">
         <source>MSBUILD : MSB1044: Project is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : MSB1044: Projekt je neplatný. {0}</target>
+        <target state="translated">MSBUILD : MSB1044: Projekt je neplatný. {0}</target>
         <note>{StrBegin="MSBUILD : MSB1044: "}UE: This error is shown when the user asks his project to be validated against a schema (-val switch for
     MSBuild.exe), and the project has errors. "{0}" contains a message explaining the problem.
     LOCALIZATION: "{0}" is a message from the System.XML schema validator and is already localized.</note>
       </trans-unit>
       <trans-unit id="SchemaNotFoundError">
         <source>MSBUILD : error MSB1026: Schema file does not exist.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1026: Soubor schématu neexistuje.</target>
+        <target state="translated">MSBUILD : error MSB1026: Soubor schématu neexistuje.</target>
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is shown when the user specifies a schema file using the -validate:&lt;schema&gt; switch, and the file
     does not exist on disk. This message does not need in-line parameters because the exception takes care of displaying the
     invalid arg.
@@ -1166,7 +1167,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1002: Pro tento přepínač se nepoužívají žádné parametry.</target>
+        <target state="translated">MSBUILD : error MSB1002: Pro tento přepínač se nepoužívají žádné parametry.</target>
         <note>{StrBegin="MSBUILD : error MSB1002: "}UE: For example, if somebody types "msbuild.exe -noLogo:1", they would get this error because the -noLogo switch
     should not be followed by any parameters ... it stands alone.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
@@ -1189,7 +1190,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingIgnoreProjectExtensionsError">
         <source>MSBUILD : error MSB1035: Specify the project extensions to ignore.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1035: Zadejte přípony projektů, které mají být ignorovány.</target>
+        <target state="translated">MSBUILD : error MSB1035: Zadejte přípony projektů, které mají být ignorovány.</target>
         <note>{StrBegin="MSBUILD : error MSB1035: "}
       UE: This happens if the user does something like "msbuild.exe -ignoreProjectExtensions". The user must pass in one or more
       project extensions to ignore e.g. "msbuild.exe -ignoreProjectExtensions:.sln".
@@ -1198,12 +1199,12 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidExtensionToIgnore">
         <source>MSBUILD : error MSB1036: There is an invalid extension in the -ignoreProjectExtensions list. Extensions must start with a period ".", have one or more characters after the period and not contain any invalid path characters or wildcards.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1036: Seznam /ignoreprojectextensions obsahuje neplatnou příponu. Přípony musí začínat tečkou (.), za níž následuje jeden nebo několik znaků, a nesmí obsahovat žádné znaky, které nejsou platné v cestě, ani zástupné znaky.</target>
+        <target state="translated">MSBUILD : error MSB1036: Seznam -ignoreProjectExtensions obsahuje neplatnou příponu. Přípony musí začínat tečkou (.), za níž následuje jeden nebo několik znaků, a nesmí obsahovat žádné znaky, které nejsou platné v cestě, ani zástupné znaky.</target>
         <note>{StrBegin="MSBUILD : error MSB1036: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MissingConsoleLoggerParameterError">
         <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1037: Pokud používáte přepínač /consoleLoggerParameters, zadejte jeden nebo více parametrů protokolovacího nástroje konzoly.</target>
+        <target state="translated">MSBUILD : error MSB1037: Pokud používáte přepínač -consoleLoggerParameters, zadejte jeden nebo více parametrů protokolovacího nástroje konzoly.</target>
         <note>{StrBegin="MSBUILD : error MSB1037: "}
       UE: This happens if the user does something like "msbuild.exe -consoleLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -consoleLoggerParameters:ErrorSummary".
@@ -1212,7 +1213,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingFileLoggerParameterError">
         <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1038: Pokud používáte přepínač /fileLoggerParameters, zadejte jeden nebo více parametrů protokolovacího nástroje souborů</target>
+        <target state="translated">MSBUILD : error MSB1038: Pokud používáte přepínač -fileLoggerParameters, zadejte jeden nebo více parametrů protokolovacího nástroje souborů</target>
         <note>{StrBegin="MSBUILD : error MSB1038: "}
       UE: This happens if the user does something like "msbuild.exe -fileLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -fileLoggerParameters:logfile=c:\temp\logfile".
@@ -1221,7 +1222,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingNodeReuseParameterError">
         <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1041: Pokud používáte přepínač /nodereuse, zadejte jeden nebo více parametrů opakovaného použití uzlu.</target>
+        <target state="translated">MSBUILD : error MSB1041: Pokud používáte přepínač -nodeReuse, zadejte jeden nebo více parametrů opakovaného použití uzlu.</target>
         <note>{StrBegin="MSBUILD : error MSB1041: "}
       UE: This happens if the user does something like "msbuild.exe -nodeReuse:" without a true or false
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1256,7 +1257,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="LoggerNotFoundError">
         <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1020: Protokolovací nástroj se nenašel. Zkontrolujte následující body: 1.) Zadaný název protokolovacího nástroje je stejný jako název třídy protokolovacího nástroje. 2.) Třída protokolovacího nástroje je veřejná (public) a implementuje rozhraní Microsoft.Build.Framework.ILogger. 3.) Cesta k sestavení protokolovacího nástroje je správná, nebo se protokolovací nástroj dá načíst jenom pomocí zadaného názvu sestavení.</target>
+        <target state="translated">MSBUILD : error MSB1020: Protokolovací nástroj se nenašel. Zkontrolujte následující body: 1.) Zadaný název protokolovacího nástroje je stejný jako název třídy protokolovacího nástroje. 2.) Třída protokolovacího nástroje je veřejná (public) a implementuje rozhraní Microsoft.Build.Framework.ILogger. 3.) Cesta k sestavení protokolovacího nástroje je správná, nebo se protokolovací nástroj dá načíst jenom pomocí zadaného názvu sestavení.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
@@ -1313,14 +1314,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      continue to execute as if it was a warning but the overall
                      build will fail.
     </source>
-        <target state="needs-review-translation">  /warnaserror[:kód[;kód2]]
+        <target state="translated">  -warnAsError[:kód[;kód2]]
                      Seznam kódů upozornění, která se mají považovat za chyby. Více kódů
                      oddělte středníkem nebo čárkou. Pokud chcete považovat
                      za chyby všechna upozornění, použijte přepínač bez hodnot.
-                     (Krátká forma: /err[:k;[k2]])
+                     (Krátký tvar: -err[:k;[k2]])
 
                      Příklad:
-                       /warnaserror:MSB4130
+                       -warnAsError:MSB4130
 
                      Pokud se upozornění považuje za chybu, cíl bude
                      pokračovat v činnosti, jako by šlo o upozornění,
@@ -1341,14 +1342,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -warnAsMessage:MSB3026
     </source>
-        <target state="needs-review-translation">  /warnasmessage[:kód[;kód2]]
+        <target state="translated">  -warnAsMessage[:kód[;kód2]]
                      Seznám kódů upozornění, která se mají považovat
                      za zprávy s nízkou důležitostí. Více kódů oddělte
                      středníkem nebo čárkou.
-                     (Krátká forma: /nowarn[:k;[k2]])
+                     (Krátký tvar: -noWarn[:k;[k2]])
 
                      Příklad:
-                       /warnasmessage:MSB3026
+                       -warnAsMessage:MSB3026
     </target>
         <note>
       LOCALIZATION: "-warnAsMessage" and "-noWarn" should not be localized.
@@ -1362,7 +1363,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1051: Když použijete přepínač /warnasmessage, určete jeden nebo více kódů upozornění, která se mají považovat za zprávy s nízkou důležitostí.</target>
+        <target state="translated">MSBUILD : error MSB1051: Když použijete přepínač -warnAsMessage, určete jeden nebo více kódů upozornění, která se mají považovat za zprávy s nízkou důležitostí.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1413,17 +1414,17 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializuje všechny události sestavení do komprimovaného
                      binárního souboru. Tento soubor se standardně nachází
                      v aktuálním adresáři a má název msbuild.binlog. Binární
                      protokol je podrobný popis procesu sestavení, který se
                      dá později použít k rekonstrukci textových protokolů
                      a který můžou používat jiné nástroje pro analýzu.
-                     Binární protokol má obvykle 10–20x menší velikost než
+                     Binární protokol má obvykle 10–20krát menší velikost než
                      nejpodrobnější textový protokol na úrovni diagnostiky,
                      ale obsahuje více informací.
-                     (Krátký formát: /bl)
+                     (Krátký tvar: -bl)
 
                      Binární protokolovací nástroj standardně shromažďuje
                      zdrojový text projektových souborů včetně všech
@@ -1454,12 +1455,12 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      Příklady:
-                       /bl
-                       /bl:output.binlog
-                       /bl:output.binlog;ProjectImports=None
-                       /bl:output.binlog;ProjectImports=ZipFile
-                       /bl:..\..\custom.binlog
-                       /binaryLogger
+                       -bl
+                       -bl:output.binlog
+                       -bl:output.binlog;ProjectImports=None
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1481,14 +1482,16 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      a value that comes from a response file.
                      (Short form: -r)
     </source>
-        <target state="needs-review-translation">  /restore[:True|False]
+        <target state="translated">  -restore[:True|False]
                      Před sestavením jiných cílů spustí cíl s názvem
-                     Restore. Je to užitečné, když váš strom
-                     projektů vyžaduje obnovení balíčků, aby je bylo možné
-                     sestavit. Zadání parametru /restore je stejné jako
-                     zadání /restore:True. Pomocí tohoto parametru
+                     Restore a zajistí, aby sestavení pro tyto cíle
+                     používalo nejnovější obnovenou logiku sestavení.
+                     Je to užitečné, když váš strom projektů vyžaduje
+                     obnovení balíčků, aby je bylo možné sestavit.
+                     Zadání parametru -restore je stejné jako
+                     zadání -restore:True. Pomocí tohoto parametru
                      přepíšete hodnotu pocházející ze souboru odpovědí.
-                     (Krátký tvar: /r)
+                     (Krátký tvar: -r)
     </target>
         <note>
       LOCALIZATION: "-restore" and "-r" should not be localized.
@@ -1520,7 +1523,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="needs-review-translation">  /profileevaluation:&lt;soubor&gt;
+        <target state="translated">  -profileEvaluation:&lt;soubor&gt;
                      Profiluje vyhodnocení nástroje MSBuild a zapíše výsledek
                      do určeného souboru. Pokud je přípona zadaného
                      souboru .md, vygeneruje se výsledek ve formátu
@@ -1540,16 +1543,16 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
-        <target state="needs-review-translation">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+        <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
                      Tyto vlastnosti na úrovni projektu nastavte nebo přepište
                      jen během obnovení a nepoužívejte vlastnosti určené
-                     argumentem /property. &lt;n&gt; je název vlastnosti
+                     argumentem -property. &lt;n&gt; je název vlastnosti
                      a &lt;v&gt; je hodnota vlastnosti. K oddělení více
                      vlastností použijte středník nebo čárku, případně zadejte
                      každou vlastnost samostatně.
-                     (Krátký tvar: /rp)
+                     (Krátký tvar: -rp)
                      Příklad:
-                       /restoreProperty:IsRestore=true;Vlastnost=hodnota
+                       -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.

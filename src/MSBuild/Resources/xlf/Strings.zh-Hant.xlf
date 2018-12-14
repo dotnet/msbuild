@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="CannotAutoDisableAutoResponseFile">
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1027: 無法在 MSBuild.rsp 自動回應檔中指定 /noautoresponse 參數，也無法在該自動回應檔所參考的任何回應檔中指定此參數。</target>
+        <target state="translated">MSBUILD : error MSB1027: -noAutoResponse 參數不能在 MSBuild.rsp 自動回應檔中指定，也不能在自動回應檔所參考的任何回應檔中指定。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="CopyrightMessage">
@@ -55,7 +55,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       <trans-unit id="HelpMessage_1_Syntax">
         <source>Syntax:              MSBuild.exe [options] [project file | directory]
 </source>
-        <target state="needs-review-translation">語法:              MSBuild.exe [選項] [專案檔 | 目錄]
+        <target state="translated">語法:              MSBuild.exe [選項] [專案檔 | 目錄]
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -74,7 +74,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      a directory is specified, MSBuild searches that
                      directory for a project file.
 </source>
-        <target state="needs-review-translation">描述:         在專案檔中建置指定的目標。若未
+        <target state="translated">描述:         在專案檔中建置指定的目標。若未
                     指定專案檔，MSBuild 會從目前的
                     工作目錄中，搜尋副檔名結尾為
                      "proj" 的檔案，並使用該檔案。
@@ -100,14 +100,14 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      -interactive:true.  Use the parameter to override a
                      value that comes from a response file.
     </source>
-        <target state="new">  -interactive[:True|False]
-                     Indicates that actions in the build are allowed to
-                     interact with the user.  Do not use this argument
-                     in an automated scenario where interactivity is
-                     not expected.
-                     Specifying -interactive is the same as specifying
-                     -interactive:true.  Use the parameter to override a
-                     value that comes from a response file.
+        <target state="translated">  -interactive[:True|False]
+                     指出不允許組建中的動作與使用者
+                     互動。請勿在自動化情節中使用此
+                     引數，因為在這個情節中不應出現
+                     功能。
+                     指定 -interactive 就等同於指定
+                     -interactive:true。這個參數可用來
+                     覆寫來自回應檔的值。
     </target>
         <note>
       LOCALIZATION: "-interactive" should not be localized.
@@ -126,16 +126,16 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -isolateProjects[:True|False]
-                     Causes MSBuild to build each project in isolation.
+        <target state="translated">  -isolateProjects[:True|False]
+                     引發 MSBuild 獨立建置各個專案。
 
-                     This is a more restrictive mode of MSBuild as it requires
-                     that the project graph be statically discoverable at
-                     evaluation time, but can improve scheduling and reduce
-                     memory overhead when building a large set of projects.
-                     (Short form: -isolate)
+                     這是限制度較高的 MSBuild 模式，因為
+                     專案圖形會需要在評估階段可供靜態探索，
+                     但能在建置一組大量專案時改善排程
+                     及降低記憶體額外負荷。
+                     (簡短形式: -isolate)
 
-                     This flag is experimental and may not work as intended.
+                     這是實驗性的旗標，運作情形可能不如預期。
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -155,17 +155,17 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -graphBuild[:True|False]
-                     Causes MSBuild to construct and build a project graph.
+        <target state="translated">  -graphBuild[:True|False]
+                     引發 MSBuild 建構及建置專案圖形。
 
-                     Constructing a graph involves identifying project
-                     references to form dependencies. Building that graph
-                     involves attempting to build project references prior
-                     to the projects that reference them, differing from
-                     traditional MSBuild scheduling.
-                     (Short form: -graph)
+                     建構圖形會牽涉到識別專案參考
+                     以構成專案相依性。建置圖形
+                     會牽涉到嘗試在專案加以參考之前，
+                     先建置專案參考，而這與傳統的
+                     MSBuild 排程不同。
+                     (簡短形式: -graph)
 
-                     This flag is experimental and may not work as intended.
+                     這是實驗性的旗標，運作情形可能不如預期。
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -177,7 +177,8 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         <source>Switches:            Note that you can specify switches using both
                      "-switch" and "/switch".
 </source>
-        <target state="needs-review-translation">參數:
+        <target state="translated">參數:            請注意，您可以同時使用 "-switch" 和 "/switch"
+                     來指定參數。
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -191,7 +192,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       <trans-unit id="HelpMessage_4_HelpSwitch">
         <source>  -help              Display this usage message. (Short form: -? or -h)
 </source>
-        <target state="needs-review-translation">  /help              顯示此使用方式訊息。(簡短形式: /? 或 /h)
+        <target state="translated">  -help              顯示此使用方式訊息。(簡短形式: -? 或 -h)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -205,7 +206,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
         <source>  -noLogo            Do not display the startup banner and copyright message.
 </source>
-        <target state="needs-review-translation">  /nologo            不顯示程式啟始資訊及著作權訊息。
+        <target state="translated">  -noLogo            不顯示啟動橫幅及著作權訊息。
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -219,7 +220,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       <trans-unit id="HelpMessage_6_VersionSwitch">
         <source>  -version           Display version information only. (Short form: -ver)
 </source>
-        <target state="needs-review-translation">  /version           只顯示版本資訊。(簡短形式: /ver)
+        <target state="translated">  -version           只顯示版本資訊。(簡短形式: -ver)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -240,7 +241,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="needs-review-translation">  @&lt;檔案&gt;            從文字檔插入命令列設定。若要指定
+        <target state="translated">  @&lt;檔案&gt;            從文字檔插入命令列設定。若要指定
                      多個回應檔，請個別指定
                      每個回應檔。
 
@@ -262,8 +263,8 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         <source>  -noAutoResponse    Do not auto-include any MSBuild.rsp files. (Short form:
                      -noAutoRsp)
 </source>
-        <target state="needs-review-translation">  /noautoresponse    不要自動納入任何 MSBuild.rsp 檔。(簡短形式:
-                    /noautorsp)
+        <target state="translated">  -noAutoResponse    不自動包含任何 MSBuild.rsp 檔案。(簡短形式:
+                     -noAutoRsp)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -281,11 +282,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="needs-review-translation">  /target:&lt;目標&gt;  在此專案中建置這些目標。使用分號或逗號分隔多個目標，
-                    或個別指定
-                    每個目標。(簡短形式: /t)
+        <target state="translated">  -target:&lt;目標&gt;  在此專案中建置這些目標。使用分號或逗點分隔多個目標，
+                    或分別指定
+                    各個目標。(簡短形式: -t)
                     範例:
-                      /target:Resources;Compile
+                       -target:Resources;Compile
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -304,12 +305,12 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="needs-review-translation">  /property:&lt;n&gt;=&lt;v&gt;  設定或覆寫這些專案層級的屬性。&lt;n&gt; 為屬性名稱，
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  設定或覆寫這些專案層級的屬性。&lt;n&gt; 為屬性名稱，
                     &lt;v&gt; 則為屬性值。使用
-                    分號或逗號分隔多個目標，或
-                    個別指定每個屬性。(簡短形式: /p)
+                    分號或逗點分隔多個目標，或
+                    分別指定各個屬性。(簡短形式: -p)
                     範例:
-                      /property:WarningLevel=2;OutDir=bin\Debug\
+                       -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -335,8 +336,8 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  /logger:&lt;記錄器&gt;   使用此記錄器，記錄來自 MSBuild 的事件。若要指定
-                    多個記錄檔，請個別指定每個記錄檔。
+        <target state="translated">  -logger:&lt;記錄器&gt;   使用此記錄器，記錄來自 MSBuild 的事件。若要指定
+                    多個記錄檔，請分別指定各個記錄檔。
                     &lt;記錄器&gt; 語法為:
                       [&lt;記錄器類別&gt;,]&lt;記錄器組件&gt;[;&lt;記錄器參數&gt;]
                     &lt;記錄器類別&gt; 語法為:
@@ -344,10 +345,10 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                     &lt;記錄器組件&gt; 語法為:
                       {&lt;組件名稱&gt;[,&lt;強式名稱&gt;] | &lt;組件檔&gt;}
                     &lt;記錄器參數&gt; 為選擇性，
-                    並且會在您輸入的同時傳遞到記錄器。(簡短形式: /l)
+                    並且會在您鍵入的同時傳遞到記錄器。(簡短形式: -l)
                     範例:
-                      /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                      /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -365,11 +366,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="needs-review-translation">  /verbosity:&lt;層級&gt; 在事件記錄檔中顯示此資訊量。
+        <target state="translated">  -verbosity:&lt;層級&gt; 在事件記錄檔中顯示此資訊量。
                     可用的詳細資訊層級有: q[uiet]、m[inimal]、
-                    n[ormal]、d[etailed] 及 diag[nostic]。(簡短形式: /v)
+                    n[ormal]、d[etailed] 及 diag[nostic]。(簡短形式: -v)
                     範例:
-                      /verbosity:quiet
+                      -verbosity:quiet
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -416,8 +417,8 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  /consoleloggerparameters:&lt;參數&gt;
-                     主控台記錄器的參數. (簡短形式: /clp)
+        <target state="translated">  -consoleLoggerParameters:&lt;參數&gt;
+                     主控台記錄器的參數. (簡短形式: -clp)
                      可用的參數有:
                         PerformanceSummary--顯示花費在工作、目標和專案
                             的時間。
@@ -445,10 +446,10 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                             根據預設，會開啟此記錄樣式。
                         ForceConsoleColor--即使主控台不支援 ANSI 主控台色彩，
                             也予以使用。
-                        Verbosity--覆寫此記錄器的 /verbosity
+                        Verbosity--覆寫此記錄器的 -verbosity
                             設定。
                      範例:
-                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -464,8 +465,8 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         <source>  -noConsoleLogger   Disable the default console logger and do not log events
                      to the console. (Short form: -noConLog)
 </source>
-        <target state="needs-review-translation">  /noconsolelogger   停用預設主控台記錄器，而且不將事件記錄
-                    到主控台。(簡短形式: /noconlog)
+        <target state="translated">  -noConsoleLogger   停用預設主控台記錄器，而且不將事件記錄
+                    到主控台。(簡短形式: -noConLog)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -485,13 +486,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="needs-review-translation">  /validate          針對預設結構描述驗證專案。(簡短
-                    形式: /val)
+        <target state="translated">  -validate          依預設結構描述驗證專案。(簡短
+                    形式: -val)
 
- /validate:&lt;結構描述&gt; 針對指定的結構描述驗證專案。(簡短
-                    形式: /val)
+ -validate:&lt;結構描述&gt; 依指定結構描述驗證專案。(簡短
+                    形式: -val)
                     範例:
-                      /validate:MyExtendedBuildSchema.xsd
+                      -validate:MyExtendedBuildSchema.xsd
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -509,11 +510,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: -m[:n])
       </source>
-        <target state="needs-review-translation">  /maxcpucount[:n]   指定要一同建置的並行處理序
+        <target state="translated">  -maxCpuCount[:n]   指定要一同建置的並行處理序
                     最大數目。如果未使用參數，會使用
                     預設值 1。如果使用了參數但未提供值，
                     MSBuild 會使用電腦上的最大
-                    處理器數目。(簡短形式: /m[:n])
+                    處理器數目。(簡短形式: -m[:n])
       </target>
         <note>
           LOCALIZATION: "maxCpuCount" should not be localized.
@@ -527,11 +528,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         MSBuild MyApp.csproj -t:Clean
                              -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="needs-review-translation">範例:
+        <target state="translated">範例:
 
-        MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean
-                             /p:Configuration=Debug;TargetFrameworkVersion=v3.5
+        MSBuild MyApp.sln -t:Rebuild -p:Configuration=Release
+        MSBuild MyApp.csproj -t:Clean
+                             -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -544,7 +545,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="HelpPrompt">
         <source>For switch syntax, type "MSBuild -help"</source>
-        <target state="needs-review-translation">如需參數語法，請輸入 "MSBuild /help"</target>
+        <target state="translated">如需參數語法，請鍵入 "MSBuild -help"</target>
         <note>UE: this message is shown when the user makes a syntax error on the command-line for a switch.
     LOCALIZATION: "MSBuild -help" should not be localized.</note>
       </trans-unit>
@@ -566,11 +567,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  /distributedlogger:&lt;中央記錄器&gt;*&lt;轉送記錄器&gt;
+        <target state="translated">  -distributedLogger:&lt;中央記錄器&gt;*&lt;轉送記錄器&gt;
                      使用此記錄器，記錄來自 MSBuild 的事件，
                      將其他記錄器執行個體連結到各個節點。若要指定
-                     多個記錄器，請個別指定每個記錄器。
-                     (簡短形式 /dl)
+                     多個記錄器，請分別指定各個記錄器。
+                     (簡短形式 -dl)
                      &lt;記錄器&gt; 語法為:
                        [&lt;記錄器類別&gt;,]&lt;記錄器組件&gt;[;&lt;記錄器參數&gt;]
                      &lt;記錄器類別&gt; 語法為:
@@ -578,10 +579,10 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      &lt;記錄器組件&gt; 語法為:
                        {&lt;組件名稱&gt;[,&lt;強式名稱&gt;] | &lt;組件檔&gt;}
                      &lt;記錄器參數&gt; 為選擇性，
-                     並且會在您將其鍵入的同時傳遞到記錄器。(簡短形式: /l)
+                     並且會在您鍵入的同時傳遞到記錄器。(簡短形式: -l)
                      範例:
-                       /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -601,13 +602,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="needs-review-translation">  /ignoreprojectextensions:&lt;副檔名&gt;
+        <target state="translated">  -ignoreProjectExtensions:&lt;副檔名&gt;
                      在決定要建置哪個專案檔時，
-                     要略過的副檔名清單。請使用分號或逗號
+                     要略過的副檔名清單。請使用分號或逗點
                      分隔多個副檔名。
-                     (簡短形式: /ignore)
+                     (簡短形式: -ignore)
                      範例:
-                       /ignoreprojectextensions:.sln
+                       -ignoreProjectExtensions:.sln
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -627,13 +628,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -toolsVersion:3.5
    </source>
-        <target state="needs-review-translation">  /toolsversion:&lt;版本&gt;
-                     在建置期間要使用的
-                    MSBuild 工具組 (工作、目標等) 版本。此版本會覆寫
-                     個別專案指定的版本。(簡短形式:
-                     /tv)
+        <target state="translated">  -toolsVersion:&lt;版本&gt;
+                     在建置期間要使用的 
+                    MSBuild 工具組 (工作、目標等) 版本。
+                     此版本會覆寫個別專案指定的版本。
+                     (簡短形式: -tv)
                      範例:
-                       /toolsversion:3.5
+                       -toolsversion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -654,14 +655,14 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: -fl[n])
     </source>
-        <target state="needs-review-translation">  /fileLogger[n]     將建置輸出記錄到檔案。根據預設，
-                     此檔案位於目前的目錄中，
+        <target state="translated">  -fileLogger[n]     將建置輸出記錄到檔案。
+                     根據預設，此檔案位於目前的目錄中，
                      且名為 "msbuild[n].log"。來自所有節點的事件會合併成
-                     單一記錄。透過新增 "/fileLoggerParameters[n]" 參數，
+                     單一記錄。透過新增 "-fileLoggerParameters[n]" 參數，
                      可以指定 fileLogger 的檔案位置及
                      其他參數。
                      如果 "n" 存在，可以是 1-9 之間的數字，
-                     最多允許連結 10 個檔案記錄器。(簡短形式: /fl[n])
+                     最多允許連結 10 個檔案記錄器。(簡短形式: -fl[n])
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -686,11 +687,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="needs-review-translation">  /distributedFileLogger
+        <target state="translated">  -distributedFileLogger
                      將建置輸出記錄到多個記錄檔，
                      每個 MSBuild 節點各一個記錄檔。這些檔案的初始位置為
                      目前的目錄。根據預設，檔案名稱為
-                     "MSBuild&lt;節點識別碼&gt;.log"。透過新增 "/fileLoggerParameters" 參數，
+                     "MSBuild&lt;節點識別碼&gt;.log"。透過新增 "-fileLoggerParameters" 參數，
                      可以指定 fileLogger 的檔案位置
                      及其他參數。
 
@@ -738,14 +739,14 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="needs-review-translation">  /fileloggerparameters[n]:&lt;參數&gt;
+        <target state="translated">  -fileLoggerParameters[n]:&lt;參數&gt;
                      為檔案記錄器提供任何額外參數。
                      此參數的存在表示有
-                     對應的 /filelogger[n] 參數。
+                     對應的 -fileLogger[n] 參數。
                      如果 "n" 存在，可以是 1-9 之間的數字。
-                     任何分散式檔案記錄器也都會使用 /fileloggerparameters，
-                     請查看 /distributedFileLogger 的描述。
-                     (簡短形式: /flp[n])
+                     任何分散式檔案記錄器也都會使用 -fileLoggerParameters，
+                     請查看 -distributedFileLogger 的描述。
+                     (簡短形式: -flp[n])
                      為主控台記錄器列出的相同參數
                      均可用。其他可用的參數有:
                         LogFile--會寫入組建記錄檔的記錄檔
@@ -760,12 +761,12 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                             例如 UTF-8、Unicode 或 ASCII
                      預設詳細資訊為 Detailed。
                      範例:
-                       /fileLoggerParameters:LogFile=MyLog.log;Append;
+                       -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       /flp1:warningsonly;logfile=msbuild.wrn
-                       /flp2:errorsonly;logfile=msbuild.err
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -787,15 +788,15 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -nr:true
     </source>
-        <target state="needs-review-translation">  /nodeReuse:&lt;參數&gt;
+        <target state="translated">  -nodeReuse:&lt;參數&gt;
                     允許或禁止重複使用 MSBuild 節點。
                     參數有:
                     True --節點在建置完成後會保留，
                            供後續建置重複使用 (預設)
                     False--節點在建置完成後不會保留
-                    (簡短形式: /nr)
+                    (簡短形式: -nr)
                     範例:
-                      /nr:true
+                      -nr:true
     </target>
         <note />
       </trans-unit>
@@ -813,7 +814,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -pp:out.txt
     </source>
-        <target state="needs-review-translation">  /preprocess[:file]
+        <target state="translated">  -preprocess[:file]
                      藉由內嵌所有會在建置期間匯入的檔案
                      建立單一的彙總專案檔，
                      並標記這些檔案的界限。要找出匯入的檔案有哪些、
@@ -822,9 +823,9 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      這會很實用。根據預設，輸出會寫入
                      主控台視窗。如有提供輸出檔的路徑，
                      則會改用該路徑。
-                     (簡短形式: /pp)
+                     (簡短形式: -pp)
                      範例:
-                       /pp:out.txt
+                       -pp:out.txt
     </target>
         <note />
       </trans-unit>
@@ -835,11 +836,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  /detailedsummary
+        <target state="translated">  -detailedsummary
                      在建置結束時顯示詳細資訊，
                      內容為建置的組態，
                      以及將組態排程到節點的方式。
-                     (簡短形式: /ds)
+                     (簡短形式: -ds)
     </target>
         <note />
       </trans-unit>
@@ -854,7 +855,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1057: 圖形組建值無效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -864,7 +865,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidInteractiveValue">
         <source>MSBUILD : error MSB1055: Interactive value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1055: Interactive value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1055: 互動值無效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1055: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -874,7 +875,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: 獨立式專案值無效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -884,7 +885,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidLoggerError">
         <source>MSBUILD : error MSB1019: Logger switch was not correctly formed.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1019: 記錄器參數的格式不正確。</target>
+        <target state="translated">MSBUILD : error MSB1019: 記錄器參數的格式不正確。</target>
         <note>{StrBegin="MSBUILD : error MSB1019: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user does any of the following:
       msbuild.exe -logger:;"logger parameters"                    (missing logger class and assembly)
@@ -896,7 +897,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidMaxCPUCountValue">
         <source>MSBUILD : error MSB1030: Maximum CPU count is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1030: 最大 CPU 計數無效。{0}</target>
+        <target state="translated">MSBUILD : error MSB1030: 最大 CPU 計數無效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1030: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -906,7 +907,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidMaxCPUCountValueOutsideRange">
         <source>MSBUILD : error MSB1032: Maximum CPU count is not valid. Value must be an integer greater than zero and no more than 1024.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1032: 最大 CPU 計數無效。值必須為大於零且不超過 1024 的整數。</target>
+        <target state="translated">MSBUILD : error MSB1032: 最大 CPU 計數無效。值必須為大於零且不超過 1024 的整數。</target>
         <note>{StrBegin="MSBUILD : error MSB1032: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a CPU value that is zero or less. For example, -m:0 instead of -m:2.
@@ -915,7 +916,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidNodeNumberValue">
         <source>MSBUILD : error MSB1033: Node number is not valid. {0}.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1033: 節點數目無效。{0}。</target>
+        <target state="translated">MSBUILD : error MSB1033: 節點數目無效。{0}。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1033: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -925,7 +926,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidNodeNumberValueIsNegative">
         <source>MSBUILD : error MSB1034: Node number is not valid. Value must be an integer greater than zero.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1034: 節點數目無效。值必須為大於零的整數。</target>
+        <target state="translated">MSBUILD : error MSB1034: 節點數目無效。值必須為大於零的整數。</target>
         <note>{StrBegin="MSBUILD : error MSB1034: "}
         UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
         This error is shown when a user specifies a CPU value that is zero or less. For example, -nodeMode:0 instead of -nodeMode:2.
@@ -934,7 +935,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidPropertyError">
         <source>MSBUILD : error MSB1006: Property is not valid.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1006: 屬性無效。</target>
+        <target state="translated">MSBUILD : error MSB1006: 屬性無效。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1006: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown if the user does any of the following:
@@ -952,7 +953,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidSwitchIndicator">
         <source>Switch: {0}</source>
-        <target state="needs-review-translation">參數: {0}</target>
+        <target state="translated">參數: {0}</target>
         <note>
       UE: This is attached to error messages caused by an invalid switch. This message indicates what the invalid arg was.
       For example, if an unknown switch is passed to MSBuild.exe, the error message will look like this:
@@ -963,7 +964,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidToolsVersionError">
         <source>MSBUILD : error MSB1040: ToolsVersion is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1040: ToolsVersion 無效。{0}</target>
+        <target state="translated">MSBUILD : error MSB1040: ToolsVersion 無效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1040: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -973,7 +974,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidVerbosityError">
         <source>MSBUILD : error MSB1018: Verbosity level is not valid.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1018: 詳細等級無效。</target>
+        <target state="translated">MSBUILD : error MSB1018: 詳細等級無效。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1018: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an unknown verbosity level e.g. "msbuild -verbosity:foo". The only valid verbosities
@@ -983,7 +984,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="LoggerFatalError">
         <source>MSBUILD : error MSB1028: The logger failed unexpectedly.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1028: 記錄器發生未預期的失敗。</target>
+        <target state="translated">MSBUILD : error MSB1028: 記錄器發生未預期的失敗。</target>
         <note>{StrBegin="MSBUILD : error MSB1028: "}
       UE: This error is shown when a logger specified with the -logger switch throws an exception while being
       initialized. This message is followed by the exception text including the stack trace.
@@ -1010,7 +1011,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1007: 指定記錄器。</target>
+        <target state="translated">MSBUILD : error MSB1007: 指定記錄器。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1007: "}UE: This happens if the user does something like "msbuild.exe -logger". The user must pass in an actual logger class
       following the switch, as in "msbuild.exe -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral".
@@ -1019,7 +1020,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingMaxCPUCountError">
         <source>MSBUILD : error MSB1031: Specify the maximum number of CPUs.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1031: 指定 CPU 的最大數目。</target>
+        <target state="translated">MSBUILD : error MSB1031: 指定 CPU 的最大數目。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1031: "}UE: This happens if the user does something like "msbuild.exe -m". The user must pass in an actual number like -m:4.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1036,7 +1037,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingPropertyError">
         <source>MSBUILD : error MSB1005: Specify a property and its value.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1005: 請指定屬性和屬性值。</target>
+        <target state="translated">MSBUILD : error MSB1005: 請指定屬性和屬性值。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1005: "}UE: This happens if the user does something like "msbuild.exe -property". The user must pass in an actual property
       name and value following the switch, as in "msbuild.exe -property:Configuration=Debug".
@@ -1054,7 +1055,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingTargetError">
         <source>MSBUILD : error MSB1004: Specify the name of the target.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1004: 請指定目標的名稱。</target>
+        <target state="translated">MSBUILD : error MSB1004: 請指定目標的名稱。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1004: "}UE: This happens if the user does something like "msbuild.exe -target". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -target:blah".
@@ -1063,7 +1064,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingToolsVersionError">
         <source>MSBUILD : error MSB1039: Specify the version of the toolset.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1039: 指定工具組的版本。</target>
+        <target state="translated">MSBUILD : error MSB1039: 指定工具組的版本。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1039: "}
       UE: This happens if the user does something like "msbuild.exe -toolsVersion". The user must pass in an actual toolsversion
@@ -1073,7 +1074,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingVerbosityError">
         <source>MSBUILD : error MSB1016: Specify the verbosity level.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1016: 請指定詳細等級。</target>
+        <target state="translated">MSBUILD : error MSB1016: 請指定詳細等級。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1016: "}UE: This happens if the user does something like "msbuild.exe -verbosity". The user must pass in a verbosity level
       after the switch e.g. "msbuild.exe -verbosity:detailed".
@@ -1082,7 +1083,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MultipleSchemasError">
         <source>MSBUILD : error MSB1024: Only one schema can be specified for validation of the project.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1024: 專案的驗證只能指定一個結構描述。</target>
+        <target state="translated">MSBUILD : error MSB1024: 專案的驗證只能指定一個結構描述。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1090,7 +1091,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="PickedUpSwitchesFromAutoResponse">
         <source>Some command line switches were read from the auto-response file "{0}". To disable this file, use the "-noAutoResponse" switch.</source>
-        <target state="needs-review-translation">有些命令列參數讀取自自動回應檔 "{0}"。若要停用此檔案，請使用 "/noautoresponse" 參數。</target>
+        <target state="translated">有些命令列參數讀取自自動回應檔 "{0}"。若要停用此檔案，請使用 "-noAutoResponse" 參數。</target>
         <note>
       UE: This message appears in high verbosity modes when we used some
       switches from the auto-response file msbuild.rsp: otherwise the user may be unaware
@@ -1105,7 +1106,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="PossiblyOmittedMaxCPUSwitch">
         <source>Building the projects in this solution one at a time. To enable parallel build, please add the "-m" switch.</source>
-        <target state="needs-review-translation">在此解決方案中一次建置一個專案。若要啟用平行建置，請新增 "/m" 參數。</target>
+        <target state="translated">在此解決方案中一次建置一個專案。若要啟用平行建置，請新增 "-m" 參數。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectSchemaErrorHalt">
@@ -1144,14 +1145,14 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="SchemaValidationError">
         <source>MSBUILD : MSB1044: Project is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : MSB1044: 專案無效。{0}</target>
+        <target state="translated">MSBUILD : MSB1044: 專案無效。{0}</target>
         <note>{StrBegin="MSBUILD : MSB1044: "}UE: This error is shown when the user asks his project to be validated against a schema (-val switch for
     MSBuild.exe), and the project has errors. "{0}" contains a message explaining the problem.
     LOCALIZATION: "{0}" is a message from the System.XML schema validator and is already localized.</note>
       </trans-unit>
       <trans-unit id="SchemaNotFoundError">
         <source>MSBUILD : error MSB1026: Schema file does not exist.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1026: 結構描述檔不存在。</target>
+        <target state="translated">MSBUILD : error MSB1026: 結構描述檔不存在。</target>
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is shown when the user specifies a schema file using the -validate:&lt;schema&gt; switch, and the file
     does not exist on disk. This message does not need in-line parameters because the exception takes care of displaying the
     invalid arg.
@@ -1166,7 +1167,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1002: 這個參數不使用任何參數。</target>
+        <target state="translated">MSBUILD : error MSB1002: 這個參數不使用任何參數。</target>
         <note>{StrBegin="MSBUILD : error MSB1002: "}UE: For example, if somebody types "msbuild.exe -noLogo:1", they would get this error because the -noLogo switch
     should not be followed by any parameters ... it stands alone.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
@@ -1189,7 +1190,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingIgnoreProjectExtensionsError">
         <source>MSBUILD : error MSB1035: Specify the project extensions to ignore.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1035: 指定要忽略的專案副檔名。</target>
+        <target state="translated">MSBUILD : error MSB1035: 指定要忽略的專案副檔名。</target>
         <note>{StrBegin="MSBUILD : error MSB1035: "}
       UE: This happens if the user does something like "msbuild.exe -ignoreProjectExtensions". The user must pass in one or more
       project extensions to ignore e.g. "msbuild.exe -ignoreProjectExtensions:.sln".
@@ -1198,12 +1199,12 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidExtensionToIgnore">
         <source>MSBUILD : error MSB1036: There is an invalid extension in the -ignoreProjectExtensions list. Extensions must start with a period ".", have one or more characters after the period and not contain any invalid path characters or wildcards.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1036: /ignoreprojectextensions 清單中有無效的副檔名。副檔名必須以句點 "." 開頭、句點後面有一個 (含) 以上的字元，而且不可包含任何無效路徑字元或萬用字元。</target>
+        <target state="translated">MSBUILD : error MSB1036: -ignoreProjectExtensions 清單中有無效的副檔名。副檔名必須以句點 "." 開頭、句點後面必須有一個 (含) 以上的字元，而且不可包含任何無效路徑字元或萬用字元。</target>
         <note>{StrBegin="MSBUILD : error MSB1036: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MissingConsoleLoggerParameterError">
         <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1037: 如果使用 /consoleLoggerParameters 參數，請指定一或多個主控台記錄器的參數</target>
+        <target state="translated">MSBUILD : error MSB1037: 如果使用 -consoleLoggerParameters 參數，請為主控台記錄器指定一或多個參數</target>
         <note>{StrBegin="MSBUILD : error MSB1037: "}
       UE: This happens if the user does something like "msbuild.exe -consoleLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -consoleLoggerParameters:ErrorSummary".
@@ -1212,7 +1213,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingFileLoggerParameterError">
         <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1038: 如果使用 /fileLoggerParameters 參數，請指定一或多個檔案記錄器的參數</target>
+        <target state="translated">MSBUILD : error MSB1038: 如果使用 -fileLoggerParameters 參數，請為檔案記錄器指定一或多個參數</target>
         <note>{StrBegin="MSBUILD : error MSB1038: "}
       UE: This happens if the user does something like "msbuild.exe -fileLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -fileLoggerParameters:logfile=c:\temp\logfile".
@@ -1221,7 +1222,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingNodeReuseParameterError">
         <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1041: 如果使用 /nodereuse 參數，請指定一或多個節點重複使用的參數</target>
+        <target state="translated">MSBUILD : error MSB1041: 如果使用 -nodeReuse 參數，請為節點重複使用指定一或多個參數</target>
         <note>{StrBegin="MSBUILD : error MSB1041: "}
       UE: This happens if the user does something like "msbuild.exe -nodeReuse:" without a true or false
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1256,7 +1257,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="LoggerNotFoundError">
         <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1020: 找不到記錄器。請檢查下列事項: 1.) 指定的記錄器名稱與記錄器類別的名稱相同。2.) 記錄器類別為 "public" 且實作 Microsoft.Build.Framework.ILogger 介面。3.) 記錄器組件的路徑為正確，或記錄器只能使用所提供的組件名稱載入。</target>
+        <target state="translated">MSBUILD : error MSB1020: 找不到記錄器。請檢查下列事項: 1.) 指定的記錄器名稱與記錄器類別的名稱相同。2.) 記錄器類別為 "public" 且實作 Microsoft.Build.Framework.ILogger 介面。3.) 記錄器組件的路徑為正確，或記錄器只能使用所提供的組件名稱載入。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
@@ -1313,16 +1314,16 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      continue to execute as if it was a warning but the overall
                      build will fail.
     </source>
-        <target state="needs-review-translation">  /warnaserror[:code[;code2]]
-                     要視為錯誤之警告碼的清單。如有多個
-                     警告碼，請使用分號或逗點加以分隔。
-                     若要將所有警告視為錯誤，請使用參數，但不要指定值。
-                     (簡短形式: /err[:c;[c2]])
+        <target state="translated">  -warnAsError[:code[;code2]]
+                     要視為錯誤的警告碼清單。如有多個警告碼，
+                     請使用分號或逗點加以分隔。若要將所有警告
+                     視為錯誤，請使用參數，但不要指定值。
+                     (簡短形式: -err[:c;[c2]])
 
                      範例:
-                       /warnaserror:MSB4130
+                       -warnAsError:MSB4130
 
-                     當將警告視為錯誤時，目標會將其
+                     當警告視為錯誤時，目標會將其
                      視為警告繼續執行，但整個建置
                      作業會失敗。
     </target>
@@ -1341,14 +1342,14 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -warnAsMessage:MSB3026
     </source>
-        <target state="needs-review-translation">  /warnasmessage[:code[;code2]]
-                     要視為低重要性訊息之警告碼的清單。
+        <target state="translated">  -warnAsMessage[:code[;code2]]
+                     要視為低重要性訊息的警告碼清單。
                      如有多個警告碼，請使用分號或逗點
                      加以分隔。
-                     (Short form: /nowarn[:c;[c2]])
+                     (Short form:-noWarn[:c;[c2]])
 
                      範例:
-                       /warnasmessage:MSB3026
+                       -warnAsMessage:MSB3026
     </target>
         <note>
       LOCALIZATION: "-warnAsMessage" and "-noWarn" should not be localized.
@@ -1362,7 +1363,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="needs-review-translation">MSBUILD : 錯誤 MSB1051: 使用 /warnasmessage 參數時，請指定一或多個要視為低重要性訊息的警告碼。</target>
+        <target state="translated">MSBUILD : error MSB1051: 使用 -warnAsMessage 參數時，請指定一或多個要視為低重要性訊息的警告碼。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1413,7 +1414,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                     將所有建置事件序列化成壓縮的二進位檔案。
                      根據預設，此檔案存放在目前的目錄下，
                      並會命名為 "msbuild.binlog"。此二進位記錄檔是
@@ -1421,7 +1422,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      以及供其他分析工具使用。二進位記錄檔
                      的大小通常會比大部分的詳細文字
                      診斷層級記錄小 10-20 倍，但包含了更多資訊。
-                     (簡短形式: /bl)
+                     (簡短形式: -bl)
 
                      根據預設，二進位記錄器會收集專案檔的
                      原始程式文字，包括在建置期間遇到的
@@ -1449,12 +1450,12 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      範例:
-                       /bl
-                       /bl:output.binlog
-                       /bl:output.binlog;ProjectImports=None
-                       /bl:output.binlog;ProjectImports=ZipFile
-                       /bl:..\..\custom.binlog
-                       /binaryLogger
+                       -bl
+                       -bl:output.binlog
+                       -bl:output.binlog;ProjectImports=None
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1476,14 +1477,16 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      a value that comes from a response file.
                      (Short form: -r)
     </source>
-        <target state="needs-review-translation">  /restore[:True|False]
+        <target state="translated">  -restore[:True|False]
                      在建置其他目標前，會先執行名為
-                     Restore 的目標。當您專案樹狀結構的
-                     套件必須先還原才可加以建置時，這會很實用。
-                     指定 /restore 的方式與指定
-                     /restore:True 的方式相同。  使用該參數來
-                     覆寫來自回應檔的值。
-                     (簡短形式: /r)
+                     Restore 的目標，並確認這些目標的
+                     組建使用還原的最新組建邏輯。
+                     當您的專案樹狀結構要求套件必須
+                     才可加以建置時，這會很實用。
+                     指定 -restore 的方式與指定
+                     -restore:True 的方式相同。該參數
+                     可用來覆寫來自回應檔的值。
+                     (簡短形式: -r)
     </target>
         <note>
       LOCALIZATION: "-restore" and "-r" should not be localized.
@@ -1515,9 +1518,9 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="needs-review-translation">  /profileevaluation:&lt;檔案&gt;
+        <target state="translated">  -profileEvaluation:&lt;檔案&gt;
                      分析 MSBuild 評估並將結果寫入
-                     指定的檔案。若所指定檔案的副檔名為
+                     指定的檔案。若所指定檔案的副檔名為 
                      '.md'，結果會以 Markdown 格式
                      產生。否則會產生定位字元分隔檔案。
     </target>
@@ -1535,16 +1538,16 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
-        <target state="needs-review-translation">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+        <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
                      請僅在還原期間設定或覆寫這些專案層級
-                     的屬性，並請勿使用以 /property 引數
+                     的屬性，並請勿使用以 -property 引數
                      指定的屬性。&lt;n&gt; 為屬性名稱，
-                     &lt;v&gt; 則為屬性值。請使用分號或點 (.)
+                     &lt;v&gt; 則為屬性值。請使用分號或逗點
                      分隔多個屬性，
-                     或個別指定各屬性。
-                     (簡短形式: /rp)
+                     或分別指定各個屬性。
+                     (簡短形式: -rp)
                      範例:
-                       /restoreProperty:IsRestore=true;MyProperty=value
+                       -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.
