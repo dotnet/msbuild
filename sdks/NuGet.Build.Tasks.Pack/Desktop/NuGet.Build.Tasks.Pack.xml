@@ -361,7 +361,7 @@
             Indicates if this token will pro-actively raise callbacks. Callbacks are still guaranteed to fire, eventually.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands329239.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands330616.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -373,41 +373,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands329239.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands330616.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands329239.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands330616.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Commands329239.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Commands330616.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands329239.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Commands330616.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands329239.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Commands330616.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands329239.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands330616.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands329239.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands330616.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -451,6 +451,13 @@
       <param name="localResourceName">
       </param>
       <throws>Thorws <code>ArgumentException</code> if the specified resource name does not match a known cache type.</throws>
+      <returns>
+        <code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
+    </member>
+    <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetPluginsCache(NuGet.Commands.LocalsArgs)">
+      <summary>
+            Clears the NuGet plugins cache.
+            </summary>
       <returns>
         <code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
     </member>
@@ -2450,14 +2457,19 @@
               Looks up a localized string similar to Clearing NuGet cache: {0}.
             </summary>
     </member>
-    <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetGlobalPackagesCache">
+    <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetGlobalPackagesFolder">
       <summary>
-              Looks up a localized string similar to Clearing NuGet global packages cache: {0}.
+              Looks up a localized string similar to Clearing NuGet global packages folder: {0}.
             </summary>
     </member>
     <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetHttpCache">
       <summary>
               Looks up a localized string similar to Clearing NuGet HTTP cache: {0}.
+            </summary>
+    </member>
+    <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetPluginsCache">
+      <summary>
+              Looks up a localized string similar to Clearing NuGet plugins cache: {0}.
             </summary>
     </member>
     <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetTempCache">
@@ -2472,7 +2484,7 @@
     </member>
     <member name="P:NuGet.Commands.Strings.LocalsCommand_Help">
       <summary>
-               Looks up a localized string similar to usage: NuGet locals &lt;all | http-cache | global-packages | temp&gt; [--clear | -c | --list | -l]
+               Looks up a localized string similar to usage: NuGet locals &lt;all | http-cache | global-packages | temp | plugins-cache&gt; [--clear | -c | --list | -l]
             For more information, visit http://docs.nuget.org/docs/reference/command-line-reference.
              </summary>
     </member>
@@ -2823,7 +2835,7 @@
     </member>
     <member name="P:NuGet.Commands.Strings.Log_VersionConflict">
       <summary>
-              Looks up a localized string similar to Version conflict detected for {0}. Reference the package directly from the project to resolve this issue..
+              Looks up a localized string similar to Version conflict detected for {0}. Install/reference {1} directly to project {2} to resolve this issue..
             </summary>
     </member>
     <member name="P:NuGet.Commands.Strings.Log_WritingCacheFile">
@@ -3169,6 +3181,14 @@
       <param name="logMessage">IAssetsLogMessage to be converted.</param>
       <returns>RestoreLogMessage equivalent to the IAssetsLogMessage.</returns>
     </member>
+    <member name="M:NuGet.Commands.Extensions.AsRestoreLogMessage(NuGet.Common.LogMessage)">
+      <summary>
+            Converts an LogMessage into a RestoreLogMessage.
+            This is needed when an LogMessage needs to be logged and loggers do not have visibility to LogMessage.
+            </summary>
+      <param name="logMessage">LogMessage to be converted.</param>
+      <returns>RestoreLogMessage equivalent to the LogMessage.</returns>
+    </member>
     <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
       <summary>
             Determine the target framework of an msbuild project.
@@ -3243,7 +3263,7 @@
       <param name="token">Cancellation token.</param>
       <returns>SecureString containing the user input password. The SecureString should be disposed after use.</returns>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common473484.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common474232.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -3255,41 +3275,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common473484.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common474232.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common473484.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common474232.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Common473484.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Common474232.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common473484.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Common474232.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common473484.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Common474232.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common473484.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common474232.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common473484.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common474232.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -3728,6 +3748,11 @@
             Package MinClientVersion did not match.
             </summary>
     </member>
+    <member name="F:NuGet.Common.NuGetLogCode.NU1402">
+      <summary>
+            Package contains unsafe zip entry.
+            </summary>
+    </member>
     <member name="F:NuGet.Common.NuGetLogCode.NU1410">
       <summary>
             Package Signature is invalid
@@ -3982,6 +4007,16 @@
     <member name="F:NuGet.Common.NuGetLogCode.NU3036">
       <summary>
             Timestamp Generalized time is outside certificate's valdity period
+            </summary>
+    </member>
+    <member name="F:NuGet.Common.NuGetLogCode.NU3037">
+      <summary>
+            The signature has expired.
+            </summary>
+    </member>
+    <member name="F:NuGet.Common.NuGetLogCode.NU3038">
+      <summary>
+            Verification settings require a repository countersignature, but the package does not have a repository countersignature.
             </summary>
     </member>
     <member name="F:NuGet.Common.NuGetLogCode.NU5000">
@@ -4249,6 +4284,11 @@
             Migrator_XdtTransformInPackage
             </summary>
     </member>
+    <member name="F:NuGet.Common.NuGetLogCode.NU5123">
+      <summary>
+            Warning_FilePathTooLong
+            </summary>
+    </member>
     <member name="F:NuGet.Common.NuGetLogCode.NU5500">
       <summary>
             Undefined package warning
@@ -4439,6 +4479,11 @@
             Convert the provided string to MSBuild style.
             </summary>
     </member>
+    <member name="M:NuGet.Common.MSBuildStringUtility.GetDistinctNuGetLogCodesOrDefault(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{NuGet.Common.NuGetLogCode}})">
+      <summary>
+            Return empty list of NuGetLogCode if all lists of NuGetLogCode are not the same. 
+            </summary>
+    </member>
     <member name="M:NuGet.Common.NetworkProtocolUtility.ConfigureSupportedSslProtocols">
       <summary>
             This only has effect on .NET Framework (desktop). On .NET Core,
@@ -4534,6 +4579,11 @@
             Since <see cref="T:System.Environment.SpecialFolder" /> is not available on .NET Core, we have to
             make our own and re-implement the functionality. On .NET Framework, we can use the
             built-in functionality.
+            </summary>
+    </member>
+    <member name="M:NuGet.Common.NuGetEnvironment.GetValueOrThrowMissingEnvVarsDotnet(System.Func{System.String},System.String,System.String)">
+      <summary>
+            Throw a helpful message if the required env vars are not set.
             </summary>
     </member>
     <member name="M:NuGet.Common.NuGetEnvironment.GetValueOrThrowMissingEnvVar(System.Func{System.String},System.String)">
@@ -4710,6 +4760,18 @@
       <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="tokenReplacement" />
             is <c>null</c>.</exception>
     </member>
+    <member name="F:NuGet.Common.RevocationMode.Online">
+      <summary>
+            If needed go online to check for revocation.
+            This translates to X509RevocationMode.Online
+            </summary>
+    </member>
+    <member name="F:NuGet.Common.RevocationMode.Offline">
+      <summary>
+            Only use the machine cache to check for revocation.
+            This translates to X509RevocationMode.Offline
+            </summary>
+    </member>
     <member name="T:NuGet.Common.Strings">
       <summary>
               A strongly-typed resource class, for looking up localized strings, etc.
@@ -4749,6 +4811,11 @@
     <member name="P:NuGet.Common.Strings.MissingRequiredEnvVar">
       <summary>
               Looks up a localized string similar to Required environment variable '{0}' is not set. Try setting '{0}' and running the operation again..
+            </summary>
+    </member>
+    <member name="P:NuGet.Common.Strings.MissingRequiredEnvVarsDotnet">
+      <summary>
+              Looks up a localized string similar to Required environment variable '{0}' is not set. Try setting '{1}' or '{0}' and running the operation.
             </summary>
     </member>
     <member name="P:NuGet.Common.Strings.NoPackageFoldersFound">
@@ -4898,7 +4965,7 @@
       <param name="path">Source path.</param>
       <returns>The absolute source path or the original source. Noops for non-file paths.</returns>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration509541.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration510544.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -4910,41 +4977,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration509541.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration510544.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration509541.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration510544.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Configuration509541.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Configuration510544.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration509541.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Configuration510544.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration509541.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Configuration510544.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration509541.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration510544.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration509541.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration510544.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -5780,6 +5847,11 @@
             Get the HTTP cache folder from either an environment variable or a default.
             </summary>
     </member>
+    <member name="M:NuGet.Configuration.SettingsUtility.GetPluginsCacheFolder">
+      <summary>
+             Get plugins cache folder
+            </summary>
+    </member>
     <member name="M:NuGet.Configuration.SettingsUtility.GetDefaultPushSource(NuGet.Configuration.ISettings)">
       <summary>
             The DefaultPushSource can be:
@@ -5794,7 +5866,7 @@
             Throw if a path is relative.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core558195.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -5806,41 +5878,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core558195.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core558195.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.DependencyResolver.Core553911.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.DependencyResolver.Core558195.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core558195.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core558195.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core558195.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core558195.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -6134,7 +6206,7 @@
               Looks up a localized string similar to The feed '{0}' lists package '{1}' but multiple attempts to download the nupkg have failed. The feed is either invalid or required packages were removed while the current operation was in progress. Verify the package exists on the feed and try again..
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks575382.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks579666.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -6146,41 +6218,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks575382.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks579666.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks575382.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks579666.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Frameworks575382.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Frameworks579666.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks575382.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Frameworks579666.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks575382.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Frameworks579666.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks575382.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks579666.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks575382.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks579666.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -6989,7 +7061,7 @@
               Looks up a localized string similar to Invalid portable frameworks for '{0}'. A portable framework must have at least one framework in the profile..
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel615876.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -7001,41 +7073,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel615876.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel615876.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.LibraryModel611592.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.LibraryModel615876.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel615876.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel615876.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel615876.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel615876.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -7173,7 +7245,7 @@
             Indicates that the library could not be resolved
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core628490.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -7185,41 +7257,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core628490.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core628490.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Packaging.Core624206.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Packaging.Core628490.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core628490.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core628490.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core628490.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core628490.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -7908,7 +7980,7 @@
               Looks up a localized string similar to String argument '{0}' cannot be null or empty.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging640560.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging644844.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -7920,41 +7992,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging640560.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging644844.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging640560.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging644844.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Packaging640560.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Packaging644844.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging640560.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Packaging644844.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging640560.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Packaging644844.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging640560.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging644844.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging640560.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging644844.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -8726,6 +8798,12 @@
       <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
       <param name="compatibilityProvider">Framework compatibility provider.</param>
     </member>
+    <member name="M:NuGet.Packaging.PackageArchiveReader.ValidatePackageEntriesAsync(System.Threading.CancellationToken)">
+      <summary>
+            Validate all files in package are not traversed outside of the expected extraction path.
+            Eg: file entry like ../../foo.dll can get outside of the expected extraction path.
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.PackageArchiveReader.SigningSpecifications">
       <summary>
             Signature specifications.
@@ -9055,6 +9133,12 @@
     <member name="M:NuGet.Packaging.PackageReaderBase.IsReferenceAssembly(System.String)">
       <summary>
             True only for assemblies that should be added as references to msbuild projects
+            </summary>
+    </member>
+    <member name="M:NuGet.Packaging.PackageReaderBase.ValidatePackageEntry(System.String,System.String,NuGet.Packaging.Core.PackageIdentity)">
+      <summary>
+            Validate file entry in package is not traversed outside of the expected extraction path.
+            Eg: file entry like ../../foo.dll can get outside of the expected extraction path.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.PackageReaderBase.NuspecReader">
@@ -9533,9 +9617,19 @@
               Looks up a localized string similar to The package signature is invalid or cannot be verified on this platform..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.ErrorUnableCheckPackageEntries">
+      <summary>
+              Looks up a localized string similar to An unexpected error occurred while checking package entries..
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.ErrorUnableToDeleteFile">
       <summary>
               Looks up a localized string similar to Unable to delete temporary file '{0}'. Error: '{1}'..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.ErrorUnsafePackageEntry">
+      <summary>
+              Looks up a localized string similar to The package '{0}' contains an entry which is unsafe for extraction..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.ErrorZip64NotSupported">
@@ -9576,6 +9670,11 @@
     <member name="P:NuGet.Packaging.Strings.InvalidArgument">
       <summary>
               Looks up a localized string similar to The argument is invalid..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.InvalidArgumentCombination">
+      <summary>
+              Looks up a localized string similar to Invalid combination of arguments {0} and {1}..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.InvalidAsn1">
@@ -9693,9 +9792,9 @@
               Looks up a localized string similar to The package does not contain a valid package signature file..
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Strings.NoRepositorySignature">
+    <member name="P:NuGet.Packaging.Strings.NoRepositoryCountersignature">
       <summary>
-              Looks up a localized string similar to The package does not have a repository signature (primary or countersignature)..
+              Looks up a localized string similar to Verification settings require a repository countersignature, but the package does not have a repository countersignature..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.NuGetPackageOwners">
@@ -9741,6 +9840,11 @@
     <member name="P:NuGet.Packaging.Strings.PackageMinVersionNotSatisfied">
       <summary>
               Looks up a localized string similar to The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'. To upgrade NuGet, please go to http://docs.nuget.org/consume/installing-nuget.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.PackageSignatureVerificationLog">
+      <summary>
+              Looks up a localized string similar to PackageSignatureVerificationLog: PackageIdentity: {0} Source: {1} PackageSignatureValidity: {2}.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.PackagesNodeNotExist">
@@ -10033,6 +10137,11 @@
               Looks up a localized string similar to An unexpected error occurred while verifying a package signature..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.UnrecognizedEnumValue">
+      <summary>
+              Looks up a localized string similar to The enum value '{0}' is unrecognized..
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.UnrelatedSignatures">
       <summary>
               Looks up a localized string similar to The primary signature and repository countersignature are unrelated..
@@ -10061,6 +10170,16 @@
     <member name="P:NuGet.Packaging.Strings.Verify_ErrorNoCertificate">
       <summary>
               Looks up a localized string similar to The {0} does not have a signing certificate..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyCertTrustOfflineWhileRevocationModeOffline">
+      <summary>
+              Looks up a localized string similar to The revocation function was unable to check revocation because the certificate is not available in the cached certificate revocation list and NUGET_CERT_REVOCATION_MODE environment variable has been set to offline. For more information, visit https://aka.ms/certificateRevocationMode..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyCertTrustOfflineWhileRevocationModeOnline">
+      <summary>
+              Looks up a localized string similar to The revocation function was unable to check revocation because the revocation server could not be reached. For more information, visit https://aka.ms/certificateRevocationMode..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.VerifyChainBuildingIssue">
@@ -10885,6 +11004,18 @@
             Individual trust results.
             </summary>
     </member>
+    <member name="T:NuGet.Packaging.Signing.SignatureLog">
+      <summary>
+            Log message for signature verification.
+            </summary>
+    </member>
+    <member name="M:NuGet.Packaging.Signing.SignatureLog.AsRestoreLogMessage">
+      <summary>
+            Converts an SignatureLog into a Restore
+            This is needed when an SignatureLog needs to be logged and loggers do not have visibility to SignatureLog.
+            </summary>
+      <returns>RestoreLogMessage equivalent to the SignatureLog.</returns>
+    </member>
     <member name="T:NuGet.Packaging.Signing.AlgorithmIdentifier">
       <remarks>This is public only to facilitate testing.</remarks>
     </member>
@@ -10975,7 +11106,7 @@
       <remarks>If <see cref="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoTimestamp" /> is set to true this method return true with a <see cref="!:validTimestamp" /> set to null.</remarks>
       <returns>true if a valid timestamp was found</returns>
     </member>
-    <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignatureVerifySettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
+    <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignatureVerifySettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection)">
       <summary>
             Verify if the signature object meets the specification trust and validity requirements.
             </summary>
@@ -11028,6 +11159,11 @@
             A countersignature on the primary signature.
             </summary>
     </member>
+    <member name="F:NuGet.Packaging.Signing.SignaturePlacement.Any">
+      <summary>
+            A primary signature or a countersignature.
+            </summary>
+    </member>
     <member name="T:NuGet.Packaging.Signing.SignatureType">
       <summary>
             Indicates author or repository signing.
@@ -11050,16 +11186,15 @@
     </member>
     <member name="T:NuGet.Packaging.Signing.SignatureVerifySettings">
       <summary>
-            Settings to customize Signature.Verify behavior. 
+            Settings to customize Signature.Verify behavior.
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.TreatIssuesAsErrors">
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowIllegal">
       <summary>
-            Treat any issue as fatal.
+            Allow packages with signatures that do not conform to the specification.
             </summary>
-      <remarks>If set true, any issue will be an error instead of a warning</remarks>
     </member>
-    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowUntrustedRoot">
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowUntrusted">
       <summary>
             Specifies that a signing certificate's chain that chains to an untrusted root is allowed
             </summary>
@@ -11070,10 +11205,14 @@
             If set to true, offline revocation is allowed.
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.LogOnSignatureExpired">
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.ReportUnknownRevocation">
       <summary>
-            Specifies that an error should be logged when the signature is expired.
-            If set to false, this won't allow expired signatures, only skip the logging of the failure.
+            Indicates if unknown revocation status should be reported.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.RevocationMode">
+      <summary>
+            Gets how the revocation verification should be performed.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.Default">
@@ -11641,7 +11780,7 @@
             finalizer impact.
             </remarks>
     </member>
-    <member name="M:NuGet.Packaging.Signing.AllowListVerificationProvider.VerifyAllowList(NuGet.Packaging.Signing.AllowListVerificationProvider.CertificateListVerificationRequest)">
+    <member name="M:NuGet.Packaging.Signing.AllowListVerificationProvider.VerifyAllowList(NuGet.Packaging.Signing.AllowListVerificationProvider.CertificateListVerificationRequest,System.Boolean)">
       <summary>
             Verify an allow list with a given request
             </summary>
@@ -11700,10 +11839,26 @@
             List of issues found in the verification process
             </summary>
     </member>
-    <member name="T:NuGet.Packaging.Signing.RepositorySignatureVerifier">
-      <remarks>
-            This is used by NuGetGallery to determine repository signature validity.
-            </remarks>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationBehavior.Never">
+      <summary>
+            Do not verify a signature.
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationBehavior.IfExists">
+      <summary>
+            Verify a signature if and only if it exists.
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationBehavior.IfExistsAndIsNecessary">
+      <summary>
+            Verify a signature if and only if it exists and is necessary
+            (e.g.:  trust evaluation of another signature depends on it).
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationBehavior.Always">
+      <summary>
+            Verify a signature always.  If the signature is not present, it is an error.
+            </summary>
     </member>
     <member name="T:NuGet.Packaging.Signing.SignatureVerificationStatus">
       <summary>
@@ -11725,14 +11880,9 @@
             </summary>
       <remarks>This could happen because the package integrity check fails or the certificate is revoked.</remarks>
     </member>
-    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Illegal">
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Disallowed">
       <summary>
-            Signature does not conform with NuGet signing specification.
-            </summary>
-    </member>
-    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Untrusted">
-      <summary>
-            Signature certificate does not match known allowlists.
+            The signature is disallowed based on verification settings.
             </summary>
     </member>
     <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Valid">
@@ -11832,6 +11982,16 @@
             The Timestamp's generalized time was outside certificate's validity period
             </summary>
     </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.NoValidTimestamp">
+      <summary>
+            A valid timestamp was not found.
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.MultipleTimestamps">
+      <summary>
+            Multiple timestamps were found.
+            </summary>
+    </member>
     <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.Suspect">
       <summary>
             Flags which indicate that the signed package is suspect.
@@ -11871,7 +12031,7 @@
       <summary>
             Expiration Date and Time for signature
             </summary>
-      <remarks>This field will only be set if the flag CertificateExpired is present <see cref="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Flags" /></remarks>
+      <remarks>This field will only be set if the certificate is expired.</remarks>
     </member>
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerificationResult.Signature">
       <summary>
@@ -11890,7 +12050,7 @@
     </member>
     <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetAcceptModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
       <summary>
-            The aceept mode policy.
+            The accept mode policy.
             </summary>
     </member>
     <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetRequireModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
@@ -11933,14 +12093,14 @@
             Allow no timestamp.
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AlwaysVerifyCountersignature">
-      <summary>
-            Always verify the countersignature if present
-            </summary>
-    </member>
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUnknownRevocation">
       <summary>
             Treat unknown revocation status as a warning instead of an error during verification.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.ReportUnknownRevocation">
+      <summary>
+            Report unknown revocation status.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoRepositoryCertificateList">
@@ -11951,6 +12111,26 @@
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoClientCertificateList">
       <summary>
             Allow an empty or null ClientCertificateList.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.VerificationTarget">
+      <summary>
+            Gets the verification target(s).
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.SignaturePlacement">
+      <summary>
+            Gets the placement of verification target(s).
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.RepositoryCountersignatureVerificationBehavior">
+      <summary>
+            Gets the repository countersignature verification behavior.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.RevocationMode">
+      <summary>
+            Gets how the revocation verification should be performed.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.RepositoryCertificateList">
@@ -11981,14 +12161,24 @@
             It only refers to author or repository type of signature.
             If a specific placement is needed use the <see cref="T:NuGet.Packaging.Signing.SignaturePlacement" /> enum.</remarks>
     </member>
+    <member name="F:NuGet.Packaging.Signing.VerificationTarget.Unknown">
+      <summary>
+            Target unknown primary signatures.
+            </summary>
+    </member>
     <member name="F:NuGet.Packaging.Signing.VerificationTarget.Author">
       <summary>
-            Target Author signatures
+            Target author signatures
             </summary>
     </member>
     <member name="F:NuGet.Packaging.Signing.VerificationTarget.Repository">
       <summary>
-            Target Repository signatures
+            Target repository signatures
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.VerificationTarget.All">
+      <summary>
+            Target all available signatures.
             </summary>
     </member>
     <member name="T:NuGet.Packaging.Signing.VerifySignaturesResult">
@@ -11999,6 +12189,11 @@
     <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Valid">
       <summary>
             True if signature is valid.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Signed">
+      <summary>
+            True if the package is signed.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Results">
@@ -12309,6 +12504,11 @@
     <member name="P:NuGet.Packaging.Rules.AnalysisResources.DefaultSpecValueWarning">
       <summary>
               Looks up a localized string similar to The value "{0}" for {1} is a sample value and should be removed. Replace it with an appropriate value or remove it and rebuild your package..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Rules.AnalysisResources.FilePathTooLongWarning">
+      <summary>
+              Looks up a localized string similar to The file '{0}' path, name, or both are too long. Your package might not work without long file path support. Please shorten the file path or file name..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Rules.AnalysisResources.InvalidFrameworkWarning">
@@ -12678,7 +12878,7 @@
             Pattern used to identify Tools assets for global tools
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel835397.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -12690,41 +12890,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel835397.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel835397.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.ProjectModel827628.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.ProjectModel835397.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel835397.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel835397.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel835397.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel835397.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -13463,6 +13663,11 @@
             Create warning properties from the msbuild property strings.
             </summary>
     </member>
+    <member name="M:NuGet.ProjectModel.WarningProperties.GetWarningProperties(System.String,System.Collections.Generic.IEnumerable{NuGet.Common.NuGetLogCode},System.Collections.Generic.IEnumerable{NuGet.Common.NuGetLogCode})">
+      <summary>
+            Create warning properties from NuGetLogCode collection.
+            </summary>
+    </member>
     <member name="P:NuGet.ProjectModel.WarningProperties.WarningsAsErrors">
       <summary>
             List of Warning Codes that should be treated as Errors.
@@ -13478,7 +13683,7 @@
             Indicates if all warnings should be ignored.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol884765.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol892619.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -13490,41 +13695,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol884765.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol892619.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol884765.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol892619.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Protocol884765.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Protocol892619.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol884765.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Protocol892619.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol884765.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Protocol892619.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol884765.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol892619.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol884765.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol892619.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -15808,6 +16013,11 @@
               Looks up a localized string similar to Repository content URL for repository signatures must be HTTPS..
             </summary>
     </member>
+    <member name="P:NuGet.Protocol.Strings.RepositorySignaturesResourceMustBeHttps">
+      <summary>
+              Looks up a localized string similar to Repository Signatures resouce must be served over HTTPS. Source: {0}.
+            </summary>
+    </member>
     <member name="P:NuGet.Protocol.Strings.RequiredFeatureUnsupportedException_DefaultMessageWithFeature">
       <summary>
               Looks up a localized string similar to The '{0}' installation feature was required by a package but is not supported on the current host..
@@ -15842,6 +16052,14 @@
       <summary>
               Looks up a localized string similar to Found symbols package '{0}', but no API key was specified for the symbol server. To save an API Key, run 'NuGet.exe setApiKey [your API key from http://www.NuGet.org]'..
             </summary>
+    </member>
+    <member name="M:NuGet.Protocol.CachingUtility.ComputeHash(System.String)">
+      <summary>
+            Given a string, it hashes said string and appends identifiable characters to make the root of the cache more human readable
+            </summary>
+      <param name="value">
+      </param>
+      <returns>hash</returns>
     </member>
     <member name="M:NuGet.Protocol.FeedTypeUtility.GetFeedType(NuGet.Configuration.PackageSource)">
       <summary>
@@ -16744,6 +16962,36 @@
       <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
       <remarks>This is intended to be called by NuGet client tools.</remarks>
     </member>
+    <member name="M:NuGet.Protocol.Plugins.IPluginManager.CreatePluginsAsync(NuGet.Protocol.Core.Types.SourceRepository,System.Threading.CancellationToken)">
+      <summary>
+            Create plugins appropriate for the given source
+            </summary>
+      <param name="source">
+      </param>
+      <param name="cancellationToken">
+      </param>
+      <exception cref="T:System.ArgumentNullException">Throw if <paramref name="source" /> is null </exception>
+      <returns>PluginCreationResults</returns>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.IPluginManager.FindAvailablePluginsAsync(System.Threading.CancellationToken)">
+      <summary>
+            Find all available plugins on the machine
+            </summary>
+      <param name="cancellationToken">
+      </param>
+      <returns>PluginDiscoveryResults</returns>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.IPluginManager.TryGetSourceAgnosticPluginAsync(NuGet.Protocol.Plugins.PluginDiscoveryResult,NuGet.Protocol.Plugins.OperationClaim,System.Threading.CancellationToken)">
+      <summary>
+            Creates a plugin from the given pluginDiscoveryResult.
+            This plugin's operations will be source agnostic ones
+            </summary>
+      <param name="pluginDiscoveryResult">
+      </param>
+      <param name="cancellationToken">
+      </param>
+      <returns>A PluginCreationResult</returns>
+    </member>
     <member name="T:NuGet.Protocol.Plugins.IPluginMulticlientUtilities">
       <summary>
             Plugin multiclient utilities.
@@ -17241,6 +17489,11 @@
             Set log level
             </summary>
     </member>
+    <member name="F:NuGet.Protocol.Plugins.MessageMethod.GetAuthenticationCredentials">
+      <summary>
+            Get authentication credentials, for authentication operation
+            </summary>
+    </member>
     <member name="T:NuGet.Protocol.Plugins.MessageResponseCode">
       <summary>
             Message response codes.
@@ -17416,6 +17669,98 @@
             Gets the fault message.
             </summary>
     </member>
+    <member name="T:NuGet.Protocol.Plugins.GetAuthenticationCredentialsRequest">
+      <summary>
+            A get authentication credentials request
+            </summary>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.GetAuthenticationCredentialsRequest.#ctor(System.Uri,System.Boolean,System.Boolean,System.Boolean)">
+      <summary>
+            Create a GetAuthenticationCredentialsRequest
+            </summary>
+      <param name="uri">
+      </param>
+      <param name="isRetry">
+      </param>
+      <param name="isNonInteractive">
+      </param>
+      <exception cref="T:System.ArgumentNullException"> if <paramref name="uri" /> is null</exception>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsRequest.Uri">
+      <summary>
+            Uri
+            </summary>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsRequest.IsRetry">
+      <summary>
+            isRetry
+            </summary>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsRequest.IsNonInteractive">
+      <summary>
+            IsNonInteractive - tells the plugin whether it can block the operation to ask for user input. Be it a device flow request or a pop-up. 
+            </summary>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsRequest.CanShowDialog">
+      <summary>
+            CanShowDialog - tells the plugin whether it can show a dialog if the plugin is run in interactive mode. This being false normally means that the auth method should be device flow.
+            </summary>
+    </member>
+    <member name="T:NuGet.Protocol.Plugins.GetAuthenticationCredentialsResponse">
+      <summary>
+            A get authentication credentials response
+            </summary>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.GetAuthenticationCredentialsResponse.#ctor(System.String,System.String,System.String,System.Collections.Generic.IList{System.String},NuGet.Protocol.Plugins.MessageResponseCode)">
+      <summary>
+            Create a response object
+            </summary>
+      <param name="username">
+      </param>
+      <param name="password">
+      </param>
+      <param name="message">
+      </param>
+      <param name="authenticationTypes">
+      </param>
+      <param name="responseCode">
+      </param>
+      <exception cref="T:System.ArgumentException">If MessageResponseCode is not defined on this runtime</exception>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.GetAuthenticationCredentialsResponse.IsValid">
+      <summary>
+            Gets a value indicating whether the provider returnd a valid response.
+            </summary>
+      <remarks>
+            Either Username or Password (or both) must be set, and AuthTypes must either be null or contain at least
+            one element
+            </remarks>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsResponse.Username">
+      <summary>
+            Username
+            </summary>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsResponse.Password">
+      <summary>
+            password token
+            </summary>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsResponse.Message">
+      <summary>
+            message - optional, can be used as a way to communicate to NuGet why the authentication failed.
+            </summary>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsResponse.AuthenticationTypes">
+      <summary>
+            Gets or sets the list of authentication types this credential is applicable to. Useful values include
+            <c>basic</c>, <c>digest</c>, <c>negotiate</c>, and <c>ntlm</c></summary>
+    </member>
+    <member name="P:NuGet.Protocol.Plugins.GetAuthenticationCredentialsResponse.ResponseCode">
+      <summary>
+            ResponseCode - status of the credentials
+            </summary>
+    </member>
     <member name="T:NuGet.Protocol.Plugins.GetCredentialsRequest">
       <summary>
             A request to get credentials.
@@ -17530,6 +17875,7 @@
     <member name="T:NuGet.Protocol.Plugins.GetOperationClaimsRequest">
       <summary>
             A query to a plugin about which operations it supports for a specific package source.
+            In version 1.0.0, the fields are required. That's not the case for version 2.0.0
             </summary>
     </member>
     <member name="M:NuGet.Protocol.Plugins.GetOperationClaimsRequest.#ctor(System.String,Newtonsoft.Json.Linq.JObject)">
@@ -17538,9 +17884,7 @@
             </summary>
       <param name="packageSourceRepository">The package source location.</param>
       <param name="serviceIndex">The service index (index.json).</param>
-      <exception cref="T:System.ArgumentException">Thrown if <paramref name="packageSourceRepository" /> is either
-            <c>null</c> or an empty string.</exception>
-      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="serviceIndex" /> is <c>null</c>.</exception>
+      <remarks>Both packageSourceRepository and service index can be null. If they are, the operation claims request is considered as source agnostic</remarks>
     </member>
     <member name="P:NuGet.Protocol.Plugins.GetOperationClaimsRequest.PackageSourceRepository">
       <summary>
@@ -18262,6 +18606,11 @@
             The download package operation claim.
             </summary>
     </member>
+    <member name="F:NuGet.Protocol.Plugins.OperationClaim.Authentication">
+      <summary>
+            The authentication operation claim
+            </summary>
+    </member>
     <member name="T:NuGet.Protocol.Plugins.OutboundRequestContext">
       <summary>
             Context for an outbound request.
@@ -18441,6 +18790,32 @@
             Occurs when a plugin has been idle for the configured idle timeout period.
             </summary>
     </member>
+    <member name="T:NuGet.Protocol.Plugins.PluginCacheEntry">
+      <summary>
+            This class represents a plugin operations cache entry.
+            It contains expiry logic, read/write/update logic.
+            </summary>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.PluginCacheEntry.#ctor(System.String,System.String,System.String)">
+      <summary>
+            Create a plugin cache entry.
+            </summary>
+      <param name="rootCacheFolder">The root cache folder, normally /localappdata/nuget/plugins-cache</param>
+      <param name="pluginFilePath">The full plugin file path, which will be used to create a key for the folder created in the root folder itself </param>
+      <param name="requestKey">A unique request key for the operation claims. Ideally the packageSourceRepository value of the PluginRequestKey. Example https://protected.package.feed/index.json, or Source-Agnostic</param>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.PluginCacheEntry.LoadFromFile">
+      <summary>
+            Loads and processes the contet from the generated file if it exists.
+            Even after this method is invoked, the operation claims might be null. 
+            </summary>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.PluginCacheEntry.UpdateCacheFileAsync">
+      <summary>
+            Updates the cache file with the current value in the operation claims if the operationn claims is not null.
+            </summary>
+      <returns>Task</returns>
+    </member>
     <member name="T:NuGet.Protocol.Plugins.PluginConstants">
       <summary>
             Plugin constants.
@@ -18550,16 +18925,13 @@
             A plugin discovery result.
             </summary>
     </member>
-    <member name="M:NuGet.Protocol.Plugins.PluginDiscoveryResult.#ctor(NuGet.Protocol.Plugins.PluginFile,System.String)">
+    <member name="M:NuGet.Protocol.Plugins.PluginDiscoveryResult.#ctor(NuGet.Protocol.Plugins.PluginFile)">
       <summary>
             Instantiates a new <see cref="T:NuGet.Protocol.Plugins.PluginDiscoveryResult" /> class.
             </summary>
       <param name="pluginFile">A plugin file.</param>
-      <param name="message">A message if <see cref="P:NuGet.Protocol.Plugins.PluginFile.State" /> is not
-            <see cref="F:NuGet.Protocol.Plugins.PluginFileState.Valid" />; otherwise, <c>null</c>.</param>
-      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="pluginFile" />
-            is <c>null</c>.</exception>
-    </member>
+      <see cref="F:NuGet.Protocol.Plugins.PluginFileState.Valid" />; otherwise, <c>null</c><exception cref="T:System.ArgumentNullException">Thrown if <paramref name="pluginFile" />
+            is <c>null</c>.</exception></member>
     <member name="P:NuGet.Protocol.Plugins.PluginDiscoveryResult.PluginFile">
       <summary>
             Gets the plugin file.
@@ -18570,6 +18942,27 @@
             Gets a message if <see cref="P:NuGet.Protocol.Plugins.PluginFile.State" /> is not <see cref="F:NuGet.Protocol.Plugins.PluginFileState.Valid" />;
             otherwise, <c>null</c>.
             </summary>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.PluginDiscoveryUtility.GetInternalPlugins">
+      <summary>
+            The internal plugins located next to the NuGet assemblies.
+            </summary>
+      <returns>Internal plugins</returns>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.PluginDiscoveryUtility.GetInternalPluginRelativeToMSBuildExe(System.String)">
+      <summary>
+            Given Visual Studio 2017 MSBuild.exe path, return the NuGet plugins directory which is in CommonExtensions\NuGet\Plugins
+            </summary>
+      <param name="msbuildExePath">The MsBuildExe path. Needs to be a valid path. file:// not supported.</param>
+      <returns>The NuGet plugins directory, null if <paramref name="msbuildExePath" /> is null</returns>
+      <remarks>The MSBuild.exe is in MSBuild\15.0\Bin\MsBuild.exe, the Plugins directory is in Common7\IDE\CommonExtensions\Microsoft\NuGet\Plugins</remarks>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.PluginDiscoveryUtility.GetNuGetPluginsDirectoryRelativeToNuGetAssembly(System.String)">
+      <summary>
+            Given a NuGet assembly path, returns the NuGet plugins directory
+            </summary>
+      <param name="nugetAssemblyPath">The path to a NuGet assembly in CommonExtensions\NuGet, needs to be a valid path. file:// not supported</param>
+      <returns>The NuGet plugins directory in CommonExtensions\NuGet\Plugins, null if the <paramref name="nugetAssemblyPath" /> is null</returns>
     </member>
     <member name="T:NuGet.Protocol.Plugins.PluginEventArgs">
       <summary>
@@ -18672,12 +19065,12 @@
             Represents a plugin file.
             </summary>
     </member>
-    <member name="M:NuGet.Protocol.Plugins.PluginFile.#ctor(System.String,NuGet.Protocol.Plugins.PluginFileState)">
+    <member name="M:NuGet.Protocol.Plugins.PluginFile.#ctor(System.String,System.Lazy{NuGet.Protocol.Plugins.PluginFileState})">
       <summary>
             Instantiates a new <see cref="T:NuGet.Protocol.Plugins.PluginFile" /> class.
             </summary>
       <param name="filePath">The plugin's file path.</param>
-      <param name="state">The plugin file state.</param>
+      <param name="state">A lazy that evaluates the plugin file state.</param>
     </member>
     <member name="P:NuGet.Protocol.Plugins.PluginFile.Path">
       <summary>
@@ -19308,6 +19701,11 @@
             The current protocol version.
             </summary>
     </member>
+    <member name="F:NuGet.Protocol.Plugins.ProtocolConstants.Version100">
+      <summary>
+            The minimum supported protocol version.
+            </summary>
+    </member>
     <member name="F:NuGet.Protocol.Plugins.ProtocolConstants.HandshakeTimeout">
       <summary>
             The default handshake timeout.
@@ -19869,6 +20267,22 @@
       <returns>
         <c>true</c> if the timeout is valid; otherwise, <c>false</c>.</returns>
     </member>
+    <member name="T:NuGet.Protocol.Plugins.UnixPlatformsEmbeddedSignatureVerifier">
+      <summary>
+            Embedded Signature Verifier for the MacOS and Linux platforms.
+            </summary>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.UnixPlatformsEmbeddedSignatureVerifier.IsValid(System.String)">
+      <summary>
+            Checks if a file has a valid embedded signature.
+            </summary>
+      <param name="filePath">The path of a file to be checked.</param>
+      <returns>
+        <c>true</c> if the file has a valid signature; otherwise, <c>false</c>.</returns>
+      <exception cref="T:System.ArgumentException">Thrown if <paramref name="filePath" />
+            is either <c>null</c> or an empty string.</exception>
+      <exception cref="T:System.PlatformNotSupportedException">Thrown if the current platform is unsupported.</exception>
+    </member>
     <member name="T:NuGet.Protocol.Plugins.WindowsEmbeddedSignatureVerifier">
       <summary>
             Windows Authenticode signature verifier.
@@ -20131,6 +20545,85 @@
             True at 100% completion
             </summary>
     </member>
+    <member name="T:NuGet.Protocol.Core.Types.PluginManager">
+      <summary>
+            A plugin manager. This manages all the live plugins and their operation claims.
+            Invoked in by both the credential provider and the PluginResourceProvider
+            </summary>
+    </member>
+    <member name="M:NuGet.Protocol.Core.Types.PluginManager.#ctor(NuGet.Common.IEnvironmentVariableReader,System.Lazy{NuGet.Protocol.Plugins.IPluginDiscoverer},System.Func{System.TimeSpan,NuGet.Protocol.Plugins.IPluginFactory})">
+      <summary>
+            Creates a new plugin manager
+            </summary>
+      <remarks>This is public to facilitate unit testing. This should not be called from product code</remarks>
+      <param name="reader">An environment variable reader.</param>
+      <param name="pluginDiscoverer">A lazy plugin discoverer.</param>
+      <param name="pluginFactoryCreator">A plugin factory creator.</param>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="reader" /> is <c>null</c>.</exception>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="pluginDiscoverer" />
+            is <c>null</c>.</exception>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="pluginFactoryCreator" />
+            is <c>null</c>.</exception>
+    </member>
+    <member name="M:NuGet.Protocol.Core.Types.PluginManager.Dispose">
+      <summary>
+            Disposes of this instance.
+            This should not be called in production code as this is a singleton instance.
+            The pattern is implemented because the plugin manager transitively owns objects
+            that need to implement IDisposable because they potentially have managed and unmanaged resources.
+            </summary>
+    </member>
+    <member name="M:NuGet.Protocol.Core.Types.PluginManager.FindAvailablePluginsAsync(System.Threading.CancellationToken)">
+      <summary>
+            Find all available plugins on the machine
+            </summary>
+      <param name="cancellationToken">
+      </param>
+      <returns>PluginDiscoveryResults</returns>
+    </member>
+    <member name="M:NuGet.Protocol.Core.Types.PluginManager.CreatePluginsAsync(NuGet.Protocol.Core.Types.SourceRepository,System.Threading.CancellationToken)">
+      <summary>
+            Create plugins appropriate for the given source
+            </summary>
+      <param name="source">
+      </param>
+      <param name="cancellationToken">
+      </param>
+      <exception cref="T:System.ArgumentNullException">Throw if <paramref name="source" /> is null </exception>
+      <returns>PluginCreationResults</returns>
+    </member>
+    <member name="M:NuGet.Protocol.Core.Types.PluginManager.TryGetSourceAgnosticPluginAsync(NuGet.Protocol.Plugins.PluginDiscoveryResult,NuGet.Protocol.Plugins.OperationClaim,System.Threading.CancellationToken)">
+      <summary>
+            Creates a plugin from the given pluginDiscoveryResult.
+            This plugin's operations will be source agnostic ones (Authentication)
+            </summary>
+      <param name="pluginDiscoveryResult">plugin discovery result</param>
+      <param name="requestedOperationClaim">The requested operation claim</param>
+      <param name="cancellationToken">cancellation token</param>
+      <returns>A plugin creation result, null if the requested plugin cannot handle the given operation claim</returns>
+    </member>
+    <member name="M:NuGet.Protocol.Core.Types.PluginManager.TryCreatePluginAsync(NuGet.Protocol.Plugins.PluginDiscoveryResult,NuGet.Protocol.Plugins.OperationClaim,NuGet.Protocol.Core.Types.PluginManager.PluginRequestKey,System.String,Newtonsoft.Json.Linq.JObject,System.Threading.CancellationToken)">
+      <summary>
+            Creates a plugin from the discovered plugin.
+            We firstly check the cache for the operation claims for the given request key.
+            If there is a valid cache entry, and it does contain the requested operation claim, then we start the plugin, and if need be update the cache value itself.
+            If there is a valid cache entry, and it does NOT contain the requested operation claim, then we return a null.
+            If there is no valid cache entry or an invalid one, we start the plugin as normally, return an active plugin even if the requested claim is not available, and write a cache entry.
+            </summary>
+      <param name="result">plugin discovery result</param>
+      <param name="requestedOperationClaim">The requested operation claim</param>
+      <param name="requestKey">plugin request key</param>
+      <param name="packageSourceRepository">package source repository</param>
+      <param name="serviceIndex">service index</param>
+      <param name="cancellationToken">cancellation token</param>
+      <returns>A plugin creation result, null if the requested plugin cannot handle the given operation claim</returns>
+    </member>
+    <member name="P:NuGet.Protocol.Core.Types.PluginManager.EnvironmentVariableReader">
+      <summary>
+            Gets an environment variable reader.
+            </summary>
+      <remarks>This is non-private only to facilitate testing.</remarks>
+    </member>
     <member name="T:NuGet.Protocol.Core.Types.ProviderComparer">
       <summary>
             An imperfect sort for provider before/after
@@ -20141,16 +20634,6 @@
             A plugin resource provider.
             </summary>
       <remarks>This is unsealed only to facilitate testing.</remarks>
-    </member>
-    <member name="M:NuGet.Protocol.Core.Types.PluginResourceProvider.#ctor">
-      <summary>
-            Initializes a new <see cref="T:NuGet.Protocol.Core.Types.PluginResourceProvider" /> class.
-            </summary>
-    </member>
-    <member name="M:NuGet.Protocol.Core.Types.PluginResourceProvider.Dispose">
-      <summary>
-            Disposes of this instance.
-            </summary>
     </member>
     <member name="M:NuGet.Protocol.Core.Types.PluginResourceProvider.TryCreate(NuGet.Protocol.Core.Types.SourceRepository,System.Threading.CancellationToken)">
       <summary>
@@ -20163,27 +20646,6 @@
       <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="source" /> is <c>null</c>.</exception>
       <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
-    </member>
-    <member name="M:NuGet.Protocol.Core.Types.PluginResourceProvider.Reinitialize(NuGet.Common.IEnvironmentVariableReader,System.Lazy{NuGet.Protocol.Plugins.IPluginDiscoverer},System.Func{System.TimeSpan,NuGet.Protocol.Plugins.IPluginFactory})">
-      <summary>
-            Reinitializes static state.
-            </summary>
-      <remarks>This is non-private only to facilitate unit testing.
-            This should not be called by product code.</remarks>
-      <param name="reader">An environment variable reader.</param>
-      <param name="pluginDiscoverer">A lazy plugin discoverer.</param>
-      <param name="pluginFactoryCreator">A plugin factory creator.</param>
-      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="reader" /> is <c>null</c>.</exception>
-      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="pluginDiscoverer" />
-            is <c>null</c>.</exception>
-      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="pluginFactoryCreator" />
-            is <c>null</c>.</exception>
-    </member>
-    <member name="P:NuGet.Protocol.Core.Types.PluginResourceProvider.EnvironmentVariableReader">
-      <summary>
-            Gets an environment variable reader.
-            </summary>
-      <remarks>This is non-private only to facilitate testing.</remarks>
     </member>
     <member name="T:NuGet.Protocol.Core.Types.PluginFindPackageByIdResource">
       <summary>
@@ -20895,7 +21357,7 @@
             </summary>
       <param name="client">Http client</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1147738.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1160080.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -20907,41 +21369,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1147738.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1160080.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1147738.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1160080.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Versioning1147738.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Versioning1160080.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1147738.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Versioning1160080.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1147738.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Versioning1160080.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1147738.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1160080.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1147738.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1160080.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -22081,4 +22543,4 @@
             </summary>
     </member>
   </members>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>7XBrXC+rTkVBF1AICFyey83RVeI=</DigestValue></Reference></SignedInfo><SignatureValue>hhhEZP1HktXqA+u+xZzNnWYmB6C8iz7nK02NemDIRqsKOaCJgOLjr1vxG+6N1hkPRXB2489Nvg4CFDXJTiF/K2T6KHybZAOE3J/KL05TQKr9p+6LHx4m2hEVB59BcBpazTwj02r3OYWM+MF8DRPpzZ7utRvG2vxaKQKPt+I1BQANDFMAUVJredgAgdfbSHY6je84J2SRBUMkhzLLjwRWd201JZaZMMD3YohGiP6x/eZ/31TI9nw9aZseZEXpTYme7ty/VjSKdnyITokQHHy8o9eg5/skBKCkSfZ4i4G5DWtOsyYADI081SnfhH8Uqm7G0+TsdL25YHwT/OsPoLvsPQ==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>qCn+1BDI/1UKnpkAA1KP3LC/+av4Uf5cjFTCJ85MK5br24Ecy4Yrecp1frhngyaGvdYvHD7HWKqPb5X7WvynxhvBw+hMF04iPbdbVlx/11r1Lbq7pgm/BnzumP5A+TC4a/5Ab3SzuNY4ScnQhwcvMd+2vE6j0J63YntWcHVPZ78FzKOuvgCSwhtQoWE7EAABsYbQKfNA9Q/Zow9Xq2MJqNypaudHQ6e+FcQ9J6ToVlKIz1mZoQCENpvQOdIqDS/mBOK/E5aIg6lRNxhBieL5hZ2OZRo9A2TMxd5QcF3yC4Wpj7FF6Hf/g50Ju3Lg5lYIlbkrgxKJMfznWHIdvfmDIw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE7TCCA9WgAwIBAgITMwAAAXl8LldOUuHK1gABAAABeTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xNzA4MTEyMDExMTVaFw0xODA4MTEyMDExMTVaMIGDMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BSMR4wHAYDVQQDExVNaWNyb3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoKf7UEMj/VQqemQADUo/csL/5q/hR/lyMVMInzkwrluvbgRzLhit5ynV+uGeDJoa91i8cPsdYqo9vlfta/KfGG8HD6EwXTiI9t1tWXH/XWvUturumCb8GfO6Y/kD5MLhr/kBvdLO41jhJydCHBy8x37a8TqPQnrdie1ZwdU9nvwXMo66+AJLCG1ChYTsQAAGxhtAp80D1D9mjD1erYwmo3Klq50dDp74VxD0npOhWUojPWZmhAIQ2m9A50ioNL+YE4r8TloiDqVE3GEGJ4vmFnY5lGj0DZMzF3lBwXfILhamPsUXod/+DnQm7cuDmVgiVuSuDEokx/OdYch29+YMjAgMBAAGjggFhMIIBXTATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU+OR+jRxjfACqzHMAStPybTiqzYEwUgYDVR0RBEswSaRHMEUxDTALBgNVBAsTBE1PUFIxNDAyBgNVBAUTKzIyOTgwMysxYWJmOWU1Zi1jZWQwLTQyZTYtYTY1ZC1kOTM1MDk1OWZlMGUwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAG9La36GDdgLJlBrOojIWqn2suoqmaflBjREAe9z+60v/e341YBqNRw0xxMMtV5kPHNrjPJv02m+zjsPm/kFcjwdRuHonD42sW81qaZQVH/h1Fc9Ox56XI8BP3c/XnMnV/qnMOfUcq+L33Ei/Yrg+uAt31/y3ndk39qwBgAJq0aQo/X+gYYskyt1xhEo1+WK4hwnq5eMmsTiBxnT8mQXsSvd8wh6eFCFBjIcOVCjzYtw3gjVe29MP5rodW3kyxNXHClZOF++Raummsr5KZ7NOM+5yAW6LPvEJb9oDd8Pe0IalcePvVprkAtR+te354+yszMocwNcf6NGgpyttjZ3doc=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>MIIGBzCCA++gAwIBAgIKYRZoNAAAAAAAHDANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDcwNDAzMTI1MzA5WhcNMjEwNDAzMTMwMzA5WjB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCfoWyx39tIkip8ay4Z4b3i48WZUSNQrc7dGE4kD+7Rp9FMrXQwIBHrB9VUlRVJlBtCkq6YXDAm2gBr6Hu97IkHD/cOBJjwicwfyzMkh53y9GccLPx754gd6udOo6HBI1PKjfpFzwnQXq/QsEIEovmmbJNn1yjcRlOwhtDlKEYuJ6yGT1VSDOQDLPtqkJAwbofzWTCd+n7Wl7PoIZd++NIT8wi3U21StEWQn0gASkdmEScpZqiX5NMGgUqi+YSnEUcUCYKfhO1VeP4Bmh1QCIUAEDBG7bfeI0a7xC1Un68eeEExd8yb3zuDk6FhArUdDbH895uyAc4iS1T/+QXDwiALAgMBAAGjggGrMIIBpzAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQjNPjZUkZwCu1A+3b7syuwwzWzDzALBgNVHQ8EBAMCAYYwEAYJKwYBBAGCNxUBBAMCAQAwgZgGA1UdIwSBkDCBjYAUDqyCYEBWJ5flJRP8KuEKU5VZ5KShY6RhMF8xEzARBgoJkiaJk/IsZAEZFgNjb20xGTAXBgoJkiaJk/IsZAEZFgltaWNyb3NvZnQxLTArBgNVBAMTJE1pY3Jvc29mdCBSb290IENlcnRpZmljYXRlIEF1dGhvcml0eYIQea0WoUqgpa1Mc1j0BxMuZTBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAgEAEJeKw1wDRDbd6bStd9vOeVFNAbEudHFbbQwTq86+e4+4LtQSooxtYrhXAstOIBNQmd16QOJXu69YmhzhHQGGrLt48ovQ7DsB7uK+jwoFyI1I4vBTFd1Pq5Lk541q1YDB5pTyBi+FA+mRKiQicPv2/OR4mS4N9wficLwYTp2OawpylbihOZxnLcVRDupiXD8WmIsgP+IHGjL5zDFKdjE9K3ILyOpwPf+FChPfwgphjvDXuBfrTot/xTUrXqO/67x9C0J71FNyIe4wyrt4ZVxbARcKFA7S2hSY9Ty5ZlizLS/n+YWGzFFW6J1wlGysOUzU9nm/qhh6YinvopspNAZ3GmLJPR5tH4LwC8csu89Ds+X57H2146SodDW4TsVxIxImdgs8UoxxWkZDFLyzs7BNZ8ifQv+AeSGAnhUwZuhCEl4ayJ4iIdBD6Svpu/RIzCzU2DKATCYqSCRfWupW76bemZ3KOm+9gSd0BhHudiG/m4LBJ1S2sWo9iaF2YbRuoROmv6pH8BJv/YoybLL+31HIjCPJZr2dHYcSZAI9La9Zj7jkIeW1sMpjtHhUBdRBLlCslLCleKuzoJZ1GtmShxN1Ii8yqAhuoFuMJb+g74TKIdbrHk/Jmu5J4PcBZW+JC33Iacjmbuqnl84xKf8OxVtc2E0bodj6L54/LlUWa8kTo/0=</X509Certificate><X509Certificate>MIIEwjCCA6qgAwIBAgITMwAAAMRudtBNPf6pZQAAAAAAxDANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTYwOTA3MTc1ODUyWhcNMTgwOTA3MTc1ODUyWjCBsjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIERTRSBFU046MjEzNy0zN0EwLTRBQUExJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoA5rFUpl2jKM9/L26GuVj6Beo87YdPTwuOL0C+QObtrYvih7LDNDAeWLw+wYlSkAmfmaSXFpiRHM1dBzq+VcuF8YGmZm/LKWIAB3VTj6df05JH8kgtp4gN2myPTR+rkwoMoQ3muR7zb1nvNiLsEpgJ2EuwX5M/71uYrK6DHAPbbD3ryFizZAfqYcGUWuDhEE6ZV+onexUulZ6DK6IoLjtQvUbH1ZMEWvNVTliPYOgNYLTIcJ5mYphnUMABoKdvGDcVpSmGn6sLKGgiFC82nun9h7koj7+ZpSHElsLwhWQiGVWCRVk8ZMbec+qhu+/9HwzdVJYb4HObmwNDaqpqe17AgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUiAUj6xG9EI77i5amFSZrXv1V3lAwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAcDh+kjmXvCnoEO5AcUWfp4/4fWCqiBQL8uUFq6cuBuYp8ML4UyHSLKNPOoJmzzy1OT3GFGYrmprgO6c2d1tzuSaN3HeFGENXDbn7N2RBvJtSl0UkahSyak4TsRUPk/WwMQ0GOGNbxjolrOR41LVsSmHVnn8IWDOCWBj1c+1jkPkzG51jCiAnWzHU1Q25A/0txrhLYjNtI4P3f0T0vv65X7rZAIz3ecQS/EglmADfQk/zrLgKqJdxZKy3tXS7+35zIrDegdAH2G7d3jvCNTjatrV7cxKH+ZX9oEsFl10uh/U83KA2QiQJQMtbjGSzQV2xRpcNf2GpHBRPW0sK4yL3ww==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>UDMF68Uf7pGosDpy6Q3ZqmoQoYk=</DigestValue></Reference></SignedInfo><SignatureValue>NAlzFBoUxIQhLNnrAeWiOfHUQ9+b7zNxwoyP0S/tfEoD4i/P8bVhGd8ggsCxHmiJpxogz4+aCAxzX0Y3BFK8L5Efz5jzylO1WiUFmbAt6fLadkIblY8nlazNdAIPDJhk3342AE8L74reDoTtbRu4w+RUh38MZX13SKEg2GaOVGTMj09C8IV1RdC758+FZyi7Y663Hz7JwX+8hZ2b4IzNt7dBLb0YEYasgLewfleAG1Zo4BbCR4MeDCfMJz+KpZ2teXQxhg8v5h0dWpEg0JcKgxr6uDJdf09/3LklrXHqsqhLhR7f362eKOPPJYXrfJ9fFCGWdxtjteWNPzu9szatjw==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>m1K+Tyy0HVPLPV0jHraDo5/A5UrgV7PC+C3WipFfzBLODN0Ct0Z49Gub3ufLICGP1D4OJZRyOnhjZi61X+Hbl/2IjqiIl1VMHR4+qWlJLRNj+X7DparTv3/CBzkhMGY2lZdvp96rpRL2heloKGkmmxqet6/sU3hvw8wxMIf29zYrMEBZSEaAUajNDIDd40qeLXRV7OanRHrVE770wiR9DP0zzeYjX5rN1CltAtUyWmonz7DJAYuUr+UMi3offSITg4byWkvThGNXGmtJeDpU6Y/hhcblP5Yl5175yMvHofLyGw0iW7kv/Izp2yjEVRe26PTXes/9nNOP7ul2KoKMoQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE2zCCA8OgAwIBAgITMwAAAbHd7bpU6WW4XwABAAABsTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xODA3MTIyMDExMTlaFw0xOTA3MjYyMDExMTlaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xHjAcBgNVBAMTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJtSvk8stB1Tyz1dIx62g6OfwOVK4Fezwvgt1oqRX8wSzgzdArdGePRrm97nyyAhj9Q+DiWUcjp4Y2YutV/h25f9iI6oiJdVTB0ePqlpSS0TY/l+w6Wq079/wgc5ITBmNpWXb6feq6US9oXpaChpJpsanrev7FN4b8PMMTCH9vc2KzBAWUhGgFGozQyA3eNKni10Vezmp0R61RO+9MIkfQz9M83mI1+azdQpbQLVMlpqJ8+wyQGLlK/lDIt6H30iE4OG8lpL04RjVxprSXg6VOmP4YXG5T+WJede+cjLx6Hy8hsNIlu5L/yM6dsoxFUXtuj013rP/ZzTj+7pdiqCjKECAwEAAaOCAV8wggFbMBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBREE7QCnXc+kFVx9eQcf6wXFM8+czBQBgNVHREESTBHpEUwQzEpMCcGA1UECxMgTWljcm9zb2Z0IE9wZXJhdGlvbnMgUHVlcnRvIFJpY28xFjAUBgNVBAUTDTIyOTgwMys0Mzc5NTAwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAIOp8qYzxaF7HNJegK7spKbD6ShdVyUjjd0lCWlw6E1pFi+UuwXZm4DsWdBoZBuDNKjcz2ONnWt2APV7r0J0B8X8kcDirEUzll2x/fqORrJJ4kMGGZiFcXjTnunblRZBMTRwLEOWogJ3qS89YUpjWfGXfdFSlWCFqLwbRQc/2cGP91D1uX4IieRCxFiOQcCVOEkf1x34ME8pLztHWZI37pch7RdmkBwvLW1r/wt15aoS3fqvxBG04CEyWr8FzkX5P41Wrs5R1syufQQZMBLyv59IJpwOAA0oraXeRC3M1If/lEmVVwxNNJwjCt3DjTIJ9L01KMXe0Ig/qRIToTBwoBE=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIE2jCCA8KgAwIBAgITMwAAAPNnPYNhmA8cpgAAAAAA8zANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTgwODIzMjAxOTU2WhcNMTkxMTIzMjAxOTU2WjCByjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjElMCMGA1UECxMcTWljcm9zb2Z0IEFtZXJpY2EgT3BlcmF0aW9uczEmMCQGA1UECxMdVGhhbGVzIFRTUyBFU046RjZGRi0yREE3LUJCNzUxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCum1v/6NysKcNZwQxKEIrpa4cW1fG9VgjInuWglPN9slvs/xUw5hWjBeXIWNpPPfCgg8biPUIuMOTfTnUQHeHGCt3RJHnvkZnt1Sa9YG+qasp0Tfj3Ugo8zF4ByEaHquIgP6ps17kkDh7hXrysVjWFU0qBBTf+04dANvYXNNoTNyPhudDx2O3MS9kINlmzjvOVMDH+j+y7bKkIKdvxhVGvTjPfAH7UjtYtYWe+IFnkBzdfriO+UOrVLXtkVolXP6ytINIQD1G5dmB6h1Q5l9r6EJ5MWc1ifuOuhGxIEZXrHmer6C4VU84Gf16oBGmH7zAsencfYkBO3mtXQuuFeo4zAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUrMOQPcGQ7gcjCPw0JXGsOdef8hYwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAZ8mAl+WwiGichsW27b42Swis3D6yaoCpJ2PPLzsydU8EoazOckFVZl2c5AOJNnzE6PEuAKQxZU0/B1XLoIDcdSP4ErtqC1Pa7mIf7NHbVZDPCEaIu74f7iWpq/L3zEiEAhXmyUVzRim+ntmZhwaFCVmaGtu0c2HP/RoF9U1Pjk2UMmlTdELZjwwcLpOmgswAxz2su+iqyLH381L16QkaPHuQq9bzbZoE80wk5QpaGfRgxzV1sCDBRuRhHHlPedvmFMLZ/xwAzPmKrYRgdG+mzu2EmFCjm+UGrJwoXJK3CM+9Wds3uln3hnftCWV5v6jlC1dGiDrlRigksgTmJ/YEFA==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>

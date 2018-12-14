@@ -36,10 +36,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
-      <_IsPortable Condition=" '$(_IsPortable)' == '' And '$(SelfContained)' == 'true' ">false</_IsPortable>
-      <_IsPortable Condition=" '$(_IsPortable)' == ''">true</_IsPortable>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(UseAppHost)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == ''">$(SelfContained)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == ''">false</_UseAppHost>
       <_ExecutableExtension Condition="'$(_ExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_ExecutableExtension>
-      <_TransformWebConfigForAzure Condition=" '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
+      <_TransformWebConfigForAzure Condition=" '$(PublishProvider)' == 'AzureWebSite' Or '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
     </PropertyGroup>
     
 
@@ -47,14 +48,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true' And '$(IsWebConfigTransformDisabled)' != 'true'"
         TargetPath="$(TargetPath)"
         PublishDir="$(PublishIntermediateOutputPath)"
-        IsPortable="$(_IsPortable)"
+        UseAppHost="$(_UseAppHost)"
         ExecutableExtension="$(_ExecutableExtension)"
         IsAzure="$(_TransformWebConfigForAzure)"
         ProjectGuid="$(ProjectGuid)"
         IgnoreProjectGuid="$(IgnoreProjectGuid)" 
         ProjectFullPath="$(MSBuildProjectFullPath)" 
-        SolutionPath ="$(SolutionPath)"
-        AspNetCoreModuleHostingModel="$(AspNetCoreModuleHostingModel)" /> 
+        SolutionPath="$(SolutionPath)"
+        AspNetCoreModuleHostingModel="$(AspNetCoreModuleHostingModel)"
+        EnvironmentName="$(EnvironmentName)"/> 
   </Target>
 
   <!--
@@ -112,8 +114,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <_IsWebJobProject Condition="'$(_IsWebJobProject)' == '' and '$(WebJobName)' != '' and '$(WebJobType)' != ''">true</_IsWebJobProject>
-      <_IsPortable Condition=" '$(_IsPortable)' == '' And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
-      <_IsPortable Condition=" '$(_IsPortable)' == ''">true</_IsPortable>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(UseAppHost)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(SelfContained)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">false</_UseAppHost>
       <_ExecutableExtension Condition="'$(_ExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_ExecutableExtension>
     </PropertyGroup>
 
@@ -122,7 +125,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ProjectDirectory="$(MSBuildProjectDirectory)"
         TargetPath="$(TargetPath)"
         WebJobsDirectory="$(PublishIntermediateOutputPath)\app_data\Jobs\$(WebJobType)\$(WebJobName)\"
-        IsPortable="$(_IsPortable)"
+        UseAppHost="$(_UseAppHost)"
         ExecutableExtension="$(_ExecutableExtension)" />
   </Target>
 </Project>

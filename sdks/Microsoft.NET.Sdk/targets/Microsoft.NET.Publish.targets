@@ -17,8 +17,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
 
-    <!-- publishing self-contained apps should publish the native host as $(AssemblyName).exe -->
-    <DeployAppHost Condition=" '$(DeployAppHost)' == '' and '$(_IsExecutable)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(SelfContained)' == 'true'">true</DeployAppHost>
+    <!-- publishing with the apphost should publish the native host as $(AssemblyName).exe -->
+    <DeployAppHost Condition="'$(DeployAppHost)' == '' and '$(_IsExecutable)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(UseAppHost)' == 'true'">true</DeployAppHost>
   
     <IsPublishable Condition="'$(IsPublishable)'==''">true</IsPublishable>
   </PropertyGroup>

@@ -118,7 +118,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       RestoreIgnoreFailedSources="$(RestoreIgnoreFailedSources)"
       RestoreRecursive="$(RestoreRecursive)"
       RestoreForce="$(RestoreForce)"
-      HideWarningsAndErrors="$(HideWarningsAndErrors)"/>
+      HideWarningsAndErrors="$(HideWarningsAndErrors)"
+      Interactive="$(NuGetInteractive)"/>
   </Target>
 
   <!--

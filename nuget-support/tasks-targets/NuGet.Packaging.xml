@@ -769,6 +769,12 @@
             <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
             <param name="compatibilityProvider">Framework compatibility provider.</param>
         </member>
+        <member name="M:NuGet.Packaging.PackageArchiveReader.ValidatePackageEntriesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Validate all files in package are not traversed outside of the expected extraction path.
+            Eg: file entry like ../../foo.dll can get outside of the expected extraction path.
+            </summary>
+        </member>
         <member name="T:NuGet.Packaging.EmptyFrameworkFolderFile">
             <summary>
             Represents an empty framework folder in NuGet 2.0+ packages. 
@@ -1219,6 +1225,12 @@
             True only for assemblies that should be added as references to msbuild projects
             </summary>
         </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.ValidatePackageEntry(System.String,System.String,NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            Validate file entry in package is not traversed outside of the expected extraction path.
+            Eg: file entry like ../../foo.dll can get outside of the expected extraction path.
+            </summary>
+        </member>
         <member name="T:NuGet.Packaging.PackageReference">
             <summary>
             Represents a package element in the packages.config file
@@ -1497,6 +1509,11 @@
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.DefaultSpecValueWarning">
             <summary>
               Looks up a localized string similar to The value "{0}" for {1} is a sample value and should be removed. Replace it with an appropriate value or remove it and rebuild your package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.FilePathTooLongWarning">
+            <summary>
+              Looks up a localized string similar to The file '{0}' path, name, or both are too long. Your package might not work without long file path support. Please shorten the file path or file name..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.InvalidFrameworkWarning">
@@ -2451,6 +2468,18 @@
             Individual trust results.
             </summary>
         </member>
+        <member name="T:NuGet.Packaging.Signing.SignatureLog">
+            <summary>
+            Log message for signature verification.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureLog.AsRestoreLogMessage">
+            <summary>
+            Converts an SignatureLog into a Restore
+            This is needed when an SignatureLog needs to be logged and loggers do not have visibility to SignatureLog.
+            </summary>
+            <returns>RestoreLogMessage equivalent to the SignatureLog.</returns>
+        </member>
         <member name="T:NuGet.Packaging.Signing.AlgorithmIdentifier">
             <remarks>This is public only to facilitate testing.</remarks>
         </member>
@@ -2555,7 +2584,7 @@
             <remarks>If <see cref="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoTimestamp" /> is set to true this method return true with a <see cref="!:validTimestamp" /> set to null.</remarks>
             <returns>true if a valid timestamp was found</returns>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignatureVerifySettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
+        <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignatureVerifySettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection)">
             <summary>
             Verify if the signature object meets the specification trust and validity requirements.
             </summary>
@@ -2591,6 +2620,11 @@
             A countersignature on the primary signature.
             </summary>
         </member>
+        <member name="F:NuGet.Packaging.Signing.SignaturePlacement.Any">
+            <summary>
+            A primary signature or a countersignature.
+            </summary>
+        </member>
         <member name="T:NuGet.Packaging.Signing.SignatureType">
             <summary>
             Indicates author or repository signing.
@@ -2613,16 +2647,15 @@
         </member>
         <member name="T:NuGet.Packaging.Signing.SignatureVerifySettings">
             <summary>
-            Settings to customize Signature.Verify behavior. 
+            Settings to customize Signature.Verify behavior.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.TreatIssuesAsErrors">
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowIllegal">
             <summary>
-            Treat any issue as fatal.
+            Allow packages with signatures that do not conform to the specification.
             </summary>
-            <remarks>If set true, any issue will be an error instead of a warning</remarks>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowUntrustedRoot">
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowUntrusted">
             <summary>
             Specifies that a signing certificate's chain that chains to an untrusted root is allowed
             </summary>
@@ -2633,10 +2666,14 @@
             If set to true, offline revocation is allowed.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.LogOnSignatureExpired">
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.ReportUnknownRevocation">
             <summary>
-            Specifies that an error should be logged when the signature is expired.
-            If set to false, this won't allow expired signatures, only skip the logging of the failure.
+            Indicates if unknown revocation status should be reported.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.RevocationMode">
+            <summary>
+            Gets how the revocation verification should be performed.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.Default">
@@ -3203,7 +3240,7 @@
             finalizer impact.
             </remarks>
         </member>
-        <member name="M:NuGet.Packaging.Signing.AllowListVerificationProvider.VerifyAllowList(NuGet.Packaging.Signing.AllowListVerificationProvider.CertificateListVerificationRequest)">
+        <member name="M:NuGet.Packaging.Signing.AllowListVerificationProvider.VerifyAllowList(NuGet.Packaging.Signing.AllowListVerificationProvider.CertificateListVerificationRequest,System.Boolean)">
             <summary>
             Verify an allow list with a given request
             </summary>
@@ -3262,10 +3299,26 @@
             PackageVerificationResult
             </summary>
         </member>
-        <member name="T:NuGet.Packaging.Signing.RepositorySignatureVerifier">
-            <remarks>
-            This is used by NuGetGallery to determine repository signature validity.
-            </remarks>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationBehavior.Never">
+            <summary>
+            Do not verify a signature.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationBehavior.IfExists">
+            <summary>
+            Verify a signature if and only if it exists.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationBehavior.IfExistsAndIsNecessary">
+            <summary>
+            Verify a signature if and only if it exists and is necessary
+            (e.g.:  trust evaluation of another signature depends on it).
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationBehavior.Always">
+            <summary>
+            Verify a signature always.  If the signature is not present, it is an error.
+            </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.SignatureVerificationStatus">
             <summary>
@@ -3287,14 +3340,9 @@
             </summary>
             <remarks>This could happen because the package integrity check fails or the certificate is revoked.</remarks>
         </member>
-        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Illegal">
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Disallowed">
             <summary>
-            Signature does not conform with NuGet signing specification.
-            </summary>
-        </member>
-        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Untrusted">
-            <summary>
-            Signature certificate does not match known allowlists.
+            The signature is disallowed based on verification settings.
             </summary>
         </member>
         <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Valid">
@@ -3394,6 +3442,16 @@
             The Timestamp's generalized time was outside certificate's validity period
             </summary>
         </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.NoValidTimestamp">
+            <summary>
+            A valid timestamp was not found.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.MultipleTimestamps">
+            <summary>
+            Multiple timestamps were found.
+            </summary>
+        </member>
         <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.Suspect">
             <summary>
             Flags which indicate that the signed package is suspect.
@@ -3433,7 +3491,7 @@
             <summary>
             Expiration Date and Time for signature
             </summary>
-            <remarks>This field will only be set if the flag CertificateExpired is present <see cref="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Flags" /></remarks>
+            <remarks>This field will only be set if the certificate is expired.</remarks>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerificationResult.Signature">
             <summary>
@@ -3475,14 +3533,14 @@
             Allow no timestamp.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AlwaysVerifyCountersignature">
-            <summary>
-            Always verify the countersignature if present
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUnknownRevocation">
             <summary>
             Treat unknown revocation status as a warning instead of an error during verification.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.ReportUnknownRevocation">
+            <summary>
+            Report unknown revocation status.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoRepositoryCertificateList">
@@ -3493,6 +3551,26 @@
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoClientCertificateList">
             <summary>
             Allow an empty or null ClientCertificateList.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.VerificationTarget">
+            <summary>
+            Gets the verification target(s).
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.SignaturePlacement">
+            <summary>
+            Gets the placement of verification target(s).
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.RepositoryCountersignatureVerificationBehavior">
+            <summary>
+            Gets the repository countersignature verification behavior.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.RevocationMode">
+            <summary>
+            Gets how the revocation verification should be performed.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.RepositoryCertificateList">
@@ -3512,7 +3590,7 @@
         </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetAcceptModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
             <summary>
-            The aceept mode policy.
+            The accept mode policy.
             </summary>
         </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetRequireModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
@@ -3543,14 +3621,24 @@
             It only refers to author or repository type of signature.
             If a specific placement is needed use the <see cref="T:NuGet.Packaging.Signing.SignaturePlacement" /> enum.</remarks>
         </member>
+        <member name="F:NuGet.Packaging.Signing.VerificationTarget.Unknown">
+            <summary>
+            Target unknown primary signatures.
+            </summary>
+        </member>
         <member name="F:NuGet.Packaging.Signing.VerificationTarget.Author">
             <summary>
-            Target Author signatures
+            Target author signatures
             </summary>
         </member>
         <member name="F:NuGet.Packaging.Signing.VerificationTarget.Repository">
             <summary>
-            Target Repository signatures
+            Target repository signatures
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.VerificationTarget.All">
+            <summary>
+            Target all available signatures.
             </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.VerifySignaturesResult">
@@ -3561,6 +3649,11 @@
         <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Valid">
             <summary>
             True if signature is valid.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Signed">
+            <summary>
+            True if the package is signed.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Results">
@@ -3789,9 +3882,19 @@
               Looks up a localized string similar to The package signature is invalid or cannot be verified on this platform..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorUnableCheckPackageEntries">
+            <summary>
+              Looks up a localized string similar to An unexpected error occurred while checking package entries..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.ErrorUnableToDeleteFile">
             <summary>
               Looks up a localized string similar to Unable to delete temporary file '{0}'. Error: '{1}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorUnsafePackageEntry">
+            <summary>
+              Looks up a localized string similar to The package '{0}' contains an entry which is unsafe for extraction..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorZip64NotSupported">
@@ -3832,6 +3935,11 @@
         <member name="P:NuGet.Packaging.Strings.InvalidArgument">
             <summary>
               Looks up a localized string similar to The argument is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidArgumentCombination">
+            <summary>
+              Looks up a localized string similar to Invalid combination of arguments {0} and {1}..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidAsn1">
@@ -3949,9 +4057,9 @@
               Looks up a localized string similar to The package does not contain a valid package signature file..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.NoRepositorySignature">
+        <member name="P:NuGet.Packaging.Strings.NoRepositoryCountersignature">
             <summary>
-              Looks up a localized string similar to The package does not have a repository signature (primary or countersignature)..
+              Looks up a localized string similar to Verification settings require a repository countersignature, but the package does not have a repository countersignature..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.NuGetPackageOwners">
@@ -3997,6 +4105,11 @@
         <member name="P:NuGet.Packaging.Strings.PackageMinVersionNotSatisfied">
             <summary>
               Looks up a localized string similar to The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'. To upgrade NuGet, please go to http://docs.nuget.org/consume/installing-nuget.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageSignatureVerificationLog">
+            <summary>
+              Looks up a localized string similar to PackageSignatureVerificationLog: PackageIdentity: {0} Source: {1} PackageSignatureValidity: {2}.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.PackagesNodeNotExist">
@@ -4289,6 +4402,11 @@
               Looks up a localized string similar to An unexpected error occurred while verifying a package signature..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.UnrecognizedEnumValue">
+            <summary>
+              Looks up a localized string similar to The enum value '{0}' is unrecognized..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.UnrelatedSignatures">
             <summary>
               Looks up a localized string similar to The primary signature and repository countersignature are unrelated..
@@ -4317,6 +4435,16 @@
         <member name="P:NuGet.Packaging.Strings.Verify_ErrorNoCertificate">
             <summary>
               Looks up a localized string similar to The {0} does not have a signing certificate..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyCertTrustOfflineWhileRevocationModeOffline">
+            <summary>
+              Looks up a localized string similar to The revocation function was unable to check revocation because the certificate is not available in the cached certificate revocation list and NUGET_CERT_REVOCATION_MODE environment variable has been set to offline. For more information, visit https://aka.ms/certificateRevocationMode..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyCertTrustOfflineWhileRevocationModeOnline">
+            <summary>
+              Looks up a localized string similar to The revocation function was unable to check revocation because the revocation server could not be reached. For more information, visit https://aka.ms/certificateRevocationMode..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.VerifyChainBuildingIssue">
@@ -4764,4 +4892,4 @@
             </summary>
         </member>
     </members>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>4on2SbJsGzmuADPqIkz46QO2fhM=</DigestValue></Reference></SignedInfo><SignatureValue>c8+PXtYeSgRGlk6EpQs+H9zLZi6CdKBRuQHSYNuH10feQm1gXoM+Ctq/U9vY53yvTWR6dkIJ9uZj+HiBeqn+HbWuQf2BdiMX5ZGAgUW+KnHGKoRY6dzJ5X4xzM9rXxbmmxhKGIvFDVf3TvoUynMinb+BVEbzCsuZYgblCuHfPY5O/cFcja5UIyh+rkmIxBKHjd1IaE1mvHwNsjzOBWuc8PeZvILlQLrk31oiHUykS9XRiv0Ig5uDrPTP3Uasfr0bGu4atXUrUtbDzS3Zb3wAhExUzxLIPDzq1iiM5GRnlkdJD7djNYFcPxdfJ/ks/ny2OWvRBX20CJjJlF4nh3BvoA==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>qCn+1BDI/1UKnpkAA1KP3LC/+av4Uf5cjFTCJ85MK5br24Ecy4Yrecp1frhngyaGvdYvHD7HWKqPb5X7WvynxhvBw+hMF04iPbdbVlx/11r1Lbq7pgm/BnzumP5A+TC4a/5Ab3SzuNY4ScnQhwcvMd+2vE6j0J63YntWcHVPZ78FzKOuvgCSwhtQoWE7EAABsYbQKfNA9Q/Zow9Xq2MJqNypaudHQ6e+FcQ9J6ToVlKIz1mZoQCENpvQOdIqDS/mBOK/E5aIg6lRNxhBieL5hZ2OZRo9A2TMxd5QcF3yC4Wpj7FF6Hf/g50Ju3Lg5lYIlbkrgxKJMfznWHIdvfmDIw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE7TCCA9WgAwIBAgITMwAAAXl8LldOUuHK1gABAAABeTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xNzA4MTEyMDExMTVaFw0xODA4MTEyMDExMTVaMIGDMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BSMR4wHAYDVQQDExVNaWNyb3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoKf7UEMj/VQqemQADUo/csL/5q/hR/lyMVMInzkwrluvbgRzLhit5ynV+uGeDJoa91i8cPsdYqo9vlfta/KfGG8HD6EwXTiI9t1tWXH/XWvUturumCb8GfO6Y/kD5MLhr/kBvdLO41jhJydCHBy8x37a8TqPQnrdie1ZwdU9nvwXMo66+AJLCG1ChYTsQAAGxhtAp80D1D9mjD1erYwmo3Klq50dDp74VxD0npOhWUojPWZmhAIQ2m9A50ioNL+YE4r8TloiDqVE3GEGJ4vmFnY5lGj0DZMzF3lBwXfILhamPsUXod/+DnQm7cuDmVgiVuSuDEokx/OdYch29+YMjAgMBAAGjggFhMIIBXTATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU+OR+jRxjfACqzHMAStPybTiqzYEwUgYDVR0RBEswSaRHMEUxDTALBgNVBAsTBE1PUFIxNDAyBgNVBAUTKzIyOTgwMysxYWJmOWU1Zi1jZWQwLTQyZTYtYTY1ZC1kOTM1MDk1OWZlMGUwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAG9La36GDdgLJlBrOojIWqn2suoqmaflBjREAe9z+60v/e341YBqNRw0xxMMtV5kPHNrjPJv02m+zjsPm/kFcjwdRuHonD42sW81qaZQVH/h1Fc9Ox56XI8BP3c/XnMnV/qnMOfUcq+L33Ei/Yrg+uAt31/y3ndk39qwBgAJq0aQo/X+gYYskyt1xhEo1+WK4hwnq5eMmsTiBxnT8mQXsSvd8wh6eFCFBjIcOVCjzYtw3gjVe29MP5rodW3kyxNXHClZOF++Raummsr5KZ7NOM+5yAW6LPvEJb9oDd8Pe0IalcePvVprkAtR+te354+yszMocwNcf6NGgpyttjZ3doc=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIEwjCCA6qgAwIBAgITMwAAAL6kD/XJpQ7hMAAAAAAAvjANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTYwOTA3MTc1ODQ5WhcNMTgwOTA3MTc1ODQ5WjCBsjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIERTRSBFU046ODQzRC0zN0Y2LUYxMDQxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCROfFjRVxKmgTCtN14U6jxq1vAK7TBi39qS2BIU56Xw1IeOFNjg7bw6O8DMLr04Ghia8ath6lj3yabPSyXiYULrfk/7PkLUAqDbr6CFA/kuvoLYmePEgYKgI2vtruq05MABGYyw4WpUfLtchCNiBYWawyrdeHaw80xvfUrb7cDAU8st94bIkgyboaDN7f3oIzQHqyxok8XSSaZJKTyqNtEtDo7p6ZJ3ygCa98lCk/SjpVnLkGlX0lJ3y/H2FM28gNnfQZQO8Pe0ICv3KCpi4CPqx9LEuPgQoJrYK573I1LJlbjTV+l73UHPbo2w40W9L1SGu5UWrwNb6tZqk4RwEvJAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUHG4NXaJsQp0+3x29Li7nwpc0kH8wHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAbmBxbLeCqxsZFPMYFz/20DMP8Q12dH/1cNQursRMH0Yg0cTwLn1IF3DGypfHZJwbyl9HWNVf+2Jq05zMajfjxiEu+khzmMnA9/BJ1utPwR0nPyyLbN+0IGBMfYLeIAdC81e0CW9TpWpc6lH/jgWbhviUt4Mvt2DQMWIQ7WwJAdBeGjCntLINPxC9RmHysFGexMsXS+hYNR2z/h/PmvsNwhq7CtM6bM71ZvYFaBSCmtdQ8/KQCPiN6acb2V/28VuZEwjq3GFAJfcKMvhssewRgCYsKxhvWZHUkBrUxWnsvxNCOWPpenBiVSYl5nT9jBoVoTDChMITR35gr//DmhzXsw==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>4Oq6h0vv8HfUO82aK2ztWxP/iTU=</DigestValue></Reference></SignedInfo><SignatureValue>c2QKhziIaHTSwBDgRc12+46cC0s3ma17ZdCrZknJ6jMn1YSiZJfJmGYPY3+x9lovgGxr4jJGhajSeVWOLDTloDiwEKl2fOq1p0OpLhBQ1mcwxI7BiGb8mzy8FAkBjiIM341LSqFnXcqeSnQ6k0Wd4aW0vBZVnl6UMUX3XEXfo40+TLjCeyZzbPA2fQwsjByLh2CDGFET9MVEPpnWKEtgpLLZdy57HnH5ffgi7OcRvQevozk4xpLBfemRJGR4idNZZC/NQ3AEt14Hsigg43RQlWECqICWpU2miozzMutpMNnn2rcylqHaHHNzHEWf+1jd81SbYfKMO4sLPsX/O5GEig==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>m1K+Tyy0HVPLPV0jHraDo5/A5UrgV7PC+C3WipFfzBLODN0Ct0Z49Gub3ufLICGP1D4OJZRyOnhjZi61X+Hbl/2IjqiIl1VMHR4+qWlJLRNj+X7DparTv3/CBzkhMGY2lZdvp96rpRL2heloKGkmmxqet6/sU3hvw8wxMIf29zYrMEBZSEaAUajNDIDd40qeLXRV7OanRHrVE770wiR9DP0zzeYjX5rN1CltAtUyWmonz7DJAYuUr+UMi3offSITg4byWkvThGNXGmtJeDpU6Y/hhcblP5Yl5175yMvHofLyGw0iW7kv/Izp2yjEVRe26PTXes/9nNOP7ul2KoKMoQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE2zCCA8OgAwIBAgITMwAAAbHd7bpU6WW4XwABAAABsTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xODA3MTIyMDExMTlaFw0xOTA3MjYyMDExMTlaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xHjAcBgNVBAMTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJtSvk8stB1Tyz1dIx62g6OfwOVK4Fezwvgt1oqRX8wSzgzdArdGePRrm97nyyAhj9Q+DiWUcjp4Y2YutV/h25f9iI6oiJdVTB0ePqlpSS0TY/l+w6Wq079/wgc5ITBmNpWXb6feq6US9oXpaChpJpsanrev7FN4b8PMMTCH9vc2KzBAWUhGgFGozQyA3eNKni10Vezmp0R61RO+9MIkfQz9M83mI1+azdQpbQLVMlpqJ8+wyQGLlK/lDIt6H30iE4OG8lpL04RjVxprSXg6VOmP4YXG5T+WJede+cjLx6Hy8hsNIlu5L/yM6dsoxFUXtuj013rP/ZzTj+7pdiqCjKECAwEAAaOCAV8wggFbMBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBREE7QCnXc+kFVx9eQcf6wXFM8+czBQBgNVHREESTBHpEUwQzEpMCcGA1UECxMgTWljcm9zb2Z0IE9wZXJhdGlvbnMgUHVlcnRvIFJpY28xFjAUBgNVBAUTDTIyOTgwMys0Mzc5NTAwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAIOp8qYzxaF7HNJegK7spKbD6ShdVyUjjd0lCWlw6E1pFi+UuwXZm4DsWdBoZBuDNKjcz2ONnWt2APV7r0J0B8X8kcDirEUzll2x/fqORrJJ4kMGGZiFcXjTnunblRZBMTRwLEOWogJ3qS89YUpjWfGXfdFSlWCFqLwbRQc/2cGP91D1uX4IieRCxFiOQcCVOEkf1x34ME8pLztHWZI37pch7RdmkBwvLW1r/wt15aoS3fqvxBG04CEyWr8FzkX5P41Wrs5R1syufQQZMBLyv59IJpwOAA0oraXeRC3M1If/lEmVVwxNNJwjCt3DjTIJ9L01KMXe0Ig/qRIToTBwoBE=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIE2jCCA8KgAwIBAgITMwAAAO87PT5gr0llIAAAAAAA7zANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTgwODIzMjAxOTQ0WhcNMTkxMTIzMjAxOTQ0WjCByjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjElMCMGA1UECxMcTWljcm9zb2Z0IEFtZXJpY2EgT3BlcmF0aW9uczEmMCQGA1UECxMdVGhhbGVzIFRTUyBFU046RDIzNi0zN0RBLTk3NjExJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDKAoM+JZXt2QHAW0fzq1A+Eo16GzOcOwaU0Md9QcQgH4vFA7R5Xec8Y0+rH89t/hcWGC9zFc900QCAia3VZgM7i6bRFRL5A0YUMv6F7UPWTqppirccYGjVrs7RiJtGbPUKaKCKhhTZ1NA1FC6QwsWmyo+a/R1gFtcoHdCN6xn0RMvh4RcIGSIiDr6VmtdW3N0qDDo8/TXxDS1roCh5bOTIFjSlNAFbqYnp7L8zPYwdizWy/URm75I+dxfNhngTgGj7KyJhksgIlSzko0XdKRnyaF22PL806UaXylklK5SDdTDk05GaAyV8e+tIsMdVQ0hwgh05BGExE0R06NHjnxUrAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUlB6M3h0tMwUDjaUAKcF+hH9WAQUwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAOyvqWaVgRVzte8SCJjkB4tn6LHoWT+a3vrtOckmUgC4Lmz0dxCRsixSVnz4RXwM3Y9i3Yry65S570jHbUM2Cw2ZN9Z86wjSwn7S4XGgFPSh+Q1l0fyqpDm7pHKk+B1maKEeqfQxFVIcrGmaVfRm/l0OWSplyxZ70Z2EfK6nVruSbELs/2HMPJh5pcc+w7xKGGWpnIVwYHj6ahacDbIyD72HqpFqHkRv4ufWFbAzgoW+2eXXDSi5Eg54PYjXzRGTkj3d1MGlLJaRiwsf5ZHty2uZlComeJ/bNoCCWuyBmxY/1mmWo6hGvFcOoxxjauDui4lOJYhgXue6OUzSnH1vdLQ==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>
