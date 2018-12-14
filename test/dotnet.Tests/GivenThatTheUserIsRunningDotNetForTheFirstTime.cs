@@ -125,9 +125,7 @@ namespace Microsoft.DotNet.Tests
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
             var homeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
-            string[] fileEntries = Directory.GetFiles(homeFolder.ToString());
-            fileEntries.Should().OnlyContain(x => !x.Contains(".dotnetFirstUseSentinel"));
-            fileEntries.Should().OnlyContain(x => !x.Contains(".aspNetCertificateSentinel"));
+            homeFolder.Should().NotExist();
         }
 
         [Fact]
@@ -189,7 +187,7 @@ namespace Microsoft.DotNet.Tests
         [LinuxOnlyFact]
         public void ItCreatesTheProfileFileOnLinuxWhenInvokedFromNativeInstaller()
         {
-            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var emptyHome = Path.Combine(_testDirectory, "empty_home_for_profile_on_linux");
             var profiled = Path.Combine(_testDirectory, "profile.d");
 
             var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
@@ -211,7 +209,7 @@ namespace Microsoft.DotNet.Tests
         [MacOsOnlyFact]
         public void ItCreatesThePathDFileOnMacOSWhenInvokedFromNativeInstaller()
         {
-            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var emptyHome = Path.Combine(_testDirectory, "empty_home_for_pathd");
             var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
