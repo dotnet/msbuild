@@ -28,6 +28,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('-', '_'))</ImplicitConfigurationDefine>
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('.', '_'))</ImplicitConfigurationDefine>
+    <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace(' ', '_'))</ImplicitConfigurationDefine>
     <DefineConstants>$(DefineConstants);$(ImplicitConfigurationDefine)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>

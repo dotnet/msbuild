@@ -55,6 +55,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('-', '_'))</ImplicitConfigurationDefine>
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('.', '_'))</ImplicitConfigurationDefine>
+    <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace(' ', '_'))</ImplicitConfigurationDefine>
     <!-- In F# and C# this is called DefineConstants, VB is idiosyncratic and calls it FinalDefineConstants -->
   </PropertyGroup>
 
