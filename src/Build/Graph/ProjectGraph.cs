@@ -239,6 +239,8 @@ namespace Microsoft.Build.Graph
                 EntryPointNodes = entryPointNodes.AsReadOnly();
                 ProjectNodes = _allParsedProjects.Values.ToList();
                 GraphRoots = graphRoots.AsReadOnly();
+
+                _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes.Count));
             }
             else
             {
@@ -255,6 +257,48 @@ namespace Microsoft.Build.Graph
         /// Get an unordered collection of all project nodes in the graph.
         /// </summary>
         public IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; }
+
+        private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
+
+        private static IReadOnlyCollection<ProjectGraphNode> TopologicalSort(IReadOnlyCollection<ProjectGraphNode> graphRoots, int nodeCount)
+        {
+            var discoveredNodes = new HashSet<ProjectGraphNode>(nodeCount);
+            var reverseTopologicalSort = new List<ProjectGraphNode>(nodeCount);
+
+            discoveredNodes.UnionWith(graphRoots);
+            reverseTopologicalSort.AddRange(graphRoots);
+
+            for (var i = 0; i < nodeCount; i++)
+            {
+                var currentNode = reverseTopologicalSort[i];
+
+                foreach (var reference in currentNode.ProjectReferences)
+                {
+                    if (!discoveredNodes.Contains(reference))
+                    {
+                        discoveredNodes.Add(reference);
+                        reverseTopologicalSort.Add(reference);
+                    }
+                }
+
+                // found all the nodes, no point in iterating through the rest as there won't be any new discovered nodes
+                if (reverseTopologicalSort.Count == nodeCount)
+                {
+                    break;
+                }
+            }
+
+            ErrorUtilities.VerifyThrow(reverseTopologicalSort.Count == nodeCount, "sorted node count must be equal to total node count");
+
+            reverseTopologicalSort.Reverse();
+
+            return reverseTopologicalSort;
+        }
+        
+        /// <summary>
+        /// Get a topologically sorted collection of all project nodes in the graph.
+        /// </summary>
+        public IReadOnlyCollection<ProjectGraphNode> ProjectNodesTopologicallySorted => _projectNodesTopologicallySorted.Value;
 
         public IReadOnlyCollection<ProjectGraphNode> GraphRoots { get; }
 

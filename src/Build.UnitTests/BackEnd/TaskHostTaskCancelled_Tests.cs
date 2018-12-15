@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             TaskHostTaskCancelled cancelled = new TaskHostTaskCancelled();
 
-            ((INodePacketTranslatable)cancelled).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)cancelled).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostTaskCancelled.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             TaskHostTaskCancelled deserializedCancelled = packet as TaskHostTaskCancelled;

@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="CannotAutoDisableAutoResponseFile">
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1027: ключ /noautoresponse не может быть указан в файле автоответа MSBuild.rsp или в любом другом файле ответа, на который файл автоответа ссылается.</target>
+        <target state="translated">MSBUILD : ошибка MSB1027: ключ noAutoResponse не может быть указан в файле автоответа MSBuild.rsp или в любом другом файле ответа, на который файл автоответа ссылается.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="CopyrightMessage">
@@ -31,6 +31,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 (C) Корпорация Майкрософт (Microsoft Corporation). Все права защищены.
 </target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
+      </trans-unit>
+      <trans-unit id="DuplicateOutputResultsCache">
+        <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
+        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified.</target>
+        <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
         <source>MSBUILD : error MSB1008: Only one project can be specified.</source>
@@ -50,7 +55,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="HelpMessage_1_Syntax">
         <source>Syntax:              MSBuild.exe [options] [project file | directory]
 </source>
-        <target state="needs-review-translation">Синтаксис:              MSBuild.exe [параметры] [файл проекта | каталог]
+        <target state="translated">Синтаксис:              MSBuild.exe [параметры] [файл проекта | каталог]
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -69,7 +74,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      a directory is specified, MSBuild searches that
                      directory for a project file.
 </source>
-        <target state="needs-review-translation">Описание:         собирает указанные целевые объекты в файле проекта. Если
+        <target state="translated">Описание:         собирает указанные целевые объекты в файле проекта. Если
                      файл проекта не указан, MSBuild ищет
                      в текущем рабочем каталоге файл, который имеет расширение,
                      заканчивающееся на proj, и использует этот файл. Если
@@ -94,14 +99,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      -interactive:true.  Use the parameter to override a
                      value that comes from a response file.
     </source>
-        <target state="new">  -interactive[:True|False]
-                     Indicates that actions in the build are allowed to
-                     interact with the user.  Do not use this argument
-                     in an automated scenario where interactivity is
-                     not expected.
-                     Specifying -interactive is the same as specifying
-                     -interactive:true.  Use the parameter to override a
-                     value that comes from a response file.
+        <target state="translated">  -interactive[:True|False]
+                     Указывает, что действию в сборке можно
+                     взаимодействовать с пользователем. Не используйте этот аргумент
+                     в сценарии автоматизации, где интерактивность
+                     не ожидается.
+                     Указание -interactive равносильно указанию
+                     -interactive:true.  Используйте этот параметр, чтобы переопределить
+                     значение, которое поступает из файла ответа.
     </target>
         <note>
       LOCALIZATION: "-interactive" should not be localized.
@@ -120,16 +125,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -isolateProjects[:True|False]
-                     Causes MSBuild to build each project in isolation.
+        <target state="translated">  -isolateProjects[:True|False]
+                     Сообщает MSBuild, что нужно собирать каждый проект по отдельности.
 
-                     This is a more restrictive mode of MSBuild as it requires
-                     that the project graph be statically discoverable at
-                     evaluation time, but can improve scheduling and reduce
-                     memory overhead when building a large set of projects.
-                     (Short form: -isolate)
+                     Это более строгий режим MSBuild, так как он требует,
+                     чтобы граф проекта можно было статически обнаружить
+                     во время оценки, но он может улучшить планирование и сократить
+                     издержки памяти при сборке больших наборов проектов.
+                     (Краткая форма: -isolate)
 
-                     This flag is experimental and may not work as intended.
+                     Это экспериментальный флаг. Может работать не так, как ожидалось.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -149,17 +154,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -graphBuild[:True|False]
-                     Causes MSBuild to construct and build a project graph.
+        <target state="translated">  -graphBuild[:True|False]
+                     Сообщает MSBuild, что нужно построить и собрать граф проекта.
 
-                     Constructing a graph involves identifying project
-                     references to form dependencies. Building that graph
-                     involves attempting to build project references prior
-                     to the projects that reference them, differing from
-                     traditional MSBuild scheduling.
-                     (Short form: -graph)
+                     Построение графа связано с определением ссылок
+                     проекта для формирования зависимостей. Сборка графа
+                     связана с попыткой собрать ссылки проекта до проектов,
+                     которые на них ссылаются, что отличается от
+                     традиционного графика MSBuild.
+                     (Краткая форма: -graph)
 
-                     This flag is experimental and may not work as intended.
+                     Это экспериментальный флаг. Может работать не так, как ожидалось.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -171,7 +176,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>Switches:            Note that you can specify switches using both
                      "-switch" and "/switch".
 </source>
-        <target state="needs-review-translation">Параметры:
+        <target state="translated">Параметры:            Вы можете указывать параметры с помощью
+                     "-switch" и "/switch".
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -185,7 +191,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="HelpMessage_4_HelpSwitch">
         <source>  -help              Display this usage message. (Short form: -? or -h)
 </source>
-        <target state="needs-review-translation">  /help              Отображать это сообщение об использовании. (Краткая форма: /? или /h)
+        <target state="translated">  -help              Отображать это сообщение об использовании. (Краткая форма: -? или -h)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -199,7 +205,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
         <source>  -noLogo            Do not display the startup banner and copyright message.
 </source>
-        <target state="needs-review-translation">  /nologo            Не отображать начальный заголовок и сообщение об авторском праве.
+        <target state="translated">  -noLogo            Не отображать начальный заголовок и сообщение об авторском праве.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -213,7 +219,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="HelpMessage_6_VersionSwitch">
         <source>  -version           Display version information only. (Short form: -ver)
 </source>
-        <target state="needs-review-translation">  /version           Отображать только данные о версии. (Краткая форма: /ver)
+        <target state="translated">  -version           Отображать только данные о версии. (Краткая форма: -ver)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -234,11 +240,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="needs-review-translation">  @&lt;файл&gt;            Вставьте параметры командной строки из текстового файла. Чтобы указать
+        <target state="translated">  @&lt;файл&gt;            Вставьте параметры командной строки из текстового файла. Чтобы указать
                      несколько файлов ответов, укажите каждый из них
                      по отдельности.
-
-                     Любые файлы ответов с именем "msbuild.rsp" автоматически
+                     
+                     Любые файлы ответов с именем "msbuild.rsp" автоматически 
                      используются из следующих расположений:
                      (1) каталог msbuild.exe;
                      (2) каталог первого собираемого проекта или решения.
@@ -256,8 +262,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>  -noAutoResponse    Do not auto-include any MSBuild.rsp files. (Short form:
                      -noAutoRsp)
 </source>
-        <target state="needs-review-translation">  /noautoresponse    Не включать автоматически никакие файлы MSBuild.rsp. (Краткая форма:
-                     /noautorsp)
+        <target state="translated">  -noAutoResponse    Не включать автоматически никакие файлы MSBuild.rsp. (Краткая форма:
+                     -noAutoRsp)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -275,11 +281,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="needs-review-translation">  /target:&lt;целевые_объекты&gt; Собрать эти целевые объекты в конкретном проекте. Используйте точку с запятой или
+        <target state="translated">  -target:&lt;целевые_объекты&gt; Собрать эти целевые объекты в конкретном проекте. Используйте точку с запятой или
                      запятую для разделения нескольких целевых объектов или укажите каждый
-                     целевой объект отдельно. (Краткая форма: /t)
+                     целевой объект отдельно. (Краткая форма: -t)
                      Пример:
-                       /target:Resources;Compile
+                       -target:Resources;Compile
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -298,12 +304,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="needs-review-translation">  /property:&lt;n&gt;=&lt;v&gt;  Задать или переопределить конкретные свойства уровня проекта. &lt;n&gt; является
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Задать или переопределить конкретные свойства уровня проекта. &lt;n&gt; является
                      именем свойства, а &lt;v&gt; — значением свойства. Используйте
                      точку с запятой или запятую для разделения нескольких свойств или
-                     укажите каждое свойство отдельно. (Краткая форма: /p)
+                     укажите каждое свойство отдельно. (Краткая форма: -p)
                      Пример:
-                       /property:WarningLevel=2;OutDir=bin\Debug\
+                       -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -329,7 +335,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  /logger:&lt;средство&gt;   Использовать средство ведения журнала для записи событий из MSBuild. Чтобы указать
+        <target state="translated">  -logger:&lt;средство&gt;   Использовать средство ведения журнала для записи событий из MSBuild. Чтобы указать
                      несколько средств ведения журнала, задайте каждое средство отдельно.
                      Синтаксис &lt;средство&gt;:
                        [&lt;класс_средства&gt;,]&lt;сборка_средства&gt;[;&lt;параметры_средства&gt;]
@@ -338,10 +344,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Синтаксис &lt;сборка_средства&gt;:
                        {&lt;имя_сборки&gt;[,&lt;строгое_имя&gt;] | &lt;файл_сборки&gt;}
                      &lt;Параметры_средства&gt; являются необязательными и передаются
-                     в средство ведения журнала в том виде, в каком были введены. (Краткая форма: /l)
+                     в средство ведения журнала в том виде, в каком были введены. (Краткая форма: -l)
                      Примеры:
-                       /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -359,11 +365,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="needs-review-translation">  /verbosity:&lt;уровень&gt; Отобразить указанный объем информации в журнале событий.
+        <target state="translated">  -verbosity:&lt;уровень&gt; Отобразить указанный объем информации в журнале событий.
                      Доступные уровни детализации: q[uiet], m[inimal],
-                     n[ormal], d[etailed] и diag[nostic]. (Краткая форма: /v)
+                     n[ormal], d[etailed] и diag[nostic]. (Краткая форма: -v)
                      Пример:
-                       /verbosity:quiet
+                       -verbosity:quiet
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -410,8 +416,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  /consoleloggerparameters:&lt;параметры&gt;
-                     Параметры для журнала консоли. (Краткая форма: /clp)
+        <target state="translated">  -consoleLoggerParameters:&lt;параметры&gt;
+                     Параметры для журнала консоли. (Краткая форма: -clp)
                      Доступные параметры
                         PerformanceSummary — отобразить время, проведенное в задачах, целевых объектах
                             и проектах.
@@ -439,10 +445,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             режиме. Этот стиль используется по умолчанию.
                         ForceConsoleColor — использовать цвета консоли ANSI, даже если
                             консоль их не поддерживает.
-                        Verbosity — переопределяет настройку /verbosity для этого
+                        Verbosity — переопределяет настройку -verbosity для этого
                             журнала.
                      Пример:
-                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -458,8 +464,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>  -noConsoleLogger   Disable the default console logger and do not log events
                      to the console. (Short form: -noConLog)
 </source>
-        <target state="needs-review-translation">  /noconsolelogger   Отключить средство ведения журнала консоли по умолчанию
-                     и не записывать события в консоль. (Краткая форма: /noconlog)
+        <target state="translated">  -noConsoleLogger   Отключить средство ведения журнала консоли по умолчанию
+                     и не записывать события в консоль. (Краткая форма: -noConLog)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -479,13 +485,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="needs-review-translation">  /validate          Проверить проект схемой по умолчанию. (Краткая
-                     форма: /val)
+        <target state="translated">  -validate          Проверить проект схемой по умолчанию. (Краткая
+                     форма: -val)
 
-  /validate:&lt;схема&gt; Проверить проект указанной схемой. (Краткая
-                     форма: /val)
+  -validate:&lt;схема&gt; Проверить проект указанной схемой. (Краткая
+                     форма: -val)
                      Пример:
-                       /validate:MyExtendedBuildSchema.xsd
+                       -validate:MyExtendedBuildSchema.xsd
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -503,11 +509,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: -m[:n])
       </source>
-        <target state="needs-review-translation">  /maxcpucount[:n]   Указывает максимальное число одновременных процессов,
-                     с помощью которых выполняется сборка. Если параметр не используется, значение
-                     по умолчанию — 1. Если параметр используется без значения,
-                     MSBuild сможет использовать число процессов вплоть до количества процессоров на
-                     компьютере. (Краткая форма: /m[:n])
+        <target state="translated">  -maxCpuCount[:n]   Указывает максимальное количество
+                     параллельных процессов сборки. Если ключ
+                     не используется, применяется значение по умолчанию 1.
+                     Если ключ используется без значения, MSBuild
+                     будет использовать то количество процессоров,
+                     которое установлено на компьютере. (Краткая форма: -m[:n])
       </target>
         <note>
           LOCALIZATION: "maxCpuCount" should not be localized.
@@ -521,11 +528,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         MSBuild MyApp.csproj -t:Clean
                              -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="needs-review-translation">Примеры:
+        <target state="translated">Примеры:
 
-        MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean
-                             /p:Configuration=Debug;TargetFrameworkVersion=v3.5
+        MSBuild MyApp.sln -t:Rebuild -p:Configuration=Release
+        MSBuild MyApp.csproj -t:Clean
+                             -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -538,7 +545,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="HelpPrompt">
         <source>For switch syntax, type "MSBuild -help"</source>
-        <target state="needs-review-translation">Для переключения синтаксиса введите "MSBuild /help"</target>
+        <target state="translated">Для переключения синтаксиса введите "MSBuild -help"</target>
         <note>UE: this message is shown when the user makes a syntax error on the command-line for a switch.
     LOCALIZATION: "MSBuild -help" should not be localized.</note>
       </trans-unit>
@@ -560,11 +567,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  /distributedlogger:&lt;центральный_журнал&gt;*&lt;перенаправляющий_журнал&gt;
+        <target state="translated">  -distributedLogger:&lt;центральный_журнал&gt;*&lt;перенаправляющий_журнал&gt; 
                      Используйте это средство ведения журнала для записи событий из MSBuild с прикреплением
                      разных экземпляров к каждому узлу. Чтобы указать
                      несколько журналов, задавайте каждый из них по отдельности.
-                     (Краткая форма: /dl)
+                     (Краткая форма: -dl)
                      Синтаксис &lt;журнала&gt;:
                        [&lt;класс_журнала&gt;,]&lt;сборка_журнала&gt;[;&lt;параметры_журнала&gt;]
                      Синтаксис &lt;класс_журнала&gt;:
@@ -572,10 +579,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Синтаксис &lt;сборки_журнала&gt;:
                        {&lt;имя_сборки&gt;[,&lt;строгое_имя&gt;] | &lt;файл_сборки&gt;}
                      &lt;Параметры_журнала&gt; являются необязательными и передаются
-                     в средство ведения журнала точно в том виде, в котором они введены. (Краткая форма: /l)
+                     в средство ведения журнала точно в том виде, в котором они введены. (Краткая форма: -l)
                      Примеры:
-                       /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -595,13 +602,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="needs-review-translation">  /ignoreprojectextensions:&lt;расширения&gt;
+        <target state="translated">  -ignoreProjectExtensions:&lt;расширения&gt;
                      Список расширений, которые пропускаются при определении
                      файла проекта для сборки. Используйте точку с запятой или запятую,
                      чтобы отделять разные расширения.
-                     (Краткая форма: /ignore)
+                     (Краткая форма: -ignore)
                      Пример:
-                       /ignoreprojectextensions:.sln
+                       -ignoreProjectExtensions:.sln
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -621,13 +628,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -toolsVersion:3.5
    </source>
-        <target state="needs-review-translation">  /toolsversion:&lt;версия&gt;
+        <target state="translated">  -toolsVersion:&lt;версия&gt;
                      Версия набора инструментов MSBuild (задачи, целевые объекты и т. д.),
                      используемая во время сборки. Эта версия переопределит
                      версии, указанные отдельными проектами. (Краткая форма:
-                     /tv)
+                     -tv)
                      Пример:
-                       /toolsversion:3.5
+                       -toolsversion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -648,14 +655,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: -fl[n])
     </source>
-        <target state="needs-review-translation">  /fileLogger[n]     Записывает выходные данные сборки в файл. По умолчанию
+        <target state="translated">  -fileLogger[n]     Записывает выходные данные сборки в файл. По умолчанию
                      файл находится в текущем каталоге и называется
                      "msbuild[n].log". События из всех узлов объединяются в
                      один журнал. Расположение файла и других
                      параметров для fileLogger можно указать,
-                     добавив параметр "/fileLoggerParameters[n]".
+                     добавив параметр "-fileLoggerParameters[n]".
                      Значение "n" (при наличии) может быть цифрой от 1 до 9 и позволяет
-                     прикрепить до 10 средств ведения файловых журналов. (Краткая форма: /fl[n])
+                     прикрепить до 10 средств ведения файловых журналов. (Краткая форма: -fl[n])
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -680,13 +687,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="needs-review-translation">  /distributedFileLogger
+        <target state="translated">  -distributedFileLogger
                      Записывает выходные данные сборки в несколько файлов журнала: по одному файлу журнала
                      на узел MSBuild. Начальное расположение для этих файлов —
                      текущий каталог. По умолчанию файлы называются
                      "MSBuild&lt;идентификатор_узла&gt;.log". Расположение файлов и
                      других параметров для fileLogger можно указать,
-                     добавив параметр "/fileLoggerParameters".
+                     добавив параметр "-fileLoggerParameters".
 
                      Если с помощью параметра fileLoggerParameters задано имя файла журнала (fileName),
                      распределенное средство ведения журнала будет использовать это имя в качестве
@@ -732,14 +739,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="needs-review-translation">  /fileloggerparameters[n]:&lt;параметры&gt;
+        <target state="translated">  -fileLoggerParameters[n]:&lt;параметры&gt;
                      Предоставляет дополнительные параметры для средств ведения журналов в виде файла.
                      Присутствие этого параметра подразумевает использование
-                     соответствующего параметра /filelogger[n].
+                     соответствующего параметра -fileLogger[n].
                      Значение "n" (при наличии) может быть цифрой от 1 до 9.
-                     Свойство /fileloggerparameters также может использоваться любыми распределенными
-                     средствами ведения файловых журналов. См. описание /distributedFileLogger.
-                     (Краткая форма: /flp[n])
+                     Свойство -fileLoggerParameters также может использоваться любыми распределенными
+                     средствами ведения файловых журналов. См. описание -distributedFileLogger.
+                     (Краткая форма: -flp[n])
                      Доступны те же параметры, что перечислены для средства ведения журнала
                      консоли. Вот некоторые дополнительные параметры.
                         LogFile — путь к файлу журнала, в который будет
@@ -754,12 +761,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             например UTF-8, Юникод или ASCII.
                      Детализация по умолчанию — подробная.
                      Примеры:
-                       /fileLoggerParameters:LogFile=MyLog.log;Append;
+                       -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       /flp1:warningsonly;logfile=msbuild.wrn
-                       /flp2:errorsonly;logfile=msbuild.err
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -781,15 +788,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -nr:true
     </source>
-        <target state="needs-review-translation">  /nodeReuse:&lt;параметры&gt;
+        <target state="translated">  -nodeReuse:&lt;параметры&gt;
                      Включает или отключает многократное использование узлов MSBuild.
                      Параметры:
-                     True — узлы останутся после завершения сборки
+                     True — узлы останутся после завершения сборки
                             и будут еще раз использованы в последующих сборках (по умолчанию)
-                     False — узлы не останутся после завершения сборки
-                     (Краткая форма: /nr)
+                     False — узлы не останутся после завершения сборки
+                     (Краткая форма: -nr)
                      Пример:
-                       /nr:true
+                       -nr:true
     </target>
         <note />
       </trans-unit>
@@ -807,7 +814,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -pp:out.txt
     </source>
-        <target state="needs-review-translation">  /preprocess[:file]
+        <target state="translated">  -preprocess[:file]
                      Создает один объединенный файл проекта,
                      встраивая в него все файлы, которые были бы импортированы во время сборки,
                      и отмечая их границы. Это может быть
@@ -816,9 +823,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      сборку. По умолчанию выходные данные записываются в
                      окно консоли. Если указан путь к файлу выходных
                      данных, то будет использоваться этот файл.
-                     (Краткая форма: /pp)
+                     (Краткая форма: -pp)
                      Пример:
-                       /pp:out.txt
+                       -pp:out.txt
     </target>
         <note />
       </trans-unit>
@@ -829,11 +836,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  /detailedsummary
+        <target state="translated">  -detailedSummary
                      Показывает в конце сборки подробные сведения
                      о созданных конфигурациях и графике их передачи
                      на узлы.
-                     (Краткая форма: /ds)
+                     (Краткая форма: -ds)
     </target>
         <note />
       </trans-unit>
@@ -848,7 +855,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid. {0}</target>
+        <target state="translated">MSBUILD: ошибка MSB1057 — значение сборки графа является недопустимым. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -858,7 +865,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidInteractiveValue">
         <source>MSBUILD : error MSB1055: Interactive value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1055: Interactive value is not valid. {0}</target>
+        <target state="translated">MSBUILD: ошибка MSB1055 — интерактивное значение является недопустимым. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1055: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -868,7 +875,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</target>
+        <target state="translated">MSBUILD: ошибка MSB1056 — значение изолирования проектов является недопустимым. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -878,7 +885,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidLoggerError">
         <source>MSBUILD : error MSB1019: Logger switch was not correctly formed.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1019: ключ журнала сформирован некорректно.</target>
+        <target state="translated">MSBUILD : error MSB1019: ключ журнала сформирован некорректно.</target>
         <note>{StrBegin="MSBUILD : error MSB1019: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user does any of the following:
       msbuild.exe -logger:;"logger parameters"                    (missing logger class and assembly)
@@ -890,7 +897,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidMaxCPUCountValue">
         <source>MSBUILD : error MSB1030: Maximum CPU count is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1030: недопустимое значение наиб. ЦП. {0}</target>
+        <target state="translated">MSBUILD : error MSB1030: недопустимое значение наиб. ЦП. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1030: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -900,7 +907,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidMaxCPUCountValueOutsideRange">
         <source>MSBUILD : error MSB1032: Maximum CPU count is not valid. Value must be an integer greater than zero and no more than 1024.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1032: недопустимое значение максимального числа ЦП. Значение должно быть целым числом больше нуля и не более 1024.</target>
+        <target state="translated">MSBUILD : error MSB1032: недопустимое значение максимального числа ЦП. Значение должно быть целым числом больше нуля и не более 1024.</target>
         <note>{StrBegin="MSBUILD : error MSB1032: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a CPU value that is zero or less. For example, -m:0 instead of -m:2.
@@ -909,7 +916,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeNumberValue">
         <source>MSBUILD : error MSB1033: Node number is not valid. {0}.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1033: недопустимый номер узла. {0}.</target>
+        <target state="translated">MSBUILD : error MSB1033: недопустимый номер узла. {0}.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1033: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -919,7 +926,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeNumberValueIsNegative">
         <source>MSBUILD : error MSB1034: Node number is not valid. Value must be an integer greater than zero.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1034: недопустимый номер узла. Значение должно быть целым числом больше нуля.</target>
+        <target state="translated">MSBUILD : error MSB1034: недопустимый номер узла. Значение должно быть целым числом больше нуля.</target>
         <note>{StrBegin="MSBUILD : error MSB1034: "}
         UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
         This error is shown when a user specifies a CPU value that is zero or less. For example, -nodeMode:0 instead of -nodeMode:2.
@@ -928,7 +935,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidPropertyError">
         <source>MSBUILD : error MSB1006: Property is not valid.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1006: недопустимое свойство.</target>
+        <target state="translated">MSBUILD : error MSB1006: недопустимое свойство.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1006: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown if the user does any of the following:
@@ -946,7 +953,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidSwitchIndicator">
         <source>Switch: {0}</source>
-        <target state="needs-review-translation">Ключ: {0}</target>
+        <target state="translated">Ключ: {0}</target>
         <note>
       UE: This is attached to error messages caused by an invalid switch. This message indicates what the invalid arg was.
       For example, if an unknown switch is passed to MSBuild.exe, the error message will look like this:
@@ -957,7 +964,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidToolsVersionError">
         <source>MSBUILD : error MSB1040: ToolsVersion is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1040: недопустимая версия ToolsVersion. {0}</target>
+        <target state="translated">MSBUILD : error MSB1040: недопустимая версия ToolsVersion. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1040: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -967,7 +974,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidVerbosityError">
         <source>MSBUILD : error MSB1018: Verbosity level is not valid.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1018: недопустимый уровень детализации.</target>
+        <target state="translated">MSBUILD : error MSB1018: недопустимый уровень детализации.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1018: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an unknown verbosity level e.g. "msbuild -verbosity:foo". The only valid verbosities
@@ -977,7 +984,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="LoggerFatalError">
         <source>MSBUILD : error MSB1028: The logger failed unexpectedly.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1028: неожиданный сбой журнала.</target>
+        <target state="translated">MSBUILD : error MSB1028: неожиданный сбой журнала.</target>
         <note>{StrBegin="MSBUILD : error MSB1028: "}
       UE: This error is shown when a logger specified with the -logger switch throws an exception while being
       initialized. This message is followed by the exception text including the stack trace.
@@ -1004,7 +1011,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1007: укажите журнал.</target>
+        <target state="translated">MSBUILD : error MSB1007: укажите журнал.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1007: "}UE: This happens if the user does something like "msbuild.exe -logger". The user must pass in an actual logger class
       following the switch, as in "msbuild.exe -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral".
@@ -1013,7 +1020,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingMaxCPUCountError">
         <source>MSBUILD : error MSB1031: Specify the maximum number of CPUs.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1031: задайте максимальное число процессоров.</target>
+        <target state="translated">MSBUILD : error MSB1031: задайте максимальное число процессоров.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1031: "}UE: This happens if the user does something like "msbuild.exe -m". The user must pass in an actual number like -m:4.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1030,7 +1037,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingPropertyError">
         <source>MSBUILD : error MSB1005: Specify a property and its value.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1005: укажите свойство и его значение.</target>
+        <target state="translated">MSBUILD : error MSB1005: укажите свойство и его значение.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1005: "}UE: This happens if the user does something like "msbuild.exe -property". The user must pass in an actual property
       name and value following the switch, as in "msbuild.exe -property:Configuration=Debug".
@@ -1048,7 +1055,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingTargetError">
         <source>MSBUILD : error MSB1004: Specify the name of the target.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1004: укажите имя конечного объекта.</target>
+        <target state="translated">MSBUILD : error MSB1004: укажите имя конечного объекта.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1004: "}UE: This happens if the user does something like "msbuild.exe -target". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -target:blah".
@@ -1057,7 +1064,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingToolsVersionError">
         <source>MSBUILD : error MSB1039: Specify the version of the toolset.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1039: укажите версию набора инструментов.</target>
+        <target state="translated">MSBUILD : error MSB1039: укажите версию набора инструментов.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1039: "}
       UE: This happens if the user does something like "msbuild.exe -toolsVersion". The user must pass in an actual toolsversion
@@ -1067,7 +1074,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingVerbosityError">
         <source>MSBUILD : error MSB1016: Specify the verbosity level.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1016: укажите уровень детализации.</target>
+        <target state="translated">MSBUILD : error MSB1016: укажите уровень детализации.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1016: "}UE: This happens if the user does something like "msbuild.exe -verbosity". The user must pass in a verbosity level
       after the switch e.g. "msbuild.exe -verbosity:detailed".
@@ -1076,7 +1083,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MultipleSchemasError">
         <source>MSBUILD : error MSB1024: Only one schema can be specified for validation of the project.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1024: для проверки проекта можно указать только одну схему.</target>
+        <target state="translated">MSBUILD : error MSB1024: для проверки проекта можно указать только одну схему.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1084,7 +1091,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="PickedUpSwitchesFromAutoResponse">
         <source>Some command line switches were read from the auto-response file "{0}". To disable this file, use the "-noAutoResponse" switch.</source>
-        <target state="needs-review-translation">Некоторые параметры командной строки были считаны из файла автоматического ответа "{0}". Чтобы отключить этот файл, используйте параметр "/noautoresponse".</target>
+        <target state="translated">Некоторые параметры командной строки были считаны из файла автоматического ответа "{0}". Чтобы отключить этот файл, используйте параметр "-noAutoResponse".</target>
         <note>
       UE: This message appears in high verbosity modes when we used some
       switches from the auto-response file msbuild.rsp: otherwise the user may be unaware
@@ -1099,7 +1106,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="PossiblyOmittedMaxCPUSwitch">
         <source>Building the projects in this solution one at a time. To enable parallel build, please add the "-m" switch.</source>
-        <target state="needs-review-translation">Выполняется последовательная сборка проектов в этом решении. Чтобы включить параллельную сборку, добавьте параметр "/m".</target>
+        <target state="translated">Выполняется последовательная сборка проектов в этом решении. Чтобы включить параллельную сборку, добавьте параметр "-m".</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectSchemaErrorHalt">
@@ -1138,14 +1145,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="SchemaValidationError">
         <source>MSBUILD : MSB1044: Project is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : MSB1044: проект недействителен. {0}</target>
+        <target state="translated">MSBUILD : MSB1044: проект недействителен. {0}</target>
         <note>{StrBegin="MSBUILD : MSB1044: "}UE: This error is shown when the user asks his project to be validated against a schema (-val switch for
     MSBuild.exe), and the project has errors. "{0}" contains a message explaining the problem.
     LOCALIZATION: "{0}" is a message from the System.XML schema validator and is already localized.</note>
       </trans-unit>
       <trans-unit id="SchemaNotFoundError">
         <source>MSBUILD : error MSB1026: Schema file does not exist.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1026: файл схемы не существует.</target>
+        <target state="translated">MSBUILD : error MSB1026: файл схемы не существует.</target>
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is shown when the user specifies a schema file using the -validate:&lt;schema&gt; switch, and the file
     does not exist on disk. This message does not need in-line parameters because the exception takes care of displaying the
     invalid arg.
@@ -1160,7 +1167,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1002: у этого ключа нет параметров.</target>
+        <target state="translated">MSBUILD : error MSB1002: у этого ключа нет параметров.</target>
         <note>{StrBegin="MSBUILD : error MSB1002: "}UE: For example, if somebody types "msbuild.exe -noLogo:1", they would get this error because the -noLogo switch
     should not be followed by any parameters ... it stands alone.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
@@ -1183,7 +1190,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingIgnoreProjectExtensionsError">
         <source>MSBUILD : error MSB1035: Specify the project extensions to ignore.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1035: задайте игнорируемые расширения проекта.</target>
+        <target state="translated">MSBUILD : error MSB1035: задайте игнорируемые расширения проекта.</target>
         <note>{StrBegin="MSBUILD : error MSB1035: "}
       UE: This happens if the user does something like "msbuild.exe -ignoreProjectExtensions". The user must pass in one or more
       project extensions to ignore e.g. "msbuild.exe -ignoreProjectExtensions:.sln".
@@ -1192,12 +1199,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidExtensionToIgnore">
         <source>MSBUILD : error MSB1036: There is an invalid extension in the -ignoreProjectExtensions list. Extensions must start with a period ".", have one or more characters after the period and not contain any invalid path characters or wildcards.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1036: недопустимое расширение в списке /ignoreprojectextensions. Расширения должны начинаться с точки ".", содержать один или несколько символов после точки и не могут включать в себя какие-либо недопустимые символы пути или подстановочные знаки.</target>
+        <target state="translated">MSBUILD : ошибка MSB1036: недопустимое расширение в списке -ignoreProjectExtensions. Расширения должны начинаться с точки ".", содержать один или несколько символов после точки и не могут включать в себя какие-либо недопустимые символы пути или подстановочные знаки.</target>
         <note>{StrBegin="MSBUILD : error MSB1036: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MissingConsoleLoggerParameterError">
         <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1037: задайте один или несколько параметров журнала консоли при использования ключа /consoleLoggerParameters</target>
+        <target state="translated">MSBUILD : ошибка MSB1037: задайте один или несколько параметров журнала консоли при использовании ключа -consoleLoggerParameters</target>
         <note>{StrBegin="MSBUILD : error MSB1037: "}
       UE: This happens if the user does something like "msbuild.exe -consoleLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -consoleLoggerParameters:ErrorSummary".
@@ -1206,7 +1213,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingFileLoggerParameterError">
         <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1038: задайте один или несколько параметров для журнала файла при использования ключа /fileLoggerParameters</target>
+        <target state="translated">MSBUILD : ошибка MSB1038: задайте один или несколько параметров для журнала файла при использовании ключа -fileLoggerParameters</target>
         <note>{StrBegin="MSBUILD : error MSB1038: "}
       UE: This happens if the user does something like "msbuild.exe -fileLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -fileLoggerParameters:logfile=c:\temp\logfile".
@@ -1215,7 +1222,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingNodeReuseParameterError">
         <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1041: задайте один или несколько параметров для повторного использования узла при использовании ключа /nodereuse</target>
+        <target state="translated">MSBUILD : ошибка MSB1041: задайте один или несколько параметров для повторного использования узла при использовании ключа -nodeReuse</target>
         <note>{StrBegin="MSBUILD : error MSB1041: "}
       UE: This happens if the user does something like "msbuild.exe -nodeReuse:" without a true or false
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1250,7 +1257,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="LoggerNotFoundError">
         <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1020: не удалось найти средство ведения журнала. Убедитесь в следующем. 1. Имя средства ведения журнала совпадает с именем класса средства ведения журнала. 2. Класс средства ведения журнала является открытым и реализует интерфейс Microsoft.Build.Framework.ILogger. 3. Путь к сборке ведения журнала правильный или средство ведения журнала можно успешно загрузить, используя только указанное имя сборки.</target>
+        <target state="translated">MSBUILD : error MSB1020: не удалось найти средство ведения журнала. Убедитесь в следующем. 1. Имя средства ведения журнала совпадает с именем класса средства ведения журнала. 2. Класс средства ведения журнала является открытым и реализует интерфейс Microsoft.Build.Framework.ILogger. 3. Путь к сборке ведения журнала правильный или средство ведения журнала можно успешно загрузить, используя только указанное имя сборки.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
@@ -1307,15 +1314,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      continue to execute as if it was a warning but the overall
                      build will fail.
     </source>
-        <target state="needs-review-translation">  /warnaserror[:код[;код_2]]
+        <target state="translated">  -warnAsError[:код[;код_2]]
                      Список кодов предупреждений, которые следует считать
                      ошибками. Чтобы разделить коды, используйте точку с запятой
                      или запятую. Параметр без значений
                      указывает считать все предупреждения ошибками.
-                     (краткая форма: /err[:код;[код_2]])
+                     (краткая форма: -err[:код;[код_2]])
 
                      Пример:
-                       /warnaserror:MSB4130
+                       -warnAsError:MSB4130
 
                      Если предупреждение считается ошибкой, целевой объект
                      продолжит выполняться (что и происходит в случае возникновения
@@ -1336,15 +1343,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -warnAsMessage:MSB3026
     </source>
-        <target state="needs-review-translation">  /warnasmessage[:код[;код_2]]
+        <target state="translated">  -warnAsMessage[:код[;код_2]]
                      Список кодов предупреждений, которые следует считать
                      сообщениями с низкой важностью.
                      Чтобы разделить коды,
                      используйте точку с запятой или запятую.
-                     (краткая форма: /nowarn[:код;[код_2]])
+                     (краткая форма: -noWarn[:код;[код_2]])
 
                      Пример:
-                       /warnasmessage:MSB3026
+                       -warnAsMessage:MSB3026
     </target>
         <note>
       LOCALIZATION: "-warnAsMessage" and "-noWarn" should not be localized.
@@ -1358,7 +1365,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="needs-review-translation">MSBUILD: error MSB1051: если используется параметр /warnasmessage, нужно указать один код предупреждения (или несколько), которые следует считать сообщениями с низкой важностью.</target>
+        <target state="translated">MSBUILD: ошибка MSB1051: если используется параметр -warnAsMessage, нужно указать один код предупреждения (или несколько), которые следует считать сообщениями с низкой важностью.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1409,7 +1416,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Сериализует все события сборки в сжатый двоичный файл.
                      По умолчанию файл находится в текущем каталоге и называется
                      "msbuild.binlog". Двоичный журнал включает подробное описание
@@ -1417,7 +1424,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      текстовых журналов. Он также может использоваться другими средствами анализа. Двоичный журнал
                      обычно в 10–20 раз меньше самого подробного текстового
                      журнала уровня диагностики, но содержит больше информации.
-                     (Краткая форма: /bl)
+                     (Краткая форма: -bl)
 
                      Средство ведения двоичного журнала по умолчанию собирает исходный текст
                      файлов проекта, включая все импортированные проекты и целевые
@@ -1445,12 +1452,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      Примеры:
-                       /bl
-                       /bl:output.binlog
-                       /bl:output.binlog;ProjectImports=None
-                       /bl:output.binlog;ProjectImports=ZipFile
-                       /bl:..\..\custom.binlog
-                       /binaryLogger
+                       -bl
+                       -bl:output.binlog
+                       -bl:output.binlog;ProjectImports=None
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1472,14 +1479,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      a value that comes from a response file.
                      (Short form: -r)
     </source>
-        <target state="needs-review-translation">  /restore[:True|False]
-                     Запускает целевой объект с именем "Восстановление" перед сборкой
-                     других целевых объектов. Это может быть полезно, если дереву
-                     проектов нужно восстановить пакеты перед
-                     их сборкой. Параметры /restore и /restore:True
-                     взаимозаменяемы. Используйте один из параметров, чтобы
-                     переопределить значение, полученное из файла ответа.
-                     (Краткая форма: /r)
+        <target state="translated">  -restore[:True|False]
+                     Запускает целевой объект с именем "Восстановление перед сборкой
+                     других целевых объектов" и гарантирует, что сборка для этих
+                     целевых объектов использует логику последней восстановленной сборки.
+                     Это полезно, если дереву проектов нужно
+                     восстановить пакеты перед сборкой.
+                     Указание -restore аналогично указанию
+                     -restore:True. Используйте этот параметр, чтобы переопределить
+                     значение, поступающее от файла ответа.
+                     (Краткая форма: -r)
     </target>
         <note>
       LOCALIZATION: "-restore" and "-r" should not be localized.
@@ -1511,7 +1520,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="needs-review-translation">  /profileevaluation:&lt;файл&gt;
+        <target state="translated">  -profileEvaluation:&lt;файл&gt;    
                      Профилирует вычисление MSBuild и записывает результат
                      в указанный файл. Если файл имеет расширение
                      ".md", результат создается в формате Markdown.
@@ -1531,16 +1540,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
-        <target state="needs-review-translation">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+        <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
                      Задавайте или переопределяйте эти свойства уровня проекта только
                      при восстановлении и не используйте указанные свойства
-                     с аргументом "/property". &lt;n&gt; — это имя свойства,
+                     с аргументом "-property". &lt;n&gt; — это имя свойства,
                      а &lt;v&gt; — его значение. Используйте для разделения
                      свойств запятую или точку с запятой либо укажите
                      каждое свойство по-отдельности.
-                     (Краткая форма: /rp)
+                     (Краткая форма: -rp)
                      Пример:
-                       /restoreProperty:IsRestore=true;&lt;Свойство&gt;=&lt;значение&gt;
+                       -restoreProperty:IsRestore=true;&lt;Свойство&gt;=&lt;значение&gt;
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.

@@ -69,7 +69,7 @@ namespace Microsoft.Build.Execution
     /// Constructors are internal in order to direct users to Project class instead; these are only createable via Project objects.
     /// </comments>
     [DebuggerDisplay(@"{FullPath} #Targets={TargetsCount} DefaultTargets={(DefaultTargets == null) ? System.String.Empty : System.String.Join("";"", DefaultTargets.ToArray())} ToolsVersion={Toolset.ToolsVersion} InitialTargets={(InitialTargets == null) ? System.String.Empty : System.String.Join("";"", InitialTargets.ToArray())} #GlobalProperties={GlobalProperties.Count} #Properties={Properties.Count} #ItemTypes={ItemTypes.Count} #Items={Items.Count}")]
-    public class ProjectInstance : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>, IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>, INodePacketTranslatable
+    public class ProjectInstance : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>, IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>, ITranslatable
     {
         /// <summary>
         /// Targets in the project after overrides have been resolved.
@@ -443,9 +443,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
-        private ProjectInstance(INodePacketTranslator translator)
+        private ProjectInstance(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -1858,7 +1858,7 @@ namespace Microsoft.Build.Execution
         /// Translate the project instance to or from a stream.
         /// Only translates global properties, properties, items, and mutability.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _translateEntireState);
 
@@ -1872,7 +1872,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal void TranslateMinimalState(INodePacketTranslator translator)
+        internal void TranslateMinimalState(ITranslator translator)
         {
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
@@ -1880,7 +1880,7 @@ namespace Microsoft.Build.Execution
             TranslateItems(translator);
         }
 
-        private void TranslateAllState(INodePacketTranslator translator)
+        private void TranslateAllState(ITranslator translator)
         {
             TranslateProperties(translator);
             TranslateItems(translator);
@@ -1899,7 +1899,7 @@ namespace Microsoft.Build.Execution
                 capacity => new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
         }
 
-        private void TranslateToolsetSpecificState(INodePacketTranslator translator)
+        private void TranslateToolsetSpecificState(ITranslator translator)
         {
             translator.Translate(ref _toolset, Toolset.FactoryForDeserialization);
             translator.Translate(ref _usingDifferentToolsVersionFromProjectFile);
@@ -1908,7 +1908,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _subToolsetVersion);
         }
 
-        private void TranslateProperties(INodePacketTranslator translator)
+        private void TranslateProperties(ITranslator translator)
         {
             translator.TranslateDictionary(ref _environmentVariableProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
@@ -1923,7 +1923,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private void TranslateTargets(INodePacketTranslator translator)
+        private void TranslateTargets(ITranslator translator)
         {
             translator.TranslateDictionary(ref _targets,
                 ProjectTargetInstance.FactoryForDeserialization,
@@ -1937,18 +1937,18 @@ namespace Microsoft.Build.Execution
         }
 
         // todo move to nested function after c#7
-        private static void TranslatorForTargetSpecificDictionaryKey(ref string key, INodePacketTranslator translator)
+        private static void TranslatorForTargetSpecificDictionaryKey(ref string key, ITranslator translator)
         {
             translator.Translate(ref key);
         }
 
         // todo move to nested function after c#7
-        private static void TranslatorForTargetSpecificDictionaryValue(ref List<TargetSpecification> value, INodePacketTranslator translator)
+        private static void TranslatorForTargetSpecificDictionaryValue(ref List<TargetSpecification> value, ITranslator translator)
         {
             translator.Translate(ref value, TargetSpecification.FactoryForDeserialization);
         }
 
-        private void TranslateItems(INodePacketTranslator translator)
+        private void TranslateItems(ITranslator translator)
         {
             // ignore EvaluatedItemElements. Only used by public API users, not nodes
             // ignore itemsByEvaluatedInclude. Only used by public API users, not nodes
@@ -2078,7 +2078,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static ProjectInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectInstance FactoryForDeserialization(ITranslator translator)
         {
             return new ProjectInstance(translator);
         }
@@ -2191,9 +2191,9 @@ namespace Microsoft.Build.Execution
         /// Cache the contents of this project instance to the translator.
         /// The object is retained, but the bulk of its content is released.
         /// </summary>
-        internal void Cache(INodePacketTranslator translator)
+        internal void Cache(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
 
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -2206,9 +2206,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Retrieve the contents of this project from the translator.
         /// </summary>
-        internal void RetrieveFromCache(INodePacketTranslator translator)
+        internal void RetrieveFromCache(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>

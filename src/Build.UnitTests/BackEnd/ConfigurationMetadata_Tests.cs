@@ -16,6 +16,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd;
 using System.IO;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -125,6 +126,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration config3 = new BuildRequestConfiguration(1, data, "3.0");
             ConfigurationMetadata metadata4 = new ConfigurationMetadata(config3);
             Assert.False(metadata1.Equals(metadata4));
+        }
+
+        [Fact]
+        public void TestTranslation()
+        {
+            var globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
+            globalProperties["a"] = ProjectPropertyInstance.Create("a", "b");
+
+            var initial = new ConfigurationMetadata("path", globalProperties);
+
+            initial.Translate(TranslationHelpers.GetWriteTranslator());
+            var copy = ConfigurationMetadata.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            copy.ProjectFullPath.ShouldBe(initial.ProjectFullPath);
+            copy.ToolsVersion.ShouldBe(initial.ToolsVersion);
+
+            Assert.Equal(copy.GlobalProperties.GetCopyOnReadEnumerable(), initial.GlobalProperties.GetCopyOnReadEnumerable(), EqualityComparer<ProjectPropertyInstance>.Default);
         }
 
         /// <summary>

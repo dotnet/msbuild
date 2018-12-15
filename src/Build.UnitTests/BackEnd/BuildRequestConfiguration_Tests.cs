@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(NodePacketType.BuildRequestConfiguration, config.Type);
 
-            ((INodePacketTranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = BuildRequestConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;

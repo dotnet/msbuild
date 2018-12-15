@@ -17,7 +17,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The configurations
         /// </summary>
-        private Dictionary<int, BuildRequestConfiguration> _configurations;
+        private IDictionary<int, BuildRequestConfiguration> _configurations;
 
         /// <summary>
         /// Object used for locking.
@@ -27,7 +27,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Lookup which can be used to find a configuration with the specified metadata.
         /// </summary>
-        private Dictionary<ConfigurationMetadata, int> _configurationIdsByMetadata;
+        private IDictionary<ConfigurationMetadata, int> _configurationIdsByMetadata;
 
         /// <summary>
         /// The maximum cache entries allowed before a sweep can occur.
@@ -343,6 +343,32 @@ namespace Microsoft.Build.BackEnd
         }
 
         #endregion
+
+        public void Translate(ITranslator translator)
+        {
+            translator.TranslateDictionary(
+                ref _configurations,
+                (ref int configId, ITranslator aTranslator) => aTranslator.Translate(ref configId),
+                (ref BuildRequestConfiguration configuration, ITranslator aTranslator) =>
+                {
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        configuration.TranslateForFutureUse(aTranslator);
+                    }
+                    else
+                    {
+                        configuration = new BuildRequestConfiguration();
+                        configuration.TranslateForFutureUse(aTranslator);
+                    }
+                },
+                capacity => new Dictionary<int, BuildRequestConfiguration>(capacity));
+
+            translator.TranslateDictionary(
+                ref _configurationIdsByMetadata,
+                (ref ConfigurationMetadata configMetadata, ITranslator aTranslator) => aTranslator.Translate(ref configMetadata, ConfigurationMetadata.FactoryForDeserialization),
+                (ref int configId, ITranslator aTranslator) => aTranslator.Translate(ref configId),
+                capacity => new Dictionary<ConfigurationMetadata, int>(capacity));
+        }
 
         /// <summary>
         /// Factory for component creation.

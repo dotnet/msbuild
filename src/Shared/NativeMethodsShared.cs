@@ -56,7 +56,7 @@ namespace Microsoft.Build.Shared
         private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
         private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
 
-        private static DateTime minFileDate = DateTime.FromFileTimeUtc(0);
+        internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
 #if FEATURE_HANDLEREF
         internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
@@ -178,13 +178,6 @@ namespace Microsoft.Build.Shared
             // Who knows
             Unknown
         }
-
-        internal enum MaxPathLimits
-        {
-            Unknown = 0,
-            LegacyWindows = MAX_PATH,
-            None = int.MaxValue,
-        };
 
         #endregion
 
@@ -475,44 +468,46 @@ namespace Microsoft.Build.Shared
 
         #region Member data
 
+        internal static bool HasMaxPath => MaxPath == MAX_PATH;
+
         /// <summary>
-        /// Gets an enum for the max path limit of the current OS.
+        /// Gets the max path limit of the current OS.
         /// </summary>
-        internal static MaxPathLimits OSMaxPathLimit
+        internal static int MaxPath
         {
             get
             {
-#if EXPERIMENTAL_LONGPATHS_ENABLED
-                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                if (!IsMaxPathSet)
                 {
-                    SetOSMaxPathLimit();
+                    SetMaxPath();
                 }
-                return osMaxPathLimit;
-#else
-                return MaxPathLimits.LegacyWindows;
-#endif
+                return _maxPath;
             }
         }
 
         /// <summary>
-        /// Cached value for OSMaxPathLimit.
+        /// Cached value for MaxPath.
         /// </summary>
-        private static MaxPathLimits osMaxPathLimit = MaxPathLimits.Unknown;
+        private static int _maxPath;
 
-        private static readonly object osMaxPathLimitLock = new object();
+        private static bool IsMaxPathSet { get; set; }
 
-        private static void SetOSMaxPathLimit()
+        private static readonly object MaxPathLock = new object();
+
+        private static void SetMaxPath()
         {
-            lock (osMaxPathLimitLock)
+            lock (MaxPathLock)
             {
-                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                if (!IsMaxPathSet)
                 {
-                    osMaxPathLimit = IsMaxPathLimitLegacyWindows() ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
+                    bool isMaxPathRestricted = Traits.Instance.EscapeHatches.DisableLongPaths || IsMaxPathLegacyWindows();
+                    _maxPath = isMaxPathRestricted ? MAX_PATH : int.MaxValue;
+                    IsMaxPathSet = true;
                 }
             }
         }
 
-        private static bool IsMaxPathLimitLegacyWindows()
+        private static bool IsMaxPathLegacyWindows()
         {
             try
             {
@@ -844,7 +839,7 @@ namespace Microsoft.Build.Shared
             }
 
             DateTime lastWriteTime = Directory.GetLastWriteTimeUtc(fullPath);
-            bool directoryExists = lastWriteTime != minFileDate;
+            bool directoryExists = lastWriteTime != MinFileDate;
 
             fileModifiedTimeUtc = directoryExists ? lastWriteTime : DateTime.MinValue;
             return directoryExists;
@@ -987,7 +982,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 DateTime lastWriteTime = File.GetLastWriteTimeUtc(fullPath);
-                bool fileExists = lastWriteTime != minFileDate;
+                bool fileExists = lastWriteTime != MinFileDate;
 
                 fileModifiedTime = fileExists ? lastWriteTime : DateTime.MinValue;
             }

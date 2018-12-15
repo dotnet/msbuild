@@ -172,6 +172,10 @@
   <data name="ToolTask.EnvironmentVariableHeader">
     <value>Environment Variables passed to tool:</value>
   </data>
+  <data name="ToolTask.ValidateParametersFailed">
+    <value>MSB6011: Invalid parameters passed to the {0} task.</value>
+    <comment>{StrBegin="MSB6011: "}</comment>
+  </data>
   <!-- FileTracker strings -->
   <data name="Tracking_LogFilesNotAvailable">
     <value xml:space="preserve">Tracking logs are not available, minimal rebuild will be disabled.</value>
@@ -287,7 +291,7 @@
   <!--
         The Utilities message bucket is: MSB6001 - MSB6200
 
-        Next message code should be MSB6011
+        Next message code should be MSB6012
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

@@ -49,7 +49,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates and routes a packet with data from a binary stream.
         /// </summary>
-        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, INodePacketTranslator translator)
+        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.ContainsKey(packetType))
@@ -99,7 +99,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Creates a packet from a binary stream and sends it to the registered handler.
             /// </summary>
-            public void DeserializeAndRoutePacket(int nodeId, INodePacketTranslator translator)
+            public void DeserializeAndRoutePacket(int nodeId, ITranslator translator)
             {
                 INodePacket packet = _factoryMethod(translator);
                 RoutePacket(nodeId, packet);

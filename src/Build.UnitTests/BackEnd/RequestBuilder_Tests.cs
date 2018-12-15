@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult result = new BuildResult(entry.Request);
                 foreach (string target in targets)
                 {
-                    result.AddResultsForTarget(target, TestUtilities.GetEmptyFailingTargetResult());
+                    result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyFailingTargetResult());
                 }
                 return Task<BuildResult>.FromResult(result);
             }
@@ -390,7 +390,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     BuildResult result = new BuildResult(entry.Request);
                     foreach (string target in targets)
                     {
-                        result.AddResultsForTarget(target, TestUtilities.GetEmptyFailingTargetResult());
+                        result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyFailingTargetResult());
                     }
                     return Task<BuildResult>.FromResult(result);
                 }

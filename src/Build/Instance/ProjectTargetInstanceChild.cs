@@ -13,7 +13,7 @@ namespace Microsoft.Build.Execution
     /// Type for ProjectTaskInstance and ProjectPropertyGroupTaskInstance and ProjectItemGroupTaskInstance
     /// allowing them to be used in a single collection of target children
     /// </summary>
-    public abstract class ProjectTargetInstanceChild : INodePacketTranslatable
+    public abstract class ProjectTargetInstanceChild : ITranslatable
     {
         /// <summary>
         /// Condition on the element
@@ -42,13 +42,13 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public abstract ElementLocation ConditionLocation { get; }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             // all subclasses should be translateable
             ErrorUtilities.ThrowInternalErrorUnreachable();
         }
 
-        internal static ProjectTargetInstanceChild FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectTargetInstanceChild FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectTargetInstanceChild>();
         }

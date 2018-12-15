@@ -336,7 +336,7 @@ namespace Microsoft.Build.Shared
 
                 if (IsPathTooLong(uncheckedFullPath))
                 {
-                    string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, (int)NativeMethodsShared.OSMaxPathLimit);
+                    string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);
                     throw new PathTooLongException(message);
                 }
 
@@ -642,11 +642,8 @@ namespace Microsoft.Build.Shared
 
             if (NativeMethodsShared.IsWindows && !EndsWithSlash(fullPath))
             {
-                Match drive = FileUtilitiesRegex.DrivePattern.Match(fileSpec);
-                Match UNCShare = FileUtilitiesRegex.UNCPattern.Match(fullPath);
-
-                if ((drive.Success && (drive.Length == fileSpec.Length)) ||
-                    (UNCShare.Success && (UNCShare.Length == fullPath.Length)))
+                if (FileUtilitiesRegex.DrivePattern.IsMatch(fileSpec) ||
+                    FileUtilitiesRegex.UncPattern.IsMatch(fullPath))
                 {
                     // append trailing slash if Path.GetFullPath failed to (this happens with drive-specs and UNC shares)
                     fullPath += Path.DirectorySeparatorChar;
@@ -1062,13 +1059,13 @@ namespace Microsoft.Build.Shared
         private static bool IsPathTooLong(string path)
         {
             // >= not > because MAX_PATH assumes a trailing null
-            return path.Length >= (int)NativeMethodsShared.OSMaxPathLimit;
+            return path.Length >= NativeMethodsShared.MaxPath;
         }
 
         private static bool IsPathTooLongIfRooted(string path)
         {
-            bool hasMaxPath = NativeMethodsShared.OSMaxPathLimit != NativeMethodsShared.MaxPathLimits.None;
-            int maxPath = (int)NativeMethodsShared.OSMaxPathLimit;
+            bool hasMaxPath = NativeMethodsShared.HasMaxPath;
+            int maxPath = NativeMethodsShared.MaxPath;
             // >= not > because MAX_PATH assumes a trailing null
             return hasMaxPath && !IsRootedNoThrow(path) && NativeMethodsShared.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= maxPath;
         }

@@ -69,7 +69,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        INodePacketTranslatable
+        ITranslatable
     {
         /// <summary>
         /// The TaskParameterType of the wrapped parameter
@@ -205,7 +205,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Serialize / deserialize this item. 
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.TranslateEnum<TaskParameterType>(ref _parameterType, (int)_parameterType);
 
@@ -261,7 +261,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static TaskParameter FactoryForDeserialization(INodePacketTranslator translator)
+        internal static TaskParameter FactoryForDeserialization(ITranslator translator)
         {
             TaskParameter taskParameter = new TaskParameter();
             taskParameter.Translate(translator);
@@ -327,7 +327,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Serialize / deserialize this item. 
         /// </summary>
-        private void TranslateITaskItemArray(INodePacketTranslator translator)
+        private void TranslateITaskItemArray(ITranslator translator)
         {
             if (!TranslateNullable(translator, _wrappedParameter))
             {
@@ -364,7 +364,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Serialize / deserialize this item. 
         /// </summary>
-        private void TranslateITaskItem(INodePacketTranslator translator)
+        private void TranslateITaskItem(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -381,7 +381,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Write the given ITaskItem, using the given write translator
         /// </summary>
-        private void WriteITaskItem(INodePacketTranslator translator, ITaskItem wrappedItem)
+        private void WriteITaskItem(ITranslator translator, ITaskItem wrappedItem)
         {
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "Cannot call this method when reading!");
 
@@ -448,7 +448,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Read an ITaskItem into the given parameter, using the given read translator
         /// </summary>
-        private void ReadITaskItem(INodePacketTranslator translator, ref ITaskItem wrappedItem)
+        private void ReadITaskItem(ITranslator translator, ref ITaskItem wrappedItem)
         {
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.ReadFromStream, "Cannot call this method when writing!");
 
@@ -472,7 +472,7 @@ namespace Microsoft.Build.BackEnd
         /// Writes out the boolean which says if this object is null or not.
         /// </summary>
         /// <typeparam name="T">The nullable type to translate.</typeparam>
-        private bool TranslateNullable<T>(INodePacketTranslator translator, T value)
+        private bool TranslateNullable<T>(ITranslator translator, T value)
         {
             bool haveRef = false;
 
