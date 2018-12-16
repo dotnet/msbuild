@@ -539,7 +539,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 File.WriteAllText(sourceFile, "This is a source temp file.");
-                var msg = string.Empty
+                var msg = string.Empty;
 
                 // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
                 for (var i = 0; i < 2; i++)
