@@ -415,7 +415,7 @@ namespace Microsoft.Build.UnitTests
                     _output.WriteLine(logText);
                 }
 
-                throw new Exception(logText);
+                MockLogger.AssertLogContains(contains);
             }
         }
 

@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests
                 // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
                 for (var i = 0; i < 2; i++)
                 {
-                    var engine = new MockEngine(true);
+                    var engine = new MockEngine();
                     var t = new Copy
                     {
                         RetryDelayMilliseconds = 1,  // speed up tests!
@@ -563,6 +563,12 @@ namespace Microsoft.Build.UnitTests
                         // SkipUnchanged check will always fail for symbolic links,
                         // because we compare attributes of real file with attributes of symbolic link.
                         !UseSymbolicLinks;
+
+                    var msg = $"skipUnchangedFiles={skipUnchangedFiles}, " +
+                        $"UseHardLinks={UseHardLinks}, " +
+                        $"UseSymbolicLinks={UseSymbolicLinks}, " +
+                        engine.Log;
+                    throw new Exception(msg);
 
                     if (shouldNotCopy)
                     {
