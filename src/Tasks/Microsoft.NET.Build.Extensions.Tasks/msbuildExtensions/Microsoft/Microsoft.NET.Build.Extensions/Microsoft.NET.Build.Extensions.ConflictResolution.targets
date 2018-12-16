@@ -29,7 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_HandlePackageFileConflicts"
           BeforeTargets="$(_HandlePackageFileConflictsBefore)"
           AfterTargets="$(_HandlePackageFileConflictsAfter)"
-          DependsOnTargets="GetReferenceAssemblyPaths">
+          DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths">
     <ResolvePackageFileConflicts References="@(Reference)"
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"

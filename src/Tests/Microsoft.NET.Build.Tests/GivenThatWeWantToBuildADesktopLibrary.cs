@@ -442,5 +442,36 @@ public static class {project.Name}
                 referencedProject.TargetFrameworks);
             return new FileInfo(Path.Combine(outputDirectory.FullName, referencedProject.Name + ".dll")).FullName;
         }
+
+        //  Regression test for https://github.com/dotnet/sdk/issues/1730
+        [WindowsOnlyFact]
+        public void A_target_can_depend_on_RunResolvePublishAssemblies()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "DependsOnPublish",
+                IsSdkProject = true,
+                TargetFrameworks = "net461",
+                IsExe = false
+            };
+
+            var testInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var pns = p.Root.Name.Namespace;
+
+                    p.Root.Add(new XElement(pns + "Target",
+                        new XAttribute("Name", "Repro"),
+                        new XAttribute("DependsOnTargets", "RunResolvePublishAssemblies"),
+                        new XAttribute("BeforeTargets", "BeforeBuild")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testInstance.TestRoot, testProject.Name);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+        }
     }
 }
