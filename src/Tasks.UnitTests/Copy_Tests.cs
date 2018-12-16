@@ -525,11 +525,13 @@ namespace Microsoft.Build.UnitTests
         /*
          * Method:   DoCopyOverCopiedFile
          *
-         * If SkipUnchangedFiles is set to "false" then we should still be able to copy over files (or links)
-         * that have same dates and sizes.
+         * If SkipUnchangedFiles is set to "false" then we should always copy over files that have same dates and sizes.
+         * If SkipUnchangedFiles is set to "true" then we should never copy over files that have same dates and sizes.
          */
-        [Fact]
-        public void DoCopyOverCopiedFile()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DoCopyOverCopiedFile(bool skipUnchangedFiles)
         {
             var sourceFile = FileUtilities.GetTemporaryFile(null, "src", false);
             var destinationFile = FileUtilities.GetTemporaryFile(null, "dst", false);
@@ -547,13 +549,40 @@ namespace Microsoft.Build.UnitTests
                         BuildEngine = new MockEngine(),
                         SourceFiles = new[] { new TaskItem(sourceFile) },
                         DestinationFiles = new[] { new TaskItem(destinationFile) },
-                        SkipUnchangedFiles = false, // CopyAlways
+                        SkipUnchangedFiles = skipUnchangedFiles,
                         UseHardlinksIfPossible = UseHardLinks,
                         UseSymboliclinksIfPossible = UseSymbolicLinks,
                     };
 
                     var success = t.Execute();
                     Assert.True(success);
+
+                    var shouldNotCopy = skipUnchangedFiles &&
+                        i == 1 &&
+                        // SkipUnchanged check will always fail for symbolic links,
+                        // because we compare attributes of real file with attributes of symbolic link.
+                        !UseSymbolicLinks;
+
+                    if (shouldNotCopy)
+                    {
+                        ((MockEngine)t.BuildEngine).AssertLogContainsMessageFromResource(AssemblyResources.GetString,
+                            "Copy.DidNotCopyBecauseOfFileMatch",
+                            sourceFile,
+                            destinationFile,
+                            "SkipUnchangedFiles",
+                            "true"
+                            );
+                    }
+                    else
+                    {
+                        ((MockEngine)t.BuildEngine).AssertLogDoesntContainMessageFromResource(AssemblyResources.GetString,
+                          "Copy.DidNotCopyBecauseOfFileMatch",
+                          sourceFile,
+                          destinationFile,
+                          "SkipUnchangedFiles",
+                          "true"
+                          );
+                    }
 
                     // "Expected the destination file to contain the contents of source file."
                     Assert.Equal(File.ReadAllText(destinationFile), "This is a source temp file.");
