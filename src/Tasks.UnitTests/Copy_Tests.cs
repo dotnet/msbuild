@@ -543,10 +543,11 @@ namespace Microsoft.Build.UnitTests
                 // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
                 for (var i = 0; i < 2; i++)
                 {
+                    var engine = new MockEngine(true);
                     var t = new Copy
                     {
                         RetryDelayMilliseconds = 1,  // speed up tests!
-                        BuildEngine = new MockEngine(),
+                        BuildEngine = engine,
                         SourceFiles = new[] { new TaskItem(sourceFile) },
                         DestinationFiles = new[] { new TaskItem(destinationFile) },
                         SkipUnchangedFiles = skipUnchangedFiles,
@@ -565,7 +566,7 @@ namespace Microsoft.Build.UnitTests
 
                     if (shouldNotCopy)
                     {
-                        ((MockEngine)t.BuildEngine).AssertLogContainsMessageFromResource(AssemblyResources.GetString,
+                        engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString,
                             "Copy.DidNotCopyBecauseOfFileMatch",
                             sourceFile,
                             destinationFile,
@@ -575,7 +576,7 @@ namespace Microsoft.Build.UnitTests
                     }
                     else
                     {
-                        ((MockEngine)t.BuildEngine).AssertLogDoesntContainMessageFromResource(AssemblyResources.GetString,
+                        engine.AssertLogDoesntContainMessageFromResource(AssemblyResources.GetString,
                           "Copy.DidNotCopyBecauseOfFileMatch",
                           sourceFile,
                           destinationFile,
@@ -586,7 +587,7 @@ namespace Microsoft.Build.UnitTests
 
                     // "Expected the destination file to contain the contents of source file."
                     Assert.Equal(File.ReadAllText(destinationFile), "This is a source temp file.");
-                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+                    engine.AssertLogDoesntContain("MSB3026"); // Didn't do retries
                 }
             }
             finally
