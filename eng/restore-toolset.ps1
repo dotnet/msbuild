@@ -1,6 +1,6 @@
 function InitializeCustomSDKToolset {    
   if ($env:TestFullMSBuild -eq "true") {
-     $env:DOTNET_SDK_TEST_MSBUILD_PATH = InitializeVisualStudioMSBuild -install:$false -vs:$GlobalJson.tools.'vs-opt'
+     $env:DOTNET_SDK_TEST_MSBUILD_PATH = InitializeVisualStudioMSBuild -install:$false -vsRequirements:$GlobalJson.tools.'vs-opt'
      Write-Host "INFO: Tests will run against full MSBuild in $env:DOTNET_SDK_TEST_MSBUILD_PATH"
   }
 
