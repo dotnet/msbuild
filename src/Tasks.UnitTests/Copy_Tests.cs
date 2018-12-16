@@ -568,8 +568,9 @@ namespace Microsoft.Build.UnitTests
                         $"UseHardLinks={UseHardLinks}, " +
                         $"UseSymbolicLinks={UseSymbolicLinks}, " +
                         engine.Log;
-                    throw new Exception(msg);
 
+                    throw new Exception(msg);
+                    /*
                     if (shouldNotCopy)
                     {
                         engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString,
@@ -594,6 +595,7 @@ namespace Microsoft.Build.UnitTests
                     // "Expected the destination file to contain the contents of source file."
                     Assert.Equal(File.ReadAllText(destinationFile), "This is a source temp file.");
                     engine.AssertLogDoesntContain("MSB3026"); // Didn't do retries
+                    */
                 }
             }
             finally
