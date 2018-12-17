@@ -1,33 +1,26 @@
-﻿<Project>
-   <!-- AssemblyName must be set before importing Sdk.props to set the vsix file name. -->
-   <PropertyGroup>
-       <AssemblyName>Microsoft.Build</AssemblyName>
-       <ShouldSkipProject>false</ShouldSkipProject>
-       <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
-   </PropertyGroup>
-
-   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
-
-   <PropertyGroup>
+﻿<!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
+    <!-- <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization> -->
 
-    <!-- The IBCMerge process tries to treat this project as
-         the real Microsoft.Build.dll, producing thousands
-         of avoidable warnings. The real output of this
-         project isn't a product DLL, so just disable PGO. -->
-    <MicroBuild_EnablePGO>false</MicroBuild_EnablePGO>
-
-    <!-- Not sure what the right ID is here -->
+    <!-- VS Insertion -->
+    <TargetVsixContainerName>Microsoft.Build.vsix</TargetVsixContainerName>
     <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
+
+    <ShouldSkipProject>false</ShouldSkipProject>
+    <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
   </PropertyGroup>
-  
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" PrivateAssets="All"/>
+  </ItemGroup>
+
   <ItemGroup>
     <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
     <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />
 
-  </ItemGroup>
-  <ItemGroup>
-     <SwrFile Include="*.swr" /> 
+    <SwrFile Include="*.swr" />
   </ItemGroup>
 
   <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
@@ -47,12 +40,5 @@
     </ItemGroup>
   </Target>
 
-  <ItemGroup>
-     <!-- This package needs to be restored _somewhere_ but it isn't used in this project. -->
-     <PackageReference Include="RoslynDependencies.OptimizationData" />
-  </ItemGroup>
-
-  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
-
-  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 </Project>
