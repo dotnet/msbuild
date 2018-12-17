@@ -27,6 +27,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <_ToolsSettingsFilePath>$(BaseIntermediateOutputPath)DotnetToolSettings.xml</_ToolsSettingsFilePath>
     <SuppressDependenciesWhenPacking Condition=" '$(PackAsTool)' == 'true' ">true</SuppressDependenciesWhenPacking>
+    <UseAppHost Condition=" '$(SelfContained)' != 'true' and '$(PackAsTool)' == 'true' ">false</UseAppHost>
   </PropertyGroup>
 
   <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish;_PackToolValidation" Condition=" '$(PackAsTool)' == 'true' ">
