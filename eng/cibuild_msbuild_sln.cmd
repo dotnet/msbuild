@@ -1,3 +1,3 @@
 @echo off
-powershell -NoLogo -NoProfile -ExecutionPolicy ByPass -Command "& """%~dp0common\cibuild.cmd""" /p:Projects="""%~dp0../MSBuild.sln""" %*"
+powershell -NoLogo -NoProfile -ExecutionPolicy ByPass -Command "& """%~dp0common\cibuild.cmd""" %*"
 exit /b %ErrorLevel%

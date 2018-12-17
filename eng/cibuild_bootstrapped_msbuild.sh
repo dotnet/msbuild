@@ -40,7 +40,7 @@ TempDir="$ArtifactsDir/tmp/$configuration"
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci /p:CreateBootstrap=true /p:Projects="$RepoRoot/MSBuild.sln" $properties
+	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci /p:CreateBootstrap=true $properties
 fi
 
 bootstrapRoot="$ArtifactsBinDir/bootstrap"
@@ -60,4 +60,5 @@ export ArtifactsDir="$ArtifactsDir\\2\\"
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests
 # - Don't try to create a bootstrap deployment
-. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false /p:CreateBootstrap=false /p:Projects="$RepoRoot/MSBuild.sln" $properties
+. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false /p:CreateBootstrap=false $properties
+

@@ -70,7 +70,7 @@ try {
 
   if ($buildStage1)
   {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=true /p:Projects="$RepoRoot\MSBuild.sln" @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=true @properties
   }
 
   $bootstrapRoot = Join-Path $ArtifactsBinDir "bootstrap"
@@ -105,7 +105,7 @@ try {
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Do run tests
   # - Don't try to create a bootstrap deployment
-  & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false /p:Projects="$RepoRoot\MSBuild.sln" @properties
+  & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false @properties
 
   exit $lastExitCode
 }
