@@ -47,24 +47,20 @@ $RepoRoot = Join-Path $PSScriptRoot "..\"
 $RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd($([System.IO.Path]::DirectorySeparatorChar));
 
 $ArtifactsDir = Join-Path $RepoRoot "artifacts"
-$ArtifactsBinDir = Join-Path $ArtifactsDir "bin"
-$LogDir = Join-Path $ArtifactsDir "log\$configuration"
-$TempDir = Join-Path $ArtifactsDir "tmp\$configuration"
-
-# $log = -not $nolog
-# $restore = -not $norestore
-# $runTests = (-not $skiptests) -or $test
+$Stage1Dir = Join-Path $RepoRoot "stage1"
+$Stage1BinDir = Join-Path $Stage1Dir "bin"
 
 if ($hostType -eq '')
 {
   $hostType = 'full'
 }
 
-# TODO: If host type is full, either make sure we're running in a developer command prompt, or attempt to locate VS, or fail
-
 $msbuildToUse = "msbuild"
 
 try {
+
+  # turning off vbcscompiler.exe because it causes the move-item call below to fail
+  $env:UseSharedCompilation="false"
 
   KillProcessesFromRepo
 
@@ -73,7 +69,11 @@ try {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=true @properties
   }
 
-  $bootstrapRoot = Join-Path $ArtifactsBinDir "bootstrap"
+  $bootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
+
+  # we need to do this to guarantee we have/know where dotnet.exe is installed
+  $dotnetToolPath = InitializeDotNetCli $true
+  $dotnetExePath = Join-Path $dotnetToolPath "dotnet.exe"
 
   if ($hostType -eq 'full')
   {
@@ -89,17 +89,25 @@ try {
   }
   else
   {
-    # we need to do this to guarantee we have/know where dotnet.exe is installed
-    $dotnetToolPath = InitializeDotNetCli $true
-    $buildToolPath = Join-Path $dotnetToolPath "dotnet.exe"
+    $buildToolPath = $dotnetExePath
     $buildToolCommand = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\MSBuild.dll"
   }
 
   # Use separate artifacts folder for stage 2
-  $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
+  # $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
+
+  & $dotnetExePath build-server shutdown
+
+  if ($buildStage1)
+  {
+    Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
+  }
 
   $buildTool = @{ Path = $buildToolPath; Command = $buildToolCommand }
   $global:_BuildTool = $buildTool
+
+  # turn vbcscompiler back on to save on time. It speeds up the build considerably
+  $env:UseSharedCompilation="true"
 
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)

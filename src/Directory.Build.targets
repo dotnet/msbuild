@@ -131,7 +131,7 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and '$(OsEnvironment)' == 'windows' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and '$(OsEnvironment)' == 'windows' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' != 'Core'">
     <!-- Provide a mechanism for turning on verbose TlbExp output for diagnosing issues -->
     <PropertyGroup>
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' == 'true'">/verbose</TlbExpVerbosity>

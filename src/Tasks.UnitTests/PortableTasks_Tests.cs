@@ -30,6 +30,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
         public void TestDesktopMSBuildShouldRunPortableTask()
         {
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(true);

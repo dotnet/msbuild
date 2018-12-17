@@ -11,13 +11,13 @@ phases:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'eng/cibuild_msbuild_sln.cmd'
+      filename: 'eng/common/cibuild.cmd'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -26,7 +26,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -56,7 +56,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/2/TestResults/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -65,20 +65,20 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/2/TestResults/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/2/log/Debug'
+      PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/TestResults'
+      PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
@@ -96,7 +96,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/2/TestResults/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -105,20 +105,20 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/2/TestResults/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/2/log/Debug'
+      PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/TestResults'
+      PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
@@ -129,14 +129,14 @@ phases:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'eng/cibuild_msbuild_sln.cmd'
+      filename: 'eng/common/cibuild.cmd'
       arguments: '-configuration Release'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Windows-on-full Release Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -145,7 +145,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Release .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -175,7 +175,7 @@ phases:
 #   - task: BatchScript@1
 #     displayName: cibuild.cmd
 #     inputs:
-#       filename: 'eng/cibuild_msbuild_sln.cmd'
+#       filename: 'eng/common/cibuild.cmd'
 #       arguments: '-hostType Core'
 #   - task: PublishTestResults@2
 #     displayName: Publish .NET Framework Test Results
@@ -212,14 +212,14 @@ phases:
   displayName: "Build and test on Linux using .NET Core MSBuild"
   queue: 'Hosted Ubuntu 1604'
   steps:
-  - bash: . 'eng/cibuild_msbuild_sln.sh'
+  - bash: . 'eng/common/cibuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
       testRunTitle: 'Linux .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/*UnitTests'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -247,20 +247,20 @@ phases:
     inputs:
       testRunTitle: 'Linux .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/*UnitTests'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/2/log/Debug'
+      PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnLinux build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/TestResults'
+      PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
@@ -268,14 +268,14 @@ phases:
   displayName: "Build and test on macOS using .NET Core MSBuild"
   queue: 'Hosted macOS'
   steps:
-  - bash: . 'eng/cibuild_msbuild_sln.sh'
+  - bash: . 'eng/common/cibuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
       testRunTitle: 'macOS .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/*UnitTests'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()

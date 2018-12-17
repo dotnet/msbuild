@@ -34,16 +34,14 @@ done
 
 RepoRoot="$ScriptRoot/.."
 ArtifactsDir="$RepoRoot/artifacts"
-ArtifactsBinDir="$ArtifactsDir/bin"
-LogDir="$ArtifactsDir/log/$configuration"
-TempDir="$ArtifactsDir/tmp/$configuration"
+Stage1Dir="$RepoRoot/stage1"
 
 if [[ $build_stage1 == true ]];
 then
 	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci /p:CreateBootstrap=true $properties
 fi
 
-bootstrapRoot="$ArtifactsBinDir/bootstrap"
+bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
@@ -53,8 +51,7 @@ else
   exit 1
 fi
 
-# forcing the slashes here or they get normalized and lost later
-export ArtifactsDir="$ArtifactsDir\\2\\"
+mv $ArtifactsDir $Stage1Dir
 
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)

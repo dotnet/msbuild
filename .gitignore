@@ -240,3 +240,6 @@ Samples/MultiprocessBuild/PortableTask.dll
 
 # Repo nuget cache
 .packages/
+
+#Stage1 build folder for when doing bootstrap builds
+stage1/
