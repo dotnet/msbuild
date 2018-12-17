@@ -62,14 +62,12 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
     <MonoBuild>true</MonoBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
     <MonoBuild>true</MonoBuild>
   </PropertyGroup>
   <!-- Configuration MSBuild for portable (xcopy-install) toolsets: works on WinNT and linux/mac via Mono, isolates from machine environment:
