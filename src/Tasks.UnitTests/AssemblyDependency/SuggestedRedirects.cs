@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool result = Execute(t);
 
-            Assert.Single(e.Warnings); // @"Expected one warning."
+            Assert.Equal(1, e.Warnings); // @"Expected one warning."
             e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
 
             Assert.Empty(t.SuggestedRedirects);
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool result = Execute(t);
 
-            Assert.Single(e.Warnings); // @"Expected one warning."
+            Assert.Equal(1, e.Warnings); // @"Expected one warning."
             e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
 
             Assert.Empty(t.SuggestedRedirects);
