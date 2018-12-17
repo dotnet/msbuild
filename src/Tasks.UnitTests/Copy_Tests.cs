@@ -589,7 +589,7 @@ namespace Microsoft.Build.UnitTests
                     }
 
                     // "Expected the destination file to contain the contents of source file."
-                    Assert.Equal(File.ReadAllText(destinationFile), "This is a source temp file.");
+                    Assert.Equal("This is a source temp file.", File.ReadAllText(destinationFile));
                     engine.AssertLogDoesntContain("MSB3026"); // Didn't do retries
                 }
             }
