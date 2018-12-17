@@ -539,6 +539,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 File.WriteAllText(sourceFile, "This is a source temp file.");
+                var msg = string.Empty;
 
                 // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
                 for (var i = 0; i < 2; i++)
@@ -564,6 +565,13 @@ namespace Microsoft.Build.UnitTests
                         // because we compare attributes of real file with attributes of symbolic link.
                         !UseSymbolicLinks;
 
+                    msg += $"i={i}, " +
+                        $"skipUnchangedFiles={skipUnchangedFiles}, " +
+                        $"UseHardLinks={UseHardLinks}, " +
+                        $"UseSymbolicLinks={UseSymbolicLinks}, " +
+                        engine.Log + Environment.NewLine;
+
+                    /*
                     if (shouldNotCopy)
                     {
                         engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString,
@@ -588,7 +596,10 @@ namespace Microsoft.Build.UnitTests
                     // "Expected the destination file to contain the contents of source file."
                     Assert.Equal(File.ReadAllText(destinationFile), "This is a source temp file.");
                     engine.AssertLogDoesntContain("MSB3026"); // Didn't do retries
+                    */
                 }
+
+                throw new Exception(msg);
             }
             finally
             {
