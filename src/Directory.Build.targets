@@ -146,7 +146,7 @@
       <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
     </ItemGroup>
 
-    <Exec Command="tlbexp.exe $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
+    <Exec Command="&quot;$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToDotNetFrameworkSdkFile('tlbexp.exe'))&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
   </Target>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />
