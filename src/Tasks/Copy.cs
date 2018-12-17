@@ -267,9 +267,11 @@ namespace Microsoft.Build.Tasks
                 Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", sourceFilePath, destinationFilePath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
+
+                // On Windows File.Copy already preserves LastWriteTime, but on on other platforms extra operation is needed.
+                // We require LastWriteTime to be preserved so we can use it to skip unmodified files.
                 if (!NativeMethodsShared.IsWindows)
                 {
-                    // We need LastWriteTime to be preserved - so we can use it to skip unodified files
                     var originFileInfo = new FileInfo(sourceFileState.Name);
                     var destinationFileInfo = new FileInfo(destinationFileState.Name);
                     destinationFileInfo.LastWriteTimeUtc = originFileInfo.LastWriteTimeUtc;

@@ -565,13 +565,6 @@ namespace Microsoft.Build.UnitTests
                         // because we compare attributes of real file with attributes of symbolic link.
                         !UseSymbolicLinks;
 
-                    msg += $"i={i}, " +
-                        $"skipUnchangedFiles={skipUnchangedFiles}, " +
-                        $"UseHardLinks={UseHardLinks}, " +
-                        $"UseSymbolicLinks={UseSymbolicLinks}, " +
-                        engine.Log + Environment.NewLine;
-
-                    /*
                     if (shouldNotCopy)
                     {
                         engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString,
@@ -596,7 +589,6 @@ namespace Microsoft.Build.UnitTests
                     // "Expected the destination file to contain the contents of source file."
                     Assert.Equal(File.ReadAllText(destinationFile), "This is a source temp file.");
                     engine.AssertLogDoesntContain("MSB3026"); // Didn't do retries
-                    */
                 }
 
                 throw new Exception(msg);
