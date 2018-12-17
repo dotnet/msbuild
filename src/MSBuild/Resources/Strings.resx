@@ -480,7 +480,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <data name="HelpMessage_InputCachesFiles" UESanitized="false" Visibility="Public">
    <value>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will use to read build results from.
+                     will read build results from.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </value>
