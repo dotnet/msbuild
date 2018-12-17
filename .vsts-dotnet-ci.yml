@@ -9,11 +9,6 @@ phases:
   queue: 'Hosted VS2017'
   steps:
   - task: BatchScript@1
-    displayName: VsDevCmd
-    inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      modifyEnvironment: true
-  - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
       filename: 'eng/cibuild_msbuild_sln.cmd'
@@ -22,7 +17,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/TestResults/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -31,7 +26,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -42,9 +37,9 @@ phases:
       ArtifactName: 'FullOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs/TestResults'
+    displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/log/Debug/TestResults'
+      PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
@@ -52,11 +47,6 @@ phases:
   displayName: "Build and test on Windows using bootstrapped full MSBuild"
   queue: 'Hosted VS2017'
   steps:
-  - task: BatchScript@1
-    displayName: VsDevCmd
-    inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      modifyEnvironment: true
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
@@ -66,7 +56,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/2/TestResults/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -75,7 +65,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/2/TestResults/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -86,9 +76,9 @@ phases:
       ArtifactName: 'FullOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs/TestResults'
+    displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/log/Debug/TestResults'
+      PathtoPublish: 'artifacts/2/TestResults'
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
@@ -96,11 +86,6 @@ phases:
   displayName: "Build and test on Windows using bootstrapped core MSBuild"
   queue: 'Hosted VS2017'
   steps:
-  - task: BatchScript@1
-    displayName: VsDevCmd
-    inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      modifyEnvironment: true
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
@@ -111,7 +96,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/2/TestResults/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -120,7 +105,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/2/TestResults/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -131,9 +116,9 @@ phases:
       ArtifactName: 'FullOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs/TestResults'
+    displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/log/Debug/TestResults'
+      PathtoPublish: 'artifacts/2/TestResults'
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
@@ -141,11 +126,6 @@ phases:
   displayName: "Build and test Release on Windows using full MSBuild"
   queue: 'Hosted VS2017'
   steps:
-  - task: BatchScript@1
-    displayName: VsDevCmd
-    inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      modifyEnvironment: true
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
@@ -156,7 +136,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Release Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/TestResults/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -165,7 +145,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Release .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -176,9 +156,9 @@ phases:
       ArtifactName: 'FullOnWindows Release build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs/TestResults'
+    displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/log/Release/TestResults'
+      PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows Release test logs'
     condition: succeededOrFailed()
 
@@ -239,7 +219,7 @@ phases:
     inputs:
       testRunTitle: 'Linux .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/*UnitTests'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -250,9 +230,9 @@ phases:
       ArtifactName: 'CoreOnLinux build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs/TestResults'
+    displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/log/Debug/TestResults'
+      PathtoPublish: 'artifacts/TestResults/'
       ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
@@ -267,7 +247,7 @@ phases:
     inputs:
       testRunTitle: 'Linux .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/*UnitTests'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -278,9 +258,9 @@ phases:
       ArtifactName: 'CoreOnLinux build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs/TestResults'
+    displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/log/Debug/TestResults'
+      PathtoPublish: 'artifacts/2/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
@@ -295,7 +275,7 @@ phases:
     inputs:
       testRunTitle: 'macOS .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/*UnitTests'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -306,9 +286,9 @@ phases:
       ArtifactName: 'CoreOnMac build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs/TestResults'
+    displayName: 'Publish Artifact: TestResults'
     inputs:
-      PathtoPublish: 'artifacts/log/Debug/TestResults'
+      PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnMac test logs'
     condition: succeededOrFailed()
 

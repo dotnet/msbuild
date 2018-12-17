@@ -44,11 +44,20 @@ phases:
         filename: set
       condition: always()
 
-    - task: CmdLine@1
-      displayName: Run build.cmd
+    - task: BatchScript@1
+      displayName: cibuild.cmd
       inputs:
-        filename: '$(comspec)'
-        arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & $(Build.Repository.LocalPath)\eng\common\cibuild.cmd -configuration $(BuildConfiguration) /p:Projects=$(Build.Repository.LocalPath)\MSBuild.sln $(_PublishArgs) $(_SignArgs)"'
+        filename: 'eng/common/cibuild.cmd'
+        arguments: '-configuration $(BuildConfiguration) $(_PublishArgs) $(_SignArgs)'
+
+    - task: PublishTestResults@2
+      displayName: Publish Test Results
+      inputs:
+        testRunTitle: 'Windows-on-full Full Framework'
+        testRunner: XUnit
+        testResultsFiles: 'artifacts/TestResults/*UnitTests*.xml'
+        publishRunAttachments: true
+        mergeTestResults: true
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: logs'
