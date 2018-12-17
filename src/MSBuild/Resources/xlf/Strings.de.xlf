@@ -545,13 +545,13 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
       <trans-unit id="HelpMessage_InputCachesFiles">
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will use to read build results from.
+                     will read build results from.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
         <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will use to read build results from.
+                     will read build results from.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </target>
