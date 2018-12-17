@@ -29,6 +29,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
     <XUnitRunnerAdditionalArguments>-parallel none</XUnitRunnerAdditionalArguments>
