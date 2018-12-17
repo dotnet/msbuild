@@ -272,8 +272,10 @@ namespace Microsoft.Build.Tasks
                 // We require LastWriteTime to be preserved so we can use it to skip unmodified files.
                 if (NativeMethodsShared.IsLinux)
                 {
+                    var sourceFileStateFileInfo = new FileInfo(sourceFileState.Name);
                     var destinationFileInfo = new FileInfo(destinationFileState.Name);
-                    destinationFileInfo.LastWriteTimeUtc = File.GetLastWriteTimeUtc(sourceFileState.Name);
+                    sourceFileStateFileInfo.Refresh();
+                    destinationFileInfo.LastWriteTimeUtc = sourceFileStateFileInfo.LastWriteTimeUtc;
                 }
             }
 
