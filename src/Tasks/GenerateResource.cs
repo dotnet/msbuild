@@ -544,6 +544,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         static GenerateResource()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                allowMOTW = true;
+                return;
+            }
             try
             {
                 object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
