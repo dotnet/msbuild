@@ -268,13 +268,12 @@ namespace Microsoft.Build.Tasks
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
 
-                // On Windows File.Copy already preserves LastWriteTime, but on on other platforms extra operation is needed.
+                // On Windows File.Copy already preserves LastWriteTime, but on Linux extra step is needed.
                 // We require LastWriteTime to be preserved so we can use it to skip unmodified files.
-                if (!NativeMethodsShared.IsWindows)
+                if (NativeMethodsShared.IsLinux)
                 {
-                    var originFileInfo = new FileInfo(sourceFileState.Name);
                     var destinationFileInfo = new FileInfo(destinationFileState.Name);
-                    destinationFileInfo.LastWriteTimeUtc = originFileInfo.LastWriteTimeUtc;
+                    destinationFileInfo.LastWriteTimeUtc = File.GetLastWriteTimeUtc(sourceFileState.Name);
                 }
             }
 
