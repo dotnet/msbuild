@@ -267,6 +267,13 @@ namespace Microsoft.Build.Tasks
                 Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", sourceFilePath, destinationFilePath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    // We need LastWriteTime to be preserved - so we can use it to skip unodified files
+                    var originFileInfo = new FileInfo(sourceFileState.Name);
+                    var destinationFileInfo = new FileInfo(destinationFileState.Name);
+                    destinationFileInfo.LastWriteTime = originFileInfo.LastWriteTime;
+                }
             }
 
             destinationFileState.Reset();
