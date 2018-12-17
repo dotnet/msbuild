@@ -272,7 +272,7 @@ namespace Microsoft.Build.Tasks
                     // We need LastWriteTime to be preserved - so we can use it to skip unodified files
                     var originFileInfo = new FileInfo(sourceFileState.Name);
                     var destinationFileInfo = new FileInfo(destinationFileState.Name);
-                    destinationFileInfo.LastWriteTime = originFileInfo.LastWriteTime;
+                    destinationFileInfo.LastWriteTimeUtc = originFileInfo.LastWriteTimeUtc;
                 }
             }
 
