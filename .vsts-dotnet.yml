@@ -41,11 +41,9 @@ phases:
         SecretsFilter: 'HelixApiAccessToken'
       condition: always()
 
-    - task: CmdLine@1
-      displayName: Print Vars
+    - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
       inputs:
-        filename: set
-      condition: always()
+        feedSource: 'https://dnceng.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json'
 
     - task: BatchScript@1
       displayName: cibuild.cmd
