@@ -540,6 +540,8 @@ namespace Microsoft.Build.UnitTests
             {
                 File.WriteAllText(sourceFile, "This is a source temp file.");
 
+                var msg = String.Empty;
+
                 // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
                 for (var i = 0; i < 2; i++)
                 {
@@ -562,11 +564,15 @@ namespace Microsoft.Build.UnitTests
                         i == 1 &&
                         // SkipUnchanged check will always fail for symbolic links,
                         // because we compare attributes of real file with attributes of symbolic link.
-                        !UseSymbolicLinks &&
-                        // On Windows and MacOS File.Copy already preserves LastWriteTime, but on Linux extra step is needed.
-                        // TODO - this need to be fixed on Linux
-                        (!NativeMethodsShared.IsLinux || UseHardLinks);
+                        !UseSymbolicLinks;
 
+
+                    msg += $"I:{i}, " +
+                        $"skipUnchangedFiles:{skipUnchangedFiles}, UseHardLinks:{UseHardLinks}, UseSymbolicLinks:{UseSymbolicLinks}, " +
+                        $"CreationTimeUtc: {File.GetCreationTimeUtc(sourceFile).Ticks}<->{File.GetCreationTimeUtc(destinationFile).Ticks}, " +
+                        $"LastWriteTimeUtc: {File.GetLastWriteTimeUtc(sourceFile).Ticks}<->{File.GetLastWriteTimeUtc(destinationFile).Ticks}, ";
+
+                    /*
                     if (shouldNotCopy)
                     {
                         engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString,
@@ -591,7 +597,10 @@ namespace Microsoft.Build.UnitTests
                     // "Expected the destination file to contain the contents of source file."
                     Assert.Equal("This is a source temp file.", File.ReadAllText(destinationFile));
                     engine.AssertLogDoesntContain("MSB3026"); // Didn't do retries
+                    */
                 }
+
+                throw new Exception(msg);
             }
             finally
             {

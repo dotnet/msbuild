@@ -267,6 +267,12 @@ namespace Microsoft.Build.Tasks
                 Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", sourceFilePath, destinationFilePath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
+                // On Windows File.Copy already preserves LastWriteTime, but on Linux extra step is needed.
+                // We require LastWriteTime to be preserved so we can use it to skip unmodified files.
+                if (NativeMethodsShared.IsLinux)
+                {
+                    File.SetLastWriteTimeUtc(destinationFileState.Name, File.GetLastWriteTimeUtc(sourceFileState.Name));
+                }
             }
 
             destinationFileState.Reset();
