@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">候補がない Shared Framework に対するロールフォワードが有効です。</target>
+        <source>Set roll forward on no candidate shared framework behavior.</source>
+        <target state="needs-review-translation">候補がない Shared Framework に対するロールフォワードが有効です。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

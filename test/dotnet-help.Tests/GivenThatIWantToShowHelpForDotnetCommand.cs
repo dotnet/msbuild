@@ -19,10 +19,10 @@ namespace Microsoft.DotNet.Help.Tests
 Execute a .NET Core application.
 
 runtime-options:
-  --additionalprobingpath <path>     Path containing probing policy and assemblies to probe for.
-  --additional-deps <path>           Path to additional deps.json file.
-  --fx-version <version>             Version of the installed Shared Framework to use to run the application.
-  --roll-forward-on-no-candidate-fx  Roll forward on no candidate shared framework is enabled.
+  --additionalprobingpath <path>         Path containing probing policy and assemblies to probe for.
+  --additional-deps <path>               Path to additional deps.json file.
+  --fx-version <version>                 Version of the installed Shared Framework to use to run the application.
+  --roll-forward-on-no-candidate-fx <n>  Set roll forward on no candidate shared framework behavior.
 
 path-to-application:
   The path to an application .dll file to execute.

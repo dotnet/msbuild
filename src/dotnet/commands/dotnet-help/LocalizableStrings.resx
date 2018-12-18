@@ -265,7 +265,7 @@
     <value>Version of the installed Shared Framework to use to run the application.</value>
   </data>
   <data name="RollForwardOnNoCandidateFxDefinition" xml:space="preserve">
-    <value>Roll forward on no candidate shared framework is enabled.</value>
+    <value>Set roll forward on no candidate shared framework behavior.</value>
   </data>
   <data name="AdditionalDeps" xml:space="preserve">
     <value>Path to additional deps.json file.</value>
