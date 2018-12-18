@@ -523,6 +523,84 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*
+         * Method:   DoCopyOverCopiedFile
+         *
+         * If SkipUnchangedFiles is set to "false" then we should always copy over files that have same dates and sizes.
+         * If SkipUnchangedFiles is set to "true" then we should never copy over files that have same dates and sizes.
+         */
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DoCopyOverCopiedFile(bool skipUnchangedFiles)
+        {
+            var sourceFile = FileUtilities.GetTemporaryFile(null, "src", false);
+            var destinationFile = FileUtilities.GetTemporaryFile(null, "dst", false);
+
+            try
+            {
+                File.WriteAllText(sourceFile, "This is a source temp file.");
+
+                // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
+                for (var i = 0; i < 2; i++)
+                {
+                    var engine = new MockEngine();
+                    var t = new Copy
+                    {
+                        RetryDelayMilliseconds = 1,  // speed up tests!
+                        BuildEngine = engine,
+                        SourceFiles = new[] { new TaskItem(sourceFile) },
+                        DestinationFiles = new[] { new TaskItem(destinationFile) },
+                        SkipUnchangedFiles = skipUnchangedFiles,
+                        UseHardlinksIfPossible = UseHardLinks,
+                        UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    };
+
+                    var success = t.Execute();
+                    Assert.True(success);
+
+                    var shouldNotCopy = skipUnchangedFiles &&
+                        i == 1 &&
+                        // SkipUnchanged check will always fail for symbolic links,
+                        // because we compare attributes of real file with attributes of symbolic link.
+                        !UseSymbolicLinks &&
+                        // On Windows and MacOS File.Copy already preserves LastWriteTime, but on Linux extra step is needed.
+                        // TODO - this need to be fixed on Linux
+                        (!NativeMethodsShared.IsLinux || UseHardLinks);
+
+                    if (shouldNotCopy)
+                    {
+                        engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString,
+                            "Copy.DidNotCopyBecauseOfFileMatch",
+                            sourceFile,
+                            destinationFile,
+                            "SkipUnchangedFiles",
+                            "true"
+                            );
+                    }
+                    else
+                    {
+                        engine.AssertLogDoesntContainMessageFromResource(AssemblyResources.GetString,
+                          "Copy.DidNotCopyBecauseOfFileMatch",
+                          sourceFile,
+                          destinationFile,
+                          "SkipUnchangedFiles",
+                          "true"
+                          );
+                    }
+
+                    // "Expected the destination file to contain the contents of source file."
+                    Assert.Equal("This is a source temp file.", File.ReadAllText(destinationFile));
+                    engine.AssertLogDoesntContain("MSB3026"); // Didn't do retries
+                }
+            }
+            finally
+            {
+                File.Delete(sourceFile);
+                File.Delete(destinationFile);
+            }
+        }
+
+        /*
          * Method:   DoCopyOverNonExistentFile
          *
          * If OnlyCopyIfDifferent is set to "true" then we should still copy over files that
