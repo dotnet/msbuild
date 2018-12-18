@@ -23,6 +23,9 @@ phases:
                 /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                 /p:PB_PublishType=blob
       _SignArgs: /p:DotNetSignType=real /p:TeamName=MSBuild
+      _DotNetPublishToBlobFeed: true
+      _PublishType: blob
+      _SignType: real
 
     steps:
     - task: AzureKeyVault@1
@@ -51,13 +54,23 @@ phases:
         arguments: '-configuration $(BuildConfiguration) $(_PublishArgs) $(_SignArgs)'
 
     - task: PublishTestResults@2
-      displayName: Publish Test Results
+      displayName: Publish .NET Framework Test Results
       inputs:
-        testRunTitle: 'Windows-on-full Full Framework'
+        testRunTitle: 'Windows-on-full Release Full Framework'
         testRunner: XUnit
-        testResultsFiles: 'artifacts/TestResults/*UnitTests*.xml'
+        testResultsFiles: 'artifacts/TestResults/$(BuildConfiguration)/*UnitTests_net472*.xml'
         publishRunAttachments: true
         mergeTestResults: true
+      condition: always()
+    - task: PublishTestResults@2
+      displayName: Publish .NET Core 2.1 Test Results
+      inputs:
+        testRunTitle: 'Windows-on-full Release .NET Core 2.1'
+        testRunner: XUnit
+        testResultsFiles: 'artifacts/TestResults/$(BuildConfiguration)/*UnitTests_netcoreapp2.1*.xml'
+        publishRunAttachments: true
+        mergeTestResults: true
+      condition: always()
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: logs'
@@ -69,7 +82,7 @@ phases:
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: packages'
       inputs:
-        PathtoPublish: 'artifacts\packages\$(BuildConfiguration)\*Shipping\*.nupkg'
+        PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
         ArtifactName: packages
       condition: succeededOrFailed()
 
