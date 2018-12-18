@@ -1920,6 +1920,9 @@ namespace Microsoft.Build.Shared
             Debug.Assert(filespecUnescaped != null);
             Debug.Assert(Path.IsPathRooted(projectDirectoryUnescaped));
 
+            const string projectPathPrependedToken = "p";
+            const string pathValityExceptionTriggeredToken = "e";
+
             var excludeSize = 0;
 
             if (excludes != null)
@@ -1950,7 +1953,7 @@ namespace Microsoft.Build.Shared
                     {
                         // filespec is not absolute, include the project directory path
                         // differentiate fully qualified filespecs vs relative filespecs that got prepended with the project directory
-                        sb.Append("p");
+                        sb.Append(projectPathPrependedToken);
                         sb.Append(filespecUnescapedFullyQualified);
                     }
 
@@ -1968,7 +1971,10 @@ namespace Microsoft.Build.Shared
 
                 if (pathValidityExceptionTriggered)
                 {
-                    sb.Append($"ep{projectDirectoryUnescaped}{filespecUnescaped}");
+                    sb.Append(pathValityExceptionTriggeredToken);
+                    sb.Append(projectPathPrependedToken);
+                    sb.Append(projectDirectoryUnescaped);
+                    sb.Append(filespecUnescaped);
                 }
 
                 if (excludes != null)
