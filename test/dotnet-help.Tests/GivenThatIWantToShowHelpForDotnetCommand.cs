@@ -22,7 +22,7 @@ runtime-options:
   --additionalprobingpath <path>         Path containing probing policy and assemblies to probe for.
   --additional-deps <path>               Path to additional deps.json file.
   --fx-version <version>                 Version of the installed Shared Framework to use to run the application.
-  --roll-forward-on-no-candidate-fx <n>  Set roll forward on no candidate shared framework behavior.
+  --roll-forward-on-no-candidate-fx <n>  Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major & minor).
 
 path-to-application:
   The path to an application .dll file to execute.

@@ -233,7 +233,7 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Set roll forward on no candidate shared framework behavior.</source>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
         <target state="needs-review-translation">已启用“不前滚到候选共享框架”。</target>
         <note />
       </trans-unit>
