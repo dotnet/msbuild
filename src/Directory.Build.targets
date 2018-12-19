@@ -34,6 +34,7 @@
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
     
+    <PackageOutputPath Condition="'$(IsVisualStudioInsertionPackage)' == 'true'">$(DevDivPackagesDir)</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">

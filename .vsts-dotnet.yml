@@ -7,8 +7,12 @@ phases:
   variables:
     BuildConfiguration: 'Release'
     TeamName: MSBuild
-    _PublishArgs: /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+    _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+              /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+              /p:DotNetPublishToBlobFeed=true
+              /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
               /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+              /p:PB_PublishType=blob
     _SignArgs: /p:DotNetSignType=real /p:TeamName=MSBuild
     _SignType: real
 
@@ -26,6 +30,7 @@ phases:
               -configuration $(BuildConfiguration)
               $(_PublishArgs)
               $(_SignArgs)
+              /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
     displayName: Build
     condition: succeeded()
 
