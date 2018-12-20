@@ -174,12 +174,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             NodeEndpointInProc.EndpointPair endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
                     NodeEndpointInProc.EndpointMode.Synchronous, _host);
-            Assert.NotNull(endpoints);
 
             endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
                     NodeEndpointInProc.EndpointMode.Asynchronous, _host);
-            Assert.NotNull(endpoints);
         }
 
         [Fact]
@@ -269,8 +267,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             CallOpOnEndpoints(endpoints, VerifyLinkActive);
 
             // We should have received callbacks informing us of the link change.
-            Assert.Equal(_linkStatusTable[endpoints.NodeEndpoint].status, LinkStatus.Active);
-            Assert.Equal(_linkStatusTable[endpoints.ManagerEndpoint].status, LinkStatus.Active);
+            Assert.Equal(LinkStatus.Active, _linkStatusTable[endpoints.NodeEndpoint].status);
+            Assert.Equal(LinkStatus.Active, _linkStatusTable[endpoints.ManagerEndpoint].status);
         }
 
         [Fact]
@@ -368,12 +366,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private void VerifyLinkInactive(NodeEndpointInProc endpoint)
         {
-            Assert.Equal(endpoint.LinkStatus, LinkStatus.Inactive); // "Expected LinkStatus to be Inactive"
+            Assert.Equal(LinkStatus.Inactive, endpoint.LinkStatus); // "Expected LinkStatus to be Inactive"
         }
 
         private void VerifyLinkActive(NodeEndpointInProc endpoint)
         {
-            Assert.Equal(endpoint.LinkStatus, LinkStatus.Active); // "Expected LinkStatus to be Active"
+            Assert.Equal(LinkStatus.Active, endpoint.LinkStatus); // "Expected LinkStatus to be Active"
         }
 
         private void VerifySendDataInvalidOperation(NodeEndpointInProc endpoint)
@@ -419,8 +417,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private void VerifyLinksAndCallbacksInactive(NodeEndpointInProc.EndpointPair endpoints)
         {
             CallOpOnEndpoints(endpoints, VerifyLinkInactive);
-            Assert.Equal(_linkStatusTable[endpoints.NodeEndpoint].status, LinkStatus.Inactive);
-            Assert.Equal(_linkStatusTable[endpoints.ManagerEndpoint].status, LinkStatus.Inactive);
+            Assert.Equal(LinkStatus.Inactive, _linkStatusTable[endpoints.NodeEndpoint].status);
+            Assert.Equal(LinkStatus.Inactive, _linkStatusTable[endpoints.ManagerEndpoint].status);
         }
 
         private NodeEndpointInProc.EndpointPair SetupConnection(NodeEndpointInProc.EndpointMode mode)

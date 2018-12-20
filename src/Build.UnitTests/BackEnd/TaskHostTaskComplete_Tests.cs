@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
             Assert.NotNull(deserializedComplete.TaskOutputParameters);
-            Assert.Equal(0, deserializedComplete.TaskOutputParameters.Count);
+            Assert.Empty(deserializedComplete.TaskOutputParameters);
         }
 
         /// <summary>

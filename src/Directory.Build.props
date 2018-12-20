@@ -2,12 +2,6 @@
   <!-- Import the repo root props -->
   <Import Project="..\Directory.Build.props"/>
 
-  <ItemGroup>
-    <!-- Add IsImplicitlyDefined to any packages that were 'magically' referenced (RepoTools!). This
-         should be removed if RepoTools adds the metadata for their package references. -->
-    <PackageReference Update="@(PackageReference)" IsImplicitlyDefined="true" />
-  </ItemGroup>
-
   <PropertyGroup>
       <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -20,16 +14,8 @@
 
   <!-- Override project defaults provided by Repo toolset -->
   <PropertyGroup>
-    <!-- Set DebugType.  This logic is repeated in Directory.Build.targets, because xunit.core.targets overrides it -->
-    <DebugType Condition=" '$(TargetFramework)' == '' and '$(DebugType)' == ''">full</DebugType>
-    <DebugType Condition=" '$(TargetFramework)' != '' and '$(DebugType)' == ''">embedded</DebugType>
-    <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
-
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
-
-    <!-- Some hash code implementations may overflow -->
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
 
     <!-- Set up BeforeCommon.targets -->
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Directory.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
@@ -78,7 +64,7 @@
     <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
     <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
 
-    <ArtifactsTestResultsDir>$(ArtifactsLogDir)\TestResults\</ArtifactsTestResultsDir>
+    <DevDivPackagesDir>$(VisualStudioSetupOutputPath)DevDivPackages\</DevDivPackagesDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">

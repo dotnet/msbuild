@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestConstructorNoItems()
         {
             TargetResult result = new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult());
-            Assert.Equal(0, result.Items.Length);
+            Assert.Empty(result.Items);
             Assert.Null(result.Exception);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
             TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
-            Assert.Equal(1, result.Items.Length);
+            Assert.Single(result.Items);
             Assert.Equal(item.ItemSpec, result.Items[0].ItemSpec);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
             TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult(new ArgumentException()));
-            Assert.Equal(1, result.Items.Length);
+            Assert.Single(result.Items);
             Assert.NotNull(result.Exception);
             Assert.Equal(typeof(ArgumentException), result.Exception.GetType());
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
             TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
-            Assert.Equal(1, result.Items.Length);
+            Assert.Single(result.Items);
             Assert.Null(result.Exception);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }

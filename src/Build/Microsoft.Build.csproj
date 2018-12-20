@@ -1,4 +1,4 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -18,7 +18,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
 
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
-    <CreateTlb>true</CreateTlb>
+    <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>

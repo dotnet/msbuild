@@ -163,6 +163,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing enums.
         /// </summary>
+        [Fact]
         public void TestSerializeEnum()
         {
             TranslationDirection value = TranslationDirection.ReadFromStream;
@@ -379,9 +380,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
 
             Assert.Equal(value.Count, deserializedValue.Count);
-            Assert.Equal(BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]), 0);
-            Assert.Equal(BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]), 0);
-            Assert.Equal(BaseClass.Comparer.Compare(value["FOO"], deserializedValue["FOO"]), 0);
+            Assert.Equal(0, BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]));
+            Assert.Equal(0, BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]));
+            Assert.Equal(0, BaseClass.Comparer.Compare(value["FOO"], deserializedValue["FOO"]));
         }
 
         /// <summary>
@@ -418,8 +419,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationHelpers.GetReadTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
             Assert.Equal(value.Count, deserializedValue.Count);
-            Assert.Equal(BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]), 0);
-            Assert.Equal(BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]), 0);
+            Assert.Equal(0, BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]));
+            Assert.Equal(0, BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]));
             Assert.False(deserializedValue.ContainsKey("FOO"));
         }
 

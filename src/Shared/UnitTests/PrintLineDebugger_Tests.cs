@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
             var artifactsDirectory = PrintLineDebuggerWriters.ArtifactsLogDirectory;
 
             artifactsDirectory.ShouldNotBeNull();
-            artifactsDirectory.ShouldEndWith(Path.Combine("Debug", "log"), Case.Sensitive);
+            artifactsDirectory.ShouldEndWith(Path.Combine("log", "Debug"), Case.Sensitive);
             Path.IsPathRooted(artifactsDirectory).ShouldBeTrue();
             Directory.Exists(artifactsDirectory).ShouldBeTrue();
         }

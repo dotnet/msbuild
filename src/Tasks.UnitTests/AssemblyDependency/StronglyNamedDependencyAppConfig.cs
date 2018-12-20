@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             engine.AssertLogContains
                 (
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 bool succeeded = Execute(t, false);
 
                 Assert.True(succeeded);
-                Assert.Equal(0, t.ResolvedDependencyFiles.Length);
+                Assert.Empty(t.ResolvedDependencyFiles);
                 engine.AssertLogDoesntContain
                     (
                         String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -259,7 +259,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             engine.AssertLogContains
                 (
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(0, t.ResolvedDependencyFiles.Length);
+            Assert.Empty(t.ResolvedDependencyFiles);
             string shouldContain;
 
             string code = t.Log.ExtractMessageCode
@@ -391,7 +391,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             engine.AssertLogContains
                 (

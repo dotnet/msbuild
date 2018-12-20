@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        public static IEnumerable<object> ContextPinsGlobExpansionCacheData
+        public static IEnumerable<object[]> ContextPinsGlobExpansionCacheData
         {
             get
             {
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 );
         }
 
-        public static IEnumerable<object> ContextDisambiguatesRelativeGlobsData
+        public static IEnumerable<object[]> ContextDisambiguatesRelativeGlobsData
         {
             get
             {

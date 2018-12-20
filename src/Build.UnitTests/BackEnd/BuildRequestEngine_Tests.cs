@@ -403,7 +403,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Wait for the new requests to be spawned by the builder
             WaitForEvent(_newRequestEvent, "NewRequestEvent");
             Assert.Equal(1, _newRequest_Request.BuildRequests[0].ConfigurationId);
-            Assert.Equal(1, _newRequest_Request.BuildRequests[0].Targets.Count);
+            Assert.Single(_newRequest_Request.BuildRequests[0].Targets);
             Assert.Equal("requiredTarget1", _newRequest_Request.BuildRequests[0].Targets[0]);
 
             // Wait for a moment, because the build request engine thread may not have gotten around
@@ -471,7 +471,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             WaitForEvent(_newRequestEvent, "NewRequestEvent");
             Assert.Equal(2, _newRequest_Request.BuildRequests[0].ConfigurationId);
             Assert.Equal(2, _newRequest_Request.BuildRequests[0].ConfigurationId);
-            Assert.Equal(1, _newRequest_Request.BuildRequests[0].Targets.Count);
+            Assert.Single(_newRequest_Request.BuildRequests[0].Targets);
             Assert.Equal("requiredTarget1", _newRequest_Request.BuildRequests[0].Targets[0]);
 
             // Report a result to satisfy the build request

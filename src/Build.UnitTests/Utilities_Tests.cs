@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
 
-                Assert.Equal(true, foundDoNotModify);
+                Assert.True(foundDoNotModify);
             }
             finally
             {

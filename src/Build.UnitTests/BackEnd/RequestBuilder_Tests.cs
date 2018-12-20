@@ -40,9 +40,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private string _originalWorkingDirectory;
 
+        #pragma warning disable xUnit1013
+
         public void LoggingException(Exception e)
         {
         }
+
+        #pragma warning restore xUnit1013
 
         public RequestBuilder_Tests()
         {

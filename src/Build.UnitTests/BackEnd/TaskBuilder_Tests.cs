@@ -462,7 +462,7 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.Equal(true, result);
+            Assert.True(result);
             logger.AssertLogDoesntContain("[]");
             logger.AssertLogDoesntContain("MSB4118");
             logger.AssertLogDoesntContain("MSB3031");
@@ -489,7 +489,7 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.Equal(false, result);
+            Assert.False(result);
             logger.AssertLogContains("MSB3031");
         }
 
@@ -512,7 +512,7 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.Equal(false, result);
+            Assert.False(result);
             logger.AssertLogContains("MSB3031");
         }
 
@@ -542,7 +542,7 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.Equal(true, result);
+            Assert.True(result);
             logger.AssertLogContains("[.ext]");
         }
 
@@ -573,7 +573,7 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.Equal(true, result);
+            Assert.True(result);
             logger.AssertLogContains("[||illegal||]");
         }
 
@@ -727,6 +727,7 @@ namespace ItemCreationTask
         /// various task output-related operations, using a task built against the current 
         /// version of MSBuild.  
         /// </summary>
+        [Fact]
         public void ValidateDefiningProjectMetadataOnTaskOutputs()
         {
             string customTaskPath = CustomTaskHelper.GetAssemblyForTask(s_itemCreationTaskContents);

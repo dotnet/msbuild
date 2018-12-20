@@ -14,7 +14,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class ConfigCache_Tests
     {
-        public static IEnumerable<object> CacheSerializationTestData
+        public static IEnumerable<object[]> CacheSerializationTestData
         {
             get
             {

@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath));
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_GDllPath));
 
-            Assert.Equal(1, t.SuggestedRedirects.Length);
+            Assert.Single(t.SuggestedRedirects);
             Assert.True(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")); // "Expected to find suggested redirect, but didn't"
             Assert.Equal(1, e.Warnings); // "Should only be one warning for suggested redirects."
         }
@@ -98,13 +98,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             Assert.Equal(1, engine.Warnings); // @"Expected a warning because this is an unresolvable conflict."
-            Assert.Equal(1, t.SuggestedRedirects.Length);
+            Assert.Single(t.SuggestedRedirects);
             Assert.True(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")); // "Expected to find suggested redirect, but didn't"
             Assert.Equal(1, engine.Warnings); // "Should only be one warning for suggested redirects."
-            Assert.True(
-                engine.Log.Contains
-                (
-                    String.Format
+            Assert.Contains(
+                String.Format
                     (
                         AssemblyResources.GetString
                         (
@@ -115,8 +113,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         s_myLibraries_V1_DDllPath,
                         "2.0.0.0",
                         s_myLibraries_V2_DDllPath
-                    )
-                )
+                    ),
+                engine.Log
             );
         }
 
@@ -155,7 +153,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             // RAR will now produce suggested redirects even if AutoUnify is on.
-            Assert.Equal(1, t.SuggestedRedirects.Length);
+            Assert.Single(t.SuggestedRedirects);
             Assert.Equal(0, engine.Warnings); // "Should be no warning for suggested redirects."
         }
 
@@ -200,7 +198,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // @"Expected one warning."
             e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
 
-            Assert.Equal(0, t.SuggestedRedirects.Length);
+            Assert.Empty(t.SuggestedRedirects);
             Assert.Equal(3, t.ResolvedFiles.Length);
             Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
         }
@@ -240,7 +238,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // @"Expected one warning."
             e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
 
-            Assert.Equal(0, t.SuggestedRedirects.Length);
+            Assert.Empty(t.SuggestedRedirects);
             Assert.Equal(3, t.ResolvedFiles.Length);
             Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
         }
@@ -280,7 +278,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Equal(0, t.SuggestedRedirects.Length);
+            Assert.Empty(t.SuggestedRedirects);
         }
 
         /// <summary>
@@ -321,7 +319,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             // Expect a suggested redirect plus a warning
-            Assert.Equal(1, t.SuggestedRedirects.Length);
+            Assert.Single(t.SuggestedRedirects);
             Assert.Equal(1, e.Warnings);
         }
 
@@ -360,7 +358,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             // Expect a suggested redirect with no warning.
-            Assert.Equal(1, t.SuggestedRedirects.Length);
+            Assert.Single(t.SuggestedRedirects);
             Assert.Equal(0, e.Warnings);
         }
 
@@ -405,7 +403,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(2, t.ResolvedDependencyFiles.Length);
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress387218\v2\D.dll")); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress387218\v1\D.dll")); // "Expected to find assembly, but didn't."
-            Assert.Equal(0, t.SuggestedRedirects.Length);
+            Assert.Empty(t.SuggestedRedirects);
             Assert.Equal(0, e.Warnings); // "Should only be no warning about suggested redirects."
         }
 
@@ -449,7 +447,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(2, t.ResolvedDependencyFiles.Length);
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress390219\v2\D.dll")); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress390219\v1\D.dll")); // "Expected to find assembly, but didn't."
-            Assert.Equal(0, t.SuggestedRedirects.Length);
+            Assert.Empty(t.SuggestedRedirects);
             Assert.Equal(0, e.Warnings); // "Should only be no warning about suggested redirects."
         }
 
