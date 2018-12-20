@@ -28,7 +28,7 @@ phases:
     inputs:
       feedSource: 'https://devdiv-test.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json'
 
-  - script: eng/common/cibuild.cmd
+  - script: eng/CIBuild.cmd
               -configuration $(BuildConfiguration)
               $(_PublishArgs)
               $(_SignArgs)
