@@ -201,29 +201,59 @@ Copyright (c) .NET Foundation. All rights reserved.
            versions .props file. They should look something like this: -->
       
       <!--
-      <KnownFrameworkReference Include="Microsoft.AspNetCore"
-                               RuntimeFrameworkName="Microsoft.AspNetCore.App"
-                               DefaultRuntimeFrameworkVersion="2.1.1"
-                               LatestRuntimeFrameworkVersion="2.1.3"
-                               TargetingPackName="Microsoft.AspNetCore.App"
-                               TargetingPackVersion="2.1.0"
-                               />
+    <KnownFrameworkReference Include="Microsoft.AspNetCore.App"
+                              TargetFramework="netcoreapp3.0"
+                              RuntimeFrameworkName="Microsoft.AspNetCore.App"
+                              DefaultRuntimeFrameworkVersion="3.0.0-preview-18572-0018"
+                              LatestRuntimeFrameworkVersion="3.0.0-preview-18572-0018"
+                              TargetingPackName="Microsoft.AspNetCore.App"
+                              TargetingPackVersion="3.0.0-preview-18572-0018"
+                              />
       -->
       
+      <!-- Treat Microsoft.NETCore.App as a KnownFrameworkReference (which it isn't yet in the stage 0 SDK) -->
+    <KnownFrameworkReference Include="Microsoft.NETCore.App"
+                              TargetFramework="netcoreapp3.0"
+                              RuntimeFrameworkName="Microsoft.NETCore.App"
+                              DefaultRuntimeFrameworkVersion="3.0.0-preview-27122-01"
+                              LatestRuntimeFrameworkVersion="3.0.0-preview-27122-01"
+                              TargetingPackName="Microsoft.NETCore.App"
+                              TargetingPackVersion="3.0.0-preview-27122-01"
+                              AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
+                              AppHostRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
+                              />
+      
     </ItemGroup>
+    
+    <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == ''">
+      <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
+      <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
+    </PropertyGroup>
 
     <ResolveFrameworkReferences FrameworkReferences="@(FrameworkReference)"
                                 KnownFrameworkReferences="@(KnownFrameworkReference)"
                                 TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
-                                TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)">
-      <Output TaskParameter="PackageReferencesToAdd" ItemName="PackageReferenceToAdd" />
+                                TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
+                                TargetingPackRoot="$(NetCoreTargetingPackRoot)"
+                                NuGetPackageRoot="$(NuGetPackageRoot)"
+                                AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
+                                RuntimeGraphPath="$(NetCoreRuntimeGraphPath)"
+                                DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)">
+      
+      <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
+      <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
+      <Output TaskParameter="AppHostPath" PropertyName="AppHostSourcePath" />
+      
       <Output TaskParameter="UnresolvedFrameworkReferences" ItemName="_UnresolvedFrameworkReference" />
       
     </ResolveFrameworkReferences>
 
     <ItemGroup>
-      <PackageReference Include="@(PackageReferenceToAdd)" />
+      <PackageReference Include="@(PackageReferenceToAdd)"
+                        IsImplicitlyDefined="true"
+                        PrivateAssets="all"
+                        ExcludeAssets="all" />
     </ItemGroup>
     
   </Target>

@@ -1,0 +1,36 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.TargetingPackResolution.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project>
+  <PropertyGroup>
+    <ResolveAssemblyReferencesDependsOn>
+      $(ResolveAssemblyReferencesDependsOn);
+      ResolveTargetingPacks;
+    </ResolveAssemblyReferencesDependsOn>
+    <!-- TODO: How does conflict resolution fit in here?  Probably it should depend on ResolveTargetingPacks -->
+  </PropertyGroup>
+  
+  <Target Name="ResolveTargetingPacks">
+
+    <ItemGroup>
+      <Reference Include="%(TargetingPack.Path)\ref\netcoreapp3.0\*.dll">
+        <WinMDFile>false</WinMDFile>
+        <Private>false</Private>
+        <ReferenceGroupingDisplayName>.NET Core</ReferenceGroupingDisplayName>
+        <ReferenceGrouping>%(ResolvedTargetingPack.Identity)</ReferenceGrouping>
+        <ResolvedFrom>ResolveTargetingPacks</ResolvedFrom>
+        <IsSystemReference>True</IsSystemReference>
+
+      </Reference>
+    </ItemGroup>
+
+  </Target>
+</Project>

@@ -9,6 +9,7 @@ using System.Linq;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.RuntimeModel;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -77,6 +78,23 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return IsAnalyzer() && FileMatchesProjectLanguage();
+        }
+
+        public static string GetBestMatchingRid(RuntimeGraph runtimeGraph, string runtimeIdentifier,
+            IEnumerable<string> availableRuntimeIdentifiers)
+        {
+            //  TODO: Are runtime identifers case sensitive?
+            HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers);
+            foreach (var candidateRuntimeIdentifier in runtimeGraph.ExpandRuntime(runtimeIdentifier))
+            {
+                if (availableRids.Contains(candidateRuntimeIdentifier))
+                {
+                    return candidateRuntimeIdentifier;
+                }
+            }
+
+            //  TODO: should this generate an error (probably yes, in some cases, to cover cases where RID is misspelled)
+            return runtimeIdentifier;
         }
     }
 }

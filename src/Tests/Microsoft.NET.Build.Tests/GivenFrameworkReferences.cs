@@ -33,7 +33,6 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.SourceFiles.Add("Program.cs", @"
 using System;
-using Humanizer;
 
 namespace FrameworkReferenceTest
 {
@@ -41,7 +40,7 @@ namespace FrameworkReferenceTest
     {
         public static void Main(string [] args)
         {
-            Console.WriteLine(""HelloWorld"".Humanize());
+            
         }
     }
 }");
@@ -108,7 +107,6 @@ namespace FrameworkReferenceTest
 
             testProject.SourceFiles.Add("Program.cs", @"
 using System;
-using Humanizer;
 
 namespace FrameworkReferenceTest
 {
@@ -116,7 +114,6 @@ namespace FrameworkReferenceTest
     {
         public static void Main(string [] args)
         {
-            Console.WriteLine(""HelloWorld"".Humanize());
         }
     }
 }");
