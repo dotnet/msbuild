@@ -67,6 +67,11 @@
         <target state="translated">NETSDK1069: 이 프로젝트는 .NET Standard 1.5 이상을 대상으로 하는 라이브러리를 사용하며, 이 프로젝트는 해당 버전의 .NET Standard를 기본으로 제공하지 않는 .NET Framework 버전을 대상으로 합니다. 알려진 문제에 대해서는 https://aka.ms/net-standard-known-issues를 참조하세요. .NET Framework 4.7.2로 대상을 다시 지정해 보세요.</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
+      <trans-unit id="NoAppHostAvailable">
+        <source>NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.</source>
+        <target state="new">NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.</target>
+        <note>{StrBegin="NETSDK1084: "}</note>
+      </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
         <target state="translated">NETSDK1002: '{0}' 프로젝트가 '{2}'을(를) 대상으로 합니다. '{1}'을(를) 대상으로 하는 프로젝트에서 참조할 수 없습니다.</target>
@@ -102,10 +107,20 @@
         <target state="translated">NETSDK1008: '{1}' 항목 '{2}'에 '{0}' 메타데이터가 없습니다.</target>
         <note>{StrBegin="NETSDK1008: "}</note>
       </trans-unit>
+      <trans-unit id="NoRuntimePackAvailable">
+        <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
+        <target state="new">NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</target>
+        <note>{StrBegin="NETSDK1082: "}</note>
+      </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
         <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierNotRecognized">
+        <source>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</source>
+        <target state="new">NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</target>
+        <note>{StrBegin="NETSDK1083: "}</note>
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
@@ -161,6 +176,11 @@
         <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
         <target state="translated">NETSDK1018: NuGet 버전 문자열 '{0}'이(가) 잘못되었습니다.</target>
         <note>{StrBegin="NETSDK1018: "}</note>
+      </trans-unit>
+      <trans-unit id="UnresolvedTargetingPack">
+        <source>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</source>
+        <target state="new">NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</target>
+        <note>{StrBegin="NETSDK1081: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFramework">
         <source>NETSDK1019: {0} is an unsupported framework.</source>

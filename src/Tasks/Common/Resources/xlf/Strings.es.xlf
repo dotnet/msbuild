@@ -67,6 +67,11 @@
         <target state="translated">NETSDK1069: Este proyecto utiliza una biblioteca para .NET Standard 1.5 o posterior, pero el proyecto es para una versión de .NET Framework que no incluye compatibilidad con esa versión de .NET Standard. Visite https://aka.ms/net-standard-known-issues para ver un conjunto de problemas conocidos. Considere la posibilidad de cambiar el destino a .NET Framework 4.7.2.</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
+      <trans-unit id="NoAppHostAvailable">
+        <source>NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.</source>
+        <target state="new">NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.</target>
+        <note>{StrBegin="NETSDK1084: "}</note>
+      </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
         <target state="translated">NETSDK1002: El proyecto "{0}" tiene como destino "{2}". No se puede hacer referencia a él mediante un proyecto que tenga como destino "{1}".</target>
@@ -102,10 +107,20 @@
         <target state="translated">NETSDK1008: Faltan los metadatos de "{0}" en el elemento de "{1}" "{2}".</target>
         <note>{StrBegin="NETSDK1008: "}</note>
       </trans-unit>
+      <trans-unit id="NoRuntimePackAvailable">
+        <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
+        <target state="new">NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</target>
+        <note>{StrBegin="NETSDK1082: "}</note>
+      </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
         <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierNotRecognized">
+        <source>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</source>
+        <target state="new">NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</target>
+        <note>{StrBegin="NETSDK1083: "}</note>
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
@@ -161,6 +176,11 @@
         <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
         <target state="translated">NETSDK1018: Cadena de versión de NuGet no válida: "{0}".</target>
         <note>{StrBegin="NETSDK1018: "}</note>
+      </trans-unit>
+      <trans-unit id="UnresolvedTargetingPack">
+        <source>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</source>
+        <target state="new">NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</target>
+        <note>{StrBegin="NETSDK1081: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFramework">
         <source>NETSDK1019: {0} is an unsupported framework.</source>
