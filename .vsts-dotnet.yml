@@ -3,7 +3,9 @@ trigger:
 
 phases:
 - phase: Windows_NT
-  queue: VSEng-MicroBuildVS2017
+  queue: 
+    name: VSEng-MicroBuildVS2017
+    timeoutInMinutes: 180
   variables:
     BuildConfiguration: 'Release'
     TeamName: MSBuild
