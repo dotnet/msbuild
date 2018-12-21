@@ -17,7 +17,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.TargetFrameworkIdentifier = ".NETCoreApp";
             task.TargetFrameworkVersion = "3.0";
             task.TargetingPackRoot = Directory.GetCurrentDirectory();
-            task.NuGetPackageRoot = Directory.GetCurrentDirectory();
             task.FrameworkReferences = new[]
             {
                 new MockTaskItem("Microsoft.AspNetCore.App", new Dictionary<string, string>())

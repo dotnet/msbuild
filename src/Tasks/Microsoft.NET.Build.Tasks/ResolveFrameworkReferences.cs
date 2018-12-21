@@ -20,12 +20,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public string TargetFrameworkVersion { get; set; }
 
-        //public string[] TargetingPackRoots { get; set; } = Array.Empty<string>();
         public string TargetingPackRoot { get; set; }
-
-        //  TODO: Remove this.  For packages to download, set a relative path, and use a task which runs later to
-        //  resolve the full path using the packageFolders from the assets file
-        public string NuGetPackageRoot { get; set; }
 
         public string AppHostRuntimeIdentifier { get; set; }
 
@@ -50,8 +45,11 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] TargetingPacks { get; set; }
 
+        //  There should only be one AppHost item, but we use an item here so we can attach metadata to it
+        //  (ie the apphost pack name and version, and the relative path to the apphost inside of it so
+        //  we can resolve the full path later)
         [Output]
-        public string AppHostPath { get; set; }
+        public ITaskItem[] AppHost { get; set; }
 
         [Output]
         public string[] UnresolvedFrameworkReferences { get; set; }
@@ -71,13 +69,6 @@ namespace Microsoft.NET.Build.Tasks
             string appHostPackPattern = null;
             string appHostPackVersion = null;
             string appHostRuntimeIdentifiers = null;
-
-            if (string.IsNullOrEmpty(NuGetPackageRoot))
-            {
-                //  TODO: Remove this, and just resolve relative paths here, and full paths after reading packageFolders from
-                //  assets file
-                NuGetPackageRoot = Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE"), ".nuget", "packages");
-            }
 
             foreach (var frameworkReference in FrameworkReferences)
             {
@@ -100,34 +91,34 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
+                    TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
                     string targetingPackPath = null;
+                    string relativeTargetingPackPath = null;
                     if (!string.IsNullOrEmpty(TargetingPackRoot))
                     {
                         targetingPackPath = GetPackagePath(knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion,
                             TargetingPackRoot);
                     }
-                    if (targetingPackPath == null || !Directory.Exists(targetingPackPath))
+                    if (targetingPackPath != null && Directory.Exists(targetingPackPath))
                     {
-                        //  Use targeting pack in the NuGet packages folder
-                        targetingPackPath = GetPackagePath(knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion,
-                            NuGetPackageRoot);
+                        targetingPack.SetMetadata("Path", targetingPackPath);
+                    }
+                    else
+                    {
+                        //  Download targeting pack
+                        relativeTargetingPackPath = GetPackagePath(knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion,
+                            root: string.Empty);
 
-                        //  If it hasn't been downloaded yet, then download it
-                        //  Note that if the restore operation is running, then the NuGetPackageRoot may not be set correctly
-                        //  (Because it comes from NuGet config and is written to the nuget.g.props file during restore, which
-                        //  isn't imported during restore).  This should be OK as long as restore is run separately from the rest
-                        //  of the build (which is what is supposed to happen).
-                        if (!Directory.Exists(targetingPackPath))
-                        {
-                            TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
-                            packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
+                        TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
+                        packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
 
-                            packagesToDownload.Add(packageToDownload);
-                        }
+                        packagesToDownload.Add(packageToDownload);
+
+                        targetingPack.SetMetadata(MetadataKeys.PackageName, knownFrameworkReference.TargetingPackName);
+                        targetingPack.SetMetadata(MetadataKeys.PackageVersion, knownFrameworkReference.TargetingPackVersion);
+                        targetingPack.SetMetadata(MetadataKeys.RelativePath, "");
                     }
 
-                    TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
-                    targetingPack.SetMetadata("Path", targetingPackPath);
                     targetingPacks.Add(targetingPack);
 
                     TaskItem runtimeFramework = new TaskItem(knownFrameworkReference.RuntimeFrameworkName);
@@ -146,7 +137,6 @@ namespace Microsoft.NET.Build.Tasks
 
             if (appHostPackPattern != null && AppHostRuntimeIdentifier != null)
             {
-
                 //  Choose AppHost RID as best match of the specified RID
                 string bestAppHostRuntimeIdentifier; // = AppHostRuntimeIdentifier;
                 if (appHostRuntimeIdentifiers != null && !string.IsNullOrEmpty(RuntimeGraphPath))
@@ -162,25 +152,35 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 string appHostPackName = appHostPackPattern.Replace("**RID**", bestAppHostRuntimeIdentifier);
+
+                string appHostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
+                    DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier));
+
+
+                TaskItem appHostItem = new TaskItem("AppHost");
                 string appHostPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
                 {
                     appHostPackPath = GetPackagePath(appHostPackName, appHostPackVersion, TargetingPackRoot);
                 }
-                if (appHostPackPath == null || !Directory.Exists(appHostPackPath))
+                if (appHostPackPath != null && Directory.Exists(appHostPackPath))
                 {
-                    //  Use package in NuGet packase folder
-                    appHostPackPath = GetPackagePath(appHostPackName, appHostPackVersion, NuGetPackageRoot);
-                    if (!Directory.Exists(appHostPackPath))
-                    {
-                        TaskItem packageToDownload = new TaskItem(appHostPackName);
-                        packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);
-                        packagesToDownload.Add(packageToDownload);
-                    }
+                    //  Use AppHost from packs folder
+                    appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, appHostRelativePathInPackage));
+                }
+                else
+                {
+                    //  Download apphost pack
+                    TaskItem packageToDownload = new TaskItem(appHostPackName);
+                    packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);
+                    packagesToDownload.Add(packageToDownload);
+
+                    appHostItem.SetMetadata(MetadataKeys.PackageName, appHostPackName);
+                    appHostItem.SetMetadata(MetadataKeys.PackageVersion, appHostPackVersion);
+                    appHostItem.SetMetadata(MetadataKeys.RelativePath, appHostRelativePathInPackage);
                 }
 
-                AppHostPath = Path.Combine(appHostPackPath, "runtimes", bestAppHostRuntimeIdentifier, "native",
-                    DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier));
+                AppHost = new ITaskItem[] { appHostItem };
             }
 
             if (packagesToDownload.Any())

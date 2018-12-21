@@ -61,6 +61,8 @@ namespace Microsoft.NET.Build.Tasks
         public const string NuGetPackageId = "NuGetPackageId";
         public const string NuGetPackageVersion = "NuGetPackageVersion";
         public const string NuGetSourceType = "NuGetSourceType";
+        public const string RelativePath = "RelativePath";
+        public const string PackageDirectory = "PackageDirectory";
 
         // References
         public const string ExternallyResolved = "ExternallyResolved";

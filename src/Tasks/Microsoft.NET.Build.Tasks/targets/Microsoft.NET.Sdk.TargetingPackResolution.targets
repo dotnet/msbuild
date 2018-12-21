@@ -17,20 +17,63 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveAssemblyReferencesDependsOn>
     <!-- TODO: How does conflict resolution fit in here?  Probably it should depend on ResolveTargetingPacks -->
   </PropertyGroup>
+
+  <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <Target Name="ResolveTargetingPacks">
 
+    <GetPackageDirectory
+      Items="@(TargetingPack)"
+      ProjectAssetsFile="$(ProjectAssetsFile)"
+      ProjectPath="$(MSBuildProjectFullPath)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedTargetingPack" />
+      
+    </GetPackageDirectory>    
+    
     <ItemGroup>
-      <Reference Include="%(TargetingPack.Path)\ref\netcoreapp3.0\*.dll">
+      <ResolvedTargetingPack>
+        <Path Condition="'%(ResolvedTargetingPack.Path)' == ''">%(PackageDirectory)</Path>
+      </ResolvedTargetingPack>
+      <Reference Include="%(ResolvedTargetingPack.Path)\ref\netcoreapp3.0\*.dll">
         <WinMDFile>false</WinMDFile>
         <Private>false</Private>
         <ReferenceGroupingDisplayName>.NET Core</ReferenceGroupingDisplayName>
         <ReferenceGrouping>%(ResolvedTargetingPack.Identity)</ReferenceGrouping>
         <ResolvedFrom>ResolveTargetingPacks</ResolvedFrom>
         <IsSystemReference>True</IsSystemReference>
-
       </Reference>
     </ItemGroup>
+      
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(SelfContained)' != 'true'">
+      <PackageConflictPlatformManifests Include="%(ResolvedTargetingPack.Path)\build\netcoreapp3.0\Microsoft.NETCore.App.PlatformManifest.txt"
+                                        Condition="Exists('%(ResolvedTargetingPack.Path)\build\netcoreapp3.0\Microsoft.NETCore.App.PlatformManifest.txt')"/>
+    </ItemGroup>
+
+    <GetPackageDirectory
+      Items="@(AppHostPack)"
+      ProjectAssetsFile="$(ProjectAssetsFile)"
+      ProjectPath="$(MSBuildProjectFullPath)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedAppHostPack" />
+
+    </GetPackageDirectory>
+
+    <ItemGroup>
+      <ResolvedAppHostPack>
+        <Path Condition="'%(ResolvedAppHostPack.Path)' == ''">%(PackageDirectory)\%(RelativePath)</Path>
+      </ResolvedAppHostPack>
+
+      <AppHostTest Include="@(ResolvedAppHostPack)"/>
+      
+    </ItemGroup>
+
+    <!--<Message Text="@(ResolvedAppHostPack)" />-->
+
+    <PropertyGroup>
+      <AppHostSourcePath>@(ResolvedAppHostPack->'%(Path)')</AppHostSourcePath>
+    </PropertyGroup>
+
 
   </Target>
 </Project>

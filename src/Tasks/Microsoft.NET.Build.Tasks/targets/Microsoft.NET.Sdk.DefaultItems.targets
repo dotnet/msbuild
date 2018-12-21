@@ -235,7 +235,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
                                 TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                                 TargetingPackRoot="$(NetCoreTargetingPackRoot)"
-                                NuGetPackageRoot="$(NuGetPackageRoot)"
                                 AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
                                 RuntimeGraphPath="$(NetCoreRuntimeGraphPath)"
                                 DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)">
@@ -243,7 +242,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
-      <Output TaskParameter="AppHostPath" PropertyName="AppHostSourcePath" />
+      <Output TaskParameter="AppHost" ItemName="AppHostPack" />
       
       <Output TaskParameter="UnresolvedFrameworkReferences" ItemName="_UnresolvedFrameworkReference" />
       
