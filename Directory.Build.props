@@ -4,7 +4,7 @@
   <PropertyGroup>
     <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
 
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)eng\AspNetCore.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)eng\WebSdk.snk</AssemblyOriginatorKeyFile>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 

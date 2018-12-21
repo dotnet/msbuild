@@ -29,6 +29,6 @@ launchsettings.json
 7za.exe
 Microsoft.Web.MsBuildTasks2.dll
 project.fragment.lock.json
-build/WebDeploy
+build
 artifacts
 .dotnet

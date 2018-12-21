@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <WebRoot Condition="'$(WebRoot)' == ''">..\</WebRoot>
-    <WebSdkSrc Condition="'$(WebSdkSrc)' == ''">$(WebRoot)\..\</WebSdkSrc>
+    <WebRoot Condition="'$(WebRoot)' == ''">$(RepoRoot)\src\Web\</WebRoot>
   </PropertyGroup>
 
   <Import Project="$(RepositoryEngineeringDir)\Package.props" />
@@ -15,7 +14,7 @@
   <ItemGroup>
     <Content Include="$(WebRoot)\Targets\netstandard1.0\**\*.*">
       <Pack>true</Pack>
-      <PackagePath>build\netstandard1.0\%(RecursiveDir)</PackagePath>
+      <PackagePath>build\netstandard1.0</PackagePath>
     </Content>
 
     <Content Include="$(WebRoot)\Targets\Sdk.*">
@@ -25,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(WebSdkSrc)\ProjectSystem\Package\Microsoft.NET.Sdk.Web.ProjectSystem.csproj" />
-    <ProjectReference Include="$(WebSdkSrc)\Publish\Package\Microsoft.NET.Sdk.Publish.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\ProjectSystem\Package\Microsoft.NET.Sdk.Web.ProjectSystem.csproj" />
+    <ProjectReference Include="$(RepoRoot)\src\Publish\Package\Microsoft.NET.Sdk.Publish.csproj" />
   </ItemGroup>
 
 </Project>
