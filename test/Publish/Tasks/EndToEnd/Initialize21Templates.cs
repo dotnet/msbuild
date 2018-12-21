@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 {
     public class Initialize21Templates: IDisposable
     {
-        public const string DotNet21SdkVersion = "2.1.500";
+        public const string DotNet21SdkVersion = "2.1.502";
         public Initialize21Templates()
         {
             string dotNetInstallDir = Environment.GetEnvironmentVariable("DOTNET_INSTALL_DIR");
