@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <WebRoot Condition="'$(WebRoot)' == ''">..\</WebRoot>
+    <WebSdkSrc Condition="'$(WebSdkSrc)' == ''">$(WebRoot)\..\</WebSdkSrc>
+  </PropertyGroup>
+
+  <Import Project="$(RepositoryEngineeringDir)\Package.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="$(WebRoot)\Targets\netstandard1.0\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0\%(RecursiveDir)</PackagePath>
+    </Content>
+
+    <Content Include="$(WebRoot)\Targets\Sdk.*">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(WebSdkSrc)\ProjectSystem\Package\Microsoft.NET.Sdk.Web.ProjectSystem.csproj" />
+    <ProjectReference Include="$(WebSdkSrc)\Publish\Package\Microsoft.NET.Sdk.Publish.csproj" />
+  </ItemGroup>
+
+</Project>

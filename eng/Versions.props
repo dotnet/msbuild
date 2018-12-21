@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Opt out of certain Arcade features -->
+  <PropertyGroup>
+    <UsingToolXliff>false</UsingToolXliff>
+  </PropertyGroup>
+ <PropertyGroup>
+    <VersionPrefix>3.0.100</VersionPrefix>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RestoreSources>
+      $(RestoreSources);
+      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
+      https://dotnet.myget.org/F/msbuild/api/v3/index.json;
+      https://www.myget.org/F/nugetbuild/api/v3/index.json;
+      https://dotnet.myget.org/F/dotnet-web/api/v3/index.json
+    </RestoreSources>
+  </PropertyGroup>
+</Project>

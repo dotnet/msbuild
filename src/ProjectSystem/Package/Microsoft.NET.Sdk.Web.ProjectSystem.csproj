@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ProjectSystemRoot Condition="'$(ProjectSystemRoot)' == ''">..\</ProjectSystemRoot>
+  </PropertyGroup>
+
+  <Import Project="$(RepositoryEngineeringDir)\Package.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="$(ProjectSystemRoot)\Targets\netstandard1.0\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0\%(RecursiveDir)</PackagePath>
+    </Content>
+
+    <Content Include="$(ProjectSystemRoot)\Targets\Sdk.*">
+      <PackagePath>Sdk</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+  </ItemGroup>
+
+</Project>

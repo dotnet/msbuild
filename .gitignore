@@ -30,4 +30,5 @@ launchsettings.json
 Microsoft.Web.MsBuildTasks2.dll
 project.fragment.lock.json
 build/WebDeploy
-artifacts/
+artifacts
+.dotnet

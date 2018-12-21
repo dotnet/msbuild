@@ -1,0 +1,126 @@
+variables:
+  # Cannot use key:value syntax in root defined variables
+  - name: _TeamName
+    value: DotNetCore
+
+resources:
+  containers:
+  - container: LinuxContainer
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+
+jobs:
+- template: /eng/common/templates/jobs/jobs.yml
+  parameters:
+    enableMicrobuild: true
+    enablePublishBuildArtifacts: true
+    enablePublishTestResults: true
+    enablePublishBuildAssets: true
+    enableTelemetry: true
+    helixRepo: dotnet/websdk
+    jobs:
+    - job: Windows_NT
+      pool:
+        # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
+        # Will eventually change this to two BYOC pools.
+        ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+          name: Hosted VS2017
+        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          name: dotnet-internal-temp
+
+      variables:
+      - _Script: eng\common\cibuild.cmd
+      - _ValidateSdkArgs: ''
+      - _InternalBuildArgs: ''
+
+      # Only enable publishing in non-public, non PR scenarios.
+      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        # DotNet-Blob-Feed provides: dotnetfeed-storage-access-key-1
+        # DotNet-Symbol-Server-Pats provides: microsoft-symbol-server-pat, symweb-symbol-server-pat
+        # Publish-Build-Assets provides: MaestroAccessToken, BotAccount-dotnet-maestro-bot-PAT
+        - group: DotNet-Blob-Feed
+        - group: DotNet-Symbol-Server-Pats
+        - group: Publish-Build-Assets
+        - _PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+        - _InternalBuildArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
+            /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+            /p:DotNetPublishBlobFeedUrl=$(_PublishBlobFeedUrl)
+            /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+            /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+            /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+            /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+
+      strategy:
+        matrix:
+          Build_Debug:
+            _BuildConfig: Debug
+            _PublishType: none
+            _SignType: test
+            _DotNetPublishToBlobFeed : false
+          Build_Release:
+            _BuildConfig: Release
+            # PRs or external builds are not signed.
+            ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+              _PublishType: none
+              _SignType: test
+              _DotNetPublishToBlobFeed : false
+            ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+              _PublishType: blob
+              _SignType: real
+              _DotNetPublishToBlobFeed : true
+              _Script: eng\validate-sdk.cmd
+              _ValidateSdkArgs: -gitHubPat $(BotAccount-dotnet-maestro-bot-PAT) -barToken $(MaestroAccessToken)
+      steps:
+      - checkout: self
+        clean: true
+      # Use utility script to run script command dependent on agent OS.
+      - script: $(_Script)
+          -configuration $(_BuildConfig) 
+          -prepareMachine
+          $(_InternalBuildArgs)
+          $(_ValidateSdkArgs)
+        displayName: Windows Build / Publish
+
+- template: /eng/common/templates/job/job.yml
+  parameters:
+    name: OSX
+    enableTelemetry: true
+    enablePublishBuildArtifacts: true
+    helixRepo: dotnet/arcade-minimalci-sample
+    pool:
+      name: Hosted macOS
+    strategy:
+      matrix:
+        debug_configuration:
+          _BuildConfig: Debug
+        release_configuration:
+          _BuildConfig: Release
+    steps:
+    - script: eng/common/cibuild.sh
+        --configuration $(_BuildConfig)
+        --prepareMachine
+      name: Build
+      displayName: Build
+      condition: succeeded()
+
+- template: /eng/common/templates/job/job.yml
+  parameters:
+    name: Linux
+    enableTelemetry: true
+    enablePublishBuildArtifacts: true
+    helixRepo: dotnet/arcade-minimalci-sample
+    pool:
+      name: Hosted Ubuntu 1604
+    container: LinuxContainer
+    strategy:
+      matrix:
+        debug_configuration:
+          _BuildConfig: Debug
+        release_configuration:
+          _BuildConfig: Release
+    steps:
+    - script: eng/common/cibuild.sh
+        --configuration $(_BuildConfig)
+        --prepareMachine
+      name: Build
+      displayName: Build
+      condition: succeeded()
