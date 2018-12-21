@@ -221,7 +221,19 @@ Copyright (c) .NET Foundation. All rights reserved.
                               TargetingPackVersion="3.0.0-preview-27122-01"
                               AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
                               AppHostRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
+                              RuntimePackNamePatterns="runtime.**RID**.Microsoft.NETCore.App;runtime.**RID**.Microsoft.NETCore.DotNetHostResolver;runtime.**RID**.Microsoft.NETCore.DotNetHostPolicy"
+                              RuntimePackRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
                               />
+
+      <KnownFrameworkReference RuntimePackNamePatterns="runtime.**RID**.Microsoft.WindowsDesktop.App"
+                               RuntimePackRuntimeIdentifiers="win-x64;win-x86"
+                               Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App'"
+                               />
+
+      <KnownFrameworkReference RuntimePackNamePatterns="runtime.**RID**.Microsoft.AspNetCore.App"
+                               RuntimePackRuntimeIdentifiers="win-x64;win-x86;win-arm;osx-x64;linux-musl-x64;linux-x64;linux-arm;linux-arm64"
+                               Condition="'%(Identity)' == 'Microsoft.AspNetCore.App'"
+                               />
       
     </ItemGroup>
     
@@ -237,9 +249,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetingPackRoot="$(NetCoreTargetingPackRoot)"
                                 AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
                                 RuntimeGraphPath="$(NetCoreRuntimeGraphPath)"
+                                SelfContained="$(SelfContained)"
+                                RuntimeIdentifier="$(RuntimeIdentifier)"
                                 DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)">
-      
+
       <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
+      <Output TaskParameter="PackagesToReference" ItemName="PackageReference" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="AppHost" ItemName="AppHostPack" />

@@ -26,6 +26,10 @@ namespace Microsoft.NET.Build.Tasks
 
         public string RuntimeGraphPath { get; set; }
 
+        public bool SelfContained { get; set; }
+
+        public string RuntimeIdentifier { get; set; }
+
         /// <summary>
         /// The file name of Apphost asset.
         /// </summary>
@@ -38,6 +42,9 @@ namespace Microsoft.NET.Build.Tasks
 
         [Output]
         public ITaskItem[] PackagesToDownload { get; set; }
+
+        [Output]
+        public ITaskItem[] PackagesToReference { get; set; }
 
         [Output]
         public ITaskItem[] RuntimeFrameworks { get; set; }
@@ -62,6 +69,7 @@ namespace Microsoft.NET.Build.Tasks
                 .ToDictionary(kfr => kfr.Name);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
+            List<ITaskItem> packagesToReference = new List<ITaskItem>();
             List<ITaskItem> runtimeFrameworks = new List<ITaskItem>();
             List<ITaskItem> targetingPacks = new List<ITaskItem>();
             List<string> unresolvedFrameworkReferences = new List<string>();
@@ -121,6 +129,21 @@ namespace Microsoft.NET.Build.Tasks
 
                     targetingPacks.Add(targetingPack);
 
+                    if (SelfContained && !string.IsNullOrEmpty(knownFrameworkReference.RuntimePackNamePatterns))
+                    {
+                        foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
+                        {
+                            string runtimePackRuntimeIdentifier = GetBestRuntimeIdentifier(RuntimeIdentifier, knownFrameworkReference.RuntimePackRuntimeIdentifiers);
+                            string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
+
+                            TaskItem runtimePackItem = new TaskItem(runtimePackName);
+                            runtimePackItem.SetMetadata(MetadataKeys.Version, knownFrameworkReference.LatestRuntimeFrameworkVersion);
+                            runtimePackItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, "true");
+
+                            packagesToReference.Add(runtimePackItem);
+                        }
+                    }
+
                     TaskItem runtimeFramework = new TaskItem(knownFrameworkReference.RuntimeFrameworkName);
 
                     //  Use default (non roll-forward) version for now.  Eventually we'll need to add support for rolling
@@ -138,18 +161,7 @@ namespace Microsoft.NET.Build.Tasks
             if (appHostPackPattern != null && AppHostRuntimeIdentifier != null)
             {
                 //  Choose AppHost RID as best match of the specified RID
-                string bestAppHostRuntimeIdentifier; // = AppHostRuntimeIdentifier;
-                if (appHostRuntimeIdentifiers != null && !string.IsNullOrEmpty(RuntimeGraphPath))
-                {
-                    var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
-                    bestAppHostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph,
-                        AppHostRuntimeIdentifier,
-                        appHostRuntimeIdentifiers.Split(';'));
-                }
-                else
-                {
-                    bestAppHostRuntimeIdentifier = AppHostRuntimeIdentifier;
-                }
+                string bestAppHostRuntimeIdentifier = GetBestRuntimeIdentifier(AppHostRuntimeIdentifier, appHostRuntimeIdentifiers);
 
                 string appHostPackName = appHostPackPattern.Replace("**RID**", bestAppHostRuntimeIdentifier);
 
@@ -188,6 +200,11 @@ namespace Microsoft.NET.Build.Tasks
                 PackagesToDownload = packagesToDownload.ToArray();
             }
 
+            if (packagesToReference.Any())
+            {
+                PackagesToReference = packagesToReference.ToArray();
+            }
+
             if (runtimeFrameworks.Any())
             {
                 RuntimeFrameworks = runtimeFrameworks.ToArray();
@@ -201,6 +218,23 @@ namespace Microsoft.NET.Build.Tasks
             if (unresolvedFrameworkReferences.Any())
             {
                 UnresolvedFrameworkReferences = unresolvedFrameworkReferences.ToArray();
+            }
+        }
+
+        string GetBestRuntimeIdentifier(string targetRuntimeIdentifier, string availableRuntimeIdentifiers)
+        {
+            if (availableRuntimeIdentifiers != null && !string.IsNullOrEmpty(RuntimeGraphPath))
+            {
+                var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
+                var bestRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph,
+                    AppHostRuntimeIdentifier,
+                    availableRuntimeIdentifiers.Split(';'));
+
+                return bestRuntimeIdentifier;
+            }
+            else
+            {
+                return targetRuntimeIdentifier;
             }
         }
 
@@ -250,6 +284,10 @@ namespace Microsoft.NET.Build.Tasks
             public string AppHostPackNamePattern => _item.GetMetadata("AppHostPackNamePattern");
 
             public string AppHostRuntimeIdentifiers => _item.GetMetadata("AppHostRuntimeIdentifiers");
+
+            public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
+
+            public string RuntimePackRuntimeIdentifiers => _item.GetMetadata("RuntimePackRuntimeIdentifiers");
 
             public NuGetFramework TargetFramework { get; }
         }
