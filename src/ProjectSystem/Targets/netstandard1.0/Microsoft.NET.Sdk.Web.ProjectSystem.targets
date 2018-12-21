@@ -29,6 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Include="DotNetCoreWeb" />
     <ProjectCapability Include="AspNetCore" />
     <ProjectCapability Include="Web" />
+    <ProjectCapability Include="AppServicePublish" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' != '' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0' ">
