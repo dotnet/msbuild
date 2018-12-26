@@ -13,7 +13,7 @@
           Outputs="%(GenerateArchivesInputsOutputs.Outputs)">
 
     <PropertyGroup>
-      <GenerateArchivesDestinationArchive>$(ArchiveOutputDirectory)/%(GenerateArchivesInputsOutputs.OutFileName)$(InternalArchiveExtension)</GenerateArchivesDestinationArchive>
+      <GenerateArchivesDestinationArchive>$(ArchiveOutputDirectory)/%(GenerateArchivesInputsOutputs.OutFileName).zip</GenerateArchivesDestinationArchive>
     </PropertyGroup>
 
     <ZipFileCreateFromDirectory
@@ -41,7 +41,7 @@
     <ItemGroup>
       <GenerateArchivesInputsOutputs Condition=" '%(LayoutDefinition.Name)' != '' " Include="%(LayoutDefinition.Name)">
         <Inputs>%(LayoutDefinition.OutputFiles)</Inputs>
-        <Outputs>$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion)$(InternalArchiveExtension)</Outputs>
+        <Outputs>$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion).zip</Outputs>
         <InputDirectory>$(LayoutDirectory)/%(LayoutDefinition.Name)</InputDirectory>
         <OutFileName>%(LayoutDefinition.NameWithVersion)</OutFileName>
         <ExcludePatterns>%(LayoutDefinition.ExcludePatterns)</ExcludePatterns>

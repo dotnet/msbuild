@@ -3,7 +3,7 @@
     <BundledTools Include="MSBuild;
                            dotnet;
                            NuGet.CommandLine.XPlat" />
-    
+
     <BundledToolProjects Include="tool_msbuild;
                                   tool_nuget;
                                   tool_cli;

@@ -84,6 +84,9 @@
     <IntermediateDirectory>$(ArtifactsDir)int</IntermediateDirectory>
     <ToolsetOutputDirectory>$(IntermediateDirectory)/Toolset/sdk/$(Version)</ToolsetOutputDirectory>
 
+    <ExeExtension>.exe</ExeExtension>
+    <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
+
     <_DotNetHiveRoot>$(DOTNET_INSTALL_DIR)</_DotNetHiveRoot>
     <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet/</_DotNetHiveRoot>
     <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)/</_DotNetHiveRoot>

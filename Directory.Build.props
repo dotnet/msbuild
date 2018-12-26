@@ -1,54 +1,10 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-<!--
-Projects which don't import dir.props:
-
-build\RestoreDependency.proj
-build\Signing.proj
-build\sdks\sdks.csproj
-build\test\RunTest.proj
-build_projects\Microsoft.DotNet.Cli.Build.SelfTest\InvokeWithStage2.proj
-build_projects\update-dependencies\update-dependencies.csproj
-tools\TestAssetsDependencies\TestAssetsDependencies.csproj
-
--->
-
   <PropertyGroup>
-    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
 
-    <RelativeCLIBuildBinaries>build_projects/dotnet-cli-build/bin</RelativeCLIBuildBinaries>
-    <RelativeCLIBuildDllName>dotnet-cli-build.dll</RelativeCLIBuildDllName>
-    <CLIBuildDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/$(RelativeCLIBuildDllName)</CLIBuildDll>
-    <BuildTasksFeedDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
-
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
   </PropertyGroup>
-
-  <Import Project="build/TargetFramework.props" />
-
-  <Import Project="build/BranchInfo.props" />
-
-  <Import Project="build/Branding.props" />
-  <Import Project="build/FileExtensions.props" />
-  <Import Project="build/InputDirectories.props" />
-
-  <Import Project="build/SetupPreviousStage.props" />
-
-  <ImportGroup Condition=" '$(BuildingSigningProject)' != 'true' ">
-    <!-- These imports aren't required for signing, and some of them have syntax which isn't supported in MSBuild 14,
-         which is what the signing build uses -->
-    <Import Project="build/BundledTools.props" />
-    <Import Project="build/BundledSdks.props" />
-
-    <Import Project="build/AzureInfo.props" />
-    <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/DotnetCoreSdkLKG.props" />
-
-    <Import Project="build/GenerateResxSource.targets" />
-  </ImportGroup>
 
   <PropertyGroup>
     <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
