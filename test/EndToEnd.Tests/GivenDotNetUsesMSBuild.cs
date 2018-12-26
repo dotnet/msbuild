@@ -106,33 +106,5 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello I prefer the cli runtime World!");;
         }
-
-        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
-        public void ItCanRunAToolThatInvokesADependencyToolInACSProj()
-        {
-            var repoDirectoriesProvider = new RepoDirectoriesProvider();
-
-            var testInstance = TestAssets.Get("TestAppWithProjDepTool")
-                                         .CreateInstance()
-                                         .WithSourceFiles()
-                                         .WithRestoreFiles();
-
-            var configuration = "Debug";
-
-            var testProjectDirectory = testInstance.Root;
-
-            new BuildCommand()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"-c {configuration} ")
-                .Should()
-                .Pass();
-
-            new DotnetCommand()
-                .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput(
-                    $"-d dependency-tool-invoker -c {configuration} -f netcoreapp2.2 portable")
-                .Should().Pass()
-                     .And.HaveStdOutContaining("Hello Portable World!");;
-        }
     }
 }
