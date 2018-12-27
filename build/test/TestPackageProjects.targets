@@ -20,16 +20,6 @@
 
   <Target Name="SetupTestPackageProjectBaseData">
     <ItemGroup>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-tool-invoker">
-        <Name>dotnet-dependency-tool-invoker</Name>
-        <ProjectName>dotnet-dependency-tool-invoker.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
-        <ReleaseSuffix>$(ReleaseSuffix)</ReleaseSuffix>
-        <Clean>True</Clean>
-      </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable">
         <Name>dotnet-portable</Name>
         <ProjectName>dotnet-portable.csproj</ProjectName>

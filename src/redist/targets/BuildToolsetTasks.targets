@@ -23,5 +23,7 @@
   <UsingTask TaskName="Chmod" AssemblyFile="$(ToolsetTaskDll)" />
   <UsingTask TaskName="RemoveAssetFromDepsPackages" AssemblyFile="$(ToolsetTaskDll)" />
   <UsingTask TaskName="ChangeEntryPointLibraryName" AssemblyFile="$(ToolsetTaskDll)"/>
+  <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(ToolsetTaskDll)"/>
+  <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(ToolsetTaskDll)"/>
 
 </Project>

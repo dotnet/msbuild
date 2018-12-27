@@ -81,9 +81,6 @@
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
 
-    <IntermediateDirectory>$(ArtifactsDir)int</IntermediateDirectory>
-    <ToolsetOutputDirectory>$(IntermediateDirectory)/Toolset/sdk/$(Version)</ToolsetOutputDirectory>
-
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
 

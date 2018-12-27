@@ -20,9 +20,5 @@
   <PropertyGroup>
     <ArtifactNameSdk>dotnet-toolset-internal</ArtifactNameSdk>
     <ArtifactNameSdkLanguagePack>dotnet-toolset-langpack</ArtifactNameSdkLanguagePack>
-
-    <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(Version)</ArtifactNameWithVersionSdk>
-
-    <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(Version)</ArtifactNameWithVersionSdkLanguagePack>
   </PropertyGroup>
 </Project>
