@@ -36,7 +36,7 @@
 
   <ItemGroup>
     <Content Include="minimumMSBuildVersion">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 </Project>

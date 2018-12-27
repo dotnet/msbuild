@@ -143,6 +143,8 @@
     <!-- The WPF SDK .nupkg includes some files in the root that we don't want to bundle, so delete them -->
     <ItemGroup>
       <SDKFilesToDelete Include="$(OutputPath)/Sdks/Microsoft.NET.Sdk.Wpf/*" />
+      <SDKFilesToDelete Include="$(OutputPath)/Sdks/**/*.nupkg.metadata" />
+      <SDKFilesToDelete Include="$(OutputPath)/Sdks/**/*.signature.p7s" />
     </ItemGroup>
     <Delete Files="@(SDKFilesToDelete)" />
   </Target>
@@ -207,8 +209,8 @@
           AfterTargets="Build">
     <PropertyGroup>
       <LayoutDirectory>$(BaseOutputPath)$(Configuration)\layouts\</LayoutDirectory>
-      <SdkLayoutOutputDirectory>$(LayoutDirectory)$(ArtifactNameSdk)\sdk\$(Version)</SdkLayoutOutputDirectory>
-      <SdkLanguagePackOutputDirectory>$(LayoutDirectory)$(ArtifactNameSdkLanguagePack)\sdk\$(Version)</SdkLanguagePackOutputDirectory>
+      <SdkLayoutOutputDirectory>$(LayoutDirectory)$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
+      <SdkLanguagePackOutputDirectory>$(LayoutDirectory)$(ArtifactNameSdkLanguagePack)</SdkLanguagePackOutputDirectory>
     </PropertyGroup>
 
     <ItemGroup>
