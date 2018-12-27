@@ -1,0 +1,30 @@
+<Project ToolsVersion="14.0" DefaultTargets="Test">
+  <Target Name="OverlaySdkOnLKG" AfterTargets="Build" DependsOnTargets="GenerateLayout">
+    <PropertyGroup>
+      <RedistLayoutPath>$(BaseOutputPath)$(Configuration)\dotnet\</RedistLayoutPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <OverlaySDK Include="$(_DotNetHiveRoot)/**/*" />
+      <ToolsetToOverlay Include="$(OutputPath)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(OverlaySDK)"
+          DestinationFiles="@(OverlaySDK->'$(RedistLayoutPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- This is a hack? to discover the SDK folder on which we will overlay the
+    toolset without having to duplicate the LKG SDK property between the global.json
+    and a property. -->
+    <ItemGroup>
+      <VersionFilePath Include="$(RedistLayoutPath)/sdk/*/.version" />
+      <SdkDirectoryPath Include="$([System.IO.Path]::GetDirectoryName('%(VersionFilePath.Identity)'))" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <SdkOutputDirectory>@(SdkDirectoryPath)</SdkOutputDirectory>
+    </PropertyGroup>
+
+    <Copy SourceFiles="@(ToolsetToOverlay)"
+          DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+</Project>

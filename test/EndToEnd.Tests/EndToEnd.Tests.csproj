@@ -4,7 +4,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)targets/Empty.props" />
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)targets/Empty.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(OutputPath)Tests\Directory.Build.props" />
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(OutputPath)Tests\Directory.Build.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(_DotNetHiveRoot)\sdk\*\.version">
       <Link>.version</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -18,4 +28,11 @@
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsPackageVersion)" />
   </ItemGroup>
+
+  <Target Name="CopyDirectoryBuildTestDependencies"
+          Inputs="@(_CopyDirectoryBuildTestDependenciesInput)"
+          Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)"
+          AfterTargets="Build">
+    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
+  </Target>
 </Project>

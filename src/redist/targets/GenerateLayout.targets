@@ -206,7 +206,7 @@
                             RetargetTools"
           AfterTargets="Build">
     <PropertyGroup>
-      <LayoutDirectory>$(ArtifactsBinDir)layouts\</LayoutDirectory>
+      <LayoutDirectory>$(BaseOutputPath)$(Configuration)\layouts\</LayoutDirectory>
       <SdkLayoutOutputDirectory>$(LayoutDirectory)$(ArtifactNameSdk)\sdk\$(Version)</SdkLayoutOutputDirectory>
       <SdkLanguagePackOutputDirectory>$(LayoutDirectory)$(ArtifactNameSdkLanguagePack)\sdk\$(Version)</SdkLanguagePackOutputDirectory>
     </PropertyGroup>

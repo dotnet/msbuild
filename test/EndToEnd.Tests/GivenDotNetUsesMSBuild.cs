@@ -70,41 +70,5 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
         }
-
-        [Fact]
-        public void ItCanRunToolsInACSProj()
-        {
-            var testInstance = TestAssets.Get("MSBuildTestApp")
-                                         .CreateInstance()
-                                         .WithSourceFiles()
-                                         .WithRestoreFiles();
-
-            var testProjectDirectory = testInstance.Root;
-
-            new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput("portable")
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello Portable World!");;
-        }
-
-        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
-        public void ItCanRunToolsThatPrefersTheCliRuntimeEvenWhenTheToolItselfDeclaresADifferentRuntime()
-        {
-            var testInstance = TestAssets.Get("MSBuildTestApp")
-                                         .CreateInstance()
-                                         .WithSourceFiles()
-                                         .WithRestoreFiles();
-
-            var testProjectDirectory = testInstance.Root;
-
-            new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput("prefercliruntime")
-                .Should().Pass()
-                .And.HaveStdOutContaining("Hello I prefer the cli runtime World!");;
-        }
     }
 }
