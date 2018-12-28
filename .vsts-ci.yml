@@ -24,7 +24,7 @@ phases:
         name: dotnet-external-temp
       ${{ if ne(variables['System.TeamProject'], 'public') }}:
         name: dotnet-internal-temp
-      parallel: 2
+      parallel: 99
       matrix:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           Build_Debug_x86:
