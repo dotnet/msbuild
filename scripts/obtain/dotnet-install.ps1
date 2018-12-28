@@ -468,7 +468,7 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
     }
 }
 
-function DownloadFile([string]$Source, [string]$OutPath) {
+function DownloadFile($Source, [string]$OutPath) {
     if ($Source -notlike "http*") {
         #  Using System.IO.Path.GetFullPath to get the current directory
         #    does not work in this context - $pwd gives the current directory
@@ -484,7 +484,7 @@ function DownloadFile([string]$Source, [string]$OutPath) {
     $Stream = $null
 
     try {
-        $Response = GetHTTPResponse -Uri [Uri]$Source
+        $Response = GetHTTPResponse -Uri $Source
         $Stream = $Response.Content.ReadAsStreamAsync().Result
         $File = [System.IO.File]::Create($OutPath)
         $Stream.CopyTo($File)
@@ -570,7 +570,7 @@ Say-Verbose "Zip path: $ZipPath"
 $DownloadFailed = $false
 Say "Downloading link: $DownloadLink"
 try {
-    DownloadFile -Uri $DownloadLink -OutPath $ZipPath
+    DownloadFile -Source $DownloadLink -OutPath $ZipPath
 }
 catch {
     Say "Cannot download: $DownloadLink"
@@ -580,7 +580,7 @@ catch {
         Say-Verbose "Legacy zip path: $ZipPath"
         Say "Downloading legacy link: $DownloadLink"
         try {
-            DownloadFile -Uri $DownloadLink -OutPath $ZipPath
+            DownloadFile -Source $DownloadLink -OutPath $ZipPath
         }
         catch {
             Say "Cannot download: $DownloadLink"
