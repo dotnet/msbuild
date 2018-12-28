@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Nie przenoś do przodu w czasie dla żadnego kandydata, dla którego jest włączona platforma współużytkowana.</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="needs-review-translation">Nie przenoś do przodu w czasie dla żadnego kandydata, dla którego jest włączona platforma współużytkowana.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
