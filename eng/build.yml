@@ -61,7 +61,6 @@ phases:
     - ${{ if eq(parameters.agentOs, 'Linux') }}:
       - script: ./build.sh
                   --pack --publish --ci --test
-                  --skip-prereqs
                   --configuration $(BuildConfig)
                   $(DockerParameter)
                   --architecture $(BuildArchitecture)
@@ -72,7 +71,6 @@ phases:
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
                   --pack --publish --ci --test
-                  --skip-prereqs
                   --configuration $(BuildConfig)
         displayName: Build
 
