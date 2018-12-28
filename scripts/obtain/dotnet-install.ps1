@@ -494,8 +494,13 @@ function DownloadFile([Uri]$Uri, [string]$OutPath) {
 function Prepend-Sdk-InstallRoot-To-Path([string]$InstallRoot, [string]$BinFolderRelativePath) {
     $BinPath = Get-Absolute-Path $(Join-Path -Path $InstallRoot -ChildPath $BinFolderRelativePath)
     if (-Not $NoPath) {
-        Say "Adding to current process PATH: `"$BinPath`". Note: This change will not be visible if PowerShell was run as a child process."
-        $env:path = "$BinPath;" + $env:path
+        $SuffixedBinPath = "$BinPath;"
+        if (-Not $env:path.Contains($SuffixedBinPath)) {
+            Say "Adding to current process PATH: `"$BinPath`". Note: This change will not be visible if PowerShell was run as a child process."
+            $env:path = $SuffixedBinPath + $env:path
+        } else {
+            Say-Verbose "Current process PATH already contains `"$BinPath`""
+        }
     }
     else {
         Say "Binaries of dotnet can be found in $BinPath"
