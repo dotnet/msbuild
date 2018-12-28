@@ -17,23 +17,50 @@ phases:
       _HelixBuildConfig: $(_BuildConfig)
       BuildConfig: $(_BuildConfig)
       BuildArchitecture: $(_BuildArchitecture)
-      _HelixSource: pr/dotnet/toolset/$(Build.SourceBranch)
       DockerParameter: $(_DockerParameter)
       LinuxPortable: $(_LinuxPortable)
       RuntimeId: $(_RuntimeIdentifier)
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        _HelixSource: pr/dotnet/toolset/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: ''
+        _PublishArgs: ''
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        _HelixSource: official/dotnet/toolset/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+        _PublishArgs: /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+                  /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
+                  /p:DotNetPublishBlobFeedKey=$(dotnetcli-storage-key)
+                  /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                  /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                  /p:PB_PublishType=$(_PublishType)
 
     steps:
+    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
+          KeyVaultName: EngKeyVault
+          SecretsFilter: 'dotnetcli-storage-key,microsoft-symbol-server-pat,symweb-symbol-server-pat'
+        condition: succeeded()
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: 'HelixProd_KeyVault'
+          KeyVaultName: HelixProdKV
+          SecretsFilter: 'HelixApiAccessToken'
+        condition: always()
+
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: build.cmd
+                  -pack -publish -ci -test
                   -Configuration $(BuildConfig)
                   -Architecture $(BuildArchitecture)
+                  $(_PublishArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
-        env:
-          DOTNET_CLI_UI_LANGUAGE: $(_DOTNET_CLI_UI_LANGUAGE)
-          DropSuffix: $(_DropSuffix)
 
     - ${{ if eq(parameters.agentOs, 'Linux') }}:
       - script: ./build.sh
+                  --pack --publish --ci --test
                   --skip-prereqs
                   --configuration $(BuildConfig)
                   $(DockerParameter)
@@ -41,11 +68,10 @@ phases:
                   $(LinuxPortable)
                   $(RuntimeId)
         displayName: Build
-        env:
-          DropSuffix: $(_DropSuffix)
 
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
+                  --pack --publish --ci --test
                   --skip-prereqs
                   --configuration $(BuildConfig)
         displayName: Build
@@ -53,21 +79,20 @@ phases:
     - task: PublishTestResults@1
       displayName: Publish Test Results
       inputs:
-        testRunner: VSTest
-        testResultsFiles: '**/*.trx'
-        testRunTitle: 'Unit Test Results'
+        testRunner: XUnit
+        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'
+        testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'
         platform: '$(BuildPlatform)'
         configuration: '$(_BuildConfig)'
-      condition: and(succeededOrFailed(), ne(variables['PB_SkipTests'], 'true'))
+      condition: and(succeededOrFailed(), ne(variables['PB_SkipTests'], 'true'), ne(variables['RunTests'], 'false'))
 
     - task: CopyFiles@2
       displayName: Gather Logs
       inputs:
         SourceFolder: '$(Build.SourcesDirectory)'
         Contents: |
-         msbuild.log
-         msbuild.mainbuild.binlog
-         msbuild.generatepropsfile.binlog
+         artifacts/log/$(_BuildConfig)/**/*
+         artifacts/TestResults/$(_BuildConfig)/**/*
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
       continueOnError: true
       condition: always()
