@@ -1,60 +1,33 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-<!--
-Projects which don't import dir.props:
-
-build\RestoreDependency.proj
-build\Signing.proj
-build\sdks\sdks.csproj
-build\test\RunTest.proj
-build_projects\Microsoft.DotNet.Cli.Build.SelfTest\InvokeWithStage2.proj
-build_projects\update-dependencies\update-dependencies.csproj
-tools\TestAssetsDependencies\TestAssetsDependencies.csproj
-
--->
-
   <PropertyGroup>
-    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
 
-    <RelativeCLIBuildBinaries>build_projects/dotnet-cli-build/bin</RelativeCLIBuildBinaries>
-    <RelativeCLIBuildDllName>dotnet-cli-build.dll</RelativeCLIBuildDllName>
-    <CLIBuildDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/$(RelativeCLIBuildDllName)</CLIBuildDll>
-    <BuildTasksFeedDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
-
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
+    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
   </PropertyGroup>
 
-  <Import Project="build/TargetFramework.props" />
-  <Import Project="build/InitRepo.props" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(HostInfoProps)" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(BuildInfoProps)" />
+  <PropertyGroup>
+    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+  </PropertyGroup>
 
-  <Import Project="build/BranchInfo.props" />
-
-  <Import Project="build/DependencyVersions.props" />
-  <Import Project="build/Version.props" />
-  <Import Project="build/Branding.props" />
-  <Import Project="build/FileExtensions.props" />
-  <Import Project="build/InputDirectories.props" />
-
-  <Import Project="build/SetupPreviousStage.props" />
-  <Import Project="build/OutputDirectories.props" />
-
-  <ImportGroup Condition=" '$(BuildingSigningProject)' != 'true' ">
-    <!-- These imports aren't required for signing, and some of them have syntax which isn't supported in MSBuild 14,
-         which is what the signing build uses -->
-    <Import Project="build/BundledTools.props" />
-    <Import Project="build/BundledSdks.props" />
-
-    <Import Project="build/AzureInfo.props" />
-    <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/DotnetCoreSdkLKG.props" />
-
-    <Import Project="build/GenerateResxSource.targets" />
-  </ImportGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
   
+  <PropertyGroup>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+
+    <IsShipping>true</IsShipping>
+    <ToolsetTargetFramework>netcoreapp3.0</ToolsetTargetFramework>
+
+    <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir>
+
+    <!-- NU1701: Disable asset target fallback warning globally since it does not work transitively on NoWarn of individual packages -->
+    <!-- Since we disabled the implict fallback to net461, this will only kick in when we have an explicit fallback and we don't need to be warned about it doing what we asked it to do. -->
+    <!-- NU5104: Disable 'A stable release of a package should not have a prerelease dependency' warning globally -->
+    <!-- The "pack" command under 'buildCrossTargeting' for 'Microsoft.DotNet.MSBuildSdkResolver' throws a "NU5104" warning/error while using a "2.1.300" stage0 SDK. For: Linux-x64, Linux-arm, and Linux-arm64 -->
+    <NoWarn>NU1701;NU5104</NoWarn>
+  </PropertyGroup>
+
 </Project>

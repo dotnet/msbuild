@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)targets/Empty.props" />
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)targets/Empty.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(OutputPath)Tests\Directory.Build.props" />
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(OutputPath)Tests\Directory.Build.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(_DotNetHiveRoot)\sdk\*\.version">
+      <Link>.version</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsPackageVersion)" />
+  </ItemGroup>
+
+  <Target Name="CopyDirectoryBuildTestDependencies"
+          Inputs="@(_CopyDirectoryBuildTestDependenciesInput)"
+          Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)"
+          AfterTargets="Build">
+    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
+  </Target>
+</Project>

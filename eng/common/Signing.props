@@ -1,0 +1,12 @@
+<Project>
+    <ItemGroup>
+        <!-- Remove all automatically included packages -->
+        <ItemsToSign Remove="@(ItemsToSign)" />
+
+        <!-- Only sign the NuGet packages with the default signing infrastructure, as the other files need to be signed
+             as part of the build (as the default infrastructure doesn't support signing everything inside packages the
+             way they would need to be done if signing was done after all packages were produced.  -->
+        <ItemsToSign Include="$(ArtifactsShippingPackagesDir)*.nupkg"/>
+
+    </ItemGroup>
+</Project>

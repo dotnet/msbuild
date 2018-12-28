@@ -1,0 +1,3 @@
+<Project>
+  <!-- Empty Directory.Build.props file to prevent test asset projects from picking up the repo's Directory.Build.props' -->
+</Project>

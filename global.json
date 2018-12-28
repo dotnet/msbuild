@@ -1,3 +1,8 @@
 {
-    "projects": [ "src", "test", "tools", "build_projects" ]
+  "tools": {
+    "dotnet": "3.0.100-preview-009812"
+  },
+  "msbuild-sdks": {
+    "Microsoft.DotNet.Arcade.Sdk": "1.0.0-beta.18620.6"
+  }
 }

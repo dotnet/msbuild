@@ -1,7 +1,0 @@
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-      <CliTargetFramework>netcoreapp3.0</CliTargetFramework>
-      <!-- We only need this until we get a stage0 with a 3.0 SDK. -->
-      <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
-  </PropertyGroup>
-</Project>
