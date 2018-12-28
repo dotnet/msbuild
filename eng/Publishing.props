@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+
+  <PropertyGroup>
+    <Product>Toolset</Product>
+    <BlobStoragePartialRelativePath>$(Product)</BlobStoragePartialRelativePath>
+    <BlobStoragePartialRelativePath Condition="'$(IsNotOrchestratedPublish)' == 'false'">assets/$(Product)</BlobStoragePartialRelativePath>
+    <PublishToBlobFeedFlatContainer>true</PublishToBlobFeedFlatContainer>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SdkAssetsToPublish Include="$(ArtifactsShippingPackagesDir)*.zip" />
+  </ItemGroup>
+
+  <Target Name="PrepareCoreSdkAssets" BeforeTargets="Publish">
+    <PropertyGroup>
+      <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
+      <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ItemsToPushToBlobFeed Include="@(SdkAssetsToPublish)" IsShipping="true" >
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(Version)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
+      </ItemsToPushToBlobFeed>
+    </ItemGroup>
+  </Target>
+
+</Project>
