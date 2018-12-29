@@ -26,5 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string ToolPackageArgumentName = "<PACKAGE_ID>";
 
         public static readonly string AnyRid = "any";
+
+        public static readonly string RestoreInteractiveOption= "--interactive";
     }
 }
