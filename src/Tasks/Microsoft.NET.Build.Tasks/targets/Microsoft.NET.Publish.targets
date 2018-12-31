@@ -602,9 +602,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputeReferenceAssemblies"
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
 
+    <PropertyGroup>
+      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
+    </PropertyGroup>
+
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
-                      DepsFilePath="$(PublishDir)$(ProjectDepsFileName)"
+                      DepsFilePath="$(PublishDepsFilePath)"
                       TargetFramework="$(TargetFrameworkMoniker)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyExtension="$(TargetExt)"
