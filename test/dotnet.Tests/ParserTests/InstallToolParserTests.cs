@@ -158,5 +158,15 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["install"];
             appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--disable-parallel");
         }
+
+        [Fact]
+        public void InstallToolParserCanParseInteractiveRestoreOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool install -g console.test.app --interactive");
+
+            var appliedOptions = result["dotnet"]["tool"]["install"];
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--interactive");
+        }
     }
 }

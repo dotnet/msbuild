@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 Constants.AnyRid
             });
 
-            argsToPassToRestore.Add($"-verbosity:{verbosity ?? "quiet"}");
+            argsToPassToRestore.Add($"-verbosity:{verbosity ?? GetDefaultVerbosity()}");
 
             if (_additionalRestoreArguments != null)
             {
@@ -70,6 +70,24 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             {
                 throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
+        }
+
+        /// <summary>
+        /// Workaround to https://github.com/dotnet/cli/issues/10523
+        /// Output quiet will break "--interactive" experience since
+        /// it will output nothing. However, minimal output will have
+        /// the temp project path.
+        /// </summary>
+        private string GetDefaultVerbosity()
+        {
+            var defaultVerbosity = "quiet";
+            if ((_additionalRestoreArguments != null)
+                && _additionalRestoreArguments.Contains(Constants.RestoreInteractiveOption, StringComparer.Ordinal))
+            {
+                defaultVerbosity = "minimal";
+            }
+
+            return defaultVerbosity;
         }
 
         private static void WriteLine(IReporter reporter, string line, FilePath project)

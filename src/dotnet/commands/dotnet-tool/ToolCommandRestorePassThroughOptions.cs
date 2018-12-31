@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
 
 
@@ -31,6 +32,15 @@ namespace Microsoft.DotNet.Cli
                 "--ignore-failed-sources",
                 LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription,
                 Accept.NoArguments().ForwardAs("--ignore-failed-sources"));
+        }
+
+        public static Option InteractiveRestoreOption()
+        {
+            return Create.Option(
+                        "--interactive",
+                        LocalizableStrings.CmdInteractiveRestoreOptionDescription,
+                        Accept.NoArguments()
+                            .ForwardAs(Constants.RestoreInteractiveOption));
         }
     }
 }

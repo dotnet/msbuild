@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Cli
                 ToolCommandRestorePassThroughOptions.DisableParallelOption(),
                 ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption(),
                 ToolCommandRestorePassThroughOptions.NoCacheOption(),
+                ToolCommandRestorePassThroughOptions.InteractiveRestoreOption(),
                 CommonOptions.HelpOption(),
                 CommonOptions.VerbosityOption());
         }
