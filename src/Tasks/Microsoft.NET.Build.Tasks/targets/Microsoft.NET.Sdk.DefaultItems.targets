@@ -201,17 +201,6 @@ Copyright (c) .NET Foundation. All rights reserved.
            versions .props file. They should look something like this: -->
       
       <!--
-    <KnownFrameworkReference Include="Microsoft.AspNetCore.App"
-                              TargetFramework="netcoreapp3.0"
-                              RuntimeFrameworkName="Microsoft.AspNetCore.App"
-                              DefaultRuntimeFrameworkVersion="3.0.0-preview-18572-0018"
-                              LatestRuntimeFrameworkVersion="3.0.0-preview-18572-0018"
-                              TargetingPackName="Microsoft.AspNetCore.App"
-                              TargetingPackVersion="3.0.0-preview-18572-0018"
-                              />
-      -->
-      
-      <!-- Treat Microsoft.NETCore.App as a KnownFrameworkReference (which it isn't yet in the stage 0 SDK) -->
     <KnownFrameworkReference Include="Microsoft.NETCore.App"
                               TargetFramework="netcoreapp3.0"
                               RuntimeFrameworkName="Microsoft.NETCore.App"
@@ -224,16 +213,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                               RuntimePackNamePatterns="runtime.**RID**.Microsoft.NETCore.App;runtime.**RID**.Microsoft.NETCore.DotNetHostResolver;runtime.**RID**.Microsoft.NETCore.DotNetHostPolicy"
                               RuntimePackRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
                               />
-
-      <KnownFrameworkReference RuntimePackNamePatterns="runtime.**RID**.Microsoft.WindowsDesktop.App"
-                               RuntimePackRuntimeIdentifiers="win-x64;win-x86"
-                               Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App'"
-                               />
-
-      <KnownFrameworkReference RuntimePackNamePatterns="runtime.**RID**.Microsoft.AspNetCore.App"
-                               RuntimePackRuntimeIdentifiers="win-x64;win-x86;win-arm;osx-x64;linux-musl-x64;linux-x64;linux-arm;linux-arm64"
-                               Condition="'%(Identity)' == 'Microsoft.AspNetCore.App'"
-                               />
+      -->
       
     </ItemGroup>
     
