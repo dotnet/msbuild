@@ -1,26 +1,26 @@
-﻿<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <Description>Template Instantiation Commands for .NET Core CLI.</Description>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <OutputType>Exe</OutputType>
-  </PropertyGroup>
+<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Description>Template Instantiation Commands for .NET Core CLI.</Description>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Update="**\*.list" CopyToOutputDirectory="Always" />
-    <None Update="dotnet-new3.sh" CopyToOutputDirectory="Always" />
-    <None Update="dotnet-new3.cmd" CopyToOutputDirectory="Always" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="**\*.list" CopyToOutputDirectory="Always" />
+        <None Update="dotnet-new3.sh" CopyToOutputDirectory="Always" />
+        <None Update="dotnet-new3.cmd" CopyToOutputDirectory="Always" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Diagnostics.Process" />
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" />
-    <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="SourceLink.Create.CommandLine" />
-    <DotNetCliToolReference Include="dotnet-sourcelink" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="System.Diagnostics.Process" />
+        <PackageReference Include="Microsoft.Extensions.CommandLineUtils" />
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="SourceLink.Create.CommandLine" />
+        <DotNetCliToolReference Include="dotnet-sourcelink" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Cli\Microsoft.TemplateEngine.Cli.csproj" />
-    <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Orchestrator.RunnableProjects\Microsoft.TemplateEngine.Orchestrator.RunnableProjects.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Cli\Microsoft.TemplateEngine.Cli.csproj" />
+        <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Orchestrator.RunnableProjects\Microsoft.TemplateEngine.Orchestrator.RunnableProjects.csproj" />
+    </ItemGroup>
 </Project>
