@@ -17,10 +17,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MicroBuild.Plugins.SwixBuild" Version="$(MicroBuildPluginsSwixBuildVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
     <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />
 
-    <SwrFile Include="*.swr" />
+    <!-- Only add the swr file when building on full framework msbuild, otherwise,
+    this triggers a build of the swixproj, which is not supported in core msbuild. -->
+    <SwrFile Include="*.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
   </ItemGroup>
 
   <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
