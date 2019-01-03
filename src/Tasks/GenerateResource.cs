@@ -544,6 +544,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         static GenerateResource()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                allowMOTW = true;
+                return;
+            }
             try
             {
                 object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
@@ -2866,6 +2871,11 @@ namespace Microsoft.Build.Tasks
         /// <returns>The current path or a shorter one.</returns>
         private string EnsurePathIsShortEnough(string currentOutputFile, string currentOutputFileNoPath, string outputDirectory, string cultureName)
         {
+            if (!NativeMethodsShared.HasMaxPath)
+            {
+                return Path.GetFullPath(currentOutputFile);
+            }
+
             // File names >= 260 characters won't work.  File names of exactly 259 characters are odd though.
             // They seem to work with Notepad and Windows Explorer, but not with MakePri.  They don't work
             // reliably with cmd's dir command either (depending on whether you use absolute or relative paths

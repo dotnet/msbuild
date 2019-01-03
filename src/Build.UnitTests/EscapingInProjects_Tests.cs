@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 IEnumerable<ProjectItem> newItems = EscapingInProjectsHelper.ModifyItemOfTypeInProject(project, "MyWildcard", "b.weirdo", "foo%253Bbar.weirdo");
 
-                Assert.Equal(1, newItems.Count());
+                Assert.Single(newItems);
                 Assert.Equal("*.weirdo", newItems.First().UnevaluatedInclude);
                 Assert.Equal("foo%3Bbar.weirdo", newItems.First().EvaluatedInclude);
                 Assert.Equal("foo%253Bbar.weirdo", Project.GetEvaluatedItemIncludeEscaped(newItems.First()));
@@ -462,7 +462,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
             Helpers.CompareProjectXml(projectNewExpectedContents, project.Xml.RawXml);
 
-            Assert.Equal(1, newItems.Count());
+            Assert.Single(newItems);
             Assert.Equal("MyWildCard", newItems.First().ItemType); // "Newly added item should have correct ItemType"
             Assert.Equal("*.weirdo", newItems.First().UnevaluatedInclude); // "Newly added item should have correct UnevaluatedInclude"
             Assert.Equal("foo%253bbar.weirdo", Project.GetEvaluatedItemIncludeEscaped(newItems.First())); // "Newly added item should have correct EvaluatedIncludeEscaped"
@@ -504,7 +504,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
             Helpers.CompareProjectXml(projectNewExpectedContents, project.Xml.RawXml);
 
-            Assert.Equal(1, newItems.Count());
+            Assert.Single(newItems);
             Assert.Equal("MyWildCard", newItems.First().ItemType); // "Newly added item should have correct ItemType"
             Assert.Equal("*.AAA%253bBBB", newItems.First().UnevaluatedInclude); // "Newly added item should have correct UnevaluatedInclude"
             Assert.Equal("foo.AAA%253bBBB", Project.GetEvaluatedItemIncludeEscaped(newItems.First())); // "Newly added item should have correct EvaluatedIncludeEscaped"
@@ -761,7 +761,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             catch (InvalidProjectFileException ex)
             {
                 string expectedErrorMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("NameInvalid", "$", "$");
-                Assert.True(String.Equals(ex.Message, expectedErrorMessage, StringComparison.OrdinalIgnoreCase)); // "Wrong error message"
+                Assert.Equal(expectedErrorMessage, ex.Message); // "Wrong error message"
                 exceptionCaught = true;
             }
 
@@ -859,9 +859,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
 
             Assert.Equal(3, items.Count());
-            Assert.Equal(items.ElementAt(0).EvaluatedInclude, "a");
-            Assert.Equal(items.ElementAt(1).EvaluatedInclude, "b;c");
-            Assert.Equal(items.ElementAt(2).EvaluatedInclude, "foo;bar");
+            Assert.Equal("a", items.ElementAt(0).EvaluatedInclude);
+            Assert.Equal("b;c", items.ElementAt(1).EvaluatedInclude);
+            Assert.Equal("foo;bar", items.ElementAt(2).EvaluatedInclude);
         }
 
         /// <summary>
@@ -891,10 +891,10 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
 
             Assert.Equal(4, items.Count());
-            Assert.Equal(items.ElementAt(0).EvaluatedInclude, "a");
-            Assert.Equal(items.ElementAt(1).EvaluatedInclude, "b;c");
-            Assert.Equal(items.ElementAt(2).EvaluatedInclude, "foo");
-            Assert.Equal(items.ElementAt(3).EvaluatedInclude, "bar");
+            Assert.Equal("a", items.ElementAt(0).EvaluatedInclude);
+            Assert.Equal("b;c", items.ElementAt(1).EvaluatedInclude);
+            Assert.Equal("foo", items.ElementAt(2).EvaluatedInclude);
+            Assert.Equal("bar", items.ElementAt(3).EvaluatedInclude);
         }
     }
 

@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success);
 
-            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
             Assert.Equal(
                 NativeMethodsShared.IsWindows ? @"c:\bin2\abc.efg" : "/bin2/abc.efg",
                 t.AssignedFiles[0].ItemSpec);
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success);
 
-            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
             Assert.Equal(@"file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
 
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success);
 
-            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
             Assert.Equal("file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
 
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success);
 
-            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
             Assert.Equal(
                 NativeMethodsShared.IsWindows ? @"f3\f4\file.txt" : "f3/f4/file.txt",
                 t.AssignedFiles[0].GetMetadata("TargetPath"));

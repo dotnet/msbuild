@@ -1279,10 +1279,15 @@ namespace Microsoft.Build.Utilities
         /// <returns>true, if task executes successfully</returns>
         public override bool Execute()
         {
-            // Let the tool validate its parameters. ToolTask is responsible for logging
-            // useful information about what was wrong with the parameters.
+            // Let the tool validate its parameters.
             if (!ValidateParameters())
             {
+                // The ToolTask is responsible for logging useful information about what was wrong with the
+                // parameters; if it didn't, at least emit a generic message.
+                if (!Log.HasLoggedErrors)
+                {
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.ValidateParametersFailed", this.GetType().FullName);
+                }
                 return false;
             }
 

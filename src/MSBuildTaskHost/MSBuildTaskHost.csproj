@@ -1,8 +1,8 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
        a .props file that prevents building the project from doing much of anything. -->
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MachineIndependentBuild)' == 'true' or '$(MonoBuild)' == 'true'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MachineIndependentBuild)' == 'true' or '$(MonoBuild)' == 'true'" />
 
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>    
@@ -23,7 +23,6 @@
          out of memory problems on large trees -->
     <LargeAddressAware>true</LargeAddressAware>
     <ApplicationIcon>..\MSBuild\MSBuild.ico</ApplicationIcon>
-    <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build.Framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -85,11 +84,11 @@
     <Compile Include="..\Shared\INodePacketHandler.cs">
       <Link>INodePacketHandler.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\INodePacketTranslatable.cs">
-      <Link>INodePacketTranslatable.cs</Link>
+    <Compile Include="..\Shared\ITranslatable.cs">
+      <Link>ITranslatable.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\INodePacketTranslator.cs">
-      <Link>INodePacketTranslator.cs</Link>
+    <Compile Include="..\Shared\ITranslator.cs">
+      <Link>ITranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InternalErrorException.cs">
       <Link>InternalErrorException.cs</Link>
@@ -118,8 +117,8 @@
     <Compile Include="..\Shared\NodePacketFactory.cs">
       <Link>NodePacketFactory.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\NodePacketTranslator.cs">
-      <Link>NodePacketTranslator.cs</Link>
+    <Compile Include="..\Shared\BinaryTranslator.cs">
+      <Link>BinaryTranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>

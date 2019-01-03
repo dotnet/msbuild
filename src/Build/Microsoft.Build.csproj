@@ -1,4 +1,4 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -18,7 +18,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
 
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
-    <CreateTlb>true</CreateTlb>
+    <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
@@ -54,40 +54,6 @@
     <PackageReference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
 
-  <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
-       The code here was generally copied from the .NET Framework reference source and
-       modified to compile for .NET Core.
-       
-       After retargeting to .NET Standard 2.0, many of these can probably be removed -->
-  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
-    <Compile Include="..\Shared\Compat\Base64Encoder.cs">
-      <Link>SharedUtilities\Compat\Base64Encoder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\BinHexEncoder.cs">
-      <Link>SharedUtilities\Compat\BinHexEncoder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\SecureStringHasher.cs">
-      <Link>SharedUtilities\Compat\SecureStringHasher.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\TypeExtensions.cs">
-      <Link>SharedUtilities\Compat\TypeExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\ValidateNames.cs">
-      <Link>SharedUtilities\Compat\ValidateNames.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlCharType.cs">
-      <Link>SharedUtilities\Compat\XmlCharType.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlReservedNs.cs">
-      <Link>SharedUtilities\Compat\XmlReservedNs.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlTextEncoder.cs">
-      <Link>SharedUtilities\Compat\XmlTextEncoder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\defaultbinder.cs">
-      <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared\BinaryWriterExtensions.cs" Link="BinaryWriterExtensions.cs" />
     <Compile Include="..\Shared\EncodingUtilities.cs">
@@ -160,9 +126,9 @@
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\INodePacketTranslatable.cs" />
-    <Compile Include="..\Shared\INodePacketTranslator.cs" />
-    <Compile Include="..\Shared\NodePacketTranslator.cs" />
+    <Compile Include="..\Shared\ITranslatable.cs" />
+    <Compile Include="..\Shared\ITranslator.cs" />
+    <Compile Include="..\Shared\BinaryTranslator.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
@@ -190,6 +156,9 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
+    <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
+    <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\BuildManager\GraphBuildResult.cs" />
     <Compile Include="BackEnd\BuildManager\GraphBuildSubmission.cs" />
     <Compile Include="BackEnd\BuildManager\GraphBuildRequestData.cs" />
@@ -310,7 +279,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCache.cs" />
     <Compile Include="BackEnd\Components\Caching\IPropertyCache.cs" />
     <Compile Include="BackEnd\Components\Caching\IResultsCache.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodePacketTranslatorExtensions.cs" />
+    <Compile Include="BackEnd\Components\Communications\TranslatorExtensions.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" />

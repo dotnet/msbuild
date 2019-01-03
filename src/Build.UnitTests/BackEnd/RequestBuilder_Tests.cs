@@ -40,9 +40,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private string _originalWorkingDirectory;
 
+        #pragma warning disable xUnit1013
+
         public void LoggingException(Exception e)
         {
         }
+
+        #pragma warning restore xUnit1013
 
         public RequestBuilder_Tests()
         {
@@ -365,7 +369,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult result = new BuildResult(entry.Request);
                 foreach (string target in targets)
                 {
-                    result.AddResultsForTarget(target, TestUtilities.GetEmptyFailingTargetResult());
+                    result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyFailingTargetResult());
                 }
                 return Task<BuildResult>.FromResult(result);
             }
@@ -390,7 +394,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     BuildResult result = new BuildResult(entry.Request);
                     foreach (string target in targets)
                     {
-                        result.AddResultsForTarget(target, TestUtilities.GetEmptyFailingTargetResult());
+                        result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyFailingTargetResult());
                     }
                     return Task<BuildResult>.FromResult(result);
                 }

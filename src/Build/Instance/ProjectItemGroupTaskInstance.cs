@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("Condition={_condition}")]
-    public class ProjectItemGroupTaskInstance : ProjectTargetInstanceChild, INodePacketTranslatable
+    public class ProjectItemGroupTaskInstance : ProjectTargetInstanceChild, ITranslatable
     {
         /// <summary>
         /// Condition, if any
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Execution
             return new ProjectItemGroupTaskInstance(this);
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {

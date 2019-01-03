@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             onError.Condition = "c";
 
             Assert.Equal("c", onError.Condition);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             onError.ExecuteTargetsAttribute = "et2";
 
             Assert.Equal("et2", onError.ExecuteTargetsAttribute);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>

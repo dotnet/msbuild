@@ -67,11 +67,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
             Assert.NotNull(request.Targets);
-            Assert.Equal(0, request.Targets.Count);
+            Assert.Empty(request.Targets);
 
             BuildRequest request2 = CreateNewBuildRequest(1, new string[1] { "a" });
             Assert.NotNull(request2.Targets);
-            Assert.Equal(1, request2.Targets.Count);
+            Assert.Single(request2.Targets);
             Assert.Equal("a", request2.Targets[0]);
         }
 
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(NodePacketType.BuildRequest, request.Type);
 
-            ((INodePacketTranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             BuildRequest deserializedRequest = packet as BuildRequest;

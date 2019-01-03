@@ -244,8 +244,8 @@ namespace Microsoft.Build.Logging
 
             var pair = idTable[parentId.Value];
 
-            // We go up the parent relationship until we find an item that is either an evaluation pass or a big enough regular item
-            while (!pair.Key.IsEvaluationPass || IsTooSmall(pair.Value))
+            // We go up the parent relationship until we find an item that is an evaluation pass and is big enough
+            while (!pair.Key.IsEvaluationPass && IsTooSmall(pair.Value))
             {
                 Debug.Assert(pair.Key.ParentId.HasValue,
                     "A location that is not an evaluation pass should always have a parent");

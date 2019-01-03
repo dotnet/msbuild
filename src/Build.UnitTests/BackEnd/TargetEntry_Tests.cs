@@ -38,6 +38,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
+        #pragma warning disable xUnit1013
+
         /// <summary>
         /// Handles exceptions from the logging system.
         /// </summary>
@@ -45,6 +47,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LoggingException(Exception e)
         {
         }
+
+        #pragma warning restore xUnit1013
 
         /// <summary>
         /// Called prior to each test.
@@ -149,7 +153,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
-                Assert.Equal(entry.State, TargetEntryState.Dependencies);
+                Assert.Equal(TargetEntryState.Dependencies, entry.State);
                 entry.GatherResults();
             }
            );
@@ -170,13 +174,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(TargetEntryState.Dependencies, entry.State);
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 Assert.Equal(TargetEntryState.Execution, entry.State);
-                Assert.Equal(0, deps.Count);
+                Assert.Empty(deps);
 
                 entry = CreateStandardTargetEntry(project, "Baz");
                 Assert.Equal(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 Assert.Equal(TargetEntryState.Execution, entry.State);
-                Assert.Equal(1, deps.Count);
+                Assert.Single(deps);
                 IEnumerator<TargetSpecification> depsEnum = deps.GetEnumerator();
                 depsEnum.MoveNext();
                 Assert.Equal("Bar", depsEnum.Current.TargetName);
@@ -213,7 +217,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 Assert.Equal(TargetEntryState.Execution, entry.State);
                 ExecuteEntry(project, entry);
-                Assert.Equal(0, taskBuilder.ExecutedTasks.Count);
+                Assert.Empty(taskBuilder.ExecutedTasks);
 
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Baz");
@@ -334,8 +338,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ExecuteEntry(project, entry);
                 Assert.Equal(TargetEntryState.Completed, entry.State);
                 Assert.Equal(2, entry.Lookup.GetItems("Compile").Count);
-                Assert.Equal(1, entry.Lookup.GetItems("FooTask1_Item").Count);
-                Assert.Equal(1, entry.Lookup.GetItems("BarTask1_Item").Count);
+                Assert.Single(entry.Lookup.GetItems("FooTask1_Item"));
+                Assert.Single(entry.Lookup.GetItems("BarTask1_Item"));
             }
         }
 
@@ -360,7 +364,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(TargetEntryState.Completed, entry.State);
                 TargetResult results = entry.GatherResults();
                 Assert.Equal(2, entry.Lookup.GetItems("Compile").Count);
-                Assert.Equal(0, results.Items.Length);
+                Assert.Empty(results.Items);
                 Assert.Equal(TargetResultCode.Success, results.ResultCode);
 
                 // Foo produces one item of its own and has an output
@@ -371,17 +375,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(TargetEntryState.Completed, entry.State);
                 results = entry.GatherResults();
                 Assert.Equal(2, entry.Lookup.GetItems("Compile").Count);
-                Assert.Equal(1, entry.Lookup.GetItems("FooTask1_Item").Count);
+                Assert.Single(entry.Lookup.GetItems("FooTask1_Item"));
 
                 if (returnsEnabledForThisProject)
                 {
                     // If returns are enabled, since this is a target with "Outputs", they won't 
                     // be returned. 
-                    Assert.Equal(0, results.Items.Length);
+                    Assert.Empty(results.Items);
                 }
                 else
                 {
-                    Assert.Equal(1, results.Items.Length);
+                    Assert.Single(results.Items);
                     Assert.Equal("foo.o", results.Items[0].ItemSpec);
                 }
 
@@ -397,11 +401,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (returnsEnabledForThisProject)
                 {
-                    Assert.Equal(0, results.Items.Length);
+                    Assert.Empty(results.Items);
                 }
                 else
                 {
-                    Assert.Equal(1, results.Items.Length);
+                    Assert.Single(results.Items);
                     Assert.Equal("testProject.proj", results.Items[0].ItemSpec);
                 }
 
@@ -470,7 +474,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     // If returns are enabled, since this is a target with "Outputs", they won't 
                     // be returned. 
-                    Assert.Equal(0, results.Items.Length);
+                    Assert.Empty(results.Items);
                 }
                 else
                 {
@@ -531,7 +535,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
-                Assert.Equal(1, results.Items.Length);
+                Assert.Single(results.Items);
             }
         }
 
@@ -573,7 +577,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
-                Assert.Equal(1, results.Items.Length);
+                Assert.Single(results.Items);
             }
         }
 
@@ -594,7 +598,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
-                Assert.Equal(1, results.Items.Length);
+                Assert.Single(results.Items);
             }
         }
 
@@ -706,9 +710,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.NotNull(targetb);
                     Assert.NotNull(targetc);
 
-                    Assert.True(targeta.TargetName.Equals("a", StringComparison.OrdinalIgnoreCase));
-                    Assert.True(targetb.TargetName.Equals("b", StringComparison.OrdinalIgnoreCase));
-                    Assert.True(targetc.TargetName.Equals("c", StringComparison.OrdinalIgnoreCase));
+                    Assert.Equal("a", targeta.TargetName);
+                    Assert.Equal("b", targetb.TargetName);
+                    Assert.Equal("c", targetc.TargetName);
 
                     IEnumerable targetOutputsA = targeta.TargetOutputs;
                     IEnumerable targetOutputsB = targetb.TargetOutputs;
@@ -732,8 +736,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         outputListB.Add(item);
                     }
 
-                    Assert.Equal(1, outputListB.Count);
-                    Assert.True(outputListB[0].ItemSpec.Equals("item1", StringComparison.OrdinalIgnoreCase));
+                    Assert.Single(outputListB);
+                    Assert.Equal("item1", outputListB[0].ItemSpec);
 
                     if (!returnsEnabledForThisProject)
                     {
@@ -743,9 +747,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             outputListC.Add(item);
                         }
 
-                        Assert.Equal(1, outputListC.Count);
+                        Assert.Single(outputListC);
 
-                        Assert.True(outputListC[0].ItemSpec.Equals("item2", StringComparison.OrdinalIgnoreCase));
+                        Assert.Equal("item2", outputListC[0].ItemSpec);
                     }
                 }
             }
@@ -803,9 +807,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.NotNull(targetb);
                     Assert.NotNull(targetc);
 
-                    Assert.True(targeta.TargetName.Equals("a", StringComparison.OrdinalIgnoreCase));
-                    Assert.True(targetb.TargetName.Equals("b", StringComparison.OrdinalIgnoreCase));
-                    Assert.True(targetc.TargetName.Equals("c", StringComparison.OrdinalIgnoreCase));
+                    Assert.Equal("a", targeta.TargetName);
+                    Assert.Equal("b", targetb.TargetName);
+                    Assert.Equal("c", targetc.TargetName);
 
                     IEnumerable targetOutputsA = targeta.TargetOutputs;
                     IEnumerable targetOutputsB = targetb.TargetOutputs;
@@ -884,7 +888,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
                 // Expect the build target to pass
-                Assert.Equal(result.ResultsByTarget["Build"].ResultCode, TargetResultCode.Success);
+                Assert.Equal(TargetResultCode.Success, result.ResultsByTarget["Build"].ResultCode);
             }
             finally
             {
@@ -919,7 +923,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Only log critical event is false by default
             MockLogger log = Helpers.BuildProjectWithNewOMExpectFailure(content, allowTaskCrash: true);
 
-            Assert.Equal(1, log.TargetFinishedEvents.Count);
+            Assert.Single(log.TargetFinishedEvents);
         }
 
         #region ITargetBuilderCallback Members

@@ -9,6 +9,7 @@
     <AssemblyName>Microsoft.Build.UnitTests.Shared</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DoNotLocalizeProject>true</DoNotLocalizeProject>
+    <IsShipping>false</IsShipping>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />

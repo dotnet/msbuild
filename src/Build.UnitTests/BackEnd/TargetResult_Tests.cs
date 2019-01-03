@@ -31,8 +31,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorNoItems()
         {
-            TargetResult result = new TargetResult(new TaskItem[] { }, TestUtilities.GetStopWithErrorResult());
-            Assert.Equal(0, result.Items.Length);
+            TargetResult result = new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult());
+            Assert.Empty(result.Items);
             Assert.Null(result.Exception);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
@@ -44,8 +44,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestConstructorWithItems()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
-            Assert.Equal(1, result.Items.Length);
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
+            Assert.Single(result.Items);
             Assert.Equal(item.ItemSpec, result.Items[0].ItemSpec);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                TargetResult result = new TargetResult(null, TestUtilities.GetStopWithErrorResult());
+                TargetResult result = new TargetResult(null, BuildResultUtilities.GetStopWithErrorResult());
             }
            );
         }
@@ -69,8 +69,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestConstructorWithException()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult(new ArgumentException()));
-            Assert.Equal(1, result.Items.Length);
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult(new ArgumentException()));
+            Assert.Single(result.Items);
             Assert.NotNull(result.Exception);
             Assert.Equal(typeof(ArgumentException), result.Exception.GetType());
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
@@ -83,8 +83,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestConstructorWithExceptionNull()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
-            Assert.Equal(1, result.Items.Length);
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
+            Assert.Single(result.Items);
             Assert.Null(result.Exception);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
@@ -98,9 +98,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskItem item = new TaskItem("foo", "bar.proj");
             item.SetMetadata("a", "b");
 
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
 
-            ((INodePacketTranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
@@ -117,9 +117,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskItem item = new TaskItem("foo", "bar.proj");
             item.SetMetadata("a", "b");
 
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult(new BuildAbortedException()));
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult(new BuildAbortedException()));
 
-            ((INodePacketTranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);

@@ -818,6 +818,40 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void InputResultsCachesSupportsMultipleOccurrence()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/irc", "/irc:a;b", "/irc:c;d"}, switches);
+
+            switches[CommandLineSwitches.ParameterizedSwitch.InputResultsCaches].ShouldBe(new []{null, "a", "b", "c", "d"});
+
+            switches.HaveErrors().ShouldBeFalse();
+        }
+
+        [Fact]
+        public void OutputResultsCache()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/orc:a"}, switches);
+
+            switches[CommandLineSwitches.ParameterizedSwitch.OutputResultsCache].ShouldBe(new []{"a"});
+
+            switches.HaveErrors().ShouldBeFalse();
+        }
+
+        [Fact]
+        public void OutputResultsCachesDoesNotSupportMultipleOccurrences()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/orc:a", "/orc:b"}, switches);
+
+            switches.HaveErrors().ShouldBeTrue();
+        }
+
+        [Fact]
         public void SetParameterlessSwitchTests()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -854,7 +888,7 @@ namespace Microsoft.Build.UnitTests
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Verbosity];
 
             Assert.NotNull(parameters);
-            Assert.Equal(1, parameters.Length);
+            Assert.Single(parameters);
             Assert.Equal("q", parameters[0]);
 
             // set it again -- this is bogus, because the /verbosity switch doesn't allow multiple parameters, but for the
@@ -885,7 +919,7 @@ namespace Microsoft.Build.UnitTests
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Target];
 
             Assert.NotNull(parameters);
-            Assert.Equal(0, parameters.Length);
+            Assert.Empty(parameters);
 
             // fake/missing parameters -- this is bogus because the /target switch allows multiple parameters but we're turning
             // that off here just for testing purposes
@@ -899,7 +933,7 @@ namespace Microsoft.Build.UnitTests
 
             // but no parameters
             Assert.NotNull(parameters);
-            Assert.Equal(0, parameters.Length);
+            Assert.Empty(parameters);
 
             // more fake/missing parameters
             Assert.False(switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, "/t:A,\"\";B", "A,\"\";B", true, true, false));
@@ -928,7 +962,7 @@ namespace Microsoft.Build.UnitTests
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Logger];
 
             Assert.NotNull(parameters);
-            Assert.Equal(0, parameters.Length);
+            Assert.Empty(parameters);
 
             // don't unquote fake/missing parameters
             Assert.True(switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Logger, "/l:\"", "\"", false, false, false));
@@ -939,7 +973,7 @@ namespace Microsoft.Build.UnitTests
             parameters = switches[CommandLineSwitches.ParameterizedSwitch.Logger];
 
             Assert.NotNull(parameters);
-            Assert.Equal(1, parameters.Length);
+            Assert.Single(parameters);
             Assert.Equal("\"", parameters[0]);
 
             // don't unquote multiple fake/missing parameters -- this is bogus because the /logger switch does not take multiple
@@ -1109,7 +1143,7 @@ namespace Microsoft.Build.UnitTests
             string[] parameters = switchesLeft[CommandLineSwitches.ParameterizedSwitch.Project];
 
             Assert.NotNull(parameters);
-            Assert.Equal(1, parameters.Length);
+            Assert.Single(parameters);
             Assert.Equal("tempproject.proj", parameters[0]);
 
             Assert.Equal("/t:build", switchesLeft.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Target));
@@ -1118,7 +1152,7 @@ namespace Microsoft.Build.UnitTests
             parameters = switchesLeft[CommandLineSwitches.ParameterizedSwitch.Target];
 
             Assert.NotNull(parameters);
-            Assert.Equal(1, parameters.Length);
+            Assert.Single(parameters);
             Assert.Equal("build", parameters[0]);
         }
 
@@ -1174,7 +1208,7 @@ namespace Microsoft.Build.UnitTests
             string[] parameters = switchesLeft[CommandLineSwitches.ParameterizedSwitch.Project];
 
             Assert.NotNull(parameters);
-            Assert.Equal(1, parameters.Length);
+            Assert.Single(parameters);
             Assert.Equal("tempproject.proj", parameters[0]);
 
             Assert.True(switchesLeft.HaveErrors());
@@ -1217,7 +1251,10 @@ namespace Microsoft.Build.UnitTests
                                         enableProfiler: false,
                                         interactive: false,
                                         isolateProjects: false,
-                                        graphBuild: false);
+                                        graphBuild: false,
+                                        inputResultsCaches: null,
+                                        outputResultsCache: null
+                        );
                 }
                 finally
                 {
@@ -1262,7 +1299,7 @@ namespace Microsoft.Build.UnitTests
         {
             bool nodeReuse = MSBuildApp.ProcessNodeReuseSwitch(new string[] { "true", "false" });
 
-            Assert.Equal(false, nodeReuse);
+            Assert.False(nodeReuse);
         }
 #endif
 
@@ -1337,7 +1374,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.NotNull(actualWarningsAsErrors);
 
-            Assert.Equal(0, actualWarningsAsErrors.Count);
+            Assert.Empty(actualWarningsAsErrors);
         }
 
         /// <summary>
@@ -1378,7 +1415,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.NotNull(actualWarningsAsErrors);
 
-            Assert.Equal(0, actualWarningsAsErrors.Count);
+            Assert.Empty(actualWarningsAsErrors);
         }
 
         /// <summary>
@@ -1461,7 +1498,7 @@ namespace Microsoft.Build.UnitTests
                 typeof(CommandLineSwitchException));
         }
 
-        private static IEnumerable<object[]> GetInvalidFilenames()
+        public static IEnumerable<object[]> GetInvalidFilenames()
         {
             yield return new object[] { $"a_file_with${Path.GetInvalidFileNameChars().First()}invalid_chars" };
             yield return new object[] { $"C:\\a_path\\with{Path.GetInvalidPathChars().First()}invalid\\chars" };
@@ -1498,12 +1535,12 @@ namespace Microsoft.Build.UnitTests
                         if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
                         {
                             // If the first line in a switch it needs a certain amount of leading spaces
-                            Assert.True(helpMessageLines[i].StartsWith(switchLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{switchLeadingSpaces}'.");
+                            Assert.StartsWith(switchLeadingSpaces, helpMessageLines[i]);
                         }
                         else
                         {
                             // Otherwise it should have no leading spaces because it's a section
-                            Assert.False(helpMessageLines[i].StartsWith(" "), $"Line {i + 1} of '{item.Key}' should not have any leading spaces.");
+                            Assert.False(helpMessageLines[i].StartsWith(" "));
                         }
                     }
                     else
@@ -1515,17 +1552,17 @@ namespace Microsoft.Build.UnitTests
                             if (item.Key.Contains("Examples"))
                             {
                                 // Examples require a certain number of leading spaces
-                                Assert.True(helpMessageLines[i].StartsWith(examplesLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{examplesLeadingSpaces}'.");
+                                Assert.StartsWith(examplesLeadingSpaces, helpMessageLines[i]);
                             }
                             else if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
                             {
                                 // Switches require a certain number of leading spaces
-                                Assert.True(helpMessageLines[i].StartsWith(switchLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{switchLeadingSpaces}'.");
+                                Assert.StartsWith(switchLeadingSpaces, helpMessageLines[i]);
                             }
                             else
                             {
                                 // All other lines require a certain number of leading spaces
-                                Assert.True(helpMessageLines[i].StartsWith(otherLineLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{otherLineLeadingSpaces}'.");
+                                Assert.StartsWith(otherLineLeadingSpaces, helpMessageLines[i]);
                             }
                         }
                     }
@@ -1553,7 +1590,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (expectedMessage != null)
                 {
-                    Assert.True(e.Message.Contains(expectedMessage));
+                    Assert.Contains(expectedMessage, e.Message);
                 }
 
                 // so I can see the message in NUnit's "Standard Out" window

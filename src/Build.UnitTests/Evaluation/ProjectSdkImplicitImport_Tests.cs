@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             else
             {
                 var project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
-                Assert.Equal(0, project.Imports.Count);
+                Assert.Empty(project.Imports);
             }
         }
 

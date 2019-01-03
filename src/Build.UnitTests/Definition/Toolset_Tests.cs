@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> {@"c:\foo"})
                 });
 
-            ((INodePacketTranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             Toolset t2 = Toolset.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(t.ToolsVersion, t2.ToolsVersion);
@@ -161,7 +161,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(t.DefaultOverrideToolsVersion, t2.DefaultOverrideToolsVersion);
 
             Assert.NotNull(t2.ImportPropertySearchPathsTable);
-            Assert.Equal(1, t2.ImportPropertySearchPathsTable.Count);
+            Assert.Single(t2.ImportPropertySearchPathsTable);
             Assert.Equal(@"c:\foo", t2.ImportPropertySearchPathsTable["MSBuildExtensionsPath"].SearchPaths[0]);
         }
 

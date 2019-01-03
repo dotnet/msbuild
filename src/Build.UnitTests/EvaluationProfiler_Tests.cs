@@ -102,7 +102,7 @@ namespace Microsoft.Build.Engine.UnitTests
             var result = BuildAndGetProfilerResult(contents);
             var profiledElements = result.ProfiledLocations.Keys.ToList();
 
-            Assert.True(profiledElements.Any(location => location.ElementName == elementName));
+            Assert.Contains(profiledElements, location => location.ElementName == elementName);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Engine.UnitTests
             var result = BuildAndGetProfilerResult(contents, false);
             var profiledElements = result.ProfiledLocations.Keys.ToList();
 
-            Assert.True(profiledElements.Any(location => location.ElementName == elementName));
+            Assert.Contains(profiledElements, location => location.ElementName == elementName);
         }
 
 #if MONO
@@ -153,29 +153,29 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Initial properties (pass 0)
             // There are no XML elements representing initial properties, so just checking the pass is triggered
-            Assert.Equal(1, profiledElements.Count(location => location.EvaluationPass == EvaluationPass.InitialProperties));
+            Assert.Single(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.InitialProperties));
 
             // Properties (pass 1)
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "PropertyGroup"));
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "appname"));
+            Assert.Single(profiledElements.Where(location => location.ElementName == "PropertyGroup"));
+            Assert.Single(profiledElements.Where(location => location.ElementName == "appname"));
 
             // Item definition group (pass 2)
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "ItemDefinitionGroup"));
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefinitionGroups));
+            Assert.Single(profiledElements.Where(location => location.ElementName == "ItemDefinitionGroup"));
+            Assert.Single(profiledElements.Where(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefinitionGroups));
 
             // Item groups (pass 3 and 3.1)
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "ItemGroup"));
+            Assert.Single(profiledElements.Where(location => location.ElementName == "ItemGroup"));
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.Items));
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "Condition" & location.EvaluationPass == EvaluationPass.Items));
+            Assert.Single(profiledElements.Where(location => location.ElementName == "Condition" & location.EvaluationPass == EvaluationPass.Items));
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.LazyItems));
 
             // Using tasks (pass 4)
             // The using element itself is evaluated as part of pass 0, so just checking the overall pass is triggered by the corresponding element
-            Assert.Equal(1, profiledElements.Count(location => location.EvaluationPass == EvaluationPass.UsingTasks));
+            Assert.Single(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.UsingTasks));
 
             // Targets (pass 5)
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "Message"));
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "Target"));
+            Assert.Single(profiledElements.Where(location => location.ElementName == "Target"));
         }
 
 #if MONO
@@ -204,7 +204,7 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.LazyItems));
 
             // There should be one aggregated entry representing the total glob time
-            Assert.Equal(1, profiledElements.Count(location => location.EvaluationPass == EvaluationPass.TotalGlobbing));
+            Assert.Single(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.TotalGlobbing));
             var totalGlob = profiledElements.Find(evaluationLocation =>
                 evaluationLocation.EvaluationPass == EvaluationPass.TotalGlobbing);
             // And it should aggregate the result of the 2 glob locations

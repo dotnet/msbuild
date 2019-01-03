@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             ProjectProperty property = project.SetProperty("p", "v");
 
-            Assert.Equal(true, Object.ReferenceEquals(project, property.Project));
+            Assert.True(Object.ReferenceEquals(project, property.Project));
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Equal("v2", property.EvaluatedValue);
             Assert.Equal("v2", property.UnevaluatedValue);
-            Assert.Equal(true, project.IsDirty);
+            Assert.True(project.IsDirty);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Equal("v(2)", property.EvaluatedValue);
             Assert.Equal("v%282%29", property.UnevaluatedValue);
-            Assert.Equal(true, project.IsDirty);
+            Assert.True(project.IsDirty);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             property.UnevaluatedValue = "v1";
 
-            Assert.Equal(false, project.IsDirty);
+            Assert.False(project.IsDirty);
         }
 
         /// <summary>
@@ -176,10 +176,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             string varName = NativeMethodsShared.IsWindows ? "username" : "USER";
 
-            Assert.Equal(true, project.GetProperty(varName).IsEnvironmentProperty);
-            Assert.Equal(false, project.GetProperty(varName).IsGlobalProperty);
-            Assert.Equal(false, project.GetProperty(varName).IsReservedProperty);
-            Assert.Equal(false, project.GetProperty(varName).IsImported);
+            Assert.True(project.GetProperty(varName).IsEnvironmentProperty);
+            Assert.False(project.GetProperty(varName).IsGlobalProperty);
+            Assert.False(project.GetProperty(varName).IsReservedProperty);
+            Assert.False(project.GetProperty(varName).IsImported);
         }
 
         /// <summary>
@@ -192,10 +192,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             globalProperties["g"] = String.Empty;
             Project project = new Project(globalProperties, null, ProjectCollection.GlobalProjectCollection);
 
-            Assert.Equal(false, project.GetProperty("g").IsEnvironmentProperty);
-            Assert.Equal(true, project.GetProperty("g").IsGlobalProperty);
-            Assert.Equal(false, project.GetProperty("g").IsReservedProperty);
-            Assert.Equal(false, project.GetProperty("g").IsImported);
+            Assert.False(project.GetProperty("g").IsEnvironmentProperty);
+            Assert.True(project.GetProperty("g").IsGlobalProperty);
+            Assert.False(project.GetProperty("g").IsReservedProperty);
+            Assert.False(project.GetProperty("g").IsImported);
         }
 
         /// <summary>
@@ -208,10 +208,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.FullPath = @"c:\x";
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(false, project.GetProperty("MSBuildProjectFile").IsEnvironmentProperty);
-            Assert.Equal(false, project.GetProperty("MSBuildProjectFile").IsGlobalProperty);
-            Assert.Equal(true, project.GetProperty("MSBuildProjectFile").IsReservedProperty);
-            Assert.Equal(false, project.GetProperty("MSBuildProjectFile").IsImported);
+            Assert.False(project.GetProperty("MSBuildProjectFile").IsEnvironmentProperty);
+            Assert.False(project.GetProperty("MSBuildProjectFile").IsGlobalProperty);
+            Assert.True(project.GetProperty("MSBuildProjectFile").IsReservedProperty);
+            Assert.False(project.GetProperty("MSBuildProjectFile").IsImported);
         }
 
         /// <summary>

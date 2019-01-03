@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             metadatum.Name = "m2";
             Assert.Equal("m2", metadatum.Name);
-            Assert.Equal(true, metadatum.ContainingProject.HasUnsavedChanges);
+            Assert.True(metadatum.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             metadatum.Name = "m";
             Assert.Equal("m", metadatum.Name);
-            Assert.Equal(false, metadatum.ContainingProject.HasUnsavedChanges);
+            Assert.False(metadatum.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
+            Assert.Single(items);
 
             var item = items.First();
 
@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
+            Assert.Single(itemDefinitions);
 
             var itemDefinition = itemDefinitions.First();
 
@@ -438,8 +438,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
-            Assert.Equal(1, items[0].Metadata.Count);
+            Assert.Single(items);
+            Assert.Single(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -462,8 +462,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
-            Assert.Equal(1, itemDefinitions[0].Metadata.Count);
+            Assert.Single(itemDefinitions);
+            Assert.Single(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -495,8 +495,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
-            Assert.Equal(1, items[0].Metadata.Count);
+            Assert.Single(items);
+            Assert.Single(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -519,8 +519,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
-            Assert.Equal(1, itemDefinitions[0].Metadata.Count);
+            Assert.Single(itemDefinitions);
+            Assert.Single(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -569,8 +569,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
-            Assert.Equal(1, items[0].Metadata.Count);
+            Assert.Single(items);
+            Assert.Single(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -611,8 +611,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
-            Assert.Equal(1, itemDefinitions[0].Metadata.Count);
+            Assert.Single(itemDefinitions);
+            Assert.Single(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -684,8 +684,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
-            Assert.Equal(1, items[0].Metadata.Count);
+            Assert.Single(items);
+            Assert.Single(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -726,8 +726,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
-            Assert.Equal(1, itemDefinitions[0].Metadata.Count);
+            Assert.Single(itemDefinitions);
+            Assert.Single(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -810,8 +810,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
-            Assert.Equal(1, items[0].Metadata.Count);
+            Assert.Single(items);
+            Assert.Single(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -871,8 +871,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
-            Assert.Equal(1, itemDefinitions[0].Metadata.Count);
+            Assert.Single(itemDefinitions);
+            Assert.Single(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -938,8 +938,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
-            Assert.Equal(1, items[0].Metadata.Count);
+            Assert.Single(items);
+            Assert.Single(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -979,8 +979,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
-            Assert.Equal(1, itemDefinitions[0].Metadata.Count);
+            Assert.Single(itemDefinitions);
+            Assert.Single(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
             Assert.Equal("m1", metadata.Name);
@@ -1049,8 +1049,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
-            Assert.Equal(0, items[0].Metadata.Count);
+            Assert.Single(items);
+            Assert.Empty(items[0].Metadata);
 
             var metadata = items[0].AddMetadata("m1", "v1", true);
 
@@ -1087,8 +1087,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
-            Assert.Equal(0, itemDefinitions[0].Metadata.Count);
+            Assert.Single(itemDefinitions);
+            Assert.Empty(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].AddMetadata("m1", "v1", true);
 
@@ -1156,8 +1156,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal(1, items.Count);
-            Assert.Equal(0, items[0].Metadata.Count);
+            Assert.Single(items);
+            Assert.Empty(items[0].Metadata);
 
             var metadata = items[0].AddMetadata("m1", "v1", true);
 
@@ -1201,8 +1201,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Equal(1, itemDefinitions.Count);
-            Assert.Equal(0, itemDefinitions[0].Metadata.Count);
+            Assert.Single(itemDefinitions);
+            Assert.Empty(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].AddMetadata("m1", "v1", true);
 

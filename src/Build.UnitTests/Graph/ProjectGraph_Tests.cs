@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -18,11 +18,23 @@ namespace Microsoft.Build.Graph.UnitTests
     public class ProjectGraphTests
     {
         [Fact]
+        public void ConstructWithNoNodes()
+        {
+            var projectGraph = new ProjectGraph(Enumerable.Empty<ProjectGraphEntryPoint>());
+
+            projectGraph.ProjectNodes.ShouldBeEmpty();
+            projectGraph.EntryPointNodes.ShouldBeEmpty();
+            projectGraph.GraphRoots.ShouldBeEmpty();
+            projectGraph.ProjectNodesTopologicallySorted.ShouldBeEmpty();
+            projectGraph.GetTargetLists(new []{"restore", "build"}).ShouldBeEmpty();
+        }
+
+        [Fact]
         public void ConstructWithSingleNode()
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1);
+                TransientTestFile entryProject = CreateProjectFile(env, 1);
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(1);
                 projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
@@ -34,7 +46,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1);
+                TransientTestFile entryProject = CreateProjectFile(env, 1);
 
                 bool factoryCalled = false;
                 var projectGraph = new ProjectGraph(
@@ -59,7 +71,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1);
+                TransientTestFile entryProject = CreateProjectFile(env, 1);
 
                 Should.Throw<AggregateException>(() => new ProjectGraph(
                     entryProject.Path,
@@ -78,9 +90,9 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
-                CreateProject(env, 2);
-                CreateProject(env, 3);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3 });
+                CreateProjectFile(env, 2);
+                CreateProjectFile(env, 3);
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
 
                 graph.ProjectNodes.Count.ShouldBe(3);
@@ -102,13 +114,13 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                CreateProject(env, 1, new[] { 4, 5 });
-                TransientTestFile entryProject = CreateProject(env, 2, new[] { 3, 5, 6 });
-                CreateProject(env, 3);
-                CreateProject(env, 4);
-                CreateProject(env, 5, new[] { 7 });
-                CreateProject(env, 6, new[] { 1 });
-                CreateProject(env, 7);
+                CreateProjectFile(env, 1, new[] { 4, 5 });
+                TransientTestFile entryProject = CreateProjectFile(env, 2, new[] { 3, 5, 6 });
+                CreateProjectFile(env, 3);
+                CreateProjectFile(env, 4);
+                CreateProjectFile(env, 5, new[] { 7 });
+                CreateProjectFile(env, 6, new[] { 1 });
+                CreateProjectFile(env, 7);
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
 
@@ -156,9 +168,9 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
-                var proj2 = CreateProject(env, 2, new[] { 3 });
-                var proj3 = CreateProject(env, 3, new[] { 1 });
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 });
+                var proj2 = CreateProjectFile(env, 2, new[] { 3 });
+                var proj3 = CreateProjectFile(env, 3, new[] { 1 });
                 var projectsInCycle = new List<string>() {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
                 string expectedErrorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
                 Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage.ToString());
@@ -170,9 +182,9 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
-                CreateProject(env, 2, new[] { 2 });
-                CreateProject(env, 3);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3 });
+                CreateProjectFile(env, 2, new[] { 2 });
+                CreateProjectFile(env, 3);
                 Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
             }
         }
@@ -183,16 +195,16 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] {2,3,4});
-                var proj2 = CreateProject(env, 2, new[] {5, 6});
-                var proj3 = CreateProject(env, 3, new[] {2, 8});
-                CreateProject(env, 4);
-                CreateProject(env, 5, new []{9, 10});
-                var proj6 = CreateProject(env, 6, new[] { 7});
-                var proj7 = CreateProject(env, 7, new[] { 3 });
-                CreateProject(env, 8);
-                CreateProject(env, 9);
-                CreateProject(env, 10);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] {2,3,4});
+                var proj2 = CreateProjectFile(env, 2, new[] {5, 6});
+                var proj3 = CreateProjectFile(env, 3, new[] {2, 8});
+                CreateProjectFile(env, 4);
+                CreateProjectFile(env, 5, new []{9, 10});
+                var proj6 = CreateProjectFile(env, 6, new[] { 7});
+                var proj7 = CreateProjectFile(env, 7, new[] { 3 });
+                CreateProjectFile(env, 8);
+                CreateProjectFile(env, 9);
+                CreateProjectFile(env, 10);
                 var projectsInCycle = new List<string>(){proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
                 var errorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
                 Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage.ToString());
@@ -204,7 +216,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3 });
                 env.CreateFile("2.proj", @"
 <Project>
   <ItemGroup>
@@ -217,7 +229,7 @@ namespace Microsoft.Build.Graph.UnitTests
     <ProjectReference Include=""4.proj"" AdditionalProperties=""A=B"" />
   </ItemGroup>
 </Project>");
-                CreateProject(env, 4);
+                CreateProjectFile(env, 4);
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
 
                 // Project 4 requires 2 nodes
@@ -243,8 +255,8 @@ namespace Microsoft.Build.Graph.UnitTests
     <ProjectReference Include=""2.proj"" AdditionalProperties=""A=B""/>
   </ItemGroup>
 </Project>");
-                CreateProject(env, 2, new[] { 3 });
-                CreateProject(env, 3);
+                CreateProjectFile(env, 2, new[] { 3 });
+                CreateProjectFile(env, 3);
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 graph.ProjectNodes.Count.ShouldBe(3);
                 GetNodeForProject(graph, 3).GlobalProperties["A"].ShouldBe("B");
@@ -256,7 +268,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3 });
                 env.CreateFile("2.proj", @"
 <Project>
   <ItemGroup>
@@ -275,7 +287,7 @@ namespace Microsoft.Build.Graph.UnitTests
     <ProjectReference Include=""5.proj"" GlobalPropertiesToRemove=""Foo"" />
   </ItemGroup>
 </Project>");
-                CreateProject(env, 5);
+                CreateProjectFile(env, 5);
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
 
                 // Project 4 requires 2 nodes, but project 5 does not
@@ -296,7 +308,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3 });
                 env.CreateFile("2.proj", @"
 <Project>
   <ItemGroup>
@@ -309,7 +321,7 @@ namespace Microsoft.Build.Graph.UnitTests
     <ProjectReference Include=""4.proj"" GlobalPropertiesToRemove=""DoesNotExist"" />
   </ItemGroup>
 </Project>");
-                CreateProject(env, 4);
+                CreateProjectFile(env, 4);
                 ProjectGraph graph = new ProjectGraph(
                     entryProject.Path,
                     new Dictionary<string, string> { { "Foo", "Bar" } });
@@ -327,7 +339,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3, 4 });
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3, 4 });
                 env.CreateFile("2.proj", @"
 <Project>
   <ItemGroup>
@@ -346,7 +358,7 @@ namespace Microsoft.Build.Graph.UnitTests
     <ProjectReference Include=""5.proj"" AdditionalProperties=""foo=BAR"" />
   </ItemGroup>
 </Project>");
-                CreateProject(env, 5);
+                CreateProjectFile(env, 5);
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
 
                 // Project 5 requires 2 nodes
@@ -369,14 +381,14 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 });
                 env.CreateFile("2.proj", @"
 <Project>
   <ItemGroup>
     <ProjectReference Include=""3.proj"" AdditionalProperties=""ThisIsntValid"" />
   </ItemGroup>
 </Project>");
-                CreateProject(env, 3);
+                CreateProjectFile(env, 3);
 
                 Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<InvalidProjectFileException>();
             }
@@ -387,9 +399,9 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject1 = CreateProject(env, 1, new[] { 3 });
-                TransientTestFile entryProject2 = CreateProject(env, 2, new[] { 3 });
-                CreateProject(env, 3);
+                TransientTestFile entryProject1 = CreateProjectFile(env, 1, new[] { 3 });
+                TransientTestFile entryProject2 = CreateProjectFile(env, 2, new[] { 3 });
+                CreateProjectFile(env, 3);
                 var projectGraph = new ProjectGraph(new [] { entryProject1.Path, entryProject2.Path });
                 projectGraph.ProjectNodes.Count.ShouldBe(3);
 
@@ -408,8 +420,8 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
-                CreateProject(env, 2);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 });
+                CreateProjectFile(env, 2);
                 var entryPoint1 = new ProjectGraphEntryPoint(entryProject.Path, new Dictionary<string, string> { { "Platform", "x86" } });
                 var entryPoint2 = new ProjectGraphEntryPoint(entryProject.Path, new Dictionary<string, string> { { "Platform", "x64" } });
 
@@ -448,7 +460,7 @@ namespace Microsoft.Build.Graph.UnitTests
     <ProjectReference Include=""2.proj"" GlobalPropertiesToRemove=""Platform"" />
   </ItemGroup>
 </Project>");
-                CreateProject(env, 2);
+                CreateProjectFile(env, 2);
                 var entryPoint1 = new ProjectGraphEntryPoint(entryProject.Path, new Dictionary<string, string> { { "Platform", "x86" } });
                 var entryPoint2 = new ProjectGraphEntryPoint(entryProject.Path, new Dictionary<string, string> { { "Platform", "x64" } });
 
@@ -479,12 +491,12 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using(var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject1 = CreateProject(env, 1, new[] { 4 });
-                TransientTestFile entryProject2 = CreateProject(env, 2, new[] { 4, 5 });
-                TransientTestFile entryProject3 = CreateProject(env, 3, new[] { 2, 6 });
-                CreateProject(env, 4);
-                CreateProject(env, 5);
-                CreateProject(env, 6);
+                TransientTestFile entryProject1 = CreateProjectFile(env, 1, new[] { 4 });
+                TransientTestFile entryProject2 = CreateProjectFile(env, 2, new[] { 4, 5 });
+                TransientTestFile entryProject3 = CreateProjectFile(env, 3, new[] { 2, 6 });
+                CreateProjectFile(env, 4);
+                CreateProjectFile(env, 5);
+                CreateProjectFile(env, 6);
                 var projectGraph = new ProjectGraph(new[] { entryProject1.Path, entryProject2.Path, entryProject3.Path });
                 projectGraph.EntryPointNodes.Count.ShouldBe(3);
                 projectGraph.GraphRoots.Count.ShouldBe(2);
@@ -497,10 +509,10 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 }, new Dictionary<string, string[]> { { "A", new[] { "B" } } });
-                CreateProject(env, 2, new[] { 4 }, new Dictionary<string, string[]> { { "B", new[] { "C" } } });
-                CreateProject(env, 3, new[] { 4 }, new Dictionary<string, string[]> { { "B", new[] { "D" } } });
-                CreateProject(env, 4);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3 }, new Dictionary<string, string[]> { { "A", new[] { "B" } } });
+                CreateProjectFile(env, 2, new[] { 4 }, new Dictionary<string, string[]> { { "B", new[] { "C" } } });
+                CreateProjectFile(env, 3, new[] { 4 }, new Dictionary<string, string[]> { { "B", new[] { "D" } } });
+                CreateProjectFile(env, 4);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(4);
@@ -526,9 +538,9 @@ namespace Microsoft.Build.Graph.UnitTests
 
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 }, projectReferenceTargets);
-                CreateProject(env, 2, new[] { 3 }, projectReferenceTargets);
-                CreateProject(env, 3, Array.Empty<int>(), projectReferenceTargets);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 }, projectReferenceTargets);
+                CreateProjectFile(env, 2, new[] { 3 }, projectReferenceTargets);
+                CreateProjectFile(env, 3, Array.Empty<int>(), projectReferenceTargets);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(3);
@@ -554,12 +566,12 @@ namespace Microsoft.Build.Graph.UnitTests
 
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3, 5 }, projectReferenceTargets);
-                CreateProject(env, 2, new[] { 4, 5 }, projectReferenceTargets);
-                CreateProject(env, 3, new[] { 5, 6 }, projectReferenceTargets);
-                CreateProject(env, 4, new[] { 5 }, projectReferenceTargets);
-                CreateProject(env, 5, new[] { 6 }, projectReferenceTargets);
-                CreateProject(env, 6, Array.Empty<int>(), projectReferenceTargets);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3, 5 }, projectReferenceTargets);
+                CreateProjectFile(env, 2, new[] { 4, 5 }, projectReferenceTargets);
+                CreateProjectFile(env, 3, new[] { 5, 6 }, projectReferenceTargets);
+                CreateProjectFile(env, 4, new[] { 5 }, projectReferenceTargets);
+                CreateProjectFile(env, 5, new[] { 6 }, projectReferenceTargets);
+                CreateProjectFile(env, 6, Array.Empty<int>(), projectReferenceTargets);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(6);
@@ -580,8 +592,8 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "A", new[] { "B" } } }, "A");
-                CreateProject(env, 2);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "A", new[] { "B" } } }, "A");
+                CreateProjectFile(env, 2);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(2);
@@ -598,8 +610,8 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "A", new[] { ".default" } } }, defaultTargets: "A");
-                CreateProject(env, 2, defaultTargets: "B");
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "A", new[] { ".default" } } }, defaultTargets: "A");
+                CreateProjectFile(env, 2, defaultTargets: "B");
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(2);
@@ -616,8 +628,8 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "Build", new[] { "A", ".default" } } });
-                CreateProject(env, 2);
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "Build", new[] { "A", ".default" } } });
+                CreateProjectFile(env, 2);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(2);
@@ -641,13 +653,13 @@ namespace Microsoft.Build.Graph.UnitTests
 
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3, 4 }, projectReferenceTargets, defaultTargets: null);
-                CreateProject(env, 2, new[] { 5 }, projectReferenceTargets, defaultTargets: null);
-                CreateProject(env, 3, new[] { 6 }, projectReferenceTargets, defaultTargets: "X");
-                CreateProject(env, 4, new[] { 7 }, projectReferenceTargets, defaultTargets: "Y");
-                CreateProject(env, 5, defaultTargets: null);
-                CreateProject(env, 6, defaultTargets: null);
-                CreateProject(env, 7, defaultTargets: "Z;W");
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3, 4 }, projectReferenceTargets, defaultTargets: null);
+                CreateProjectFile(env, 2, new[] { 5 }, projectReferenceTargets, defaultTargets: null);
+                CreateProjectFile(env, 3, new[] { 6 }, projectReferenceTargets, defaultTargets: "X");
+                CreateProjectFile(env, 4, new[] { 7 }, projectReferenceTargets, defaultTargets: "Y");
+                CreateProjectFile(env, 5, defaultTargets: null);
+                CreateProjectFile(env, 6, defaultTargets: null);
+                CreateProjectFile(env, 7, defaultTargets: "Z;W");
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(7);
@@ -664,40 +676,164 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        private static TransientTestFile CreateProject(
+        public static IEnumerable<object[]> TopologicalSortShouldTopologicallySortData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>(),
+                    new int[0]
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, null}
+                    },
+                    new []{1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, null},
+                        {2, null}
+                    },
+                    new []{2, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2}},
+                    },
+                    new []{2, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2}},
+                        {2, null}
+                    },
+                    new []{2, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2}},
+                        {2, new []{3}}
+                    },
+                    new []{3, 2, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2, 3}},
+                    },
+                    new []{3, 2, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2, 3}},
+                        {2, new []{4}},
+                        {3, new []{4}},
+                    },
+                    new []{4, 3, 2, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2, 3, 4}},
+                        {2, new []{4}},
+                        {3, new []{4}},
+                    },
+                    new []{4, 3, 2, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2}},
+                        {3, new []{4}},
+                    },
+                    new []{4, 2, 3, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2, 4}},
+                        {3, new []{4}},
+                    },
+                    new []{4, 2, 3, 1}
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{4, 5}},
+                        {2, new []{5}},
+                        {3, new []{5, 6}},
+                        {4, new []{7}},
+                        {5, new []{7, 8}},
+                        {6, new []{7, 9}},
+                    },
+                    new []{9, 8, 7, 6, 5, 4, 3, 2, 1}
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TopologicalSortShouldTopologicallySortData))]
+        public void TopologicalSortShouldTopologicallySort(Dictionary<int, int[]> edges, int[] expectedTopoSort)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var projectGraph = Helpers.CreateProjectGraph(env, edges);
+
+                projectGraph.ProjectNodesTopologicallySorted.Select(n => Path.GetFileNameWithoutExtension(n.ProjectInstance.FullPath))
+                    .ToArray()
+                    .ShouldBe(expectedTopoSort.Select(n => n.ToString()));
+            }
+        }
+
+        private static ProjectGraphNode GetNodeForProject(ProjectGraph graph, int projectNum) => graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.EndsWith(projectNum + ".proj"));
+
+        internal static TransientTestFile CreateProjectFile(
             TestEnvironment env,
             int projectNumber,
             int[] projectReferences = null,
             Dictionary<string, string[]> projectReferenceTargets = null,
-            string defaultTargets = null)
+            string defaultTargets = null
+            )
         {
-            var sb = new StringBuilder(64);
-
-            // Use "Build" when the default target is unspecified since in practice that is usually the default target.
-            sb.AppendFormat("<Project DefaultTargets=\"{0}\"><ItemGroup>", defaultTargets ?? "Build");
-
-            if (projectReferences != null)
-            {
-                foreach (int projectReference in projectReferences)
-                {
-                    sb.AppendFormat("<ProjectReference Include=\"{0}.proj\" />", projectReference);
-                }
-            }
-
-            if (projectReferenceTargets != null)
-            {
-                foreach (KeyValuePair<string, string[]> pair in projectReferenceTargets)
-                {
-                    sb.AppendFormat("<ProjectReferenceTargets Include=\"{0}\" Targets=\"{1}\" />", pair.Key, string.Join(";", pair.Value));
-                }
-            }
-
-            sb.Append("</ItemGroup></Project>");
-
-            return env.CreateFile(projectNumber + ".proj", sb.ToString());
+            return Helpers.CreateProjectFile(
+                env,
+                projectNumber,
+                projectReferences,
+                projectReferenceTargets,
+                // Use "Build" when the default target is unspecified since in practice that is usually the default target.
+                defaultTargets ?? "Build",
+                null);
         }
-
-        private static ProjectGraphNode GetNodeForProject(ProjectGraph graph, int projectNum) => graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.EndsWith(projectNum + ".proj"));
     }
 
 }

@@ -143,8 +143,8 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 Assert.NotNull(node1);
                 Assert.NotNull(node2);
                 Assert.NotSame(node1, node2);
-                Assert.Equal(1, node1.Attributes.Count);
-                Assert.Equal(1, node2.Attributes.Count);
+                Assert.Single(node1.Attributes);
+                Assert.Single(node2.Attributes);
                 Assert.Same(node1.Attributes[0].Value, node2.Attributes[0].Value);
 
                 node2.Attributes[0].Value = "attr1value";

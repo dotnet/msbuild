@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("file", location.File);
             Assert.Equal(65536, location.Line);
             Assert.Equal(0, location.Column);
-            Assert.True(location.GetType().FullName.Contains("RegularElementLocation"));
+            Assert.Contains("RegularElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("file", location.File);
             Assert.Equal(0, location.Line);
             Assert.Equal(65536, location.Column);
-            Assert.True(location.GetType().FullName.Contains("RegularElementLocation"));
+            Assert.Contains("RegularElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("file", location.File);
             Assert.Equal(65536, location.Line);
             Assert.Equal(65537, location.Column);
-            Assert.True(location.GetType().FullName.Contains("RegularElementLocation"));
+            Assert.Contains("RegularElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
@@ -88,11 +88,11 @@ namespace Microsoft.Build.UnitTests.Construction
             IElementLocation location5 = ElementLocation.Create("file", 0, 1);
             IElementLocation location6 = ElementLocation.Create("file", 65536, 65537);
 
-            Assert.Equal(true, location1.Equals(location6));
-            Assert.Equal(true, location2.Equals(location5));
-            Assert.Equal(false, location3.Equals(location1));
-            Assert.Equal(false, location4.Equals(location2));
-            Assert.Equal(false, location4.Equals(location6));
+            Assert.True(location1.Equals(location6));
+            Assert.True(location2.Equals(location5));
+            Assert.False(location3.Equals(location1));
+            Assert.False(location4.Equals(location2));
+            Assert.False(location4.Equals(location6));
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(location.File, deserializedLocation.File);
             Assert.Equal(location.Line, deserializedLocation.Line);
             Assert.Equal(location.Column, deserializedLocation.Column);
-            Assert.True(location.GetType().FullName.Contains("RegularElementLocation"));
+            Assert.Contains("RegularElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(location.File, deserializedLocation.File);
             Assert.Equal(location.Line, deserializedLocation.Line);
             Assert.Equal(location.Column, deserializedLocation.Column);
-            Assert.True(deserializedLocation.GetType().FullName.Contains("SmallElementLocation"));
+            Assert.Contains("SmallElementLocation", deserializedLocation.GetType().FullName);
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("file", location.File);
             Assert.Equal(65535, location.Line);
             Assert.Equal(65534, location.Column);
-            Assert.True(location.GetType().FullName.Contains("SmallElementLocation"));
+            Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("file", location.File);
             Assert.Equal(65535, location.Line);
             Assert.Equal(0, location.Column);
-            Assert.True(location.GetType().FullName.Contains("SmallElementLocation"));
+            Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("file", location.File);
             Assert.Equal(0, location.Line);
             Assert.Equal(65535, location.Column);
-            Assert.True(location.GetType().FullName.Contains("SmallElementLocation"));
+            Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("file", location.File);
             Assert.Equal(65535, location.Line);
             Assert.Equal(65534, location.Column);
-            Assert.True(location.GetType().FullName.Contains("SmallElementLocation"));
+            Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(location.File, deserializedLocation.File);
             Assert.Equal(location.Line, deserializedLocation.Line);
             Assert.Equal(location.Column, deserializedLocation.Column);
-            Assert.True(location.GetType().FullName.Contains("SmallElementLocation"));
+            Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>

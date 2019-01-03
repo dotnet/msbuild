@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             project.ProjectCollection.UnregisterAllLoggers();
 
             string log = File.ReadAllText(logFile);
-            Assert.True(log.Contains("Hello world from the FileLogger")); // "Log should have contained message"
+            Assert.Contains("Hello world from the FileLogger", log); // "Log should have contained message"
 
             File.Delete(logFile);
         }
