@@ -254,18 +254,18 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.1")]
+        [InlineData("netcoreapp3.0")]
         public void It_builds_a_runnable_apphost_by_default(string targetFramework)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
-                .WithSource();
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
                 .Execute(new string[] {
                     "/restore",
-                    $"/p:TargetFramework={targetFramework}",
-                    $"/p:NETCoreSdkRuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(targetFramework)}"
                 })
                 .Should()
                 .Pass();
@@ -297,27 +297,34 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp2.1")]
+        [InlineData("netcoreapp3.0")]
         public void It_runs_the_app_from_the_output_folder(string targetFramework)
         {
             RunAppFromOutputFolder("RunFromOutputFolder_" + targetFramework, false, false, targetFramework);
         }
 
-        [Fact]
-        public void It_runs_a_rid_specific_app_from_the_output_folder()
+        [Theory]
+        [InlineData("netcoreapp2.1")]
+        [InlineData("netcoreapp3.0")]
+        public void It_runs_a_rid_specific_app_from_the_output_folder(string targetFramework)
         {
-            RunAppFromOutputFolder("RunFromOutputFolderWithRID", true, false);
+            RunAppFromOutputFolder("RunFromOutputFolderWithRID_" + targetFramework, true, false, targetFramework);
         }
 
-        [Fact]
-        public void It_runs_the_app_with_conflicts_from_the_output_folder()
+        [Theory]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp3.0")]
+        public void It_runs_the_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
-            RunAppFromOutputFolder("RunFromOutputFolderConflicts", false, true);
+            RunAppFromOutputFolder("RunFromOutputFolderConflicts_" + targetFramework, false, true, targetFramework);
         }
 
-        [Fact]
-        public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder()
+        [Theory]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp3.0")]
+        public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
-            RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts", true, true);
+            RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts_" + targetFramework, true, true, targetFramework);
         }
 
         private void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts,
@@ -389,13 +396,15 @@ public static class Program
 
         }
 
-        [Fact]
-        public void It_trims_conflicts_from_the_deps_file()
+        [Theory]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp3.0")]
+        public void It_trims_conflicts_from_the_deps_file(string targetFramework)
         {
             TestProject project = new TestProject()
             {
                 Name = "NetCore2App",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = targetFramework,
                 IsExe = true,
                 IsSdkProject = true
             };
@@ -413,7 +422,7 @@ public static class Program
 }
 ";
 
-            var testAsset = _testAssetsManager.CreateTestProject(project)
+            var testAsset = _testAssetsManager.CreateTestProject(project, identifier: targetFramework)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;

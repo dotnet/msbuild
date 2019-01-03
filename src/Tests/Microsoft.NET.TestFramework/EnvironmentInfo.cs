@@ -10,6 +10,14 @@ namespace Microsoft.NET.TestFramework
 {
     public static class EnvironmentInfo
     {
+        public static string ExecutableExtension
+        {
+            get
+            {
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+            }
+        }
+
         public static string GetCompatibleRid(string targetFramework)
         {
             string rid = DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();

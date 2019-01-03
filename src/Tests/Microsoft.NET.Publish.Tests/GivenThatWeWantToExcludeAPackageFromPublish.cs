@@ -11,6 +11,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using System.Xml.Linq;
 using Xunit.Abstractions;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -20,12 +21,16 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [Fact]
-        public void It_does_not_publish_a_PackageReference_with_PrivateAssets_All()
+        [Theory]
+        [InlineData("netcoreapp1.1", false)]
+        [InlineData("netcoreapp2.0", false)]
+        [InlineData("netcoreapp3.0", true)]
+        public void It_does_not_publish_a_PackageReference_with_PrivateAssets_All(string targetFramework, bool shouldIncludeExecutable)
         {
             var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", "PublishExcludePackage")
+                .CopyTestAsset("HelloWorld", "PublishExcludePackage", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -45,22 +50,34 @@ namespace Microsoft.NET.Publish.Tests
 
             publishResult.Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory();
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
 
-            publishDirectory.Should().OnlyHaveFiles(new[] {
+            var expectedFiles = new List<string>()
+            {
                 "HelloWorld.dll",
                 "HelloWorld.pdb",
                 "HelloWorld.deps.json",
                 "HelloWorld.runtimeconfig.json"
-            });
+            };
+
+            if (shouldIncludeExecutable)
+            {
+                expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
+            }
+
+            publishDirectory.Should().OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
-        public void It_does_not_publish_a_PackageReference_with_Publish_false()
+        [Theory]
+        [InlineData("netcoreapp1.1", false)]
+        [InlineData("netcoreapp2.0", false)]
+        [InlineData("netcoreapp3.0", true)]
+        public void It_does_not_publish_a_PackageReference_with_Publish_false(string targetFramework, bool shouldIncludeExecutable)
         {
             var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", "PublishPackagePublishFalse")
+                .CopyTestAsset("HelloWorld", "PublishPackagePublishFalse", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -79,22 +96,34 @@ namespace Microsoft.NET.Publish.Tests
 
             publishResult.Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory();
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
 
-            publishDirectory.Should().OnlyHaveFiles(new[] {
+            var expectedFiles = new List<string>()
+            {
                 "HelloWorld.dll",
                 "HelloWorld.pdb",
                 "HelloWorld.deps.json",
                 "HelloWorld.runtimeconfig.json"
-            });
+            };
+
+            if (shouldIncludeExecutable)
+            {
+                expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
+            }
+
+            publishDirectory.Should().OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
-        public void It_publishes_a_PackageReference_with_PrivateAssets_All_and_Publish_true()
+        [Theory]
+        [InlineData("netcoreapp1.1", false)]
+        [InlineData("netcoreapp2.0", false)]
+        [InlineData("netcoreapp3.0", true)]
+        public void It_publishes_a_PackageReference_with_PrivateAssets_All_and_Publish_true(string targetFramework, bool shouldIncludeExecutable)
         {
             var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", "PublishPrivateAssets")
+                .CopyTestAsset("HelloWorld", "PublishPrivateAssets", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -114,16 +143,28 @@ namespace Microsoft.NET.Publish.Tests
 
             publishResult.Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory();
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
 
-            publishDirectory.Should().OnlyHaveFiles(new[] {
+            var expectedFiles = new List<string>()
+            {
                 "HelloWorld.dll",
                 "HelloWorld.pdb",
                 "HelloWorld.deps.json",
                 "HelloWorld.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
-                "System.Runtime.Serialization.Primitives.dll"
-            });
+            };
+
+            if (targetFramework == "netcoreapp1.1")
+            {
+                expectedFiles.Add("System.Runtime.Serialization.Primitives.dll");
+            }
+
+            if (shouldIncludeExecutable)
+            {
+                expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
+            }
+
+            publishDirectory.Should().OnlyHaveFiles(expectedFiles);
         }
     }
 }

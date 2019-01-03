@@ -29,12 +29,16 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
-        public void It_builds_the_library_successfully()
+        [Theory]
+        [InlineData("netstandard1.5")]
+        [InlineData("netcoreapp2.1")]
+        [InlineData("netcoreapp3.0")]
+        public void It_builds_the_library_successfully(string targetFramework)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
+                .CopyTestAsset("AppWithLibrary", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework, "TestLibrary")
                 .Restore(Log, relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
@@ -45,7 +49,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netstandard1.5");
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestLibrary.dll",
@@ -401,6 +405,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net45", new[] { "NETFRAMEWORK", "NET45" }, true)]
         [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0" }, false)]
+        [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0" }, false)]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40" }, false)]
         [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS", "XAMARINIOS1_0" }, false)]

@@ -29,18 +29,19 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(null, "netcoreapp2.1")]
         [InlineData("true", "netcoreapp2.1")]
         [InlineData("false", "netcoreapp2.1")]
-        //  Tests disabled in master branch since it can't currently target 2.2, because that's also under development
-        //  (https://github.com/dotnet/cli/issues/10125)
-        //[InlineData(null, "netcoreapp2.2")]
-        //[InlineData("true", "netcoreapp2.2")]
-        //[InlineData("false", "netcoreapp2.2")]
+        [InlineData(null, "netcoreapp2.2")]
+        [InlineData("true", "netcoreapp2.2")]
+        [InlineData("false", "netcoreapp2.2")]
+        [InlineData(null, "netcoreapp3.0")]
+        [InlineData("true", "netcoreapp3.0")]
+        [InlineData("false", "netcoreapp3.0")]
         public void It_publishes_with_or_without_apphost(string useAppHost, string targetFramework)
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             var appHostName = $"{TestProjectName}{Constants.ExeSuffix}";
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}")
+                .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}_{targetFramework}")
                 .WithSource();
 
             var msbuildArgs = new List<string>()
@@ -89,6 +90,7 @@ namespace Microsoft.NET.Publish.Tests
                         Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)",
                         Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath))
                     .CaptureStdOut()
+                    .CaptureStdErr()
                     .Execute()
                     .Should()
                     .Pass()

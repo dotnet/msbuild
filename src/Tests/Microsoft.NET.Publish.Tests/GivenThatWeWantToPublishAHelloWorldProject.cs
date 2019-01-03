@@ -24,20 +24,24 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [Fact]
-        public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run()
+        [Theory]
+        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp3.0")]
+        public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
             var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .Restore(Log);
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
-            var publishResult = publishCommand.Execute("-p:CopyLocalLockFileAssemblies=true");
+            var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory();
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
             var outputDirectory = publishDirectory.Parent;
 
             var filesPublished = new[] {
@@ -59,15 +63,18 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("Hello World!");
         }
 
-        [Fact]
-        public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run()
+        [Theory]
+        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp3.0")]
+        public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
-            var targetFramework = "netcoreapp1.1";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", "SelfContained")
+                .CopyTestAsset("HelloWorld", "SelfContained", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifier={rid}");
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
@@ -97,9 +104,12 @@ namespace Microsoft.NET.Publish.Tests
             outputDirectory.Should().HaveFiles(filesPublished);
             publishDirectory.Should().HaveFiles(filesPublished);
 
-            publishDirectory.Should().NotHaveFiles(new[] {
-                $"apphost{Constants.ExeSuffix}",
-            });
+            var filesNotPublished = new[] {
+                $"apphost{Constants.ExeSuffix}"
+            };
+
+            outputDirectory.Should().NotHaveFiles(filesNotPublished);
+            publishDirectory.Should().NotHaveFiles(filesNotPublished);
 
             string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
             Command.Create(selfContainedExecutableFullPath, new string[] { })
@@ -149,85 +159,7 @@ public static class Program
 
             publishDirectory.Should().HaveFile($"Hello.World{Constants.ExeSuffix}");
         }
-
-        //Note: Pre Netcoreapp2.0 standalone activation uses renamed dotnet.exe
-        //      While Post 2.0 we are shifting to using apphost.exe, so both publish needs to be validated
-        [Fact]
-        public void Publish_standalone_post_netcoreapp2_app_and_it_should_run()
-        {
-            var targetFramework = "netcoreapp2.0";
-            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
-
-            TestProject testProject = new TestProject()
-            {
-                Name = "Hello",
-                IsSdkProject = true,
-                TargetFrameworks = targetFramework,
-                RuntimeIdentifier = rid,
-                IsExe = true,
-            };
-            
-            testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
-            testProject.SourceFiles["Program.cs"] = @"
-using System;
-public static class Program
-{
-    public static void Main()
-    {
-        Console.WriteLine(""Hello from a netcoreapp2.0.!"");
-    }
-}
-";
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
-
-            testProjectInstance.Restore(Log, testProject.Name);
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
-            var publishResult = publishCommand.Execute();
-
-            publishResult.Should().Pass();
-
-            var publishDirectory = publishCommand.GetOutputDirectory(
-                targetFramework: targetFramework,
-                runtimeIdentifier: rid);
-            var outputDirectory = publishDirectory.Parent;
-            var selfContainedExecutable = $"Hello{Constants.ExeSuffix}";
-
-            var filesPublished = new[] {
-                selfContainedExecutable,
-                "Hello.dll",
-                "Hello.pdb",
-                "Hello.deps.json",
-                "Hello.runtimeconfig.json",
-                $"{FileConstants.DynamicLibPrefix}coreclr{FileConstants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
-                $"mscorlib.dll",
-                $"System.Private.CoreLib.dll",
-            };
-
-            var filesNotPublished = new[] {
-                $"apphost{Constants.ExeSuffix}"
-            };
-
-            outputDirectory.Should().HaveFiles(filesPublished);
-            publishDirectory.Should().HaveFiles(filesPublished);
-
-            outputDirectory.Should().NotHaveFiles(filesNotPublished);
-            publishDirectory.Should().NotHaveFiles(filesNotPublished);
-
-            string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
-
-            Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .CaptureStdOut()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello from a netcoreapp2.0.!");
-        }
 		
-		//Note: Pre Netcoreapp2.0 standalone activation uses renamed dotnet.exe
-        //      While Post 2.0 we are shifting to using apphost.exe, so both publish needs to be validated
         [CoreMSBuildOnlyTheory]
         [InlineData("win-arm")]
         [InlineData("win8-arm")]
