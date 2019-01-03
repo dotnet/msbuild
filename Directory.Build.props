@@ -25,6 +25,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
     <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
