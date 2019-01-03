@@ -8,6 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Cli.Runtime" Version="$(DotnetCliInternalVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Runtime" Version="$(MicrosoftDotNetCliRuntimePackageVersion)" />
   </ItemGroup>
 </Project>
