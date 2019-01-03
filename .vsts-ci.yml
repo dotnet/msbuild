@@ -24,6 +24,7 @@ phases:
         name: dotnet-external-temp
       ${{ if ne(variables['System.TeamProject'], 'public') }}:
         name: dotnet-internal-temp
+      timeoutInMinutes: 180
       parallel: 99
       matrix:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
@@ -54,6 +55,7 @@ phases:
       agentOs: Linux
       queue:
         name: Hosted Ubuntu 1604
+        timeoutInMinutes: 180
         matrix:
           Build_Ubuntu_14_04_Release_x64:
             _BuildConfig: Release
@@ -146,6 +148,7 @@ phases:
       agentOs: Darwin
       queue:
         name: Hosted macOS
+        timeoutInMinutes: 180
         matrix:
           Build_Release:
             _BuildConfig: Release
