@@ -102,8 +102,7 @@ namespace Microsoft.NET.Build.Tasks
                 AppHost.Create(
                     resolvedApphostAssetPath,
                     appHostDestinationFilePath,
-                    appBinaryFilePath,
-                    overwriteExisting: true
+                    appBinaryFilePath
                 );
 
                 var item = new TaskItem(appHostDestinationFilePath);

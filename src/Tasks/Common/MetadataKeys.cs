@@ -81,6 +81,12 @@ namespace Microsoft.NET.Build.Tasks
 
         // Resource assemblies
         public const string Culture = "Culture";
+        // The DestinationSubDirectory is the directory containing the asset, relative to the destination folder.
         public const string DestinationSubDirectory = "DestinationSubDirectory";
+
+        // Copy local assets
+        // The DestinationSubPath is the path to the asset, relative to the destination folder.
+        public const string DestinationSubPath = "DestinationSubPath";
+        public const string AssetType = "AssetType";
     }
 }

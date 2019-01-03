@@ -65,7 +65,7 @@ namespace Microsoft.NET.Build.Tasks
             // Note that there can be more than one spelling of the same target framework (e.g. net45 and net4.5) and 
             // we must return a value that is spelled exactly the same way as the PossibleTargetFrameworks input. To 
             // achieve this, we find the index of the returned framework among the set we passed to nuget and use that
-            // to retrive a value at the same position in the input.
+            // to retrieve a value at the same position in the input.
             //
             // This is required to guarantee that a project can use whatever spelling appears in $(TargetFrameworks)
             // in a condition that compares against $(TargetFramework).

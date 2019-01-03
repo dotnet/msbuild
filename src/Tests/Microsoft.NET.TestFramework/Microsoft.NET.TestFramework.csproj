@@ -3,7 +3,7 @@
 <Project>
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -38,20 +38,4 @@
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
-  <PropertyGroup>
-    <_DotNetSdkVersionFile>$(IntermediateOutputPath)\DotNetSdkVersion.g.cs</_DotNetSdkVersionFile>
-  </PropertyGroup>
-
-  <Target Name="_GenerateSdkVersionAttribute" BeforeTargets="CoreCompile" Outputs="$(_DotNetSdkVersionFile)">
-    <ItemGroup>
-      <_Attribute Include="Microsoft.NET.TestFramework.DotNetSdkVersionAttribute">
-        <_Parameter1>$(NETCoreSdkVersion)</_Parameter1>
-      </_Attribute>
-    </ItemGroup>
-    
-    <WriteCodeFragment AssemblyAttributes="@(_Attribute)" Language="$(Language)" OutputFile="$(_DotNetSdkVersionFile)">
-      <Output TaskParameter="OutputFile" ItemName="Compile" />
-      <Output TaskParameter="OutputFile" ItemName="FileWrites" />    
-    </WriteCodeFragment>
-  </Target>
 </Project>

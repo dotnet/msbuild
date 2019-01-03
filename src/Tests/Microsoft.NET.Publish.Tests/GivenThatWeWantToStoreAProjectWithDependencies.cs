@@ -171,11 +171,11 @@ namespace Microsoft.NET.Publish.Tests
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "o");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
-            var additonalproj1 = Path.Combine(simpleDependenciesAsset.TestRoot, "NewtonsoftMultipleVersions.xml");
-            var additonalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertion.xml");
+            var additionalproj1 = Path.Combine(simpleDependenciesAsset.TestRoot, "NewtonsoftMultipleVersions.xml");
+            var additionalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertion.xml");
 
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additonalproj1}%3b{additonalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additionalproj1}%3b{additionalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
             DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);

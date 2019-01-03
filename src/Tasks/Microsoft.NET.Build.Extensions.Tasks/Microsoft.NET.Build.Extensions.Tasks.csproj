@@ -17,7 +17,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <OutDirName>Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
     <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
@@ -29,10 +29,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <OutputPath>$(BaseOutputPath)</OutputPath>
     <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
     <IsPackable>true</IsPackable>
     <IncludeSymbols>true</IncludeSymbols>
-    <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
+    <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -96,8 +97,7 @@
     </ItemGroup>
   </Target>
 
-  <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
-  <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
+  <!-- TODO: remove this target when building with a newer 3.0 toolset as this workaround is no longer needed. -->
   <Target Name="FilterCopyLocal" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
     <ItemGroup>
       <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />

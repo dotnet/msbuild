@@ -2,6 +2,46 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
     <body>
+      <trans-unit id="AspNetCoreAllNotSupported">
+        <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
+        <target state="new">NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</target>
+        <note>{StrBegin="NETSDK1079: "}</note>
+      </trans-unit>
+      <trans-unit id="AspNetCoreUsesFrameworkReference">
+        <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
+        <target state="new">NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</target>
+        <note>{StrBegin="NETSDK1080: "}</note>
+      </trans-unit>
+      <trans-unit id="FailedToLockResource">
+        <source>NETSDK1077: Failed to lock resource.</source>
+        <target state="new">NETSDK1077: Failed to lock resource.</target>
+        <note>{StrBegin="NETSDK1077: "}</note>
+      </trans-unit>
+      <trans-unit id="AddResourceWithNonIntegerResource">
+        <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
+        <target state="new">NETSDK1076: AddResource can only be used with integer resource types.</target>
+        <note>{StrBegin="NETSDK1076: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidResourceUpdate">
+        <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
+        <target state="new">NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</target>
+        <note>{StrBegin="NETSDK1075: "}</note>
+      </trans-unit>
+      <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
+        <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
+        <target state="new">NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</target>
+        <note>{StrBegin="NETSDK1074: "}</note>
+      </trans-unit>
+      <trans-unit id="AppHostNotWindows">
+        <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
+        <target state="new">NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</target>
+        <note>{StrBegin="NETSDK1078: "}</note>
+      </trans-unit>
+      <trans-unit id="AppHostNotWindowsCLI">
+        <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
+        <target state="new">NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</target>
+        <note>{StrBegin="NETSDK1072: "}</note>
+      </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
         <target state="new">NETSDK1070: The application configuration file must have root configuration element.</target>
@@ -11,11 +51,6 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: необходимо указать хотя бы одну целевую платформу.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
-      </trans-unit>
-      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
-        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="translated">NETSDK1066: для публикации зависящего от платформы приложения на узле приложения необходимо указать RuntimeIdentifierentifier.</target>
-        <note>{StrBegin="NETSDK1066: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
@@ -72,6 +107,11 @@
         <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
         <note />
       </trans-unit>
+      <trans-unit id="UnknownFrameworkReference">
+        <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
+        <target state="new">NETSDK1073: The FrameworkReference '{0}' was not recognized</target>
+        <note>{StrBegin="NETSDK1073: "}</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
         <target state="translated">NETSDK1009: не распознан маркер препроцессора "{0}" в "{1}".</target>
@@ -92,7 +132,7 @@
         <target state="translated">NETSDK1012: недопустимый тип файла для "{0}". Тип является "{1}" и "{2}".</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
-      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+      <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: значение "{0}" в TargetFramework не распознано. Возможно, оно содержит опечатку. Если это не так, задайте свойства TargetFrameworkIdentifier и (или) TargetFrameworkVersion явным образом.</target>
         <note>{StrBegin="NETSDK1013: "}</note>

@@ -120,7 +120,7 @@ namespace Microsoft.NET.Pack.Tests
         }
 
         [WindowsOnlyFact]
-        public void Packing_an_app_exclude_dependencys_framework_assemblies_dependency()
+        public void Packing_an_app_exclude_dependencies_framework_assemblies_dependency()
         {
             TestProject testProject = new TestProject()
             {

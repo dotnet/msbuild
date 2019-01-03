@@ -13,6 +13,8 @@ using Xunit.Abstractions;
 using NuGet.Packaging;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -121,6 +123,26 @@ namespace Microsoft.NET.ToolPack.Tests
                 {
                     var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
                     allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/consoledemo.runtimeconfig.json");
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_does_not_contain_apphost_exe(bool multiTarget)
+        {
+            var nugetPackage = SetupNuGetPackage(multiTarget);
+            using (var nupkgReader = new PackageArchiveReader(nugetPackage))
+            {
+                IEnumerable<NuGet.Frameworks.NuGetFramework> supportedFrameworks = nupkgReader.GetSupportedFrameworks();
+                supportedFrameworks.Should().NotBeEmpty();
+
+                foreach (NuGet.Frameworks.NuGetFramework framework in supportedFrameworks)
+                {
+                    var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
+                    var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
+                    allItems.Should().NotContain($"tools/{framework.GetShortFolderName()}/any/consoledemo{extension}");
                 }
             }
         }

@@ -33,18 +33,22 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore(Log);
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
-            var publishResult = publishCommand.Execute();
+            var publishResult = publishCommand.Execute("-p:CopyLocalLockFileAssemblies=true");
 
             publishResult.Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory();
+            var outputDirectory = publishDirectory.Parent;
 
-            publishDirectory.Should().OnlyHaveFiles(new[] {
+            var filesPublished = new[] {
                 "HelloWorld.dll",
                 "HelloWorld.pdb",
                 "HelloWorld.deps.json",
                 "HelloWorld.runtimeconfig.json"
-            });
+            };
+
+            outputDirectory.Should().HaveFiles(filesPublished);
+            publishDirectory.Should().HaveFiles(filesPublished);
 
             Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "HelloWorld.dll") })
                 .CaptureStdOut()
@@ -67,18 +71,17 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifier={rid}");
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
-            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}");
+            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:CopyLocalLockFileAssemblies=true");
 
             publishResult.Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid);
+            var outputDirectory = publishDirectory.Parent;
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
-            string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
-
-            publishDirectory.Should().HaveFiles(new[] {
+            var filesPublished = new[] {
                 selfContainedExecutable,
                 "HelloWorld.dll",
                 "HelloWorld.pdb",
@@ -89,8 +92,16 @@ namespace Microsoft.NET.Publish.Tests
                 $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
                 $"mscorlib.dll",
                 $"System.Private.CoreLib.dll",
+            };
+
+            outputDirectory.Should().HaveFiles(filesPublished);
+            publishDirectory.Should().HaveFiles(filesPublished);
+
+            publishDirectory.Should().NotHaveFiles(new[] {
+                $"apphost{Constants.ExeSuffix}",
             });
 
+            string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
             Command.Create(selfContainedExecutableFullPath, new string[] { })
                 .CaptureStdOut()
                 .Execute()
@@ -115,7 +126,7 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = true,
             };
             
-
+            testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
             testProject.SourceFiles["Program.cs"] = @"
 using System;
 public static class Program
@@ -139,7 +150,7 @@ public static class Program
             publishDirectory.Should().HaveFile($"Hello.World{Constants.ExeSuffix}");
         }
 
-        //Note: Pre Netcoreapp2.0 stanalone activation uses renamed dotnet.exe
+        //Note: Pre Netcoreapp2.0 standalone activation uses renamed dotnet.exe
         //      While Post 2.0 we are shifting to using apphost.exe, so both publish needs to be validated
         [Fact]
         public void Publish_standalone_post_netcoreapp2_app_and_it_should_run()
@@ -156,7 +167,7 @@ public static class Program
                 IsExe = true,
             };
             
-
+            testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
             testProject.SourceFiles["Program.cs"] = @"
 using System;
 public static class Program
@@ -178,11 +189,10 @@ public static class Program
             var publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid);
+            var outputDirectory = publishDirectory.Parent;
             var selfContainedExecutable = $"Hello{Constants.ExeSuffix}";
 
-            string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
-
-            publishDirectory.Should().HaveFiles(new[] {
+            var filesPublished = new[] {
                 selfContainedExecutable,
                 "Hello.dll",
                 "Hello.pdb",
@@ -193,7 +203,19 @@ public static class Program
                 $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
                 $"mscorlib.dll",
                 $"System.Private.CoreLib.dll",
-            });
+            };
+
+            var filesNotPublished = new[] {
+                $"apphost{Constants.ExeSuffix}"
+            };
+
+            outputDirectory.Should().HaveFiles(filesPublished);
+            publishDirectory.Should().HaveFiles(filesPublished);
+
+            outputDirectory.Should().NotHaveFiles(filesNotPublished);
+            publishDirectory.Should().NotHaveFiles(filesNotPublished);
+
+            string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
                 .CaptureStdOut()
@@ -227,7 +249,8 @@ public static class Program
                 RuntimeIdentifier = runtimeIdentifier,
                 IsExe = true,
             };
-            
+
+            testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
             testProject.SourceFiles["Program.cs"] = @"
 using System;
 public static class Program
@@ -249,6 +272,7 @@ public static class Program
             var publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = publishDirectory.Parent;
             
             // The name of the self contained executable depends on the runtime identifier.
             // For Windows family ARM publishing, it'll always be Hello.exe.
@@ -256,7 +280,7 @@ public static class Program
             // depending on the RuntimeInformation
             var selfContainedExecutable = "Hello.exe";
 
-            publishDirectory.Should().HaveFiles(new[] {
+            var filesPublished = new [] {
                 selfContainedExecutable,
                 "Hello.dll",
                 "Hello.pdb",
@@ -267,7 +291,10 @@ public static class Program
                 "hostpolicy.dll",
                 "mscorlib.dll",
                 "System.Private.CoreLib.dll",
-            });
+            };
+
+            outputDirectory.Should().HaveFiles(filesPublished);
+            publishDirectory.Should().HaveFiles(filesPublished);
         }
 
         [Fact]
@@ -310,6 +337,7 @@ public static class Program
 
             string outputMessage = $"Hello from {testProject.Name}!";
 
+            testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
             testProject.SourceFiles["Program.cs"] = @"
 using System;
 public static class Program
@@ -357,6 +385,7 @@ public static class Program
             var publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid ?? string.Empty);
+            var outputDirectory = publishDirectory.Parent;
 
             DependencyContext dependencyContext;
             using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, $"{testProject.Name}.deps.json")))
@@ -381,7 +410,7 @@ public static class Program
 
                 var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
 
-                publishDirectory.Should().HaveFiles(new[] {
+                var filesPublished = new[] {
                     selfContainedExecutable,
                     $"{testProject.Name}.dll",
                     $"{testProject.Name}.pdb",
@@ -392,7 +421,10 @@ public static class Program
                     $"{libPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
                     $"mscorlib.dll",
                     $"System.Private.CoreLib.dll",
-                });
+                };
+
+                outputDirectory.Should().HaveFiles(filesPublished);
+                publishDirectory.Should().HaveFiles(filesPublished);
 
                 dependencyContext.Should()
                     .OnlyHaveRuntimeAssembliesWhichAreInFolder(rid, publishDirectory.FullName)
@@ -403,12 +435,15 @@ public static class Program
             }
             else
             {
-                publishDirectory.Should().OnlyHaveFiles(new[] {
+                var filesPublished = new[] {
                     $"{testProject.Name}.dll",
                     $"{testProject.Name}.pdb",
                     $"{testProject.Name}.deps.json",
                     $"{testProject.Name}.runtimeconfig.json"
-                });
+                };
+
+                outputDirectory.Should().HaveFiles(filesPublished);
+                publishDirectory.Should().HaveFiles(filesPublished);
 
                 dependencyContext.Should()
                     .OnlyHaveRuntimeAssemblies(rid ?? "", testProject.Name);

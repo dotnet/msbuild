@@ -247,7 +247,7 @@ namespace Microsoft.NET.Perf.Tests
                 }
                 else if (perfOperation == ProjectPerfOperation.BuildWithNoChanges)
                 {
-                    //  Build once before taking folder snaspshot
+                    //  Build once before taking folder snapshot
                     commandToTest.Execute().Should().Pass();
 
                     perfTest.TestName = "Build (no changes)";

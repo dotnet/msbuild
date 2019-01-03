@@ -140,7 +140,7 @@ namespace Microsoft.NET.Publish.Tests
             immutableDir.Should().BeEquivalentTo(coreDir, "immutable collections library from Framework should win");
         }
 
-        [Fact]
+        [Fact(Skip = ".NET Core 2.2 not supported in this branch yet: https://github.com/dotnet/cli/issues/10125")]
         public void Inbox_version_is_loaded_if_runtime_file_versions_arent_in_deps()
         {
             void testProjectChanges(TestProject testProject)
@@ -152,7 +152,7 @@ namespace Microsoft.NET.Publish.Tests
             immutableDir.Should().BeEquivalentTo(coreDir, "inbox immutable collections library from should win");
         }
 
-        [Fact]
+        [Fact(Skip = ".NET Core 2.2 not supported in this branch yet: https://github.com/dotnet/cli/issues/10125")]
         public void Local_version_of_assembly_with_higher_version_is_loaded_over_inbox_version()
         {
             void publishFolderChanges(string publishFolder)
@@ -224,7 +224,6 @@ static class Program
             //  to force the .NET Core 2.0 app to run on that version
             string rollForwardVersion = GetRollForwardNetCoreAppVersion();
 
-            var foo = TestContext.Current.ToolsetUnderTest.CliVersionForBundledVersions;
             var runAppCommand = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath,
                 new string[] { "exec", "--fx-version", rollForwardVersion, exePath });
 

@@ -31,7 +31,18 @@ Copyright (c) .NET Foundation. All rights reserved.
          be stored in a shared directory next to the assets.json file -->
     <ProjectAssetsCacheFile Condition="'$(ProjectAssetsCacheFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).assets.cache</ProjectAssetsCacheFile>
     <ProjectAssetsCacheFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(ProjectAssetsCacheFile)))</ProjectAssetsCacheFile>
-    
+
+    <!-- Don't copy local for netstandard projects. -->
+    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
+                                            '$(TargetFrameworkIdentifier)' == '.NETStandard'">false</CopyLocalLockFileAssemblies>
+
+    <!-- Don't copy local for netcoreapp projects before 3.0 or non-exe projects. -->
+    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
+                                            '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                                            ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0' or
+                                             '$(HasRuntimeOutput)' != 'true')">false</CopyLocalLockFileAssemblies>
+
+    <!-- All other project types should copy local. -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
 
     <ContentPreprocessorOutputDirectory Condition="'$(ContentPreprocessorOutputDirectory)' == ''">$(IntermediateOutputPath)NuGet\</ContentPreprocessorOutputDirectory>
@@ -120,7 +131,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolvePackageDependenciesForBuildDependsOn>
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
-      ResolveLockFileCopyLocalProjectDeps;
+      ResolveLockFileCopyLocalFiles;
       RunProduceContentAssets;
       IncludeTransitiveProjectReferences
     </ResolvePackageDependenciesForBuildDependsOn>
@@ -187,7 +198,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ResolvePackageAssets" 
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
+          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
+          DependsOnTargets="ResolveFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary">
 
     <PropertyGroup Condition="'$(EnsureRuntimePackageDependencies)' == ''
                           and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
@@ -213,6 +225,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       EmitAssetsLogMessages="$(EmitAssetsLogMessages)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
+      DefaultAppHostRuntimeIdentifier="$(DefaultAppHostRuntimeIdentifier)"
+      PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+      RuntimeFrameworks="@(RuntimeFramework)"
+      IsSelfContained="$(SelfContained)"
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"
       DisablePackageAssetsCache="$(DisablePackageAssetsCache)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
@@ -221,8 +237,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
       VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
-      ExpectedPlatformPackages="@(ExpectedPlatformPackages)"      
-      >
+      ExpectedPlatformPackages="@(ExpectedPlatformPackages)"
+      SatelliteResourceLanguages="$(SatelliteResourceLanguages)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->
@@ -233,27 +249,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
       <Output TaskParameter="ResourceAssemblies" ItemName="ResourceCopyLocalItems" />
       <Output TaskParameter="RuntimeAssemblies" ItemName="RuntimeCopyLocalItems" />
-      <Output TaskParameter="RuntimeTargets" ItemName="ResolvedRuntimeTargets" />
+      <Output TaskParameter="RuntimeTargets" ItemName="RuntimeTargetsCopyLocalItems" />
       <Output TaskParameter="CompileTimeAssemblies" ItemName="ResolvedCompileFileDefinitions" />
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
     </ResolvePackageAssets>
 
-
-  </Target>
-
-  <Target Name="FilterSatelliteResources" AfterTargets="ResolvePackageAssets"
-          Condition="'$(SatelliteResourceLanguages)' != ''">
-
-    <JoinItems Left="@(ResourceCopyLocalItems)" LeftKey="Culture" LeftMetadata="*"
-               Right="$(SatelliteResourceLanguages)" RightKey="" RightMetadata=""
-               ItemSpecToUse="Left">
-      <Output TaskParameter="JoinResult" ItemName="FilteredResourceCopyLocalItems" />
-    </JoinItems>
-
     <ItemGroup>
-      <ResourceCopyLocalItems Remove="@(ResourceCopyLocalItems)" />
-      <ResourceCopyLocalItems Include="@(FilteredResourceCopyLocalItems)" />
+      <_NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
+                                     Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -285,6 +290,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
+
   </Target>
     
   <!--
@@ -309,6 +315,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="SDKReferencesDesignTime" ItemName="_SDKReference" />
     </CollectSDKReferencesDesignTime>
+
   </Target>
 
   <!--
@@ -330,6 +337,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="SDKReferencesDesignTime" ItemName="_ResolvedSDKReference" />
     </CollectSDKReferencesDesignTime>
+
   </Target>
 
   <!--
@@ -352,8 +360,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ContentPreprocessorValues="@(PreprocessorValue)"
       ContentPreprocessorOutputDirectory="$(ContentPreprocessorOutputDirectory)"
       ProduceOnlyPreprocessorFiles="true"
-      ProjectLanguage="$(Language)"
- >
+      ProjectLanguage="$(Language)">
 
       <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />
       <Output TaskParameter="ProcessedContentItems" ItemName="_ProcessedContentItems" />
@@ -365,6 +372,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CreateItem Include="@(_ProcessedContentItems)" Condition="'@(_ProcessedContentItems)' != ''">
       <Output TaskParameter="Include" ItemName="%(_ProcessedContentItems.ProcessedItemType)" />
     </CreateItem>
+
   </Target>
 
   <!--
@@ -448,6 +456,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- Add the references we computed -->
       <Reference Include="@(ResolvedCompileFileDefinitionsToAdd)" />
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -481,29 +490,27 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-    CopyLocal Targets: For populating CopyLocal based on lock file
-     _ComputeLockFileCopyLocal
-    - ResolveLockFileCopyLocalProjectDeps
+    ResolveLockFileCopyLocalFiles
+    Resolves the files from the assets file to copy for build and publish.
     ============================================================
-    -->
-
-  <Target Name="_ComputeLockFileCopyLocal"
-        DependsOnTargets="ResolvePackageAssets;RunProduceContentAssets">
-  
-    <ItemGroup>
-      <AllCopyLocalItems Include="@(NativeCopyLocalItems)" />
-      <AllCopyLocalItems Include="@(RuntimeCopyLocalItems)" />
-      <AllCopyLocalItems Include="@(ResourceCopyLocalItems)" />
-      <AllCopyLocalItems Include="@(_ContentCopyLocalItems)" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="ResolveLockFileCopyLocalProjectDeps"
-          Condition="'$(CopyLocalLockFileAssemblies)' == 'true'"
-          DependsOnTargets="_ComputeLockFileCopyLocal">
+  -->
+  <Target Name="ResolveLockFileCopyLocalFiles"
+          DependsOnTargets="ResolvePackageAssets">
 
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" />
+      <_ResolvedCopyLocalBuildAssets Include="@(RuntimeCopyLocalItems)"
+                                     Condition="'%(RuntimeCopyLocalItems.CopyLocal)' == 'true'" />
+      <_ResolvedCopyLocalBuildAssets Include="@(ResourceCopyLocalItems)"
+                                     Condition="'%(ResourceCopyLocalItems.CopyLocal)' == 'true'" />
+      <!-- Always exclude the apphost executable from copy local assets; we will copy the generated apphost instead. -->
+      <_ResolvedCopyLocalBuildAssets Include="@(NativeCopyLocalItems)"
+                                     Exclude="@(_NativeRestoredAppHostNETCore)"
+                                     Condition="'%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
+      <_ResolvedCopyLocalBuildAssets Include="@(RuntimeTargetsCopyLocalItems)"
+                                     Condition="'%(RuntimeTargetsCopyLocalItems.CopyLocal)' == 'true'" />
+
+      <ReferenceCopyLocalPaths Include="@(_ResolvedCopyLocalBuildAssets)"
+                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true'" />
     </ItemGroup>
 
   </Target>
