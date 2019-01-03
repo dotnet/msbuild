@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <Description>Microsoft.DotNet.TestFramework Class Library</Description>
-    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFrameworks>$(CliTargetFramework);net472</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(CliTargetFramework)</TargetFrameworks>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>

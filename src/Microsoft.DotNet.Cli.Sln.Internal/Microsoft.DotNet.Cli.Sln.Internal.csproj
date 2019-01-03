@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <Description>SLN file reader/writer</Description>
-    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>Microsoft.DotNet.Cli.Sln.Internal</AssemblyName>
