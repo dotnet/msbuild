@@ -15,6 +15,7 @@ phases:
               /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
               /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
               /p:PB_PublishType=blob
+              /p:PublishToSymbolServer=true
     _SignArgs: /p:DotNetSignType=real /p:TeamName=MSBuild
     _SignType: real
 
