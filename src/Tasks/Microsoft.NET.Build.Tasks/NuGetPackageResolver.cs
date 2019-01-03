@@ -60,12 +60,16 @@ namespace Microsoft.NET.Build.Tasks
 
         public static NuGetPackageResolver CreateResolver(LockFile lockFile, string projectPath)
         {
+            return CreateResolver(lockFile.PackageFolders.Select(f => f.Path), projectPath);
+        }
+        public static NuGetPackageResolver CreateResolver(IEnumerable<string> packageFolders, string projectPath)
+        {
             NuGetPackageResolver packageResolver;
 
-            string userPackageFolder = lockFile.PackageFolders.FirstOrDefault()?.Path;
+            string userPackageFolder = packageFolders.FirstOrDefault();
             if (userPackageFolder != null)
             {
-                var fallBackFolders = lockFile.PackageFolders.Skip(1).Select(f => f.Path);
+                var fallBackFolders = packageFolders.Skip(1);
                 packageResolver = new NuGetPackageResolver(userPackageFolder, fallBackFolders);
             }
             else

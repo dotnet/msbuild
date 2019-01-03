@@ -20,12 +20,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
-  <Target Name="ResolveTargetingPacks">
+  <Target Name="ResolveTargetingPacks" DependsOnTargets="ResolvePackageAssets">
 
     <GetPackageDirectory
       Items="@(TargetingPack)"
-      ProjectAssetsFile="$(ProjectAssetsFile)"
-      ProjectPath="$(MSBuildProjectFullPath)">
+      ProjectPath="$(MSBuildProjectFullPath)"
+      PackageFolders="@(AssetFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedTargetingPack" />
       
@@ -52,8 +52,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <GetPackageDirectory
       Items="@(AppHostPack)"
-      ProjectAssetsFile="$(ProjectAssetsFile)"
-      ProjectPath="$(MSBuildProjectFullPath)">
+      ProjectPath="$(MSBuildProjectFullPath)"
+      PackageFolders="@(AssetFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedAppHostPack" />
 

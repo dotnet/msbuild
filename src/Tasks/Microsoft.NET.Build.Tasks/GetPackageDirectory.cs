@@ -14,21 +14,18 @@ namespace Microsoft.NET.Build.Tasks
     {
         public ITaskItem[] Items { get; set; }
 
-        public string ProjectAssetsFile { get; set; }
-
+        [Required]
         public string ProjectPath { get; set; }
+
+        [Required]
+        public string [] PackageFolders { get; set; }
 
         [Output]
         public ITaskItem[] Output { get; set; }
 
         protected override void ExecuteCore()
         {
-            NuGetPackageResolver packageResolver = null;
-            if (!string.IsNullOrEmpty(ProjectAssetsFile) && File.Exists(ProjectAssetsFile))
-            {
-                var lockFile = new LockFileCache(this).GetLockFile(ProjectAssetsFile);
-                packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
-            }
+            NuGetPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(PackageFolders, ProjectPath);
 
             var updatedItems = new List<ITaskItem>();
 
