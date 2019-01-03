@@ -134,3 +134,4 @@ echo "Generating platform file..."
 echo "RID=android.21-arm64" > $__ToolchainDir/sysroot/android_platform
 echo Now run:
 echo CONFIG_DIR=\`realpath cross/android/$__BuildArch\` ROOTFS_DIR=\`realpath $__ToolchainDir/sysroot\` ./build.sh cross $__BuildArch skipgenerateversion skipnuget cmakeargs -DENABLE_LLDBPLUGIN=0
+

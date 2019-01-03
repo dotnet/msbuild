@@ -30,7 +30,7 @@ steps:
       }
     }
     JobListStuff
-
+    
     cat $jobInfo
 
     # create a temporary file for curl output
@@ -52,7 +52,7 @@ steps:
     fi
 
     curlResult=`cat $res`
-
+    
     # validate status of curl command
     if [ $curlStatus -ne 0 ]; then
       echo "Failed To Send Job Start information"
@@ -61,7 +61,7 @@ steps:
       echo "##$vstsLogOutput"
       exit 1
     fi
-
+    
     # Set the Helix_JobToken variable
     export Helix_JobToken=`echo $curlResult | xargs echo` # Strip Quotes
     echo "##vso[task.setvariable variable=Helix_JobToken;issecret=true;]$Helix_JobToken"
@@ -110,7 +110,7 @@ steps:
     BuildUri: $(System.TaskDefinitionsUri)$(System.TeamProject)/_build/index?buildId=$(Build.BuildId)&_a=summary
     Helix_JobToken: $(Helix_JobToken)
   condition: and(always(), ne(variables['Agent.Os'], 'Windows_NT'))
-
+  
 - powershell: |
     $jobInfo = [pscustomobject]@{
       QueueId=$env:QueueId;
@@ -120,7 +120,7 @@ steps:
       Attempt=$env:Attempt;
       Properties=[pscustomobject]@{ operatingSystem=$env:OperatingSystem; configuration=$env:Configuration };
     }
-
+    
     $jobInfoJson = $jobInfo | ConvertTo-Json
 
     if ($env:HelixApiAccessToken) {
@@ -144,7 +144,7 @@ steps:
 - powershell: |
     $workItemId = Invoke-RestMethod -Uri "https://helix.dot.net/api/2018-03-14/telemetry/job/build?buildUri=$([Net.WebUtility]::UrlEncode($env:BuildUri))" -Method Post -ContentType "application/json" -Body "" `
       -Headers @{ 'X-Helix-Job-Token'=$env:Helix_JobToken }
-
+  
     $env:Helix_WorkItemId = $workItemId
     Write-Host "##vso[task.setvariable variable=Helix_WorkItemId]$env:Helix_WorkItemId"
   displayName: Send Windows Build Start Telemetry
