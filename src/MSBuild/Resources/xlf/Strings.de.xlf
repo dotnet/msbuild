@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
     <body>
@@ -130,7 +130,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      Führt dazu, dass MSBuild jedes Projekt isoliert erstellt.
 
                      Dies ist ein restriktiverer Modus von MSBuild, da er erfordert, dass
-                     das Projektdiagramm zur Auswertungszeit statisch ermittelbar ist. Er kann jedoch 
+                     der Projektgraph zur Auswertungszeit statisch ermittelbar ist. Er kann jedoch 
                      die Planung verbessern und den Speichermehraufwand
                      beim Erstellen einer großen Anzahl von Projekten verringern.
                      (Kurzform: -isolate)
@@ -156,10 +156,10 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -graphBuild[:True|False]
-                     Führt dazu, dass MSBuild ein Projektdiagramm konstruiert und erstellt.
+                     Führt dazu, dass MSBuild einen Projektgraphen konstruiert und erstellt.
 
-                     Das Konstruieren eines Diagramms beinhaltet das Identifizieren von
-                     Projektverweisen auf Formularabhängigkeiten. Beim Erstellen des Diagramms
+                     Das Konstruieren eines Graphen beinhaltet das Identifizieren von
+                     Projektverweisen, um Abhängigkeiten zu erstellen. Bei der Grapherstellung
                      wird versucht, Projektverweise vor den Projekten zu erstellen,
                      die sie referenzieren. Dies ist eine Unterscheidung zur
                      traditionellen MSBuild-Planung.
