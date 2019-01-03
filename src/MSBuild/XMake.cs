@@ -1163,8 +1163,8 @@ namespace Microsoft.Build.CommandLine
                             // Determine if the user specified /Target:Restore which means we should only execute a restore in the fancy way that /restore is executed
                             bool restoreOnly = targets.Length == 1 && String.Equals(targets[0], MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
 
-                            // Execute restore below changes the current working directory and does not change back. Therefore, if we try to create the request after
-                            // the restore call we end up with incorrect normalize paths to the project. To avoid that, we are preparing the request before the first
+                            // ExecuteRestore below changes the current working directory and does not change back. Therefore, if we try to create the request after
+                            // the restore call we end up with incorrectly normalized paths to the project. To avoid that, we are preparing the request before the first
                             // build (restore) request.
                             // PS: We couldn't find a straight forward way to make the restore invocation clean up after itself, so we should this ugly but less risky
                             // approach.
