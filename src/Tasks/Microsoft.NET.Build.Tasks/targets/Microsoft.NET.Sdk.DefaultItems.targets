@@ -228,7 +228,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                                 TargetingPackRoot="$(NetCoreTargetingPackRoot)"
                                 AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
-                                RuntimeGraphPath="$(NetCoreRuntimeGraphPath)"
+                                RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                                 SelfContained="$(SelfContained)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)">

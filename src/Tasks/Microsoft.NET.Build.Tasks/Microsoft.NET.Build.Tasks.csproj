@@ -81,12 +81,6 @@
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="targets\runtime.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
       <_NugetBuildTasksPackPath>$(NuGetPackageRoot)nuget.build.tasks.pack\$(NuGetBuildTasksPackVersion)</_NugetBuildTasksPackPath>
