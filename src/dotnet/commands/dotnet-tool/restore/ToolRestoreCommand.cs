@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
         {
             if (toolRestoreResults.Any(r => !r.IsSuccess))
             {
-                _reporter.WriteLine(Environment.NewLine);
+                _reporter.WriteLine();
                 _errorReporter.WriteLine(string.Join(
                     Environment.NewLine,
                     toolRestoreResults.Where(r => !r.IsSuccess).Select(r => r.Message)).Red());
@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                 var successMessage = toolRestoreResults.Where(r => r.IsSuccess).Select(r => r.Message);
                 if (successMessage.Any())
                 {
-                    _reporter.WriteLine(Environment.NewLine);
+                    _reporter.WriteLine();
                     _reporter.WriteLine(string.Join(Environment.NewLine, successMessage));
 
                 }
@@ -191,7 +191,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             {
                 _reporter.WriteLine(string.Join(Environment.NewLine,
                     toolRestoreResults.Where(r => r.IsSuccess).Select(r => r.Message)));
-                _reporter.WriteLine(Environment.NewLine);
+                _reporter.WriteLine();
                 _reporter.WriteLine(LocalizableStrings.LocalToolsRestoreWasSuccessful.Green());
 
                 return 0;
