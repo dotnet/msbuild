@@ -24,6 +24,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public string AppHostRuntimeIdentifier { get; set; }
 
+        [Required]
         public string RuntimeGraphPath { get; set; }
 
         public bool SelfContained { get; set; }
@@ -133,14 +134,31 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
                         {
-                            string runtimePackRuntimeIdentifier = GetBestRuntimeIdentifier(RuntimeIdentifier, knownFrameworkReference.RuntimePackRuntimeIdentifiers);
-                            string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
+                            string runtimePackRuntimeIdentifier = GetBestRuntimeIdentifier(RuntimeIdentifier, knownFrameworkReference.RuntimePackRuntimeIdentifiers,
+                                                                                            out bool wasInGraph);
+                            if (runtimePackRuntimeIdentifier == null)
+                            {
+                                if (wasInGraph)
+                                {
+                                    //  NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.
+                                    Log.LogError(Strings.NoRuntimePackAvailable, knownFrameworkReference.Name, RuntimeIdentifier);
+                                }
+                                else
+                                {
+                                    //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
+                                    Log.LogError(Strings.UnsupportedRuntimeIdentifier, RuntimeIdentifier);
+                                }
+                            }
+                            else
+                            {
+                                string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
 
-                            TaskItem runtimePackItem = new TaskItem(runtimePackName);
-                            runtimePackItem.SetMetadata(MetadataKeys.Version, knownFrameworkReference.LatestRuntimeFrameworkVersion);
-                            runtimePackItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, "true");
+                                TaskItem runtimePackItem = new TaskItem(runtimePackName);
+                                runtimePackItem.SetMetadata(MetadataKeys.Version, knownFrameworkReference.LatestRuntimeFrameworkVersion);
+                                runtimePackItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, "true");
 
-                            packagesToReference.Add(runtimePackItem);
+                                packagesToReference.Add(runtimePackItem);
+                            }
                         }
                     }
 
@@ -161,38 +179,53 @@ namespace Microsoft.NET.Build.Tasks
             if (appHostPackPattern != null && AppHostRuntimeIdentifier != null)
             {
                 //  Choose AppHost RID as best match of the specified RID
-                string bestAppHostRuntimeIdentifier = GetBestRuntimeIdentifier(AppHostRuntimeIdentifier, appHostRuntimeIdentifiers);
-
-                string appHostPackName = appHostPackPattern.Replace("**RID**", bestAppHostRuntimeIdentifier);
-
-                string appHostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
-                    DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier));
-
-
-                TaskItem appHostItem = new TaskItem("AppHost");
-                string appHostPackPath = null;
-                if (!string.IsNullOrEmpty(TargetingPackRoot))
+                string bestAppHostRuntimeIdentifier = GetBestRuntimeIdentifier(AppHostRuntimeIdentifier, appHostRuntimeIdentifiers, out bool wasInGraph);
+                if (bestAppHostRuntimeIdentifier == null)
                 {
-                    appHostPackPath = GetPackagePath(appHostPackName, appHostPackVersion, TargetingPackRoot);
-                }
-                if (appHostPackPath != null && Directory.Exists(appHostPackPath))
-                {
-                    //  Use AppHost from packs folder
-                    appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, appHostRelativePathInPackage));
+                    if (wasInGraph)
+                    {
+                        //  NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.
+                        Log.LogError(Strings.NoAppHostAvailable, RuntimeIdentifier);
+                    }
+                    else
+                    {
+                        //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
+                        Log.LogError(Strings.UnsupportedRuntimeIdentifier, RuntimeIdentifier);
+                    }
                 }
                 else
                 {
-                    //  Download apphost pack
-                    TaskItem packageToDownload = new TaskItem(appHostPackName);
-                    packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);
-                    packagesToDownload.Add(packageToDownload);
+                    string appHostPackName = appHostPackPattern.Replace("**RID**", bestAppHostRuntimeIdentifier);
 
-                    appHostItem.SetMetadata(MetadataKeys.PackageName, appHostPackName);
-                    appHostItem.SetMetadata(MetadataKeys.PackageVersion, appHostPackVersion);
-                    appHostItem.SetMetadata(MetadataKeys.RelativePath, appHostRelativePathInPackage);
+                    string appHostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
+                        DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier));
+
+
+                    TaskItem appHostItem = new TaskItem("AppHost");
+                    string appHostPackPath = null;
+                    if (!string.IsNullOrEmpty(TargetingPackRoot))
+                    {
+                        appHostPackPath = GetPackagePath(appHostPackName, appHostPackVersion, TargetingPackRoot);
+                    }
+                    if (appHostPackPath != null && Directory.Exists(appHostPackPath))
+                    {
+                        //  Use AppHost from packs folder
+                        appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, appHostRelativePathInPackage));
+                    }
+                    else
+                    {
+                        //  Download apphost pack
+                        TaskItem packageToDownload = new TaskItem(appHostPackName);
+                        packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);
+                        packagesToDownload.Add(packageToDownload);
+
+                        appHostItem.SetMetadata(MetadataKeys.PackageName, appHostPackName);
+                        appHostItem.SetMetadata(MetadataKeys.PackageVersion, appHostPackVersion);
+                        appHostItem.SetMetadata(MetadataKeys.RelativePath, appHostRelativePathInPackage);
+                    }
+
+                    AppHost = new ITaskItem[] { appHostItem };
                 }
-
-                AppHost = new ITaskItem[] { appHostItem };
             }
 
             if (packagesToDownload.Any())
@@ -221,21 +254,16 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        string GetBestRuntimeIdentifier(string targetRuntimeIdentifier, string availableRuntimeIdentifiers)
+        string GetBestRuntimeIdentifier(string targetRuntimeIdentifier, string availableRuntimeIdentifiers, out bool wasInGraph)
         {
-            if (availableRuntimeIdentifiers != null && !string.IsNullOrEmpty(RuntimeGraphPath))
-            {
-                var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
-                var bestRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph,
-                    AppHostRuntimeIdentifier,
-                    availableRuntimeIdentifiers.Split(';'));
+            var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
+            var bestRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph,
+                AppHostRuntimeIdentifier,
+                availableRuntimeIdentifiers.Split(';'),
+                out wasInGraph);
 
-                return bestRuntimeIdentifier;
-            }
-            else
-            {
-                return targetRuntimeIdentifier;
-            }
+            return bestRuntimeIdentifier;
+            
         }
 
         static string GetPackagePath(string name, string version, string root)

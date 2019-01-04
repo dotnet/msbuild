@@ -81,9 +81,10 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         public static string GetBestMatchingRid(RuntimeGraph runtimeGraph, string runtimeIdentifier,
-            IEnumerable<string> availableRuntimeIdentifiers)
+            IEnumerable<string> availableRuntimeIdentifiers, out bool wasInGraph)
         {
-            //  TODO: Are runtime identifers case sensitive?
+            wasInGraph = runtimeGraph.Runtimes.ContainsKey(runtimeIdentifier);
+
             HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers);
             foreach (var candidateRuntimeIdentifier in runtimeGraph.ExpandRuntime(runtimeIdentifier))
             {
@@ -93,8 +94,8 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            //  TODO: should this generate an error (probably yes, in some cases, to cover cases where RID is misspelled)
-            return runtimeIdentifier;
+            //  No compatible RID found in availableRuntimeIdentifiers
+            return null;
         }
     }
 }
