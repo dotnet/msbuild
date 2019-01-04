@@ -18,6 +18,79 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- TODO: How does conflict resolution fit in here?  Probably it should depend on ResolveTargetingPacks -->
   </PropertyGroup>
 
+
+  <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
+    <ItemGroup>
+      <!-- The KnownFrameworkReference items that this target expects will be defined in the bundled
+           versions .props file. They should look something like this: -->
+
+      <!--
+    <KnownFrameworkReference Include="Microsoft.NETCore.App"
+                              TargetFramework="netcoreapp3.0"
+                              RuntimeFrameworkName="Microsoft.NETCore.App"
+                              DefaultRuntimeFrameworkVersion="3.0.0-preview-27214-02"
+                              LatestRuntimeFrameworkVersion="3.0.0-preview-27214-02"
+                              TargetingPackName="Microsoft.NETCore.App"
+                              TargetingPackVersion="3.0.0-preview-27122-01"
+                              AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
+                              AppHostRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
+                              RuntimePackNamePatterns="runtime.**RID**.Microsoft.NETCore.App;runtime.**RID**.Microsoft.NETCore.DotNetHostResolver;runtime.**RID**.Microsoft.NETCore.DotNetHostPolicy"
+                              RuntimePackRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
+                              />
+      -->
+
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == ''">
+      <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
+      <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
+    </PropertyGroup>
+
+    <ResolveFrameworkReferences FrameworkReferences="@(FrameworkReference)"
+                                KnownFrameworkReferences="@(KnownFrameworkReference)"
+                                TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+                                TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
+                                TargetingPackRoot="$(NetCoreTargetingPackRoot)"
+                                AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
+                                RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                                SelfContained="$(SelfContained)"
+                                RuntimeIdentifier="$(RuntimeIdentifier)"
+                                DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)">
+
+      <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
+      <Output TaskParameter="PackagesToReference" ItemName="PackageReference" />
+      <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
+      <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
+      <Output TaskParameter="AppHost" ItemName="AppHostPack" />
+
+      <Output TaskParameter="UnresolvedFrameworkReferences" ItemName="_UnresolvedFrameworkReference" />
+
+    </ResolveFrameworkReferences>
+
+    <ItemGroup>
+      <PackageReference Include="@(PackageReferenceToAdd)"
+                        IsImplicitlyDefined="true"
+                        PrivateAssets="all"
+                        ExcludeAssets="all" />
+    </ItemGroup>
+
+  </Target>
+
+  <UsingTask TaskName="ReportUnknownFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!-- Report unresolved FrameworkReferences in a separate target so that the error is only reported on Build, not Restore. -->
+  <Target Name="ReportUnresolvedFrameworkReferences" DependsOnTargets="ResolveFrameworkReferences"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'@(_UnresolvedFrameworkReference)' != ''">
+
+    <!-- Use a custom task in order to report multiple errors instead of stopping on the first one (which would happen if we batched) -->
+    <ReportUnknownFrameworkReferences UnresolvedFrameworkReferences="@(_UnresolvedFrameworkReference)"/>
+
+  </Target>
+
+
   <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <Target Name="ResolveTargetingPacks" DependsOnTargets="ResolvePackageAssets">
