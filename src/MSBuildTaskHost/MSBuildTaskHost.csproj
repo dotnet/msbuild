@@ -23,6 +23,8 @@
          out of memory problems on large trees -->
     <LargeAddressAware>true</LargeAddressAware>
     <ApplicationIcon>..\MSBuild\MSBuild.ico</ApplicationIcon>
+
+    <DebugType>full</DebugType><!-- Work around arcade stomping on symbols for same-program-different-arches. -->
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build.Framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
