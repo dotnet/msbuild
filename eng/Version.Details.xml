@@ -37,6 +37,10 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha></Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="15.9.0">
+      <Uri>https://github.com/microsoft/vstest</Uri>
+      <Sha></Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.18620.6">
