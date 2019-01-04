@@ -102,11 +102,9 @@ namespace Microsoft.NET.Build.Tasks
                     //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                     TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
                     string targetingPackPath = null;
-                    string relativeTargetingPackPath = null;
                     if (!string.IsNullOrEmpty(TargetingPackRoot))
                     {
-                        targetingPackPath = GetPackagePath(knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion,
-                            TargetingPackRoot);
+                        targetingPackPath = GetPackPath(knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion);
                     }
                     if (targetingPackPath != null && Directory.Exists(targetingPackPath))
                     {
@@ -115,9 +113,6 @@ namespace Microsoft.NET.Build.Tasks
                     else
                     {
                         //  Download targeting pack
-                        relativeTargetingPackPath = GetPackagePath(knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion,
-                            root: string.Empty);
-
                         TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
                         packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
 
@@ -205,7 +200,7 @@ namespace Microsoft.NET.Build.Tasks
                     string appHostPackPath = null;
                     if (!string.IsNullOrEmpty(TargetingPackRoot))
                     {
-                        appHostPackPath = GetPackagePath(appHostPackName, appHostPackVersion, TargetingPackRoot);
+                        appHostPackPath = GetPackPath(appHostPackName, appHostPackVersion);
                     }
                     if (appHostPackPath != null && Directory.Exists(appHostPackPath))
                     {
@@ -266,9 +261,9 @@ namespace Microsoft.NET.Build.Tasks
             
         }
 
-        static string GetPackagePath(string name, string version, string root)
+        string GetPackPath(string name, string version)
         {
-            return Path.Combine(root, name.ToLowerInvariant(), version);
+            return Path.Combine(TargetingPackRoot, name, version);
         }
 
         static Version NormalizeVersion(Version version)
