@@ -652,4 +652,7 @@ setx PATH "%PATH%;{0}"
   <data name="SolutionOrProjectArgumentName" xml:space="preserve">
     <value>PROJECT | SOLUTION</value>
   </data>
+  <data name="CommandInteractiveOptionDescription" xml:space="preserve">
+    <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
+  </data>
 </root>

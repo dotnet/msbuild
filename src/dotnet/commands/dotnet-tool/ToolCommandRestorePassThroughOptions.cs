@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
 
 
@@ -38,7 +39,7 @@ namespace Microsoft.DotNet.Cli
         {
             return Create.Option(
                         "--interactive",
-                        LocalizableStrings.CmdInteractiveRestoreOptionDescription,
+                        CommonLocalizableStrings.CommandInteractiveOptionDescription,
                         Accept.NoArguments()
                             .ForwardAs(Constants.RestoreInteractiveOption));
         }
