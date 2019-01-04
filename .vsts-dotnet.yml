@@ -78,10 +78,10 @@ phases:
     condition: succeededOrFailed()
 
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: symbols'
+    displayName: 'Publish Artifact: bin'
     inputs:
-      PathtoPublish: 'artifacts\SymStore'
-      ArtifactName: symbols
+      PathtoPublish: 'artifacts\bin'
+      ArtifactName: bin
     condition: succeededOrFailed()
 
   - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
