@@ -34,7 +34,7 @@ fi
 # Configures warning treatment in msbuild.
 warn_as_error=${warn_as_error:-true}
 
-# True to attempt using .NET Core already that meets requirements specified in global.json
+# True to attempt using .NET Core already that meets requirements specified in global.json 
 # installed on the machine instead of downloading one.
 use_installed_dotnet_cli=${use_installed_dotnet_cli:-true}
 
@@ -186,20 +186,11 @@ function InitializeBuildTool {
   if [[ -n "${_InitializeBuildTool:-}" ]]; then
     return
   fi
-
+  
   InitializeDotNetCli $restore
 
   # return value
-  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
-}
-
-function InitializeMSBuildToUse {
-  if [[ -n "${_InitializeMSBuildToUse:-}" ]]; then
-    return
-  fi
-
-  # return value
-  _InitializeMSBuildToUse="msbuild"
+  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"  
 }
 
 function GetNuGetPackageCachePath {
@@ -286,14 +277,13 @@ function MSBuild {
   fi
 
   InitializeBuildTool
-  InitializeMSBuildToUse
 
   local warnaserror_switch=""
   if [[ $warn_as_error == true ]]; then
     warnaserror_switch="/warnaserror"
   fi
 
-  "$_InitializeBuildTool" "$_InitializeMSBuildToUse" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error "$@"
+  "$_InitializeBuildTool" msbuild /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error "$@"
   lastexitcode=$?
 
   if [[ $lastexitcode != 0 ]]; then
