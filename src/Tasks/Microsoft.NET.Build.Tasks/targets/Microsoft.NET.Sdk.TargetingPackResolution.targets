@@ -15,7 +15,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(ResolveAssemblyReferencesDependsOn);
       ResolveTargetingPacks;
     </ResolveAssemblyReferencesDependsOn>
-    <!-- TODO: How does conflict resolution fit in here?  Probably it should depend on ResolveTargetingPacks -->
   </PropertyGroup>
 
 
@@ -24,9 +23,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
     <ItemGroup>
       <!-- The KnownFrameworkReference items that this target expects will be defined in the bundled
-           versions .props file. They should look something like this: -->
-
-      <!--
+           versions .props file. They should look something like this:
+           
     <KnownFrameworkReference Include="Microsoft.NETCore.App"
                               TargetFramework="netcoreapp3.0"
                               RuntimeFrameworkName="Microsoft.NETCore.App"
@@ -109,6 +107,8 @@ Copyright (c) .NET Foundation. All rights reserved.
         <Path Condition="'%(ResolvedTargetingPack.Path)' == ''">%(PackageDirectory)</Path>
       </ResolvedTargetingPack>
       <Reference Include="%(ResolvedTargetingPack.Path)\ref\netcoreapp3.0\*.dll">
+        <!-- TODO: Work out what metadata we should use here to display these references grouped under the targeting pack
+             in solution explorer.  These metadata values are based on what PCLs were using. -->
         <WinMDFile>false</WinMDFile>
         <Private>false</Private>
         <ReferenceGroupingDisplayName>.NET Core</ReferenceGroupingDisplayName>
@@ -141,9 +141,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       
     </ItemGroup>
 
-    <!--<Message Text="@(ResolvedAppHostPack)" />-->
-
-    <PropertyGroup>
+    <PropertyGroup Condition="'@(ResolvedAppHostPack)' != ''">
       <AppHostSourcePath>@(ResolvedAppHostPack->'%(Path)')</AppHostSourcePath>
     </PropertyGroup>
 
