@@ -60,4 +60,4 @@ jobs:
           PublishLocation: Container
           ArtifactName: $(Agent.Os)_PublishBuildAssets
         continueOnError: true
-        condition: always()
+        condition: always()      

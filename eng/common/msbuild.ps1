@@ -16,7 +16,7 @@ try {
   }
 
   MSBuild @extraArgs
-}
+} 
 catch {
   Write-Host $_
   Write-Host $_.Exception

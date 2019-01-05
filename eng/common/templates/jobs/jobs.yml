@@ -46,7 +46,7 @@ parameters:
 jobs:
 - ${{ each job in parameters.jobs }}:
   - template: ../job/job.yml
-    parameters:
+    parameters: 
       # pass along parameters
       ${{ each parameter in parameters }}:
         ${{ if ne(parameter.key, 'jobs') }}:
@@ -74,3 +74,4 @@ jobs:
         vmImage: vs2017-win2016
       runAsPublic: ${{ parameters.runAsPublic }}
       enablePublishBuildArtifacts: ${{ parameters.enablePublishBuildArtifacts }}
+
