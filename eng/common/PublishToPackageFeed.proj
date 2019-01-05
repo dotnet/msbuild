@@ -1,5 +1,5 @@
 <!--
-  This MSBuild file is intended to be used as the body of the default
+  This MSBuild file is intended to be used as the body of the default 
   publishing release pipeline. The release pipeline will use this file
   to invoke the PushToStaticFeed task that will read the build asset
   manifest and publish the assets described in the manifest to

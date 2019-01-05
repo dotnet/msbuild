@@ -38,18 +38,14 @@
     <MicrosoftDotNetCliUtilsPackageVersion>2.2.100-refac-20180613-1</MicrosoftDotNetCliUtilsPackageVersion>
     <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
   </PropertyGroup>
-
   <PropertyGroup>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
-
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
-
     <_DotNetHiveRoot>$(DOTNET_INSTALL_DIR)</_DotNetHiveRoot>
     <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet/</_DotNetHiveRoot>
     <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)/</_DotNetHiveRoot>
-
     <DotNetExe>$(_DotNetHiveRoot)dotnet$(ExeExtension)</DotNetExe>
   </PropertyGroup>
   <PropertyGroup>
