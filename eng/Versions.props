@@ -12,7 +12,7 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <MicrosoftDotNetCliRuntimePackageVersion>3.0.100-preview.18580.6</MicrosoftDotNetCliRuntimePackageVersion>
+    <MicrosoftDotNetCliRuntimePackageVersion>3.0.100-preview.19053.4</MicrosoftDotNetCliRuntimePackageVersion>
     <MicrosoftNETSdkPackageVersion>3.0.100-preview.19053.1</MicrosoftNETSdkPackageVersion>
     <MicrosoftBuildPackageVersion>16.0.0-preview.352</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
