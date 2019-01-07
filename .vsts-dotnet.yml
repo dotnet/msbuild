@@ -20,7 +20,7 @@ jobs:
   steps:
   - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
     inputs:
-      signType: real
+      signType: test
     condition: succeeded()
 
   - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
@@ -35,7 +35,7 @@ jobs:
               /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
               /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)              
               /p:PublishToSymbolServer=true
-              /p:DotNetSignType=real
+              /p:DotNetSignType=test
               /p:TeamName=MSBuild
               /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
     displayName: Build
