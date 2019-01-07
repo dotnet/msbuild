@@ -109,11 +109,10 @@ jobs:
   - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
     displayName: Execute cleanup tasks
 
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: /eng/common/templates/job/publish-build-assets.yml
-    parameters:
-      enablePublishBuildArtifacts: true
-      dependsOn:
-        - Windows_NT
-      pool:
-        vmImage: vs2017-win2016
+- template: /eng/common/templates/job/publish-build-assets.yml
+  parameters:
+    enablePublishBuildArtifacts: true
+    dependsOn:
+      - Windows_NT
+    pool:
+      vmImage: vs2017-win2016
