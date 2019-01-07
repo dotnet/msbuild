@@ -3841,5 +3841,59 @@ $(
             string result = expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             result.ShouldBe(expected);
         }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_GetPathsOfAllFilesAbove()
+        {
+            // Directory structure:
+            // <temp>\
+            //    .squiggle
+            //    alpha\
+            //        One.cs
+            //        beta\
+            //            .squiggle
+            //            Two.cs
+            //            Three.cs
+            //        gamma\
+            //            .squiggle
+
+            string alphaDirectory = Path.Combine(ObjectModelHelpers.TempProjectDir, "alpha");
+            string betaDirectory = Path.Combine(alphaDirectory, "beta");
+            string gammaDirectory = Path.Combine(alphaDirectory, "gamma");
+
+            string tempSquiggleFilePath = Path.Combine(ObjectModelHelpers.TempProjectDir, ".squiggle");
+            Directory.CreateDirectory(ObjectModelHelpers.TempProjectDir);
+            File.WriteAllText(tempSquiggleFilePath, string.Empty);
+            string betaSquiggleFilePath = Path.Combine(betaDirectory, ".squiggle");
+            Directory.CreateDirectory(betaDirectory);
+            File.WriteAllText(betaSquiggleFilePath, string.Empty);
+            string gammaSquiggleFilePath = FileUtilities.CombinePaths(gammaDirectory, ".squiggle");
+            Directory.CreateDirectory(gammaDirectory);
+            File.WriteAllText(gammaSquiggleFilePath, string.Empty);
+
+            MockElementLocation projectLocation = new MockElementLocation(Path.Combine(alphaDirectory, Path.GetRandomFileName()));
+
+            string projectFileContents = @"<Project>
+  <ItemGroup>
+    <Compile Include=""One.cs"" />
+    <Compile Include=""beta\Two.cs"" />
+    <Compile Include=""beta\Three.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Squiggle Include=""@(Compile->GetPathsOfAllFilesAbove('.squiggle'))"" />
+  </ItemGroup>
+</Project>";
+
+            File.WriteAllText(projectLocation.File, projectFileContents);
+            Project project = new Project(projectLocation.File);
+
+            ProjectInstance projectInstance = project.CreateProjectInstance();
+            ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Squiggle");
+
+            Assert.Equal(expected: 2, actual: squiggleItems.Count);
+            Assert.Collection(squiggleItems,
+                              item => StringComparer.OrdinalIgnoreCase.Compare(item.EvaluatedInclude, tempSquiggleFilePath),
+                              item => StringComparer.OrdinalIgnoreCase.Compare(item.EvaluatedInclude, betaSquiggleFilePath));
+        }
     }
 }
