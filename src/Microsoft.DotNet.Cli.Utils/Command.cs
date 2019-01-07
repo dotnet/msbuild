@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -28,7 +29,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public CommandResult Execute()
         {
-
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.RunningFileNameArguments,
                 _process.StartInfo.FileName,
@@ -39,6 +39,8 @@ namespace Microsoft.DotNet.Cli.Utils
             _running = true;
 
             _process.EnableRaisingEvents = true;
+
+            Console.CancelKeyPress += HandleCancelKeyPress;
 
 #if DEBUG
             var sw = Stopwatch.StartNew();
@@ -60,6 +62,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 taskOut?.Wait();
                 taskErr?.Wait();
             }
+
+            Console.CancelKeyPress -= HandleCancelKeyPress;
 
             var exitCode = _process.ExitCode;
 
@@ -210,6 +214,12 @@ namespace Microsoft.DotNet.Cli.Utils
                     LocalizableStrings.UnableToInvokeMemberNameAfterCommand,
                     memberName));
             }
+        }
+
+        private void HandleCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            // Ignore SIGINT/SIGQUIT so that the child can process the signal
+            e.Cancel = true;
         }
     }
 }
