@@ -5,9 +5,9 @@
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>7366b1468d44292c611f0a37464cb7fb964b2018</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview.19053.1">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview.19054.2">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>f9d8ca9533e85598766a78911b4683224a61bf34</Sha>
+      <Sha>3fbd4bc64e9fd9dc7b99dd3429e3f8a699dae957</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.0.0-preview.352">
       <Uri>https://github.com/microsoft/build</Uri>
@@ -43,9 +43,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19053.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19055.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>7acae668c8dd3efc4b0e18946982d7ddee3e5591</Sha>
+      <Sha>b43f8c50d78c00d33f0b31a666b46ce5e9bcbe3d</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
