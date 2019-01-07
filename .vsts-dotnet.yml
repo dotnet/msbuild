@@ -46,7 +46,7 @@ jobs:
     inputs:
       testRunTitle: 'Windows-on-full Release Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/$(BuildConfiguration)/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -55,7 +55,7 @@ jobs:
     inputs:
       testRunTitle: 'Windows-on-full Release .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/$(BuildConfiguration)/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -63,21 +63,21 @@ jobs:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
+      PathtoPublish: 'artifacts\log\Release'
       ArtifactName: logs
     condition: succeededOrFailed()
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: packages'
     inputs:
-      PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
+      PathtoPublish: 'artifacts\packages\Release'
       ArtifactName: packages
     condition: succeededOrFailed()
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: vsix'
     inputs:
-      PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+      PathtoPublish: 'artifacts\VSSetup\Release\Insertion'
       ArtifactName: vsix
     condition: succeededOrFailed()
 
@@ -91,7 +91,7 @@ jobs:
   - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
     displayName: Upload VSTS Drop
     inputs:
-      DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+      DropFolder: 'artifacts\VSSetup\Release\Insertion'
     condition: succeeded()
 
   - task: CopyFiles@2
