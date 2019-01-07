@@ -3890,7 +3890,6 @@ $(
             ProjectInstance projectInstance = project.CreateProjectInstance();
             ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Squiggle");
 
-            Assert.Equal(expected: 2, actual: squiggleItems.Count);
             Assert.Collection(squiggleItems,
                               item => StringComparer.OrdinalIgnoreCase.Compare(item.EvaluatedInclude, tempSquiggleFilePath),
                               item => StringComparer.OrdinalIgnoreCase.Compare(item.EvaluatedInclude, betaSquiggleFilePath));
