@@ -3,6 +3,7 @@
 configuration="debug"
 host_type="core"
 build_stage1=true
+properties=
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -47,7 +48,12 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-	_InitializeMSBuildToUse="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
+  . "$ScriptRoot/common/tools.sh"
+
+  InitializeDotNetCli true
+
+  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
+  _InitializeBuildToolCommand="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
 else
   echo "Unsupported hostType ($host_type)"
   exit 1
