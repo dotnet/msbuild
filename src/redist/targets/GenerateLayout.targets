@@ -22,6 +22,22 @@
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
+  <Target Name="PublishTestCli"
+          BeforeTargets="Build">
+    <PropertyGroup>
+      <TestCliNuGetDirectory>$(NuGetPackagesDir)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.0/</TestCliNuGetDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NewtonSoft.Json.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.DotNet.PlatformAbstractions.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.Extensions.DependencyModel.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Xml.XPath.XmlDocument.dll" />
+      <TestCliBits Include="$(TestCliNuGetDirectory)**/*"
+                   Exclude="@(TestCliBitsToExclude)" />
+    </ItemGroup>
+    <Copy SourceFiles="@(TestCliBits)" DestinationFiles="@(TestCliBits->'$(OutputPath)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
   <Target Name="PublishFSharp"
           BeforeTargets="Build">
     <MSBuild
