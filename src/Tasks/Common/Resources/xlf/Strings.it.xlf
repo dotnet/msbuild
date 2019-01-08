@@ -68,8 +68,8 @@
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
-        <source>NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.</source>
-        <target state="new">NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.</target>
+        <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
+        <target state="new">NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</target>
         <note>{StrBegin="NETSDK1084: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">

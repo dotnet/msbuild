@@ -441,7 +441,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1081: "}</comment>
   </data>
   <data name="NoAppHostAvailable" xml:space="preserve">
-    <value>NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.</value>
+    <value>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</value>
     <comment>{StrBegin="NETSDK1084: "}</comment>
   </data>
   <data name="NoRuntimePackAvailable" xml:space="preserve">
