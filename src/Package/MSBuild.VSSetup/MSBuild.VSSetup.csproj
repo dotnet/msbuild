@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MicroBuild.Plugins.SwixBuild" Version="$(MicroBuildPluginsSwixBuildVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
-  </ItemGroup>
-
-  <ItemGroup>
     <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
     <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />
 
