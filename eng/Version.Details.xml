@@ -29,9 +29,9 @@
       <Uri>https://github.com/aspnet/websdk</Uri>
       <Sha></Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-alpha-27218-5">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-alpha-27308-10">
       <Uri>https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</Uri>
-      <Sha>01c3fb6e2fa0e58c29de950d2da97bc5006f5004</Sha>
+      <Sha>5381793bd93743a127943c31086deab088c2ef25</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.0.0-preview1.5663">
       <Uri>https://github.com/nuget/nuget.client</Uri>
