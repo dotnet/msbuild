@@ -586,7 +586,7 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
-        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Ensure that all parameters are defined, are of the correct type, and are specified in the right order.</source>
+        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
         <target state="needs-review-translation">MSB4186: 정적 메서드 호출 구문 "{0}"이(가) 잘못되었습니다. {1} 정적 메서드 호출의 형식은 $([FullTypeName]::Method())여야 합니다. 예: $([System.IO.Path]::Combine(`a`, `b`)) </target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
