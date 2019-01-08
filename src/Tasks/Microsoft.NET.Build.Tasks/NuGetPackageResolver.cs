@@ -62,6 +62,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             return CreateResolver(lockFile.PackageFolders.Select(f => f.Path), projectPath);
         }
+
         public static NuGetPackageResolver CreateResolver(IEnumerable<string> packageFolders, string projectPath)
         {
             NuGetPackageResolver packageResolver;

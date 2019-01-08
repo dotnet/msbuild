@@ -309,36 +309,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
      -->
   <Target Name="_GetAppHostPaths"
-          DependsOnTargets="_GetAppHostPathsFromAssetFile;_GetAppHostPathFromAppHostPack"
-          Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true'">
-    
-  </Target>
-
-  <Target Name="_GetAppHostPathFromAppHostPack"
-          Condition="'$(UseAppHostFromAssetsFile)' == 'false'">
-
-    <PropertyGroup>
-      <!-- AppHostSourcePath already set by ResolveFrameworkReferences -->
-      <AppHostIntermediatePath>$(IntermediateOutputPath)$(AssemblyName)$([System.IO.Path]::GetExtension($(AppHostSourcePath)))</AppHostIntermediatePath>
-    </PropertyGroup>
-    
-  </Target>
-
-  <Target Name="_GetAppHostPathsFromAssetFile"
           DependsOnTargets="ResolvePackageAssets"
-          Condition="'$(UseAppHostFromAssetsFile)' == 'true' and '@(_NativeRestoredAppHostNETCore)' != ''">
-    <ItemGroup>
-      <_NativeAppHostNETCore Include="@(_NativeRestoredAppHostNETCore->'$(IntermediateOutputPath)$(AssemblyName)%(Extension)')" />
-    </ItemGroup>
+          Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true'">
 
-    <NETSdkError Condition="'@(_NativeAppHostNETCore->Count())' > 1"
-                 ResourceName="MultipleFilesResolved"
-                 FormatArguments="$(_DotNetAppHostExecutableName)" />
+    <NETSdkError Condition="'@(_NativeRestoredAppHostNETCore->Count())' > 1"
+             ResourceName="MultipleFilesResolved"
+             FormatArguments="$(_DotNetAppHostExecutableName)" />
 
     <PropertyGroup>
-      <AppHostSourcePath>@(_NativeRestoredAppHostNETCore)</AppHostSourcePath>
-      <AppHostIntermediatePath>@(_NativeAppHostNETCore->'%(FullPath)')</AppHostIntermediatePath>
+      <!-- AppHostSourcePath will be set from ResolveFrameworkReferences if not using the apphost from the assets file -->
+      <AppHostSourcePath Condition="'$(UseAppHostFromAssetsFile)' == 'true'">@(_NativeRestoredAppHostNETCore)</AppHostSourcePath>
+      <AppHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)$(AssemblyName)$(_NativeExecutableExtension)'))</AppHostIntermediatePath>
     </PropertyGroup>
+    
   </Target>
 
   <!--

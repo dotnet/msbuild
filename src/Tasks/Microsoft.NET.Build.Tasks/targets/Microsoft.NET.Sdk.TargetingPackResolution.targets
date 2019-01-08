@@ -107,6 +107,8 @@ Copyright (c) .NET Foundation. All rights reserved.
         <Path Condition="'%(ResolvedTargetingPack.Path)' == ''">%(PackageDirectory)</Path>
       </ResolvedTargetingPack>
       <Reference Include="%(ResolvedTargetingPack.Path)\ref\netcoreapp3.0\*.dll">
+        <ExternallyResolved>true</ExternallyResolved>
+        
         <!-- TODO: Work out what metadata we should use here to display these references grouped under the targeting pack
              in solution explorer.  These metadata values are based on what PCLs were using. -->
         <WinMDFile>false</WinMDFile>
@@ -135,16 +137,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <ResolvedAppHostPack>
         <Path Condition="'%(ResolvedAppHostPack.Path)' == ''">%(PackageDirectory)\%(RelativePath)</Path>
-      </ResolvedAppHostPack>
-
-      <AppHostTest Include="@(ResolvedAppHostPack)"/>
-      
+      </ResolvedAppHostPack>      
     </ItemGroup>
 
-    <PropertyGroup Condition="'@(ResolvedAppHostPack)' != ''">
+    <PropertyGroup Condition="'@(ResolvedAppHostPack)' != '' And '$(AppHostSourcePath)' == ''">
       <AppHostSourcePath>@(ResolvedAppHostPack->'%(Path)')</AppHostSourcePath>
     </PropertyGroup>
-
 
   </Target>
 </Project>

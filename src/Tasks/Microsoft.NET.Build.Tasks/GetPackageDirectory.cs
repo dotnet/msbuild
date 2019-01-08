@@ -25,12 +25,12 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            NuGetPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(PackageFolders, ProjectPath);
-
-            var updatedItems = new List<ITaskItem>();
-
             if (Items != null)
             {
+                NuGetPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(PackageFolders, ProjectPath);
+
+                var updatedItems = new List<ITaskItem>();
+
                 foreach (var item in Items)
                 {
                     string packageName = item.GetMetadata(MetadataKeys.PackageName);
@@ -57,9 +57,9 @@ namespace Microsoft.NET.Build.Tasks
                         updatedItems.Add(item);
                     }
                 }
-            }
 
-            Output = updatedItems.ToArray();
+                Output = updatedItems.ToArray();
+            }
         }
     }
 }

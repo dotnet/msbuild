@@ -32,7 +32,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Only use the default apphost if building without a RID and without a deps file path (used by GenerateDeps.proj for CLI tools). -->
     <!-- This needs to be set prior to _IsExecutable being reassigned below. -->
     <DefaultAppHostRuntimeIdentifier Condition="'$(DefaultAppHostRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' == '' and '$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true' and '$(ProjectDepsFilePath)' == ''">$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
-    <RuntimeIdentifiers Condition="'$(DefaultAppHostRuntimeIdentifier)' != ''">$(RuntimeIdentifiers);$(DefaultAppHostRuntimeIdentifier)</RuntimeIdentifiers>
   </PropertyGroup>
 
   <!--

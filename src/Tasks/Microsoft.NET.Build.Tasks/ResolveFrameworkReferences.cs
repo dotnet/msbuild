@@ -94,8 +94,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
                         else
                         {
-                            //  Should not happen unless there is a bug, so this message probably doesn't need to be localized
-                            Log.LogError("Multiple FrameworkReferences defined an AppHostPack, which is not supposed to happen");
+                            throw new InvalidOperationException("Multiple FrameworkReferences defined an AppHostPack, which is not supposed to happen");
                         }
                     }
 
