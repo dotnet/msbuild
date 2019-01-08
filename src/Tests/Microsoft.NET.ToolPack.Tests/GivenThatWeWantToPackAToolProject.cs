@@ -48,7 +48,8 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
-            packCommand.Execute();
+            var result = packCommand.Execute();
+            result.Should().Pass();
 
             return packCommand.GetNuGetPackage();
         }
