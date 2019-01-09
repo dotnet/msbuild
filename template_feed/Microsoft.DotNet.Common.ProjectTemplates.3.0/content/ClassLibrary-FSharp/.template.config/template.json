@@ -50,10 +50,6 @@
           "choice": "netstandard2.0",
           "description": "Target netstandard2.0"
         },
-        {
-          "choice": "netstandard2.1",
-          "description": "Target netstandard2.1"
-        }
       ],
       "replaces": "netstandard2.0",
       "defaultValue": "netstandard2.0"
