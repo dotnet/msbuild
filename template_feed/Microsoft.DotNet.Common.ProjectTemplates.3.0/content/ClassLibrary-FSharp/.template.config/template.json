@@ -49,7 +49,7 @@
         {
           "choice": "netstandard2.0",
           "description": "Target netstandard2.0"
-        },
+        }
       ],
       "replaces": "netstandard2.0",
       "defaultValue": "netstandard2.0"
