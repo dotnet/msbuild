@@ -3429,7 +3429,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CoreCompileCache Include="$(DefineConstants)" />
     </ItemGroup>
 
-    <Hash ItemsToHash="@(CoreCompileCache)" IgnoreCase="true">
+    <Hash 
+      ItemsToHash="@(CoreCompileCache)" 
+      IgnoreCase="$([MSBuild]::ValueOrDefault(`$(CoreCompileCacheIgnoreCase)`, `true`))">
       <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
     </Hash>
 
