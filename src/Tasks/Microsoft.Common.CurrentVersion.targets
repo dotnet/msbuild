@@ -3429,7 +3429,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CoreCompileCache Include="$(DefineConstants)" />
     </ItemGroup>
 
-    <Hash ItemsToHash="@(CoreCompileCache)">
+    <Hash ItemsToHash="@(CoreCompileCache)" IgnoreCase="true">
       <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
     </Hash>
 
