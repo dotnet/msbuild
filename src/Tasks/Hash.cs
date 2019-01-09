@@ -54,11 +54,8 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (var item in ItemsToHash)
                         {
-                            foreach (char c in item.ItemSpec)
-                            {
-                                stringBuilder.Append(IgnoreCase ? char.ToLower(c) : c);
-                            }
-
+                            string itemSpec = item.ItemSpec;
+                            stringBuilder.Append(IgnoreCase ? itemSpec.ToUpperInvariant() : itemSpec);
                             stringBuilder.Append(ItemSeparatorCharacter);
                         }
 
