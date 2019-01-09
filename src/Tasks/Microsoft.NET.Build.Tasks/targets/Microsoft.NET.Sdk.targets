@@ -319,6 +319,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <!-- AppHostSourcePath will be set from ResolveFrameworkReferences if not using the apphost from the assets file -->
       <AppHostSourcePath Condition="'$(UseAppHostFromAssetsFile)' == 'true'">@(_NativeRestoredAppHostNETCore)</AppHostSourcePath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(UseAppHostFromAssetsFile)' == 'false' Or '@(_NativeRestoredAppHostNETCore)' != ''">
       <AppHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)$(AssemblyName)$(_NativeExecutableExtension)'))</AppHostIntermediatePath>
     </PropertyGroup>
     
