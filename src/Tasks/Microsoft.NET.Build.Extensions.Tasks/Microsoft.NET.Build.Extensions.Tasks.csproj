@@ -72,7 +72,7 @@
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
-      <_NETStandardLibraryNETFrameworkPath>$(NuGetPackageRoot)NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_NETStandardLibraryNETFrameworkPath>
+      <_NETStandardLibraryNETFrameworkPath>$(NuGetPackageRoot)netstandard.library.netframework\$(NETStandardLibraryNETFrameworkVersion)\build</_NETStandardLibraryNETFrameworkPath>
     </PropertyGroup>
     <ItemGroup>
       <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
