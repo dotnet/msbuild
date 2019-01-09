@@ -13,6 +13,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
+    <!-- Adding explicit dependencies to NuGet and Newtonsoft because for some reason they are not
+    being brought transitively -->
+    <PackageReference Include="NuGet.Versioning" Version="4.4.0" />
+    <PackageReference Include="NuGet.Packaging" Version="4.4.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
 </Project>
