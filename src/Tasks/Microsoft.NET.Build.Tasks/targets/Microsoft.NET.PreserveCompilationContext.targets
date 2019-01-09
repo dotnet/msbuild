@@ -15,6 +15,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
 
     <RefAssembliesFolderName Condition="'$(RefAssembliesFolderName)' == ''">refs</RefAssembliesFolderName>
+    
+    <PreserveCompilationReferences Condition=" '$(PreserveCompilationReferences)' == ''">$(PreserveCompilationContext)</PreserveCompilationReferences>
   </PropertyGroup>
 
   <Target Name="ComputeDependencyFileCompilerOptions"
@@ -43,7 +45,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="FindItemsFromPackages" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="ComputeRefAssembliesToPublish"
-          Condition="'$(PreserveCompilationContext)' == 'true'"
+          Condition="'$(PreserveCompilationReferences)' == 'true'"
           DependsOnTargets="ResolvePackageAssets;
                             _ParseTargetManifestFiles"
           AfterTargets="ComputeFilesToPublish"
@@ -82,7 +84,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_CopyReferenceOnlyAssembliesForBuild"
-          Condition="'$(PreserveCompilationContext)' == 'true'"
+          Condition="'$(PreserveCompilationReferences)' == 'true'"
           DependsOnTargets="_ComputeReferenceAssemblies"
           AfterTargets="CopyFilesToOutputDirectory">
 

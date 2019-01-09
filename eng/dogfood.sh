@@ -9,13 +9,15 @@ done
 scriptroot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 . "$scriptroot/common/tools.sh"
+InitializeToolset
+. "$scriptroot/restore-toolset.sh"
 
-InitializeTools
+ReadGlobalVersion "dotnet"
+dotnet_sdk_version=$_ReadGlobalVersion
 
-export SDK_REPO_ROOT="$RepoRoot"
-export SDK_CLI_VERSION="$DotNetCliVersion"
-export MSBuildSDKsPath="$ArtifactsConfigurationDir/bin/Sdks"
+export SDK_REPO_ROOT="$repo_root"
+export SDK_CLI_VERSION="$dotnet_sdk_version"
+export MSBuildSDKsPath="$artifacts_dir/bin/$configuration/Sdks"
 export DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR="$MSBuildSDKsPath"
-export NETCoreSdkBundledVersionsProps="$DotNetRoot/sdk/$DotNetCliVersion/Microsoft.NETCoreSdk.BundledVersions.props"
-export CustomAfterMicrosoftCommonTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions-ver/Microsoft.Common.Targets/ImportAfter/Microsoft.NET.Build.Extensions.targets"
-export MicrosoftNETBuildExtensionsTargets="$CustomAfterMicrosoftCommonTargets"
+export NETCoreSdkBundledVersionsProps="$DOTNET_INSTALL_DIR/sdk/$dotnet_sdk_version/Microsoft.NETCoreSdk.BundledVersions.props"
+export MicrosoftNETBuildExtensionsTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/Microsoft.NET.Build.Extensions.targets"

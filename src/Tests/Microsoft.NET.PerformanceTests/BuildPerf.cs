@@ -75,7 +75,21 @@ namespace Microsoft.NET.Perf.Tests
 
             TestProject(Path.Combine(testDir.Path, "mvc"), "Build Web Large", operation);
         }
+   
+        [CoreMSBuildOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildWebLarge30(ProjectPerfOperation operation)
+        {
+            string sourceProject = Path.Combine(TestContext.GetRepoRoot(), ".perftestsource/PerformanceTestProjects/WebLarge30");
+            var testDir = _testAssetsManager.CreateTestDirectory("WebLarge30", identifier: operation.ToString());
+            Console.WriteLine($"Mirroring {sourceProject} to {testDir}...");
+            FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
+            Console.WriteLine("Done");
 
+            TestProject(Path.Combine(testDir.Path, "mvc"), "Build Web Large 3.0", operation);
+        }
+   
         [CoreMSBuildOnlyTheory]
         [InlineData(ProjectPerfOperation.CleanBuild)]
         [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
