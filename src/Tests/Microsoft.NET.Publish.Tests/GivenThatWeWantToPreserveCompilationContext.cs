@@ -25,10 +25,11 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("net46", "netstandard1.3")]
-        [InlineData("netcoreapp1.1", "netstandard1.3")]
-        [InlineData("netcoreapp2.0", "netstandard2.0")]
-        public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file(string appTargetFramework, string libraryTargetFramework)
+        [InlineData("net46", "netstandard1.3", false)]
+        [InlineData("netcoreapp1.1", "netstandard1.3", false)]
+        [InlineData("netcoreapp2.0", "netstandard2.0", false)]
+        [InlineData("netcoreapp2.0", "netstandard2.0", true)]
+        public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file(string appTargetFramework, string libraryTargetFramework, bool withoutCopyingRefs)
         {
             if (appTargetFramework == "net46" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -52,11 +53,17 @@ namespace Microsoft.NET.Publish.Tests
             };
 
             testProject.AdditionalProperties["PreserveCompilationContext"] = "true";
+
+            if (withoutCopyingRefs)
+            {
+                testProject.AdditionalProperties["PreserveCompilationReferences"] = "false";
+            }
+
             testProject.ReferencedProjects.Add(testLibraryProject);
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "9.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("System.Data.SqlClient", "4.4.3"));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework + withoutCopyingRefs);
 
             testAsset.Restore(Log, "TestApp");
 
@@ -76,11 +83,19 @@ namespace Microsoft.NET.Publish.Tests
                 "Newtonsoft.Json.dll"});
 
             var refsDirectory = new DirectoryInfo(Path.Combine(publishDirectory.FullName, "refs"));
-            // Should have compilation time assemblies
-            refsDirectory.Should().HaveFile("System.IO.dll");
-            // Libraries in which lib==ref should be deduped
-            refsDirectory.Should().NotHaveFile("TestLibrary.dll");
-            refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+
+            if (withoutCopyingRefs)
+            {
+                refsDirectory.Should().NotExist();
+            }
+            else
+            {
+                // Should have compilation time assemblies
+                refsDirectory.Should().HaveFile("System.IO.dll");
+                // Libraries in which lib==ref should be deduped
+                refsDirectory.Should().NotHaveFile("TestLibrary.dll");
+                refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+            }
 
             using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
             {
