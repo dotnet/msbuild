@@ -117,6 +117,15 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
+                    IEnumerable<ProjectContext.RuntimeFramework> runtimeFrameworksToUse = projectContext.RuntimeFrameworks;
+                    if (runtimeFrameworksToUse.Count() > 1)
+                    {
+                        //  If there are multiple runtime frameworks, then exclude Microsoft.NETCore.App,
+                        //  as a workaround for https://github.com/dotnet/core-setup/issues/4947
+                        runtimeFrameworksToUse = runtimeFrameworksToUse.Where(
+                            rf => !rf.Name.Equals("Microsoft.NETCore.App", StringComparison.InvariantCultureIgnoreCase));
+                    }
+
                     foreach (var platformLibrary in projectContext.RuntimeFrameworks)
                     {
                         RuntimeConfigFramework framework = new RuntimeConfigFramework();
