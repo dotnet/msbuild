@@ -248,7 +248,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        string GetBestRuntimeIdentifier(string targetRuntimeIdentifier, string availableRuntimeIdentifiers, out bool wasInGraph)
+        private string GetBestRuntimeIdentifier(string targetRuntimeIdentifier, string availableRuntimeIdentifiers, out bool wasInGraph)
         {
             var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
             var bestRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph,
@@ -257,15 +257,14 @@ namespace Microsoft.NET.Build.Tasks
                 out wasInGraph);
 
             return bestRuntimeIdentifier;
-            
         }
 
-        string GetPackPath(string name, string version)
+        private string GetPackPath(string name, string version)
         {
             return Path.Combine(TargetingPackRoot, name, version);
         }
 
-        static Version NormalizeVersion(Version version)
+        private static Version NormalizeVersion(Version version)
         {
             if (version.Revision == 0)
             {
@@ -282,7 +281,7 @@ namespace Microsoft.NET.Build.Tasks
             return version;
         }
 
-        class KnownFrameworkReference
+        private class KnownFrameworkReference
         {
             ITaskItem _item;
             public KnownFrameworkReference(ITaskItem item)

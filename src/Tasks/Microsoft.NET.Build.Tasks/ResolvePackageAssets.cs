@@ -1145,14 +1145,14 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            private void WriteCopyLocalMetadata(LockFileTargetLibrary package, string assetFileName, string assetType, string destinationSubDirectory = null)
+            private void WriteCopyLocalMetadata(LockFileTargetLibrary package, string assetsFileName, string assetType, string destinationSubDirectory = null)
             {
                 WriteMetadata(MetadataKeys.CopyLocal, "true");
                 WriteMetadata(
                     MetadataKeys.DestinationSubPath,
                     string.IsNullOrEmpty(destinationSubDirectory) ?
-                        assetFileName :
-                        Path.Combine(destinationSubDirectory, assetFileName));
+                        assetsFileName :
+                        Path.Combine(destinationSubDirectory, assetsFileName));
                 if (!string.IsNullOrEmpty(destinationSubDirectory))
                 {
                     WriteMetadata(MetadataKeys.DestinationSubDirectory, destinationSubDirectory);

@@ -96,7 +96,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GetPackageDirectory
       Items="@(TargetingPack)"
       ProjectPath="$(MSBuildProjectFullPath)"
-      PackageFolders="@(AssetFilePackageFolder)">
+      PackageFolders="@(AssetsFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedTargetingPack" />
       
@@ -109,8 +109,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Reference Include="%(ResolvedTargetingPack.Path)\ref\netcoreapp3.0\*.dll">
         <ExternallyResolved>true</ExternallyResolved>
         
-        <!-- TODO: Work out what metadata we should use here to display these references grouped under the targeting pack
-             in solution explorer.  These metadata values are based on what PCLs were using. -->
+        <!-- TODO: Once we work out what metadata we should use here to display these references grouped under the targeting pack
+             in solution explorer, set that metadata here.  These metadata values are based on what PCLs were using.
+             https://github.com/dotnet/sdk/issues/2802 -->
         <WinMDFile>false</WinMDFile>
         <Private>false</Private>
         <ReferenceGroupingDisplayName>.NET Core</ReferenceGroupingDisplayName>
@@ -128,7 +129,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GetPackageDirectory
       Items="@(AppHostPack)"
       ProjectPath="$(MSBuildProjectFullPath)"
-      PackageFolders="@(AssetFilePackageFolder)">
+      PackageFolders="@(AssetsFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedAppHostPack" />
 
