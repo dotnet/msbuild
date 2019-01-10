@@ -102,7 +102,7 @@ namespace Microsoft.NET.TestFramework
             {
                 if (!string.IsNullOrEmpty(projectName))
                 {
-                    if (!projectName.Equals(System.IO.Path.GetFileNameWithoutExtension(path), StringComparison.InvariantCultureIgnoreCase))
+                    if (!projectName.Equals(System.IO.Path.GetFileNameWithoutExtension(path), StringComparison.OrdinalIgnoreCase))
                     {
                         return;
                     }

@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tasks
                     platformManifests.Add(new TaskItem(platformManifestPath));
                 }
 
-                if (targetingPack.ItemSpec.Equals("Microsoft.NETCore.App", StringComparison.InvariantCultureIgnoreCase))
+                if (targetingPack.ItemSpec.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
                 {
                     //  Hardcode this for now.  Load this from the targeting pack once we have "real" targeting packs
                     //  https://github.com/dotnet/cli/issues/10581
