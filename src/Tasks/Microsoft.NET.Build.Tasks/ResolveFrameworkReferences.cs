@@ -100,6 +100,10 @@ namespace Microsoft.NET.Build.Tasks
 
                     //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                     TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
+                    targetingPack.SetMetadata(MetadataKeys.PackageName, knownFrameworkReference.TargetingPackName);
+                    targetingPack.SetMetadata(MetadataKeys.PackageVersion, knownFrameworkReference.TargetingPackVersion);
+                    targetingPack.SetMetadata(MetadataKeys.RelativePath, "");
+
                     string targetingPackPath = null;
                     if (!string.IsNullOrEmpty(TargetingPackRoot))
                     {
@@ -107,7 +111,8 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     if (targetingPackPath != null && Directory.Exists(targetingPackPath))
                     {
-                        targetingPack.SetMetadata("Path", targetingPackPath);
+                        targetingPack.SetMetadata(MetadataKeys.Path, targetingPackPath);
+                        targetingPack.SetMetadata(MetadataKeys.PackageDirectory, targetingPackPath);
                     }
                     else
                     {
@@ -116,10 +121,6 @@ namespace Microsoft.NET.Build.Tasks
                         packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
 
                         packagesToDownload.Add(packageToDownload);
-
-                        targetingPack.SetMetadata(MetadataKeys.PackageName, knownFrameworkReference.TargetingPackName);
-                        targetingPack.SetMetadata(MetadataKeys.PackageVersion, knownFrameworkReference.TargetingPackVersion);
-                        targetingPack.SetMetadata(MetadataKeys.RelativePath, "");
                     }
 
                     targetingPacks.Add(targetingPack);

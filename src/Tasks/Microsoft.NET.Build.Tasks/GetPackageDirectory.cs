@@ -8,8 +8,8 @@ using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    //  Locates the root NuGet package directory for each of the input items that has PackageName and PackageVersion
-    //  metadata specified
+    //  Locates the root NuGet package directory for each of the input items that has PackageName and PackageVersion,
+    //  but not PackageDirectory metadata specified
     public class GetPackageDirectory : TaskBase
     {
         public ITaskItem[] Items { get; set; }
@@ -35,7 +35,8 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     string packageName = item.GetMetadata(MetadataKeys.PackageName);
                     string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
-                    if (!string.IsNullOrEmpty(packageName) && !string.IsNullOrEmpty(packageVersion))
+                    if (!string.IsNullOrEmpty(packageName) && !string.IsNullOrEmpty(packageVersion)
+                        && string.IsNullOrEmpty(item.GetMetadata(MetadataKeys.PackageDirectory)))
                     {
                         var newItem = new TaskItem(item);
 

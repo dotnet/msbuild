@@ -90,6 +90,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
   <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="ResolveTargetingPackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <Target Name="ResolveTargetingPacks" DependsOnTargets="ResolvePackageAssets">
 
@@ -106,24 +107,19 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedTargetingPack>
         <Path Condition="'%(ResolvedTargetingPack.Path)' == ''">%(PackageDirectory)</Path>
       </ResolvedTargetingPack>
-      <Reference Include="%(ResolvedTargetingPack.Path)\ref\netcoreapp3.0\*.dll">
-        <ExternallyResolved>true</ExternallyResolved>
-        
-        <!-- TODO: Once we work out what metadata we should use here to display these references grouped under the targeting pack
-             in solution explorer, set that metadata here.  These metadata values are based on what PCLs were using.
-             https://github.com/dotnet/sdk/issues/2802 -->
-        <WinMDFile>false</WinMDFile>
-        <Private>false</Private>
-        <ReferenceGroupingDisplayName>.NET Core</ReferenceGroupingDisplayName>
-        <ReferenceGrouping>%(ResolvedTargetingPack.Identity)</ReferenceGrouping>
-        <ResolvedFrom>ResolveTargetingPacks</ResolvedFrom>
-        <IsSystemReference>True</IsSystemReference>
-      </Reference>
-    </ItemGroup>
       
+    </ItemGroup>
+
+    <ResolveTargetingPackAssets ResolvedTargetingPacks="@(ResolvedTargetingPack)">
+      <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
+      <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
+      <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
+      <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
+      
+    </ResolveTargetingPackAssets>
+    
     <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(SelfContained)' != 'true'">
-      <PackageConflictPlatformManifests Include="%(ResolvedTargetingPack.Path)\build\netcoreapp3.0\Microsoft.NETCore.App.PlatformManifest.txt"
-                                        Condition="Exists('%(ResolvedTargetingPack.Path)\build\netcoreapp3.0\Microsoft.NETCore.App.PlatformManifest.txt')"/>
+      <PackageConflictPlatformManifests Include="@(PlatformManifestsFromTargetingPacks)" />
     </ItemGroup>
 
     <GetPackageDirectory
