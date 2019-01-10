@@ -70,8 +70,4 @@
       https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json
     </RestoreSources>
   </PropertyGroup>
-  <!--Package names-->
-  <PropertyGroup>
-    <MicrosoftNETSdkWebPackage>Microsoft.NET.Sdk.Web</MicrosoftNETSdkWebPackage>
-  </PropertyGroup>
 </Project>
