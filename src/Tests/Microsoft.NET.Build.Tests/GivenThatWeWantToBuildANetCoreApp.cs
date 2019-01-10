@@ -15,6 +15,7 @@ using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Linq;
 using System.Text;
@@ -294,6 +295,45 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("Hello World!");
         }
 
+        [WindowsOnlyTheory]
+        [InlineData("x86")]
+        [InlineData("x64")]
+        [InlineData("AnyCPU")]
+        [InlineData("")]
+        public void It_uses_an_apphost_based_on_platform_target(string target)
+        {
+            var targetFramework = "netcoreapp3.0";
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource();
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute(new string[] {
+                    "/restore",
+                    $"/p:TargetFramework={targetFramework}",
+                    $"/p:PlatformTarget={target}",
+                    $"/p:NETCoreSdkRuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(targetFramework)}"
+                })
+                .Should()
+                .Pass();
+
+            var apphostPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, "HelloWorld.exe");
+            if (target == "x86")
+            {
+                IsPE32(apphostPath).Should().BeTrue();
+            }
+            else if (target == "x64")
+            {
+                IsPE32(apphostPath).Should().BeFalse();
+            }
+            else
+            {
+                IsPE32(apphostPath).Should().Be(!Environment.Is64BitProcess);
+            }
+        }
+
         [Theory]
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp2.1")]
@@ -570,6 +610,14 @@ public static class Program
                 .Select(Path.GetFileName)
                 .Should()
                 .BeEquivalentTo("netcoreapp1.1");
+        }
+
+        private static bool IsPE32(string path)
+        {
+            using (var reader = new PEReader(File.OpenRead(path)))
+            {
+                return reader.PEHeaders.PEHeader.Magic == PEMagic.PE32;
+            }
         }
     }
 }
