@@ -32,7 +32,7 @@
     <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
     <NuGetProjectModelPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelPackageVersion>
     <MicrosoftBuildNuGetSdkResolverPackageVersion>$(NuGetBuildTasksPackageVersion)</MicrosoftBuildNuGetSdkResolverPackageVersion>
-    <MicrosoftNETTestSdkPackageVersion>15.9.0</MicrosoftNETTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>16.0.0-preview-20181205-02</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftTestPlatformCLIPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformCLIPackageVersion>
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
     <MicrosoftDotNetCliUtilsPackageVersion>2.2.100-refac-20180613-1</MicrosoftDotNetCliUtilsPackageVersion>
