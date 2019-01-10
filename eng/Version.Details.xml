@@ -25,10 +25,6 @@
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
       <Sha></Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview-20181219-2288798">
-      <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha></Sha>
-    </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-alpha-27309-1">
       <Uri>https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</Uri>
       <Sha>b40797a2c88df726c9ad54b5f2383972fdca821d</Sha>
@@ -39,6 +35,10 @@
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="15.9.0">
       <Uri>https://github.com/microsoft/vstest</Uri>
+      <Sha></Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview.18621.22">
+      <Uri>https://github.com/aspnet/websdk</Uri>
       <Sha></Sha>
     </Dependency>
   </ProductDependencies>
