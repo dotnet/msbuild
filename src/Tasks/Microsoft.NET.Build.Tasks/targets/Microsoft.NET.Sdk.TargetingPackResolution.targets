@@ -92,7 +92,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveTargetingPackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
-  <Target Name="ResolveTargetingPacks" DependsOnTargets="ResolvePackageAssets">
+  <Target Name="ResolveTargetingPacks" DependsOnTargets="ResolvePackageAssets"
+          Condition="'@(TargetingPack)' != ''">
 
     <GetPackageDirectory
       Items="@(TargetingPack)"
