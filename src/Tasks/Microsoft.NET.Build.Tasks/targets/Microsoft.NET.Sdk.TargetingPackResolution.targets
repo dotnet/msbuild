@@ -142,4 +142,32 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
   </Target>
+
+  <!--
+    Adds metadata so the SDK will generate the UserSecretsIdAttribute.
+    
+    This is associated with ASP.NET Core, but may be used in projects that don't use the Web SDK (especially test projects).
+    So it is in the base .NET SDK.  (It used to be in the Microsoft.AspNetCore.App package, but now that that's a targeting
+    pack we don't support importing build logic from it directly).
+
+    If GeneratedUserSecretsAttributeFile is set, that means Microsoft.Extensions.Configuration.UserSecrets 2.1
+    or earlier was referenced as a package. This didn't use the AssemblyAttribute item group, so we cannot
+    avoid duplicate AssemblyAttribute items without skipping this target altogether..
+  -->
+  <Target Name="_GetUserSecretsAssemblyAttribute"
+          BeforeTargets="GetAssemblyAttributes"
+          Condition=" '$(UserSecretsId)' != '' AND '$(GenerateUserSecretsAttribute)' != 'false' AND '$(GeneratedUserSecretsAttributeFile)' == '' ">
+
+    <!--
+      If the Microsoft.Extensions.Configuration.UserSecrets package 2.2 or higher is referenced directly,
+      it will also add an AssemblyAttribute item. Since this attribute only allows one per assembly, do not
+      duplicate the item.
+    -->
+     <ItemGroup Condition=" @(AssemblyAttribute->WithMetadataValue('Identity', 'Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute')->Count()) == 0 ">
+      <AssemblyAttribute Include="Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute">
+        <_Parameter1>$(UserSecretsId.Trim())</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
 </Project>
