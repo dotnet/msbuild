@@ -5,9 +5,9 @@
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>8ab404143cf3e53a0778a072a95ba5028ff8a7d8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview.19058.3">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview.19059.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>929df47b1be83c15ff4bd2e147df48e4db3d5982</Sha>
+      <Sha>674b4ae3250f294d3c922a425b44a1731dcff207</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.0.0-preview.370">
       <Uri>https://github.com/microsoft/build</Uri>
@@ -25,11 +25,7 @@
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
       <Sha></Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview-20181219-2288798">
-      <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha></Sha>
-    </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-alpha-27309-3">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-alpha-27309-1">
       <Uri>https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</Uri>
       <Sha>63610380c84a0d348c63651e9194aac5a87738b0</Sha>
     </Dependency>
@@ -41,11 +37,15 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha></Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview.18621.22">
+      <Uri>https://github.com/aspnet/websdk</Uri>
+      <Sha></Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19058.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19058.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>35ce15432d5ae2faa563ad0ba99aff49f8e28130</Sha>
+      <Sha>3220be53ac764d9ee160b0bc64baa492af219aa7</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

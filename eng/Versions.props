@@ -13,7 +13,7 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <MicrosoftDotNetCliRuntimePackageVersion>3.0.100-preview.19057.4</MicrosoftDotNetCliRuntimePackageVersion>
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview.19058.3</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-preview.19059.1</MicrosoftNETSdkPackageVersion>
     <MicrosoftBuildPackageVersion>16.0.0-preview.370</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
@@ -22,7 +22,7 @@
     <MicrosoftFSharpCompilerPackageVersion>10.4.0-rtm-181207-02</MicrosoftFSharpCompilerPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>3.0.0-beta2-19054-03</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview-19057-06</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkWebPackageVersion>3.0.100-preview-20181219-2288798</MicrosoftNETSdkWebPackageVersion>
+    <MicrosoftNETSdkWebPackageVersion>3.0.100-preview.18621.22</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-alpha-27309-3</MicrosoftNETSdkWindowsDesktopPackageVersion>
