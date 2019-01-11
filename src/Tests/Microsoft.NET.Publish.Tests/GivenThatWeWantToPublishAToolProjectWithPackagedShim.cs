@@ -16,7 +16,7 @@ using System.Runtime.CompilerServices;
 using System;
 using NuGet.Frameworks;
 
-namespace Microsoft.NET.ToolPack.Tests
+namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAToolProjectWithPackagedShim : SdkTest
     {

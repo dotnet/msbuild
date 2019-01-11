@@ -29,6 +29,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="Microsoft.NET.Sdk.DefaultItems.targets" />
 
+  <Import Project="Microsoft.NET.Sdk.TargetingPackResolution.targets" />
+
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -281,18 +283,18 @@ Copyright (c) .NET Foundation. All rights reserved.
      -->
   <UsingTask TaskName="CreateAppHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="_CreateAppHost"
-          Inputs="@(IntermediateAssembly);@(_NativeRestoredAppHostNETCore)"
-          Outputs="@(_NativeAppHostNETCore)"
+          Inputs="@(IntermediateAssembly);$(AppHostSourcePath)"
+          Outputs="$(AppHostIntermediatePath)"
           DependsOnTargets="_GetAppHostPaths;CoreCompile"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and
-                     '@(_NativeAppHostNETCore)' != '' and
+                     '$(AppHostSourcePath)' != '' and
                      Exists('@(IntermediateAssembly)') and
-                     Exists('@(_NativeRestoredAppHostNETCore)')">
+                     Exists('$(AppHostSourcePath)')">
     <PropertyGroup>
       <_UseWindowsGraphicalUserInterface Condition="($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win'))) and '$(OutputType)'=='WinExe'">true</_UseWindowsGraphicalUserInterface>
     </PropertyGroup>
-    <CreateAppHost AppHostSourcePath="@(_NativeRestoredAppHostNETCore)"
-                   AppHostDestinationPath="@(_NativeAppHostNETCore->'%(FullPath)')"
+    <CreateAppHost AppHostSourcePath="$(AppHostSourcePath)"
+                   AppHostDestinationPath="$(AppHostIntermediatePath)"
                    AppBinaryName="$(AssemblyName)$(TargetExt)"
                    IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
                    WindowsGraphicalUserInterface="$(_UseWindowsGraphicalUserInterface)" />
@@ -302,20 +304,26 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         _GetAppHostPaths
 
-    Gets the path to the restored apphost, and if the restored apphost
-    was present, computes the path for the destination apphost.
+    Gets the path to apphost (restored via packages or in an apphost pack),
+    and computes the path for the destination apphost.
     ============================================================
      -->
   <Target Name="_GetAppHostPaths"
           DependsOnTargets="ResolvePackageAssets"
           Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true'">
-    <ItemGroup>
-      <_NativeAppHostNETCore Include="@(_NativeRestoredAppHostNETCore->'$(IntermediateOutputPath)$(AssemblyName)%(Extension)')" />
-    </ItemGroup>
 
-    <NETSdkError Condition="'@(_NativeAppHostNETCore->Count())' > 1"
-                 ResourceName="MultipleFilesResolved"
-                 FormatArguments="$(_DotNetAppHostExecutableName)" />
+    <NETSdkError Condition="'@(_NativeRestoredAppHostNETCore->Count())' > 1"
+             ResourceName="MultipleFilesResolved"
+             FormatArguments="$(_DotNetAppHostExecutableName)" />
+
+    <PropertyGroup>
+      <!-- AppHostSourcePath will be set from ResolveFrameworkReferences if not using the apphost from the assets file -->
+      <AppHostSourcePath Condition="'$(UseAppHostFromAssetsFile)' == 'true'">@(_NativeRestoredAppHostNETCore)</AppHostSourcePath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(UseAppHostFromAssetsFile)' == 'false' Or '@(_NativeRestoredAppHostNETCore)' != ''">
+      <AppHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)$(AssemblyName)$(_NativeExecutableExtension)'))</AppHostIntermediatePath>
+    </PropertyGroup>
+    
   </Target>
 
   <!--
@@ -331,12 +339,20 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
     <!-- Fallback to renaming the dotnet host if there is no apphost for self-contained builds. -->
-    <ItemGroup Condition="'@(_NativeAppHostNETCore)' == '' and '$(SelfContained)' == 'true'">
-      <_NativeAppHostNETCore Include="@(NativeCopyLocalItems)"
-                             Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostExecutableName)'" />
+    <PropertyGroup Condition="'$(AppHostIntermediatePath)' == '' and '$(SelfContained)' == 'true'">
+      <_CopyAndRenameDotnetHost Condition="'$(_CopyAndRenameDotnetHost)' == ''">true</_CopyAndRenameDotnetHost>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(_CopyAndRenameDotnetHost)' == 'true'">
+      <None Include="@(NativeCopyLocalItems)"
+            Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostExecutableName)'">
+        <Link>$(AssemblyName)$(_NativeExecutableExtension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </None>
     </ItemGroup>
 
-    <ItemGroup Condition="'@(_NativeAppHostNETCore)' != ''">
+
+    <ItemGroup Condition="'$(AppHostIntermediatePath)' != '' or '$(_CopyAndRenameDotnetHost)' == 'true'">
       <!--
         If not copying local lock file assemblies, copy the host policy and host fxr libraries for self-contained builds.
         This is required to allow the host to activate in self-contained mode.
@@ -349,8 +365,9 @@ Copyright (c) .NET Foundation. All rights reserved.
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>Never</CopyToPublishDirectory>
       </None>
-
-      <None Include="@(_NativeAppHostNETCore)">
+    </ItemGroup>
+    <ItemGroup Condition="'$(AppHostIntermediatePath)' != ''">
+      <None Include="$(AppHostIntermediatePath)">
         <Link>$(AssemblyName)$(_NativeExecutableExtension)</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

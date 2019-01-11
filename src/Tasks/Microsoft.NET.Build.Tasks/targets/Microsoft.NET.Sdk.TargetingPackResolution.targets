@@ -1,0 +1,174 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.TargetingPackResolution.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project>
+  <PropertyGroup>
+    <ResolveAssemblyReferencesDependsOn>
+      $(ResolveAssemblyReferencesDependsOn);
+      ResolveTargetingPacks;
+    </ResolveAssemblyReferencesDependsOn>
+  </PropertyGroup>
+
+
+  <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
+    <ItemGroup>
+      <!-- The KnownFrameworkReference items that this target expects will be defined in the bundled
+           versions .props file. They should look something like this:
+           
+    <KnownFrameworkReference Include="Microsoft.NETCore.App"
+                              TargetFramework="netcoreapp3.0"
+                              RuntimeFrameworkName="Microsoft.NETCore.App"
+                              DefaultRuntimeFrameworkVersion="3.0.0-preview-27214-02"
+                              LatestRuntimeFrameworkVersion="3.0.0-preview-27214-02"
+                              TargetingPackName="Microsoft.NETCore.App"
+                              TargetingPackVersion="3.0.0-preview-27122-01"
+                              AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
+                              AppHostRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
+                              RuntimePackNamePatterns="runtime.**RID**.Microsoft.NETCore.App;runtime.**RID**.Microsoft.NETCore.DotNetHostResolver;runtime.**RID**.Microsoft.NETCore.DotNetHostPolicy"
+                              RuntimePackRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
+                              />
+      -->
+
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == ''">
+      <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
+      <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
+    </PropertyGroup>
+
+    <ResolveFrameworkReferences FrameworkReferences="@(FrameworkReference)"
+                                KnownFrameworkReferences="@(KnownFrameworkReference)"
+                                TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+                                TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
+                                TargetingPackRoot="$(NetCoreTargetingPackRoot)"
+                                AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
+                                RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                                SelfContained="$(SelfContained)"
+                                RuntimeIdentifier="$(RuntimeIdentifier)"
+                                DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)">
+
+      <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
+      <Output TaskParameter="PackagesToReference" ItemName="PackageReference" />
+      <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
+      <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
+      <Output TaskParameter="AppHost" ItemName="AppHostPack" />
+
+      <Output TaskParameter="UnresolvedFrameworkReferences" ItemName="_UnresolvedFrameworkReference" />
+
+    </ResolveFrameworkReferences>
+
+    <ItemGroup>
+      <PackageReference Include="@(PackageReferenceToAdd)"
+                        IsImplicitlyDefined="true"
+                        PrivateAssets="all"
+                        ExcludeAssets="all" />
+    </ItemGroup>
+
+  </Target>
+
+  <UsingTask TaskName="ReportUnknownFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!-- Report unresolved FrameworkReferences in a separate target so that the error is only reported on Build, not Restore. -->
+  <Target Name="ReportUnresolvedFrameworkReferences" DependsOnTargets="ResolveFrameworkReferences"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'@(_UnresolvedFrameworkReference)' != ''">
+
+    <!-- Use a custom task in order to report multiple errors instead of stopping on the first one (which would happen if we batched) -->
+    <ReportUnknownFrameworkReferences UnresolvedFrameworkReferences="@(_UnresolvedFrameworkReference)"/>
+
+  </Target>
+
+
+  <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="ResolveTargetingPackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  
+  <Target Name="ResolveTargetingPacks" DependsOnTargets="ResolvePackageAssets"
+          Condition="'@(TargetingPack)' != ''">
+
+    <GetPackageDirectory
+      Items="@(TargetingPack)"
+      ProjectPath="$(MSBuildProjectFullPath)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedTargetingPack" />
+      
+    </GetPackageDirectory>    
+    
+    <ItemGroup>
+      <ResolvedTargetingPack>
+        <Path Condition="'%(ResolvedTargetingPack.Path)' == ''">%(PackageDirectory)</Path>
+      </ResolvedTargetingPack>
+      
+    </ItemGroup>
+
+    <ResolveTargetingPackAssets ResolvedTargetingPacks="@(ResolvedTargetingPack)">
+      <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
+      <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
+      <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
+      <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
+      
+    </ResolveTargetingPackAssets>
+    
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(SelfContained)' != 'true'">
+      <PackageConflictPlatformManifests Include="@(PlatformManifestsFromTargetingPacks)" />
+    </ItemGroup>
+
+    <GetPackageDirectory
+      Items="@(AppHostPack)"
+      ProjectPath="$(MSBuildProjectFullPath)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedAppHostPack" />
+
+    </GetPackageDirectory>
+
+    <ItemGroup>
+      <ResolvedAppHostPack>
+        <Path Condition="'%(ResolvedAppHostPack.Path)' == ''">%(PackageDirectory)\%(RelativePath)</Path>
+      </ResolvedAppHostPack>      
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(ResolvedAppHostPack)' != '' And '$(AppHostSourcePath)' == ''">
+      <AppHostSourcePath>@(ResolvedAppHostPack->'%(Path)')</AppHostSourcePath>
+    </PropertyGroup>
+
+  </Target>
+
+  <!--
+    Adds metadata so the SDK will generate the UserSecretsIdAttribute.
+    
+    This is associated with ASP.NET Core, but may be used in projects that don't use the Web SDK (especially test projects).
+    So it is in the base .NET SDK.  (It used to be in the Microsoft.AspNetCore.App package, but now that that's a targeting
+    pack we don't support importing build logic from it directly).
+
+    If GeneratedUserSecretsAttributeFile is set, that means Microsoft.Extensions.Configuration.UserSecrets 2.1
+    or earlier was referenced as a package. This didn't use the AssemblyAttribute item group, so we cannot
+    avoid duplicate AssemblyAttribute items without skipping this target altogether..
+  -->
+  <Target Name="_GetUserSecretsAssemblyAttribute"
+          BeforeTargets="GetAssemblyAttributes"
+          Condition=" '$(UserSecretsId)' != '' AND '$(GenerateUserSecretsAttribute)' != 'false' AND '$(GeneratedUserSecretsAttributeFile)' == '' ">
+
+    <!--
+      If the Microsoft.Extensions.Configuration.UserSecrets package 2.2 or higher is referenced directly,
+      it will also add an AssemblyAttribute item. Since this attribute only allows one per assembly, do not
+      duplicate the item.
+    -->
+     <ItemGroup Condition=" @(AssemblyAttribute->WithMetadataValue('Identity', 'Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute')->Count()) == 0 ">
+      <AssemblyAttribute Include="Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute">
+        <_Parameter1>$(UserSecretsId.Trim())</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
+</Project>

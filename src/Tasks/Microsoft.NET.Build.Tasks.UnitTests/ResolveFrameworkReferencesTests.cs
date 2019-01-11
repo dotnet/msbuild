@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using FluentAssertions;
 using Xunit;
@@ -36,7 +37,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             task.Execute().Should().BeTrue();
 
-            task.PackageReferencesToAdd.Length.Should().Be(1);
+            task.PackagesToDownload.Length.Should().Be(1);
 
             task.RuntimeFrameworks.Length.Should().Be(1);
             task.RuntimeFrameworks[0].ItemSpec.Should().Be("Microsoft.AspNetCore.App");
@@ -73,7 +74,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             task.Execute().Should().BeTrue();
 
-            task.PackageReferencesToAdd.Should().BeNull();
+            task.PackagesToDownload.Should().BeNull();
             task.RuntimeFrameworks.Should().BeNull();
 
             task.UnresolvedFrameworkReferences.Length.Should().Be(1);

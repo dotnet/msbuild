@@ -91,6 +91,28 @@ namespace Microsoft.NET.TestFramework
             return this;
         }
 
+        public TestAsset WithTargetFramework(string targetFramework, string projectName = null)
+        {
+            if (string.IsNullOrEmpty(targetFramework))
+            {
+                return this;
+            }
+
+            return WithProjectChanges((path, project) =>
+            {
+                if (!string.IsNullOrEmpty(projectName))
+                {
+                    if (!projectName.Equals(System.IO.Path.GetFileNameWithoutExtension(path), StringComparison.OrdinalIgnoreCase))
+                    {
+                        return;
+                    }
+                }
+
+                var ns = project.Root.Name.Namespace;
+                project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single().SetValue(targetFramework);
+            });
+        }
+
         public TestAsset WithProjectChanges(Action<XDocument> xmlAction)
         {
             return WithProjectChanges((path, project) => xmlAction(project));
