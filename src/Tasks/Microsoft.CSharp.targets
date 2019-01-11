@@ -25,6 +25,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
    </PropertyGroup>
 
+   
+  <ItemGroup>
+      <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+      <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+      <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
+  </ItemGroup>
    <!--
         In VS 2010 SP1 and VS 2012, both supported for asset compatibility, the MSBuild installed 
         as part of them did not enforce using the local ToolsVersion (4.0) in all cases, but instead 
