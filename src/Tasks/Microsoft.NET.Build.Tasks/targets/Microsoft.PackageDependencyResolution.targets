@@ -209,7 +209,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
     <PropertyGroup Condition="'$(UseAppHostFromAssetsFile)' == ''">
       <UseAppHostFromAssetsFile>true</UseAppHostFromAssetsFile>
-      <DefaultAppHostRuntimeIdentifierFromAssetsFile>$(DefaultAppHostRuntimeIdentifier)</DefaultAppHostRuntimeIdentifierFromAssetsFile>
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(EnsureRuntimePackageDependencies)' == ''
@@ -237,7 +236,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       EmitAssetsLogMessages="$(EmitAssetsLogMessages)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
-      DefaultAppHostRuntimeIdentifier="$(DefaultAppHostRuntimeIdentifierFromAssetsFile)"
       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
       RuntimeFrameworks="@(RuntimeFramework)"
       IsSelfContained="$(SelfContained)"

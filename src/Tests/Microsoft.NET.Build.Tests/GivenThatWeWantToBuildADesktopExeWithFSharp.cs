@@ -62,7 +62,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_can_customize_the_apphost()
         {
-            var targetFramework = "netcoreapp2.1";
+            var targetFramework = "netcoreapp3.0";
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorldFS")
                 .WithSource()
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
-                .Execute()
+                .Execute("/p:CopyLocalLockFileAssemblies=false")
                 .Should()
                 .Pass();
 
