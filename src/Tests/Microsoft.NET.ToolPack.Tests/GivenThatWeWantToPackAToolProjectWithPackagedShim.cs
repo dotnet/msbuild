@@ -235,7 +235,7 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Generate_shims_runs_incrementaly(bool multiTarget)
+        public void Generate_shims_runs_incrementally(bool multiTarget)
         {
             TestAsset helloWorldAsset = SetUpHelloWorld(multiTarget);
 

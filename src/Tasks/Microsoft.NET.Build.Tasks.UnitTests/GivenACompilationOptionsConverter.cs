@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                             { "PlatformTarget", "x64" },
                             { "AllowUnsafeBlocks", "true" },
                             { "TreatWarningsAsErrors", "false" },
-                            //{ "Optimize", "" }, Explicitly not setting Optmize
+                            //{ "Optimize", "" }, Explicitly not setting Optimize
                             { "AssemblyOriginatorKeyFile", "../keyfile.snk" },
                             { "DelaySign", "" },
                             { "PublicSign", "notFalseOrTrue" },
@@ -75,7 +75,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                             { "PlatformTarget", "x64" },
                             { "AllowUnsafeBlocks", "true" },
                             { "TreatWarningsAsErrors", "false" },
-                            //{ "Optimize", "" }, Explicitly not setting Optmize
+                            //{ "Optimize", "" }, Explicitly not setting Optimize
                             { "AssemblyOriginatorKeyFile", "../keyfile.snk" },
                             { "DelaySign", "" },
                             { "PublicSign", "notFalseOrTrue" },

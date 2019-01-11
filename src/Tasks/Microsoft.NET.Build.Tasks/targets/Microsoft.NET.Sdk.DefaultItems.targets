@@ -117,11 +117,51 @@ Copyright (c) .NET Foundation. All rights reserved.
                       Condition="'$(DisableImplicitFrameworkReferences)' == 'true'"
                       AllowExplicitVersion="true"/>
   </ItemGroup>
-  
-  <UsingTask TaskName="ApplyImplicitVersions" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
+  <UsingTask TaskName="ApplyImplicitVersions" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="CheckIfPackageReferenceShouldBeFrameworkReference" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="UpdateAspNetToFrameworkReference"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+
+    <CheckIfPackageReferenceShouldBeFrameworkReference
+          PackageReferences="@(PackageReference)"
+          FrameworkReferences="@(FrameworkReference)"
+          PackageReferenceToReplace="Microsoft.AspNetCore.All"
+          FrameworkReferenceToUse="Microsoft.AspNetCore.App">
+      <Output TaskParameter="ShouldRemovePackageReference" PropertyName="_ShouldRemoveAspNetCoreAll" />
+    </CheckIfPackageReferenceShouldBeFrameworkReference>
+
+    <!-- NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.
+         A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web. -->
+    <NETSdkError Condition="'$(_ShouldRemoveAspNetCoreAll)' == 'true'"
+                 ResourceName="AspNetCoreAllNotSupported" />
+
+    <CheckIfPackageReferenceShouldBeFrameworkReference
+      PackageReferences="@(PackageReference)"
+      FrameworkReferences="@(FrameworkReference)"
+      PackageReferenceToReplace="Microsoft.AspNetCore.App"
+      FrameworkReferenceToUse="Microsoft.AspNetCore.App">
+      <Output TaskParameter="ShouldRemovePackageReference" PropertyName="_ShouldRemoveAspNetCoreApp" />
+      <Output TaskParameter="ShouldAddFrameworkReference" PropertyName="_ShouldAddAspNetCoreAppFrameworkReference" />
+    </CheckIfPackageReferenceShouldBeFrameworkReference>
+
+    <ItemGroup>
+      <PackageReference Remove="Microsoft.AspNetCore.App" Condition="'$(_ShouldRemoveAspNetCoreApp)' == 'true'" />
+      <FrameworkReference Include="Microsoft.AspNetCore.App" Condition="'$(_ShouldAddAspNetCoreAppFrameworkReference)' == 'true'" />
+    </ItemGroup>
+    
+    <!-- NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher.
+         If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference
+         should be replaced with a FrameworkReference. -->
+
+    <NETSdkWarning Condition="'$(_ShouldRemoveAspNetCoreApp)' == 'true'"
+                   ResourceName="AspNetCoreUsesFrameworkReference" />
+    
+  </Target>
+  
   <Target Name="ApplyImplicitVersions" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences"
-          DependsOnTargets="CheckForImplicitPackageReferenceOverrides">
+          DependsOnTargets="UpdateAspNetToFrameworkReference;CheckForImplicitPackageReferenceOverrides">
     <ApplyImplicitVersions TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                            TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
                            PackageReferences="@(PackageReference)"
@@ -152,7 +192,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'@(SdkBuildWarning)' != ''">
     <NetSdkWarning FormattedText="%(SdkBuildWarning.Identity)" />
   </Target>
-  
+
   <!--
     Automatically add Link metadata to items of specific types if they are outside of the project folder and don't already have the Link metadata set.
     This will cause them to be shown in the Solution Explorer.  If an item has LinkBase metadata, the automatic Link will start with that value, and

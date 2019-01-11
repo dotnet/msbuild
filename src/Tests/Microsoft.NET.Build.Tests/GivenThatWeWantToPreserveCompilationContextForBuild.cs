@@ -21,8 +21,10 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [WindowsOnlyFact]
-        public void It_supports_copylocal_false_references()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_supports_copylocal_false_references(bool withoutCopyingRefs)
         {
             var testProject = new TestProject()
             {
@@ -34,6 +36,11 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties.Add("PreserveCompilationContext", "true");
 
+            if (withoutCopyingRefs)
+            { 
+                testProject.AdditionalProperties.Add("PreserveCompilationReferences", "false");
+            }
+
             var testReference = new TestProject()
             {
                 Name = "NetStandardLibrary",
@@ -44,8 +51,11 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.ReferencedProjects.Add(testReference);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(
+                testProject,
+                identifier: withoutCopyingRefs.ToString());
+
+            testAsset = testAsset.Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -57,8 +67,14 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
             // The "_ReferenceOnlyAssemblies" should be copied to the 'refs' directory, so they can be resolved at runtime
-            outputDirectory.Sub("refs")
-                .Should().OnlyHaveFiles(Net461ReferenceOnlyAssemblies);
+            if (withoutCopyingRefs)
+            {
+                outputDirectory.Sub("refs").Should().NotExist();
+            }
+            else
+            {
+                outputDirectory.Sub("refs").Should().OnlyHaveFiles(Net461ReferenceOnlyAssemblies);
+            }
 
             using (var depsJsonFileStream = File.OpenRead(Path.Combine(outputDirectory.FullName, $"{testProject.Name}.deps.json")))
             {

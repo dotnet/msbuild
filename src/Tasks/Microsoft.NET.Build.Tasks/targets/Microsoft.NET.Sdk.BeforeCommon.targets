@@ -61,7 +61,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Default settings for .NET Core and .NET Standard build logic -->
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == 'true'">
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
-    
+
     <!-- Assembly and file versions of runtime assets should be written to the deps.json by default, to support
          runtime minor version roll-forward: https://github.com/dotnet/core-setup/issues/3546 -->
     <IncludeFileVersionsInDependencyFile Condition="'$(IncludeFileVersionsInDependencyFile)' == ''">true</IncludeFileVersionsInDependencyFile>
@@ -69,15 +69,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Force .dll extension for .NETCoreApp and .NETStandard projects even if output type is exe. -->
     <TargetExt Condition="'$(TargetExt)' == ''">.dll</TargetExt>
 
-    <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core and .NETStandard projects -->
-    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">false</CopyLocalLockFileAssemblies>
-
     <!-- Disable the use of FrameworkPathOverride in Microsoft.Common.CurrentVersion.targets which can slow down evaluation.  FrameworkPathOverride
     is not needed for NETStandard or NETCore since references come from NuGet packages-->
     <EnableFrameworkPathOverride Condition="'$(EnableFrameworkPathOverride)' == ''">false</EnableFrameworkPathOverride>
   </PropertyGroup>
   
-  <!-- Regardless of platform, enable dependency file generation if PreserveCompilatioContext is set. -->
+  <!-- Regardless of platform, enable dependency file generation if PreserveCompilationContext is set. -->
   <PropertyGroup>
     <GenerateDependencyFile Condition="'$(GenerateDependencyFile)' == ''">$(PreserveCompilationContext)</GenerateDependencyFile>
   </PropertyGroup>

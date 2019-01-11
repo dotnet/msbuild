@@ -43,7 +43,7 @@
   <Target Name="PopulatePerformanceTestsFromGitHub" BeforeTargets="CoreCompile">
     <PropertyGroup>
       <PerformanceTestsRepoURL>https://github.com/dotnet/BuildPerformanceTestAssets</PerformanceTestsRepoURL>
-      <PerformanceTestsCommit>daf705c</PerformanceTestsCommit>
+      <PerformanceTestsCommit>c967e0f</PerformanceTestsCommit>
       <PerformanceTestsLocalDirectory>$(RepoRoot).perftestsource</PerformanceTestsLocalDirectory>
     </PropertyGroup>
 
