@@ -111,6 +111,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
   </PropertyGroup>
 
+  <!-- Only use the default apphost if building without a RID and without a deps file path (used by GenerateDeps.proj for CLI tools). -->
+  <PropertyGroup Condition="'$(DefaultAppHostRuntimeIdentifier)' == '' and
+                            '$(RuntimeIdentifier)' == '' and
+                            '$(UseAppHost)' == 'true' and
+                            '$(ProjectDepsFilePath)' == ''">
+    <DefaultAppHostRuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x64'">win-x64</DefaultAppHostRuntimeIdentifier>
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x86'">win-x86</DefaultAppHostRuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DefaultAppHostRuntimeIdentifier)' != '' and
+                            '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                            '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'">
+    <RuntimeIdentifiers>$(RuntimeIdentifiers);$(DefaultAppHostRuntimeIdentifier)</RuntimeIdentifiers>
+  </PropertyGroup>
+
   <Target Name="_CheckForUnsupportedAppHostUsage"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
