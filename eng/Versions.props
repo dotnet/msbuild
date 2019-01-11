@@ -25,7 +25,7 @@
     <MicrosoftNETSdkWebPackageVersion>3.0.100-preview.18621.22</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
-    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-alpha-27309-3</MicrosoftNETSdkWindowsDesktopPackageVersion>
+    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-preview-27310-7</MicrosoftNETSdkWindowsDesktopPackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <NuGetBuildTasksPackageVersion>5.0.0-preview1.5663</NuGetBuildTasksPackageVersion>
     <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
@@ -67,7 +67,8 @@
       https://dotnet.myget.org/F/dotnet-cli/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://dotnet.myget.org/F/vstest/api/v3/index.json;
-      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json
+      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-windowsdesktop/index.json
     </RestoreSources>
   </PropertyGroup>
 </Project>
