@@ -1456,6 +1456,14 @@ namespace Microsoft.Build.Globbing.Extensions
 }
 namespace Microsoft.Build.Graph
 {
+    [System.Runtime.CompilerServices.IsReadOnlyAttribute]
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct BuildData
+    {
+        public BuildData(System.Collections.Generic.IReadOnlyCollection<string> targets, System.Collections.Generic.IReadOnlyDictionary<string, string> globalProperties) { throw null;}
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> GlobalProperties { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyCollection<string> Targets { get { throw null; } }
+    }
     public sealed partial class ProjectGraph
     {
         public ProjectGraph(Microsoft.Build.Graph.ProjectGraphEntryPoint entryPoint) { }
@@ -1493,6 +1501,7 @@ namespace Microsoft.Build.Graph
         public Microsoft.Build.Execution.ProjectInstance ProjectInstance { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ProjectReferences { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ReferencingProjects { get { throw null; } }
+        public Microsoft.Build.Graph.BuildData ComputeBuildData(System.Collections.Generic.IReadOnlyCollection<string> targets) { throw null; }
     }
 }
 namespace Microsoft.Build.Logging
