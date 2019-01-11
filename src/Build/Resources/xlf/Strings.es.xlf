@@ -37,10 +37,10 @@
     - the reference was not included in the provided input caches
     - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
     </source>
-        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was not explicitly specified as a ProjectReference item in "{0}"
-    - the reference was not included in the provided input caches
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+        <target state="translated">MSB4252: El proyecto "{0}" tiene una referencia a "{1}" ({2} destinos(s)), pero el resultado de la compilación para la referencia no está en la memoria caché del motor. En compilaciones aisladas, esto puede indicar uno de los siguientes casos:
+    - La referencia no se especificó de forma explícita como un elemento ProjectReference en "{0}"
+    - La referencia no se incluyó en las memorias caché de entrada proporcionadas.
+    - Se llamó a la referencia con un destino que no está especificado en el elemento ProjectReferenceTargets en "{0}".
     </target>
         <note>
       {StrBegin="MSB4252:"}
@@ -64,22 +64,22 @@
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
-        <target state="new">MSB4257: The specified output result cache file is empty.</target>
+        <target state="translated">MSB4257: El archivo de caché de resultados de salida especificado está vacío.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
-        <target state="new">MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</target>
+        <target state="translated">MSB4256: Error al leer los archivos de caché de resultados de entrada en la ruta de acceso "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorWritingCacheFile">
         <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
-        <target state="new">MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</target>
+        <target state="translated">MSB4258: Error al escribir el archivo de caché de resultados de salida en la ruta de acceso "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
-        <target state="new">MSB4255: The following input result cache files do not exist: "{0}"</target>
+        <target state="translated">MSB4255: Los siguientes archivos de caché de resultados de entrada no existen: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
@@ -118,7 +118,7 @@
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
-        <target state="new">Using input build results caches: {0}</target>
+        <target state="translated">Usando las cachés de resultados de compilación: {0}</target>
         <note>
       LOCALIZATION: {0} is a list of semicolon separated file paths
     </note>
@@ -1632,7 +1632,7 @@
       </trans-unit>
       <trans-unit id="WritingToOutputCache">
         <source>Writing build results caches to: {0}</source>
-        <target state="new">Writing build results caches to: {0}</target>
+        <target state="translated">Escribiendo las cachés de resultados de compilación en: {0}</target>
         <note>
       LOCALIZATION: {0} is a file path
     </note>

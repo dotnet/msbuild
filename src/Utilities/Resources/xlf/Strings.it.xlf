@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.ValidateParametersFailed">
         <source>MSB6011: Invalid parameters passed to the {0} task.</source>
-        <target state="new">MSB6011: Invalid parameters passed to the {0} task.</target>
+        <target state="translated">MSB6011: sono stati passati parametri non validi all'attività {0}.</target>
         <note>{StrBegin="MSB6011: "}</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
