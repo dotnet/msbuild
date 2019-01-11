@@ -3885,9 +3885,8 @@ $(
 </Project>";
 
             File.WriteAllText(projectLocation.File, projectFileContents);
-            Project project = new Project(projectLocation.File);
 
-            ProjectInstance projectInstance = project.CreateProjectInstance();
+            ProjectInstance projectInstance = new ProjectInstance(projectLocation.File);
             ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Squiggle");
 
             Assert.Collection(squiggleItems,
