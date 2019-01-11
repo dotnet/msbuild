@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified.</target>
+        <target state="translated">MSBUILD : error MSB1058: 只能指定一个输出结果缓存。</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -550,10 +550,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     分号分隔的输入缓存文件列表，MSBuild 
+                     将从中读取生成结果。
+                     设置它也会打开隔离的生成 (-isolate).
                      (short form: -irc)
    </target>
         <note>
@@ -568,10 +568,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
+        <target state="translated">  -outputResultsCache:[cacheFile]
+                     输出缓存文件，MSBuild 将在
+                     生成结束时写入其生成结果缓存的内容。
+                     设置它也会打开隔离的生成 (-isolate).
                      (short form: -orc)
    </target>
         <note>
