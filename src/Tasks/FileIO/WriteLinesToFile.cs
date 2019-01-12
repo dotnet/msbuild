@@ -84,12 +84,13 @@ namespace Microsoft.Build.Tasks
                 try
                 {
 
+                    var directoryPath = Path.GetDirectoryName(File.ItemSpec);
                     if (Overwrite)
                     {
                         if (buffer.Length == 0)
                         {
                             // File.Delete throws when the directory does not exist.
-                            if (System.IO.Directory.Exists(GetTargetDirectory()))
+                            if (Directory.Exists(directoryPath))
                             {
                                 // if overwrite==true, and there are no lines to write,
                                 // just delete the file to leave everything tidy.
@@ -98,7 +99,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            CreateTargetDirectory();
+                            Directory.CreateDirectory(directoryPath);
                             string contentsAsString = buffer.ToString();
                             try
                             {
@@ -129,7 +130,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (buffer.Length > 0)
                         {
-                            CreateTargetDirectory();
+                            Directory.CreateDirectory(directoryPath);
                             System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
                         }
                     }
@@ -142,18 +143,6 @@ namespace Microsoft.Build.Tasks
             }
 
             return success;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CreateTargetDirectory()
-        {
-            Directory.CreateDirectory(GetTargetDirectory());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private string GetTargetDirectory()
-        {
-            return Path.GetDirectoryName(File.ItemSpec);
         }
     }
 }
