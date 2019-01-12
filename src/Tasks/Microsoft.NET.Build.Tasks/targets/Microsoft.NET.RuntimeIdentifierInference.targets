@@ -107,7 +107,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
-    <UseAppHost Condition="'$(UseAppHost)' == '' and ('$(SelfContained)' == 'true' or '$(_TargetFrameworkVersionWithoutV)' >= '2.1')">true</UseAppHost>
+    <UseAppHost Condition="'$(UseAppHost)' == '' and
+                           ('$(SelfContained)' == 'true' or
+                            ('$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1') or
+                            '$(_TargetFrameworkVersionWithoutV)' >= '3.0')">true</UseAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
   </PropertyGroup>
 
@@ -119,12 +122,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultAppHostRuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x64'">win-x64</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x86'">win-x86</DefaultAppHostRuntimeIdentifier>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(DefaultAppHostRuntimeIdentifier)' != '' and
-                            '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
-                            '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'">
-    <RuntimeIdentifiers>$(RuntimeIdentifiers);$(DefaultAppHostRuntimeIdentifier)</RuntimeIdentifiers>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedAppHostUsage"

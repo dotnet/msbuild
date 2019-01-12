@@ -254,7 +254,6 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp2.1")]
         [InlineData("netcoreapp3.0")]
         public void It_builds_a_runnable_apphost_by_default(string targetFramework)
         {
@@ -293,6 +292,33 @@ namespace Microsoft.NET.Build.Tests
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello World!");
+        }
+
+        [Theory]
+        [InlineData("netcoreapp2.1")]
+        [InlineData("netcoreapp2.2")]
+        public void It_does_not_build_with_an_apphost_by_default_before_netcoreapp_3(string targetFramework)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute(new string[] { "/restore" })
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "HelloWorld.dll",
+                "HelloWorld.pdb",
+                "HelloWorld.deps.json",
+                "HelloWorld.runtimeconfig.dev.json",
+                "HelloWorld.runtimeconfig.json",
+            });
         }
 
         [WindowsOnlyTheory]
