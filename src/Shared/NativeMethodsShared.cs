@@ -838,11 +838,16 @@ namespace Microsoft.Build.Shared
                 return success;
             }
 
-            DateTime lastWriteTime = Directory.GetLastWriteTimeUtc(fullPath);
-            bool directoryExists = lastWriteTime != MinFileDate;
-
-            fileModifiedTimeUtc = directoryExists ? lastWriteTime : DateTime.MinValue;
-            return directoryExists;
+            if (Directory.Exists(fullPath))
+            {
+                fileModifiedTimeUtc = Directory.GetLastWriteTimeUtc(fullPath);
+                return true;
+            }
+            else
+            {
+                fileModifiedTimeUtc = DateTime.MinValue;
+                return false;
+            }
         }
 
         /// <summary>
@@ -967,7 +972,7 @@ namespace Microsoft.Build.Shared
 
                 success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
 
-                if (success)
+                if (success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
                     long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
                     fileModifiedTime = DateTime.FromFileTimeUtc(dt);
@@ -978,16 +983,15 @@ namespace Microsoft.Build.Shared
                         fileModifiedTime = GetContentLastWriteFileUtcTime(fullPath);
                     }
                 }
+
+                return fileModifiedTime;
             }
             else
             {
-                DateTime lastWriteTime = File.GetLastWriteTimeUtc(fullPath);
-                bool fileExists = lastWriteTime != MinFileDate;
-
-                fileModifiedTime = fileExists ? lastWriteTime : DateTime.MinValue;
+                return File.Exists(fullPath)
+                        ? File.GetLastWriteTimeUtc(fullPath)
+                        : DateTime.MinValue;
             }
-
-            return fileModifiedTime;
         }
 
         /// <summary>
