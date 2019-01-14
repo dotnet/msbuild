@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified.</target>
+        <target state="translated">MSBUILD: Error MSB1058: Solo se puede especificar una memoria caché de resultados de salida.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -550,11 +550,12 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;archivo-de-caché&gt;...
+                     Lista de archivos de caché de entrada separados con
+                     punto y coma de donde MSBuild lee los resultados de
+                     compilación. Si se establece esta opción, se activan
+                     también las compilaciones aisladas.
+                     (Forma corta: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -568,11 +569,13 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:[archivo-de-caché]
+                     Archivo de caché de salida donde MSBuild escribe
+                     el contenido de las memorias caché de resultados
+                     de compilación cuando esta acaba.
+                     Si se establece esta opción, se activan también las
+                     compilaciones aisladas (-isolate).
+                     (Forma corta: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate

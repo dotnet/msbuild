@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified.</target>
+        <target state="translated">MSBUILD : 오류 MSB1058: 출력 결과 캐시는 하나만 지정할 수 있습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -550,10 +550,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     MSBuild에서 빌드 결과를 읽을
+                     세미콜론으로 구분된 입력 캐시 파일 목록입니다.
+                     설정하면 격리된 빌드에서도 설정됩니다(-isolate).
                      (short form: -irc)
    </target>
         <note>
@@ -568,10 +568,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
+        <target state="translated">  -outputResultsCache:[cacheFile]
+                     MSBuild에서 빌드 마지막에 빌드 결과 캐시의
+                     콘텐츠를 쓰는 출력 캐시 파일입니다.
+                     설정하면 격리된 빌드에서도 설정됩니다(-isolate).
                      (short form: -orc)
    </target>
         <note>
@@ -882,7 +882,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
-        <target state="translated">MSBUILD : Configuration error MSB1043: 응용 프로그램을 시작할 수 없습니다. {0}</target>
+        <target state="translated">MSBUILD : Configuration error MSB1043: 애플리케이션을 시작할 수 없습니다. {0}</target>
         <note>
       {StrBegin="MSBUILD : Configuration error MSB1043: "}
       UE: This error is shown when the msbuild.exe.config file had invalid content.
