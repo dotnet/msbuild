@@ -395,6 +395,27 @@ namespace Microsoft.DotNet.Tests.Commands
             _installCalledCount.Should().Be(installCallCountBeforeTheSecondRestore + 1);
         }
 
+        [Fact]
+        public void WhenRunWithoutManifestFileItShouldPrintSpecificRestoreErrorMessage()
+        {
+            IToolManifestFinder manifestFinder =
+                new CannotFindManifestFinder();
+
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
+                _parseResult,
+                _toolPackageInstallerMock,
+                manifestFinder,
+                _localToolsResolverCache,
+                _fileSystem,
+                _reporter
+            );
+
+            toolRestoreCommand.Execute().Should().Be(0);
+
+            _reporter.Lines.Should().Contain(l =>
+                l.Contains(Cli.Utils.AnsiColorExtensions.Yellow(LocalizableStrings.NoToolsWereRestored)));
+        }
+
         private class MockManifestFinder : IToolManifestFinder
         {
             private readonly IReadOnlyCollection<ToolManifestPackage> _toReturn;
@@ -407,6 +428,19 @@ namespace Microsoft.DotNet.Tests.Commands
             public IReadOnlyCollection<ToolManifestPackage> Find(FilePath? filePath = null)
             {
                 return _toReturn;
+            }
+
+            public FilePath FindFirst()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class CannotFindManifestFinder : IToolManifestFinder
+        {
+            public IReadOnlyCollection<ToolManifestPackage> Find(FilePath? filePath = null)
+            {
+                throw new ToolManifestCannotBeFoundException("In test cannot find manifest");
             }
 
             public FilePath FindFirst()

@@ -127,6 +127,18 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
+        public void GivenNoManifestFileItShouldThrowAndContainNoManifestGuide()
+        {
+            _fileSystem.File.Delete(_manifestFilePath);
+            var toolInstallLocalCommand = GetDefaultTestToolInstallLocalCommand();
+
+            Action a = () => toolInstallLocalCommand.Execute();
+            a.ShouldThrow<GracefulException>()
+                .And.Message.Should()
+                .Contain(LocalizableStrings.NoManifestGuide);
+        }
+
+        [Fact]
         public void WhenRunWithExplicitManifestFileItShouldAddEntryToExplicitManifestFile()
         {
             var explicitManifestFilePath = Path.Combine(_temporaryDirectory, "subdirectory", "dotnet-tools.json");

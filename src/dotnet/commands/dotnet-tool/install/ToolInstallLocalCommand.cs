@@ -104,9 +104,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
             try
             {
-                var manifestFile = string.IsNullOrWhiteSpace(_explicitManifestFile)
-                    ? _toolManifestFinder.FindFirst()
-                    : new FilePath(_explicitManifestFile);
+                FilePath manifestFile = GetManifestFilePath();
 
                 IToolPackage toolDownloadedPackage =
                     _toolPackageInstaller.InstallPackageToExternalManagedLocation(
@@ -155,6 +153,25 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 throw new GracefulException(
                     messages: InstallToolCommandLowLevelErrorConverter.GetUserFacingMessages(ex, _packageId),
                     verboseMessages: new[] {ex.ToString()},
+                    isUserError: false);
+            }
+        }
+
+        private FilePath GetManifestFilePath()
+        {
+            try
+            {
+                return string.IsNullOrWhiteSpace(_explicitManifestFile)
+                    ? _toolManifestFinder.FindFirst()
+                    : new FilePath(_explicitManifestFile);
+            }
+            catch (ToolManifestCannotBeFoundException e)
+            {
+                throw new GracefulException(new[]
+                    {
+                        e.Message,
+                        LocalizableStrings.NoManifestGuide
+                    },
                     isUserError: false);
             }
         }

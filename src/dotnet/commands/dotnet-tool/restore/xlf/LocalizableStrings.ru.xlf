@@ -14,6 +14,11 @@
 {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoToolsWereRestored">
+        <source>No tools were restored.</source>
+        <target state="new">No tools were restored.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdColumn">
         <source>Package Id</source>
         <target state="new">Package Id</target>

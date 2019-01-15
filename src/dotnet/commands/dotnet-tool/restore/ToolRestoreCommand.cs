@@ -88,6 +88,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             catch (ToolManifestCannotBeFoundException e)
             {
                 _reporter.WriteLine(e.Message.Yellow());
+                _reporter.WriteLine(LocalizableStrings.NoToolsWereRestored.Yellow());
                 return 0;
             }
 

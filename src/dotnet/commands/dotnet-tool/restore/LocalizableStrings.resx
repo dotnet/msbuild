@@ -182,4 +182,7 @@
   <data name="PackagesCommandNameCollisionForOnePackage" xml:space="preserve">
     <value>A command "{0}" in package "{1}"</value>
   </data>
+  <data name="NoToolsWereRestored" xml:space="preserve">
+    <value>No tools were restored.</value>
+  </data>
 </root>
