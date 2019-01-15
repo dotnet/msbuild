@@ -3105,9 +3105,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                     Utilities.ExecuteTask(task);
 
                     string outputResourceFile = task.OutputResources[0].ItemSpec;
-                    Assert.Equal(Path.GetExtension(outputResourceFile), ".resources");
+                    Assert.Equal(".resources", Path.GetExtension(outputResourceFile));
                     outputResourceFile = task.FilesWritten[0].ItemSpec;
-                    Assert.Equal(Path.GetExtension(outputResourceFile), ".resources");
+                    Assert.Equal(".resources", Path.GetExtension(outputResourceFile));
 
                     return task;
                 };
