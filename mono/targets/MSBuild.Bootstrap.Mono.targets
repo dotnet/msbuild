@@ -45,10 +45,14 @@
 			Properties="OutputPath=$(OutputPath);OutDir=$(OutDir);TargetFramework=$(TargetFramework);MonoBuild=true"
 			Targets="Restore;Build" />
 
+		<ItemGroup>
+			<_MonoBuildTaskOutputFiles Include="$(OutDir)\Mono.Build.Tasks.*" />
+		</ItemGroup>
+
 		<!-- Copy to the MSBuildExtensionsPath for bootstrap -->
 		<Copy
 			Condition="'$(CreateBootstrap)' == 'true'"
-			SourceFiles="$(OutDir)\Mono.Build.Tasks.dll"
+			SourceFiles="@(_MonoBuildTaskOutputFiles)"
 			DestinationFolder="$(BootstrapDestination)" />
 	</Target>
 </Project>
