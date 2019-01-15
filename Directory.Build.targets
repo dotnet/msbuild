@@ -10,7 +10,8 @@
 
   <Target Name="_RemoveMSSourceLinkGitHub" AfterTargets="CollectPackageReferences" Condition="'$(MonoBuild)' == 'true'">
     <ItemGroup>
-      <PackageReference Remove="Microsoft.SourceLink.$(SourceLinkProvider)" />
+      <PackageReference Remove="Microsoft.SourceLink.GitHub" />
+      <PackageReference Remove="Microsoft.SourceLink.Vsts.Git" />
     </ItemGroup>
   </Target>
 
