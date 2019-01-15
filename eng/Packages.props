@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="2.2.13" Condition="'$(DisableNerdbankVersioning)' != 'true'" PrivateAssets="All" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="2.2.33" Condition="'$(DisableNerdbankVersioning)' != 'true'" PrivateAssets="All" />
     <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-004" PrivateAssets="All"/>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
