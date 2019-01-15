@@ -132,6 +132,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
       ResolveLockFileCopyLocalFiles;
+      ResolveRuntimePackAssets;
       RunProduceContentAssets;
       IncludeTransitiveProjectReferences
     </ResolvePackageDependenciesForBuildDependsOn>

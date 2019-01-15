@@ -45,13 +45,13 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] PackagesToDownload { get; set; }
 
         [Output]
-        public ITaskItem[] PackagesToReference { get; set; }
-
-        [Output]
         public ITaskItem[] RuntimeFrameworks { get; set; }
 
         [Output]
         public ITaskItem[] TargetingPacks { get; set; }
+
+        [Output]
+        public ITaskItem[] RuntimePacks { get; set; }
 
         //  There should only be one AppHost item, but we use an item here so we can attach metadata to it
         //  (ie the apphost pack name and version, and the relative path to the apphost inside of it so
@@ -70,9 +70,9 @@ namespace Microsoft.NET.Build.Tasks
                 .ToDictionary(kfr => kfr.Name);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
-            List<ITaskItem> packagesToReference = new List<ITaskItem>();
             List<ITaskItem> runtimeFrameworks = new List<ITaskItem>();
             List<ITaskItem> targetingPacks = new List<ITaskItem>();
+            List<ITaskItem> runtimePacks = new List<ITaskItem>();
             List<string> unresolvedFrameworkReferences = new List<string>();
 
             string appHostPackPattern = null;
@@ -149,10 +149,17 @@ namespace Microsoft.NET.Build.Tasks
                                 string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
 
                                 TaskItem runtimePackItem = new TaskItem(runtimePackName);
-                                runtimePackItem.SetMetadata(MetadataKeys.Version, knownFrameworkReference.LatestRuntimeFrameworkVersion);
-                                runtimePackItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, "true");
+                                runtimePackItem.SetMetadata(MetadataKeys.PackageName, runtimePackName);
+                                runtimePackItem.SetMetadata(MetadataKeys.PackageVersion, knownFrameworkReference.LatestRuntimeFrameworkVersion);
+                                runtimePackItem.SetMetadata("FrameworkReference", knownFrameworkReference.Name);
+                                runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
 
-                                packagesToReference.Add(runtimePackItem);
+                                runtimePacks.Add(runtimePackItem);
+
+                                TaskItem packageToDownload = new TaskItem(runtimePackName);
+                                packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.LatestRuntimeFrameworkVersion);
+
+                                packagesToDownload.Add(packageToDownload);
                             }
                         }
                     }
@@ -228,11 +235,6 @@ namespace Microsoft.NET.Build.Tasks
                 PackagesToDownload = packagesToDownload.ToArray();
             }
 
-            if (packagesToReference.Any())
-            {
-                PackagesToReference = packagesToReference.ToArray();
-            }
-
             if (runtimeFrameworks.Any())
             {
                 RuntimeFrameworks = runtimeFrameworks.ToArray();
@@ -241,6 +243,11 @@ namespace Microsoft.NET.Build.Tasks
             if (targetingPacks.Any())
             {
                 TargetingPacks = targetingPacks.ToArray();
+            }
+
+            if (runtimePacks.Any())
+            {
+                RuntimePacks = runtimePacks.ToArray();
             }
 
             if (unresolvedFrameworkReferences.Any())

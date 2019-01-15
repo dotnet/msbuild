@@ -67,6 +67,8 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem[] FilesToSkip { get; set; }
 
+        public ITaskItem[] RuntimePackAssets { get; set; }
+
         public ITaskItem CompilerOptions { get; set; }
 
         public ITaskItem[] ExcludeFromPublishPackageReferences { get; set; }
@@ -136,6 +138,9 @@ namespace Microsoft.NET.Build.Tasks
 
             IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
 
+            IEnumerable<RuntimePackAssetInfo> runtimePackAssets = RuntimePackAssets == null ? Enumerable.Empty<RuntimePackAssetInfo>() :
+                RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item));
+
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
@@ -150,6 +155,7 @@ namespace Microsoft.NET.Build.Tasks
                 .WithDependencyReferences(dependencyReferences)
                 .WithReferenceProjectInfos(referenceProjects)
                 .WithExcludeFromPublishAssets(excludeFromPublishAssets)
+                .WithRuntimePackAssets(runtimePackAssets)
                 .WithCompilationOptions(compilationOptions)
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
                 .WithPackagesThatWhereFiltered(GetFilteredPackages())

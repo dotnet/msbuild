@@ -276,7 +276,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_ResolveCopyLocalAssetsForPublish"
           DependsOnTargets="ResolveLockFileCopyLocalFiles;
                             _ComputeUseBuildDependencyFile;
-                            _DefaultMicrosoftNETPlatformLibrary">
+                            _DefaultMicrosoftNETPlatformLibrary;
+                            ResolveRuntimePackAssets">
 
       <ResolveCopyLocalAssets ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(ProjectAssetsFile)"
@@ -291,6 +292,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                               Condition="'$(_UseBuildDependencyFile)' != 'true'">
         <Output TaskParameter="ResolvedAssets" ItemName="_ResolvedCopyLocalPublishAssets" />
       </ResolveCopyLocalAssets>
+
+      <ItemGroup>
+        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"/>
+      </ItemGroup>
 
       <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
         <!-- Remove the apphost executable from publish copy local assets; we will copy the generated apphost instead -->
@@ -599,7 +604,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _HandlePackageFileConflictsForPublish;
-                            _ComputeReferenceAssemblies"
+                            _ComputeReferenceAssemblies;
+                            ResolveRuntimePackAssets"
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
 
     <PropertyGroup>
@@ -618,6 +624,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ReferenceDependencyPaths="@(ReferenceDependencyPaths)"
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       ReferenceAssemblies="@(_ReferenceAssemblies)"
+                      RuntimePackAssets="@(RuntimePackAsset)"
                       IncludeMainProject="$(IncludeMainProjectInDepsFile)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"

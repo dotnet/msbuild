@@ -58,9 +58,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
-      <Output TaskParameter="PackagesToReference" ItemName="PackageReference" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
+      <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
       <Output TaskParameter="AppHost" ItemName="AppHostPack" />
 
       <Output TaskParameter="UnresolvedFrameworkReferences" ItemName="_UnresolvedFrameworkReference" />
@@ -142,6 +142,32 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AppHostSourcePath>@(ResolvedAppHostPack->'%(Path)')</AppHostSourcePath>
     </PropertyGroup>
 
+  </Target>
+  
+  <UsingTask TaskName="ResolveRuntimePackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  
+  <Target Name="ResolveRuntimePackAssets" DependsOnTargets="ResolvePackageAssets"
+          Condition="'@(RuntimePack)' != ''">
+    
+      <GetPackageDirectory
+        Items="@(RuntimePack)"
+        ProjectPath="$(MSBuildProjectFullPath)"
+        PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedRuntimePack" />
+      
+    </GetPackageDirectory>    
+    
+    <ResolveRuntimePackAssets ResolvedRuntimePacks="@(ResolvedRuntimePack)">
+      <Output TaskParameter="RuntimePackAssets" ItemName="RuntimePackAsset" />
+    </ResolveRuntimePackAssets>
+    
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Include="@(RuntimePackAsset)"
+                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true'" />
+    </ItemGroup>
+  
+  
   </Target>
 
   <!--
