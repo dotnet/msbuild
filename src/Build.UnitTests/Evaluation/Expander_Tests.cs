@@ -3856,24 +3856,14 @@ $(
             //            Three.cs
             //        gamma\
             //            .squiggle
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+                var rootSquiggle = env.CreateFile(root, ".squiggle", string.Empty);
 
-            string alphaDirectory = Path.Combine(ObjectModelHelpers.TempProjectDir, "alpha");
-            string betaDirectory = Path.Combine(alphaDirectory, "beta");
-            string gammaDirectory = Path.Combine(alphaDirectory, "gamma");
-
-            string tempSquiggleFilePath = Path.Combine(ObjectModelHelpers.TempProjectDir, ".squiggle");
-            Directory.CreateDirectory(ObjectModelHelpers.TempProjectDir);
-            File.WriteAllText(tempSquiggleFilePath, string.Empty);
-            string betaSquiggleFilePath = Path.Combine(betaDirectory, ".squiggle");
-            Directory.CreateDirectory(betaDirectory);
-            File.WriteAllText(betaSquiggleFilePath, string.Empty);
-            string gammaSquiggleFilePath = FileUtilities.CombinePaths(gammaDirectory, ".squiggle");
-            Directory.CreateDirectory(gammaDirectory);
-            File.WriteAllText(gammaSquiggleFilePath, string.Empty);
-
-            MockElementLocation projectLocation = new MockElementLocation(Path.Combine(alphaDirectory, Path.GetRandomFileName()));
-
-            string projectFileContents = @"<Project>
+                var alpha = root.CreateDirectory("alpha");
+                var projectFile = env.CreateFile(alpha, ".proj",
+                    @"<Project>
   <ItemGroup>
     <Compile Include=""One.cs"" />
     <Compile Include=""beta\Two.cs"" />
@@ -3882,16 +3872,19 @@ $(
   <ItemGroup>
     <Squiggle Include=""@(Compile->GetPathsOfAllFilesAbove('.squiggle'))"" />
   </ItemGroup>
-</Project>";
+</Project>");
 
-            File.WriteAllText(projectLocation.File, projectFileContents);
+                var beta = alpha.CreateDirectory("beta");
+                var betaSquiggle = env.CreateFile(beta, ".squiggle", string.Empty);
 
-            ProjectInstance projectInstance = new ProjectInstance(projectLocation.File);
-            ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Squiggle");
+                var gamma = alpha.CreateDirectory("gamma");
+                var gammaSquiggle = env.CreateFile(gamma, ".squiggle", string.Empty);
 
-            Assert.Collection(squiggleItems,
-                              item => StringComparer.OrdinalIgnoreCase.Compare(item.EvaluatedInclude, tempSquiggleFilePath),
-                              item => StringComparer.OrdinalIgnoreCase.Compare(item.EvaluatedInclude, betaSquiggleFilePath));
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Squiggle");
+
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { rootSquiggle.Path, betaSquiggle.Path }, Case.Insensitive);
+            }
         }
     }
 }
