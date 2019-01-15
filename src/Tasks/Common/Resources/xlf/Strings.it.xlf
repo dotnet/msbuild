@@ -69,6 +69,7 @@
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
+        <target state="new">NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</target>
         <note>{StrBegin="NETSDK1084: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
@@ -108,6 +109,7 @@
       </trans-unit>
       <trans-unit id="NoRuntimePackAvailable">
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
+        <target state="new">NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</target>
         <note>{StrBegin="NETSDK1082: "}</note>
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
@@ -117,6 +119,7 @@
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
         <source>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</source>
+        <target state="new">NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</target>
         <note>{StrBegin="NETSDK1083: "}</note>
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
@@ -176,6 +179,7 @@
       </trans-unit>
       <trans-unit id="UnresolvedTargetingPack">
         <source>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</source>
+        <target state="new">NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</target>
         <note>{StrBegin="NETSDK1081: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFramework">
