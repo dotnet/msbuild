@@ -56,6 +56,8 @@ namespace Microsoft.Build.Shared
         private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
         private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
 
+        internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
+
 #if FEATURE_HANDLEREF
         internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
 #endif
@@ -177,13 +179,6 @@ namespace Microsoft.Build.Shared
             Unknown
         }
 
-        internal enum MaxPathLimits
-        {
-            Unknown = 0,
-            LegacyWindows = MAX_PATH,
-            None = int.MaxValue,
-        };
-
         #endregion
 
         #region Structs
@@ -299,16 +294,22 @@ namespace Microsoft.Build.Shared
         [StructLayout(LayoutKind.Sequential)]
         private struct PROCESS_BASIC_INFORMATION
         {
-            public IntPtr ExitStatus;
+            public uint ExitStatus;
             public IntPtr PebBaseAddress;
-            public IntPtr AffinityMask;
-            public IntPtr BasePriority;
-            public IntPtr UniqueProcessId;
-            public IntPtr InheritedFromUniqueProcessId;
+            public UIntPtr AffinityMask;
+            public int BasePriority;
+            public UIntPtr UniqueProcessId;
+            public UIntPtr InheritedFromUniqueProcessId;
 
-            public int Size
+            public uint Size
             {
-                get { return (6 * IntPtr.Size); }
+                get
+                {
+                    unsafe
+                    {
+                        return (uint)sizeof(PROCESS_BASIC_INFORMATION);
+                    }
+                }
             }
         };
 
@@ -467,44 +468,46 @@ namespace Microsoft.Build.Shared
 
         #region Member data
 
+        internal static bool HasMaxPath => MaxPath == MAX_PATH;
+
         /// <summary>
-        /// Gets an enum for the max path limit of the current OS.
+        /// Gets the max path limit of the current OS.
         /// </summary>
-        internal static MaxPathLimits OSMaxPathLimit
+        internal static int MaxPath
         {
             get
             {
-#if EXPERIMENTAL_LONGPATHS_ENABLED
-                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                if (!IsMaxPathSet)
                 {
-                    SetOSMaxPathLimit();
+                    SetMaxPath();
                 }
-                return osMaxPathLimit;
-#else
-                return MaxPathLimits.LegacyWindows;
-#endif
+                return _maxPath;
             }
         }
 
         /// <summary>
-        /// Cached value for OSMaxPathLimit.
+        /// Cached value for MaxPath.
         /// </summary>
-        private static MaxPathLimits osMaxPathLimit = MaxPathLimits.Unknown;
+        private static int _maxPath;
 
-        private static readonly object osMaxPathLimitLock = new object();
+        private static bool IsMaxPathSet { get; set; }
 
-        private static void SetOSMaxPathLimit()
+        private static readonly object MaxPathLock = new object();
+
+        private static void SetMaxPath()
         {
-            lock (osMaxPathLimitLock)
+            lock (MaxPathLock)
             {
-                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                if (!IsMaxPathSet)
                 {
-                    osMaxPathLimit = IsMaxPathLimitLegacyWindows() ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
+                    bool isMaxPathRestricted = Traits.Instance.EscapeHatches.DisableLongPaths || IsMaxPathLegacyWindows();
+                    _maxPath = isMaxPathRestricted ? MAX_PATH : int.MaxValue;
+                    IsMaxPathSet = true;
                 }
             }
         }
 
-        private static bool IsMaxPathLimitLegacyWindows()
+        private static bool IsMaxPathLegacyWindows()
         {
             try
             {
@@ -595,6 +598,10 @@ namespace Microsoft.Build.Shared
             }
         }
 
+#if !CLR2COMPATIBILITY
+        private static bool? _isWindows;
+#endif
+
         /// <summary>
         /// Gets a flag indicating if we are running under some version of Windows
         /// </summary>
@@ -603,7 +610,13 @@ namespace Microsoft.Build.Shared
 #if CLR2COMPATIBILITY
             get { return true; }
 #else
-            get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); }
+            get {
+                if (_isWindows == null)
+                {
+                    _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+                }
+                return _isWindows.Value;
+            }
 #endif
         }
 
@@ -800,11 +813,10 @@ namespace Microsoft.Build.Shared
         {
             // This code was copied from the reference manager, if there is a bug fix in that code, see if the same fix should also be made
             // there
-
-            fileModifiedTimeUtc = DateTime.MinValue;
-
             if (IsWindows)
             {
+                fileModifiedTimeUtc = DateTime.MinValue;
+
                 WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
                 bool success = false;
 
@@ -826,8 +838,11 @@ namespace Microsoft.Build.Shared
                 return success;
             }
 
-            fileModifiedTimeUtc = Directory.GetLastWriteTimeUtc(fullPath);
-            return true;
+            DateTime lastWriteTime = Directory.GetLastWriteTimeUtc(fullPath);
+            bool directoryExists = lastWriteTime != MinFileDate;
+
+            fileModifiedTimeUtc = directoryExists ? lastWriteTime : DateTime.MinValue;
+            return directoryExists;
         }
 
         /// <summary>
@@ -964,9 +979,12 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-            else if (File.Exists(fullPath))
+            else
             {
-                fileModifiedTime = File.GetLastWriteTimeUtc(fullPath);
+                DateTime lastWriteTime = File.GetLastWriteTimeUtc(fullPath);
+                bool fileExists = lastWriteTime != MinFileDate;
+
+                fileModifiedTime = fileExists ? lastWriteTime : DateTime.MinValue;
             }
 
             return fileModifiedTime;
@@ -1435,7 +1453,7 @@ namespace Microsoft.Build.Shared
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("NTDLL.DLL")]
-        private static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, int cb, ref int pSize);
+        private static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, uint cb, ref int pSize);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -1591,6 +1609,6 @@ namespace Microsoft.Build.Shared
             return GetFileAttributesEx(path, 0, ref data);
         }
 
-        #endregion
+#endregion
     }
 }

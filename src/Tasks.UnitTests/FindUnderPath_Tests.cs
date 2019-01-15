@@ -27,8 +27,8 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(1, t.InPath.Length);
-            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Single(t.InPath);
+            Assert.Single(t.OutOfPath);
             Assert.Equal(FileUtilities.FixFilePath(@"C:\MyProject\File1.txt"), t.InPath[0].ItemSpec);
             Assert.Equal(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
@@ -108,8 +108,8 @@ namespace Microsoft.Build.UnitTests
             RunTask(t, out testFile, out success);
 
             Assert.True(success);
-            Assert.Equal(1, t.InPath.Length);
-            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Single(t.InPath);
+            Assert.Single(t.OutOfPath);
             Assert.Equal(testFile.FullName, t.InPath[0].ItemSpec);
             Assert.Equal(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
                 t.OutOfPath[0].ItemSpec);
@@ -131,8 +131,8 @@ namespace Microsoft.Build.UnitTests
             RunTask(t, out testFile, out success);
 
             Assert.True(success);
-            Assert.Equal(1, t.InPath.Length);
-            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Single(t.InPath);
+            Assert.Single(t.OutOfPath);
             Assert.Equal(testFile.Name, t.InPath[0].ItemSpec);
             Assert.Equal(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
                 t.OutOfPath[0].ItemSpec);

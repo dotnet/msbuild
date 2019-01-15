@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectMetadataInstance clone = metadata.DeepClone();
 
-            Assert.Equal(false, Object.ReferenceEquals(metadata, clone));
+            Assert.False(Object.ReferenceEquals(metadata, clone));
             Assert.Equal("m", clone.Name);
             Assert.Equal("m1", clone.EvaluatedValue);
         }

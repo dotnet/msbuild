@@ -234,3 +234,12 @@ Samples/MultiprocessBuild/PortableTask.dll
 
 # Rider
 .idea/
+
+# Dotnet Core SDK
+.dotnet/
+
+# Repo nuget cache
+.packages/
+
+#Stage1 build folder for when doing bootstrap builds
+stage1/

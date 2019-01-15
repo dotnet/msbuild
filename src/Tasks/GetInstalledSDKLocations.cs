@@ -156,7 +156,7 @@ namespace Microsoft.Build.Tasks
 
                 foreach (KeyValuePair<string, Tuple<string, string>> sdk in installedSDKs)
                 {
-                    string sdkInfo = ResourceUtilities.FormatResourceString("GetInstalledSDKs.SDKNameAndLocation", sdk.Key, sdk.Value.Item1);
+                    string sdkInfo = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GetInstalledSDKs.SDKNameAndLocation", sdk.Key, sdk.Value.Item1);
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", sdkInfo);
 
                     var item = new TaskItem(sdk.Value.Item1);

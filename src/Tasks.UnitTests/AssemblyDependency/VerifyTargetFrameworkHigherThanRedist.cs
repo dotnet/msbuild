@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -13,6 +14,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class VerifyTargetFrameworkHigherThanRedist : ResolveAssemblyReferenceTestFixture
     {
+        public VerifyTargetFrameworkHigherThanRedist(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Verify there are no warnings when the assembly being resolved is not in the redist list and only has dependencies to references in the redist list with the same
         /// version as is described in the redist list.
@@ -20,7 +25,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TargetCurrentTargetFramework()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -36,7 +41,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOnOnlyv4Assemblies.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -48,7 +53,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RemapAssemblyBasic()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -79,11 +84,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.RemappedReference", "DependsOnOnlyv4Assemblies", "ReferenceVersion9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             e.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.RemappedReference", "AnotherOne", "ReferenceVersion9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
 
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
 
-            Assert.True(t.ResolvedFiles[0].GetMetadata("OriginalItemSpec").Equals("AnotherOne", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("AnotherOne", t.ResolvedFiles[0].GetMetadata("OriginalItemSpec"));
 
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -93,7 +98,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherThanHighestInRedistList()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -111,7 +116,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
             e.AssertLogContains("MSB3257");
             e.AssertLogContains("ReferenceVersion9");
-            Assert.Equal(0, t.ResolvedFiles.Length);
+            Assert.Empty(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -122,7 +127,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void HigherThanHighestInRedistListForMSBuildAssembly()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -140,7 +145,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "Expected successful resolution with no warnings."
             e.AssertLogContains("Microsoft.Build.dll");
-            Assert.Equal(1, t1.ResolvedFiles.Length);
+            Assert.Single(t1.ResolvedFiles);
 
             ResolveAssemblyReference t2 = new ResolveAssemblyReference();
             t2.TargetFrameworkVersion = "v4.0";
@@ -151,7 +156,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // TODO: https://github.com/Microsoft/msbuild/issues/2305
             //e.AssertLogContains("Microsoft.Build.dll");
-            Assert.Equal(0, t2.ResolvedFiles.Length);
+            Assert.Empty(t2.ResolvedFiles);
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
             t3.TargetFrameworkVersion = "v4.5";
@@ -163,7 +168,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // TODO: https://github.com/Microsoft/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
-            Assert.Equal(1, t1.ResolvedFiles.Length);
+            Assert.Single(t1.ResolvedFiles);
         }
 
         /// <summary>
@@ -172,7 +177,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherThanHighestInRedistList3rdPartyRedist()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -189,7 +194,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, e.Warnings); // "Expected one warning in this scenario."
             e.AssertLogDoesntContain("MSB3257");
             e.AssertLogContains("ReferenceVersion9");
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -198,7 +203,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherThanHighestInRedistListWithSpecificVersionMetadata()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -218,7 +223,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogDoesntContain("MSB3258");
             e.AssertLogDoesntContain("MSB3257");
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -229,7 +234,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void DependenciesHigherThanHighestInRedistList()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -248,7 +253,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", "DependsOn9", "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "9.0.0.0", "4.0.0.0"));
             e.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", "DependsOn9", "System.Data, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "9.0.0.0", "4.0.0.0"));
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(0, t.ResolvedFiles.Length);
+            Assert.Empty(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -259,7 +264,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void DependenciesHigherThanHighestInRedistListForMSBuildAssembly()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -278,7 +283,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, e.Warnings); // "Expected successful resolution with no warnings."
             e.AssertLogContains("DependsOnMSBuild12");
             e.AssertLogContains("Microsoft.Build.dll");
-            Assert.Equal(1, t1.ResolvedFiles.Length);
+            Assert.Single(t1.ResolvedFiles);
 
             ResolveAssemblyReference t2 = new ResolveAssemblyReference();
             t2.TargetFrameworkVersion = "v4.0";
@@ -290,7 +295,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // TODO: https://github.com/Microsoft/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
-            Assert.Equal(0, t2.ResolvedFiles.Length);
+            Assert.Empty(t2.ResolvedFiles);
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
             //t2.TargetFrameworkVersion is null
@@ -302,7 +307,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // TODO: https://github.com/Microsoft/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
-            Assert.Equal(0, t3.ResolvedFiles.Length);
+            Assert.Empty(t3.ResolvedFiles);
         }
 
         /// <summary>
@@ -311,7 +316,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void DependenciesHigherThanHighestInRedistListSpecificVersionMetadata()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -332,7 +337,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogDoesntContain("MSB3258");
             e.AssertLogDoesntContain("MSB3257");
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -344,7 +349,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TwoDependenciesHigherThanHighestInRedistListIgnoreOnOne()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -365,7 +370,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
             e.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", "DependsOn9Also", "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "9.0.0.0", "4.0.0.0"));
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to not find assembly, but did."
             Assert.False(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -378,7 +383,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TwoDependenciesHigherThanHighestInRedistListIgnoreOnBoth()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -411,7 +416,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TwoDependenciesSameNameDependOnHigherVersion()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -431,7 +436,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", "DependsOn9, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089", "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "9.0.0.0", "4.0.0.0"));
             e.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", "DependsOn9, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089", "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "9.0.0.0", "4.0.0.0"));
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(0, t.ResolvedFiles.Length);
+            Assert.Empty(t.ResolvedFiles);
         }
 
         /// <summary>
@@ -443,7 +448,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void MixedDependenciesSpecificVersionOnHigherVersionMetadataSet()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -484,7 +489,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void MixedDependenciesSpecificVersionOnLowerVersionMetadataSet()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -509,8 +514,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, s_40ComponentDependsOnOnlyv4AssembliesDllPath)); // "Expected to find assembly, but didn't."
             Assert.False(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
         }

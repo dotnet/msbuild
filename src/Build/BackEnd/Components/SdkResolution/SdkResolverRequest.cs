@@ -20,13 +20,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private string _solutionPath;
         private int _submissionId;
         private string _version;
+        private bool _interactive;
 
-        public SdkResolverRequest(INodePacketTranslator translator)
+        public SdkResolverRequest(ITranslator translator)
         {
             Translate(translator);
         }
 
-        private SdkResolverRequest(int submissionId, string name, string version, string minimumVersion, BuildEventContext buildEventContext, ElementLocation elementLocation, string solutionPath, string projectPath)
+        private SdkResolverRequest(int submissionId, string name, string version, string minimumVersion, BuildEventContext buildEventContext, ElementLocation elementLocation, string solutionPath, string projectPath, bool interactive)
         {
             _buildEventContext = buildEventContext;
             _submissionId = submissionId;
@@ -36,11 +37,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _projectPath = projectPath;
             _solutionPath = solutionPath;
             _version = version;
+            _interactive = interactive;
         }
 
         public BuildEventContext BuildEventContext => _buildEventContext;
 
         public ElementLocation ElementLocation => _elementLocation;
+
+        public bool Interactive => _interactive;
 
         public string MinimumVersion => _minimumVersion;
 
@@ -58,17 +62,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public string Version => _version;
 
-        public static SdkResolverRequest Create(int submissionId, SdkReference sdkReference, BuildEventContext buildEventContext, ElementLocation elementLocation, string solutionPath, string projectPath)
+        public static SdkResolverRequest Create(int submissionId, SdkReference sdkReference, BuildEventContext buildEventContext, ElementLocation elementLocation, string solutionPath, string projectPath, bool interactive)
         {
-            return new SdkResolverRequest(submissionId, sdkReference.Name, sdkReference.Version, sdkReference.MinimumVersion, buildEventContext, elementLocation, solutionPath, projectPath);
+            return new SdkResolverRequest(submissionId, sdkReference.Name, sdkReference.Version, sdkReference.MinimumVersion, buildEventContext, elementLocation, solutionPath, projectPath, interactive);
         }
 
-        public static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        public static INodePacket FactoryForDeserialization(ITranslator translator)
         {
             return new SdkResolverRequest(translator);
         }
 
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref _buildEventContext);
             translator.Translate(ref _elementLocation, ElementLocation.FactoryForDeserialization);
@@ -78,6 +82,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             translator.Translate(ref _solutionPath);
             translator.Translate(ref _submissionId);
             translator.Translate(ref _version);
+            translator.Translate(ref _interactive);
         }
     }
 }

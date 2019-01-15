@@ -148,6 +148,16 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        public static void VerifyThrowInternalLength<T>(T[] parameterValue, string parameterName)
+        {
+            VerifyThrowInternalNull(parameterValue, parameterName);
+
+            if (parameterValue.Length == 0)
+            {
+                ThrowInternalError("{0} unexpectedly empty", parameterName);
+            }
+        }
+
         /// <summary>
         /// Helper to throw an InternalErrorException when the specified parameter is not a rooted path.
         /// This should be used ONLY if this would indicate a bug in MSBuild rather than
@@ -301,7 +311,7 @@ namespace Microsoft.Build.Shared
 #endif
             if (s_throwExceptions)
             {
-                throw new InvalidOperationException(ResourceUtilities.FormatResourceString(resourceName, args));
+                throw new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args));
             }
         }
 
@@ -469,7 +479,7 @@ namespace Microsoft.Build.Shared
 #endif
             if (s_throwExceptions)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString(resourceName, args), innerException);
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
             }
         }
 
@@ -718,7 +728,7 @@ namespace Microsoft.Build.Shared
 
             if (parameter.Length == 0 && s_throwExceptions)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("Shared.ParameterCannotHaveZeroLength", parameterName));
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
             }
         }
         
@@ -734,7 +744,7 @@ namespace Microsoft.Build.Shared
 
             if (FileUtilities.PathIsInvalid(parameter) && s_throwExceptions)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("Shared.ParameterCannotHaveInvalidPathChars", parameterName, parameter));
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveInvalidPathChars", parameterName, parameter));
             }
         }
 
@@ -746,7 +756,7 @@ namespace Microsoft.Build.Shared
         {
             if (parameter != null && parameter.Length == 0 && s_throwExceptions)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("Shared.ParameterCannotHaveZeroLength", parameterName));
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
             }
         }
 
@@ -772,7 +782,7 @@ namespace Microsoft.Build.Shared
                 // Most ArgumentNullException overloads append its own rather clunky multi-line message. 
                 // So use the one overload that doesn't.
                 throw new ArgumentNullException(
-                    ResourceUtilities.FormatResourceString(resourceName, parameterName),
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName),
                     (Exception)null);
             }
         }
@@ -791,7 +801,7 @@ namespace Microsoft.Build.Shared
 
             if (parameter1.Length != parameter2.Length && s_throwExceptions)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("Shared.ParametersMustHaveTheSameLength", parameter1Name, parameter2Name));
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParametersMustHaveTheSameLength", parameter1Name, parameter2Name));
             }
         }
 

@@ -35,6 +35,7 @@ namespace Microsoft.Build.Unittest
         internal class ConfigurableMockSdkResolver : SdkResolver
         {
             private readonly Dictionary<string, SdkResult> _resultMap;
+            private readonly Func<SdkReference, SdkResolverContext, SdkResultFactory, Framework.SdkResult> _resolveFunc;
 
             public ConcurrentDictionary<string, int> ResolvedCalls { get; } = new ConcurrentDictionary<string, int>();
 
@@ -48,18 +49,30 @@ namespace Microsoft.Build.Unittest
                 _resultMap = resultMap;
             }
 
+            public ConfigurableMockSdkResolver(Func<SdkReference, SdkResolverContext, SdkResultFactory, Framework.SdkResult> resolveFunc)
+            {
+                _resolveFunc = resolveFunc;
+            }
+
             public override string Name => nameof(ConfigurableMockSdkResolver);
 
             public override int Priority => int.MaxValue;
 
             public override Framework.SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)
             {
+                if (_resolveFunc != null)
+                {
+                    return _resolveFunc(sdkReference, resolverContext, factory);
+                }
+
                 ResolvedCalls.AddOrUpdate(sdkReference.Name, k => 1, (k, c) => c + 1);
 
                 return _resultMap.TryGetValue(sdkReference.Name, out var result)
                     ? new SdkResult(sdkReference, result.Path, result.Version, null)
                     : null;
             }
+
+
         }
 
         internal class FileBasedMockSdkResolver : SdkResolver

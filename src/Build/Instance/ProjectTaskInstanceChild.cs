@@ -12,7 +12,7 @@ namespace Microsoft.Build.Execution
     /// Type for TaskOutputItem and TaskOutputProperty
     /// allowing them to be used in a single collection
     /// </summary>
-    public abstract class ProjectTaskInstanceChild : INodePacketTranslatable
+    public abstract class ProjectTaskInstanceChild : ITranslatable
     {
         /// <summary>
         /// Condition on the element
@@ -46,13 +46,13 @@ namespace Microsoft.Build.Execution
             get;
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             // all subclasses should be translateable
             ErrorUtilities.ThrowInternalErrorUnreachable();
         }
 
-        internal static ProjectTaskInstanceChild FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectTaskInstanceChild FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectTaskInstanceChild>();
         }

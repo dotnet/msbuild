@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             table1.Add(new ProjectItemInstance(project, "i2", "a%3b1", project.FullPath));
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
             lookup.PopulateWithItem(new ProjectItemInstance(project, "i1", "a2", project.FullPath));
             lookup.PopulateWithItem(new ProjectItemInstance(project, "i2", "a%282", project.FullPath));
 
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             table1.Add(new ProjectItemInstance(project, "i2", "a%3b1", project.FullPath));
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Should return item from the secondary table.
             Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
@@ -70,9 +70,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x"); // Doesn't matter really
+            lookup.EnterScope("x"); // Doesn't matter really
 
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
         }
 
         /// <summary>
@@ -89,22 +89,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // We see the one item
             Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.Equal(1, lookup.GetItems("i1").Count);
+            Assert.Single(lookup.GetItems("i1"));
 
             // One item in the project
             Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.Equal(1, table1["i1"].Count);
+            Assert.Single(table1["i1"]);
 
             // Start a target
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
             // We see the one item 
             Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.Equal(1, lookup.GetItems("i1").Count);
+            Assert.Single(lookup.GetItems("i1"));
 
             // One item in the project
             Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.Equal(1, table1["i1"].Count);
+            Assert.Single(table1["i1"]);
 
             // Start a task (eg) and add a new item
             Lookup.Scope enteredScope2 = lookup.EnterScope("x");
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // But there's still one item in the project
             Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.Equal(1, table1["i1"].Count);
+            Assert.Single(table1["i1"]);
 
             // Finish the task
             enteredScope2.LeaveScope();
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // But there's still one item in the project
             Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.Equal(1, table1["i1"].Count);
+            Assert.Single(table1["i1"]);
 
             // Finish the target
             enteredScope.LeaveScope();
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Only two of the items should have the 'a1' include.
             Assert.Equal(2, group.Where(item => item.EvaluatedInclude == "a1").Count());
             // And ensure the other item got added.
-            Assert.Equal(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
+            Assert.Single(group.Where(item => item.EvaluatedInclude == "a2"));
 
             scope.LeaveScope();
 
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Only two of the items should have the 'a1' include.
             Assert.Equal(2, group.Where(item => item.EvaluatedInclude == "a1").Count());
             // And ensure the other item got added.
-            Assert.Equal(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
+            Assert.Single(group.Where(item => item.EvaluatedInclude == "a2"));
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(4, group.Where(item => item.EvaluatedInclude == "a1").Count());
 
             // One item will have the a2 include
-            Assert.Equal(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
+            Assert.Single(group.Where(item => item.EvaluatedInclude == "a2"));
 
             scope.LeaveScope();
 
@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(4, group.Where(item => item.EvaluatedInclude == "a1").Count());
 
             // One item will have the a2 include
-            Assert.Equal(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
+            Assert.Single(group.Where(item => item.EvaluatedInclude == "a2"));
         }
 
         [Fact]
@@ -271,33 +271,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.RemoveItem(item1);
 
             // We see one item
-            Assert.Equal(1, lookup.GetItems("i1").Count);
+            Assert.Single(lookup.GetItems("i1"));
             Assert.Equal("a2", lookup.GetItems("i1").First().EvaluatedInclude);
 
             // Remove the other item
             lookup.RemoveItem(item2);
 
             // We see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
 
             // Finish the task
             enteredScope2.LeaveScope();
 
             // We still see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
 
             // But there's still one item in the project
             Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.Equal(1, table1["i1"].Count);
+            Assert.Single(table1["i1"]);
 
             // Finish the target
             enteredScope.LeaveScope();
 
             // We still see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
 
             // And now there are no items in the project either
-            Assert.Equal(0, table1["i1"].Count);
+            Assert.Empty(table1["i1"]);
         }
 
         [Fact]
@@ -315,44 +315,44 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.PopulateWithItem(item1);
 
             // We see it
-            Assert.Equal(1, lookup.GetItems("i1").Count);
+            Assert.Single(lookup.GetItems("i1"));
 
             // Make a clone so we can keep an eye on that item
             Lookup lookup2 = lookup.Clone();
 
             // We can see the item in the clone
-            Assert.Equal(1, lookup2.GetItems("i1").Count);
+            Assert.Single(lookup2.GetItems("i1"));
 
             // Start a task (eg)
             Lookup.Scope enteredScope2 = lookup.EnterScope("x");
 
             // We see the item below
-            Assert.Equal(1, lookup.GetItems("i1").Count);
+            Assert.Single(lookup.GetItems("i1"));
 
             // Remove that item
             lookup.RemoveItem(item1);
 
             // We see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
 
             // The clone is unaffected so far
-            Assert.Equal(1, lookup2.GetItems("i1").Count);
+            Assert.Single(lookup2.GetItems("i1"));
 
             // Finish the task
             enteredScope2.LeaveScope();
 
             // We still see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
 
             // But now the clone doesn't either
-            Assert.Equal(0, lookup2.GetItems("i1").Count);
+            Assert.Empty(lookup2.GetItems("i1"));
 
             // Finish the target
             enteredScope.LeaveScope();
 
             // We still see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
-            Assert.Equal(0, lookup2.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
+            Assert.Empty(lookup2.GetItems("i1"));
         }
 
         [Fact]
@@ -373,25 +373,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup.Scope enteredScope2 = lookup.EnterScope("x");
 
             // We see the item below
-            Assert.Equal(1, lookup.GetItems("i1").Count);
+            Assert.Single(lookup.GetItems("i1"));
 
             // Remove that item
             lookup.RemoveItem(item1);
 
             // We see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
 
             // Finish the task
             enteredScope2.LeaveScope();
 
             // We still see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
 
             // Finish the target
             enteredScope.LeaveScope();
 
             // We still see no items
-            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Empty(lookup.GetItems("i1"));
         }
 
         /// <summary>
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone.
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata2);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -447,7 +447,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -485,7 +485,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // All metadata are present
             Assert.Equal("m1", group.First().GetMetadataValue("m1"));
@@ -500,7 +500,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata2);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // All metadata are gone
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -510,7 +510,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // All metadata are gone
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -545,7 +545,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone.
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -563,7 +563,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata2);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1, m2 and m3 are gone
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -576,7 +576,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1, m2 and m3 are gone
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -616,7 +616,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone.
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -634,7 +634,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata2);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -646,7 +646,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 is still here.
             Assert.Equal("m1", group.First().GetMetadataValue("m1"));
@@ -694,7 +694,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope2.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 should still be here
             Assert.Equal("m1", group.First().GetMetadataValue("m1"));
@@ -705,7 +705,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 should still be here
             Assert.Equal("m1", group.First().GetMetadataValue("m1"));
@@ -737,7 +737,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone.
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -746,7 +746,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope2.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone.
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -755,7 +755,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
 
             // m1 and m2 are gone.
             Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
@@ -787,7 +787,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Now it has m=m2
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
             Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // But the original item hasn't changed yet
@@ -797,7 +797,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It still has m=m2
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
             Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // The original item still hasn't changed
@@ -808,7 +808,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It still has m=m2
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
             Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // But now the original item has changed
@@ -830,7 +830,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Make a modification to the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -840,7 +840,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             group.Add(item1);
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
-            Lookup.Scope enteredScope2 = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Make another modification to the item
             newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -850,7 +850,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's now m=m3, n=n2, o=o3
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
             Assert.Equal("m3", group.First().GetMetadataValue("m"));
             Assert.Equal("n2", group.First().GetMetadataValue("n"));
             Assert.Equal("o3", group.First().GetMetadataValue("o"));
@@ -871,7 +871,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Make a modification to the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -887,7 +887,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's now m=m2
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
             Assert.Equal("m2", group.First().GetMetadataValue("m"));
         }
 
@@ -912,7 +912,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's still m=m1, n=n1, o=o1
             ICollection<ProjectItemInstance> group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
             Assert.Equal("m1", group.First().GetMetadataValue("m"));
             Assert.Equal("n1", group.First().GetMetadataValue("n"));
             Assert.Equal("o1", group.First().GetMetadataValue("o"));
@@ -927,7 +927,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's now m=m2, n=n2, o=o1
             ICollection<ProjectItemInstance> foundGroup = lookup.GetItems("i1");
-            Assert.Equal(1, foundGroup.Count);
+            Assert.Single(foundGroup);
             Assert.Equal("m2", foundGroup.First().GetMetadataValue("m"));
             Assert.Equal("n2", foundGroup.First().GetMetadataValue("n"));
             Assert.Equal("o1", foundGroup.First().GetMetadataValue("o"));
@@ -939,7 +939,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's now m=m2, n=n3, o=o1
             foundGroup = lookup.GetItems("i1");
-            Assert.Equal(1, foundGroup.Count);
+            Assert.Single(foundGroup);
             Assert.Equal("m2", foundGroup.First().GetMetadataValue("m"));
             Assert.Equal("n3", foundGroup.First().GetMetadataValue("n"));
             Assert.Equal("o1", foundGroup.First().GetMetadataValue("o"));
@@ -953,7 +953,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's still m=m2, n=n3, o=o1
             foundGroup = lookup.GetItems("i1");
-            Assert.Equal(1, foundGroup.Count);
+            Assert.Single(foundGroup);
             Assert.Equal("m2", foundGroup.First().GetMetadataValue("m"));
             Assert.Equal("n3", foundGroup.First().GetMetadataValue("n"));
             Assert.Equal("o1", foundGroup.First().GetMetadataValue("o"));
@@ -988,7 +988,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Now it has m=m2
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
             Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // But the original item hasn't changed yet
@@ -998,7 +998,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It still has m=m2
             group = lookup.GetItems("i1");
-            Assert.Equal(1, group.Count);
+            Assert.Single(group);
             Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // But now the original item has changed as well
@@ -1046,7 +1046,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
             ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
-            Assert.Equal(1, group2.Count);
+            Assert.Single(group2);
             ProjectItemInstance item1b = group2.First();
 
             // Modify to m=m3
@@ -1058,7 +1058,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Modifications are visible
             ICollection<ProjectItemInstance> group4 = lookup.GetItems(item1b.ItemType);
-            Assert.Equal(1, group4.Count);
+            Assert.Single(group4);
             Assert.Equal("m3", group4.First().GetMetadataValue("m"));
 
             // Leave scope
@@ -1066,7 +1066,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Still visible
             ICollection<ProjectItemInstance> group5 = lookup.GetItems(item1b.ItemType);
-            Assert.Equal(1, group5.Count);
+            Assert.Single(group5);
             Assert.Equal("m3", group5.First().GetMetadataValue("m"));
         }
 
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
             ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
-            Assert.Equal(1, group2.Count);
+            Assert.Single(group2);
             ProjectItemInstance item1b = group2.First();
 
             // Modify to m=m3
@@ -1109,7 +1109,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Modifications are visible
             ICollection<ProjectItemInstance> group4 = lookup.GetItems(item1b.ItemType);
-            Assert.Equal(1, group4.Count);
+            Assert.Single(group4);
             Assert.Equal("m3", group4.First().GetMetadataValue("m"));
 
             // Leave scope
@@ -1117,7 +1117,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Still visible
             ICollection<ProjectItemInstance> group5 = lookup.GetItems(item1b.ItemType);
-            Assert.Equal(1, group5.Count);
+            Assert.Single(group5);
             Assert.Equal("m3", group5.First().GetMetadataValue("m"));
 
             // And the one in the project is changed
@@ -1139,7 +1139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Make a modification to the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -1150,7 +1150,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
             ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
-            Assert.Equal(1, group2.Count);
+            Assert.Single(group2);
             ProjectItemInstance item1b = group2.First();
 
             // Remove the item
@@ -1158,7 +1158,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // There's now no items at all
             ICollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
-            Assert.Equal(0, group3.Count);
+            Assert.Empty(group3);
         }
 
         /// <summary>
@@ -1187,7 +1187,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
             ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
-            Assert.Equal(1, group2.Count);
+            Assert.Single(group2);
             ProjectItemInstance item1b = group2.First();
 
             // Remove the item
@@ -1195,13 +1195,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // There's now no items at all
             ICollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
-            Assert.Equal(0, group3.Count);
+            Assert.Empty(group3);
 
             // Leave scope
             enteredScope.LeaveScope();
 
             // And now none left in the project either
-            Assert.Equal(0, table1["i1"].Count);
+            Assert.Empty(table1["i1"]);
         }
 
         /// <summary>
@@ -1218,7 +1218,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(property, lookup.GetProperty("p1"));
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             Assert.Equal(property, lookup.GetProperty("p1"));
         }
@@ -1232,11 +1232,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> group = new PropertyDictionary<ProjectPropertyInstance>();
             Lookup lookup = LookupHelpers.CreateLookup(group);
 
-            Assert.Equal(null, lookup.GetProperty("p1"));
+            Assert.Null(lookup.GetProperty("p1"));
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
-            Assert.Equal(null, lookup.GetProperty("p1"));
+            Assert.Null(lookup.GetProperty("p1"));
         }
 
         /// <summary>
@@ -1286,149 +1286,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Now the lookup and original group are updated
             Assert.Equal("v4", lookup.GetProperty("p1").EvaluatedValue);
             Assert.Equal("v4", group["p1"].EvaluatedValue);
-        }
-
-#if false
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void LeaveTooMuch()
-        {
-            Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
-            enteredScope.LeaveScope();
-            enteredScope.LeaveScope();
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void RemoveScopeOnDifferentThread()
-        {
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            scopePassedBetweenThreads.LeaveScope();
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void PopulateWithItemOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.PopulateWithItem(new ProjectItemInstance(project, "x", "y"));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void PopulateWithItemsOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.PopulateWithItems("x", new List<ProjectItemInstance>());
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void AddNewItemOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.AddNewItem(new ProjectItemInstance(project, "x", "y"));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void AddNewItemsOnDifferentThread()
-        {
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.AddNewItemsOfItemType("x", new List<ProjectItemInstance>());
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void RemoveItemOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.RemoveItem(new ProjectItemInstance(project, "x", "y"));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void RemoveItemsOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            List<ProjectItemInstance> list = new List<ProjectItemInstance>();
-            list.Add(new ProjectItemInstance(project, "x", "y"));
-            lookupPassedBetweenThreads.RemoveItems(list);
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void ModifyItemOnDifferentThread()
-        {
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.ModifyItems("x", new List<ProjectItemInstance>(), new Dictionary<string,string>());
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void SetPropertyOnDifferentThread()
-        {
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.SetProperty(ProjectPropertyInstance.Create("x", "y"));
-        }
-#endif
-
-        /// <summary>
-        /// No ideal but simple way to get the lookup from another thread
-        /// </summary>
-        private static Lookup s_lookupPassedBetweenThreads;
-
-        /// <summary>
-        /// Pass scope to other thread
-        /// </summary>
-        private static Lookup.Scope s_scopePassedBetweenThreads;
-
-        private void CreateLookupAndEnterScope()
-        {
-            s_lookupPassedBetweenThreads = LookupHelpers.CreateEmptyLookup();
-            s_scopePassedBetweenThreads = s_lookupPassedBetweenThreads.EnterScope("x");
         }
     }
 

@@ -19,7 +19,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the result items for a single target as well as the overall result code.
     /// </summary>
-    public class TargetResult : ITargetResult, INodePacketTranslatable
+    public class TargetResult : ITargetResult, ITranslatable
     {
         /// <summary>
         /// The result for this target.
@@ -57,9 +57,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Private constructor for deserialization
         /// </summary>
-        private TargetResult(INodePacketTranslator translator)
+        private TargetResult(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static TargetResult FactoryForDeserialization(INodePacketTranslator translator)
+        internal static TargetResult FactoryForDeserialization(ITranslator translator)
         {
             return new TargetResult(translator);
         }
@@ -212,7 +212,7 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                INodePacketTranslator translator = GetResultsCacheTranslator(configId, targetName, TranslationDirection.WriteToStream);
+                ITranslator translator = GetResultsCacheTranslator(configId, targetName, TranslationDirection.WriteToStream);
 
                 // If the translator is null, it means these results were cached once before.  Since target results are immutable once they
                 // have been created, there is no point in writing them again.
@@ -235,7 +235,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Performs the actual translation
         /// </summary>
-        private void InternalTranslate(INodePacketTranslator translator)
+        private void InternalTranslate(ITranslator translator)
         {
             translator.Translate(ref _result, WorkUnitResult.FactoryForDeserialization);
             translator.Translate(ref _targetFailureDoesntCauseBuildFailure);
@@ -251,7 +251,7 @@ namespace Microsoft.Build.Execution
             {
                 if (_itemsStore == null)
                 {
-                    INodePacketTranslator translator = GetResultsCacheTranslator(_cacheInfo.ConfigId, _cacheInfo.TargetName, TranslationDirection.ReadFromStream);
+                    ITranslator translator = GetResultsCacheTranslator(_cacheInfo.ConfigId, _cacheInfo.TargetName, TranslationDirection.ReadFromStream);
 
                     try
                     {
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private static INodePacketTranslator GetResultsCacheTranslator(int configId, string targetToCache, TranslationDirection direction)
+        private static ITranslator GetResultsCacheTranslator(int configId, string targetToCache, TranslationDirection direction)
         {
             string cacheFile = GetCacheFile(configId, targetToCache);
             if (direction == TranslationDirection.WriteToStream)
@@ -281,11 +281,11 @@ namespace Microsoft.Build.Execution
                     return null;
                 }
 
-                return NodePacketTranslator.GetWriteTranslator(File.Create(cacheFile));
+                return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
             }
             else
             {
-                return NodePacketTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
+                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
             }
         }
 
@@ -319,7 +319,7 @@ namespace Microsoft.Build.Execution
         /// useful to keep separate as it is where we spend most of our time serializing for large projects, and these are the bits
         /// we throw out of memory when the cache gets collected.
         /// </summary>
-        private class ItemsStore : INodePacketTranslatable
+        private class ItemsStore : ITranslatable
         {
             /// <summary>
             /// The default compression threshold.
@@ -382,7 +382,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Constructor for serialization.
             /// </summary>
-            private ItemsStore(INodePacketTranslator translator)
+            private ItemsStore(ITranslator translator)
             {
                 Translate(translator);
             }
@@ -412,6 +412,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            /*
             /// <summary>
             /// Throws out the deserialized items.
             /// </summary>
@@ -419,7 +420,6 @@ namespace Microsoft.Build.Execution
             /// Not presently used, but could be used for a multi-stage caching mechanism which first throws out decompressed items,
             /// then if more space is needed, starts throwing out the compressed ones.
             /// </remarks>
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Keeping around so that we can potentially expand on our current caching mechanism later")]
             public void ReleaseItems()
             {
                 if (_compressedItems == null)
@@ -427,11 +427,12 @@ namespace Microsoft.Build.Execution
                     CompressItems();
                 }
             }
+            */
 
             /// <summary>
             /// Translates an items store.
             /// </summary>
-            public void Translate(INodePacketTranslator translator)
+            public void Translate(ITranslator translator)
             {
                 if (_compressedItems == null && translator.Mode == TranslationDirection.WriteToStream)
                 {
@@ -450,7 +451,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Factory for the serializer.
             /// </summary>
-            internal static ItemsStore FactoryForDeserialization(INodePacketTranslator translator)
+            internal static ItemsStore FactoryForDeserialization(ITranslator translator)
             {
                 return new ItemsStore(translator);
             }
@@ -476,7 +477,7 @@ namespace Microsoft.Build.Execution
                 {
                     using (DeflateStream inflateStream = new DeflateStream(serializedStream, CompressionMode.Decompress))
                     {
-                        INodePacketTranslator serializedBufferTranslator = NodePacketTranslator.GetReadTranslator(inflateStream, null);
+                        ITranslator serializedBufferTranslator = BinaryTranslator.GetReadTranslator(inflateStream, null);
                         LookasideStringInterner interner = new LookasideStringInterner(serializedBufferTranslator);
 
                         byte[] buffer = null;
@@ -485,7 +486,7 @@ namespace Microsoft.Build.Execution
 
                         using (MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true))
                         {
-                            INodePacketTranslator itemTranslator = NodePacketTranslator.GetReadTranslator(itemsStream, null);
+                            ITranslator itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
                             _uncompressedItems = new TaskItem[_itemsCount];
                             for (int i = 0; i < _uncompressedItems.Length; i++)
                             {
@@ -513,14 +514,14 @@ namespace Microsoft.Build.Execution
                 {
                     using (var deflateStream = new DeflateStream(serializedStream, CompressionMode.Compress))
                     {
-                        INodePacketTranslator serializedBufferTranslator = NodePacketTranslator.GetWriteTranslator(deflateStream);
+                        ITranslator serializedBufferTranslator = BinaryTranslator.GetWriteTranslator(deflateStream);
 
                         // Again, a rough calculation of buffer size, this time for an uncompressed buffer.  We assume compression 
                         // will give us 2:1, as it's all text.
                         int defaultUncompressedBufferCapacity = defaultCompressedBufferCapacity * 2;
                         using (var itemsStream = new MemoryStream(defaultUncompressedBufferCapacity))
                         {
-                            INodePacketTranslator itemTranslator = NodePacketTranslator.GetWriteTranslator(itemsStream);
+                            ITranslator itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
 
                             // When creating the interner, we use the number of items as the initial size of the collections since the
                             // number of strings will be of the order of the number of items in the collection.  This assumes basically

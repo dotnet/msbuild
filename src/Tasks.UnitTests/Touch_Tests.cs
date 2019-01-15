@@ -198,13 +198,11 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success);
 
-            Assert.Equal(1, t.TouchedFiles.Length);
+            Assert.Single(t.TouchedFiles);
 
-            Assert.True(
-                engine.Log.Contains
-                (
-                    String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt)
-                )
+            Assert.Contains(
+                String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),
+                engine.Log
             );
         }
 
@@ -225,11 +223,9 @@ namespace Microsoft.Build.UnitTests
             // Not success because the file doesn't exist
             Assert.False(success);
 
-            Assert.True(
-                engine.Log.Contains
-                (
-                    String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt)
-                )
+            Assert.Contains(
+                String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt),
+                engine.Log
             );
         }
 
@@ -251,11 +247,9 @@ namespace Microsoft.Build.UnitTests
             // Success because the file was created.
             Assert.True(success);
 
-            Assert.True(
-                engine.Log.Contains
-                (
-                    String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate")
-                )
+            Assert.Contains(
+                String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate"),
+                engine.Log
             );
         }
 
@@ -279,7 +273,7 @@ namespace Microsoft.Build.UnitTests
             // Failed because of badly formed time string.
             Assert.False(success);
 
-            Assert.True(engine.Log.Contains("MSB3376"));
+            Assert.Contains("MSB3376", engine.Log);
         }
 
         [Fact]
@@ -300,8 +294,8 @@ namespace Microsoft.Build.UnitTests
             // Failed because file is readonly.
             Assert.False(success);
 
-            Assert.True(engine.Log.Contains("MSB3374"));
-            Assert.True(engine.Log.Contains(myreadonly_txt));
+            Assert.Contains("MSB3374", engine.Log);
+            Assert.Contains(myreadonly_txt, engine.Log);
         }
 
         [Fact]
@@ -318,7 +312,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem(myreadonly_txt)
             };
 
-            bool success = Execute(t);
+            Execute(t);
         }
 
         [Fact]
@@ -339,8 +333,8 @@ namespace Microsoft.Build.UnitTests
             // Failed because the target directory didn't exist.
             Assert.False(success);
 
-            Assert.True(engine.Log.Contains("MSB3371"));
-            Assert.True(engine.Log.Contains(nonexisting_txt));
+            Assert.Contains("MSB3371", engine.Log);
+            Assert.Contains(nonexisting_txt, engine.Log);
         }
     }
 }

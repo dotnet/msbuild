@@ -4,6 +4,7 @@
 using System;
 using System.Xml;
 using System.Xml.Schema;
+using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Shared
 {
@@ -12,15 +13,9 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal sealed class BuildEventFileInfo
     {
-        #region Constructors
+        internal static BuildEventFileInfo Empty = new BuildEventFileInfo(ElementLocation.EmptyLocation);
 
-        /// <summary>
-        /// Private default constructor disallows parameterless instantiation.
-        /// </summary>
-        private BuildEventFileInfo()
-        {
-            // do nothing
-        }
+        #region Constructors
 
         /// <summary>
         /// Creates an instance of this class using the given filename/path.

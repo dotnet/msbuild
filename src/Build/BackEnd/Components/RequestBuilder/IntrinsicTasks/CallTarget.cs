@@ -51,9 +51,7 @@ namespace Microsoft.Build.BackEnd
         public bool RunEachTargetSeparately { get; set; } = false;
 
         /// <summary>
-        /// If true the cached result will be returned if present and a if MSBuild
-        /// task is run its result will be cached in a scope (ProjectFileName, GlobalProperties)[TargetNames]
-        /// as a list of build items
+        /// Deprecated. Does nothing.
         /// </summary>
         public bool UseResultsCache { get; set; } = false;
 
@@ -111,7 +109,6 @@ namespace Microsoft.Build.BackEnd
                 buildEngine: this.BuildEngine3,
                 log: this.Log,
                 targetOutputs: _targetOutputs,
-                useResultsCache: this.UseResultsCache,
                 unloadProjectsOnCompletion: false,
                 toolsVersion: null,
                 skipNonexistentTargets: false);

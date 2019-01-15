@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
 
-                Assert.Equal(true, foundDoNotModify);
+                Assert.True(foundDoNotModify);
             }
             finally
             {
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                Project p = ObjectModelHelpers.CreateInMemoryProject(@"
+                ObjectModelHelpers.CreateInMemoryProject(@"
 
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <ProjectExtensions Condition=`'a'=='b'`/>
@@ -189,7 +189,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                Project p = ObjectModelHelpers.CreateInMemoryProject(@"
+                ObjectModelHelpers.CreateInMemoryProject(@"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
                     <ProjectExtensions/>
                     <Import Project=`$(MSBuildBinPath)\\Microsoft.CSharp.Targets` />

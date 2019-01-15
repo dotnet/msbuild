@@ -161,7 +161,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
 
             List<ProjectItem> items = Helpers.MakeList(project.Items);
-            Assert.Equal(1, items.Count);
+            Assert.Single(items);
             Assert.Equal("i", items[0].ItemType);
             Assert.Equal("i1", items[0].EvaluatedInclude);
             Assert.Equal("i1", Helpers.GetFirst(project.GetItems("i")).EvaluatedInclude);
@@ -188,7 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
 
             List<ProjectItem> items = Helpers.MakeList(project.Items);
-            Assert.Equal(1, items.Count);
+            Assert.Single(items);
             Assert.Equal("i", items[0].ItemType);
             Assert.Equal("i(1)", items[0].EvaluatedInclude);
             Assert.Equal("i(1)", Helpers.GetFirst(project.GetItems("i")).EvaluatedInclude);
@@ -290,16 +290,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
                 project.AddItem("i", wildcard);
 
-                string expected = string.Format(
-                    ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-  <ItemGroup>
-    <i Include=""{0}"" />
-  </ItemGroup>
-</Project>"),
-                    wildcard
-                );
-
                 List<ProjectItem> items = Helpers.MakeList(project.Items);
                 Assert.Equal(2, items.Count);
                 Assert.Equal(paths[0], items[0].EvaluatedInclude);
@@ -343,7 +333,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     ? @"c:\" + Guid.NewGuid().ToString() + @"\**\i1"
                     : "/" + Guid.NewGuid().ToString() + "/**/i1");
 
-            Assert.Equal(0, items.Count);
+            Assert.Empty(items);
         }
 
         /// <summary>
@@ -492,7 +482,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.Equal(true, object.ReferenceEquals(item1, item2));
+            Assert.True(object.ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -555,7 +545,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.Equal(true, object.ReferenceEquals(item1, item2));
+            Assert.True(object.ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -580,7 +570,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.Equal(false, object.ReferenceEquals(item1, item2));
+            Assert.False(object.ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -598,7 +588,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item1.AddMetadata("m", "m1");
             project.ReevaluateIfNecessary();
 
-            ProjectItemElement item2 = project.AddItem("i", "i1.xxx")[0].Xml;
+            project.AddItem("i", "i1.xxx");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -622,11 +612,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void AddItemWithMetadata_DoesNotMatchWildcardWithNoMetadata()
         {
             Project project = new Project();
-            ProjectItemElement item1 = project.Xml.AddItem("i", "*.xxx");
+            project.Xml.AddItem("i", "*.xxx");
             project.ReevaluateIfNecessary();
 
             Dictionary<string, string> metadata = new Dictionary<string, string>() { { "m", "m1" } };
-            ProjectItemElement item2 = project.AddItem("i", "i1.xxx", metadata)[0].Xml;
+            project.AddItem("i", "i1.xxx", metadata);
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -906,7 +896,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             // The ProjectItemElement should be the same
             ProjectItemElement newItemElement = Helpers.GetFirst((Helpers.GetFirst(project.Xml.ItemGroups)).Items);
-            Assert.Equal(true, object.ReferenceEquals(item.Xml, newItemElement));
+            Assert.True(object.ReferenceEquals(item.Xml, newItemElement));
         }
 
         /// <summary>
@@ -934,7 +924,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             // The ProjectItemElement should be the same
             ProjectItemElement newItemElement = Helpers.GetLast((Helpers.GetLast(project.Xml.ItemGroups)).Items);
-            Assert.Equal(true, object.ReferenceEquals(item.Xml, newItemElement));
+            Assert.True(object.ReferenceEquals(item.Xml, newItemElement));
         }
 
         /// <summary>
@@ -960,7 +950,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             // The ProjectItemElement should be the same
             ProjectItemElement newItemElement = Helpers.GetLast((Helpers.GetLast(project.Xml.ItemGroups)).Items);
-            Assert.Equal(true, object.ReferenceEquals(item.Xml, newItemElement));
+            Assert.True(object.ReferenceEquals(item.Xml, newItemElement));
         }
 
         /// <summary>
@@ -1195,18 +1185,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
 
             ProjectItemGroupElement itemGroupElement = Helpers.GetFirst(project.Xml.ItemGroups);
-            Assert.Equal(1, Helpers.MakeList(itemGroupElement.Items).Count);
-            Assert.Equal(true, object.ReferenceEquals(itemGroupElement, item.Xml.Parent));
+            Assert.Single(Helpers.MakeList(itemGroupElement.Items));
+            Assert.True(object.ReferenceEquals(itemGroupElement, item.Xml.Parent));
 
-            Assert.Equal(1, Helpers.MakeList(project.Items).Count);
-            Assert.Equal(1, Helpers.MakeList(project.ItemsIgnoringCondition).Count);
+            Assert.Single(Helpers.MakeList(project.Items));
+            Assert.Single(Helpers.MakeList(project.ItemsIgnoringCondition));
 
-            Assert.Equal(0, Helpers.MakeList(project.GetItems("i")).Count);
-            Assert.Equal(0, Helpers.MakeList(project.GetItemsIgnoringCondition("i")).Count);
+            Assert.Empty(Helpers.MakeList(project.GetItems("i")));
+            Assert.Empty(Helpers.MakeList(project.GetItemsIgnoringCondition("i")));
 
-            Assert.Equal(true, object.ReferenceEquals(item, Helpers.GetFirst(project.GetItems("j"))));
-            Assert.Equal(true, object.ReferenceEquals(item, Helpers.GetFirst(project.GetItemsIgnoringCondition("j"))));
-            Assert.Equal(true, object.ReferenceEquals(item, Helpers.GetFirst(project.GetItemsByEvaluatedInclude("i1"))));
+            Assert.True(object.ReferenceEquals(item, Helpers.GetFirst(project.GetItems("j"))));
+            Assert.True(object.ReferenceEquals(item, Helpers.GetFirst(project.GetItemsIgnoringCondition("j"))));
+            Assert.True(object.ReferenceEquals(item, Helpers.GetFirst(project.GetItemsByEvaluatedInclude("i1"))));
         }
 
         /// <summary>
@@ -1243,7 +1233,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             // Item element identity changed unfortunately, but metadata elements should be the same objects.
             ProjectItemElement itemElement = Helpers.GetFirst(Helpers.GetFirst(project.Xml.ItemGroups).Items);
-            Assert.Equal(true, object.ReferenceEquals(itemElement, metadatumElement1.Parent));
+            Assert.True(object.ReferenceEquals(itemElement, metadatumElement1.Parent));
 
             Assert.Equal(2, Helpers.MakeList(itemElement.Metadata).Count);
 
@@ -1290,8 +1280,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItemGroupElement itemGroupElement = Helpers.GetFirst(project.Xml.ItemGroups);
             Assert.Equal(2, Helpers.MakeList(itemGroupElement.Items).Count);
-            Assert.Equal(true, object.ReferenceEquals(itemGroupElement, item.Xml.Parent));
-            Assert.Equal(true, object.ReferenceEquals(itemGroupElement, Helpers.GetFirst(project.GetItems("i")).Xml.Parent));
+            Assert.True(object.ReferenceEquals(itemGroupElement, item.Xml.Parent));
+            Assert.True(object.ReferenceEquals(itemGroupElement, Helpers.GetFirst(project.GetItems("i")).Xml.Parent));
         }
 
         [Theory]
@@ -1319,7 +1309,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
 
             Assert.Equal(0, Helpers.Count(project.Items));
-            Assert.Equal(0, Helpers.MakeList(project.CreateProjectInstance().GetItems("i")).Count);
+            Assert.Empty(Helpers.MakeList(project.CreateProjectInstance().GetItems("i")));
         }
 
         /// <summary>
@@ -1441,17 +1431,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(content);
 
-            Assert.Equal(0, Helpers.MakeList(project.GetItems("i")).Count);
+            Assert.Empty(Helpers.MakeList(project.GetItems("i")));
             List<ProjectItem> itemsIgnoringCondition = Helpers.MakeList(project.GetItemsIgnoringCondition("i"));
-            Assert.Equal(1, itemsIgnoringCondition.Count);
+            Assert.Single(itemsIgnoringCondition);
             ProjectItem item = itemsIgnoringCondition[0];
             Assert.Equal("i1", item.EvaluatedInclude);
 
             bool result = project.RemoveItem(item);
 
-            Assert.Equal(false, result); // false as it was not in the regular items collection
+            Assert.False(result); // false as it was not in the regular items collection
             itemsIgnoringCondition = Helpers.MakeList(project.GetItemsIgnoringCondition("i"));
-            Assert.Equal(0, itemsIgnoringCondition.Count);
+            Assert.Empty(itemsIgnoringCondition);
         }
 
         [Theory]
@@ -1537,7 +1527,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetProperty("OutDir", "foo"); // should not throw
 
             Assert.Equal("foo", project.GetPropertyValue("OutDir"));
-            Assert.Equal(1, Helpers.MakeList(xml.Properties).Count);
+            Assert.Single(Helpers.MakeList(xml.Properties));
         }
 
         /// <summary>
@@ -1579,11 +1569,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Project project = new Project();
             project.SetProperty("p", "v1");
-            Assert.Equal(true, project.IsDirty);
+            Assert.True(project.IsDirty);
             project.ReevaluateIfNecessary();
 
             project.SetProperty("p", "v1");
-            Assert.Equal(false, project.IsDirty);
+            Assert.False(project.IsDirty);
         }
 
         /// <summary>
@@ -1780,11 +1770,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.Xml.ItemGroups.First().Parent.RemoveAllChildren();
             project.AddItem("i", "i2");
 
-            Assert.Equal(1, project.Xml.Items.Count());
+            Assert.Single(project.Xml.Items);
 
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(1, project.Items.Count());
+            Assert.Single(project.Items);
         }
 
         /// <summary>
@@ -1799,7 +1789,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             property.Xml.Parent.RemoveAllChildren();
             project.SetProperty("p", "v2");
 
-            Assert.Equal(1, project.Xml.Properties.Count());
+            Assert.Single(project.Xml.Properties);
 
             project.ReevaluateIfNecessary();
 
@@ -1818,7 +1808,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             property.Xml.Parent.Parent.RemoveAllChildren();
             project.SetProperty("p", "v2");
 
-            Assert.Equal(1, project.Xml.Properties.Count());
+            Assert.Single(project.Xml.Properties);
 
             project.ReevaluateIfNecessary();
 
@@ -1843,7 +1833,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
 
-            Assert.Equal(null, project.GetProperty("p1"));
+            Assert.Null(project.GetProperty("p1"));
             ProjectInstance instance = project.CreateProjectInstance();
             Assert.Equal(String.Empty, instance.GetPropertyValue("p1"));
             Assert.Equal(0, Helpers.Count(project.Properties) - environmentPropertyCount);
@@ -1955,7 +1945,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectItem> items = Helpers.MakeList(project.Items);
             Assert.Equal("m2", items[0].GetMetadataValue("m"));
-            Assert.Equal(true, object.ReferenceEquals(metadatum1, metadatum2));
+            Assert.True(object.ReferenceEquals(metadatum1, metadatum2));
         }
 
         /// <summary>
@@ -1968,7 +1958,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             IList<ProjectItem> items = project.AddItem("i", "a;b");
 
-            Assert.Equal(true, object.ReferenceEquals(items[0].Xml, items[1].Xml));
+            Assert.True(object.ReferenceEquals(items[0].Xml, items[1].Xml));
             Assert.Equal("a;b", items[0].UnevaluatedInclude);
 
             items = Helpers.MakeList(project.Items);
@@ -2025,7 +2015,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item = Helpers.GetFirst(project.Items);
 
-            ProjectMetadata metadatum = item.SetMetadataValue("m", "%(l)");
+            item.SetMetadataValue("m", "%(l)");
 
             Assert.Equal("l1", item.GetMetadata("m").EvaluatedValue);
             Assert.Equal("%(l)", item.GetMetadata("m").Xml.Value);
@@ -2100,7 +2090,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
 
             List<ProjectItem> items = Helpers.MakeList(project.Items);
-            Assert.Equal(1, items.Count);
+            Assert.Single(items);
             Assert.Equal("i", items[0].ItemType);
             Assert.Equal("i1", items[0].EvaluatedInclude);
             Assert.Equal("i1", Helpers.GetFirst(project.GetItems("i")).EvaluatedInclude);
@@ -2127,7 +2117,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
 
             List<ProjectItem> items = Helpers.MakeList(project.Items);
-            Assert.Equal(1, items.Count);
+            Assert.Single(items);
             Assert.Equal("i", items[0].ItemType);
             Assert.Equal("i(1)", items[0].EvaluatedInclude);
             Assert.Equal("i(1)", Helpers.GetFirst(project.GetItems("i")).EvaluatedInclude);
@@ -2229,16 +2219,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
                 project.AddItemFast("i", wildcard);
 
-                string expected = string.Format
-                (
-                        ObjectModelHelpers.CleanupFileContents(
-                            @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-                            <ItemGroup>
-                                <i Include=""{0}"" />
-                            </ItemGroup>
-                            </Project>"),
-                    wildcard);
-
                 List<ProjectItem> items = Helpers.MakeList(project.Items);
                 Assert.Equal(2, items.Count);
                 Assert.Equal(paths[0], items[0].EvaluatedInclude);
@@ -2279,7 +2259,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             IList<ProjectItem> items = project.AddItemFast("i",
                 NativeMethodsShared.IsWindows ? @"c:\" + Guid.NewGuid().ToString() + @"\**\i1" : "/" + Guid.NewGuid().ToString() + "/**/i1");
 
-            Assert.Equal(0, items.Count);
+            Assert.Empty(items);
         }
 
         /// <summary>
@@ -2428,7 +2408,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.Equal(true, object.ReferenceEquals(item1, item2));
+            Assert.True(object.ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -2487,7 +2467,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.Equal(true, object.ReferenceEquals(item1, item2));
+            Assert.True(object.ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -2512,7 +2492,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.Equal(false, object.ReferenceEquals(item1, item2));
+            Assert.False(object.ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -2530,7 +2510,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item1.AddMetadata("m", "m1");
             project.ReevaluateIfNecessary();
 
-            ProjectItemElement item2 = project.AddItemFast("i", "i1.xxx")[0].Xml;
+            project.AddItemFast("i", "i1.xxx");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2554,11 +2534,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void AddItemFastWithMetadata_DoesNotMatchWildcardWithNoMetadata()
         {
             Project project = new Project();
-            ProjectItemElement item1 = project.Xml.AddItem("i", "*.xxx");
+            project.Xml.AddItem("i", "*.xxx");
             project.ReevaluateIfNecessary();
 
             Dictionary<string, string> metadata = new Dictionary<string, string>() { { "m", "m1" } };
-            ProjectItemElement item2 = project.AddItemFast("i", "i1.xxx", metadata)[0].Xml;
+            project.AddItemFast("i", "i1.xxx", metadata);
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2626,7 +2606,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var initialXml = project.Xml.RawXml;
             var item = project.Items.ElementAt(itemIndex);
 
-            var ex = Assert.Throws(typeof(InvalidOperationException), () => itemOperation(project, item));
+            var ex = Assert.Throws<InvalidOperationException>(() => itemOperation(project, item));
 
             Assert.Matches("The requested operation needs to split the item element at location .* into individual elements but item element splitting is disabled with .*", ex.Message);
             Assert.False(project.IsDirty, "project should not be dirty after item splitting threw exception");

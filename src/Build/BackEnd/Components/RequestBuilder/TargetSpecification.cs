@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// Contains information about a target name and reference location.
     /// </summary>
     [DebuggerDisplay("Name={TargetName}")]
-    internal class TargetSpecification : INodePacketTranslatable
+    internal class TargetSpecification : ITranslatable
     {
         private string _targetName;
         private ElementLocation _referenceLocation;
@@ -47,16 +47,16 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ElementLocation ReferenceLocation => _referenceLocation;
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _targetName);
             translator.Translate(ref _referenceLocation, ElementLocation.FactoryForDeserialization);
         }
 
-        internal static TargetSpecification FactoryForDeserialization(INodePacketTranslator translator)
+        internal static TargetSpecification FactoryForDeserialization(ITranslator translator)
         {
             var instance = new TargetSpecification();
-            ((INodePacketTranslatable) instance).Translate(translator);
+            ((ITranslatable) instance).Translate(translator);
 
             return instance;
         }

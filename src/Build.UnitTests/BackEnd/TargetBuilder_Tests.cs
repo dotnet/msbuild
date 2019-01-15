@@ -49,6 +49,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
+        #pragma warning disable xUnit1013
+
         /// <summary>
         /// Callback used to receive exceptions from loggers.  Unused here.
         /// </summary>
@@ -56,6 +58,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LoggingException(Exception e)
         {
         }
+
+        #pragma warning restore xUnit1013
 
         /// <summary>
         /// Sets up to run tests.  Creates the host object.
@@ -103,7 +107,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             Assert.True(result.HasResultsForTarget("Empty"));
             Assert.Equal(TargetResultCode.Success, result["Empty"].ResultCode);
-            Assert.Equal(0, result["Empty"].Items.Length);
+            Assert.Empty(result["Empty"].Items);
         }
 
         /// <summary>
@@ -1328,7 +1332,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int currentTask = 0;
             foreach (ProjectTaskInstance task in mockBuilder.ExecutedTasks)
             {
-                Assert.True(String.Equals(task.Name, tasks[currentTask]));
+                Assert.Equal(task.Name, tasks[currentTask]);
                 currentTask++;
             }
         }

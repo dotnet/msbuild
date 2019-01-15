@@ -13,6 +13,8 @@ using Microsoft.Win32;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
+using Xunit.Abstractions;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -164,9 +166,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 </FileList>"
             ;
 
-        public ResolveAssemblyReferenceTestFixture()
+        protected readonly ITestOutputHelper _output;
+
+        public ResolveAssemblyReferenceTestFixture(ITestOutputHelper output)
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", "1");
+
+            _output = output;
         }
 
         public void Dispose()
@@ -787,10 +793,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             else
             {
                 string gacLocation = null;
+#if FEATURE_GAC
                 if (assemblyName.Version != null)
                 {
                     gacLocation = GlobalAssemblyCache.GetLocation(assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, null, null, specificVersion /* this value does not matter if we are passing a full fusion name*/);
                 }
+#endif
                 return gacLocation;
             }
         }
@@ -2755,8 +2763,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-            Console.WriteLine("subKey={0}", subKey);
-            Assert.True(false, "New GetRegistrySubKeyNames parameters encountered, need to add unittesting support");
+            Assert.True(false, $"New GetRegistrySubKeyNames parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
 
@@ -2899,8 +2906,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-            Console.WriteLine("subKey={0}", subKey);
-            Assert.True(false, "New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support");
+            Assert.True(false, $"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
 
@@ -2911,36 +2917,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns>The last write time.</returns>
         private static DateTime GetLastWriteTime(string path)
         {
-            return DateTime.FromOADate(0.0);
-        }
-
-        /// <summary>
-        /// Assert that two strings are equal without regard to case.
-        /// </summary>
-        /// <param name="expected">The expected string.</param>
-        /// <param name="actual">The actual string.</param>
-        internal protected static void AssertNoCase(string expected, string actual)
-        {
-            if (0 != String.Compare(expected, actual, StringComparison.OrdinalIgnoreCase))
-            {
-                string message = String.Format("Expected value '{0}' but received '{1}'", expected, actual);
-                Console.WriteLine(message);
-                Assert.True(false, message);
-            }
-        }
-
-        /// <summary>
-        /// Assert that two strings are equal without regard to case.
-        /// </summary>
-        /// <param name="expected">The expected string.</param>
-        /// <param name="actual">The actual string.</param>
-        internal protected static void AssertNoCase(string message, string expected, string actual)
-        {
-            if (0 != String.Compare(expected, actual, StringComparison.OrdinalIgnoreCase))
-            {
-                Console.WriteLine(message);
-                Assert.True(false, message);
-            }
+            return fileExists(path) ? DateTime.FromFileTimeUtc(1) : DateTime.FromFileTimeUtc(0);
         }
 
         /// <summary>
@@ -3059,11 +3036,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     {
                         loadModeResolvedFiles = (ITaskItem[])t.ResolvedFiles.Clone();
                     }
-                    Assert.Equal(0, t.ResolvedDependencyFiles.Length);
-                    Assert.Equal(0, t.SatelliteFiles.Length);
-                    Assert.Equal(0, t.RelatedFiles.Length);
-                    Assert.Equal(0, t.SuggestedRedirects.Length);
-                    Assert.Equal(0, t.FilesWritten.Length);
+                    Assert.Empty(t.ResolvedDependencyFiles);
+                    Assert.Empty(t.SatelliteFiles);
+                    Assert.Empty(t.RelatedFiles);
+                    Assert.Empty(t.SuggestedRedirects);
+                    Assert.Empty(t.FilesWritten);
 
                     if (buildConsistencyCheck)
                     {
@@ -3116,8 +3093,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 	                    );
                     if (FileUtilities.FileExistsNoThrow(t.StateFile))
                     {
-                        Assert.Equal(1, t.FilesWritten.Length);
-                        Assert.True(t.FilesWritten[0].ItemSpec.Equals(cache, StringComparison.OrdinalIgnoreCase));
+                        Assert.Single(t.FilesWritten);
+                        Assert.Equal(cache, t.FilesWritten[0].ItemSpec);
                     }
 
                     File.Delete(t.StateFile);

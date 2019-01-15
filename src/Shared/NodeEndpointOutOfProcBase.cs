@@ -38,10 +38,12 @@ namespace Microsoft.Build.BackEnd
     {
         #region Private Data
 
+#if NETCOREAPP2_1
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
         /// </summary>
         private const int ClientConnectTimeout = 60000;
+#endif // NETCOREAPP2_1
 
         /// <summary>
         /// The size of the buffers to use for named pipes
@@ -58,15 +60,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LinkStatus _status;
 
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         /// <summary>
         /// The pipe client used by the nodes.
         /// </summary>
         private NamedPipeServerStream _pipeServer;
-#else
-        private AnonymousPipeClientStream _pipeClientToServer;
-        private AnonymousPipeClientStream _pipeServerToClient;
-#endif
 
         // The following private data fields are used only when the endpoint is in ASYNCHRONOUS mode.
 
@@ -109,18 +106,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private SharedReadBuffer _sharedReadBuffer;
 
-        #endregion
+#endregion
 
-        #region INodeEndpoint Events
+#region INodeEndpoint Events
 
         /// <summary>
         /// Raised when the link status has changed.
         /// </summary>
         public event LinkStatusChangedDelegate OnLinkStatusChanged;
 
-        #endregion
+#endregion
 
-        #region INodeEndpoint Properties
+#region INodeEndpoint Properties
 
         /// <summary>
         /// Returns the link status of this node.
@@ -130,13 +127,13 @@ namespace Microsoft.Build.BackEnd
             get { return _status; }
         }
 
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
 
-        #endregion
+#endregion
 
-        #region INodeEndpoint Methods
+#region INodeEndpoint Methods
 
         /// <summary>
         /// Causes this endpoint to wait for the remote endpoint to connect
@@ -181,11 +178,10 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        #endregion
+#endregion
 
-        #region Construction
+#region Construction
 
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
@@ -229,24 +225,8 @@ namespace Microsoft.Build.BackEnd
 #endif
                 );
         }
-#else
-        internal void InternalConstruct(string clientToServerPipeHandle, string serverToClientPipeHandle)
-        {
-            ErrorUtilities.VerifyThrowArgumentLength(clientToServerPipeHandle, "clientToServerPipeHandle");
-            ErrorUtilities.VerifyThrowArgumentLength(serverToClientPipeHandle, "serverToClientPipeHandle");
 
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
-
-            _status = LinkStatus.Inactive;
-            _asyncDataMonitor = new object();
-            _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
-
-            _pipeClientToServer = new AnonymousPipeClientStream(PipeDirection.Out, clientToServerPipeHandle);
-            _pipeServerToClient = new AnonymousPipeClientStream(PipeDirection.In, serverToClientPipeHandle);
-        }
-#endif
-
-        #endregion
+#endregion
 
         /// <summary>
         /// Returns the host handshake for this node endpoint
@@ -279,7 +259,7 @@ namespace Microsoft.Build.BackEnd
             OnLinkStatusChanged?.Invoke(this, newStatus);
         }
 
-        #region Private Methods
+#region Private Methods
 
         /// <summary>
         /// This does the actual work of changing the status and shutting down any threads we may have for
@@ -295,17 +275,12 @@ namespace Microsoft.Build.BackEnd
 #else
             _terminatePacketPump.Dispose();
 #endif
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             _pipeServer.Dispose();
-#else
-            _pipeClientToServer.Dispose();
-            _pipeServerToClient.Dispose();
-#endif
             _packetPump = null;
             ChangeLinkStatus(LinkStatus.Inactive);
         }
 
-        #region Asynchronous Mode Methods
+#region Asynchronous Mode Methods
 
         /// <summary>
         /// Adds a packet to the packet queue when asynchronous mode is enabled.
@@ -345,14 +320,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void PacketPumpProc()
         {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             NamedPipeServerStream localPipeServer = _pipeServer;
             PipeStream localWritePipe = _pipeServer;
             PipeStream localReadPipe = _pipeServer;
-#else
-            PipeStream localWritePipe = _pipeClientToServer;
-            PipeStream localReadPipe = _pipeServerToClient;
-#endif
 
             AutoResetEvent localPacketAvailable = _packetAvailable;
             AutoResetEvent localTerminatePacketPump = _terminatePacketPump;
@@ -371,7 +341,6 @@ namespace Microsoft.Build.BackEnd
 
                 try
                 {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                     // Wait for a connection
 #if FEATURE_APM
                     IAsyncResult resultForConnection = localPipeServer.BeginWaitForConnection(null, null);
@@ -395,7 +364,6 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Parent started connecting. Reading handshake from parent");
 #if FEATURE_APM
                     localPipeServer.EndWaitForConnection(resultForConnection);
-#endif
 #endif
 
                     // The handshake protocol is a simple long exchange.  The host sends us a long, and we
@@ -426,18 +394,12 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_SECURITY_PERMISSIONS
                         WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
-                        string remoteUserName = localPipeServer.GetImpersonationUserName();
 #endif
 
                         if (handshake != GetHostHandshake())
                         {
                             CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshake, GetHostHandshake());
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                             localPipeServer.Disconnect();
-#else
-                            localWritePipe.Dispose();
-                            localReadPipe.Dispose();
-#endif
                             continue;
                         }
 
@@ -456,17 +418,12 @@ namespace Microsoft.Build.BackEnd
                         }
 #endif
                     }
-                    catch (IOException
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
-                    e
-#endif
-                    )
+                    catch (IOException e)
                     {
                         // We will get here when:
                         // 1. The host (OOP main node) connects to us, it immediately checks for user privileges
                         //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
                         // 2. The host is too old sending us bits we automatically reject in the handshake
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
                         if (localPipeServer.IsConnected)
                         {
@@ -474,9 +431,6 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         continue;
-#else
-                        throw;
-#endif
                     }
 
                     gotValidConnection = true;
@@ -489,15 +443,10 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                     if (localPipeServer.IsConnected)
                     {
                         localPipeServer.Disconnect();
                     }
-#else
-                    localWritePipe.Dispose();
-                    localReadPipe.Dispose();
-#endif
 
                     ExceptionHandling.DumpExceptionToFile(e);
                     ChangeLinkStatus(LinkStatus.Failed);
@@ -518,17 +467,11 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 if (localPipeServer.IsConnected)
                 {
                     localPipeServer.WaitForPipeDrain();
                     localPipeServer.Disconnect();
                 }
-#else
-                localReadPipe.Dispose();
-                localWritePipe.WaitForPipeDrain();
-                localWritePipe.Dispose();
-#endif
             }
             catch (Exception)
             {
@@ -606,11 +549,10 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
-                            int packetLength = BitConverter.ToInt32(headerByte, 1);
 
                             try
                             {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, NodePacketTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
                             }
                             catch (Exception e)
                             {
@@ -640,7 +582,7 @@ namespace Microsoft.Build.BackEnd
                             while (localPacketQueue.TryDequeue(out packet))
                             {
                                 MemoryStream packetStream = new MemoryStream();
-                                INodePacketTranslator writeTranslator = NodePacketTranslator.GetWriteTranslator(packetStream);
+                                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
 
                                 packetStream.WriteByte((byte)packet.Type);
 
@@ -684,8 +626,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
     }
 }

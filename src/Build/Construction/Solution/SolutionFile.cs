@@ -611,7 +611,7 @@ namespace Microsoft.Build.Construction
             // as users such as blend opening a dev10 project cannot do anything about it.
             if (Version > slnFileMaxVersion)
             {
-                SolutionParserComments.Add(ResourceUtilities.FormatResourceString("UnrecognizedSolutionComment", Version));
+                SolutionParserComments.Add(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedSolutionComment", Version));
             }
         }
 
@@ -801,7 +801,7 @@ namespace Microsoft.Build.Construction
             catch (SecurityException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -810,7 +810,7 @@ namespace Microsoft.Build.Construction
             catch (NotSupportedException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -819,7 +819,7 @@ namespace Microsoft.Build.Construction
             catch (IOException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -828,7 +828,7 @@ namespace Microsoft.Build.Construction
             catch (UnauthorizedAccessException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -837,7 +837,7 @@ namespace Microsoft.Build.Construction
             catch (XmlException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.InvalidProjectFile",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.InvalidProjectFile",
                    etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);

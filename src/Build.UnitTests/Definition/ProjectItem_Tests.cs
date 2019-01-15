@@ -43,12 +43,12 @@ namespace Microsoft.Build.UnitTests.Definition
             item1.SetMetadataValue("m", "m2");
             item1.SetMetadataValue("n", "n1");
 
-            Assert.Equal(1, Helpers.MakeList(item2.Metadata).Count);
+            Assert.Single(Helpers.MakeList(item2.Metadata));
             Assert.Equal(String.Empty, item2.GetMetadataValue("n"));
             Assert.Equal(1 + 15 /* built-in metadata */, item2.MetadataCount);
 
             // Should still point at the same XML items
-            Assert.Equal(true, Object.ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));
+            Assert.True(Object.ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             IList<ProjectItem> items = GetItemsFromFragment(fragment);
 
-            Assert.Equal(1, items.Count);
+            Assert.Single(items);
             return items[0];
         }
 

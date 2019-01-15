@@ -20,7 +20,7 @@ namespace Microsoft.Build.Logging
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         public void Replay(string sourceFilePath)
         {
-            Replay(sourceFilePath, new CancellationToken(canceled: false));
+            Replay(sourceFilePath, CancellationToken.None);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Logging
                 // that we don't know how to read
                 if (fileFormatVersion > BinaryLogger.FileFormatVersion)
                 {
-                    var text = ResourceUtilities.FormatResourceString("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
+                    var text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
                     throw new NotSupportedException(text);
                 }
 

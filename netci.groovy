@@ -8,10 +8,7 @@ project = GithubProject
 branch = GithubBranchName
 
 // What this repo is using for its machine images at the current time
-imageVersionMap = ['Windows_NT':'latest-dev15-5',
-                    'OSX10.13':'latest-or-auto',
-                    'Ubuntu16.04':'20170731',
-                    'RHEL7.2' : 'latest']
+imageVersionMap = ['RHEL7.2' : 'latest']
 
 def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, shouldSkipTestsWhenResultsNotFound = false, isSourceBuild = false) {
     def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}${isSourceBuild ? '_SourceBuild_' : ''}", isPR)
@@ -74,84 +71,9 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
     }
 }
 
-[true, false].each { isPR ->
-    ['Windows_NT', 'OSX10.13', 'Ubuntu16.04'].each {osName ->
-        def runtimes = ['CoreCLR']
-
-        if (osName == 'Windows_NT') {
-            runtimes.add('Full')
-        }
-
-        // TODO: make this !windows once RHEL builds are working
-        //if (osName.startsWith('Ubuntu') || osName.startsWith('OSX')) {
-            //runtimes.add('Mono')
-            //runtimes.add('MonoTest')
-        //}
-
-        def script = "NA"
-        def machineAffinityOverride = null
-        def shouldSkipTestsWhenResultsNotFound = false
-
-        runtimes.each { runtime ->
-            switch(osName) {
-                case 'Windows_NT':
-
-                    // Protect against VsDevCmd behaviour of changing the current working directory https://developercommunity.visualstudio.com/content/problem/26780/vsdevcmdbat-changes-the-current-working-directory.html
-                    script = "set VSCMD_START_DIR=\"%CD%\" && call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\""
-
-                    if (runtime == "Full") {
-                        script += " && build\\cibuild.cmd"
-                    }
-                    else if (runtime == "CoreCLR") {
-                        script += " && build\\cibuild.cmd -hostType Core"
-                    }
-
-                    // this agent has VS 15.7 on it, which is a min requirement for our repo now.
-                    machineAffinityOverride = 'Windows.10.Amd64.ClientRS3.DevEx.Open'
-
-                    break;
-                case 'OSX10.13':
-                    script = "./build/cibuild.sh"
-
-                    if (runtime == "MonoTest" || runtime == "Mono") {
-                        // default is to run tests!
-                        script += " -hostType mono"
-                    }
-
-                    if (runtime == "Mono") {
-                        // tests are failing on mono right now, so default to
-                        // skipping tests
-                        script += " -skipTests"
-                        shouldSkipTestsWhenResultsNotFound = true
-                    }
-
-                    break;
-                case { it.startsWith('Ubuntu') }:
-                    script = "./build/cibuild.sh"
-
-                    if (runtime == "MonoTest" || runtime == "Mono") {
-                        // default is to run tests!
-                        script += " -hostType mono"
-                    }
-
-                    if (runtime == "Mono") {
-                        // tests are failing on mono right now, so default to
-                        // skipping tests
-                        script += " -skipTests"
-                        shouldSkipTestsWhenResultsNotFound = true
-                    }
-
-                    break;
-            }
-
-            CreateJob(script, runtime, osName, isPR, machineAffinityOverride, shouldSkipTestsWhenResultsNotFound)
-        }
-    }
-}
-
 // sourcebuild simulation
 CreateJob(
-    "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
+    "./build/build.sh build -dotnetBuildFromSource -skiptests -pack -configuration Release",
     "CoreCLR",
     "RHEL7.2",
     true,

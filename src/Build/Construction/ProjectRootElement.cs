@@ -206,7 +206,7 @@ namespace Microsoft.Build.Construction
             _versionOnDisk = Version;
             _timeLastChangedUtc = DateTime.UtcNow;
 
-            XmlDocumentWithLocation document = LoadDocument(path, preserveFormatting);
+            XmlDocumentWithLocation document = LoadDocument(path, preserveFormatting, projectRootElementCache.LoadProjectsReadOnly);
 
             ProjectParser.Parse(document, this);
 
@@ -1592,7 +1592,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInvalidOperation(FileSystems.Default.FileExists(path), "FileToReloadFromDoesNotExist", path);
 
-            XmlDocumentWithLocation DocumentProducer(bool shouldPreserveFormatting) => LoadDocument(path, shouldPreserveFormatting);
+            XmlDocumentWithLocation DocumentProducer(bool shouldPreserveFormatting) => LoadDocument(path, shouldPreserveFormatting, ProjectRootElementCache.LoadProjectsReadOnly);
             ReloadFrom(DocumentProducer, throwIfUnsavedChanges, preserveFormatting);
         }
 
@@ -1979,11 +1979,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <param name="fullPath">The full path to the document to load.</param>
         /// <param name="preserveFormatting"><code>true</code> to preserve the formatting of the document, otherwise <code>false</code>.</param>
-        private XmlDocumentWithLocation LoadDocument(string fullPath, bool preserveFormatting)
+        private XmlDocumentWithLocation LoadDocument(string fullPath, bool preserveFormatting, bool loadAsReadOnly)
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);
 
-            var document = new XmlDocumentWithLocation
+            var document = new XmlDocumentWithLocation(loadAsReadOnly ? true : (bool?) null)
             {
                 FullPath = fullPath,
                 PreserveWhitespace = preserveFormatting
@@ -1998,7 +1998,7 @@ namespace Microsoft.Build.Construction
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
-                    using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath))
+                    using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
                     {
                         _encoding = xtr.Encoding;
                         document.Load(xtr.Reader);

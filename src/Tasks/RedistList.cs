@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
         private readonly ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension> _remappingCache = new ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension>(AssemblyNameComparer.GenericComparerConsiderRetargetable);
 
         // List of cached BlackList RedistList objects, the key is a semi-colon delimited list of data file paths
-        private readonly ConcurrentDictionary<string, Hashtable> _cachedBlackList = new ConcurrentDictionary<string, Hashtable>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, Dictionary<string, string>> _cachedBlackList = new ConcurrentDictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
         
         /***************Fields which are only set in the constructor and should not be modified by the class. **********************/
         // Array of errors encountered while reading files.
@@ -497,10 +497,10 @@ namespace Microsoft.Build.Tasks
         /// 
         /// </summary>
         /// <param name="whiteListAssemblyTableInfo">List of paths to white list xml files</param>
-        /// <returns>A hashtable containing the full assembly names of black listed assemblies as the key, and null as the value. 
+        /// <returns>A dictionary containing the full assembly names of black listed assemblies as the key, and null as the value. 
         ///          If there is no assemblies in the redist list null is returned.
         /// </returns> 
-        internal Hashtable GenerateBlackList(AssemblyTableInfo[] whiteListAssemblyTableInfo, List<Exception> whiteListErrors, List<string> whiteListErrorFileNames)
+        internal Dictionary<string, string> GenerateBlackList(AssemblyTableInfo[] whiteListAssemblyTableInfo, List<Exception> whiteListErrors, List<string> whiteListErrorFileNames)
         {
             // Return null if there are no assemblies in the redist list.
             if (_assemblyList.Count == 0)
@@ -522,7 +522,7 @@ namespace Microsoft.Build.Tasks
 
             string key = keyBuilder.ToString();
 
-            if (!_cachedBlackList.TryGetValue(key, out Hashtable returnTable))
+            if (!_cachedBlackList.TryGetValue(key, out Dictionary<string, string> returnTable))
             {
                 var whiteListAssemblies = new List<AssemblyEntry>();
 
@@ -560,7 +560,7 @@ namespace Microsoft.Build.Tasks
                         if (whiteListErrors.Count == errorsBeforeReadCall)
                         {
                             // The whiteList errors passes back problems reading the redist file through the use of an array containing exceptions
-                            whiteListErrors.Add(new Exception(ResourceUtilities.FormatResourceString("ResolveAssemblyReference.NoSubSetRedistListName", info.Path)));
+                            whiteListErrors.Add(new Exception(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", info.Path)));
                             whiteListErrorFileNames.Add(info.Path);
                         }
                     }
@@ -601,8 +601,8 @@ namespace Microsoft.Build.Tasks
                     blackList.Remove(whiteListEntry.FullName + "," + whiteListEntry.RedistName);
                 }
 
-                // The output hashtable needs to be just the full names and not the names + redist name
-                var blackListOfAssemblyNames = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                // The output dictionary needs to be just the full names and not the names + redist name
+                var blackListOfAssemblyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (string name in blackList.Values)
                 {
                     blackListOfAssemblyNames[name] = null;
@@ -771,7 +771,7 @@ namespace Microsoft.Build.Tasks
                             string hashIndex = String.Format(CultureInfo.InvariantCulture, "{0},{1}", newEntry.FullName, newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString());
 
                             assemblyEntries.TryGetValue(hashIndex, out AssemblyEntry dictionaryEntry);
-                            // If the entry is not in the hashtable or the entry is in the hashtable but the new entry has the ingac flag true, make sure the hashtable contains the entry with the ingac true.
+                            // If the entry is not in the dictionary or the entry is in the dictionary but the new entry has the ingac flag true, make sure the dictionary contains the entry with the ingac true.
                             if (dictionaryEntry == null || newEntry.InGAC)
                             {
                                 assemblyEntries[hashIndex] = newEntry;
