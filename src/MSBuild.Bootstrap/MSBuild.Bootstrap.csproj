@@ -43,7 +43,7 @@
             Condition="'$(CreateBootstrap)' != 'true'"
             Include="$(MSBuildBinPath)\SdkResolvers\**\*" LinkBase="SdkResolvers" CopyToOutputDirectory="PreserveNewest" />
 
-    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
+    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' != 'true'">
