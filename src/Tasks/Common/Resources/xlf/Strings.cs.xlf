@@ -4,47 +4,47 @@
     <body>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="new">NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</target>
+        <target state="translated">NETSDK1079: Balíček Microsoft.AspNetCore.All se při cílení na .NET Core 3.0 nebo vyšší nepodporuje. Místo toho byste měli použít FrameworkReference na Microsoft.AspNetCore.App. Ten implicitně zahrnuje Microsoft.NET.Sdk.Web.</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="new">NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</target>
+        <target state="translated">NETSDK1080: Při cílení na .NET Core 3.0 nebo vyšší se nevyžaduje PackageReference na Microsoft.AspNetCore.App. Pokud použijete Microsoft.NET.Sdk.Web, bude se na sdílenou platformu odkazovat automaticky. V opačném případě byste místo PackageReference měli použít FrameworkReference.</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
-        <target state="new">NETSDK1077: Failed to lock resource.</target>
+        <target state="translated">NETSDK1077: Prostředek se nepovedlo uzamknout.</target>
         <note>{StrBegin="NETSDK1077: "}</note>
       </trans-unit>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
-        <target state="new">NETSDK1076: AddResource can only be used with integer resource types.</target>
+        <target state="translated">NETSDK1076: AddResource se dá použít jenom se zdroji typu celé číslo.</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="InvalidResourceUpdate">
         <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
-        <target state="new">NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</target>
+        <target state="translated">NETSDK1075: Popisovač aktualizace není platný. Tuto instanci nejde použít pro další aktualizace.</target>
         <note>{StrBegin="NETSDK1075: "}</note>
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="new">NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</target>
+        <target state="translated">NETSDK1074: Hostitelský spustitelný soubor aplikace se neupraví, protože pro přidání zdrojů je nutné, aby se sestavení provedlo ve Windows (kromě Nano Serveru).</target>
         <note>{StrBegin="NETSDK1074: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindows">
         <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
-        <target state="new">NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</target>
+        <target state="translated">NETSDK1078: {0} nejde použít jako hostitelský spustitelný soubor aplikace, protože to není soubor Windows PE.</target>
         <note>{StrBegin="NETSDK1078: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
-        <target state="new">NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</target>
+        <target state="translated">NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
-        <target state="new">NETSDK1070: The application configuration file must have root configuration element.</target>
+        <target state="translated">NETSDK1070: Konfigurační soubor aplikace musí obsahovat kořenový element konfigurace.</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
@@ -114,7 +114,7 @@
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
+        <target state="translated">NETSDK1071: PackageReference na balíček {0} určuje verzi {1}. Určení verze tohoto balíčku se nedoporučuje. Další informace najdete na adrese https://aka.ms/sdkimplicitrefs.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
-        <target state="new">NETSDK1073: The FrameworkReference '{0}' was not recognized</target>
+        <target state="translated">NETSDK1073: FrameworkReference {0} nejde rozpoznat.</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -364,7 +364,7 @@
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
         <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: Pracujete se sadou .NET Core SDK verze Preview. Verzi sady SDK můžete definovat prostřednictvím souboru global.json v aktuálním projektu. Další informace najdete na adrese https://go.microsoft.com/fwlink/?linkid=869452.</target>
+        <target state="translated">NETSDK1057: Používáte preview verzi .NET Core. Další informace: https://aka.ms/dotnet-core-preview</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">

@@ -4,47 +4,47 @@
     <body>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="new">NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</target>
+        <target state="translated">NETSDK1079: Das Microsoft.AspNetCore.All-Paket wird nicht unterstützt, wenn .NET Core 3.0 oder höher angezielt wird. Ein FrameworkReference-Verweis auf Microsoft.AspNetCore.App sollte stattdessen verwendet werden. Dieser wird implizit durch Microsoft.NET.Sdk.Web eingefügt.</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="new">NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</target>
+        <target state="translated">NETSDK1080: Ein PackageReference-Verweis auf Microsoft.AspNetCore.App ist nicht notwendig, wenn .NET Core 3.0 oder höher angezielt wird. Wenn Microsoft.NET.Sdk.Web verwendet wird, wird automatisch auf das freigegebene Framework verwiesen. Andernfalls sollte der PackageReference-Verweis durch einen FrameworkReference-Verweis ersetzt werden.</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
-        <target state="new">NETSDK1077: Failed to lock resource.</target>
+        <target state="translated">NETSDK1077: Fehler beim Sperren der Ressource.</target>
         <note>{StrBegin="NETSDK1077: "}</note>
       </trans-unit>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
-        <target state="new">NETSDK1076: AddResource can only be used with integer resource types.</target>
+        <target state="translated">NETSDK1076: AddResource kann nur mit ganzzahligen Ressourcentypen verwendet werden.</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="InvalidResourceUpdate">
         <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
-        <target state="new">NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</target>
+        <target state="translated">NETSDK1075: Das Updatehandle ist ungültig. Diese Instanz kann nicht für weitere Updates verwendet werden.</target>
         <note>{StrBegin="NETSDK1075: "}</note>
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="new">NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</target>
+        <target state="translated">NETSDK1074: Der ausführbare Anwendungshost wird nicht angepasst, da für das Hinzufügen zusätzlicher Ressourcen erforderlich ist, dass der Build unter Windows (ausgenommen Nano Server) durchgeführt wird.</target>
         <note>{StrBegin="NETSDK1074: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindows">
         <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
-        <target state="new">NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</target>
+        <target state="translated">NETSDK1078: "{0}" kann nicht als ausführbarer Anwendungshost verwendet werden, da es sich dabei nicht um eine Windows PE-Datei handelt.</target>
         <note>{StrBegin="NETSDK1078: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
-        <target state="new">NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</target>
+        <target state="translated">NETSDK1072: "{0}" kann nicht als ausführbarer Anwendungshost verwendet werden, da es sich dabei nicht um eine ausführbare Windows-Datei für das CUI-Subsystem (Konsole) handelt.</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
-        <target state="new">NETSDK1070: The application configuration file must have root configuration element.</target>
+        <target state="translated">NETSDK1070: Die Anwendungskonfigurationsdatei muss das Stammkonfigurationselement enthalten.</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
@@ -114,7 +114,7 @@
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
+        <target state="translated">NETSDK1071: Ein PackageReference-Verweis auf "{0}" hat die Version "{1}" angegeben. Die Angabe der Version dieses Pakets wird nicht empfohlen. Weitere Informationen finden Sie unter https://aka.ms/sdkimplicitrefs.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
-        <target state="new">NETSDK1073: The FrameworkReference '{0}' was not recognized</target>
+        <target state="translated">NETSDK1073: Der FrameworkReference-Verweis "{0}" wurde nicht erkannt.</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -322,11 +322,6 @@
         <target state="translated">NETSDK1046: Der TargetFramework-Wert "{0}" ist nicht gültig. Verwenden Sie für mehrere Ziele die Eigenschaft "TargetFrameworks".</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
-      <trans-unit id="SkippingAdditionalProbingPaths">
-        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="translated">NETSDK1048: Für GenerateRuntimeConfigurationFiles wurden "AdditionalProbingPaths" angegeben, sie werden jedoch übersprungen, weil "RuntimeConfigDevPath" leer ist.</target>
-        <note>{StrBegin="NETSDK1048: "}</note>
-      </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
         <target state="translated">NETSDK1049: Die aufgelöste Datei enthält ein fehlerhaftes Image oder keine Metadaten, oder der Zugriff ist aus anderen Gründen nicht möglich. {0} {1}</target>
@@ -336,6 +331,11 @@
         <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
         <target state="translated">NETSDK1050: Die von diesem Projekt verwendete Microsoft.NET.Sdk-Version reicht zur Unterstützung von Verweisen auf Bibliotheken für .NET Standard 1.5 oder höher nicht aus. Installieren Sie mindestens .NET Core SDK 2.0.</target>
         <note>{StrBegin="NETSDK1050: "}</note>
+      </trans-unit>
+      <trans-unit id="SkippingAdditionalProbingPaths">
+        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
+        <target state="translated">NETSDK1048: Für GenerateRuntimeConfigurationFiles wurden "AdditionalProbingPaths" angegeben, sie werden jedoch übersprungen, weil "RuntimeConfigDevPath" leer ist.</target>
+        <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
@@ -364,7 +364,7 @@
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
         <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: Sie arbeiten mit einer Vorschauversion des .NET Core SDK. Sie können die SDK-Version über eine Datei "global.json" im aktuellen Projekt definieren. Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=869452.</target>
+        <target state="translated">NETSDK1057: Sie verwenden eine Vorschauversion von .NET Core. Weitere Informationen: https://aka.ms/dotnet-core-preview</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">

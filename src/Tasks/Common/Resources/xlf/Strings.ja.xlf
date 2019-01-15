@@ -4,47 +4,47 @@
     <body>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="new">NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</target>
+        <target state="translated">NETSDK1079: .NET Core 3.0 以上をターゲットにする場合、Microsoft.AspNetCore.All パッケージはサポートされていません。 代わりに、Microsoft.AspNetCore.App への FrameworkReference を使用する必要があり、それは、Microsoft.NET.Sdk.Web によって暗黙的に含まれます。</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="new">NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</target>
+        <target state="translated">NETSDK1080: .NET Core 3.0 以上をターゲットにする場合は、Microsoft.AspNetCore.App への PackageReference は必要ありません。Microsoft.NET.Sdk.Web を使用する場合、共有のフレームワークは自動的に参照されます。それ以外の場合、PackageReference は、FrameworkReference に置き換える必要があります。</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
-        <target state="new">NETSDK1077: Failed to lock resource.</target>
+        <target state="translated">NETSDK1077: リソースをロックできませんでした。</target>
         <note>{StrBegin="NETSDK1077: "}</note>
       </trans-unit>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
-        <target state="new">NETSDK1076: AddResource can only be used with integer resource types.</target>
+        <target state="translated">NETSDK1076: AddResource は、整数リソース型でのみ使用することができます。</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="InvalidResourceUpdate">
         <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
-        <target state="new">NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</target>
+        <target state="translated">NETSDK1075: 更新ハンドルが有効ではありません。このインスタンスは、以降の更新に使用できない可能性があります。</target>
         <note>{StrBegin="NETSDK1075: "}</note>
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="new">NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</target>
+        <target state="translated">NETSDK1074: リソースを追加するには Windows (Nano Server を除く) でビルドを実行する必要があるため、アプリケーション ホストの実行可能ファイルはカスタマイズされません。</target>
         <note>{StrBegin="NETSDK1074: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindows">
         <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
-        <target state="new">NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</target>
+        <target state="translated">NETSDK1078: Windows PE ファイルではないため、 '{0}' をアプリケーション ホストの実行可能ファイルとして使用できません。</target>
         <note>{StrBegin="NETSDK1078: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
-        <target state="new">NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</target>
+        <target state="translated">NETSDK1072: CUI (コンソール) サブシステムの Windows 実行可能ファイルではないため '{0}' をアプリケーション ホストの実行可能ファイルとして使用できません。</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
-        <target state="new">NETSDK1070: The application configuration file must have root configuration element.</target>
+        <target state="translated">NETSDK1070: アプリケーション構成ファイルには、ルート構成要素が必要です。</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
@@ -114,7 +114,7 @@
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
+        <target state="translated">NETSDK1071: '{0}' への PackageReference は '{1}' のバージョンを指定しました。このパッケージのバージョンを指定することは推奨されません。詳細については、https://aka.ms/sdkimplicitrefs を参照してください</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
-        <target state="new">NETSDK1073: The FrameworkReference '{0}' was not recognized</target>
+        <target state="translated">NETSDK1073: FrameworkReference '{0}' が認識されませんでした</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -364,7 +364,7 @@
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
         <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: .NET Core SDK のプレビュー バージョンで作業をしています。現在のプロジェクトの global.json ファイルによって SDK バージョンを定義できます。詳細については、https://go.microsoft.com/fwlink/?linkid=869452 をご覧ください</target>
+        <target state="translated">NETSDK1057: プレビュー版の .NET Core を使用しています。https://aka.ms/dotnet-core-preview をご覧ください</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
