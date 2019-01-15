@@ -34,7 +34,6 @@ namespace Microsoft.NET.Build.Tasks
         private bool _includeMainProjectInDepsFile = true;
         private HashSet<string> _usedLibraryNames;
         private Dictionary<ReferenceInfo, string> _referenceLibraryNames;
-        
 
         public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
         {
@@ -363,22 +362,20 @@ namespace Microsoft.NET.Build.Tasks
             return runtimePackAssets.GroupBy(asset => asset.PackageName + "/" + asset.PackageVersion).Select(
                 runtimePackAssetGroup =>
                 {
-                    //  Use paths under runtimes as if these files came from NuGet packages, as this appears to be necessary for
-                    //  the host to load them.
+                    //  Prefix paths with a slash to workaround https://github.com/dotnet/core-setup/issues/4978
                     List<RuntimeAssetGroup> runtimeAssemblyGroups = new List<RuntimeAssetGroup>()
                     {
                         new RuntimeAssetGroup(string.Empty,
                             runtimePackAssetGroup.Where(asset => asset.AssetType == AssetType.Runtime)
-                            .Select(asset => CreateRuntimeFile($"runtimes/{asset.PackageRuntimeIdentifier}/lib/netcoreapp3.0/" + asset.DestinationSubPath, asset.SourcePath)))
+                            .Select(asset => CreateRuntimeFile("/" + asset.DestinationSubPath, asset.SourcePath)))
                     };
                     List<RuntimeAssetGroup> nativeLibraryGroups = new List<RuntimeAssetGroup>()
                     {
                         new RuntimeAssetGroup(string.Empty,
                             runtimePackAssetGroup.Where(asset => asset.AssetType == AssetType.Native)
-                            .Select(asset => CreateRuntimeFile($"runtimes/{asset.PackageRuntimeIdentifier}/native/" + asset.DestinationSubPath, asset.SourcePath)))
+                            .Select(asset => CreateRuntimeFile($"/" + asset.DestinationSubPath, asset.SourcePath)))
                     };
                     
-
                     return new RuntimeLibrary("runtimepack",
                         "runtimepack." + runtimePackAssetGroup.First().PackageName,
                         runtimePackAssetGroup.First().PackageVersion,

@@ -24,6 +24,8 @@ namespace Microsoft.NET.Build.Tasks
                 string runtimePackRoot = runtimePack.GetMetadata(MetadataKeys.PackageDirectory);
                 string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
+                //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened
+                //  folder structure and a manifest indicating how the files should be used: https://github.com/dotnet/cli/issues/10442
                 string runtimeAssetsPath = Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "lib", "netcoreapp3.0");
                 string nativeAssetsPath = Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "native");
 
@@ -32,9 +34,12 @@ namespace Microsoft.NET.Build.Tasks
 
                 void AddAsset(string assetPath, string assetType)
                 {
-                    if (Path.GetExtension(assetPath).Equals(".pdb", StringComparison.OrdinalIgnoreCase))
+                    if (assetPath.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase) ||
+                        assetPath.EndsWith(".map", StringComparison.OrdinalIgnoreCase) ||
+                        assetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
                     {
-                        //  Don't add assets for .pdb files
+                        //  Don't add assets for these files (shouldn't be necessary if/once we have a manifest in the runtime pack
+                        //  https://github.com/dotnet/cli/issues/10442
                         return;
                     }
 

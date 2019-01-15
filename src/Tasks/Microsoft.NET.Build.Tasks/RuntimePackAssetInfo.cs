@@ -26,12 +26,19 @@ namespace Microsoft.NET.Build.Tasks
             assetInfo.SourcePath = item.ItemSpec;
             assetInfo.DestinationSubPath = item.GetMetadata(MetadataKeys.DestinationSubPath);
 
-            if (!Enum.TryParse<AssetType>(item.GetMetadata(MetadataKeys.AssetType), ignoreCase: true, out AssetType parsedAssetType) ||
-                (parsedAssetType != AssetType.Native && parsedAssetType != AssetType.Runtime))
+            string assetTypeString = item.GetMetadata(MetadataKeys.AssetType);
+            if (assetTypeString.Equals("runtime", StringComparison.OrdinalIgnoreCase))
+            {
+                assetInfo.AssetType = AssetType.Runtime;
+            }
+            else if (assetTypeString.Equals("native", StringComparison.OrdinalIgnoreCase))
+            {
+                assetInfo.AssetType = AssetType.Native;
+            }
+            else
             {
                 throw new InvalidOperationException("Unexpected asset type: " + item.GetMetadata(MetadataKeys.AssetType));
             }
-            assetInfo.AssetType = parsedAssetType;
 
             assetInfo.PackageName = item.GetMetadata(MetadataKeys.PackageName);
             assetInfo.PackageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
