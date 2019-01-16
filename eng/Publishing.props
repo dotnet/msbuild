@@ -6,25 +6,37 @@
     <Product>Toolset</Product>
     <BlobStoragePartialRelativePath>$(Product)</BlobStoragePartialRelativePath>
     <BlobStoragePartialRelativePath Condition="'$(IsNotOrchestratedPublish)' == 'false'">assets/$(Product)</BlobStoragePartialRelativePath>
-    <PublishToBlobFeedFlatContainer>true</PublishToBlobFeedFlatContainer>
+    <SdkAssetsManifestFilePath>$(ArtifactsLogDir)AssetManifest\$(OS)-$(PlatformName)-SdkAssets.xml</SdkAssetsManifestFilePath>
   </PropertyGroup>
 
   <ItemGroup>
     <SdkAssetsToPublish Include="$(ArtifactsShippingPackagesDir)*.zip" />
   </ItemGroup>
-
-  <Target Name="PrepareCoreSdkAssets" BeforeTargets="Publish">
+  
+  <Target Name="PublishCoreSdkAssets" BeforeTargets="Publish" Condition="$(PublishToAzure)">
     <PropertyGroup>
       <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
       <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
     </PropertyGroup>
 
     <ItemGroup>
-      <ItemsToPushToBlobFeed Include="@(SdkAssetsToPublish)" IsShipping="true" >
+      <SdkAssetsToPushToBlobFeed Include="@(SdkAssetsToPublish)" IsShipping="true" >
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(Version)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
         <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
-      </ItemsToPushToBlobFeed>
+      </SdkAssetsToPushToBlobFeed>
     </ItemGroup>
+
+    <PushToBlobFeed
+      ExpectedFeedUrl="$(DotNetPublishBlobFeedUrl)"
+      AccountKey="$(DotNetPublishBlobFeedKey)"
+      ItemsToPush="@(SdkAssetsToPushToBlobFeed)"
+      ManifestBuildData="Location=$(DotNetPublishBlobFeedUrl)"
+      ManifestRepoUri="$(BUILD_REPOSITORY_URI)"
+      ManifestBranch="$(BUILD_SOURCEBRANCH)"
+      ManifestBuildId="$(BUILD_BUILDNUMBER)"
+      ManifestCommit="$(BUILD_SOURCEVERSION)"
+      AssetManifestPath="$(SdkAssetsManifestFilePath)"
+      PublishFlatContainer="true" />
   </Target>
 
 </Project>
