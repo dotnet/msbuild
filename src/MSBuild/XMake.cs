@@ -2951,7 +2951,7 @@ namespace Microsoft.Build.CommandLine
         {
             for (int i = 0; i < parametersToAggregate.Length; i++)
             {
-                parametersToAggregate[i] = parametersToAggregate[i].Trim(';');
+                parametersToAggregate[i] = parametersToAggregate[i].Trim(MSBuildConstants.SemicolonChar);
             }
 
             // Join the logger parameters into one string seperated by semicolons
