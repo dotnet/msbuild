@@ -195,6 +195,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       <EnsureRuntimePackageDependencies>true</EnsureRuntimePackageDependencies>
     </PropertyGroup>
 
+    <ItemGroup>
+      <_PackAsToolShimRuntimeIdentifiers Include="$(PackAsToolShimRuntimeIdentifiers)"/>
+
+      <!-- Pass these packages into the ResolvePackageAssets task to verify that the restored versions of the packages
+           match the expected version -->
+      <ExpectedPlatformPackages Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.NETCore.App'" />
+      <ExpectedPlatformPackages Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.AspNetCore.App'" />
+      <ExpectedPlatformPackages Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.AspNetCore.All'" />
+    </ItemGroup>
+
     <ResolvePackageAssets 
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectAssetsCacheFile="$(ProjectAssetsCacheFile)"
@@ -207,6 +217,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       DisablePackageAssetsCache="$(DisablePackageAssetsCache)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
+      DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
+      ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
       VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
       ExpectedPlatformPackages="@(ExpectedPlatformPackages)"      
@@ -215,6 +227,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->
       <Output TaskParameter="Analyzers" ItemName="ResolvedAnalyzers" />
+      <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiers" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
