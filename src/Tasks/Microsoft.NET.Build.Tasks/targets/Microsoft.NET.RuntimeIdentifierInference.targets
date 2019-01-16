@@ -143,7 +143,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition="'$(RuntimeIdentifier)' != '' and '$(PlatformTarget)' != ''">
 
-    <NETSdkError Condition="'$(PlatformTarget)' != 'AnyCPU' and !$(RuntimeIdentifier.ToUpper().Contains($(PlatformTarget.ToUpper())))"
+    <NETSdkError Condition="'$(PlatformTarget)' != 'AnyCPU' and !$(RuntimeIdentifier.ToUpperInvariant().Contains($(PlatformTarget.ToUpperInvariant())))"
                  ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget"
                  FormatArguments="$(RuntimeIdentifier);$(PlatformTarget)" />
 

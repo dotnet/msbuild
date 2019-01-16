@@ -176,7 +176,7 @@ namespace Microsoft.NET.TestFramework
             var binFolder = $"{System.IO.Path.DirectorySeparatorChar}bin";
             var objFolder = $"{System.IO.Path.DirectorySeparatorChar}obj";
 
-            directory = directory.ToLower();
+            directory = directory.ToLowerInvariant();
             return directory.EndsWith(binFolder)
                   || directory.EndsWith(objFolder)
                   || IsInBinOrObjFolder(directory);
@@ -189,7 +189,7 @@ namespace Microsoft.NET.TestFramework
             var binFolderWithTrailingSlash =
               $"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}";
 
-            path = path.ToLower();
+            path = path.ToLowerInvariant();
             return path.Contains(binFolderWithTrailingSlash)
                   || path.Contains(objFolderWithTrailingSlash);
         }

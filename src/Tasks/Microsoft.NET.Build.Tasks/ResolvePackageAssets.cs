@@ -1028,7 +1028,7 @@ namespace Microsoft.NET.Build.Tasks
                             WriteCopyLocalMetadata(
                                 package,
                                 Path.GetFileName(asset.Path),
-                                asset.AssetType.ToLower(),
+                                asset.AssetType.ToLowerInvariant(),
                                 destinationSubDirectory: Path.GetDirectoryName(asset.Path) + Path.DirectorySeparatorChar);
                         }
                         else
@@ -1133,7 +1133,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 WriteMetadata(MetadataKeys.AssetType, assetType);
                 WriteMetadata(MetadataKeys.PackageName, package.Name);
-                WriteMetadata(MetadataKeys.PackageVersion, package.Version.ToString().ToLower());
+                WriteMetadata(MetadataKeys.PackageVersion, package.Version.ToString().ToLowerInvariant());
             }
 
             private int GetMetadataIndex(string value)
