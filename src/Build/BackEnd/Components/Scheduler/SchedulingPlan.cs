@@ -473,7 +473,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                string[] values = line.Split(Constants.SpaceChar);
+                string[] values = line.Split(MSBuildConstants.SpaceChar);
                 if (values.Length < 1)
                 {
                     throw new InvalidDataException("Too few values in hierarchy");
@@ -504,7 +504,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                string[] values = line.Split(Constants.SemicolonChar);
+                string[] values = line.Split(MSBuildConstants.SemicolonChar);
                 if (values.Length < 3)
                 {
                     throw new InvalidDataException("Too few values in build plan.");
