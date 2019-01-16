@@ -27,6 +27,7 @@ namespace Microsoft.NET.Build.Tasks
         private IEnumerable<ReferenceInfo> _dependencyReferences;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
         private IEnumerable<string> _excludeFromPublishPackageIds;
+        private IEnumerable<RuntimePackAssetInfo> _runtimePackAssets = Enumerable.Empty<RuntimePackAssetInfo>();
         private CompilationOptions _compilationOptions;
         private string _referenceAssembliesPath;
         private Dictionary<PackageIdentity, string> _filteredPackages;
@@ -126,6 +127,12 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
+        public DependencyContextBuilder WithRuntimePackAssets(IEnumerable<RuntimePackAssetInfo> runtimePackAssets)
+        {
+            _runtimePackAssets = runtimePackAssets;
+            return this;
+        }
+
         public DependencyContextBuilder WithCompilationOptions(CompilationOptions compilationOptions)
         {
             _compilationOptions = compilationOptions;
@@ -177,6 +184,7 @@ namespace Microsoft.NET.Build.Tasks
                 });
             }
             runtimeLibraries = runtimeLibraries
+                .Concat(GetRuntimePackLibraries(_runtimePackAssets))
                 .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>())
                 .Concat(GetDirectReferenceRuntimeLibraries())
                 .Concat(GetDependencyReferenceRuntimeLibraries());
@@ -314,6 +322,10 @@ namespace Microsoft.NET.Build.Tasks
             RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.OutputName) };
 
             List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup, includeCompilationLibraries);
+            foreach (var runtimePackGroup in _runtimePackAssets.GroupBy(asset => asset.PackageName + "/" + asset.PackageVersion))
+            {
+                dependencies.Add(new Dependency("runtimepack." + runtimePackGroup.First().PackageName, runtimePackGroup.First().PackageVersion));
+            }
 
             return CreateRuntimeLibrary(
                 type: "project",
@@ -343,6 +355,37 @@ namespace Microsoft.NET.Build.Tasks
                 assemblies: new[] { projectInfo.OutputName },
                 dependencies: dependencies.ToArray(),
                 serviceable: false);
+        }
+
+        private IEnumerable<RuntimeLibrary> GetRuntimePackLibraries(IEnumerable<RuntimePackAssetInfo> runtimePackAssets)
+        {
+            return runtimePackAssets.GroupBy(asset => asset.PackageName + "/" + asset.PackageVersion).Select(
+                runtimePackAssetGroup =>
+                {
+                    //  Prefix paths with "./" to workaround https://github.com/dotnet/core-setup/issues/4978
+                    List<RuntimeAssetGroup> runtimeAssemblyGroups = new List<RuntimeAssetGroup>()
+                    {
+                        new RuntimeAssetGroup(string.Empty,
+                            runtimePackAssetGroup.Where(asset => asset.AssetType == AssetType.Runtime)
+                            .Select(asset => CreateRuntimeFile("./" + asset.DestinationSubPath, asset.SourcePath)))
+                    };
+                    List<RuntimeAssetGroup> nativeLibraryGroups = new List<RuntimeAssetGroup>()
+                    {
+                        new RuntimeAssetGroup(string.Empty,
+                            runtimePackAssetGroup.Where(asset => asset.AssetType == AssetType.Native)
+                            .Select(asset => CreateRuntimeFile($"./" + asset.DestinationSubPath, asset.SourcePath)))
+                    };
+                    
+                    return new RuntimeLibrary("runtimepack",
+                        "runtimepack." + runtimePackAssetGroup.First().PackageName,
+                        runtimePackAssetGroup.First().PackageVersion,
+                        hash: string.Empty,
+                        runtimeAssemblyGroups,
+                        nativeLibraryGroups,
+                        resourceAssemblies: Enumerable.Empty<ResourceAssembly>(),
+                        dependencies: Enumerable.Empty<Dependency>(),
+                        serviceable: false);
+                });
         }
 
         private IEnumerable<Library> GetLibraries(

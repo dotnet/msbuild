@@ -118,7 +118,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateBuildDependencyFile"
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
-                            _ComputeReferenceAssemblies"
+                            _ComputeReferenceAssemblies;
+                            ResolveRuntimePackAssets"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition="'$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
@@ -136,6 +137,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ReferenceDependencyPaths="@(ReferenceDependencyPaths)"
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       ReferenceAssemblies="@(_ReferenceAssemblies)"
+                      RuntimePackAssets="@(RuntimePackAsset)"
                       IncludeMainProject="$(IncludeMainProjectInDepsFile)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
