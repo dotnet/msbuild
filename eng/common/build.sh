@@ -182,7 +182,7 @@ function Build {
 
   MSBuild $_InitializeToolset \
           $bl \
-          /flp:v=diag;LogFile=$log_dir \
+          "-flp:v=diag;LogFile=$log_dir/Build.log" \
           -distributedFileLogger \
     /p:Configuration=$configuration \
     /p:RepoRoot="$repo_root" \
