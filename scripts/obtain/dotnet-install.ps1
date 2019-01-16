@@ -15,9 +15,9 @@
     - Current - most current release
     - LTS - most current supported release
     - 2-part version in a format A.B - represents a specific release
-          examples: 2.0; 1.0
+          examples: 2.0, 1.0
     - Branch name
-          examples: release/2.0.0; Master
+          examples: release/2.0.0, Master
 .PARAMETER Version
     Default: latest
     Represents a build version on specific channel. Possible values:
@@ -25,14 +25,14 @@
     - coherent - most latest coherent build on specific channel
           coherent applies only to SDK downloads
     - 3-part version in a format A.B.C - represents specific version of build
-          examples: 2.0.0-preview2-006120; 1.1.0
+          examples: 2.0.0-preview2-006120, 1.1.0
 .PARAMETER InstallDir
     Default: %LocalAppData%\Microsoft\dotnet
     Path to where to install dotnet. Note that binaries will be placed directly in a given directory.
 .PARAMETER Architecture
     Default: <auto> - this value represents currently running OS architecture
     Architecture of dotnet binaries to be installed.
-    Possible values are: <auto>, x64 and x86
+    Possible values are: <auto>, amd64, x64, x86, arm64, arm
 .PARAMETER SharedRuntime
     This parameter is obsolete and may be removed in a future version of this script.
     The recommended alternative is '-Runtime dotnet'.
