@@ -297,6 +297,11 @@
         <target state="translated">Запуск приложения .NET Core.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FsiDefinition">
+        <source>Start F# Interective / execute F# scripts.</source>
+        <target state="new">Start F# Interective / execute F# scripts.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
