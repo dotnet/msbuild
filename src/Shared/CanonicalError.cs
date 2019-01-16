@@ -334,7 +334,7 @@ namespace Microsoft.Build.Shared
                 parsedMessage.text = (match.Groups["TEXT"].Value + messageOverflow).Trim();
                 parsedMessage.origin = match.Groups["FILENAME"].Value.Trim();
 
-                string[] explodedText = parsedMessage.text.Split(new char[] {'\''}, StringSplitOptions.RemoveEmptyEntries);
+                string[] explodedText = parsedMessage.text.Split(MSBuildConstants.SingleQuoteChar, StringSplitOptions.RemoveEmptyEntries);
                 if (explodedText.Length > 0)
                 {
                     parsedMessage.code = "G" + explodedText[0].GetHashCode().ToString("X8");

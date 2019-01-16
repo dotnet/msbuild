@@ -14,6 +14,10 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal const char ConfigurationPlatformSeparator = '|';
 
+        // One-time allocation to avoid implicit allocations for Split(), Trim().
+        // https://blog.marcgravell.com/2013/11/allocaction-allocation-allocation.html
+        internal static readonly char[] ConfigurationPlatformSeparatorArray = { ConfigurationPlatformSeparator };
+
         /// <summary>
         /// Constructor
         /// </summary>

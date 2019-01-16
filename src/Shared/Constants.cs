@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using System.Reflection;
 
 // This file is compiled into both Microsoft.Build.Framework and Microsoft.Build.Tasks which can cause collisions.
@@ -83,6 +84,27 @@ namespace Microsoft.Build.Shared
         /// The name of the item used to specify references to other msbuild projects
         /// </summary>
         internal const string ProjectReferenceItemName = "ProjectReference";
+
+        // One-time allocations to avoid implicit allocations for Split(), Trim().
+        // https://blog.marcgravell.com/2013/11/allocaction-allocation-allocation.html
+        internal static readonly char[] SemicolonChar = { ';' };
+        internal static readonly char[] SpaceChar = { ' ' };
+        internal static readonly char[] SingleQuoteChar = { '\'' };
+        internal static readonly char[] EqualsChar = { '=' };
+        internal static readonly char[] ColonChar = { ':' };
+        internal static readonly char[] BackslashChar = { '\\' };
+        internal static readonly char[] NewlineChar = { '\n' };
+        internal static readonly char[] CrLf = { '\r', '\n' };
+        internal static readonly char[] ForwardSlash = { '/' };
+        internal static readonly char[] ForwardSlashBackslash = { '/', '\\' };
+        internal static readonly char[] WildcardChars = { '*', '?' };
+        internal static readonly char[] CommaChar = { ',' };
+        internal static readonly char[] HyphenChar = { '-' };
+        internal static readonly char[] DirectorySeparatorChar = { Path.DirectorySeparatorChar };
+        internal static readonly char[] DotChar = { '.' };
+        internal static readonly string[] EnvironmentNewLine = { Environment.NewLine };
+        internal static readonly char[] PipeChar = { '|' };
+        internal static readonly char[] PathSeparatorChar = { Path.PathSeparator };
     }
 
     /// <summary>

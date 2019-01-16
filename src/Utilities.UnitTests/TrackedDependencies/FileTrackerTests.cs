@@ -1687,7 +1687,7 @@ class X
 
                 if (envLine.StartsWith("TESTVAR=", StringComparison.OrdinalIgnoreCase) && varValue == null)
                 {
-                    string[] varVal = envLine.Split('=');
+                    string[] varVal = envLine.Split(MSBuildConstants.EqualsChar);
                     varValue = varVal[1];
                 }
                 else if (envLine.StartsWith("TRACKER_TOOLCHAIN=", StringComparison.OrdinalIgnoreCase) && toolChainValue == null)

@@ -11,6 +11,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.BackEnd
@@ -472,7 +473,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                string[] values = line.Split(new char[] { ' ' });
+                string[] values = line.Split(Constants.SpaceChar);
                 if (values.Length < 1)
                 {
                     throw new InvalidDataException("Too few values in hierarchy");
@@ -503,7 +504,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                string[] values = line.Split(new char[] { ' ' });
+                string[] values = line.Split(Constants.SemicolonChar);
                 if (values.Length < 3)
                 {
                     throw new InvalidDataException("Too few values in build plan.");
