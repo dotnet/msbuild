@@ -180,17 +180,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void ArtifactsDirectoryLooksGood()
-        {
-            var artifactsDirectory = PrintLineDebuggerWriters.ArtifactsLogDirectory;
-
-            artifactsDirectory.ShouldNotBeNull();
-            artifactsDirectory.ShouldEndWith(Path.Combine("log", "Debug"), Case.Sensitive);
-            Path.IsPathRooted(artifactsDirectory).ShouldBeTrue();
-            Directory.Exists(artifactsDirectory).ShouldBeTrue();
-        }
-
-        [Fact]
         public void CannotSetTwoWritersViaStaticSetters()
         {
             PrintLineDebugger.SetWriter(new MockWriter().Writer());
