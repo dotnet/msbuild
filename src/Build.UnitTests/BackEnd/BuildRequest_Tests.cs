@@ -4,6 +4,7 @@
 using System;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -134,6 +135,61 @@ namespace Microsoft.Build.UnitTests.BackEnd
             for (int i = 0; i < request.Targets.Count; i++)
             {
                 Assert.Equal(request.Targets[i], deserializedRequest.Targets[i]);
+            }
+        }
+
+        private interface ITestRemoteHostObject
+        {
+            int GetState();
+        }
+
+        private class TestRemoteHostObject : ITaskHost, ITestRemoteHostObject
+        {
+            private int _state;
+
+            public TestRemoteHostObject(int state)
+            {
+                _state = state;
+            }
+
+            public int GetState()
+            {
+                return _state;
+            }
+        }
+
+        [Fact]
+        public void TestTranslationHostObjects()
+        {
+            var hostServices = new HostServices();
+            var rot = new RunningObjectTable();
+            var moniker = nameof(TestTranslationHostObjects) + Guid.NewGuid();
+            var remoteHost = new TestRemoteHostObject(3);
+            using (var result = rot.Register(moniker, remoteHost))
+            {
+                hostServices.RegisterHostObject(
+                    "WithOutOfProc.targets",
+                    "DisplayMessages",
+                    "ATask",
+                    "theidforRunningObjectTable");
+
+                BuildRequest request = new BuildRequest(
+                    submissionId: 1,
+                    _nodeRequestId++,
+                    1,
+                    new string[] { "alpha", "omega" },
+                    hostServices: hostServices,
+                    BuildEventContext.Invalid,
+                    parentRequest: null);
+                Assert.Equal(NodePacketType.BuildRequest, request.Type);
+
+                ((ITranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
+                INodePacket packet = BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+                BuildRequest deserializedRequest = packet as BuildRequest;
+
+                Assert.True(request.HostServices.HasHostObject("WithOutOfProc.targets"));
+                Assert.True(deserializedRequest.HostServices.HasHostObject("WithOutOfProc.targets"));
             }
         }
 

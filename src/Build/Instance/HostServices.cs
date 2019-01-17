@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Runtime.InteropServices.ComTypes;
+using System.Runtime.InteropServices;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Execution
 {
@@ -39,7 +42,7 @@ namespace Microsoft.Build.Execution
     /// mediates access from the build to the host.
     /// </summary>
     [DebuggerDisplay("#Entries={_hostObjectMap.Count}")]
-    public class HostServices
+    public class HostServices : ITranslatable
     {
         /// <summary>
         /// Collection storing host objects for particular project/task/target combinations.
@@ -99,6 +102,27 @@ namespace Microsoft.Build.Execution
             }
 
             hostObjects.RegisterHostObject(targetName, taskName, hostObject);
+        }
+
+        // TODO wul no checkin doc
+        public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
+            ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
+            ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
+            ErrorUtilities.VerifyThrowArgumentNull(monikerName, "monikerName");
+
+            _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
+
+            // TODO wul no checkin dedup
+            HostObjects hostObjects;
+            if (!_hostObjectMap.TryGetValue(projectFile, out hostObjects))
+            {
+                hostObjects = new HostObjects();
+                _hostObjectMap[projectFile] = hostObjects;
+            }
+
+            hostObjects.RegisterHostObject(targetName, taskName, monikerName);
         }
 
         /// <summary>
@@ -226,6 +250,84 @@ namespace Microsoft.Build.Execution
             return NodeAffinity.Any;
         }
 
+        void ITranslatable.Translate(ITranslator translator)
+        {
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                int count = translator.Reader.ReadInt32();
+
+                var hostObjectMap = new Dictionary<string, HostObjects>();
+                for (int i = 0; i < count; i++)
+                {
+                    var pairKey = translator.Reader.ReadString();
+                    var hostObjectMappairKeyTargetName = translator.Reader.ReadString();
+                    var hostObjectMappairKeyTaskName = translator.Reader.ReadString();
+                    var hostObjectMappairValueMonikerName = translator.Reader.ReadString();
+                    var targetTaskKey = new HostObjects.TargetTaskKey(hostObjectMappairKeyTargetName, hostObjectMappairKeyTaskName);
+                    if (!hostObjectMap.ContainsKey(pairKey))
+                    {
+                        hostObjectMap[pairKey] = new HostObjects();
+                    }
+
+                    if (!hostObjectMap[pairKey]._hostObjects.ContainsKey(targetTaskKey))
+                    {
+                        hostObjectMap[pairKey]._hostObjects.Add(targetTaskKey, new MonikerNameOrITaskHost(hostObjectMappairValueMonikerName));
+                    }
+                }
+                _hostObjectMap = hostObjectMap;
+            }
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                var count = 0;
+                foreach (var pair in _hostObjectMap)
+                {
+                    foreach (var hostObjectMappair in pair.Value._hostObjects)
+                    {
+                        if (hostObjectMappair.Value.IsMoniker)
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                translator.Writer.Write(count);
+
+                foreach (var pair in _hostObjectMap)
+                {
+                    foreach (var hostObjectMappair in pair.Value._hostObjects)
+                    {
+                        if (hostObjectMappair.Value.IsMoniker)
+                        {
+                            translator.Writer.Write(pair.Key);
+                            translator.Writer.Write(hostObjectMappair.Key._targetName);
+                            translator.Writer.Write(hostObjectMappair.Key._taskName);
+                            translator.Writer.Write(hostObjectMappair.Value.MonikerName);
+                        }
+                    }
+                }
+            }
+        }
+
+        public class MonikerNameOrITaskHost
+        {
+            public ITaskHost TaskHost { get; }
+            public string MonikerName { get; }
+            public bool IsTaskHost { get; } = false;
+            public bool IsMoniker { get; } = false;
+            public MonikerNameOrITaskHost(ITaskHost taskHost)
+            {
+                TaskHost = taskHost;
+                IsTaskHost = true;
+            }
+
+            public MonikerNameOrITaskHost(string monikerName)
+            {
+                MonikerName = monikerName;
+                IsMoniker = true;
+            }
+        }
+
         /// <summary>
         /// Bag holding host object information for a single project file.
         /// </summary>
@@ -235,14 +337,14 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// The mapping of targets and tasks to host objects.
             /// </summary>
-            private Dictionary<TargetTaskKey, ITaskHost> _hostObjects;
+            internal Dictionary<TargetTaskKey, MonikerNameOrITaskHost> _hostObjects;
 
             /// <summary>
             /// Constructor
             /// </summary>
             internal HostObjects()
             {
-                _hostObjects = new Dictionary<TargetTaskKey, ITaskHost>(1);
+                _hostObjects = new Dictionary<TargetTaskKey, MonikerNameOrITaskHost>(1);
             }
 
             /// <summary>
@@ -267,7 +369,20 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    _hostObjects[new TargetTaskKey(targetName, taskName)] = hostObject;
+                    _hostObjects[new TargetTaskKey(targetName, taskName)] = new MonikerNameOrITaskHost(hostObject);
+                }
+            }
+
+            // TODO wul no checkin doc
+            internal void RegisterHostObject(string targetName, string taskName, string monikerName)
+            {
+                if (monikerName == null)
+                {
+                    _hostObjects.Remove(new TargetTaskKey(targetName, taskName));
+                }
+                else
+                {
+                    _hostObjects[new TargetTaskKey(targetName, taskName)] = new MonikerNameOrITaskHost(monikerName);
                 }
             }
 
@@ -276,26 +391,33 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal ITaskHost GetAnyMatchingHostObject(string targetName, string taskName)
             {
-                ITaskHost hostObject;
-                _hostObjects.TryGetValue(new TargetTaskKey(targetName, taskName), out hostObject);
-
-                return hostObject;
+                _hostObjects.TryGetValue(new TargetTaskKey(targetName, taskName), out MonikerNameOrITaskHost hostObject);
+                if (hostObject.IsMoniker)
+                {
+                    RunningObjectTable rot = new RunningObjectTable();
+                    object objectFromRunningObjectTable = rot.GetObject(hostObject.MonikerName);
+                    return (ITaskHost) objectFromRunningObjectTable;
+                }
+                else
+                {
+                    return hostObject.TaskHost;
+                }
             }
 
             /// <summary>
             /// Equatable key for the table
             /// </summary>
-            private struct TargetTaskKey : IEquatable<TargetTaskKey>
+            internal struct TargetTaskKey : IEquatable<TargetTaskKey>
             {
                 /// <summary>
                 /// Target name
                 /// </summary>
-                private string _targetName;
+                internal string _targetName;
 
                 /// <summary>
                 /// Task name
                 /// </summary>
-                private string _taskName;
+                internal string _taskName;
 
                 /// <summary>
                 /// Constructor
