@@ -7,8 +7,6 @@ set -u
 # Prevents hidden errors caused by missing error code propagation.
 set -e
 
-set -x # echo on
-
 usage()
 {
   echo "Common settings:"
@@ -181,9 +179,7 @@ function Build {
   fi
 
   MSBuild $_InitializeToolset \
-          $bl \
-          "-flp:v=diag;LogFile=$log_dir/Build.log" \
-          -distributedFileLogger \
+    $bl \
     /p:Configuration=$configuration \
     /p:RepoRoot="$repo_root" \
     /p:Restore=$restore \
