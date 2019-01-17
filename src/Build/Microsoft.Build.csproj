@@ -257,6 +257,7 @@
     <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
+    <Compile Include="Instance\RunningObjectTable.cs" />
     <Compile Include="Logging\EvaluationLocationIdAgnosticComparer.cs" />
     <Compile Include="Logging\ProfilerLogger.cs" />
     <Compile Include="Evaluation\Profiler\ProfilerResultPrettyPrinter.cs" />

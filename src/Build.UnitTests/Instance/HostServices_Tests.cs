@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
             Assert.Same(hostObject, hostServices.GetHostObject("project", "target", "task"));
 
-            hostServices.RegisterHostObject("project", "target", "task", null);
+            hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
             Assert.Null(hostServices.GetHostObject("project", "target", "task"));
         }
 
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TestHostObject hostObject = new TestHostObject();
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
             Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-            hostServices.RegisterHostObject("project", "target", "task", null);
+            hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
             Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
             hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
             Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
             Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-            hostServices.RegisterHostObject("project", "target", "task", null);
+            hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
             Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
             Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project2"));
         }
