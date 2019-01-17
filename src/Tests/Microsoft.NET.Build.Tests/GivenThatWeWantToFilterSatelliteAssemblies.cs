@@ -77,6 +77,7 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 expectedFiles.Add($"{testProject.Name}.exe");
+                expectedFiles.Add($"{testProject.Name}.exe.config");
             }
 
             outputDirectory.Should().OnlyHaveFiles(expectedFiles);
@@ -144,6 +145,7 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 expectedFiles.Add($"{testProject.Name}.exe");
+                expectedFiles.Add($"{testProject.Name}.exe.config");
             }
 
             outputDirectory.Should().OnlyHaveFiles(expectedFiles);
