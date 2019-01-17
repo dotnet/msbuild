@@ -1,6 +1,10 @@
+#!/bin/sh
+
 configuration="debug"
 host_type="core"
 build_stage1=true
+run_tests="--test"
+run_restore="--restore"
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -21,6 +25,14 @@ while [[ $# -gt 0 ]]; do
       build_stage1=$2
       shift 2
       ;;
+    --skip_tests)
+      run_tests=""
+      shift
+      ;;
+    --skip_restore)
+      run_restore=""
+      shift
+      ;;
     --host_type)
       host_type=$2
       shift 2
@@ -33,15 +45,16 @@ while [[ $# -gt 0 ]]; do
 done
 
 RepoRoot="$ScriptRoot/.."
-ArtifactsDir="$RepoRoot/artifacts"
-Stage1Dir="$RepoRoot/stage1"
+artifacts_dir="$RepoRoot/artifacts"
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci /p:CreateBootstrap=true $properties
+	/bin/bash "$ScriptRoot/common/build.sh" $run_restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties
 fi
 
-bootstrapRoot="$Stage1Dir/bin/bootstrap"
+bootstrapRoot="$artifacts_dir/bin/bootstrap"
+# export to make this available to `eng/common/build.sh`
+export artifacts_dir="$artifacts_dir/2"
 
 if [ $host_type = "core" ]
 then
@@ -51,11 +64,9 @@ else
   exit 1
 fi
 
-mv $ArtifactsDir $Stage1Dir
-
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests
 # - Don't try to create a bootstrap deployment
-. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false /p:CreateBootstrap=false $properties
+. "$ScriptRoot/common/build.sh" $run_restore --build $run_tests --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties
 
