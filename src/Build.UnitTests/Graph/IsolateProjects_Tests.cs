@@ -247,9 +247,9 @@ namespace Microsoft.Build.Graph.UnitTests
                     env.SetTempPath(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")), deleteTempDirectory:true);
                 }
 
-                var projectFile = env.CreateFile().Path;
-                var declaredReferenceFile = env.CreateFile().Path;
-                var undeclaredReferenceFile = env.CreateFile().Path;
+                var projectFile = CreateTmpFile(env).Path;
+                var declaredReferenceFile = CreateTmpFile(env).Path;
+                var undeclaredReferenceFile = CreateTmpFile(env).Path;
 
                 File.WriteAllText(
                     projectFile,
@@ -319,6 +319,13 @@ namespace Microsoft.Build.Graph.UnitTests
                 {
                     buildManager.EndBuild();
                 }
+            }
+
+            TransientTestFile CreateTmpFile(TestEnvironment env)
+            {
+                return NativeMethodsShared.IsMono && NativeMethodsShared.IsOSX
+                                                ? env.CreateFile(new TransientTestFolder(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N"))))
+                                                : env.CreateFile();
             }
         }
     }
