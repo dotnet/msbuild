@@ -373,10 +373,10 @@ namespace Microsoft.NET.ToolPack.Tests
                     ["version"] = "1000",
                 });
 
-            AssertShimIsValid(nugetPackage);
+            AssertValidShim(_testRoot, nugetPackage);
         }
 
-        private void AssertShimIsValid(string nugetPackage)
+        private void AssertValidShim(string testRoot, string nugetPackage)
         {
             using (var nupkgReader = new PackageArchiveReader(nugetPackage))
             {
