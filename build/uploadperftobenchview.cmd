@@ -1,4 +1,4 @@
-@echo off
+@echo on
 setlocal EnableDelayedExpansion
 
 REM The intent of this script is upload produced performance results to BenchView in a CI context.
@@ -33,6 +33,9 @@ if not exist %perfWorkingDirectory%\nul (
     exit 1)
 
 
+set pythonCmd=py
+if exist "C:\Python35\python.exe" set pythonCmd=C:\Python35\python.exe
+
 powershell -NoProfile -NoLogo wget https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile "%perfWorkingDirectory%\nuget.exe"
 
 if exist "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat" rmdir /s /q "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat"
@@ -49,24 +52,24 @@ if /I "%runType%" == "rolling" (set benchViewName=%benchViewName% %GIT_COMMIT%)
 echo BenchViewName: "%benchViewName%"
 
 echo Creating: "%perfWorkingDirectory%\submission-metadata.json"
-py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission-metadata.py" --name "%benchViewName%" --user-email "dotnet-bot@microsoft.com" -o "%perfWorkingDirectory%\submission-metadata.json"
+%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission-metadata.py" --name "%benchViewName%" --user-email "dotnet-bot@microsoft.com" -o "%perfWorkingDirectory%\submission-metadata.json"
 
 echo Creating: "%perfWorkingDirectory%\build.json"
-py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\build.py" git --branch %GIT_BRANCH_WITHOUT_ORIGIN% --type "%runType%" --source-timestamp "%timeStamp%" -o "%perfWorkingDirectory%\build.json"
+%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\build.py" git --branch %GIT_BRANCH_WITHOUT_ORIGIN% --type "%runType%" --source-timestamp "%timeStamp%" -o "%perfWorkingDirectory%\build.json"
 
 echo Creating: "%perfWorkingDirectory%\machinedata.json"
-py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\machinedata.py" -o "%perfWorkingDirectory%\machinedata.json"
+%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\machinedata.py" -o "%perfWorkingDirectory%\machinedata.json"
 
 echo Creating: "%perfWorkingDirectory%\measurement.json"
 pushd "%perfWorkingDirectory%"
 for /f "tokens=*" %%a in ('dir /b/a-d *.xml') do (
     echo Processing: "%%a"
-    py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\measurement.py" xunitscenario "%%a" --better desc --drop-first-value --append -o "%perfWorkingDirectory%\measurement.json"
+    %pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\measurement.py" xunitscenario "%%a" --better desc --drop-first-value --append -o "%perfWorkingDirectory%\measurement.json"
 )
 popd
 
-echo Creating: "${perfWorkingDirectory}\submission.json"
-py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission.py" "%perfWorkingDirectory%\measurement.json" ^
+echo Creating: "%perfWorkingDirectory%\submission.json"
+%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission.py" "%perfWorkingDirectory%\measurement.json" ^
                     --build "%perfWorkingDirectory%\build.json" ^
                     --machine-data "%perfWorkingDirectory%\machinedata.json" ^
                     --metadata "%perfWorkingDirectory%\submission-metadata.json" ^
@@ -80,6 +83,6 @@ py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission.py" "
                     -o "%perfWorkingDirectory%\submission.json"
 
 echo Uploading: "%perfWorkingDirectory%\submission.json"
-py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\upload.py" "%perfWorkingDirectory%\submission.json" --container coreclr
+%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\upload.py" "%perfWorkingDirectory%\submission.json" --container coreclr
 
 exit /b %ErrorLevel%
