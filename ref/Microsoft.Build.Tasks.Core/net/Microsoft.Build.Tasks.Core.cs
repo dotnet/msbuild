@@ -1125,6 +1125,17 @@ namespace Microsoft.Build.Tasks
         public string TimestampUrl { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public sealed partial class SplitTargetsByOuterAndInnerBuild : Microsoft.Build.Tasks.TaskExtension
+    {
+        public SplitTargetsByOuterAndInnerBuild() { }
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargets { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForInnerBuilds { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForOuterBuild { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] ProjectReferenceTargets { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task
     {
         internal TaskExtension() { }

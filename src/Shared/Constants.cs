@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 
 // This file is compiled into both Microsoft.Build.Framework and Microsoft.Build.Tasks which can cause collisions.
 #if MICROSOFT_BUILD_TASKS
@@ -80,12 +79,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal const string CurrentProductVersion = "16.0";
 		
-		/// <summary>
-        /// The name of the item used to specify references to other msbuild projects
-        /// </summary>
-        internal const string ProjectReferenceItemName = "ProjectReference";
-
-        // One-time allocations to avoid implicit allocations for Split(), Trim().
+		// One-time allocations to avoid implicit allocations for Split(), Trim().
         internal static readonly char[] SemicolonChar = { ';' };
         internal static readonly char[] SpaceChar = { ' ' };
         internal static readonly char[] SingleQuoteChar = { '\'' };
@@ -104,6 +98,19 @@ namespace Microsoft.Build.Shared
         internal static readonly string[] EnvironmentNewLine = { Environment.NewLine };
         internal static readonly char[] PipeChar = { '|' };
         internal static readonly char[] PathSeparatorChar = { Path.PathSeparator };
+    }
+
+    internal static class ItemTypeNames
+    {
+        /// <summary>
+        /// The name of the item used to specify references to other msbuild projects
+        /// </summary>
+        internal const string ProjectReferenceItemName = "ProjectReference";
+
+        /// <summary>
+        /// The name of the item used to statically specify what targets a project calls on its references
+        /// </summary>
+        internal const string ProjectReferenceTargetsItemType = "ProjectReferenceTargets";
     }
 
     /// <summary>
@@ -147,5 +154,6 @@ namespace Microsoft.Build.Shared
         internal const string projectReferenceOriginalItemSpec = "ProjectReferenceOriginalItemSpec";
         internal const string IgnoreVersionForFrameworkReference = "IgnoreVersionForFrameworkReference";
         internal const string frameworkFile = "FrameworkFile";
+        internal const string ProjectReferenceTargetsMetadataName = "Targets";
     }
 }

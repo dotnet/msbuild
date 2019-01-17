@@ -33,8 +33,6 @@ namespace Microsoft.Build.Graph
         private const string SetPlatformMetadataName = "SetPlatform";
         private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
         private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
-        private const string ProjectReferenceTargetsItemType = "ProjectReferenceTargets";
-        private const string ProjectReferenceTargetsMetadataName = "Targets";
         private const string DefaultTargetsMarker = ".default";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
@@ -480,7 +478,7 @@ namespace Microsoft.Build.Graph
                     var task = new Task(() =>
                     {
                         ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory);
-                        IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(MSBuildConstants.ProjectReferenceItemName);
+                        IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
                         foreach (var projectReferenceToParse in projectReferenceItems)
                         {
                             if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
@@ -560,7 +558,7 @@ namespace Microsoft.Build.Graph
             PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
             nodeState[node] = NodeState.InProcess;
-            IEnumerable<ProjectItemInstance> projectReferenceItems = node.ProjectInstance.GetItems(MSBuildConstants.ProjectReferenceItemName);
+            IEnumerable<ProjectItemInstance> projectReferenceItems = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
             foreach (var projectReferenceToParse in projectReferenceItems)
             {
                 string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
@@ -647,14 +645,14 @@ namespace Microsoft.Build.Graph
         private static ImmutableList<string> DetermineTargetsToPropagate(ProjectGraphNode node, ImmutableList<string> entryTargets)
         {
             var targetsToPropagate = ImmutableList<string>.Empty;
-            ICollection<ProjectItemInstance> projectReferenceTargets = node.ProjectInstance.GetItems(ProjectReferenceTargetsItemType);
+            ICollection<ProjectItemInstance> projectReferenceTargets = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceTargetsItemType);
             foreach (var entryTarget in entryTargets)
             {
                 foreach (var projectReferenceTarget in projectReferenceTargets)
                 {
                     if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
                     {
-                        string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetsMetadataName);
+                        string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         targetsToPropagate = targetsToPropagate.AddRange(ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue));
                     }
                 }

@@ -153,8 +153,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.
   -->
   <PropertyGroup>
-    <ProjectReferenceTargetsForBuild>GetTargetFrameworks;.default;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForBuildInnerBuilds>Build;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuildInnerBuilds)</ProjectReferenceTargetsForBuildInnerBuilds>
+
     <ProjectReferenceTargetsForClean>GetTargetFrameworks;Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
+
     <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
   </PropertyGroup>
 

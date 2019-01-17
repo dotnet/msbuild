@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
 {
@@ -25,9 +26,8 @@ namespace Microsoft.Build.Graph
     /// </summary>
     public sealed class ProjectGraphNode
     {
-        private const string IsCrossTargetingBuild = "IsCrossTargetingBuild";
-        private const string DispatchToInnerBuilds = "DispatchToInnerBuilds";
-        private const string InnerTargets = "InnerTargets";
+        private const string BuildTargetsForGraphBuild = "BuildTargetsForGraphBuild";
+        private const string GraphBuildEntryTargets = "GraphBuildEntryTargets";
 
         private readonly List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
         private readonly List<ProjectGraphNode> _referencingProjects = new List<ProjectGraphNode>();
@@ -58,13 +58,10 @@ namespace Microsoft.Build.Graph
 
         public BuildData ComputeBuildData(IReadOnlyCollection<string> targets)
         {
-            if (targets.Count == 0)
-            {
-                return new BuildData(new string[0], new Dictionary<string, string>());
-            }
+            ErrorUtilities.VerifyThrowArgumentLength(targets, nameof(targets));
 
-            return IsCrossTargeting(ProjectInstance)
-                ? new BuildData(new[] {DispatchToInnerBuilds}, new Dictionary<string, string> {{ InnerTargets, string.Join(";", targets)}})
+            return ImplementsGraphBuildEntryPoint(ProjectInstance)
+                ? new BuildData(new[] {BuildTargetsForGraphBuild}, new Dictionary<string, string> {{ GraphBuildEntryTargets, string.Join(";", targets)}})
                 : new BuildData(targets, new Dictionary<string, string>());
         }
 
@@ -77,9 +74,9 @@ namespace Microsoft.Build.Graph
 
         internal void AddReferencingProject(ProjectGraphNode projectGraphNode) => _referencingProjects.Add(projectGraphNode);
 
-        private static bool IsCrossTargeting(ProjectInstance projectInstance)
+        private static bool ImplementsGraphBuildEntryPoint(ProjectInstance projectInstance)
         {
-            return projectInstance.GetPropertyValue(IsCrossTargetingBuild).Equals("true", StringComparison.Ordinal);
+            return projectInstance.Targets.ContainsKey(BuildTargetsForGraphBuild);
         }
 
     }

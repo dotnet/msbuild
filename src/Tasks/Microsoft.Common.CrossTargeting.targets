@@ -67,8 +67,35 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MSBuild Projects="@(_InnerBuildProjects)"
              Condition="'@(_InnerBuildProjects)' != '' "
              Targets="$(InnerTargets)"
+             RemoveProperties="$(InnerBuildsRemoveProperties);InnerBuildsRemoveProperties"
              BuildInParallel="$(BuildInParallel)">
       <Output ItemName="InnerOutput" TaskParameter="TargetOutputs" />
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildTargetsForGraphBuild"
+          DependsOnTargets="_ComputeTargetFrameworkItems">
+    <ItemGroup>
+      <_GraphBuildEntryTargetsItem Include="$(GraphBuildEntryTargets)" />
+    </ItemGroup>
+
+    <SplitTargetsByOuterAndInnerBuild EntryTargets="@(_GraphBuildEntryTargetsItem)"
+                                      ProjectReferencetargets="@(ProjectReferenceTargets)">
+      <Output ItemName="_GraphBuildEntryTargetsForOuterBuild" TaskParameter="EntryTargetsForOuterBuild" />
+      <Output ItemName="_GraphBuildEntryTargetsForInnerBuilds" TaskParameter="EntryTargetsForInnerBuilds" />
+    </SplitTargetsByOuterAndInnerBuild>
+
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Condition="'@(_GraphBuildEntryTargetsForOuterBuild)' != '' "
+             Targets="@(_GraphBuildEntryTargetsForOuterBuild)"
+             RemoveProperties="GraphBuildEntryTargets">
+    </MSBuild>
+
+    <MSBuild Projects="@(_InnerBuildProjects)"
+             Condition="'@(_InnerBuildProjects)' != '' and '@(_GraphBuildEntryTargetsForInnerBuilds)' != '' "
+             Targets="@(_GraphBuildEntryTargetsForInnerBuilds)"
+             RemoveProperties="GraphBuildEntryTargets"
+             BuildInParallel="$(BuildInParallel)">
     </MSBuild>
   </Target>
 
