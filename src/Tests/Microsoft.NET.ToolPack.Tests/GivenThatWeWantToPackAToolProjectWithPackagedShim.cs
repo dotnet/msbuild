@@ -22,7 +22,7 @@ namespace Microsoft.NET.ToolPack.Tests
     {
         private string _testRoot;
         private string _packageId;
-        private readonly string _packageVersion = "1.0.0";
+        private string _packageVersion = "1.0.0";
         private const string _customToolCommandName = "customToolCommandName";
 
         public GivenThatWeWantToPackAToolProjectWithPackagedShim(ITestOutputHelper log) : base(log)
@@ -43,7 +43,7 @@ namespace Microsoft.NET.ToolPack.Tests
             packCommand.Execute().Should().Pass();
             _packageId = Path.GetFileNameWithoutExtension(packCommand.ProjectFile);
 
-            return packCommand.GetNuGetPackage();
+            return packCommand.GetNuGetPackage(packageVersion: _packageVersion);
         }
 
         private TestAsset CreateTestAsset(
@@ -349,6 +349,28 @@ namespace Microsoft.NET.ToolPack.Tests
                 {
                     ["version"] = "1.0.0-rtm",
                     ["packageVersion"] = _packageVersion
+                });
+
+            AssertValidShim(_testRoot, nugetPackage);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void When_version_and_packageVersion_is_different_It_produces_valid_shims2(bool multiTarget)
+        {
+            if (!Environment.Is64BitOperatingSystem)
+            {
+                // only sample test on win-x64 since shims are RID specific
+                return;
+            }
+
+            _packageVersion = "1000.0.0";
+
+            var nugetPackage = SetupNuGetPackage(multiTarget,
+                additionalProperty: new Dictionary<string, string>()
+                {
+                    ["version"] = "1000",
                 });
 
             AssertValidShim(_testRoot, nugetPackage);
