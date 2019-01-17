@@ -307,16 +307,19 @@ _script_dir=`dirname "$_ResolvePath"`
 
 eng_root=`cd -P "$_script_dir/.." && pwd`
 repo_root=`cd -P "$_script_dir/../.." && pwd`
-artifacts_dir="$repo_root/artifacts"
+artifacts_dir=${artifacts_dir:-"$repo_root/artifacts"}
 toolset_dir="$artifacts_dir/toolset"
 log_dir="$artifacts_dir/log/$configuration"
 temp_dir="$artifacts_dir/tmp/$configuration"
+
+# This is used by Arcade targets, override it
+export ArtifactsDir=$artifacts_dir/
 
 global_json_file="$repo_root/global.json"
 
 # HOME may not be defined in some scenarios, but it is required by NuGet
 if [[ -z $HOME ]]; then
-  export HOME="$repo_root/artifacts/.home/"
+  export HOME="$artifacts_dir/.home/"
   mkdir -p "$HOME"
 fi
 
