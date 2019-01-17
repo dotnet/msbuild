@@ -562,7 +562,7 @@ namespace Microsoft.Build.UnitTests
                         i == 1 &&
                         // SkipUnchanged check will always fail for symbolic links,
                         // because we compare attributes of real file with attributes of symbolic link.
-                        !UseSymbolicLinks &&
+                        (NativeMethodsShared.IsMono || !UseSymbolicLinks) &&
                         // On Windows and MacOS File.Copy already preserves LastWriteTime, but on Linux extra step is needed.
                         // TODO - this need to be fixed on Linux
                         (!NativeMethodsShared.IsLinux || UseHardLinks);
