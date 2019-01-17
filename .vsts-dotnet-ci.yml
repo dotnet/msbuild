@@ -3,8 +3,8 @@ trigger:
 - exp/*
 - vs*
 
-phases:
-- phase: FullOnWindows
+jobs:
+- job: FullOnWindows
   displayName: "Build and test on Windows using full MSBuild"
   queue: 'Hosted VS2017'
   steps:
@@ -43,7 +43,7 @@ phases:
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
-- phase: BootstrapMSBuildOnFullFrameworkWindows
+- job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Build and test on Windows using bootstrapped full MSBuild"
   queue: 'Hosted VS2017'
   steps:
@@ -82,7 +82,7 @@ phases:
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
-- phase: BootstrapMSBuildOnCoreWindows
+- job: BootstrapMSBuildOnCoreWindows
   displayName: "Build and test on Windows using bootstrapped core MSBuild"
   queue: 'Hosted VS2017'
   steps:
@@ -122,7 +122,7 @@ phases:
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
-- phase: FullReleaseOnWindows
+- job: FullReleaseOnWindows
   displayName: "Build and test Release on Windows using full MSBuild"
   queue: 'Hosted VS2017'
   steps:
@@ -163,7 +163,7 @@ phases:
     condition: succeededOrFailed()
 
 # Disabling the hostType CI for now: https://github.com/Microsoft/msbuild/issues/4001
-# - phase: CoreOnWindows
+# - job: CoreOnWindows
 #   displayName: "Build and test on Windows using .NET Core MSBuild"
 #   queue: 'Hosted VS2017'
 #   steps:
@@ -208,7 +208,7 @@ phases:
 #       ArtifactName: 'CoreOnWindows test logs'
 #     condition: succeededOrFailed()
 
-- phase: CoreOnLinux
+- job: CoreOnLinux
   displayName: "Build and test on Linux using .NET Core MSBuild"
   queue: 'Hosted Ubuntu 1604'
   steps:
@@ -236,7 +236,7 @@ phases:
       ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
-- phase: CoreBootstrappedOnLinux
+- job: CoreBootstrappedOnLinux
   displayName: "Build and test on Linux using bootstrapped .NET Core MSBuild"
   queue: 'Hosted Ubuntu 1604'
   steps:
@@ -264,7 +264,7 @@ phases:
       ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
-- phase: CoreOnMac
+- job: CoreOnMac
   displayName: "Build and test on macOS using .NET Core MSBuild"
   queue: 'Hosted macOS'
   steps:
