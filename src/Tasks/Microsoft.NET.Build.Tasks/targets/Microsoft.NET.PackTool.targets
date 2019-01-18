@@ -98,7 +98,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateShimsAssets"
           BeforeTargets="CopyFilesToOutputDirectory"
           DependsOnTargets="ResolvePackageAssets;_PackToolValidation;_GenerateShimInputCache;_ComputeExpectedEmbeddedApphostPaths"
-          Condition="'$(PackAsTool)' == 'true'"
+          Condition="'$(PackAsTool)' == 'true' and $(PackAsToolShimRuntimeIdentifiers) != '' "
           Inputs="@(_GenerateShimsAssetsInput)"
           Outputs="$(_ShimCreatedSentinelFile)">
 
