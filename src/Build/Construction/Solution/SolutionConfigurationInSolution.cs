@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Shared;
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -14,9 +16,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal const char ConfigurationPlatformSeparator = '|';
 
-        // One-time allocation to avoid implicit allocations for Split(), Trim().
-        // https://blog.marcgravell.com/2013/11/allocaction-allocation-allocation.html
-        internal static readonly char[] ConfigurationPlatformSeparatorArray = { ConfigurationPlatformSeparator };
+        internal static readonly char[] ConfigurationPlatformSeparatorArray = MSBuildConstants.PipeChar;
 
         /// <summary>
         /// Constructor

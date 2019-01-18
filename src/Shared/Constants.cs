@@ -86,7 +86,6 @@ namespace Microsoft.Build.Shared
         internal const string ProjectReferenceItemName = "ProjectReference";
 
         // One-time allocations to avoid implicit allocations for Split(), Trim().
-        // https://blog.marcgravell.com/2013/11/allocaction-allocation-allocation.html
         internal static readonly char[] SemicolonChar = { ';' };
         internal static readonly char[] SpaceChar = { ' ' };
         internal static readonly char[] SingleQuoteChar = { '\'' };

@@ -114,8 +114,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
 
-        // One-time allocation to avoid implicit allocations for Split(), Trim().
-        // https://blog.marcgravell.com/2013/11/allocaction-allocation-allocation.html
         private static readonly char[] s_commaSemicolon = { ',', ';' };
 
         /// <summary>
