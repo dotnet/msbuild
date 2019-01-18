@@ -72,6 +72,7 @@ namespace Microsoft.NET.Build.Tests
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{testProject.Name}.exe",
+                $"{testProject.Name}.exe.config",
                 $"{testProject.Name}.pdb",
             });
         }
@@ -150,6 +151,7 @@ namespace Microsoft.NET.Build.Tests
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{testProject.Name}.exe",
+                $"{testProject.Name}.exe.config",
                 $"{testProject.Name}.pdb",
                 
                 // These two will be includded because Netstandard1.x has a higher version of these two contracts than net4.7.1 which is why they will be added.
@@ -251,6 +253,7 @@ namespace Microsoft.NET.Build.Tests
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{testProject.Name}.exe",
+                $"{testProject.Name}.exe.config",
                 $"{testProject.Name}.pdb",
                 $"{net471library.Name}.dll",
                 $"{net471library.Name}.pdb",

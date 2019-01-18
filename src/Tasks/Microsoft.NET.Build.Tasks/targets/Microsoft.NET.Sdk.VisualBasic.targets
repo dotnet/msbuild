@@ -15,7 +15,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AppDesignerFolder Condition="'$(AppDesignerFolder)' == ''">My Project</AppDesignerFolder>
   </PropertyGroup>
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants),$(VersionlessImplicitFrameworkDefine),$(ImplicitFrameworkDefine)</DefineConstants>
     <DisableImplicitNamespaceImports Condition="'$(DisableImplicitNamespaceImports)'==''">$(DisableImplicitFrameworkReferences)</DisableImplicitNamespaceImports>
   </PropertyGroup>
   <ItemGroup Condition=" '$(DisableImplicitNamespaceImports)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -42,4 +41,26 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Include="System.Xml.Linq" />
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
+  <PropertyGroup Condition="'$(DisableImplicitConfigurationDefines)' != 'true' and '$(Configuration)' != ''">
+    <ImplicitConfigurationDefine>$(Configuration.ToUpperInvariant())</ImplicitConfigurationDefine>
+
+    <!-- Replace dashes and periods in the configuration with underscores.  This makes it more likely that
+         the resulting compilation constant will be a valid C# conditional compilation symbol.  As the set
+         of characters that aren't allowed is essentially open-ended, there's probably not a good way to
+         fully sanitize the Configuration in MSBuild evaluation.  If the resulting string still isn't a
+         valid conditional combilation symbol, then the compiler will generate the following error and
+         the define will be ignored:
+            warning MSB3052: The parameter to the compiler is invalid, '/define:0BAD_DEFINE' will be ignored.
+         -->
+    
+    <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('-', '_'))</ImplicitConfigurationDefine>
+    <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('.', '_'))</ImplicitConfigurationDefine>
+    <!-- In F# and C# this is called DefineConstants, VB is idiosyncratic and calls it FinalDefineConstants -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <FinalDefineConstants Condition="'$(VersionlessImplicitFrameworkDefine)' != ''">$(FinalDefineConstants),$(VersionlessImplicitFrameworkDefine)=-1</FinalDefineConstants>
+    <FinalDefineConstants Condition="'$(ImplicitFrameworkDefine)' != ''">$(FinalDefineConstants),$(ImplicitFrameworkDefine)=-1</FinalDefineConstants>
+    <FinalDefineConstants Condition="'$(DefineDebug)' != 'true' and '$(ImplicitConfigurationDefine)' != ''">$(FinalDefineConstants),$(ImplicitConfigurationDefine)=-1</FinalDefineConstants>
+  </PropertyGroup>
 </Project>
