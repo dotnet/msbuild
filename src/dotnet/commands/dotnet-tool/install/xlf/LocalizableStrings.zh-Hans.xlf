@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">一次只能具有本地选项(--local)、全局选项(--global)和工具路径选项(--tool-path)三者之一。请仅指定其中一个选项: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -16,39 +16,39 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
-        <target state="new">Install the tool and add to the local tool manifest (default).</target>
+        <target state="translated">安装该工具并添加到本地工具清单(默认)。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
         <source>The local option(--local) does not support the framework option (--framework).</source>
-        <target state="new">The local option(--local) does not support the framework option (--framework).</target>
+        <target state="translated">本地选项(--local)不支持框架选项(--framework)。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
         <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="new">You can invoke the tool from this directory using the following command: dotnet tool run {0}
-Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</target>
+        <target state="translated">可使用下列命令从此目录中调用工具 : dotnet tool run {0}
+已成功安装工具“{1}”(版本“{2}”)。已将条目添加到清单文件 {3}。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="new">Path to the manifest file.</target>
+        <target state="translated">清单文件路径。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
         <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
-        <target state="new">If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</target>
+        <target state="translated">如果要安装全局工具，请添加 "-g"。如果要使用工具清单，则必须先使用 "dotnet new tool-manifest" 创建该清单。</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
         <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="new">Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</target>
+        <target state="translated">指定工具清单(--tool-manifest)的操作仅在使用本地选项(--local 或默认)时才有效。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -58,7 +58,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install global or local tool. Local tools are added to manifest and restored.</source>
-        <target state="needs-review-translation">安装在命令行上使用的工具。</target>
+        <target state="translated">安装全局或本地工具。本地工具已添加到清单并已还原。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -88,7 +88,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool for the current user.</source>
-        <target state="needs-review-translation">将工具安装到当前用户的工具目录中。</target>
+        <target state="translated">为当前用户安装该工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">

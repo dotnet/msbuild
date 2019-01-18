@@ -1,25 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="LocalOptionDescription">
         <source>Uninstall the tool and remove it from the local tool manifest.</source>
-        <target state="new">Uninstall the tool and remove it from the local tool manifest.</target>
+        <target state="translated">Desinstalar a ferramenta e removê-la do manifesto de ferramenta local.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="new">Path to the manifest file.</target>
+        <target state="translated">Caminho para o arquivo de manifesto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
         <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="new">Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</target>
+        <target state="translated">Só é válido especificar o manifesto de ferramenta (--manifesto de ferramenta) com a opção local (--local ou a padrão).</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall a global tool or local tool.</source>
-        <target state="needs-review-translation">Desinstalar uma ferramenta do ambiente de desenvolvimento atual.</target>
+        <target state="translated">Desinstalar uma ferramenta global ou local.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="UninstallLocalToolSucceeded">
         <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
-        <target state="new">Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</target>
+        <target state="translated">A ferramenta '{0}' foi desinstalada com sucesso e removida do arquivo de manifesto {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">Só é possível ter uma das seguintes opções por vez: a opção local (--local), a opção global (--global) e a opção do caminho de ferramenta (--caminho de ferramenta). Especifique apenas uma das opções: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

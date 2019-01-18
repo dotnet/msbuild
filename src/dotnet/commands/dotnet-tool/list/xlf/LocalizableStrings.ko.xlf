@@ -1,30 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed globally or locally.</source>
-        <target state="needs-review-translation">현재 개발 환경에 설치된 도구를 나열합니다.</target>
+        <target state="translated">전역 또는 로컬로 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools installed for the current user.</source>
-        <target state="needs-review-translation">현재 사용자의 도구 디렉터리에 있는 도구를 나열합니다.</target>
+        <target state="translated">현재 사용자에 대해 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">로컬 옵션(--local), 전역 옵션(--global), 도구 경로 옵션(--tool-path)은 한 번에 하나만 지정할 수 있습니다. 옵션 중 하나만 지정하세요. {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>List the tools installed in the local tool manifest.</source>
-        <target state="new">List the tools installed in the local tool manifest.</target>
+        <target state="translated">로컬 도구 매니페스트에 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestFileColumn">
         <source>Manifest</source>
-        <target state="new">Manifest</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -45,7 +45,8 @@
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, please contact tool author:
 {1}</source>
-        <target state="needs-review-translation">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. {1}</target>
+        <target state="translated">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. 도구 작성자에게 문의하세요.
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

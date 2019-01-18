@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
         <source>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</source>
-        <target state="needs-review-translation">"{0}" 명령과 일치하는 실행 파일을 찾을 수 없습니다.</target>
+        <target state="translated">"{0}" 명령과 일치하는 실행 파일을 찾을 수 없습니다. 자세한 내용은 https://aka.ms/missing-command를 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="translated">응용 프로그램 이름이 기록되는 위치를 표시하는 '{1}' 예상 자리 표시자 바이트 시퀀스가 포함되지 않아서 '{0}'을(를) 응용 프로그램 호스트 실행 파일로 사용할 수 없습니다.</target>
+        <target state="translated">애플리케이션 이름이 기록되는 위치를 표시하는 '{1}' 예상 자리 표시자 바이트 시퀀스가 포함되지 않아서 '{0}'을(를) 애플리케이션 호스트 실행 파일로 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
@@ -103,7 +103,7 @@ dotnet 도구를 설치하세요. install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET Core SDK</source>
-        <target state="new">.NET Core SDK</target>
+        <target state="translated">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

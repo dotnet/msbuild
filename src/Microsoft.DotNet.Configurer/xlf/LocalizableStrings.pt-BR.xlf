@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
@@ -7,16 +7,10 @@
 ---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
-        <target state="needs-review-translation">Bem-vindo ao .NET Core!
+        <target state="translated">Bem-vindo ao .NET Core!
 ---------------------
-Saiba mais sobre o .NET Core em https://aka.ms/dotnet-docs
-Use 'dotnet --help' para ver os comandos disponíveis ou acesse: https://aka.ms/dotnet-cli-docs.
-
-Telemetria
----------
-As ferramentas do .NET Core coletam dados de uso para melhorar sua experiência. Os dados são anônimos e não incluem argumentos de linha de comando. Os dados são coletados pela Microsoft e compartilhados com a comunidade. É possível recusar a telemetria ao configurar uma variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT como '1' usando seu shell favorito.
-
-Leia mais sobre a telemetria das ferramentas do .NET Core CLI: https://aka.ms/dotnet-cli-telemetry</target>
+Saiba mais sobre o .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' para ver os comandos disponíveis ou acesse: https://aka.ms/dotnet-cli-docs</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -28,14 +22,13 @@ Here are some options to fix this error:
 2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="needs-review-translation">Permissão negada para modificar a pasta '{0}'.
+        <target state="translated">Permissão negada para modificar a pasta '{0}'.
 
 Aqui estão algumas opções para corrigir este erro:
 ----------------------------------------
-1. Execute o comando novamente com acesso elevado.
-2. Desabilite a primeira experiência de execução ao configurar a variável de ambiente DOTNET_SKIP_FIRST_TIME_EXPERIENCE como true.
-3. Copie o SDK do .NET Core para um local não protegido e use-o de lá.
-    </target>
+1. Execute novamente este comando com privilégios de acesso elevado.
+2. Desabilite a primeira experiência de execução definindo a variável de ambiente DOTNET_SKIP_FIRST_TIME_EXPERIENCE como true.
+3. Copie o SDK do .NET Core para um local não protegido e use-o de lá.</target>
         <note />
       </trans-unit>
       <trans-unit id="AspNetCertificateInstalled">
@@ -62,7 +55,7 @@ Para obter mais informações de como configurar HTTPS, confira https://go.micro
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
 HTTPS: https://aka.ms/aspnet-core-https</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">Bem-vindo ao .NET Core!
 ---------------------
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
@@ -75,16 +68,16 @@ HTTPS: https://aka.ms/aspnet-core-https</target>
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="new">Telemetry
+        <target state="translated">Telemetria
 ---------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+As ferramentas do .NET Core coletam dados de uso para nos ajudar a melhorar a sua experiência. Os dados são anônimos. Eles são coletados pela Microsoft e compartilhados com a comunidade. Você pode recusar a telemetria definindo a variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT para '1' ou 'true' usando seu shell favorito.
 
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</target>
+Saiba mais sobre a telemetria das Ferramentas CLI do .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
       <trans-unit id="ShortTelemetryMessage">
         <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="new">Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <target state="translated">Instrução de telemetria: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

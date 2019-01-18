@@ -1,25 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="LocalOptionDescription">
         <source>Uninstall the tool and remove it from the local tool manifest.</source>
-        <target state="new">Uninstall the tool and remove it from the local tool manifest.</target>
+        <target state="translated">Odinstaluje nástroj a odebere ho z manifestu místních nástrojů.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="new">Path to the manifest file.</target>
+        <target state="translated">Cesta k souboru manifestu</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
         <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="new">Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</target>
+        <target state="translated">Zadání manifestu nástroje (--tool-manifest) je platné jenom s parametrem lokálního nástroje (--local nebo výchozí).</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall a global tool or local tool.</source>
-        <target state="needs-review-translation">Odinstaluje nástroj z aktuálního vývojového prostředí.</target>
+        <target state="translated">Odinstaluje globální nebo lokální nástroj.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="UninstallLocalToolSucceeded">
         <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
-        <target state="new">Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</target>
+        <target state="translated">Nástroj {0} se úspěšně odinstaloval a odebral ze souboru manifestu {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">Možnost lokálního nástroje (--local), globálního nástroje (--global) nebo cesty k nástroji (--tool-path) nejde zadat současně s další z těchto možností. Zadejte prosím jenom jednu z těchto možností: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

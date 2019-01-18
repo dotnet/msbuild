@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed globally or locally.</source>
-        <target state="needs-review-translation">現在の開発環境にインストールされているツールを一覧表示します。</target>
+        <target state="translated">グローバルまたはローカルにインストールされているツールを一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools installed for the current user.</source>
-        <target state="needs-review-translation">現在のユーザーのツール ディレクトリにあるツールを一覧表示します。</target>
+        <target state="translated">現在のユーザーに対してインストールされたツールを一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">ローカルオプション(--local)、グローバルオプション(--global)、ツールパスオプション (--tool-path)は一度に1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>List the tools installed in the local tool manifest.</source>
-        <target state="new">List the tools installed in the local tool manifest.</target>
+        <target state="translated">ローカル ツール マニフェストにインストールされたツールを一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestFileColumn">
         <source>Manifest</source>
-        <target state="new">Manifest</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -45,7 +45,8 @@
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, please contact tool author:
 {1}</source>
-        <target state="needs-review-translation">警告: ツール パッケージ '{0}' が無効です: {1}</target>
+        <target state="translated">警告: ツール パッケージ '{0}' が無効です。ツール作成者に連絡してください:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

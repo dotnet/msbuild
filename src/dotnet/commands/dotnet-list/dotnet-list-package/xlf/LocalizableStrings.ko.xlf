@@ -4,77 +4,77 @@
     <body>
       <trans-unit id="AppFullName">
         <source>List all package references of the project or solution.</source>
-        <target state="needs-review-translation">프로젝트의 모든 프로젝트 간 참조를 나열합니다.</target>
+        <target state="translated">프로젝트 또는 솔루션의 모든 패키지 참조를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
-        <target state="new">FRAMEWORK | FRAMEWORK\RID</target>
+        <target state="translated">프레임워크 | FRAMEWORK\RID</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</source>
-        <target state="new">Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</target>
+        <target state="translated">프레임워크를 선택하여 패키지를 표시합니다. 여러 프레임워크의 경우 옵션을 여러 번 사용합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions.</source>
-        <target state="new">Lists packages that have newer versions.</target>
+        <target state="translated">최신 버전이 있는 패키지를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
         <source>Lists transitive and top-level packages.</source>
-        <target state="new">Lists transitive and top-level packages.</target>
+        <target state="translated">전이적 패키지 및 최상위 패키지를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
         <source>A project or solution file could not be found in {0}. Specify a project or solution file to use.</source>
-        <target state="new">A project or solution file could not be found in {0}. Specify a project or solution file to use.</target>
+        <target state="translated">{0}에서 프로젝트 또는 솔루션 파일을 찾을 수 없습니다. 사용할 프로젝트 또는 솔루션 파일을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfig">
         <source>CONFIG_FILE</source>
-        <target state="new">CONFIG_FILE</target>
+        <target state="translated">CONFIG_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated' option.</source>
-        <target state="new">The path to the NuGet config file to use. Requires the '--outdated' option.</target>
+        <target state="translated">사용할 NuGet 구성 파일의 경로입니다. '--outdated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">최신 패키지를 검색할 때 주 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">최신 패키지를 검색할 때 주 버전 번호와 부 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">최신 패키지를 검색할 때 시험판 버전이 있는 패키지를 고려합니다. '--outdated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">소스</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">최신 패키지를 검색할 때 사용하는 NuGet 소스입니다. '--outdated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedOptionOnly">
         <source>Option '{0}' requires the '--outdated' option to be specified.</source>
-        <target state="new">Option '{0}' requires the '--outdated' option to be specified.</target>
+        <target state="translated">'{0}' 옵션을 사용하려면 '--outdated' 옵션을 지정해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
         <source>Could not find file or directory '{0}'.</source>
-        <target state="new">Could not find file or directory '{0}'.</target>
+        <target state="translated">'{0}' 파일 또는 디렉터리를 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
     </body>

@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../CommonLocalizableStrings.resx">
     <body>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">Komutun durup kullanıcı girişini veya eylemini (örneğin, kimlik doğrulamasının tamamlanmasını) beklemesine izin verir .</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
@@ -727,18 +727,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">'{0}' araç dizini şu anda PATH ortam değişkeni üzerinde değil.
-Bash kullanıyorsanız aşağıdaki komutu çalıştırarak bunu profilinize ekleyebilirsiniz:
+        <target state="translated">'{0}' araç dizini şu an PATH ortam değişkeninde değil.
+bash kullanıyorsanız aşağıdaki komutu çalıştırarak profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# .NET Core SDK araçlarını ekle
+# Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
 Aşağıdaki komutu çalıştırarak geçerli oturuma ekleyebilirsiniz:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -754,18 +753,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">'{0}' araç dizini şu anda PATH ortam değişkeni üzerinde değil.
-Bash kullanıyorsanız aşağıdaki komutu çalıştırarak bunu profilinize ekleyebilirsiniz:
+        <target state="translated">'{0}' araç dizini şu an PATH ortam değişkeninde değil.
+bash kullanıyorsanız aşağıdaki komutu çalıştırarak profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# .NET Core SDK araçlarını ekle
+# Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Aşağıdaki komutu çalıştırarak geçerli oturuma ekleyebilirsiniz:
+Aşağıdaki komutu çalıştırarak geçerli dizine ekleyebilirsiniz:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -900,12 +898,12 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
         <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">Üzerinde işlem yapılacak proje veya çözüm dosyası. Bir dosya belirtilmezse komut geçerli dizinde dosya arar.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="new">PROJECT | SOLUTION</target>
+        <target state="translated">PROJE | ÇÖZÜM</target>
         <note />
       </trans-unit>
     </body>

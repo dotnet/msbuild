@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
         <source>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</source>
-        <target state="needs-review-translation">沒有與命令 "{0}" 相符的可執行檔</target>
+        <target state="translated">找不到任何符合命令 "{0}" 的可執行檔。如需詳細資料，請參閱 https://aka.ms/missing-command。</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} 已結束，{1} 於 {2} 毫秒後。</target>
+        <target state="translated">&lt; {0} 經過 {2} 毫秒結束，並出現 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -103,7 +103,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET Core SDK</source>
-        <target state="new">.NET Core SDK</target>
+        <target state="translated">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
         <source>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</source>
-        <target state="needs-review-translation">未找到与命令“{0}”匹配的可执行文件</target>
+        <target state="translated">找不到与命令“{0}”匹配的可执行文件。有关详细信息，请参阅 https://aka.ms/missing-command。</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0}通过了 {1} 在 {2} ms 内退出</target>
+        <target state="translated">&lt; {0} 在 {2} 毫秒内退出并返回 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -103,7 +103,7 @@ dotnet 工具安装 -- 全局 {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET Core SDK</source>
-        <target state="new">.NET Core SDK</target>
+        <target state="translated">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
         <source>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</source>
-        <target state="needs-review-translation">コマンド "{0}" に一致する実行可能ファイルが見つかりません</target>
+        <target state="translated">コマンド "{0}" に対応する実行可能ファイルが見つかりません。詳細については https://aka.ms/missing-command を参照してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} が {1} で終了しました ({2} ミリ秒)。</target>
+        <target state="translated">&lt; {0} が {1} で {2} ミリ秒で終了しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -103,7 +103,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET Core SDK</source>
-        <target state="new">.NET Core SDK</target>
+        <target state="translated">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

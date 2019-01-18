@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
@@ -65,11 +65,11 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="needs-review-translation">Protokolovací nástroj, který se použije pro výsledky testů.
+        <target state="translated">Protokolovací nástroj, který se má použít pro výsledky testů.
                                         Příklady:
-                                        Protokol ve formátu trx, který používá jedinečný název souboru: --logger trx
-                                        Protokol ve formátu trx, který používá zadaný název souboru: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Další informace o argumentech protokolovacího nástroje: https://aka.ms/vstest-report.</target>
+                                        Protokolování ve formátu trx s využitím jedinečného názvu souboru: --logger trx
+                                        Protokolování ve formátu trx s využitím zadaného názvu souboru: --logger "trx;LogFileName=&lt;VýsledkyTestů.trx&gt;"
+                                        Další informace o argumentech pro protokolovací nástroje najdete na https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -162,7 +162,7 @@ Výstupem je soubor Sequence.xml v aktuálním adresáři, do kterého se zaznam
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to test for.</source>
-        <target state="new">The target runtime to test for.</target>
+        <target state="translated">Cílový modul runtime pro testování.</target>
         <note />
       </trans-unit>
     </body>

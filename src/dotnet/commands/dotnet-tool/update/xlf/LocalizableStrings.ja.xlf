@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Update a global tool.</source>
-        <target state="needs-review-translation">ツールを、最新の安定したバージョンに更新します。</target>
+        <target state="translated">グローバル ツールを更新します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

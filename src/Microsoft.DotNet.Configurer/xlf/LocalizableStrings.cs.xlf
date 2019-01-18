@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
@@ -7,16 +7,10 @@
 ---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
-        <target state="needs-review-translation">Vítá vás .NET Core!
+        <target state="translated">Vítejte v .NET Core!
 ---------------------
 Další informace o .NET Core: https://aka.ms/dotnet-docs
-Dostupné příkazy si zobrazíte pomocí dotnet --help, případně navštivte: https://aka.ms/dotnet-cli-docs.
-
-Telemetrie
----------
-Nástroje .NET Core shromažďují data o využití s cílem usnadnit nám vylepšování vašeho prostředí. Data jsou anonymní a nezahrnují argumenty příkazového řádku. Data shromažďuje Microsoft, který je sdílí s komunitou. S telemetrií můžete vyjádřit výslovný nesouhlas, a to nastavením proměnné prostředí DOTNET_CLI_TELEMETRY_OPTOUT na 1 (neboli Pravda) prostřednictvím svého oblíbeného rozhraní.
-
-Další informace o telemetrii nástrojů .NET Core CLI: https://aka.ms/dotnet-cli-telemetry</target>
+Pomocí příkazu dotnet --help můžete zobrazit dostupné příkazy nebo navštivte tuto adresu: https://aka.ms/dotnet-cli-docs</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -28,14 +22,13 @@ Here are some options to fix this error:
 2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="needs-review-translation">Oprávnění ke změně složky {0} bylo zamítnuto.
+        <target state="translated">Byla vám odepřena oprávnění k úpravě složky {0}.
 
-Tuto chybu můžete opravit pomocí některé z těchto možností:
+Tady jsou některé možnosti, jak tuto chybu vyřešit:
 ----------------------------------------
-1. Znovu spusťte tento příkaz pomocí přístupu se zvýšenou úrovní oprávnění.
-2. Zakažte software spouštěný při prvním zapnutí počítače tak, že nastavíte proměnnou prostředí DOTNET_SKIP_FIRST_TIME_EXPERIENCE na hodnotu Pravda.
-3. Zkopírujte sadu .NET Core SDK do nechráněného umístění a použijte ji z tohoto umístění.
-    </target>
+1. Spusťte tento příkaz znovu se zvýšenými přístupovými oprávněními.
+2. Zakažte prostředí prvního spuštění nastavením proměnné prostředí DOTNET_SKIP_FIRST_TIME_EXPERIENCE na hodnotu true.
+3. Zkopírujte sadu .NET Core SDK do nechráněného umístění a použijte ji odtud.</target>
         <note />
       </trans-unit>
       <trans-unit id="AspNetCertificateInstalled">
@@ -62,7 +55,7 @@ Další informace o konfiguraci protokolu HTTPS najdete na webu https://go.micro
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
 HTTPS: https://aka.ms/aspnet-core-https</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">Vítejte v .NET Core!
 ---------------------
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
@@ -75,16 +68,16 @@ HTTPS: https://aka.ms/aspnet-core-https</target>
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="new">Telemetry
+        <target state="translated">Telemetrie
 ---------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+Nástroje .NET Core shromažďují data o využití, která nám pomáhají zlepšovat naše produkty. Tato data jsou anonymní. Shromažďuje je Microsoft a sdílí je s komunitou. Výslovný nesouhlas s telemetrií můžete vyjádřit tak, že ve svém oblíbeném nástroji nastavíte proměnnou prostředí DOTNET_CLI_TELEMETRY_OPTOUT na hodnotu 1 nebo true.
 
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</target>
+Další informace o telemetrii nástrojů příkazového řádku .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
       <trans-unit id="ShortTelemetryMessage">
         <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="new">Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <target state="translated">Telemetrický příkaz: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

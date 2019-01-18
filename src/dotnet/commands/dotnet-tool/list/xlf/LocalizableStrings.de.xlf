@@ -1,30 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed globally or locally.</source>
-        <target state="needs-review-translation">Hiermit werden die in der aktuellen Entwicklungsumgebung installierten Tools aufgelistet.</target>
+        <target state="translated">Global und lokal installierte Tools auflisten.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools installed for the current user.</source>
-        <target state="needs-review-translation">Hiermit werden Tools im Toolverzeichnis des aktuellen Benutzers aufgelistet.</target>
+        <target state="translated">Installierte Tools für den aktuellen Benutzer auflisten.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nur einmal vorkommen. Legen Sie nur eine der Optionen fest: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>List the tools installed in the local tool manifest.</source>
-        <target state="new">List the tools installed in the local tool manifest.</target>
+        <target state="translated">Im lokalen Toolmanifest installierte Tools auflisten.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestFileColumn">
         <source>Manifest</source>
-        <target state="new">Manifest</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -45,7 +45,7 @@
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, please contact tool author:
 {1}</source>
-        <target state="needs-review-translation">Warnung: Das Toolpaket "{0}" ist ungültig: {1}</target>
+        <target state="translated">Warnung: Das Toolpaket "{0}" ist ungültig. Kontaktieren Sie den Entwickler des Tools: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

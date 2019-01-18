@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
@@ -65,11 +65,11 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="needs-review-translation">要用於測試結果的記錄器。
-                                        範例:
-                                        使用唯一的檔案名稱，以 trx 格式記錄: --logger trx
-                                        使用指定的檔案名稱，以 trx 格式記錄: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        如需記錄器引數的詳細資訊，請參閱 https://aka.ms/vstest-report。</target>
+        <target state="translated">要用於測試結果的記錄器。
+ 範例: 
+ 使用唯一的檔案名稱，以 trx 格式記錄: --logger trx 
+ 使用指定的檔案名稱，以 trx 格式記錄: --logger "trx;LogFileName=&lt;TestResults.trx&gt;" 
+ 如需記錄器引數的詳細資訊，請參閱 https://aka.ms/vstest-report。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -162,7 +162,7 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to test for.</source>
-        <target state="new">The target runtime to test for.</target>
+        <target state="translated">要測試的目標執行時間。</target>
         <note />
       </trans-unit>
     </body>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -7,16 +7,10 @@
 ---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
-        <target state="needs-review-translation">.NET Core를 시작합니다.
+        <target state="translated">.NET Core를 시작합니다!
 ---------------------
-.NET Core에 대한 자세한 내용은 https://aka.ms/dotnet-docs를 참조하세요. 사용 가능한 명령을 보려면 'dotnet --help'를 사용하거나 https://aka.ms/dotnet-cli-docs를 방문하세요.
-
-원격 분석
----------
-.NET Core 도구는 사용자 환경 개선을 위해 사용량 데이터를 수집합니다. 데이터는 익명이며 명령줄 인수를 포함하지 않습니다. Microsoft에서 데이터를 수집하여 커뮤니티와 공유합니다.
-자주 사용하는 셸에서 DOTNET_CLI_TELEMETRY_OPTOUT 환경 변수를 '1' 또는 'true'로 설정하여 원격 분석을 옵트아웃할 수 있습니다.
-
-.NET Core CLI 도구 원격 분석에 대한 자세한 내용은 https://aka.ms/dotnet-cli-telemetry에서 확인할 수 있습니다.</target>
+.NET Core에 대한 자세한 내용은 https://aka.ms/dotnet-docs를 참조하세요.
+'dotnet --help'를 사용하여 사용 가능한 명령을 보거나 https://aka.ms/dotnet-cli-docs를 방문하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -28,14 +22,13 @@ Here are some options to fix this error:
 2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="needs-review-translation">'{0}' 폴더를 수정하는 데 필요한 사용 권한이 거부되었습니다.
+        <target state="translated">'{0}' 폴더를 수정하는 데 필요한 사용 권한이 거부되었습니다.
 
 이 오류를 해결하기 위한 옵션을 다음과 같습니다.
 ----------------------------------------
 1. 높은 액세스 권한으로 이 명령을 다시 실행합니다.
-2. 환경 변수 DOTNET_SKIP_FIRST_TIME_EXPERIENCE를 true로 설정하여 첫 번째 실행 환경을 사용하지 않습니다.
-3. .NET Core SDK를 보호되지 않은 위치로 복사한 후 이 위치에서 사용합니다.
-    </target>
+2. 환경 변수 DOTNET_SKIP_FIRST_TIME_EXPERIENCE를 true로 설정하여 첫 실행 경험을 사용하지 않도록 설정합니다.
+3. .NET Core SDK를 보호되지 않은 위치로 복사한 후 이 위치에서 사용합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AspNetCertificateInstalled">
@@ -62,7 +55,7 @@ HTTPS 구성에 대한 자세한 내용은 https://go.microsoft.com/fwlink/?link
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
 HTTPS: https://aka.ms/aspnet-core-https</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">.NET Core를 시작합니다!
 ---------------------
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
@@ -75,16 +68,16 @@ HTTPS: https://aka.ms/aspnet-core-https</target>
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="new">Telemetry
+        <target state="translated">원격 분석
 ---------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+.NET Core 도구는 사용자 환경 개선을 위해 사용량 데이터를 수집합니다. 데이터는 익명이며 명령줄 인수를 포함하지 않습니다. Microsoft에서 데이터를 수집하여 커뮤니티와 공유합니다. 자주 사용하는 셸에서 DOTNET_CLI_TELEMETRY_OPTOUT 환경 변수를 ‘1’ 또는 'true'로 설정하여 원격 분석을 옵트아웃할 수 있습니다.
 
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</target>
+.NET Core CLI 도구 원격 분석에 대한 자세한 내용은 https://aka.ms/dotnet-cli-telemetry에서 확인할 수 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShortTelemetryMessage">
         <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="new">Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <target state="translated">원격 분석 문: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

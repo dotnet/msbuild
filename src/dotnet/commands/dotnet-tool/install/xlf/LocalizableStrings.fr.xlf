@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">L'option local (--local), l'option global (--global) et l'option tool path (--tool-path) ne peuvent pas être définies en même temps. Spécifiez une seule des options : {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -16,39 +16,39 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
-        <target state="new">Install the tool and add to the local tool manifest (default).</target>
+        <target state="translated">Installez l'outil et ajoutez-le au manifeste de l'outil local (valeur par défaut).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
         <source>The local option(--local) does not support the framework option (--framework).</source>
-        <target state="new">The local option(--local) does not support the framework option (--framework).</target>
+        <target state="translated">L'option local (--local) ne prend pas en charge l'option framework (--framework).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
         <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="new">You can invoke the tool from this directory using the following command: dotnet tool run {0}
-Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</target>
+        <target state="translated">Vous pouvez appeler l'outil à partir de son répertoire à l'aide de la commande suivante : dotnet tool run {0}
+L'outil '{1}' (version '{2}') a été installé. L'entrée est ajoutée au fichier manifeste {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="new">Path to the manifest file.</target>
+        <target state="translated">Chemin du fichier manifeste.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
         <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
-        <target state="new">If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</target>
+        <target state="translated">Si vous voulez installer un outil global, ajoutez '-g'. Si vous voulez utiliser un manifeste d'outil, vous devez d'abord le créer avec 'dotnet new tool-manifest'.</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
         <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="new">Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</target>
+        <target state="translated">La spécification d'un manifeste d'outil (--tool-manifest) est uniquement valide avec l'option local (--local ou la valeur par défaut).</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -58,7 +58,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install global or local tool. Local tools are added to manifest and restored.</source>
-        <target state="needs-review-translation">Installez un outil à utiliser sur la ligne de commande.</target>
+        <target state="translated">Installer l'outil global ou local. Les outils locaux sont ajoutés au manifeste et restaurés.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -88,7 +88,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool for the current user.</source>
-        <target state="needs-review-translation">Installez l'outil dans le répertoire des outils de l'utilisateur actuel.</target>
+        <target state="translated">Installez l'outil pour l'utilisateur actuel.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
