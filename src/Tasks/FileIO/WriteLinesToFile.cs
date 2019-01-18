@@ -83,8 +83,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-
-                    var directoryPath = Path.IsPathRooted(File.ItemSpec) ? Path.GetDirectoryName(File.ItemSpec) : Path.GetDirectoryName(Path.GetFullPath(File.ItemSpec));
+                    var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
                     if (Overwrite)
                     {
                         if (buffer.Length == 0)
