@@ -4,73 +4,73 @@
     <body>
       <trans-unit id="CannotFindPackageIdInManifest">
         <source>Cannot find a package with the package id {0} in the manifest file.</source>
-        <target state="new">Cannot find a package with the package id {0} in the manifest file.</target>
+        <target state="translated">Não é possível encontrar um pacote com a ID do pacote {0} no arquivo de manifesto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
         <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
-        <target state="new">File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</target>
+        <target state="translated">O arquivo {0} veio de outro computador e pode ser bloqueado para ajudar a proteger este computador. Para obter mais informações, incluindo como desbloquear, confira https://aka.ms/motw</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPackageIdCollision">
         <source>Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</source>
-        <target state="new">Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</target>
+        <target state="translated">Não é possível adicionar o pacote. O arquivo de manifesto já contém a versão {0} do pacote {1}. Desinstale/instale ou edite o arquivo de manifesto {2} para especificar a nova versão {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionIsInvalid">
         <source>Version {0} is invalid.</source>
-        <target state="new">Version {0} is invalid.</target>
+        <target state="translated">A versão {0} é inválida.</target>
         <note />
       </trans-unit>
       <trans-unit id="FieldCommandsIsMissing">
         <source>Missing 'commands' entry.</source>
-        <target state="new">Missing 'commands' entry.</target>
+        <target state="translated">Entrada 'comandos' ausente.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidManifestFilePrefix">
         <source>Invalid manifest file. Path {0}:
 {1}</source>
-        <target state="new">Invalid manifest file. Path {0}:
+        <target state="translated">Arquivo de manifesto inválido. Caminho {0}:
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindAnyManifestsFileSearched">
         <source>Cannot find any manifests file. Searched:
 {0}</source>
-        <target state="new">Cannot find any manifests file. Searched:
+        <target state="translated">Não é possível encontrar nenhum arquivo de manifestos. Pesquisado:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InPackage">
         <source>In package {0}:
 {1}</source>
-        <target state="new">In package {0}:
+        <target state="translated">No pacote {0}:
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestVersionHigherThanSupported">
         <source>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</source>
-        <target state="new">Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</target>
+        <target state="translated">A versão do manifesto é a {0}. Esse manifesto pode não ser compatível com essa versão do SDK que é compatível no máximo com a versão do manifesto {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestVersion0">
         <source>Manifest version 0 is not supported.</source>
-        <target state="new">Manifest version 0 is not supported.</target>
+        <target state="translated">Não há suporte para a versão do manifesto 0.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolMissingVersion">
         <source>Missing 'version' entry.</source>
-        <target state="new">Missing 'version' entry.</target>
+        <target state="translated">Entrada de 'versão' ausente.</target>
         <note />
       </trans-unit>
       <trans-unit id="JsonParsingError">
         <source>Json parsing error in file {0} : {1}</source>
-        <target state="new">Json parsing error in file {0} : {1}</target>
+        <target state="translated">Erro de análise de JSON no arquivo {0}: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestMissingIsRoot">
         <source>Missing 'isRoot' entry.</source>
-        <target state="new">Missing 'isRoot' entry.</target>
+        <target state="translated">Entrada 'isRoot' ausente.</target>
         <note />
       </trans-unit>
     </body>

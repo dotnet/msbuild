@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
@@ -219,12 +219,12 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">Caminho para o arquivo &lt;application&gt;.deps.json.</target>
+        <target state="translated">Caminho para o arquivo &lt;aplicativo&gt;.deps.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">Caminho para o arquivo &lt;application&gt;.runtimeconfig.json.</target>
+        <target state="translated">Caminho para o arquivo &lt;aplicativo&gt;.runtimeconfig.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
@@ -234,7 +234,7 @@
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
         <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
-        <target state="needs-review-translation">Avançar quando nenhuma estrutura compartilhada candidata estiver habilitada.</target>
+        <target state="translated">Roll forward em nenhuma estrutura candidata (0 = desligado, 1 = roll em secundária, 2 = roll em principal e secundária).</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

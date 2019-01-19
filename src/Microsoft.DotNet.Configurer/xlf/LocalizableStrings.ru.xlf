@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
@@ -7,16 +7,10 @@
 ---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
-        <target state="needs-review-translation">Вас приветствует .NET Core!
+        <target state="translated">Добро пожаловать в .NET Core!
 ---------------------
-Дополнительные сведения о .NET Core: https://aka.ms/dotnet-docs
-Для просмотра доступных команд используйте команду "dotnet --help" или перейдите на страницу https://aka.ms/dotnet-cli-docs
-
-Телеметрия
-----------
-Средства .NET Core собирают данные об использовании для улучшения взаимодействия с пользователем. Эти данные анонимны и не включают в себя аргументы командной строки. Сбор данных осуществляется корпорацией Майкрософт, которая предоставляет их сообществу. Вы можете явно отказаться от телеметрии, присвоив переменной среды DOTNET_CLI_TELEMETRY_OPTOUT значение 1 или true с помощью предпочитаемой оболочки.
-
-Дополнительные сведения о телеметрии в средствах .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
+Дополнительные сведения о .NET Core см. на странице https://aka.ms/dotnet-docs
+Для просмотра списка доступных команд, выполните команду 'dotnet --help', или зайдите на страницу https://aka.ms/dotnet-cli-docs</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -28,14 +22,13 @@ Here are some options to fix this error:
 2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="needs-review-translation">Отказано в разрешении на изменение папки "{0}".
+        <target state="translated">Отсутствует разрешение на изменение папки '{0}'.
 
-Ниже приведено несколько способов устранения этой ошибки.
+Чтобы исправить эту ошибку, попробуйте выполнить одно из указанных действий:
 ----------------------------------------
-1. Повторите эту команду с правами повышенного доступа.
-2. Отключите функциональность первого запуска, задав для переменной среды DOTNET_SKIP_FIRST_TIME_EXPERIENCE значение true.
-3. Скопируйте пакет SDK для .NET Core в незащищенное расположение и используйте его оттуда.
-    </target>
+1. Повторно запустите эту команду с расширенными разрешениями.
+2. Отключите поведение при первом запуске, установив значение true для переменной среды DOTNET_SKIP_FIRST_TIME_EXPERIENCE.
+3. Скопируйте пакет SDK для .NET Core в незащищенное расположение и используйте его оттуда.</target>
         <note />
       </trans-unit>
       <trans-unit id="AspNetCertificateInstalled">
@@ -62,10 +55,10 @@ For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?l
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
 HTTPS: https://aka.ms/aspnet-core-https</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">Добро пожаловать в .NET Core!
 ---------------------
 GitHub: https://github.com/dotnet/core
-Docs: https://aka.ms/dotnet-docs
+Документация: https://aka.ms/dotnet-docs
 HTTPS: https://aka.ms/aspnet-core-https</target>
         <note />
       </trans-unit>
@@ -75,16 +68,16 @@ HTTPS: https://aka.ms/aspnet-core-https</target>
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="new">Telemetry
+        <target state="translated">Телеметрия
 ---------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+Средства .NET Core собирают данные об использовании, которые необходимы для улучшения работы с приложением. Эти данные являются анонимными. Они собираются корпорацией Майкрософт и предоставляются сообществу. Вы можете отказаться от отправки данных телеметрии, установив переменную среды DOTNET_CLI_TELEMETRY_OPTOUT в значение '1' или 'true' в оболочке, которой вы пользуетесь.
 
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</target>
+Дополнительные сведения о телеметрии средств CLI .NET Core см. на странице https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
       <trans-unit id="ShortTelemetryMessage">
         <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="new">Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <target state="translated">Заявление об использовании данных телеметрии: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

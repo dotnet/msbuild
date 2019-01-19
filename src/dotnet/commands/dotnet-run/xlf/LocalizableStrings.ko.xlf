@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
         <source>Arguments passed to the application that is being run.</source>
-        <target state="translated">실행 중인 응용 프로그램에 전달되는 인수입니다.</target>
+        <target state="translated">실행 중인 애플리케이션에 전달되는 인수입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
@@ -67,12 +67,12 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="CommandOptionLaunchProfileDescription">
         <source>The name of the launch profile (if any) to use when launching the application.</source>
-        <target state="translated">응용 프로그램을 시작할 때 사용하는 시작 프로필(있는 경우)의 이름입니다.</target>
+        <target state="translated">애플리케이션을 시작할 때 사용하는 시작 프로필(있는 경우)의 이름입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoLaunchProfileDescription">
         <source>Do not attempt to use launchSettings.json to configure the application.</source>
-        <target state="translated">launchSettings.json을 사용하여 응용 프로그램을 구성하지 마세요.</target>
+        <target state="translated">launchSettings.json을 사용하여 애플리케이션을 구성하지 마세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
@@ -148,7 +148,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="new">The target runtime to run for.</target>
+        <target state="translated">실행할 대상 런타임입니다.</target>
         <note />
       </trans-unit>
     </body>

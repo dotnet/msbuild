@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -45,7 +45,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">게시할 대상 런타임입니다. 자체 포함 배포를 만들 때 사용됩니다. 기본값은 프레임워크 종속 응용 프로그램을 게시하는 것입니다.</target>
+        <target state="translated">게시할 대상 런타임입니다. 자체 포함 배포를 만들 때 사용됩니다.
+기본값은 프레임워크 종속 애플리케이션을 게시하는 것입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -56,7 +57,7 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">런타임은 대상 머신에 설치할 필요가 없으므로 응용 프로그램과 함께 .NET Core 런타임을 게시합니다. 런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
+        <target state="translated">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 애플리케이션과 함께 .NET Core 런타임을 게시합니다. 런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
         <note />
       </trans-unit>
     </body>

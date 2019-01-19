@@ -4,115 +4,115 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Restore tools defined in the local tool manifest.</source>
-        <target state="new">Restore tools defined in the local tool manifest.</target>
+        <target state="translated">Obnoví nástroje definované v manifestu místního nástroje.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, please contact tool author:
 {1}</source>
-        <target state="new">Warning: tool package '{0}' is invalid, please contact tool author:
+        <target state="translated">Upozornění: Balíček nástroje {0} není platný. Kontaktujte prosím autora nástroje:
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NoToolsWereRestored">
         <source>No tools were restored.</source>
-        <target state="new">No tools were restored.</target>
+	<target state="new">No tools were restored.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
         <source>Package Id</source>
-        <target state="new">Package Id</target>
+        <target state="translated">ID balíčku</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">Verze</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">Příkazy</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
         <source>Add an additional NuGet package source to use during installation.</source>
-        <target state="new">Add an additional NuGet package source to use during installation.</target>
+        <target state="translated">Přidá další zdroj balíčku NuGet, který se použije při instalaci.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
+        <target state="translated">Konfigurační soubor NuGet, který se použije.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="new">FILE</target>
+        <target state="translated">Soubor</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
-        <target state="new">The version of the tool package to install.</target>
+        <target state="translated">Verze balíčku nástroje, který se má nainstalovat</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="new">VERSION</target>
+        <target state="translated">Verze</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageFailedToRestore">
         <source>Package "{0}" failed to restore, due to {1}</source>
-        <target state="new">Package "{0}" failed to restore, due to {1}</target>
+        <target state="translated">Balíček {0} se nepovedlo obnovit. Důvod: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">Obnovení se nezdařilo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsMismatch">
         <source>The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</source>
-        <target state="new">The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</target>
+        <target state="translated">Příkaz {0} zadaný v souboru manifestu nástroje není obsažený v balíčku s ID {1}. Příkazy obsažené v balíčku jsou {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="new">Path to the manifest file.</target>
+        <target state="translated">Cesta k souboru manifestu</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreSuccessful">
         <source>Tool '{0}' (version '{1}') was restored. Available commands: {2}</source>
-        <target state="new">Tool '{0}' (version '{1}') was restored. Available commands: {2}</target>
+        <target state="translated">Nástroj {0} (verze {1}) se obnovil. Dostupné příkazy: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolsRestoreWasSuccessful">
         <source>Restore was successful.</source>
-        <target state="new">Restore was successful.</target>
+        <target state="translated">Obnovení bylo úspěšné.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackagesCommandNameCollisionConclusion">
         <source>Command names conflict. Command names are case insensitive.
 {0}</source>
-        <target state="new">Command names conflict. Command names are case insensitive.
+        <target state="translated">Konflikt názvů příkazů. V názvech příkazů se nerozlišují malá a velká písmena.
 {0}</target>
         <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
       <trans-unit id="PackagesCommandNameCollisionForOnePackage">
         <source>A command "{0}" in package "{1}"</source>
-        <target state="new">A command "{0}" in package "{1}"</target>
+        <target state="translated">Příkaz {0} v balíčku {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="RestorePartiallyFailed">
         <source>Restore partially failed.</source>
-        <target state="new">Restore partially failed.</target>
+        <target state="translated">Obnovení se částečně nezdařilo.</target>
         <note />
       </trans-unit>
     </body>

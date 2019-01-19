@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">로컬 옵션(--local), 전역 옵션(--global), 도구 경로 옵션(--tool-path)은 한 번에 하나만 지정할 수 있습니다. 옵션 중 하나만 지정하세요. {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -16,39 +16,39 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
-        <target state="new">Install the tool and add to the local tool manifest (default).</target>
+        <target state="translated">도구를 설치하고 로컬 도구 매니페스트에 추가합니다(기본값).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
         <source>The local option(--local) does not support the framework option (--framework).</source>
-        <target state="new">The local option(--local) does not support the framework option (--framework).</target>
+        <target state="translated">로컬 옵션(--local)은 프레임워크 옵션(--framework)을 지원하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
         <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="new">You can invoke the tool from this directory using the following command: dotnet tool run {0}
+        <target state="translated">다음 명령을 사용하여 이 디렉터리에서 도구를 호출할 수 있습니다. dotnet tool run {0}
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="new">Path to the manifest file.</target>
+        <target state="translated">매니페스트 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
         <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
-        <target state="new">If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</target>
+        <target state="translated">전역 도구를 설치하려는 경우 '-g'를 추가합니다. 도구 매니페스트를 사용하려는 경우 먼저 'dotnet new tool-manifest'를 사용하여 도구 매니패스트를 만들어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
         <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="new">Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</target>
+        <target state="translated">도구 매니페스트 지정(--tool-manifest)은 로컬 옵션(--local 또는 기본값)과 함께 사용되는 경우에만 유효합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -58,7 +58,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install global or local tool. Local tools are added to manifest and restored.</source>
-        <target state="needs-review-translation">명령줄에서 사용할 도구를 설치합니다.</target>
+        <target state="translated">전역 또는 로컬 도구를 설치하세요. 로컬 도구는 매니페스트에 추가되고 복원됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -88,7 +88,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool for the current user.</source>
-        <target state="needs-review-translation">현재 사용자의 도구 디렉터리에 도구를 설치합니다.</target>
+        <target state="translated">현재 사용자의 도구를 설치합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">

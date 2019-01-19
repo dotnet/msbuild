@@ -1,30 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed globally or locally.</source>
-        <target state="needs-review-translation">Вывод списка инструментов, установленных в текущей среде разработки.</target>
+        <target state="translated">Выводит список средств, установленных глобально или локально.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools installed for the current user.</source>
-        <target state="needs-review-translation">Вывод списка инструментов в каталоге инструментов текущего пользователя.</target>
+        <target state="translated">Выводит список средств, установленных для текущего пользователя.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">Вы можете указать только один из параметров local (--local), global (--global) или tool path (--tool-path). Укажите только один из этих параметров: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>List the tools installed in the local tool manifest.</source>
-        <target state="new">List the tools installed in the local tool manifest.</target>
+        <target state="translated">Выводит список средств, установленных в локальном манифесте средств.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestFileColumn">
         <source>Manifest</source>
-        <target state="new">Manifest</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -45,7 +45,8 @@
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, please contact tool author:
 {1}</source>
-        <target state="needs-review-translation">Предупреждение. Пакет инструментов "{0}" недопустим: {1}</target>
+        <target state="translated">Предупреждение: пакет средства "{0}" является недопустимым. Обратитесь к автору средства:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

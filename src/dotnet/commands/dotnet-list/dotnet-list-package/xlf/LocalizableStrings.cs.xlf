@@ -4,77 +4,77 @@
     <body>
       <trans-unit id="AppFullName">
         <source>List all package references of the project or solution.</source>
-        <target state="needs-review-translation">Zobrazí všechny odkazy mezi projekty v projektu.</target>
+        <target state="translated">Vypíše všechny odkazy na balíčky z projektu nebo řešení.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
-        <target state="new">FRAMEWORK | FRAMEWORK\RID</target>
+        <target state="translated">ARCHITEKTURA | ARCHITEKTURA\RID</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</source>
-        <target state="new">Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</target>
+        <target state="translated">Zvolí architekturu, pro kterou se mají zobrazit balíčky. Pokud chcete určit více architektur, zadejte tento přepínač vícekrát.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions.</source>
-        <target state="new">Lists packages that have newer versions.</target>
+        <target state="translated">Zobrazí seznam balíčků, které mají novější verze.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
         <source>Lists transitive and top-level packages.</source>
-        <target state="new">Lists transitive and top-level packages.</target>
+        <target state="translated">Vypíše seznam přenosných balíčků a balíčků nejvyšší úrovně.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
         <source>A project or solution file could not be found in {0}. Specify a project or solution file to use.</source>
-        <target state="new">A project or solution file could not be found in {0}. Specify a project or solution file to use.</target>
+        <target state="translated">{0} neobsahuje žádný soubor projektu nebo řešení. Zadejte soubor projektu nebo řešení, který chcete použít.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfig">
         <source>CONFIG_FILE</source>
-        <target state="new">CONFIG_FILE</target>
+        <target state="translated">KONFIG_SOUBOR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated' option.</source>
-        <target state="new">The path to the NuGet config file to use. Requires the '--outdated' option.</target>
+        <target state="translated">Cesta ke konfiguračnímu souboru NuGet, který se má použít. Vyžaduje přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu jenom balíčky s odpovídajícím číslem hlavní verze. Vyžaduje přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu jenom balíčky s odpovídajícími čísly hlavní verze a podverze. Vyžaduje přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu i balíčky v předběžných verzích. Vyžaduje přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">Zdroje NuGet, které se mají použít při hledání novějších balíčků. Vyžaduje přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedOptionOnly">
         <source>Option '{0}' requires the '--outdated' option to be specified.</source>
-        <target state="new">Option '{0}' requires the '--outdated' option to be specified.</target>
+        <target state="translated">Přepínač {0} vyžaduje, aby byl zadaný také přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
         <source>Could not find file or directory '{0}'.</source>
-        <target state="new">Could not find file or directory '{0}'.</target>
+        <target state="translated">Soubor nebo adresář {0} nešlo najít.</target>
         <note />
       </trans-unit>
     </body>

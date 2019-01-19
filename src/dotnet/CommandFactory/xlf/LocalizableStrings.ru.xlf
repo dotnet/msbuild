@@ -136,7 +136,7 @@
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
         <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
-        <target state="translated">Не удалось создать файл deps.json. Возможно, он уже создан. Вы можете указать параметр "-d" перед именем средства, чтобы получить выходные данные диагностики, например "dotnet -d &lt;имя_средства&gt;": {0}</target>
+        <target state="translated">Не удается создать файл deps.json, возможно, он уже создан.  Для вывода диагностических данных вы можете указать параметр "-d" перед именем инструмента (например, "dotnet -d &lt;имя_инструмента&gt;": {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -176,7 +176,7 @@
       </trans-unit>
       <trans-unit id="NeedRunToolRestore">
         <source>Run "dotnet tool restore" to make the "{0}" command available.</source>
-        <target state="new">Run "dotnet tool restore" to make the "{0}" command available.</target>
+        <target state="translated">Чтобы команда "{0}" стала доступной, выполните команду "dotnet tool restore".</target>
         <note />
       </trans-unit>
     </body>

@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CannotFindCommandName">
         <source>Cannot find a tool in the manifest file that has a command named '{0}'.</source>
-        <target state="new">Cannot find a tool in the manifest file that has a command named '{0}'.</target>
+        <target state="translated">Не удается найти средство, которому соответствует команда с именем "{0}", в файле манифеста.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Run local tool.</source>
-        <target state="new">Run local tool.</target>
+        <target state="translated">Запуск локального инструмента.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandNameArgumentDescription">
         <source>The command name of the tool to run.</source>
-        <target state="new">The command name of the tool to run.</target>
+        <target state="translated">Имя команды для средства, которое будет запущено.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandNameArgumentName">
         <source>COMMAND_NAME</source>
-        <target state="new">COMMAND_NAME</target>
+        <target state="translated">COMMAND_NAME</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOneCommandName">
         <source>Please specify one command name to run.</source>
-        <target state="new">Please specify one command name to run.</target>
+        <target state="translated">Укажите одну команду для запуска.</target>
         <note />
       </trans-unit>
     </body>

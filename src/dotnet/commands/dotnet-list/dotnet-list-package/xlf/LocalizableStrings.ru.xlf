@@ -4,77 +4,77 @@
     <body>
       <trans-unit id="AppFullName">
         <source>List all package references of the project or solution.</source>
-        <target state="needs-review-translation">Вывод списка всех ссылок из одного проекта на другой.</target>
+        <target state="translated">Вывод списка всех ссылок на пакеты для проекта или решения.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
-        <target state="new">FRAMEWORK | FRAMEWORK\RID</target>
+        <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</source>
-        <target state="new">Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</target>
+        <target state="translated">Выбирает платформу, список пакетов для которой необходимо отобразить. Для нескольких платформ укажите этот параметр несколько раз.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions.</source>
-        <target state="new">Lists packages that have newer versions.</target>
+        <target state="translated">Список пакетов, для которых обнаружены более новые версии.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
         <source>Lists transitive and top-level packages.</source>
-        <target state="new">Lists transitive and top-level packages.</target>
+        <target state="translated">Список транзитивных пакетов и пакетов верхнего уровня.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
         <source>A project or solution file could not be found in {0}. Specify a project or solution file to use.</source>
-        <target state="new">A project or solution file could not be found in {0}. Specify a project or solution file to use.</target>
+        <target state="translated">Не удалось найти файл проекта или решения в {0}. Укажите используемый файл проекта или решения.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfig">
         <source>CONFIG_FILE</source>
-        <target state="new">CONFIG_FILE</target>
+        <target state="translated">CONFIG_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated' option.</source>
-        <target state="new">The path to the NuGet config file to use. Requires the '--outdated' option.</target>
+        <target state="translated">Путь к используемому файлу NuGet. Требуется указать параметр '--outdated'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">Учитывает только пакеты с соответствующим номером основной версии при поиске более новых версий пакетов. Требуется указать параметр '--outdated'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">Учитывать только пакеты с соответствующими номерами основной и дополнительной версий при поиске более новых версий пакетов. Требуется указать параметр "--outdated".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">Учитывает пакеты с версиями предварительных выпусков при поиске более новых версий пакетов. Требуется указать параметр '--outdated'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">Исходная база данных</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="new">The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</target>
+        <target state="translated">Источники NuGet, используемые при поиске более новых версий пакетов. Требуется указать параметр '--outdated'.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedOptionOnly">
         <source>Option '{0}' requires the '--outdated' option to be specified.</source>
-        <target state="new">Option '{0}' requires the '--outdated' option to be specified.</target>
+        <target state="translated">Для параметра '{0}' необходимо указать параметр '--outdated'.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
         <source>Could not find file or directory '{0}'.</source>
-        <target state="new">Could not find file or directory '{0}'.</target>
+        <target state="translated">Не удалось найти файл или каталог "{0}".</target>
         <note />
       </trans-unit>
     </body>

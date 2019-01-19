@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CannotFindCommandName">
         <source>Cannot find a tool in the manifest file that has a command named '{0}'.</source>
-        <target state="new">Cannot find a tool in the manifest file that has a command named '{0}'.</target>
+        <target state="translated">未在清单文件中找到具有“{0}”命令的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Run local tool.</source>
-        <target state="new">Run local tool.</target>
+        <target state="translated">运行本地工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandNameArgumentDescription">
         <source>The command name of the tool to run.</source>
-        <target state="new">The command name of the tool to run.</target>
+        <target state="translated">要运行的工具的命令名称。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandNameArgumentName">
         <source>COMMAND_NAME</source>
-        <target state="new">COMMAND_NAME</target>
+        <target state="translated">COMMAND_NAME</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOneCommandName">
         <source>Please specify one command name to run.</source>
-        <target state="new">Please specify one command name to run.</target>
+        <target state="translated">请指定一个要运行的命令名称。</target>
         <note />
       </trans-unit>
     </body>

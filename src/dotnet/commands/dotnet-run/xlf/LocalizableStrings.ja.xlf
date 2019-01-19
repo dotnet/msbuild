@@ -148,7 +148,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="new">The target runtime to run for.</target>
+        <target state="translated">実行対象のターゲット ランタイム。</target>
         <note />
       </trans-unit>
     </body>

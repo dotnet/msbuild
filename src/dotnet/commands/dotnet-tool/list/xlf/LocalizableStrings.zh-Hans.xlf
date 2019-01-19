@@ -1,30 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed globally or locally.</source>
-        <target state="needs-review-translation">列出当前开发环境中的已安装工具。</target>
+        <target state="translated">列出在全局或本地安装的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools installed for the current user.</source>
-        <target state="needs-review-translation">列出当前用户工具目录中的工具。</target>
+        <target state="translated">列出为当前用户安装的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <target state="translated">一次只能具有本地选项(--local)、全局选项(--global)和工具路径选项(--tool-path)三者之一。请仅指定其中一个选项: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>List the tools installed in the local tool manifest.</source>
-        <target state="new">List the tools installed in the local tool manifest.</target>
+        <target state="translated">列出本地工具清单中安装的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestFileColumn">
         <source>Manifest</source>
-        <target state="new">Manifest</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -45,7 +45,8 @@
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, please contact tool author:
 {1}</source>
-        <target state="needs-review-translation">警告: 工具包“{0}”无效: {1}</target>
+        <target state="translated">警告: 工具包“{0}”无效, 请联系工具作者:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">
