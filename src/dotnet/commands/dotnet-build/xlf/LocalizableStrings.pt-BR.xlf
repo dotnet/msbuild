@@ -17,7 +17,7 @@
         <target state="translated">Não criar referências de projeto para projeto e criar somente o projeto especificado.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoIncrementialOptionDescription">
+      <trans-unit id="NoIncrementalOptionDescription">
         <source>Do not use incremental building.</source>
         <target state="translated">Não usar build incremental.</target>
         <note />

@@ -146,6 +146,11 @@ O {1} atual é '{2}'.</target>
         <target state="translated">A estrutura de destino para a qual a execução ocorrerá. A estrutura de destino também precisa ser especificada no arquivo de projeto.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="new">The target runtime to run for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

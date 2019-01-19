@@ -17,7 +17,7 @@
         <target state="translated">No compile referencias de proyecto a proyecto y compile solo el proyecto especificado.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoIncrementialOptionDescription">
+      <trans-unit id="NoIncrementalOptionDescription">
         <source>Do not use incremental building.</source>
         <target state="translated">No utilice la compilación incremental.</target>
         <note />

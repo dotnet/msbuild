@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a tool to the latest stable version.</source>
-        <target state="translated">Atualizar uma ferramenta para a versão estável mais recente.</target>
+        <source>Update a global tool.</source>
+        <target state="needs-review-translation">Atualizar uma ferramenta para a versão estável mais recente.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

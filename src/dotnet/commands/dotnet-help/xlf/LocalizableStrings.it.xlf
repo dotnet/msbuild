@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Esegue il roll forward nel caso in cui non è abilitata nessuna versione candidata di Shared Framework.</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="needs-review-translation">Esegue il roll forward nel caso in cui non è abilitata nessuna versione candidata di Shared Framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

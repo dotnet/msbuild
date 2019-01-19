@@ -146,6 +146,11 @@ The current {1} is '{2}'.</source>
         <target state="translated">要运行的目标框架。必须在项目文件中指定目标框架。</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="new">The target runtime to run for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

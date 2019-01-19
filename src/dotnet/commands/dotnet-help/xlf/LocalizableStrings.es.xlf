@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Puesta al día activada, no hay ninguna instancia de Shared Framework habilitada.</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="needs-review-translation">Puesta al día activada, no hay ninguna instancia de Shared Framework habilitada.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

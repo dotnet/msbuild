@@ -41,7 +41,7 @@ Any file with the suffix `.dll` in the same folder as the managed application be
 
 Only assemblies listed in the dependencies file can be resolved from a package cache. To resolve those assemblies, two environment variables are used:
 
-* `DOTNET_PACKAGES` - The primary package cache. If not set, defaults to `$HOME/.nuget/packages` on Unix or `%LOCALAPPDATA%\NuGet\Packages` (TBD) on Windows. **NOTE**: Currently the host uses different folders as we are still coordinating with NuGet to get the directories right (there are compatability considerations). Currently we always use `$HOME/.dnx/packages`(Unix)/`%USERPROFILE%\.dnx\packages`(Win).
+* `DOTNET_PACKAGES` - The primary package cache. If not set, defaults to `$HOME/.nuget/packages` on Unix or `%LOCALAPPDATA%\NuGet\Packages` (TBD) on Windows. **NOTE**: Currently the host uses different folders as we are still coordinating with NuGet to get the directories right (there are compatibility considerations). Currently we always use `$HOME/.dnx/packages`(Unix)/`%USERPROFILE%\.dnx\packages`(Win).
 * `DOTNET_PACKAGES_CACHE` - The secondary cache. This is used by shared hosts (such as Azure) to provide a cache of pre-downloaded common packages on a faster disk. If not set, it is not used.
 
 Given the Package ID, Package Version, Package Hash and Asset Relative Path provided in the runtime configuration file, **and the assembly is not serviced** (see the full resolution algorithm below) resolution proceeds as follows (Unix-style paths will be used for convenience but these variables and paths all apply to Windows as well):

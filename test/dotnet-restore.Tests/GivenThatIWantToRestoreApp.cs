@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Restore.Tests
 {
     public class GivenThatIWantToRestoreApp : TestBase
     {
-        private static string RepoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
+        private static string RepoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.config");
 
         [Fact]
         public void ItRestoresAppToSpecificDirectory()

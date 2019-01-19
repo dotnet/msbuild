@@ -146,6 +146,11 @@ Aktuální {1} je {2}.</target>
         <target state="translated">Cílová architektura pro spuštění. Cílová architektura musí být určená také v souboru projektu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="new">The target runtime to run for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

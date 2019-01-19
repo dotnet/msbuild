@@ -15,9 +15,6 @@ Library/
 # local nuget cache
 .nuget/
 
-# NuGet.Config at the root
-/NuGet.Config
-
 # NuGet v3 restore drops these even though we don't use MSBuild :(
 *.nuget.targets
 *.nuget.props
@@ -41,7 +38,7 @@ Library/
 cmake/
 
 # stage0 install directory
-.dotnet_stage0
+.dotnet/
 
 # build tools directory
 build_tools

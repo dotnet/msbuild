@@ -6,14 +6,8 @@
         <source>Welcome to .NET Core!
 ---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-
-Telemetry
----------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
-
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">欢迎使用 .NET Core!
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
+        <target state="needs-review-translation">欢迎使用 .NET Core!
 ---------------------
 若要详细了解 NET Core: https://aka.ms/dotnet-docs
 请使用 “dotnet --help”查看可用的命令或访问: https://aka.ms/dotnet-cli-docs
@@ -25,30 +19,16 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
 若要深入了解 .NET Core CLI 工具遥测，请访问 https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">未能准备好 NuGet 缓存。{0} 失败，错误为: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">正在配置...
---------------
-正在运行一项命令来填充本地包缓存，进而加快还原速度并实现脱机访问。此命令最多需要一分钟即可完成且仅运行一次。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
 ----------------------------------------
 1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="translated">修改“{0}”文件夹的权限被拒绝。
+        <target state="needs-review-translation">修改“{0}”文件夹的权限被拒绝。
 
 以下是修复该错误的选项:
 ----------------------------------------
@@ -74,6 +54,37 @@ For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?l
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
         <target state="translated">无法确定用户的主目录。设置“{0}”环境变量以指定要使用的目录。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShortFirstTimeWelcomeMessage">
+        <source>Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https</source>
+        <target state="new">Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TelemetryMessage">
+        <source>Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShortTelemetryMessage">
+        <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

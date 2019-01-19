@@ -6,7 +6,6 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Configurer;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
@@ -43,6 +42,13 @@ namespace Microsoft.DotNet.Tests
             var assignedMachineId = unitUnderTest.GetTelemetryCommonProperties()["Machine ID"];
 
             Guid.TryParse(assignedMachineId, out var _).Should().BeTrue("it should be a guid");
+        }
+
+        [Fact]
+        public void TelemetryCommonPropertiesShouldReturnIsOutputRedirected()
+        {
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
+            unitUnderTest.GetTelemetryCommonProperties()["Output Redirected"].Should().BeOneOf("True", "False");
         }
 
         [Fact]

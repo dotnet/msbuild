@@ -146,6 +146,11 @@ Le {1} actuel est '{2}'.</target>
         <target state="translated">Framework cible pour lequel l'exécution est effectuée. Le framework cible doit également être spécifié dans le fichier projet.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="new">The target runtime to run for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

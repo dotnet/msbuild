@@ -146,6 +146,11 @@ Il valore corrente di {1} è '{2}'.</target>
         <target state="translated">Framework di destinazione da usare per l'esecuzione. Il framework di destinazione deve essere specificato anche nel file di progetto.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="new">The target runtime to run for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

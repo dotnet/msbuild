@@ -6,14 +6,8 @@
         <source>Welcome to .NET Core!
 ---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-
-Telemetry
----------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
-
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">.NET Core — Zapraszamy!
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
+        <target state="needs-review-translation">.NET Core — Zapraszamy!
 ---------------------
 Więcej informacji o programie .NET Core: https://aka.ms/dotnet-docs
 Aby wyświetlić dostępne polecenia, użyj polecenia „dotnet --help” lub przejdź na stronę: https://aka.ms/dotnet-cli-docs
@@ -25,30 +19,16 @@ Narzędzia programu .NET Core zbierają dane użycia mające pomóc nam ulepszy�
 Przeczytaj więcej na temat telemetrii narzędzi interfejsu wiersza polecenia programu .NET Core: https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Nie można utworzyć głównej pamięci podręcznej NuGet. Operacja {0} zakończyła się niepowodzeniem: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">Trwa konfigurowanie…
---------------
-Wykonywane jest polecenie w celu wypełnienia lokalnej pamięci podręcznej pakietów, poprawy szybkości przywracania i włączenia dostępu offline. Wykonanie tego polecenia jest jednorazowe i zajmie maksymalnie minutę.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
 ----------------------------------------
 1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="translated">Odmowa uprawnień do zmodyfikowania folderu „{0}”.
+        <target state="needs-review-translation">Odmowa uprawnień do zmodyfikowania folderu „{0}”.
 
 Oto kilka opcji naprawiania tego błędu:
 ----------------------------------------
@@ -74,6 +54,37 @@ Aby uzyskać więcej informacji na temat konfigurowania protokołu HTTPS, zobacz
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
         <target state="translated">Nie można określić katalogu macierzystego użytkownika. Ustaw zmienną środowiskową „{0}”, aby określić katalog do użycia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShortFirstTimeWelcomeMessage">
+        <source>Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https</source>
+        <target state="new">Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TelemetryMessage">
+        <source>Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShortTelemetryMessage">
+        <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

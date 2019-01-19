@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">사용되지 않는 후보 공유 프레임워크에 대해 롤포워드합니다.</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="needs-review-translation">사용되지 않는 후보 공유 프레임워크에 대해 롤포워드합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

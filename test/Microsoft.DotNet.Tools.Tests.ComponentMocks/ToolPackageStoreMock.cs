@@ -12,26 +12,23 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
-    internal class ToolPackageStoreMock : IToolPackageStore
+    internal class ToolPackageStoreMock : IToolPackageStoreQuery, IToolPackageStore
     {
         private IFileSystem _fileSystem;
-        private Action _uninstallCallback;
 
         public ToolPackageStoreMock(
             DirectoryPath root,
-            IFileSystem fileSystem,
-            Action uninstallCallback = null)
+            IFileSystem fileSystem)
         {
             Root = new DirectoryPath(Path.GetFullPath(root.Value));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _uninstallCallback = uninstallCallback;
         }
 
         public DirectoryPath Root { get; private set; }
 
         public DirectoryPath GetRandomStagingDirectory()
         {
-            return Root.WithSubDirectories(ToolPackageStore.StagingDirectory, Path.GetRandomFileName());
+            return Root.WithSubDirectories(ToolPackageStoreAndQuery.StagingDirectory, Path.GetRandomFileName());
         }
 
         public NuGetVersion GetStagedPackageVersion(DirectoryPath stagingDirectory, PackageId packageId)
@@ -74,7 +71,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 var name = Path.GetFileName(subdirectory);
                 var packageId = new PackageId(name);
 
-                if (name == ToolPackageStore.StagingDirectory || name != packageId.ToString())
+                if (name == ToolPackageStoreAndQuery.StagingDirectory || name != packageId.ToString())
                 {
                     continue;
                 }
@@ -100,8 +97,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     _fileSystem,
                     packageId,
                     NuGetVersion.Parse(Path.GetFileName(subdirectory)),
-                    new DirectoryPath(subdirectory),
-                    _uninstallCallback);
+                    new DirectoryPath(subdirectory));
             }
         }
 
@@ -112,7 +108,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             {
                 return null;
             }
-            return new ToolPackageMock(_fileSystem, packageId, version, directory, _uninstallCallback);
+            return new ToolPackageMock(_fileSystem, packageId, version, directory);
         }
     }
 }

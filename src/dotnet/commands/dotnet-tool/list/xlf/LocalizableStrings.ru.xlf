@@ -3,13 +3,28 @@
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>List tools installed in the current development environment.</source>
-        <target state="translated">Вывод списка инструментов, установленных в текущей среде разработки.</target>
+        <source>List tools installed globally or locally.</source>
+        <target state="needs-review-translation">Вывод списка инструментов, установленных в текущей среде разработки.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>List tools in the current user's tools directory.</source>
-        <target state="translated">Вывод списка инструментов в каталоге инструментов текущего пользователя.</target>
+        <source>List tools installed for the current user.</source>
+        <target state="needs-review-translation">Вывод списка инструментов в каталоге инструментов текущего пользователя.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>List the tools installed in the local tool manifest.</source>
+        <target state="new">List the tools installed in the local tool manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestFileColumn">
+        <source>Manifest</source>
+        <target state="new">Manifest</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -28,18 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="translated">Предупреждение. Пакет инструментов "{0}" недопустим: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="GlobalAndToolPathConflict">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
+        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</source>
+        <target state="needs-review-translation">Предупреждение. Пакет инструментов "{0}" недопустим: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

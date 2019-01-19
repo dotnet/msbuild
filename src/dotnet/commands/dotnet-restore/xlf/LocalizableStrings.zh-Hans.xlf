@@ -89,11 +89,6 @@ This is equivalent to deleting project.assets.json.</source>
 这等效于删除 project.assets.json。</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdInteractiveRestoreOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">允许命令停止和等待用户输入或操作(例如，用以完成身份验证)。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdLockedModeOptionDescription">
         <source>Don't allow updating project lock file.</source>
         <target state="translated">不允许更新项目锁定文件。</target>
