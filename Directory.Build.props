@@ -36,6 +36,9 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <EnableSourceControlManagerQueries Condition=" '$(Rid)' == 'rhel.6-x64' ">false</EnableSourceControlManagerQueries>
     <DeterministicSourcePaths Condition=" '$(Rid)' == 'rhel.6-x64' ">false</DeterministicSourcePaths>
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
+
+    <!-- https://github.com/dotnet/cli/issues/10637: frequent CI failures when test output is captured -->
+    <TestCaptureOutput>false</TestCaptureOutput>
   </PropertyGroup>
 
   <PropertyGroup>
