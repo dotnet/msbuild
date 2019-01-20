@@ -1,12 +1,54 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="translated">Вы можете указать только один из параметров local (--local), global (--global) или tool path (--tool-path). Укажите только один из этих параметров: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">Вы можете вызвать это средство с помощью следующей команды: {0}
 Средство "{1}" (версии "{2}") успешно установлено.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>Install the tool and add to the local tool manifest (default).</source>
+        <target state="translated">Установите средство и добавьте его в локальный манифест средств (по умолчанию).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
+        <source>The local option(--local) does not support the framework option (--framework).</source>
+        <target state="translated">При указании параметра local (--local) не может быть указан параметр framework (--framework).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalToolInstallationSucceeded">
+        <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
+        <target state="translated">Вы можете вызвать средство из этого каталога, выполнив следующую команду: dotnet tool run {0}
+Средство '{1}' (версия '{2}') успешно установлено. Запись добавлена в файл манифеста {3}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">Путь к файлу манифеста.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">Путь</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestGuide">
+        <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
+        <target state="translated">Если вы хотите установить глобальный инструмент, укажите параметр "-g". Если вы хотите использовать манифест инструмента, необходимо сначала создать манифест, выполнив команду  "dotnet new tool-manifest".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
+        <target state="translated">Указать манифест средства (--tool-manifest) можно только с параметром local (--local или по умолчанию).</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -15,8 +57,8 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Install a tool for use on the command line.</source>
-        <target state="translated">Устанавливает инструмент для использования в командной строке.</target>
+        <source>Install global or local tool. Local tools are added to manifest and restored.</source>
+        <target state="translated">Установите глобальное или локальное средство. Локальные средства добавляются в манифест и восстанавливаются.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -45,8 +87,8 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Install the tool to the current user's tools directory.</source>
-        <target state="translated">Установка инструмента в каталог инструментов текущего пользователя.</target>
+        <source>Install the tool for the current user.</source>
+        <target state="translated">Установите средство для текущего пользователя.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -87,16 +129,6 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
         <target state="translated">Указанная версия "{0}" не входит в допустимый диапазон версий NuGet.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">

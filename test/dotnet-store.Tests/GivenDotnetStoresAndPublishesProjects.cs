@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 {
     public class GivenDotnetStoresAndPublishesProjects : TestBase
     {
-        private static string _tfm = "netcoreapp2.2";
+        private static string _tfm = "netcoreapp3.0";
         private static string _frameworkVersion = TestAssetInstance.CurrentRuntimeFrameworkVersion;
         private static string _arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
 
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Fail()
                 .And.HaveStdErrContaining($"Error:{Environment.NewLine}" +
                     $"  An assembly specified in the application dependencies manifest (NuGetConfigDependentProject.deps.json) was not found:{Environment.NewLine}" +
-                    $"    package: 'NuGet.Configuration', version: '4.3.0-beta1-2418'{Environment.NewLine}" +
+                    $"    package: 'NuGet.Configuration', version: '4.3.0-preview3-4146'{Environment.NewLine}" +
                     "    path: 'lib/netstandard1.3/NuGet.Configuration.dll'");
         }
 

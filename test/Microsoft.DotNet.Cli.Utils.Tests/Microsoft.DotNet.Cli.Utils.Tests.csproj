@@ -1,17 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
-    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <AssemblyName>Microsoft.DotNet.Cli.Utils.Tests</AssemblyName>
-    <OutputType>Exe</OutputType>
-    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssetTargetFallback>$(AssetTargetFallback);netstandardapp1.5;dotnet5.4;portable-net451+win8</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
+    <Content Include="$(SdkOutputDirectory)\sdk\*\.version">
       <Link>.version</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -28,37 +26,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingPackageVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
     <PackageReference Include="Moq" Version="4.7.25" />
-    <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
-
-  <Target Name="CreateDotnetToolsTestAsset" AfterTargets="Build">
-
-    <PropertyGroup>
-      <testAssetSourceRoot>$(OutputPath)/TestDotnetToolsLayoutDirectory</testAssetSourceRoot>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <TestDotnetTools Include="$(RepoRoot)/build/BundledDotnetTools.proj">
-        <Properties>
-          DotnetToolsLayoutDirectory=$(SdkOutputDirectory)/DotnetTools;
-          TemplateFillInPackageName=dotnet-watch;
-          TemplateFillInPackageVersion=$(DotnetWatchPackageVersion);
-          PreviousStageDirectory=$(PreviousStageDirectory);
-          DotnetToolsLayoutDirectory=$(testAssetSourceRoot)
-        </Properties>
-      </TestDotnetTools>
-    </ItemGroup>
-    <MSBuild BuildInParallel="False" Projects="@(TestDotnetTools)" />
-  </Target>
 
 </Project>

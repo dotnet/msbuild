@@ -137,5 +137,16 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["update"];
             appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--disable-parallel");
         }
+
+        [Fact]
+        public void UpdateToolParserCanParseInteractiveRestoreOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update -g console.test.app --interactive");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--interactive");
+        }
     }
 }

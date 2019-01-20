@@ -14,98 +14,76 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.List
 {
-    internal delegate IToolPackageStore CreateToolPackageStore(DirectoryPath? nonGlobalLocation = null);
-
-    internal class ListToolCommand : CommandBase
+    internal class ToolListCommand : CommandBase
     {
-        public const string CommandDelimiter = ", ";
         private readonly AppliedOption _options;
-        private readonly IReporter _reporter;
-        private readonly IReporter _errorReporter;
-        private CreateToolPackageStore _createToolPackageStore;
+        private readonly ParseResult _result;
+        private readonly ToolListGlobalOrToolPathCommand _toolListGlobalOrToolPathCommand;
+        private readonly ToolListLocalCommand _toolListLocalCommand;
+        private readonly bool _global;
+        private readonly bool _local;
+        private readonly string _toolPath;
+        private const string GlobalOption = "global";
+        private const string LocalOption = "local";
+        private const string ToolPathOption = "tool-path";
 
-        public ListToolCommand(
+        public ToolListCommand(
             AppliedOption options,
             ParseResult result,
-            CreateToolPackageStore createToolPackageStore = null,
-            IReporter reporter = null)
+            ToolListGlobalOrToolPathCommand toolListGlobalOrToolPathCommand = null,
+            ToolListLocalCommand toolListLocalCommand = null
+        )
             : base(result)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _reporter = reporter ?? Reporter.Output;
-            _errorReporter = reporter ?? Reporter.Error;
-            _createToolPackageStore = createToolPackageStore ?? ToolPackageFactory.CreateToolPackageStore;
+            _result = result ?? throw new ArgumentNullException(nameof(result));
+            _toolListGlobalOrToolPathCommand
+                = toolListGlobalOrToolPathCommand ?? new ToolListGlobalOrToolPathCommand(_options, _result);
+            _toolListLocalCommand
+                = toolListLocalCommand ?? new ToolListLocalCommand(_options, _result);
+            _global = options.ValueOrDefault<bool>(GlobalOption);
+            _local = options.ValueOrDefault<bool>(LocalOption);
+            _toolPath = options.SingleArgumentOrDefault(ToolPathOption);
         }
 
         public override int Execute()
         {
-            var global = _options.ValueOrDefault<bool>("global");
-            var toolPathOption = _options.ValueOrDefault<string>("tool-path");
+            EnsureNoConflictGlobalLocalToolPathOption();
 
-            DirectoryPath? toolPath = null;
-            if (!string.IsNullOrWhiteSpace(toolPathOption))
+            if (_global || !string.IsNullOrWhiteSpace(_toolPath))
             {
-                if (!Directory.Exists(toolPathOption))
-                {
-                    throw new GracefulException(
-                        string.Format(
-                            LocalizableStrings.InvalidToolPathOption,
-                            toolPathOption));
-                }
-
-                toolPath = new DirectoryPath(toolPathOption);
+                return _toolListGlobalOrToolPathCommand.Execute();
             }
-
-            if (toolPath == null && !global)
+            else
             {
-                throw new GracefulException(LocalizableStrings.NeedGlobalOrToolPath);
+                return _toolListLocalCommand.Execute();
             }
-
-            if (toolPath != null && global)
-            {
-                throw new GracefulException(LocalizableStrings.GlobalAndToolPathConflict);
-            }
-
-            var table = new PrintableTable<IToolPackage>();
-
-            table.AddColumn(
-                LocalizableStrings.PackageIdColumn,
-                p => p.Id.ToString());
-            table.AddColumn(
-                LocalizableStrings.VersionColumn,
-                p => p.Version.ToNormalizedString());
-            table.AddColumn(
-                LocalizableStrings.CommandsColumn,
-                p => string.Join(CommandDelimiter, p.Commands.Select(c => c.Name)));
-
-            table.PrintRows(GetPackages(toolPath), l => _reporter.WriteLine(l));
-            return 0;
         }
 
-        private IEnumerable<IToolPackage> GetPackages(DirectoryPath? toolPath)
+        private void EnsureNoConflictGlobalLocalToolPathOption()
         {
-            return _createToolPackageStore(toolPath).EnumeratePackages()
-                .Where(PackageHasCommands)
-                .OrderBy(p => p.Id)
-                .ToArray();
-        }
-
-        private bool PackageHasCommands(IToolPackage package)
-        {
-            try
+            List<string> options = new List<string>();
+            if (_global)
             {
-                // Attempt to read the commands collection
-                // If it fails, print a warning and treat as no commands
-                return package.Commands.Count >= 0;
+                options.Add(GlobalOption);
             }
-            catch (Exception ex) when (ex is ToolConfigurationException)
+
+            if (_local)
             {
-                _errorReporter.WriteLine(
+                options.Add(LocalOption);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_toolPath))
+            {
+                options.Add(ToolPathOption);
+            }
+
+            if (options.Count > 1)
+            {
+                throw new GracefulException(
                     string.Format(
-                        LocalizableStrings.InvalidPackageWarning,
-                        package.Id,
-                        ex.Message).Yellow());
-                return false;
+                        LocalizableStrings.ListToolCommandInvalidGlobalAndLocalAndToolPath,
+                        string.Join(" ", options)));
             }
         }
     }

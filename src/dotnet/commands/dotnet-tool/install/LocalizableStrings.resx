@@ -139,7 +139,7 @@
     <value>Add an additional NuGet package source to use during installation.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Install a tool for use on the command line.</value>
+    <value>Install global or local tool. Local tools are added to manifest and restored.</value>
   </data>
   <data name="ConfigFileOptionName" xml:space="preserve">
     <value>FILE</value>
@@ -160,8 +160,15 @@
     <value>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</value>
   </data>
+  <data name="LocalToolInstallationSucceeded" xml:space="preserve">
+    <value>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</value>
+  </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
-    <value>Install the tool to the current user's tools directory.</value>
+    <value>Install the tool for the current user.</value>
+  </data>
+  <data name="LocalOptionDescription" xml:space="preserve">
+    <value>Install the tool and add to the local tool manifest (default).</value>
   </data>
   <data name="InstallFullCommandNameLocalized" xml:space="preserve">
     <value>.NET Install Command</value>
@@ -195,16 +202,28 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
   <data name="InvalidNuGetVersionRange" xml:space="preserve">
     <value>Specified version '{0}' is not a valid NuGet version range.</value>
   </data>
-  <data name="InstallToolCommandNeedGlobalOrToolPath" xml:space="preserve">
-    <value>Please specify either the global option (--global) or the tool path option (--tool-path).</value>
-  </data>
-  <data name="InstallToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
-    <value>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</value>
+  <data name="InstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
   </data>
   <data name="ToolPathOptionName" xml:space="preserve">
     <value>PATH</value>
   </data>
   <data name="ToolPathOptionDescription" xml:space="preserve">
     <value>The directory where the tool will be installed. The directory will be created if it does not exist.</value>
+  </data>
+  <data name="ManifestPathOptionDescription" xml:space="preserve">
+    <value>Path to the manifest file.</value>
+  </data>
+  <data name="ManifestPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
+    <value>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</value>
+  </data>
+  <data name="LocalOptionDoesNotSupportFrameworkOption" xml:space="preserve">
+    <value>The local option(--local) does not support the framework option (--framework).</value>
+  </data>
+  <data name="NoManifestGuide" xml:space="preserve">
+    <value>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</value>
   </data>
 </root>

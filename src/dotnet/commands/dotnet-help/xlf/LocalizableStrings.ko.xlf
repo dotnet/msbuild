@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
         <source>The path to an application .dll file to execute.</source>
-        <target state="translated">실행할 응용 프로그램 .dll 파일의 경로입니다.</target>
+        <target state="translated">실행할 애플리케이션 .dll 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
@@ -214,27 +214,27 @@
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
-        <target state="translated">검색할 검색 정책 및 어셈블리를 포함하는 경로입니다.</target>
+        <target state="translated">프로브할 프로빙 정책 및 어셈블리를 포함하는 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;응용 프로그램&gt;.deps.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;애플리케이션&gt;.deps.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;응용 프로그램&gt;.runtimeconfig.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;애플리케이션&gt;.runtimeconfig.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
-        <target state="translated">응용 프로그램을 실행하는 데 사용할 설치된 공유 프레임워크의 버전입니다.</target>
+        <target state="translated">애플리케이션을 실행하는 데 사용할 설치된 공유 프레임워크의 버전입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">사용되지 않는 후보 공유 프레임워크에 대해 롤포워드합니다.</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="translated">후보 프레임워크에 롤포워드하지 않습니다(0=끔, 1=부 버전 롤, 2=주 버전 및 부 버전 롤).</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -294,7 +294,7 @@
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET Core application.</source>
-        <target state="translated">.NET Core 응용 프로그램을 실행합니다.</target>
+        <target state="translated">.NET Core 애플리케이션을 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">

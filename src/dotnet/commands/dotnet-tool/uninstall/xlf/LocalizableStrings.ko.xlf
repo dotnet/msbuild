@@ -1,15 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and remove it from the local tool manifest.</source>
+        <target state="translated">도구를 제거하고 로컬 도구 매니페스트에서 제거합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">매니페스트 파일의 경로입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
+        <target state="translated">도구 매니페스트 지정(--tool-manifest)은 로컬 옵션(--local 또는 기본값)과 함께 사용되는 경우에만 유효합니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
         <target state="translated">제거할 도구의 NuGet 패키지 ID입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a tool from the current development environment.</source>
-        <target state="translated">현재 개발 환경에서 도구를 제거합니다.</target>
+        <source>Uninstall a global tool or local tool.</source>
+        <target state="translated">전역 도구 또는 로컬 도구를 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -25,6 +45,11 @@
       <trans-unit id="GlobalOptionDescription">
         <source>Uninstall the tool from the current user's tools directory.</source>
         <target state="translated">현재 사용자의 도구 디렉터리에서 도구를 제거합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">'{0}' 도구를 제거하고 매니페스트 파일 {1}에서 제거했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -47,14 +72,9 @@
         <target state="translated">도구 '{0}'을(를) 제거하지 못했습니다. {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(-global)이 도구 경로 옵션(--tool-path)과 충돌합니다. 옵션 중 하나만 지정하세요.</target>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="translated">로컬 옵션(--local), 전역 옵션(--global), 도구 경로 옵션(--tool-path)은 한 번에 하나만 지정할 수 있습니다. 옵션 중 하나만 지정하세요. {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

@@ -1,8 +1,0 @@
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-<!--
-  Empty Directory.Build.props so the repo's root Directory.Build.props isn't imported,
-  since it imports generated .props files that aren't necessary for update-dependencies.
--->
-  
-</Project>

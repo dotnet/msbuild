@@ -23,8 +23,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             File.WriteAllText(path, contents);
         }
-        
+
         public static void Write(string directory, string configname, string localFeedPath)
+        {
+            var path = Path.Combine(directory, configname);
+
+            File.WriteAllText(path, Format(localFeedPath));
+        }
+
+        public static string Format(string localFeedPath)
         {
             const string template = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
@@ -36,10 +43,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
 </packageSources>
 </configuration>";
-
-            var path = Path.Combine(directory, configname);
-
-            File.WriteAllText(path, string.Format(template, localFeedPath));
+            return string.Format(template, localFeedPath);
         }
     }
 }

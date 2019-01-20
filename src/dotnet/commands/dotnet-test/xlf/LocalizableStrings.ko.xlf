@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -66,10 +66,10 @@
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
         <target state="translated">테스트 결과에 사용할 로거입니다.
-                                        예:
-                                        고유한 파일 이름을 사용하여 trx 형식으로 로그인: --logger trx
-                                        지정된 파일 이름을 사용하여 trx 형식으로 로그인: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        로거 인수에 대한 자세한 내용은 https://aka.ms/vstest-report를 참조하세요.</target>
+                                         예 :
+                                         고유한 파일 이름을 사용하여 trx 형식으로 로그인: --logger trx
+                                         지정된 파일 이름을 사용하여 trx 형식으로 로그인: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                         로거 인수에 대한 자세한 내용은 https://aka.ms/vstest-report를 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -147,7 +147,7 @@ RunSettings 인수:
         <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
 Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
         <target state="translated">테스트를 원인 모드로 실행합니다. 이 옵션은 테스트 호스트 크래시를 유발하는 문제 있는 테스트를 격리하는 데 유용합니다.
-현재 디렉터리에 'Sequence.xml' 파일을 출력하며 이 파일에는 크래시 이전의 테스트 실행 순서가 캡처됩니다.</target>
+크래시 이전의 테스트 실행 순서를 캡처하는 현재 디렉터리의 'Sequence.xml' 파일을 출력합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
@@ -162,7 +162,7 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to test for.</source>
-        <target state="new">The target runtime to test for.</target>
+        <target state="translated">테스트할 대상 런타임입니다.</target>
         <note />
       </trans-unit>
     </body>

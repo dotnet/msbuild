@@ -13,8 +13,6 @@ namespace Microsoft.DotNet.Configurer
     {
         private IReporter _reporter;
         private DotnetFirstRunConfiguration _dotnetFirstRunConfiguration;
-        private INuGetCachePrimer _nugetCachePrimer;
-        private INuGetCacheSentinel _nugetCacheSentinel;
         private IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
         private IAspNetCertificateSentinel _aspNetCertificateSentinel;
         private IAspNetCoreCertificateGenerator _aspNetCoreCertificateGenerator;
@@ -23,8 +21,6 @@ namespace Microsoft.DotNet.Configurer
         private readonly IEnvironmentPath _pathAdder;
 
         public DotnetFirstTimeUseConfigurer(
-            INuGetCachePrimer nugetCachePrimer,
-            INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IAspNetCoreCertificateGenerator aspNetCoreCertificateGenerator,
@@ -34,8 +30,6 @@ namespace Microsoft.DotNet.Configurer
             string cliFallbackFolderPath,
             IEnvironmentPath pathAdder)
         {
-            _nugetCachePrimer = nugetCachePrimer;
-            _nugetCacheSentinel = nugetCacheSentinel;
             _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
             _aspNetCertificateSentinel = aspNetCertificateSentinel;
             _aspNetCoreCertificateGenerator = aspNetCoreCertificateGenerator;
@@ -56,20 +50,22 @@ namespace Microsoft.DotNet.Configurer
             if (ShouldPrintFirstTimeUseNotice())
             {
                 PrintFirstTimeUseNotice();
+                if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
+                {
+                    PrintTelemetryMessage();
+                }
+
+                _firstTimeUseNoticeSentinel.CreateIfNotExists();
             }
-
-            if (ShouldPrimeNugetCache())
+            else if (ShouldPrintShortFirstTimeUseNotice())
             {
-                if (_nugetCacheSentinel.UnauthorizedAccess)
+                PrintShortFirstTimeUseNotice();
+                if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
                 {
-                    PrintUnauthorizedAccessMessage();
+                    PrintShorTelemetryMessage();
                 }
-                else
-                {
-                    PrintNugetCachePrimeMessage();
 
-                    _nugetCachePrimer.PrimeCache();
-                }
+                _firstTimeUseNoticeSentinel.CreateIfNotExists();
             }
 
             if (ShouldGenerateAspNetCertificate())
@@ -114,16 +110,41 @@ namespace Microsoft.DotNet.Configurer
         private bool ShouldPrintFirstTimeUseNotice()
         {
             return ShouldRunFirstRunExperience() &&
-                _dotnetFirstRunConfiguration.PrintTelemetryMessage &&
                 !_firstTimeUseNoticeSentinel.Exists();
+        }
+
+        private bool ShouldPrintShortFirstTimeUseNotice()
+        {
+            return !_firstTimeUseNoticeSentinel.Exists();
+        }
+
+        private bool ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled()
+        {
+            return !_dotnetFirstRunConfiguration.TelemetryOptout;
         }
 
         private void PrintFirstTimeUseNotice()
         {
             _reporter.WriteLine();
             _reporter.WriteLine(LocalizableStrings.FirstTimeWelcomeMessage);
+        }
 
-            _firstTimeUseNoticeSentinel.CreateIfNotExists();
+        private void PrintShortFirstTimeUseNotice()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.ShortFirstTimeWelcomeMessage);
+        }
+
+        private void PrintTelemetryMessage()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.TelemetryMessage);
+        }
+
+        private void PrintShorTelemetryMessage()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.ShortTelemetryMessage);
         }
 
         private void PrintUnauthorizedAccessMessage()
@@ -132,21 +153,6 @@ namespace Microsoft.DotNet.Configurer
             _reporter.WriteLine(string.Format(
                 LocalizableStrings.UnauthorizedAccessMessage,
                 _cliFallbackFolderPath));
-        }
-
-        private bool ShouldPrimeNugetCache()
-        {
-            return ShouldRunFirstRunExperience() &&
-                !_nugetCacheSentinel.Exists() &&
-                !_nugetCacheSentinel.InProgressSentinelAlreadyExists() &&
-                !_nugetCachePrimer.SkipPrimingTheCache();
-        }
-
-        private void PrintNugetCachePrimeMessage()
-        {
-            string cachePrimeMessage = LocalizableStrings.NugetCachePrimeMessage;
-            _reporter.WriteLine();
-            _reporter.WriteLine(cachePrimeMessage);
         }
 
         private bool ShouldRunFirstRunExperience()

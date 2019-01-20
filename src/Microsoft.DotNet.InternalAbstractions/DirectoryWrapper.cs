@@ -19,9 +19,9 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
             return new TemporaryDirectory();
         }
 
-        public IEnumerable<string> EnumerateFiles(string path, string searchPattern)
+        public IEnumerable<string> EnumerateFiles(string path)
         {
-            return Directory.EnumerateFiles(path, searchPattern);
+            return Directory.EnumerateFiles(path);
         }
 
         public IEnumerable<string> EnumerateFileSystemEntries(string path)
@@ -29,28 +29,9 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
             return Directory.EnumerateFileSystemEntries(path);
         }
 
-        public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern)
+        public string GetCurrentDirectory()
         {
-            return Directory.EnumerateFileSystemEntries(path, searchPattern);
-        }
-
-        public string GetDirectoryFullName(string path)
-        {
-            var directoryFullName = string.Empty;
-            if (Exists(path))
-            {
-                directoryFullName = new DirectoryInfo(path).FullName;
-            }
-            else
-            {
-                var fileInfo = new FileInfo(path);
-                if (fileInfo.Directory != null)
-                {
-                    directoryFullName = fileInfo.Directory.FullName;
-                }
-            }
-
-            return directoryFullName;
+            return Directory.GetCurrentDirectory();
         }
 
         public void CreateDirectory(string path)

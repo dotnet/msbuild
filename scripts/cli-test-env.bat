@@ -10,11 +10,12 @@ for %%i in (%~dp0..\) DO (
 title CLI Test (%CLI_REPO_ROOT%)
 
 REM Add Stage 2 CLI to path
-set PATH=%CLI_REPO_ROOT%bin\2\win-x64\dotnet;%PATH%
+set PATH=%CLI_REPO_ROOT%artifacts\tmp\Debug\dotnet;%PATH%
 
 set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 set DOTNET_MULTILEVEL_LOOKUP=0
 set NUGET_PACKAGES=%CLI_REPO_ROOT%.nuget\packages
-set TEST_PACKAGES=%CLI_REPO_ROOT%bin\2\win-x64\test\packages
-set TEST_ARTIFACTS=%CLI_REPO_ROOT%bin\2\win-x64\test\artifacts
-set PreviousStageProps=%CLI_REPO_ROOT%bin\2\win-x64\PreviousStage.props
+set PreviousStageProps=%CLI_REPO_ROOT%bin\2\PreviousStage.props
+
+REM Prevent environment variable get into msbuild
+set architecture=

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
@@ -65,11 +65,11 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="needs-review-translation">O agente a ser usado para os resultados de teste.
+        <target state="translated">O agente a ser usado para resultados de testes.
                                         Exemplos:
-                                        Registrar no formato trx usando um nome de arquivo exclusivo: --logger trx
-                                        Registrar no formato trx usando um nome de arquivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Veja https://aka.ms/vstest-report para obter mais informações sobre os argumentos do agente.</target>
+                                        Log em formato trx usando um nome de arquivo exclusivo: --agente trx
+                                        Log no formato trx usando o nome de arquivo especificado: --agente "trx; LogFileName = &lt; TestResults.trx &gt;
+                                        Consulte https://aka.ms/vstest-report para obter mais informações sobre argumentos de agentes.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -162,7 +162,7 @@ Emite um arquivo 'Sequence.xml' no diretório atual que captura a ordem de execu
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to test for.</source>
-        <target state="new">The target runtime to test for.</target>
+        <target state="translated">O runtime escolhido para testar.</target>
         <note />
       </trans-unit>
     </body>

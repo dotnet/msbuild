@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permet à la commande de s'arrêter et d'attendre une entrée ou une action de l'utilisateur (par exemple pour effectuer une authentification).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Projet introuvable dans '{0}'.</target>
@@ -722,8 +727,8 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Le répertoire d'outils '{0}' ne se trouve pas actuellement sur la variable d'environnement PATH.
-Si vous utilisez Bash, vous pouvez l'ajouter à votre profil en exécutant la commande suivante :
+        <target state="translated">Le répertoire d'outils '{0}' n'est pas actuellement sur la variable d'environnement PATH.
+Si vous utilisez bash, vous pouvez l'ajouter à votre profil en exécutant la commande suivante :
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -732,8 +737,7 @@ EOF
 
 Vous pouvez l'ajouter à la session actuelle en exécutant la commande suivante :
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -749,8 +753,8 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Le répertoire d'outils '{0}' ne se trouve pas actuellement sur la variable d'environnement PATH.
-Si vous utilisez Bash, vous pouvez l'ajouter à votre profil en exécutant la commande suivante :
+        <target state="translated">Le répertoire d'outils '{0}' n'est pas actuellement sur la variable d'environnement PATH.
+Si vous utilisez bash, vous pouvez l'ajouter à votre profil en exécutant la commande suivante :
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -759,8 +763,7 @@ EOF
 
 Vous pouvez l'ajouter à la session actuelle en exécutant la commande suivante :
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -895,12 +898,12 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
         <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">Fichier projet ou solution à utiliser. Si vous ne spécifiez pas de fichier, la commande en recherche un dans le répertoire actuel.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="new">PROJECT | SOLUTION</target>
+        <target state="translated">PROJET | SOLUTION</target>
         <note />
       </trans-unit>
     </body>

@@ -8,6 +8,8 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tool.List;
+using Microsoft.DotNet.Tools.Tool.Restore;
+using Microsoft.DotNet.Tools.Tool.Run;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
 using Microsoft.DotNet.Tools.Tool.Update;
 
@@ -36,8 +38,16 @@ namespace Microsoft.DotNet.Tools.Tool
                     appliedOption["update"],
                     ParseResult),
                 ["list"] =
-                appliedOption => new ListToolCommand(
+                appliedOption => new ToolListCommand(
                     appliedOption["list"],
+                    ParseResult),
+                ["restore"] =
+                appliedOption => new ToolRestoreCommand(
+                    appliedOption["restore"],
+                    ParseResult),
+                ["run"] =
+                appliedOption => new ToolRunCommand(
+                    appliedOption["run"],
                     ParseResult)
             };
 

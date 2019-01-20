@@ -29,9 +29,18 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         public Telemetry(IFirstTimeUseNoticeSentinel sentinel) : this(sentinel, null) { }
 
-        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId, bool blockThreadInitialization = false)
+        public Telemetry(
+            IFirstTimeUseNoticeSentinel sentinel,
+            string sessionId,
+            bool blockThreadInitialization = false,
+            IEnvironmentProvider environmentProvider = null)
         {
-            Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
+            if (environmentProvider == null)
+            {
+                environmentProvider = new EnvironmentProvider();
+            }
+
+            Enabled = !environmentProvider.GetEnvironmentVariableAsBool(TelemetryOptout, false) && PermissionExists(sentinel);
 
             if (!Enabled)
             {

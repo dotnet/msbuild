@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
@@ -214,17 +214,17 @@
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
-        <target state="translated">Araştırma ilkesini ve araştırılacak bütünleştirilmiş kodları içeren yol.</target>
+        <target state="translated">Yoklama ilkesini ve yoklanacak bütünleştirilmiş kodları içeren yol.</target>
         <note />
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;uygulama&gt;.deps.json dosyasının yolu.</target>
+        <target state="translated">&lt;Uygulama&gt;.deps.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;uygulama&gt;.runtimeconfig.json dosyasının yolu.</target>
+        <target state="translated">&lt;Uygulama&gt;.runtimeconfig.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Aday paylaşılan çerçevelerin hiçbirinde ileri sarma etkin değil.</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="translated">Aday olmayan çerçeve durumunda ileri sar (0=kapalı, 1=ikincili sar, 2=ana ve ikincili sar).</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

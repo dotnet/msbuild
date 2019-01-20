@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,112 +22,13 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private bool _running = false;
 
-        private static string[] _knownCommandsAvailableAsDotNetTool = new[] { "dotnet-dev-certs", "dotnet-ef", "fsi", "dotnet-sql-cache", "dotnet-user-secrets", "dotnet-watch" };
-
-        private Command(CommandSpec commandSpec)
+        public Command(Process process)
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = commandSpec.Path,
-                Arguments = commandSpec.Args,
-                UseShellExecute = false
-            };
-
-            foreach(var environmentVariable in commandSpec.EnvironmentVariables)
-            {
-                if (!psi.Environment.ContainsKey(environmentVariable.Key))
-                {
-                    psi.Environment.Add(environmentVariable.Key, environmentVariable.Value);
-                }
-            }
-
-            _process = new Process
-            {
-                StartInfo = psi
-            };
-
-            ResolutionStrategy = commandSpec.ResolutionStrategy;
-        }
-
-        public static Command CreateDotNet(
-            string commandName, 
-            IEnumerable<string> args, 
-            NuGetFramework framework = null,  
-            string configuration = Constants.DefaultConfiguration)
-        {
-            return Create("dotnet", 
-                new[] { commandName }.Concat(args), 
-                framework, 
-                configuration: configuration);
-        }
-
-        /// <summary>
-        /// Create a command with the specified arg array. Args will be 
-        /// escaped properly to ensure that exactly the strings in this
-        /// array will be present in the corresponding argument array
-        /// in the command's process.
-        /// </summary>
-        public static Command Create(
-            string commandName, 
-            IEnumerable<string> args, 
-            NuGetFramework framework = null, 
-            string configuration = Constants.DefaultConfiguration,
-            string outputPath = null,
-            string applicationName  = null)
-        {
-            return Create(
-                new DefaultCommandResolverPolicy(),
-                commandName,
-                args,
-                framework,
-                configuration,
-                outputPath,
-                applicationName);
-        }
-
-        public static Command Create(
-            ICommandResolverPolicy commandResolverPolicy,
-            string commandName,
-            IEnumerable<string> args,
-            NuGetFramework framework = null,
-            string configuration = Constants.DefaultConfiguration,
-            string outputPath = null,
-            string applicationName  = null)
-        {
-            var commandSpec = CommandResolver.TryResolveCommandSpec(
-                commandResolverPolicy,
-                commandName,
-                args, 
-                framework, 
-                configuration: configuration,
-                outputPath: outputPath,
-                applicationName: applicationName);
-
-            if (commandSpec == null)
-            {
-                if (_knownCommandsAvailableAsDotNetTool.Contains(commandName, StringComparer.OrdinalIgnoreCase))
-                {
-                    throw new CommandAvailableAsDotNetToolException(commandName);
-                }
-                else
-                {
-                    throw new CommandUnknownException(commandName);
-                }
-            }
-
-            var command = new Command(commandSpec);
-
-            return command;
-        }
-
-        public static Command Create(CommandSpec commandSpec)
-        {
-            return new Command(commandSpec);
+            _process = process ?? throw new ArgumentNullException(nameof(process));
         }
 
         public CommandResult Execute()
         {
-
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.RunningFileNameArguments,
                 _process.StartInfo.FileName,
@@ -137,6 +39,8 @@ namespace Microsoft.DotNet.Cli.Utils
             _running = true;
 
             _process.EnableRaisingEvents = true;
+
+            Console.CancelKeyPress += HandleCancelKeyPress;
 
 #if DEBUG
             var sw = Stopwatch.StartNew();
@@ -158,6 +62,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 taskOut?.Wait();
                 taskErr?.Wait();
             }
+
+            Console.CancelKeyPress -= HandleCancelKeyPress;
 
             var exitCode = _process.ExitCode;
 
@@ -274,8 +180,6 @@ namespace Microsoft.DotNet.Cli.Utils
             return this;
         }
 
-        public CommandResolutionStrategy ResolutionStrategy { get; }
-
         public string CommandName => _process.StartInfo.FileName;
 
         public string CommandArgs => _process.StartInfo.Arguments;
@@ -310,6 +214,12 @@ namespace Microsoft.DotNet.Cli.Utils
                     LocalizableStrings.UnableToInvokeMemberNameAfterCommand,
                     memberName));
             }
+        }
+
+        private void HandleCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            // Ignore SIGINT/SIGQUIT so that the child can process the signal
+            e.Cancel = true;
         }
     }
 }

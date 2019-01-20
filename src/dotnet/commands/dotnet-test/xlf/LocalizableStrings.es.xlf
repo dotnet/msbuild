@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
@@ -65,10 +65,10 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">El registrador que se utilizará para los resultados de la prueba.
-                                        Ejemplo:
-                                        Inicie sesión en formato trx mediante un nombre de archivo único: --logger trx
-                                        Inicie sesión en formato trx mediante el nombre de archivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+        <target state="translated">El registrador para resultados de la prueba.
+                                        Ejemplos:
+                                        Log in trx format using a unique file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         Consulte https://aka.ms/vstest-report para obtener más información sobre los argumentos del registrador.</target>
         <note />
       </trans-unit>
@@ -146,8 +146,8 @@ Argumentos RunSettings:
       <trans-unit id="CmdBlameDescription">
         <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
 Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
-        <target state="translated">Ejecuta la prueba en modo de culpa. Esta opción es útil para aislar la prueba problemática que provoca el bloqueo del host de prueba.
-Crea un archivo de salida en el directorio actual como "Sequence.xml" que captura el orden de ejecución de la prueba antes del bloqueo.</target>
+        <target state="translated">Ejecuta las pruebas en modo de culpa. Esta opción es útil para aislar una prueba problemática que provoca el bloqueo del host de prueba.
+Crea un archivo de salida "Sequence.xml" en el directorio actual que captura el orden de ejecución de la prueba antes del bloqueo.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
@@ -162,7 +162,7 @@ Crea un archivo de salida en el directorio actual como "Sequence.xml" que captur
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to test for.</source>
-        <target state="new">The target runtime to test for.</target>
+        <target state="translated">El tiempo de ejecución de destino para probar.</target>
         <note />
       </trans-unit>
     </body>

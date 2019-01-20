@@ -136,7 +136,7 @@
     <value>SOURCE</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Update a tool to the latest stable version.</value>
+    <value>Update a global tool.</value>
   </data>
   <data name="ConfigFileOptionName" xml:space="preserve">
     <value>FILE</value>
