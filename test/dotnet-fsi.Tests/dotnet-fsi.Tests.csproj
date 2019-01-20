@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <AssemblyName>dotnet-fsi.Tests</AssemblyName>
+    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>
