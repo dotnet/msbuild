@@ -14,7 +14,9 @@ Copyright (c) .NET Foundation. All rights reserved.
      This is used by VS to show the list of frameworks to which projects can be retargeted. -->
 <Project>
     <PropertyGroup>
-        <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+        <MSBuildAllProjects Condition=" '$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0' ">
+            $(MSBuildAllProjects);$(MSBuildThisFileFullPath)
+        </MSBuildAllProjects>
     </PropertyGroup>
 
     <!-- .NET Core -->
