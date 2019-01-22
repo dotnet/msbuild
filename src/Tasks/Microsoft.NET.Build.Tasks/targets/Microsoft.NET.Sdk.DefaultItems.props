@@ -54,7 +54,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          an implicit FrameworkReference -->
     
     <PackageReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true" 
-                      Condition="'$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"/>
+                      Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0')"/>
 
     <!-- For targeting .NET Core 2.0 or higher, don't include a dependency on Microsoft.NETCore.App in the package produced by pack.
          Packing an DotnetCliTool should include the Microsoft.NETCore.App package dependency. -->
@@ -64,7 +64,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       Publish="true" />
 
     <FrameworkReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true"
-                    Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0'"/>
+                    Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
 
     <!-- Reference the Platforms package in order to supply the RID graph to NuGet.
          This can be removed once we do https://github.com/dotnet/cli/issues/10528 or
@@ -72,7 +72,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PackageReference Include="Microsoft.NETCore.Platforms" 
                       Version="$(BundledNETCorePlatformsPackageVersion)"
                       IsImplicitlyDefined="true"
-                      Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0'"/>
+                      Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
   </ItemGroup>
 
 </Project>
