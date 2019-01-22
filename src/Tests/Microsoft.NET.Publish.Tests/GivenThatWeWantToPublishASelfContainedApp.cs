@@ -128,5 +128,29 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Be(2);
         }
+
+        [Fact]
+        public void It_publishes_an_app_with_a_netcoreapp_lib_reference()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithNetCoreAppLib")
+                .WithSource();
+
+            var args = new string[]
+            {
+                "/p:SelfContained=true",
+                "/p:TargetFramework=netcoreapp3.0",
+                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")}"
+            };
+
+            var projectRoot = Path.Combine(testAsset.TestRoot, "main");
+
+            new RestoreCommand(Log, projectRoot).Execute(args);
+
+            new PublishCommand(Log, projectRoot)
+                .Execute(args)
+                .Should()
+                .Pass();
+        }
     }
 }
