@@ -15,10 +15,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GetFrameworkPaths" />
 
   <PropertyGroup>
-    <MSBuildAllProjects Condition=" '$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0' ">
-      $(MSBuildAllProjects);$(MSBuildThisFileFullPath)
-    </MSBuildAllProjects>
-
     <_TargetFrameworkDirectories />
     <FrameworkPathOverride />
     <TargetFrameworkDirectory />
