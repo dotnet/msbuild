@@ -39,6 +39,10 @@
     <DebugType Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">full</DebugType><!-- Work around arcade stomping on symbols for same-program-different-arches. -->
   </PropertyGroup>
 
+  <PropertyGroup>
+    <AllowedReferenceRelatedFileExtensions>$(AllowedReferenceRelatedFileExtensions);.tlb</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>

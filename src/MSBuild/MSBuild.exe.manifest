@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <assemblyIdentity version="15.1.0.0" name="MSBuild" />
-  
+
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
       <windowsSettings xmlns:ws2="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
           <ws2:longPathAware>true</ws2:longPathAware>
       </windowsSettings>
   </application>
-  
+
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
       <!-- Windows 7 -->
@@ -31,4 +31,19 @@
       </requestedPrivileges>
     </security>
   </trustInfo>
+
+  <!-- TODO wul no checkin version need to be generated -->
+  <file name="Microsoft.Build.Framework.tlb">
+        <typelib
+            tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}"
+            version="15.1"
+            helpdir=""/>
+  </file>
+
+  <comInterfaceExternalProxyStub
+        iid="{9049A481-D0E9-414f-8F92-D4F67A0359A6}"
+        name="ITaskHost"
+        tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}"
+        proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" />
+
 </assembly>
