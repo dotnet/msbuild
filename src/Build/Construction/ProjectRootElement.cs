@@ -1834,7 +1834,7 @@ namespace Microsoft.Build.Construction
 
         private static IEnumerable<SdkReference> ParseSdks(string sdks, IElementLocation sdkLocation)
         {
-            foreach (string sdk in sdks.Split(';').Select(i => i.Trim()))
+            foreach (string sdk in sdks.Split(MSBuildConstants.SemicolonChar).Select(i => i.Trim()))
             {
                 if (!SdkReference.TryParse(sdk, out SdkReference sdkReference))
                 {

@@ -37,7 +37,7 @@ namespace Microsoft.Build.Graph
         private const string ProjectReferenceTargetsMetadataName = "Targets";
         private const string DefaultTargetsMarker = ".default";
 
-        private static readonly char[] PropertySeparator = { ';' };
+        private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
         private readonly ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> _allParsedProjects =
             new ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode>();

@@ -29,7 +29,7 @@ namespace Microsoft.Build.Utilities
             }
 
             // look for each sub key in the main composite key
-            string[] rootComponents = compositeSubRoot.Split('|');
+            string[] rootComponents = compositeSubRoot.Split(MSBuildConstants.PipeChar);
             foreach (string subRoot in rootComponents)
             {
                 // we didn't find this subkey, so bail out
