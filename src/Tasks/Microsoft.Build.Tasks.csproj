@@ -16,6 +16,10 @@
     <Description>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <UsingToolIbcOptimization>$(ShouldUseIBCOptimization)</UsingToolIbcOptimization>
+
+    <!-- Didn't import ResX docs; just don't warn for it rather
+         than having to change each referencing point. -->
+    <NoWarn>$(NoWarn);CS1589</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -672,6 +676,15 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
   </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcore'))">
+    <!-- For now, use ResX types as source only when System.Windows.Forms isn't guaranteed available -->
+    <Compile Include="winforms\**\*.cs" />
+
+    <EmbeddedResource Include="winforms\Resources\SR.resx">
+      <GenerateSource>true</GenerateSource>
+      <Namespace>System</Namespace>
+    </EmbeddedResource>
+  </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <!-- Shim targets only work when the destination targets are installed. -->
     <Content Include="Microsoft.Data.Entity.targets">
@@ -980,6 +993,7 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Drawing.Common" />
     <PackageReference Include="System.Linq.Parallel" />
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.Reflection.Metadata" />

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../SR.resx">
+    <body>
+      <trans-unit id="InvalidResXBasePathOperation">
+        <source>Property can be changed only before the enumeration.</source>
+        <target state="new">Property can be changed only before the enumeration.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidResXFile">
+        <source>ResX file {0} cannot be parsed.</source>
+        <target state="new">ResX file {0} cannot be parsed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidResXFileReaderWriterTypes">
+        <source>ResX input is not valid. Cannot find valid "resheader" tags for the ResX reader and writer type names.</source>
+        <target state="new">ResX input is not valid. Cannot find valid "resheader" tags for the ResX reader and writer type names.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidResXNoType">
+        <source>Could not find a type for a name.  The type name was '{0}'.</source>
+        <target state="new">Could not find a type for a name.  The type name was '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidResXResourceNoName">
+        <source>Cannot find a name for the resource with the value '{0}'.</source>
+        <target state="new">Cannot find a name for the resource with the value '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvocationException">
+        <source>Type {0} in the data at line {1}, position {2}, cannot be loaded because it threw the following exception during construction: {3}</source>
+        <target state="new">Type {0} in the data at line {1}, position {2}, cannot be loaded because it threw the following exception during construction: {3}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NotSerializableType">
+        <source>Item named '{0}' of type '{1}' cannot be added to the resource file because it is not serializable.</source>
+        <target state="new">Item named '{0}' of type '{1}' cannot be added to the resource file because it is not serializable.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NotSupported">
+        <source>The type {0} on line {1}, position {2} threw the following exception while being converted: {3}</source>
+        <target state="new">The type {0} on line {1}, position {2} threw the following exception while being converted: {3}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResXResourceWriterSaved">
+        <source>Resource writer has been saved.  You may not edit it.</source>
+        <target state="new">Resource writer has been saved.  You may not edit it.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SerializationException">
+        <source>Type {0} could not be read from the data in line {1}, position {2}.  The type's internal structure may have changed.  Either implement ISerializable on the type or provide a type converter that can provide a more reliable conversion format, such as text or an array of bytes.  The conversion exception was: {3}</source>
+        <target state="new">Type {0} could not be read from the data in line {1}, position {2}.  The type's internal structure may have changed.  Either implement ISerializable on the type or provide a type converter that can provide a more reliable conversion format, such as text or an array of bytes.  The conversion exception was: {3}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeLoadException">
+        <source>Type {0} in the data at line {1}, position {2} cannot be located.</source>
+        <target state="new">Type {0} in the data at line {1}, position {2} cannot be located.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeLoadExceptionShort">
+        <source>Type {0} cannot be located.</source>
+        <target state="new">Type {0} cannot be located.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
