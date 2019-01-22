@@ -42,9 +42,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     infer the version of 1.0. The user can also override it as always we honor a TargetFrameworkIdentifier
     or TargetFrameworkVersion that is already set.
    -->
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
 
   <!-- Split $(TargetFramework) (e.g. net45) into short identifier and short version (e.g. 'net' and '45'). -->
   <PropertyGroup Condition="'$(TargetFramework)' != '' and !$(TargetFramework.Contains(',')) and !$(TargetFramework.Contains('+'))">

@@ -18,10 +18,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     The main store entry point.
     ============================================================
     -->
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-
   <Target Name="ComposeStore"
           DependsOnTargets="PrepareForComposeStore;
                             PrepOptimizer;
