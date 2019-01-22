@@ -3036,13 +3036,14 @@ namespace Microsoft.Build.Tasks
                         break;
 
                     case Format.XML:
-#if FEATURE_RESX_RESOURCE_READER
                         ResXResourceReader resXReader = null;
+#if FEATURE_RESX_RESOURCE_READER
                         if (_typeResolver != null)
                         {
                             resXReader = new ResXResourceReader(filename, _typeResolver);
                         }
                         else
+#endif // FEATURE_RESX_RESOURCE_READER
                         {
                             resXReader = new ResXResourceReader(filename);
                         }
@@ -3055,21 +3056,6 @@ namespace Microsoft.Build.Tasks
                         // ReadResources closes the reader for us
                         ReadResources(reader, resXReader, filename);
                         break;
-#else
-
-                        using (var xmlReader = new XmlTextReader(filename))
-                        {
-                            xmlReader.WhitespaceHandling = WhitespaceHandling.None;
-                            XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
-                            foreach (XElement dataElem in doc.Element("root").Elements("data"))
-                            {
-                                string name = dataElem.Attribute("name").Value;
-                                string value = dataElem.Element("value").Value;
-                                AddResource(reader, name, value, filename);
-                            }
-                        }
-                        break;
-#endif
                     case Format.Binary:
 #if FEATURE_RESX_RESOURCE_READER
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
@@ -3471,7 +3457,6 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-#if FEATURE_RESX_RESOURCE_READER
         /// <summary>
         /// Read resources from an XML or binary format file
         /// </summary>
@@ -3490,7 +3475,6 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-#endif // FEATURE_RESX_RESOURCE_READER
 
         /// <summary>
         /// Read resources from a text format file
