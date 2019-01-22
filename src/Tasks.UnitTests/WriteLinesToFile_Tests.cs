@@ -8,12 +8,19 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
 
     public sealed class WriteLinesToFile_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public WriteLinesToFile_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         /// <summary>
         /// Invalid encoding
@@ -23,7 +30,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             var a = new WriteLinesToFile
             {
-                BuildEngine = new MockEngine(),
+                BuildEngine = new MockEngine(_output),
                 Encoding = "||invalid||",
                 File = new TaskItem("c:\\" + Guid.NewGuid().ToString()),
                 Lines = new TaskItem[] { new TaskItem("x") }
@@ -46,7 +53,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // Write default encoding: UTF8
                 var a = new WriteLinesToFile
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("\uBDEA") }
                 };
@@ -65,7 +72,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // Write ANSI .. that won't work! 
                 a = new WriteLinesToFile
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("\uBDEA") },
                     Encoding = "ASCII"
@@ -97,7 +104,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var a = new WriteLinesToFile
                 {
                     Overwrite = true,
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents1") }
@@ -118,7 +125,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var a2 = new WriteLinesToFile
                 {
                     Overwrite = true,
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents1") }
@@ -130,7 +137,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var a3 = new WriteLinesToFile
                 {
                     Overwrite = true,
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents2") }
@@ -148,7 +155,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Should create directory structure when target <see cref="WriteLinesToFile.File"/> does not exist.
         /// </summary>
-        [Fact(Skip = "skip")]
+        [Fact]
         public void WriteLinesToFileDoesCreateDirectory()
         {
             using (var testEnv = TestEnvironment.Create())
@@ -158,7 +165,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 var WriteLinesToFile = new WriteLinesToFile
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("WriteLinesToFileDoesCreateDirectory Test") }
                 };
@@ -175,7 +182,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Should delete the file when <see cref="WriteLinesToFile.Lines"/> is <c>null</c> and <see cref="WriteLinesToFile.Overwrite"/> is <c>true</c>.
         /// </summary>
-        [Fact(Skip = "skip")]
+        [Fact]
         public void WriteLinesToFileDeleteFileWhenLinesIsNull()
         {
             WriteLinesToFileDeleteFileCore(null);
@@ -184,7 +191,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Should delete the file when <see cref="WriteLinesToFile.Lines"/> is empty and <see cref="WriteLinesToFile.Overwrite"/> is <c>true</c>.
         /// </summary>
-        [Fact(Skip = "skip")]
+        [Fact]
         public void WriteLinesToFileDeleteFileWhenLinesIsEmpty()
         {
             WriteLinesToFileDeleteFileCore(Array.Empty<ITaskItem>());
@@ -199,7 +206,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var WriteLinesToFile = new WriteLinesToFile
                 {
                     Overwrite = true,
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     File = new TaskItem(file.Path),
                     Lines = lines
                 };
