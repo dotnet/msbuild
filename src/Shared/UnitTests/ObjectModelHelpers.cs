@@ -910,17 +910,17 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectFileRelativePath"></param>
         /// <returns></returns>
-        internal static MockLogger BuildTempProjectFileExpectSuccess(string projectFileRelativePath)
+        internal static MockLogger BuildTempProjectFileExpectSuccess(string projectFileRelativePath, ITestOutputHelper outputHelper = null)
         {
-            return BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null);
+            return BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null, outputHelper);
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build does not succeed.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
+        internal static MockLogger BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties, ITestOutputHelper outputHelper = null)
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = outputHelper == null ? new MockLogger() : new MockLogger(outputHelper);
             bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
 
             Assert.True(success); // "Build failed.  See Standard Out tab for details"
