@@ -3060,7 +3060,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESX_RESOURCE_READER
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
 #else
-                        _logger.LogError("ResGen.exe not supported on .NET Core MSBuild");
+                        _logger.LogError("Reading resources from binary .resources files not supported on .NET Core MSBuild");
 #endif
                         break;
 
