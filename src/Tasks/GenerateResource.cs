@@ -2474,6 +2474,10 @@ namespace Microsoft.Build.Tasks
             }
 #endif
 
+#if RUNTIME_TYPE_NETCORE
+            Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+#endif
+
             try
             {
 #if FEATURE_ASSEMBLY_LOADFROM
