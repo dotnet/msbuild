@@ -154,10 +154,26 @@ namespace System.Resources {
             // because we only want to check if this is a ResXFileRef node
             // and we can't be sure that we have a typeResolutionService that can 
             // recognize this. It's not very clean but this should work.
-            Type nodeType = null;
-            if(!string.IsNullOrEmpty(nodeInfo.TypeName)) // can be null if we have a string (default for string is TypeName == null)
-                nodeType = internalTypeResolver.GetType(nodeInfo.TypeName, false, true);
-            if(nodeType != null && nodeType.Equals(typeof(ResXFileRef))) {
+            bool treatAsFileRef = false;
+
+            // Check for exact string match against the framework type, which is embedded in resources.
+            // This won't match typeof(ResXFileRef) because MSBuild reimplements that in a different assembly.
+            if (nodeInfo.TypeName?.StartsWith("System.Resources.ResXFileRef, System.Windows.Forms") == true)
+            {
+                treatAsFileRef = true;
+            }
+            else
+            {
+                Type nodeType = null;
+                if(!string.IsNullOrEmpty(nodeInfo.TypeName)) // can be null if we have a string (default for string is TypeName == null)
+                    nodeType = internalTypeResolver.GetType(nodeInfo.TypeName, false, true);
+                if(nodeType != null && nodeType.Equals(typeof(ResXFileRef))) {
+                    treatAsFileRef = true;
+                }
+            }
+
+            if(treatAsFileRef)
+            {
                 // we have a fileref, split the value data and populate the fields
                 string[] fileRefDetails = ResXFileRef.Converter.ParseResxFileRefString(nodeInfo.ValueData);
                 if(fileRefDetails != null && fileRefDetails.Length > 1) {
