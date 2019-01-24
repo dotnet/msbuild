@@ -7380,4 +7380,7 @@
   <data name="FolderBrowserDialogUseDescriptionForTitle" xml:space="preserve">
     <value>A value that indicates whether to use the value of the Description property as the dialog title for Vista style dialogs. This property has no effect on old style dialogs.</value>
   </data>
+  <data name="TextBoxPlaceholderTextDescr" xml:space="preserve">
+    <value>Specifies the PlaceholderText of the TextBox control. The PlaceholderText is displayed in the control when the Text property is null or empty and can be used to guide the user what input is expected by the control. </value>
+  </data>
 </root>

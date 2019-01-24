@@ -44,14 +44,6 @@ namespace System.Resources {
 
         private static TraceSwitch ResValueProviderSwitch = new TraceSwitch("ResX", "Debug the resource value provider");
 
-        // 
-
-
-
-
-
-
-
         internal static readonly string Beta2CompatSerializedObjectMimeType = "text/microsoft-urt/psuedoml-serialized/base64";
 
         // These two "compat" mimetypes are here. In Beta 2 and RTM we used the term "URT"
@@ -193,12 +185,10 @@ namespace System.Resources {
         </xsd:schema>
         ";
         
-        IFormatter binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter ();
         string fileName;
         Stream stream;
         TextWriter textWriter;
         XmlTextWriter xmlTextWriter;
-        string basePath;
 
         bool hasBeenSaved;
         bool initialized;
@@ -209,14 +199,7 @@ namespace System.Resources {
         /// <devdoc>
         ///     Base Path for ResXFileRefs.
         /// </devdoc>
-        public string BasePath {
-            get {
-                return basePath;
-            }
-            set {
-                basePath = value;
-            }
-        }
+        public string BasePath { get; set; }
 
         /// <include file='doc\ResXResourceWriter.uex' path='docs/doc[@for="ResXResourceWriter.ResXResourceWriter"]/*' />
         /// <devdoc>
@@ -400,8 +383,8 @@ namespace System.Resources {
         /// </devdoc>
         // NOTE: Part of IResourceWriter - not protected by class level LinkDemand.
         public void AddResource(string name, object value) {
-            if (value is ResXDataNode) {
-                AddResource((ResXDataNode)value);
+            if (value is ResXDataNode node) {
+                AddResource(node);
             }
             else {
                 AddDataRow(DataStr, name, value);
@@ -431,13 +414,12 @@ namespace System.Resources {
             string modifiedBasePath = BasePath;
             
             if (!string.IsNullOrEmpty(modifiedBasePath)) {
-                if (!(modifiedBasePath.EndsWith("\\")))
+                if (!modifiedBasePath.EndsWith("\\"))
                 {
                     modifiedBasePath += "\\";
                 }
-                if (fileRef != null) {
-                    fileRef.MakeFilePathRelative(modifiedBasePath);
-                }
+
+                fileRef?.MakeFilePathRelative(modifiedBasePath);
             }
             DataNodeInfo info = nodeClone.GetDataNodeInfo();
             AddDataRow(DataStr, info.Name, info.ValueData, info.TypeName, info.MimeType, info.Comment);
@@ -455,39 +437,45 @@ namespace System.Resources {
         ///     it will be saved that way, otherwise it will be serialized
         ///     and stored as in binary.
         /// </devdoc>
-        private void AddDataRow(string elementName, string name, object value) {
+        private void AddDataRow(string elementName, string name, object value)
+        {
             Debug.WriteLineIf(ResValueProviderSwitch.TraceVerbose, "  resx: adding resource " + name);
-            if (value is string) {
-                AddDataRow(elementName, name, (string)value);
-            }
-            else if (value is byte[]) {
-                AddDataRow(elementName, name, (byte[])value);
-            }
-            else if(value is ResXFileRef) {
-                ResXFileRef fileRef = (ResXFileRef)value;
-                ResXDataNode node = new ResXDataNode(name, fileRef, this.typeNameConverter);
-                if (fileRef != null) {
-                    fileRef.MakeFilePathRelative(BasePath);
+            switch (value)
+            {
+                case string str:
+                    AddDataRow(elementName, name, str);
+                    break;
+                case byte[] bytes:
+                    AddDataRow(elementName, name, bytes);
+                    break;
+                case ResXFileRef fileRef:
+                {
+                    ResXDataNode node = new ResXDataNode(name, fileRef, this.typeNameConverter);
+                    DataNodeInfo info = node.GetDataNodeInfo();
+                    AddDataRow(elementName, info.Name, info.ValueData, info.TypeName, info.MimeType, info.Comment);
+                    break;
                 }
-                DataNodeInfo info = node.GetDataNodeInfo();
-                AddDataRow(elementName, info.Name, info.ValueData, info.TypeName, info.MimeType, info.Comment);
-            } else {
-                ResXDataNode node = new ResXDataNode(name, value, this.typeNameConverter);
-                DataNodeInfo info = node.GetDataNodeInfo();
-                AddDataRow(elementName, info.Name, info.ValueData, info.TypeName, info.MimeType, info.Comment);
+                default:
+                {
+                    ResXDataNode node = new ResXDataNode(name, value, this.typeNameConverter);
+                    DataNodeInfo info = node.GetDataNodeInfo();
+                    AddDataRow(elementName, info.Name, info.ValueData, info.TypeName, info.MimeType, info.Comment);
+                    break;
+                }
             }
         }        
 
         /// <devdoc>
         ///     Adds a string resource to the resources.
         /// </devdoc>
-        private void AddDataRow(string elementName, string name, string value) {
-            if(value == null) {
-                // if it's a null string, set it here as a resxnullref
-                AddDataRow(elementName, name, value, MultitargetUtil.GetAssemblyQualifiedName(typeof(ResXNullRef), this.typeNameConverter), null, null);                
-            } else {
-                AddDataRow(elementName, name, value, null, null, null);
-            }
+        private void AddDataRow(string elementName, string name, string value)
+        {
+            // if it's a null string, set it here as a resxnullref
+            string typeName =
+                value == null
+                    ? MultitargetUtil.GetAssemblyQualifiedName(typeof(ResXNullRef), this.typeNameConverter)
+                    : null;
+            AddDataRow(elementName, name, value, typeName, null, null);     
         }
 
         /// <devdoc>
@@ -564,7 +552,6 @@ namespace System.Resources {
 
         private void AddAssemblyRow(string elementName, string alias, string name)
         {
-
             Writer.WriteStartElement(elementName); {
                 if (!string.IsNullOrEmpty(alias)) {
                       Writer.WriteAttributeString(AliasStr, alias);
@@ -580,11 +567,11 @@ namespace System.Resources {
 
         private string GetAliasFromName(AssemblyName assemblyName)
         {
-             if (cachedAliases == null)
+            if (cachedAliases == null)
             {
                 cachedAliases = new Hashtable();
             }
-            string alias =  (string) cachedAliases[assemblyName.FullName]; 
+            string alias = (string)cachedAliases[assemblyName.FullName]; 
             if (string.IsNullOrEmpty(alias))
             {
                 alias =  assemblyName.Name;
@@ -636,7 +623,6 @@ namespace System.Resources {
              return ((indexStart == -1) ? typeName : typeName.Substring(0, indexStart));
         }
 
-
         private string GetFullName(string typeName) {
              int indexStart = typeName.IndexOf(",");
              if(indexStart == -1)
@@ -663,24 +649,11 @@ namespace System.Resources {
                 output.Append(crlf);
                 return output.ToString();
             }
-            else {
-                return raw;
-            }
+            
+            return raw;
         }
 
         private string TypeNameWithAssembly(Type type) {
-            // 
-
-
-
-
-
-
-
-
-
-
-
             string result = MultitargetUtil.GetAssemblyQualifiedName(type, this.typeNameConverter);
             return result;
         }
