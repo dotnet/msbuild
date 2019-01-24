@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Microsoft.Build.Tasks
 {
@@ -15,7 +16,7 @@ namespace Microsoft.Build.Tasks
     public class WriteLinesToFile : TaskExtension
     {
         // Default encoding taken from System.IO.WriteAllText()
-        private static readonly Encoding s_defaultEncoding = new UTF8Encoding(false, true);
+        private static readonly Encoding s_defaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         /// <summary>
         /// File to write lines to.
@@ -82,27 +83,31 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
+                    var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
                     if (Overwrite)
                     {
                         if (buffer.Length == 0)
                         {
-                            // if overwrite==true, and there are no lines to write,
-                            // just delete the file to leave everything tidy.
-                            System.IO.File.Delete(File.ItemSpec);
+                            // File.Delete throws when the directory does not exist.
+                            if (Directory.Exists(directoryPath))
+                            {
+                                // if overwrite==true, and there are no lines to write,
+                                // just delete the file to leave everything tidy.
+                                System.IO.File.Delete(File.ItemSpec);
+                            }
                         }
                         else
                         {
-                            string contentsAsString = null;
-
+                            Directory.CreateDirectory(directoryPath);
+                            string contentsAsString = buffer.ToString();
                             try
                             {
                                 // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
                                 if (WriteOnlyWhenDifferent && FileUtilities.FileExistsNoThrow(File.ItemSpec))
                                 {
-                                    var existingContents = System.IO.File.ReadAllText(File.ItemSpec);
+                                    string existingContents = System.IO.File.ReadAllText(File.ItemSpec);
                                     if (existingContents.Length == buffer.Length)
                                     {
-                                        contentsAsString = buffer.ToString();
                                         if (existingContents.Equals(contentsAsString))
                                         {
                                             Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
@@ -116,17 +121,17 @@ namespace Microsoft.Build.Tasks
                                 Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                             }
 
-                            if (contentsAsString == null)
-                            {
-                                contentsAsString = buffer.ToString();
-                            }
 
                             System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
                         }
                     }
                     else
                     {
-                        System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
+                        if (buffer.Length > 0)
+                        {
+                            Directory.CreateDirectory(directoryPath);
+                            System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
+                        }
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
