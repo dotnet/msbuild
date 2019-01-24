@@ -40,14 +40,8 @@ namespace System.Resources {
         ///     that accepts a System.IO.Stream as a parameter.
         /// </devdoc>
         public ResXFileRef(string fileName, string typeName) {
-            if(fileName == null) {
-                throw (new ArgumentNullException(nameof(fileName)));
-            }
-            if(typeName == null) {
-                throw (new ArgumentNullException(nameof(typeName)));
-            }
-            this.fileName = fileName;
-            this.typeName = typeName;
+            this.fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
+            this.typeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
         }
 
         
@@ -114,7 +108,8 @@ namespace System.Resources {
                 {
                     break;
 
-                } else if (path1[i] == Path.DirectorySeparatorChar) {
+                }
+                if (path1[i] == Path.DirectorySeparatorChar) {
                     si = i;
                 }
             }
@@ -139,7 +134,7 @@ namespace System.Resources {
         
         internal void MakeFilePathRelative(string basePath) {
             
-            if(basePath==null || basePath.Length == 0) {
+            if(string.IsNullOrEmpty(basePath)) {
                 return;
             }
             fileName = PathDifference(basePath, fileName, false);
@@ -147,7 +142,7 @@ namespace System.Resources {
 
         /// <include file='doc\ResXFileRef.uex' path='docs/doc[@for="ResXFileRef.ToString"]/*' />
         public override string ToString() {
-            string result = "";
+            string result = string.Empty;
             
             if(fileName.IndexOf(";") != -1 || fileName.IndexOf("\"") != -1) {
                 result += ("\""+ fileName + "\";");
@@ -177,11 +172,9 @@ namespace System.Resources {
 
             /// <include file='doc\ResXFileRef.uex' path='docs/doc[@for="ResXFileRef.Converter.CanConvertTo"]/*' />
             public override bool CanConvertTo(ITypeDescriptorContext context, 
-                                              Type destinationType) {
-                if (destinationType == typeof(string)) {
-                    return true;
-                }
-                return false;
+                                              Type destinationType)
+            {
+                return destinationType == typeof(string);
             }
 
             /// <include file='doc\ResXFileRef.uex' path='docs/doc[@for="ResXFileRef.Converter.ConvertTo"]/*' />
@@ -206,22 +199,22 @@ namespace System.Resources {
                     string remainingString;
                     if(stringValue.StartsWith("\"")) {
                         int lastIndexOfQuote = stringValue.LastIndexOf("\"");
-                        if (lastIndexOfQuote-1<0)
+                        if (lastIndexOfQuote - 1 < 0)
                             throw new ArgumentException(nameof(stringValue));
-                        fileName = stringValue.Substring(1, lastIndexOfQuote-1); // remove the quotes in" ..... " 
-                        if(lastIndexOfQuote+2>stringValue.Length)
+                        fileName = stringValue.Substring(1, lastIndexOfQuote - 1); // remove the quotes in" ..... " 
+                        if(lastIndexOfQuote + 2 > stringValue.Length)
                             throw new ArgumentException(nameof(stringValue));
-                        remainingString = stringValue.Substring(lastIndexOfQuote+2);
+                        remainingString = stringValue.Substring(lastIndexOfQuote + 2);
                     } else {
                         int nextSemiColumn = stringValue.IndexOf(";");
                         if(nextSemiColumn == -1)
                             throw new ArgumentException(nameof(stringValue));
-                        fileName = stringValue.Substring(0,nextSemiColumn);
-                        if(nextSemiColumn+1>stringValue.Length)
+                        fileName = stringValue.Substring(0, nextSemiColumn);
+                        if(nextSemiColumn + 1 > stringValue.Length)
                             throw new ArgumentException(nameof(stringValue));
-                        remainingString = stringValue.Substring(nextSemiColumn+1);
+                        remainingString = stringValue.Substring(nextSemiColumn + 1);
                     }
-                    string[] parts = remainingString.Split(new char[] {';'});
+                    string[] parts = remainingString.Split(';');
                     if(parts.Length > 1) {
                         result = new string[] { fileName, parts[0], parts[1] };
                     } else if(parts.Length > 0) {
@@ -239,55 +232,52 @@ namespace System.Resources {
             public override object ConvertFrom(ITypeDescriptorContext context, 
                                                CultureInfo culture,
                                                object value) {
-                object created = null;
-                string stringValue = value as string;
-                if (stringValue != null) {
-                    string[] parts = ResXFileRef.Converter.ParseResxFileRefString(stringValue);
+                if (value is string stringValue) {
+                    string[] parts = ParseResxFileRefString(stringValue);
                     string fileName = parts[0];
                     Type toCreate = Type.GetType(parts[1], true);
 
                     // special case string and byte[]
-                    if(toCreate.Equals(typeof(string))) {
+                    if(toCreate == typeof(string)) {
                         // we have a string, now we need to check the encoding
-                        Encoding textFileEncoding = Encoding.Default;
-                        if(parts.Length > 2) {
-                            textFileEncoding = Encoding.GetEncoding(parts[2]);
-                        }
+                        Encoding textFileEncoding = 
+                            parts.Length > 2
+                                ? Encoding.GetEncoding(parts[2]) 
+                                : Encoding.Default;
                         using (StreamReader sr = new StreamReader(fileName, textFileEncoding)) {
-                            created = sr.ReadToEnd();
-                        }
-                    } else {
-
-                        // this is a regular file, we call it's constructor with a stream as a parameter
-                        // or if it's a byte array we just return that
-                        byte[] temp = null;
-
-                        using (FileStream s = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                            Debug.Assert(s != null, "Couldn't open " + fileName);
-                            temp = new byte[s.Length];
-                            s.Read(temp, 0, (int)s.Length);
-                        }
-
-                        if(toCreate.Equals(typeof(byte[]))) {
-                            created = temp;
-                        } else {
-                            MemoryStream memStream = new MemoryStream(temp);
-                            if(toCreate.Equals(typeof(MemoryStream))) {
-                                return memStream;
-                            } else if(toCreate.Equals(typeof(System.Drawing.Bitmap)) && fileName.EndsWith(".ico")) {
-                                // we special case the .ico bitmaps because GDI+ destroy the alpha channel component and
-                                // we don't want that to happen
-                                Icon ico = new Icon(memStream);
-                                created = ico.ToBitmap();
-                            } else {
-                                created = Activator.CreateInstance(toCreate, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, new object[] {memStream}, null);
-                            }
+                            return sr.ReadToEnd();
                         }
                     }
-                }
-                return created;
-            }
+                    
+                    // this is a regular file, we call it's constructor with a stream as a parameter
+                    // or if it's a byte array we just return that
+                    byte[] temp = null;
 
+                    using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+                        Debug.Assert(fileStream != null, "Couldn't open " + fileName);
+                        temp = new byte[fileStream.Length];
+                        fileStream.Read(temp, 0, (int)fileStream.Length);
+                    }
+
+                    if(toCreate == typeof(byte[])) {
+                        return temp;
+                    }
+                    
+                    MemoryStream memStream = new MemoryStream(temp);
+                    if(toCreate == typeof(MemoryStream)) {
+                        return memStream;
+                    }
+                    if(toCreate == typeof(Bitmap) && fileName.EndsWith(".ico")) {
+                        // we special case the .ico bitmaps because GDI+ destroy the alpha channel component and
+                        // we don't want that to happen
+                        Icon ico = new Icon(memStream);
+                        return ico.ToBitmap();
+                    }
+                    
+                    return Activator.CreateInstance(toCreate, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, new object[] {memStream}, null);               
+                }
+                return null;
+            }
         }
     }
 }
