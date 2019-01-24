@@ -214,6 +214,12 @@ namespace System.Resources {
                             throw new ArgumentException(nameof(stringValue));
                         remainingString = stringValue.Substring(nextSemiColumn + 1);
                     }
+
+                    // Convert Windows path separators (backslash) to current path separators
+                    // unconditionally; do not support embedding files with backslashes in
+                    // their names (since it wasn't on Windows anyway).
+                    fileName = Microsoft.Build.Shared.FileUtilities.FixFilePath(fileName);
+
                     string[] parts = remainingString.Split(';');
                     if(parts.Length > 1) {
                         result = new string[] { fileName, parts[0], parts[1] };
