@@ -1496,6 +1496,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Non-string resource with text output
         /// </summary>
         [Fact]
+        [ActiveIssue("Test uses bitmap which uses libgdiplus which isn't installed on CI Macs", TestPlatforms.OSX)]
         public void UnsupportedTextType()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
