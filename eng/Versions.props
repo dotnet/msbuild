@@ -27,7 +27,7 @@
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
-    <MicrosoftNetFrameworkReferenceAssembliesVersion>1.0.0-alpha-004</MicrosoftNetFrameworkReferenceAssembliesVersion>
+    <MicrosoftNetFrameworkReferenceAssembliesVersion>1.0.0-alpha-5</MicrosoftNetFrameworkReferenceAssembliesVersion>
   </PropertyGroup>
   <!-- Test Dependencies -->
   <PropertyGroup>
