@@ -10,7 +10,7 @@
       <Sha>6c3324d3624a10c9d1dfcfba188c974063e86984</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.0.0-preview.383">
-      <Uri>https://github.com/microsoft/build</Uri>
+      <Uri>https://github.com/microsoft/msbuild</Uri>
       <Sha>b2db71bebaae4f54f7236ca303e2b0a14aca1a0d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="10.2.3-rtm-181017-0">
