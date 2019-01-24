@@ -73,11 +73,14 @@ if [ $host_type = "mono" ] ; then
   export _InitializeMSBuildToUse="$mono_msbuild_dir/MSBuild.dll"
 
   configuration="$configuration-MONO"
+  extn_path="$mono_msbuild_dir/Extensions"
+
+  extra_properties=" /p:MSBuildExtensionsPath=$extn_path /p:MSBuildExtensionsPath32=$extn_path /p:MSBuildExtensionsPath64=$extn_path"
 fi
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" $run_restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties
+	/bin/bash "$ScriptRoot/common/build.sh" $run_restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties
 fi
 
 bootstrapRoot="$artifacts_dir/bin/bootstrap"
@@ -96,7 +99,8 @@ then
   # https://github.com/dotnet/arcade/commit/f6f14c169ba19cd851120e0d572cd1c5619205b3
   export MonoTool=`which mono`
 
-  properties="$properties /p:MSBuildExtensionsPath=$bootstrapRoot/net472/MSBuild "
+  extn_path="$bootstrapRoot/net472/MSBuild"
+  extra_properties=" /p:MSBuildExtensionsPath=$extn_path /p:MSBuildExtensionsPath32=$extn_path /p:MSBuildExtensionsPath64=$extn_path"
 else
   echo "Unsupported hostType ($host_type)"
   exit 1
@@ -106,5 +110,5 @@ fi
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests
 # - Don't try to create a bootstrap deployment
-. "$ScriptRoot/common/build.sh" $run_restore --build $run_tests --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties
+. "$ScriptRoot/common/build.sh" $run_restore --build $run_tests --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
 
