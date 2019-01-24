@@ -121,6 +121,9 @@ namespace Microsoft.DotNet.Tests
             // Disable to prevent the creation of the .dotnet folder by optimizationdata.
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
+            // Disable telemetry to prevent the creation of the .dotnet folder
+            // for machineid and docker cache files
+            command.Environment["DOTNET_CLI_TELEMETRY_OPTOUT"] = "true";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
