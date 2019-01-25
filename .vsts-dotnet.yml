@@ -1,38 +1,42 @@
 trigger:
 - master
 
-phases:
-- phase: Windows_NT
-  queue: 
+jobs:
+- job: Windows_NT
+  pool: 
     name: VSEng-MicroBuildVS2017
-    timeoutInMinutes: 180
+    demands:
+    - agent.os -equals Windows_NT
+
+  timeoutInMinutes: 180
+
   variables:
-    BuildConfiguration: 'Release'
-    TeamName: MSBuild
-    _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-              /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-              /p:DotNetPublishToBlobFeed=true
-              /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
-              /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
-              /p:PB_PublishType=blob
-              /p:PublishToSymbolServer=true
-    _SignArgs: /p:DotNetSignType=real /p:TeamName=MSBuild
-    _SignType: real
+  - group: DotNet-Blob-Feed
+  - group: DotNet-Symbol-Publish
+  - group: Publish-Build-Assets
+  - name: TeamName
+    value: MSBuild
 
   steps:
   - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
     inputs:
       signType: real
-    condition: and(succeeded(), in(variables['_SignType'], 'test', 'real'))
+    condition: succeeded()
 
   - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
     inputs:
       feedSource: 'https://devdiv-test.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json'
 
   - script: eng/CIBuild.cmd
-              -configuration $(BuildConfiguration)
-              $(_PublishArgs)
-              $(_SignArgs)
+              -configuration Release
+              /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+              /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+              /p:DotNetPublishToBlobFeed=true
+              /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+              /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)              
+              /p:PublishToSymbolServer=true
+              /p:DotNetSignType=real
+              /p:TeamName=MSBuild
               /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
     displayName: Build
     condition: succeeded()
@@ -42,7 +46,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Release Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/$(BuildConfiguration)/*UnitTests_net472*.xml'
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -51,7 +55,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Release .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/$(BuildConfiguration)/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -59,21 +63,21 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
+      PathtoPublish: 'artifacts\log\Release'
       ArtifactName: logs
     condition: succeededOrFailed()
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: packages'
     inputs:
-      PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
+      PathtoPublish: 'artifacts\packages\Release'
       ArtifactName: packages
     condition: succeededOrFailed()
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: vsix'
     inputs:
-      PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+      PathtoPublish: 'artifacts\VSSetup\Release\Insertion'
       ArtifactName: vsix
     condition: succeededOrFailed()
 
@@ -87,16 +91,31 @@ phases:
   - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
     displayName: Upload VSTS Drop
     inputs:
-      DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+      DropFolder: 'artifacts\VSSetup\Release\Insertion'
+    condition: succeeded()
+
+  - task: CopyFiles@2
+    displayName: Gather Asset Manifests
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/artifacts/log/Release/AssetManifest'
+      TargetFolder: '$(Build.StagingDirectory)/AssetManifests'
+    condition: succeeded()
+
+  - task: PublishBuildArtifacts@1
+    displayName: Push Asset Manifests
+    inputs:
+      PathtoPublish: '$(Build.StagingDirectory)/AssetManifests'
+      PublishLocation: Container
+      ArtifactName: AssetManifests
     condition: succeeded()
 
   - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
     displayName: Execute cleanup tasks
 
-# - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-#   - template: /eng/common/templates/phases/publish-build-assets.yml
-#     parameters:
-#       dependsOn:
-#         - Windows_NT
-#       queue:
-#         name: Hosted VS2017
+- template: /eng/common/templates/job/publish-build-assets.yml
+  parameters:
+    enablePublishBuildArtifacts: true
+    dependsOn:
+      - Windows_NT
+    pool:
+      vmImage: vs2017-win2016

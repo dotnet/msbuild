@@ -229,7 +229,7 @@ namespace Microsoft.Build.Logging
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
-            var parameters = Parameters.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
                 if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))

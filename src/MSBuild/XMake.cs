@@ -114,6 +114,8 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
 
+        private static readonly char[] s_commaSemicolon = { ',', ';' };
+
         /// <summary>
         /// Static constructor
         /// </summary>
@@ -2349,7 +2351,7 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string code in parameters
-                .SelectMany(parameter => parameter?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
+                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
             {
                 if (code == null)
                 {
@@ -2378,7 +2380,7 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string code in parameters
-                .SelectMany(parameter => parameter?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries))
                 .Where(i => !String.IsNullOrWhiteSpace(i))
                 .Select(i => i.Trim()))
             {
@@ -2847,12 +2849,12 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The = sign is used to pair properties with their values on the command line.
         /// </summary>
-        private static readonly char[] s_propertyValueSeparator = { '=' };
+        private static readonly char[] s_propertyValueSeparator = MSBuildConstants.EqualsChar;
 
         /// <summary>
         /// This is a set of wildcard chars which can cause a file extension to be invalid 
         /// </summary>
-        private static readonly char[] s_wildcards = { '*', '?' };
+        private static readonly char[] s_wildcards = MSBuildConstants.WildcardChars;
 
         /// <summary>
         /// Determines which ToolsVersion was specified on the command line.  If more than
@@ -2970,7 +2972,7 @@ namespace Microsoft.Build.CommandLine
         {
             for (int i = 0; i < parametersToAggregate.Length; i++)
             {
-                parametersToAggregate[i] = parametersToAggregate[i].Trim(';');
+                parametersToAggregate[i] = parametersToAggregate[i].Trim(MSBuildConstants.SemicolonChar);
             }
 
             // Join the logger parameters into one string seperated by semicolons
@@ -3197,7 +3199,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static string ExtractAnyLoggerParameter(string parameters, params string[] parameterNames)
         {
-            string[] nameValues = parameters.Split(';');
+            string[] nameValues = parameters.Split(MSBuildConstants.SemicolonChar);
             string result = null;
 
             foreach (string nameValue in nameValues)
@@ -3227,7 +3229,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!String.IsNullOrEmpty(parameter))
             {
-                string[] nameValuePair = parameter.Split('=');
+                string[] nameValuePair = parameter.Split(MSBuildConstants.EqualsChar);
 
                 value = (nameValuePair.Length > 1) ? nameValuePair[1] : null;
             }

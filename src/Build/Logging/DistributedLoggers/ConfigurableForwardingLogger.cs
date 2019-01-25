@@ -497,7 +497,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Console logger parameters delimiters.
         /// </summary>
-        private static readonly char[] s_parameterDelimiters = { ';' };
+        private static readonly char[] s_parameterDelimiters = MSBuildConstants.SemicolonChar;
 
         /// <summary>
         /// Strings that users of this logger can pass in to enable specific events or logger output.

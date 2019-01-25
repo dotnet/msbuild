@@ -66,7 +66,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Character used to split InitialTargets and DefaultTargets lists
         /// </summary>
-        private static readonly char[] s_splitter = new char[] { ';' };
+        private static readonly char[] s_splitter = MSBuildConstants.SemicolonChar;
 
         /// <summary>
         /// Expander for evaluating conditions

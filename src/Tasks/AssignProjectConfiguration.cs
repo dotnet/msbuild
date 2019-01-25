@@ -390,11 +390,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void PopulateMappingDictionary(IDictionary<string, string> map, string mappingList)
         {
-            string[] mappings = mappingList.Split(';');
+            string[] mappings = mappingList.Split(MSBuildConstants.SemicolonChar);
 
             foreach (string mapping in mappings)
             {
-                string[] platforms = mapping.Split('=');
+                string[] platforms = mapping.Split(MSBuildConstants.EqualsChar);
 
                 if (platforms.Length != 2)
                 {
