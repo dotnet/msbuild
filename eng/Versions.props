@@ -32,7 +32,7 @@
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>2.2.0-preview1-26620-03</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftDotNetCliCommandLinePackageVersion>1.0.0-preview.19074.1</MicrosoftDotNetCliCommandLinePackageVersion>
-    <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.2-preview.19074.1</MicrosoftDotNetProjectJsonMigrationPackageVersion>
+    <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.1</MicrosoftDotNetProjectJsonMigrationPackageVersion>
     <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
     <NuGetBuildTasksPackageVersion>5.0.0-preview1.5663</NuGetBuildTasksPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>

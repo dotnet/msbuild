@@ -17,10 +17,12 @@
       <Uri>https://github.com/dotnet/sdk</Uri>
       <Sha>010b0fb362878d3eb8dfff7f521fc0db6b7e3a50</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.ProjectJsonMigration" Version="1.3.2-preview.19074.1">
+    <!-- We don't want migrate being updated by DARC just yet due to the NuGet
+    discrepancy between it and the CLI. We will fix that for P3 -->
+    <!-- <Dependency Name="Microsoft.DotNet.ProjectJsonMigration" Version="1.3.2-preview.19074.1">
       <Uri>https://github.com/dotnet/cli-migrate</Uri>
       <Sha>37e3a01aa1df320a286b0a858876f9994fb6bb18</Sha>
-    </Dependency>
+    </Dependency> -->
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19074.1">
       <Uri>https://github.com/dotnet/cliCommandLineParser</Uri>
       <Sha>d8f545b1995fb62fd5c64f794491afbfcf6a84ca</Sha>
