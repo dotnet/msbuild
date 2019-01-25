@@ -10,6 +10,7 @@ using System.IO;
 using System;
 using System.Runtime.CompilerServices;
 using System.Xml;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
