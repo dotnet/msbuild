@@ -255,6 +255,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_RestoreCrossgen"
           DependsOnTargets="PrepforRestoreForComposeStore;
                            _SetupStageForCrossgen;
+                           ResolveFrameworkReferences;
                            ApplyImplicitVersions"
           Condition="$(SkipOptimization) != 'true' ">
 
