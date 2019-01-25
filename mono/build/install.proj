@@ -94,6 +94,9 @@
             <RemainingMSBuildBinFiles_Relative Include="@(RemainingMSBuildBinFiles -> '$([MSBuild]::MakeRelative('$(MSBuildBinSrcDir)', %(RemainingMSBuildBinFiles.Identity)))' )" />
         </ItemGroup>
 
+        <!-- These will be created by mono, but in bockbuild they are not present as msbuild is first installed in isolation,
+             and later merged with mono. -->
+        <MakeDir Directories="$(MonoInstallPrefix)\lib\mono\msbuild\15.0;$(MonoInstallPrefix)\lib\mono\xbuild\15.0" />
         <Exec
             WorkingDirectory="$(MonoInstallPrefix)\lib\mono\msbuild"
             Command="ln -s 15.0 Current" />
