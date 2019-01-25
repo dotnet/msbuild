@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new DotnetTestCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore")
+                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore /p:IsTestProject=''")
                 .Should().Pass()
                 .And.HaveStdOutContaining("Skipping running test for project");
         }
@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("10");
-
+            var trxFileNamePattern = "custom*.trx";
             string trxLoggerDirectory = Path.Combine(testProjectDirectory, "RD");
 
             // Delete trxLoggerDirectory if it exist
@@ -171,9 +171,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify
             if (!DotnetUnderTest.IsLocalized())
             {
-                var trxFilePath = Path.Combine(trxLoggerDirectory, "custom.trx");
-                Assert.True(File.Exists(trxFilePath));
-                result.StdOut.Should().Contain(trxFilePath);
+                // We append current date time to trx file name, hence modifying this check
+                Assert.True(Directory.EnumerateFiles(trxLoggerDirectory, trxFileNamePattern).Any());
+
                 result.StdOut.Should().Contain("Passed   VSTestPassTest");
                 result.StdOut.Should().Contain("Failed   VSTestFailTest");
             }
@@ -246,7 +246,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("7");
-
+            var trxFileNamePattern = "custom*.trx";
             string trxLoggerDirectory = Path.Combine(testProjectDirectory, "RD");
 
             // Delete trxLoggerDirectory if it exist
@@ -261,9 +261,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .ExecuteWithCapturedOutput("--logger \"trx;logfilename=custom.trx\" -- RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
 
             // Verify
-            var trxFilePath = Path.Combine(trxLoggerDirectory, "custom.trx");
-            Assert.True(File.Exists(trxFilePath));
-            result.StdOut.Should().Contain(trxFilePath);
+            // We append current date time to trx file name, hence modifying this check
+            Assert.True(Directory.EnumerateFiles(trxLoggerDirectory, trxFileNamePattern).Any());
 
             // Cleanup trxLoggerDirectory if it exist
             if (Directory.Exists(trxLoggerDirectory))
