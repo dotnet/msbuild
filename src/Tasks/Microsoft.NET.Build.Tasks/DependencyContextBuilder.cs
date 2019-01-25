@@ -394,7 +394,7 @@ namespace Microsoft.NET.Build.Tasks
             IDictionary<string, Dependency> dependencyLookup,
             bool runtime)
         {
-            return exports.Select(export => GetLibrary(export, libraryLookup, dependencyLookup, runtime));
+            return exports.Select(export => GetLibrary(export, libraryLookup, dependencyLookup, runtime)).Where(l => l != null);
         }
 
         private Library GetLibrary(
@@ -440,6 +440,12 @@ namespace Microsoft.NET.Build.Tasks
                 else if (export.IsProject())
                 {
                     referenceProjectInfo = GetProjectInfo(library);
+
+                    if (referenceProjectInfo is UnreferencedProjectInfo)
+                    {
+                        // unreferenced ProjectInfos will be added later as simple dll dependencies
+                        return null;
+                    }
 
                     if (runtime)
                     {
@@ -512,9 +518,8 @@ namespace Microsoft.NET.Build.Tasks
 
         private IReadOnlyList<RuntimeAssetGroup> CreateRuntimeAssemblyGroups(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
         {
-            if (targetLibrary.IsProject())
+            if (targetLibrary.IsProject() && !(referenceProjectInfo is UnreferencedProjectInfo))
             {
-                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
                 return new[] { new RuntimeAssetGroup(string.Empty, referenceProjectInfo.OutputName) };
             }
             else
@@ -560,9 +565,8 @@ namespace Microsoft.NET.Build.Tasks
 
         private IEnumerable<ResourceAssembly> CreateResourceAssemblyGroups(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
         {
-            if (targetLibrary.IsProject())
+            if (targetLibrary.IsProject() && !(referenceProjectInfo is UnreferencedProjectInfo))
             {
-                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
                 return CreateResourceAssemblies(referenceProjectInfo.ResourceAssemblies);
             }
             else
@@ -584,9 +588,8 @@ namespace Microsoft.NET.Build.Tasks
 
         private IEnumerable<string> GetCompileTimeAssemblies(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
         {
-            if (targetLibrary.IsProject())
+            if (targetLibrary.IsProject() && !(referenceProjectInfo is UnreferencedProjectInfo))
             {
-                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
                 return new[] { referenceProjectInfo.OutputName };
             }
             else
@@ -711,14 +714,6 @@ namespace Microsoft.NET.Build.Tasks
                 .Select(r => new ResourceAssembly(r.RelativePath, r.Culture));
         }
 
-        private static void EnsureProjectInfo(SingleProjectInfo referenceProjectInfo, string libraryName)
-        {
-            if (referenceProjectInfo == null)
-            {
-                throw new BuildErrorException(Strings.CannotFindProjectInfo, libraryName);
-            }
-        }
-
         private SingleProjectInfo GetProjectInfo(LockFileLibrary library)
         {
             string projectPath = library.MSBuildProject;
@@ -734,7 +729,7 @@ namespace Microsoft.NET.Build.Tasks
             if (_referenceProjectInfos?.TryGetValue(fullProjectPath, out referenceProjectInfo) != true ||
                 referenceProjectInfo == null)
             {
-                throw new BuildErrorException(Strings.CannotFindProjectInfo, fullProjectPath);
+                return UnreferencedProjectInfo.Default;
             }
 
             return referenceProjectInfo;
