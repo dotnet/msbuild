@@ -13,6 +13,7 @@ using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
@@ -296,6 +297,43 @@ namespace Microsoft.NET.Publish.Tests
                 newtonsoftSymbolsFiles.Length.Should().Be(1);
                 newtonsoftSymbolsFiles[0].Name.Should().StartWith("Newtonsoft.Json").And.EndWith(symbolFileExtension);
             }
+        }
+
+        [CoreMSBuildOnlyFact]
+        public void It_stores_when_targeting_netcoreapp3()
+        {
+            const string TFM = "netcoreapp3.0";
+
+            var testProject = new TestProject()
+            {
+                Name = "Test",
+                IsSdkProject = true,
+                TargetFrameworks = TFM
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            var outputFolder = Path.Combine(testProjectInstance.TestRoot, "o");
+            var workingDir = Path.Combine(testProjectInstance.TestRoot, "w");
+
+            new ComposeStoreCommand(Log, testProjectInstance.TestRoot, testProject.Name)
+                .Execute(
+                    $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(TFM)}",
+                    $"/p:ComposeDir={outputFolder}",
+                    $"/p:ComposeWorkingDir={workingDir}",
+                    "/p:DoNotDecorateComposeDir=true",
+                    "/p:CreateProfilingSymbols=false")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NU1604");
+
+            new DirectoryInfo(outputFolder).Should().OnlyHaveFiles(new List<string> {
+               "artifact.xml",
+               "newtonsoft.json/12.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
+            });
         }
 
         private static HashSet<PackageIdentity> ParseStoreArtifacts(string path)
