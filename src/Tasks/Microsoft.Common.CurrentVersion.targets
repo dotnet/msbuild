@@ -6010,7 +6010,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
-                              DesignerOutputGroup
+         DesignerRuntimeImplementationProjectOutputGroup
 
     Exposes build items to be used by designer. The default is empty, but
     SDKs can override it as appropriate. The empty stub is required so that
@@ -6019,16 +6019,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <DesignerOutputGroupDependsOn>
-      $(DesignerOutputGroupDependsOn);
+    <DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+      $(DesignerRuntimeImplementationProjectOutputGroupDependsOn);
       $(CommonOutputGroupsDependsOn)
-    </DesignerOutputGroupDependsOn>
+    </DesignerRuntimeImplementationProjectOutputGroupDependsOn>
   </PropertyGroup>
 
   <Target
-      Name="DesignerOutputGroup"
-      DependsOnTargets="$(DesignerOutputGroupDependsOn)"
-      Returns="@(DesignerOutputGroup)">
+      Name="DesignerRuntimeImplementationProjectOutputGroup"
+      DependsOnTargets="$(DesignerRuntimeImplementationProjectOutputGroupDependsOn)"
+      Returns="@(DesignerRuntimeImplementationProjectOutputGroupOutput)">
   </Target>
 
   <PropertyGroup>
