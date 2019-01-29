@@ -77,8 +77,11 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("Hello World!");
         }
 
-        [Fact]
-        public void It_should_publish_framework_dependent()
+
+        [Theory]
+        [InlineData("Microsoft.AspNetCore.App")]
+        [InlineData("Microsoft.AspNetCore.All")]
+        public void It_should_publish_framework_dependent(string platformLibrary)
         {
             var tfm = "netcoreapp2.2";
 
@@ -91,7 +94,7 @@ namespace Microsoft.NET.Publish.Tests
             };
 
             testProject.AdditionalProperties.Add("AspNetCoreHostingModel", "InProcess");
-            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.App"));
+            testProject.PackageReferences.Add(new TestPackageReference(platformLibrary));
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Razor.Design", version: "2.2.0", privateAssets: "all"));
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
