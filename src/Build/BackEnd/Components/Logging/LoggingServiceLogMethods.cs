@@ -193,7 +193,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     string projectFile;
                     _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
-                    ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                    ErrorUtilities.VerifyThrow(projectFile != null, "LSLM1: ContextID {0} should have been in the ID-to-project file mapping but wasn't! Dump: {1}", context.ProjectContextId, string.Join("\n", _projectFileMap.Select(e => $"pci {e.Key}: {e.Value}")));
                     buildEvent.ProjectFile = projectFile;
                 }
 
@@ -239,7 +239,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         string projectFile;
                         _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
-                        ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                        ErrorUtilities.VerifyThrow(projectFile != null, "LSLM2: ContextID {0} should have been in the ID-to-project file mapping but wasn't! Dump: {1}", context.ProjectContextId, string.Join("\n", _projectFileMap.Select(e => $"pci {e.Key}: {e.Value}")));
                         buildEvent.ProjectFile = projectFile;
                     }
 
@@ -418,7 +418,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     string projectFile;
                     _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
-                    ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                    ErrorUtilities.VerifyThrow(projectFile != null, "LSLM3: ContextID {0} should have been in the ID-to-project file mapping but wasn't! Dump: {1}", context.ProjectContextId, string.Join("\n", _projectFileMap.Select(e => $"pci {e.Key}: {e.Value}")));
                     buildEvent.ProjectFile = projectFile;
                 }
 

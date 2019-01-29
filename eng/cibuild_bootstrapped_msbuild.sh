@@ -59,6 +59,8 @@ fi
 
 mv $ArtifactsDir $Stage1Dir
 
+export MSBUILDDONOTLAUNCHDEBUGGER=true
+
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests

@@ -1555,8 +1555,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
             if (projectFile == null)
             {
-                ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", context.ProjectContextId);
-            }
+                ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't! Dump: {1}", context.ProjectContextId, string.Join("\n", _projectFileMap.Select(e => $"pci {e.Key}: {e.Value}")));            }
 
             return projectFile;
         }
