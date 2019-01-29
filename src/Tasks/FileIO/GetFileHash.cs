@@ -84,10 +84,6 @@ namespace Microsoft.Build.Tasks
             {
                 var hash = ComputeHash(Algorithm, file.ItemSpec);
                 file.SetMetadata("FileHashAlgorithm", Algorithm);
-
-                // This typo shipped in 15.8 and 15.9; preserve it for backward compat.
-                file.SetMetadata("FileHashAlgoritm", Algorithm);
-
                 file.SetMetadata(MetadataName, EncodeHash(encoding, hash));
             }
 
