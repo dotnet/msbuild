@@ -256,13 +256,13 @@ phases:
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnLinux build logs'
-    condition: succeededOrFailed()
+    condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
-    condition: succeededOrFailed()
+    condition: always()
 
 - phase: CoreOnMac
   displayName: "Build and test on macOS using .NET Core MSBuild"
