@@ -12,6 +12,9 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class ProjectContext
     {
+        private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
+        private const string AspNetPlatformLibrary = "Microsoft.AspNetCore.App";
+
         private readonly LockFile _lockFile;
         private readonly LockFileTarget _lockFileTarget;
         internal HashSet<PackageIdentity> PackagesToBeFiltered { get; set; }
@@ -63,6 +66,17 @@ namespace Microsoft.NET.Build.Tasks
             if (IsFrameworkDependent)
             {
                 allExclusionList.UnionWith(_lockFileTarget.GetPlatformExclusionList(PlatformLibrary, libraryLookup));
+
+                // If the platform library is Microsoft.AspNetCore.App, then implicitly
+                // treat Microsoft.NETCore.App as a dependency and add its exclusions
+                if (String.Equals(PlatformLibrary.Name, AspNetPlatformLibrary, StringComparison.OrdinalIgnoreCase))
+                {
+                    var library = _lockFileTarget.GetLibrary(NetCorePlatformLibrary);
+                    if (library != null)
+                    {
+                        allExclusionList.UnionWith(_lockFileTarget.GetPlatformExclusionList(library, libraryLookup));
+                    }
+                }
             }
 
             if (excludeFromPublishPackageIds?.Any() == true)
