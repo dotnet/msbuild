@@ -1571,8 +1571,10 @@ namespace Microsoft.Build.UnitTests
         internal static ProjectGraph CreateProjectGraph(
             TestEnvironment env,
             // direct dependencies that the kvp.key node has on the nodes represented by kvp.value
-            Dictionary<int, int[]> dependencyEdges,
-            CreateProjectFileDelegate createProjectFile = null)
+            IDictionary<int, int[]> dependencyEdges,
+            CreateProjectFileDelegate createProjectFile = null,
+            IEnumerable<int> roots = null,
+            IDictionary<string, string> globalProperties = null)
         {
             createProjectFile = createProjectFile ?? CreateProjectFile;
 
@@ -1608,9 +1610,13 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
+            var entryProjects = roots ?? nodes.Where(nodeEntry => nodeEntry.Value.IsRoot).Select(n => n.Key);
+
+            var entryProjectFiles = nodes.Where(nodeEntry => nodeEntry.Value.IsRoot).Select(nodeEntry => nodeEntry.Value.ProjectPath);
+
             return new ProjectGraph(
-                nodes.Where(nodeEntry => nodeEntry.Value.IsRoot)
-                    .Select(nodeEntry => nodeEntry.Value.ProjectPath));
+                entryProjectFiles,
+                globalProperties ?? new Dictionary<string, string>());
 
             bool IsRoot(int node)
             {

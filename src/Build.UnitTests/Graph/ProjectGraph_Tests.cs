@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -238,7 +239,8 @@ namespace Microsoft.Build.Graph.UnitTests
                 // Projects 2 and 3 both reference project 4, but with different properties, so they should not point to the same node.
                 GetNodeForProject(graph, 2).ProjectReferences.First().ShouldNotBe(GetNodeForProject(graph, 3).ProjectReferences.First());
                 GetNodeForProject(graph, 2).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("4.proj");
-                GetNodeForProject(graph, 2).ProjectReferences.First().GlobalProperties.ShouldBeEmpty();
+                GetNodeForProject(graph, 2).ProjectReferences.First().GlobalProperties.ShouldHaveSingleItem();
+                GetNodeForProject(graph, 2).ProjectReferences.First().GlobalProperties.Keys.First().ShouldBe(PropertyNames.IsGraphBuild);
                 GetNodeForProject(graph, 3).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("4.proj");
                 GetNodeForProject(graph, 3).ProjectReferences.First().GlobalProperties.ShouldNotBeEmpty();
             }
@@ -808,7 +810,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 {
                     new Dictionary<int, int[]>
                     {
-                        {1, new []{5, 4}},
+                        {1, new []{5, 4, 7}},
                         {2, new []{5}},
                         {3, new []{6, 5}},
                         {4, new []{7}},
@@ -839,6 +841,126 @@ namespace Microsoft.Build.Graph.UnitTests
                         toposort[i].ReferencingProjects.ShouldNotContain(toposort[j], $"Dependency of node at index {j} found at index {i}");
                     }
                 }
+            }
+        }
+
+        public static IEnumerable<object[]> AllNodesShouldHaveGraphBuildGlobalPropertyData
+        {
+            get
+            {
+                var globalVariablesArray = new[]
+                {
+                    //todo add null
+                    new Dictionary<string, string>(),
+                    new Dictionary<string, string>
+                    {
+                        {"a", "b"},
+                        {"c", "d"}
+                    }
+                };
+
+                var graph1 = new Dictionary<int, int[]>
+                {
+                    {1, new[] {3, 2}},
+                    {2, new[] {3}},
+                    {3, new[] {5, 4}},
+                    {4, new[] {5}}
+                };
+
+                var graph2 = new Dictionary<int, int[]>
+                {
+                    {1, new[] {5, 4, 7}},
+                    {2, new[] {5}},
+                    {3, new[] {6, 5}},
+                    {4, new[] {7}},
+                    {5, new[] {7, 8}},
+                    {6, new[] {7, 9}}
+                };
+
+                foreach (var globalVariables in globalVariablesArray)
+                {
+                    yield return new object[]
+                    {
+                        new Dictionary<int, int[]>(),
+                        new int[] {},
+                        globalVariables
+                    };
+
+                    yield return new object[]
+                    {
+                        new Dictionary<int, int[]>
+                        {
+                            {1, null}
+                        },
+                        new[] {1},
+                        globalVariables
+                    };
+
+                    yield return new object[]
+                    {
+                        graph1,
+                        new[] {1},
+                        globalVariables
+                    };
+
+                    yield return new object[]
+                    {
+                        graph1,
+                        new[] {1, 4, 3},
+                        globalVariables
+                    };
+
+                    yield return new object[]
+                    {
+                        graph2,
+                        new[] {1, 2, 3},
+                        globalVariables
+                    };
+
+                    yield return new object[]
+                    {
+                        graph2,
+                        new[] {1, 2, 6, 4, 3, 7},
+                        globalVariables
+                    };
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(AllNodesShouldHaveGraphBuildGlobalPropertyData))]
+        public void AllNodesShouldHaveGraphBuildGlobalProperty(Dictionary<int, int[]> edges, int[] roots, Dictionary<string, string> globalProperties)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var projectGraph = Helpers.CreateProjectGraph(env, edges, null, roots, globalProperties);
+
+                var expectedGlobalProperties = new Dictionary<string, string>(globalProperties) {[PropertyNames.IsGraphBuild] = "true"};
+
+                foreach (var node in projectGraph.ProjectNodes)
+                {
+                    Helpers.AssertDictionariesEqual(expectedGlobalProperties, node.GlobalProperties.ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+                }
+            }
+        }
+
+        [Fact]
+        public void EntryPointsShouldNotHaveReservedStaticGraphGlobalProperties()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var e = Should.Throw<ArgumentException>(
+                    () =>
+                    {
+                        var projectGraph = Helpers.CreateProjectGraph(
+                            env,
+                            new Dictionary<int, int[]> {{1, null}},
+                            null,
+                            null,
+                            new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}});
+                    });
+
+                e.Message.ShouldContain("MSB4259");
             }
         }
 

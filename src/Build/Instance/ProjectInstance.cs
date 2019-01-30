@@ -2459,7 +2459,18 @@ namespace Microsoft.Build.Execution
         /// Tools version may be null.
         /// Does not set mutability.
         /// </summary>
-        private void Initialize(ProjectRootElement xml, IDictionary<string, string> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, int visualStudioVersionFromSolution, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService = null, int submissionId = BuildEventContext.InvalidSubmissionId, ProjectLoadSettings? projectLoadSettings = null)
+        private void Initialize(
+            ProjectRootElement xml,
+            IDictionary<string, string> globalProperties,
+            string explicitToolsVersion,
+            string explicitSubToolsetVersion,
+            int visualStudioVersionFromSolution,
+            BuildParameters buildParameters,
+            ILoggingService loggingService,
+            BuildEventContext buildEventContext,
+            ISdkResolverService sdkResolverService = null,
+            int submissionId = BuildEventContext.InvalidSubmissionId,
+            ProjectLoadSettings? projectLoadSettings = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");

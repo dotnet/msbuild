@@ -100,6 +100,14 @@ namespace Microsoft.Build.Shared
         internal static readonly char[] PathSeparatorChar = { Path.PathSeparator };
     }
 
+    internal static class PropertyNames
+    {
+        /// <summary>
+        /// Specifies whether the current evaluation / build is happening during a graph build
+        /// </summary>
+        internal const string IsGraphBuild = "IsGraphBuild";
+    }
+
     internal static class ItemTypeNames
     {
         /// <summary>

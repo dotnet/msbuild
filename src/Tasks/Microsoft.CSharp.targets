@@ -25,11 +25,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
    </PropertyGroup>
 
-   
+   <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
+      <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+   </PropertyGroup>
+
   <ItemGroup>
       <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
       <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInnerBuilds)" Condition=" '$(ProjectReferenceTargetsForBuildInnerBuilds)' != '' " InnerBuild="true"/>
-
 
       <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
       <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />

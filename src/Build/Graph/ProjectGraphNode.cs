@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -56,13 +57,30 @@ namespace Microsoft.Build.Graph
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
 
+        /// <summary>
+        /// Given some entry targets for the node, this method computes the required build request targets and global properties.
+        /// It includes the global properties the node was evaluated with.
+        /// </summary>
+        /// <param name="targets"></param>
+        /// <returns></returns>
         public BuildData ComputeBuildData(IReadOnlyCollection<string> targets)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targets, nameof(targets));
 
             return ImplementsGraphBuildEntryPoint(ProjectInstance)
-                ? new BuildData(new[] {BuildTargetsForGraphBuild}, new Dictionary<string, string> {{ GraphBuildEntryTargets, string.Join(";", targets)}})
-                : new BuildData(targets, new Dictionary<string, string>());
+                ? new BuildData(new[] {BuildTargetsForGraphBuild}, AddEntryTargetsToGlobalProperties())
+                : new BuildData(targets, GlobalProperties);
+
+            IReadOnlyDictionary<string, string> AddEntryTargetsToGlobalProperties()
+            {
+                var dictionary = GlobalProperties.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                ErrorUtilities.VerifyThrow(!dictionary.ContainsKey(GraphBuildEntryTargets), "that property should be reserved, and rejected at graph construction time");
+
+                dictionary[GraphBuildEntryTargets] = string.Join(";", targets);
+
+                return dictionary;
+            }
         }
 
         /// <summary>

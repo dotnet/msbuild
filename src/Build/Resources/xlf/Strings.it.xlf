@@ -77,6 +77,13 @@
         <target state="translated">MSB4258: durante la scrittura del file della cache dei risultati di output nel percorso "{0}" è stato rilevato un errore: {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="GraphEntryPointHasIllegalGlobalProperty">
+        <source>MSB4259: Detected a graph build entry point with global variable '{0}'. In graph builds this property is reserved.</source>
+        <target state="new">MSB4259: Detected a graph build entry point with global variable '{0}'. In graph builds this property is reserved.</target>
+        <note>
+      {StrBegin="MSB4259:"}
+    </note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: i file della cache dei risultati di input seguenti non esistono: "{0}"</target>

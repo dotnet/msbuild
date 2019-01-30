@@ -209,12 +209,20 @@ namespace Microsoft.Build.Graph
             foreach (var entryPoint in entryPoints)
             {
                 PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary = CreatePropertyDictionary(entryPoint.GlobalProperties);
+
+                AddGraphBuildGlobalVariable(entryPoint, globalPropertyDictionary);
+
                 var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
                 projectsToEvaluate.Enqueue(configurationMetadata);
                 entryPointConfigurationMetadata.Add(configurationMetadata);
             }
 
-            if (LoadGraph(projectsToEvaluate, projectCollection, tasksInProgress, projectInstanceFactory, out List<Exception> exceptions))
+            if (LoadGraph(
+                projectsToEvaluate,
+                projectCollection,
+                tasksInProgress,
+                projectInstanceFactory,
+                out List<Exception> exceptions))
             {
                 foreach (var configurationMetadata in entryPointConfigurationMetadata)
                 {
@@ -243,6 +251,17 @@ namespace Microsoft.Build.Graph
             else
             {
                 throw new AggregateException(exceptions);
+            }
+
+            void AddGraphBuildGlobalVariable(ProjectGraphEntryPoint entryPoint, PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary)
+            {
+                if (entryPoint.GlobalProperties != null && entryPoint.GlobalProperties.ContainsKey(PropertyNames.IsGraphBuild))
+                {
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GraphEntryPointHasIllegalGlobalProperty",
+                    PropertyNames.IsGraphBuild));
+                }
+
+                globalPropertyDictionary[PropertyNames.IsGraphBuild] = ProjectPropertyInstance.Create(PropertyNames.IsGraphBuild, "true");
             }
         }
 
@@ -469,6 +488,7 @@ namespace Microsoft.Build.Graph
         {
             var exceptionsInTasks = new ConcurrentBag<Exception>();
             var evaluationWaitHandle = new AutoResetEvent(false);
+
             while (projectsToEvaluate.Count != 0 || tasksInProgress.Count != 0)
             {
                 ConfigurationMetadata projectToEvaluate;

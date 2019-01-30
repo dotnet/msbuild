@@ -77,6 +77,13 @@
         <target state="translated">MSB4258: "{0}" 경로에서 출력 결과 캐시 파일을 쓰는 중 오류가 발생했습니다. {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="GraphEntryPointHasIllegalGlobalProperty">
+        <source>MSB4259: Detected a graph build entry point with global variable '{0}'. In graph builds this property is reserved.</source>
+        <target state="new">MSB4259: Detected a graph build entry point with global variable '{0}'. In graph builds this property is reserved.</target>
+        <note>
+      {StrBegin="MSB4259:"}
+    </note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
