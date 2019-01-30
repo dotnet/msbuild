@@ -208,9 +208,9 @@ jobs:
 #       ArtifactName: 'CoreOnWindows test logs'
 #     condition: succeededOrFailed()
 
-- phase: CoreBootstrappedOnLinux
+- job: CoreBootstrappedOnLinux
   displayName: "Build and test on Linux using bootstrapped .NET Core MSBuild"
-  queue: 'Hosted Ubuntu 1604'
+  pool: 'Hosted Ubuntu 1604'
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
