@@ -175,7 +175,7 @@ function Build {
 
   local bl=""
   if [[ "$binary_log" == true ]]; then
-    bl="/bl:\"$log_dir/Build.binlog\""
+    bl="/bl:\"$log_dir/Build_$(date +%s).binlog\""
   fi
 
   MSBuild $_InitializeToolset \
