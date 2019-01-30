@@ -60,6 +60,7 @@ fi
 mv $ArtifactsDir $Stage1Dir
 
 export MSBUILDDONOTLAUNCHDEBUGGER=true
+export RoslynCommandLineLogFile=artifacts/log/Debug/Roslyn_comm.log
 
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
