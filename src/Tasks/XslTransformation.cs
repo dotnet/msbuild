@@ -460,7 +460,7 @@ namespace Microsoft.Build.Tasks
                     case XslModes.XsltCompiledDll:
                         // We accept type in format: assembly_name[;type_name]. type_name may be omitted if assembly has just one type defined
                         string dll = _data;
-                        string[] pair = dll.Split(';');
+                        string[] pair = dll.Split(MSBuildConstants.SemicolonChar);
                         string assemblyPath = pair[0];
                         string typeName = (pair.Length == 2) ? pair[1] : null;
 

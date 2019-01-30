@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified.</target>
+        <target state="translated">MSBUILD : error MSB1058: Lze zadat pouze jednu výstupní mezipaměť pro výsledky.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -550,11 +550,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;souborMezipaměti&gt;...
+                     Středníky oddělený seznam vstupních souborů mezipaměti,
+                     z nichž bude MSBuild číst výsledky sestavení.
+                     Nastavením této možnosti zapnete také izolované buildy (-isolate).
+                     (krátký tvar: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -568,11 +568,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:&lt;souborMezipaměti&gt;...
+                     Výstupní soubor mezipaměti, do něhož bude MSBuild
+                     zapisovat obsah svých mezipamětí výsledků sestavení.
+                     Nastavením této možnosti zapnete také izolované buildy (-isolate).
+                     (krátký tvar: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate

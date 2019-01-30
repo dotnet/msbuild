@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -66,7 +67,7 @@ namespace Microsoft.Build.Framework
             sdkReference = null;
             if (string.IsNullOrWhiteSpace(sdk)) return false;
 
-            var parts = sdk.Split('/').Select(i => i.Trim()).ToArray();
+            var parts = sdk.Split(MSBuildConstants.ForwardSlash).Select(i => i.Trim()).ToArray();
 
             if (parts.Length < 1 || parts.Length > 2) return false;
             if (string.IsNullOrWhiteSpace(parts[0])) return false;

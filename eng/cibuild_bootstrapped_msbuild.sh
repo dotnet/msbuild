@@ -1,3 +1,5 @@
+#! /bin/bash
+
 configuration="debug"
 host_type="core"
 build_stage1=true

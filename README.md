@@ -35,8 +35,10 @@ To get started on **Visual Studio 2017**:
 2. [Install the .NET Core 2.1 SDK](https://www.microsoft.com/net/learn/get-started/windows).
 2. Clone the source code (see above).
 2. Open a `Developer Command Prompt for VS 2017` prompt.
-3. Build the code using the `build.cmd` script. This also restores packages needed to open the projects in Visual Studio.
-5. Open `MSBuild.sln` in Visual Studio 2017.
+3. Build the code using the `build.cmd` script at the root of the repo. This also restores packages needed to open the projects in Visual Studio.
+5. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2017.
+
+Note: To produce a "bootstrap" build, run `.\build.cmd /p:CreateBootstrap=true`.
 
 ### Building MSBuild in Unix (Mac & Linux)
 

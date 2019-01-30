@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified.</target>
+        <target state="translated">MSBUILD: ошибка MSB1058: можно указать только один выходной файл кэша результатов.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -550,11 +550,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;файл_кэша&gt;...
+                     Список входных файлов кэша через точку с запятой, из которых MSBuild
+                     будет считывать результаты сборки.
+                     При задании этого параметра также включаются изолированные сборки (-isolate).
+                     (Краткая форма: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -568,11 +568,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:[файл_кэша]
+                     Выходной файл кэша, где MSBuild будет записывать содержимое
+                     результата кэша сборки в конце.
+                     При задании этого параметра также включаются изолированные сборки (-isolate).
+                     (Краткая форма: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate

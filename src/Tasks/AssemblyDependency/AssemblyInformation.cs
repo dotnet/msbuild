@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM
         private static Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            string[] nameParts = args.Name.Split(',');
+            string[] nameParts = args.Name.Split(MSBuildConstants.CommaChar);
             Assembly assembly = null;
 
             if (args.RequestingAssembly != null && !string.IsNullOrEmpty(args.RequestingAssembly.Location) && nameParts.Length > 0)

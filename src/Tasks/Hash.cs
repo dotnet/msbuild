@@ -27,6 +27,11 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] ItemsToHash { get; set; }
 
         /// <summary>
+        /// When true, will generate a case-insensitive hash.
+        /// </summary>
+        public bool IgnoreCase { get; set; }
+
+        /// <summary>
         /// Hash of the ItemsToHash ItemSpec.
         /// </summary>
         [Output]
@@ -49,7 +54,8 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (var item in ItemsToHash)
                         {
-                            stringBuilder.Append(item.ItemSpec);
+                            string itemSpec = item.ItemSpec;
+                            stringBuilder.Append(IgnoreCase ? itemSpec.ToUpperInvariant() : itemSpec);
                             stringBuilder.Append(ItemSeparatorCharacter);
                         }
 

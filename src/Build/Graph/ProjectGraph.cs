@@ -37,7 +37,7 @@ namespace Microsoft.Build.Graph
         private const string ProjectReferenceTargetsMetadataName = "Targets";
         private const string DefaultTargetsMarker = ".default";
 
-        private static readonly char[] PropertySeparator = { ';' };
+        private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
         private readonly ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> _allParsedProjects =
             new ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode>();
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Graph
                 ProjectNodes = _allParsedProjects.Values.ToList();
                 GraphRoots = graphRoots.AsReadOnly();
 
-                _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes.Count));
+                _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes));
             }
             else
             {
@@ -260,43 +260,42 @@ namespace Microsoft.Build.Graph
 
         private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
 
-        private static IReadOnlyCollection<ProjectGraphNode> TopologicalSort(IReadOnlyCollection<ProjectGraphNode> graphRoots, int nodeCount)
+        private static IReadOnlyCollection<ProjectGraphNode> TopologicalSort(IReadOnlyCollection<ProjectGraphNode> graphRoots, IReadOnlyCollection<ProjectGraphNode> graphNodes)
         {
-            var discoveredNodes = new HashSet<ProjectGraphNode>(nodeCount);
-            var reverseTopologicalSort = new List<ProjectGraphNode>(nodeCount);
+            var toposort = new List<ProjectGraphNode>(graphNodes.Count);
+            var partialRoots = new Queue<ProjectGraphNode>(graphNodes.Count);
+            var inDegree = graphNodes.ToDictionary(n => n, n => n.ReferencingProjects.Count);
 
-            discoveredNodes.UnionWith(graphRoots);
-            reverseTopologicalSort.AddRange(graphRoots);
-
-            for (var i = 0; i < nodeCount; i++)
+            foreach (var root in graphRoots)
             {
-                var currentNode = reverseTopologicalSort[i];
+                partialRoots.Enqueue(root);
+            }
 
-                foreach (var reference in currentNode.ProjectReferences)
+            while (partialRoots.Count != 0)
+            {
+                var partialRoot = partialRoots.Dequeue();
+
+                toposort.Add(partialRoot);
+
+                foreach (var reference in partialRoot.ProjectReferences)
                 {
-                    if (!discoveredNodes.Contains(reference))
+                    if (--inDegree[reference] == 0)
                     {
-                        discoveredNodes.Add(reference);
-                        reverseTopologicalSort.Add(reference);
+                        partialRoots.Enqueue(reference);
                     }
-                }
-
-                // found all the nodes, no point in iterating through the rest as there won't be any new discovered nodes
-                if (reverseTopologicalSort.Count == nodeCount)
-                {
-                    break;
                 }
             }
 
-            ErrorUtilities.VerifyThrow(reverseTopologicalSort.Count == nodeCount, "sorted node count must be equal to total node count");
+            ErrorUtilities.VerifyThrow(toposort.Count == graphNodes.Count, "sorted node count must be equal to total node count");
 
-            reverseTopologicalSort.Reverse();
+            toposort.Reverse();
 
-            return reverseTopologicalSort;
+            return toposort;
         }
         
         /// <summary>
         /// Get a topologically sorted collection of all project nodes in the graph.
+        /// Referenced projects appear before the referencing projects.
         /// </summary>
         public IReadOnlyCollection<ProjectGraphNode> ProjectNodesTopologicallySorted => _projectNodesTopologicallySorted.Value;
 
