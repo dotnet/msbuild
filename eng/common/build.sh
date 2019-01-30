@@ -180,6 +180,7 @@ function Build {
 
   MSBuild $_InitializeToolset \
     $bl \
+    "/flp9:v=diag;logfile=$log_dir/Build_$(date +%s).log"
     /p:Configuration=$configuration \
     /p:RepoRoot="$repo_root" \
     /p:Restore=$restore \
