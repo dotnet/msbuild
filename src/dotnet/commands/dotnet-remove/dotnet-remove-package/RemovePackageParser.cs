@@ -13,7 +13,11 @@ namespace Microsoft.DotNet.Cli
                 Accept.ExactlyOneArgument()
                       .With(name: Tools.Add.PackageReference.LocalizableStrings.CmdPackage,
                             description: LocalizableStrings.AppHelpText),
-                CommonOptions.HelpOption());
+                CommonOptions.HelpOption()).
+                Create.Option("--interactive",
+                                 LocalizableStrings.CmdInteractiveRestoreDescription,
+                                 Accept.NoArguments()
+                                   .ForwardAs("--interactive"));
         }
     }
 }
