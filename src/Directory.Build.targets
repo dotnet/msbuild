@@ -158,6 +158,7 @@
   <PropertyGroup>
     <!-- Use IBC optimization data if available. Depends on a property defined in the CentralPackageVersions import -->
     <IbcOptimizationDataDir>$(NuGetPackageRoot)\RoslynDependencies.OptimizationData\$(RoslynDependenciesOptimizationDataVersion)\content\OptimizationData\</IbcOptimizationDataDir>
-  </PropertyGroup>
 
+    <UseSharedCompilation>false</UseSharedCompilation>
+  </PropertyGroup>
 </Project>
