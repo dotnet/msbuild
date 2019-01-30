@@ -84,6 +84,13 @@
       {StrBegin="MSB4259:"}
     </note>
       </trans-unit>
+      <trans-unit id="GraphNodeIsBuiltWithIllegalTarget">
+        <source>MSB4260: Project graph node {0} is being built with target {1}. This target can only be invoked internally by MSBuild.</source>
+        <target state="new">MSB4260: Project graph node {0} is being built with target {1}. This target can only be invoked internally by MSBuild.</target>
+        <note>
+      {StrBegin="MSB4260:"}
+    </note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: 以下の入力結果キャッシュ ファイルが存在しません: "{0}"</target>

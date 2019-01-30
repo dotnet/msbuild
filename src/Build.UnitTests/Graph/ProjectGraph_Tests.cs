@@ -944,8 +944,10 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
-        public void EntryPointsShouldNotHaveReservedStaticGraphGlobalProperties()
+        [Theory]
+        [InlineData(PropertyNames.IsGraphBuild)]
+        [InlineData(PropertyNames.GraphBuildEntryTargets)]
+        public void EntryPointsShouldNotHaveReservedStaticGraphGlobalProperties(string reservedPropertyName)
         {
             using (var env = TestEnvironment.Create())
             {
@@ -957,10 +959,76 @@ namespace Microsoft.Build.Graph.UnitTests
                             new Dictionary<int, int[]> {{1, null}},
                             null,
                             null,
-                            new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}});
+                            new Dictionary<string, string> {{reservedPropertyName, "true"}});
                     });
 
                 e.Message.ShouldContain("MSB4259");
+            }
+        }
+
+        [Fact]
+        public void ComputeBuildDataShouldReturnInitialPropertiesIfGraphTargetIsNotPresent()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var file = env.CreateTestProjectWithFiles(@"<Project></Project>").ProjectFile;
+                var graph = new ProjectGraph(file, new Dictionary<string, string> {{"a", "b"}});
+
+                string[] targets = { "foo", "bar" };
+
+                var buildData = graph.ProjectNodes.First().ComputeBuildData(targets);
+
+                buildData.Targets.ShouldBe(targets);
+                buildData.GlobalProperties.ShouldBe(new Dictionary<string, string>()
+                {
+                    {"a", "b"},
+                    {PropertyNames.IsGraphBuild, "true"}
+                });
+            }
+        }
+
+        [Fact]
+        public void ComputeBuildDataShouldThrowOnReservedEntryTarget()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var file = env.CreateTestProjectWithFiles(@"<Project></Project>").ProjectFile;
+                var graph = new ProjectGraph(file, new Dictionary<string, string> {{"a", "b"}});
+
+                var exception = Should.Throw<ArgumentException>((() =>
+                {
+                    var buildData = graph.ProjectNodes.First().ComputeBuildData(new []{TargetNames.BuildTargetsForGraphBuild});
+                }));
+
+                exception.Message.ShouldContain("MSB4260:");
+
+            }
+        }
+
+        [Fact]
+        public void ComputeBuildDataShouldDelegateToGraphTargetWhenPresent()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var file = env.CreateTestProjectWithFiles(
+                    $@"<Project>
+                                      <Target Name='{TargetNames.BuildTargetsForGraphBuild}'/>
+                                   </Project>"
+                    ).ProjectFile;
+
+                var graph = new ProjectGraph(file, new Dictionary<string, string> {{"a", "b"}});
+
+                string[] targets = { "foo", "bar" };
+
+                var buildData = graph.ProjectNodes.First().ComputeBuildData(targets);
+
+                buildData.Targets.ShouldBe(new []{TargetNames.BuildTargetsForGraphBuild});
+                buildData.GlobalProperties.ShouldBe(new Dictionary<string, string>()
+                {
+                    {"a", "b"},
+                    {PropertyNames.IsGraphBuild, "true"},
+                    {PropertyNames.GraphBuildEntryTargets, "foo;bar" }
+                });
             }
         }
 

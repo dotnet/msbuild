@@ -37,6 +37,11 @@ namespace Microsoft.Build.Graph
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
+        private static readonly ISet<string> ReservedGlobalProperties = new HashSet<string>
+        {
+            PropertyNames.IsGraphBuild, PropertyNames.GraphBuildEntryTargets
+        };
+
         private readonly ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> _allParsedProjects =
             new ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode>();
 
@@ -210,6 +215,8 @@ namespace Microsoft.Build.Graph
             {
                 PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary = CreatePropertyDictionary(entryPoint.GlobalProperties);
 
+                ErrorIfReservedGlobalPropertiesAreUsed(globalPropertyDictionary);
+
                 AddGraphBuildGlobalVariable(entryPoint, globalPropertyDictionary);
 
                 var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
@@ -253,13 +260,23 @@ namespace Microsoft.Build.Graph
                 throw new AggregateException(exceptions);
             }
 
+            void ErrorIfReservedGlobalPropertiesAreUsed(PropertyDictionary<ProjectPropertyInstance> globalProperties)
+            {
+                foreach (var property in globalProperties)
+                {
+                    if (ReservedGlobalProperties.Contains(property.Name))
+                    {
+                        throw new ArgumentException(
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "GraphEntryPointHasIllegalGlobalProperty",
+                                property.Name));
+                    }
+                }
+            }
+
             void AddGraphBuildGlobalVariable(ProjectGraphEntryPoint entryPoint, PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary)
             {
-                if (entryPoint.GlobalProperties != null && entryPoint.GlobalProperties.ContainsKey(PropertyNames.IsGraphBuild))
-                {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GraphEntryPointHasIllegalGlobalProperty",
-                    PropertyNames.IsGraphBuild));
-                }
+                ErrorUtilities.VerifyThrow(globalPropertyDictionary.GetProperty(PropertyNames.IsGraphBuild) == null, "Should have erred before");
 
                 globalPropertyDictionary[PropertyNames.IsGraphBuild] = ProjectPropertyInstance.Create(PropertyNames.IsGraphBuild, "true");
             }

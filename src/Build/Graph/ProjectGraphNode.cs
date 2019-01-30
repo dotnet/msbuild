@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -27,9 +26,6 @@ namespace Microsoft.Build.Graph
     /// </summary>
     public sealed class ProjectGraphNode
     {
-        private const string BuildTargetsForGraphBuild = "BuildTargetsForGraphBuild";
-        private const string GraphBuildEntryTargets = "GraphBuildEntryTargets";
-
         private readonly List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
         private readonly List<ProjectGraphNode> _referencingProjects = new List<ProjectGraphNode>();
 
@@ -67,24 +63,33 @@ namespace Microsoft.Build.Graph
         {
             ErrorUtilities.VerifyThrowArgumentLength(targets, nameof(targets));
 
+            if (targets.Contains(TargetNames.BuildTargetsForGraphBuild))
+            {
+                throw new ArgumentException(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "GraphNodeIsBuiltWithIllegalTarget",
+                        ProjectInstance.FullPath,
+                        TargetNames.BuildTargetsForGraphBuild));
+            }
+
             return ImplementsGraphBuildEntryPoint(ProjectInstance)
-                ? new BuildData(new[] {BuildTargetsForGraphBuild}, AddEntryTargetsToGlobalProperties())
+                ? new BuildData(new[] {TargetNames.BuildTargetsForGraphBuild}, AddEntryTargetsToGlobalProperties())
                 : new BuildData(targets, GlobalProperties);
 
             IReadOnlyDictionary<string, string> AddEntryTargetsToGlobalProperties()
             {
                 var dictionary = GlobalProperties.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-                ErrorUtilities.VerifyThrow(!dictionary.ContainsKey(GraphBuildEntryTargets), "that property should be reserved, and rejected at graph construction time");
+                ErrorUtilities.VerifyThrow(!dictionary.ContainsKey(PropertyNames.GraphBuildEntryTargets), "that property should be reserved, and rejected at graph construction time");
 
-                dictionary[GraphBuildEntryTargets] = string.Join(";", targets);
+                dictionary[PropertyNames.GraphBuildEntryTargets] = string.Join(";", targets);
 
                 return dictionary;
             }
         }
 
         /// <summary>
-        /// Gets the global properties which should be used to evaluate and execute this node in the graph.
+        /// The global properties this node was evaluated with. See <see cref="ComputeBuildData"/> for the global properties to use when building this node.
         /// </summary>
         public IReadOnlyDictionary<string, string> GlobalProperties { get; }
 
@@ -94,7 +99,7 @@ namespace Microsoft.Build.Graph
 
         private static bool ImplementsGraphBuildEntryPoint(ProjectInstance projectInstance)
         {
-            return projectInstance.Targets.ContainsKey(BuildTargetsForGraphBuild);
+            return projectInstance.Targets.ContainsKey(TargetNames.BuildTargetsForGraphBuild);
         }
 
     }

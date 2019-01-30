@@ -100,12 +100,22 @@ namespace Microsoft.Build.Shared
         internal static readonly char[] PathSeparatorChar = { Path.PathSeparator };
     }
 
+    internal static class TargetNames
+    {
+        public const string BuildTargetsForGraphBuild = "BuildTargetsForGraphBuild";
+    }
+
     internal static class PropertyNames
     {
         /// <summary>
         /// Specifies whether the current evaluation / build is happening during a graph build
         /// </summary>
         internal const string IsGraphBuild = "IsGraphBuild";
+
+        /// <summary>
+        /// Properties used to inject the entry targets such that they are accessible during evaluation
+        /// </summary>
+        internal const string GraphBuildEntryTargets = "GraphBuildEntryTargets";
     }
 
     internal static class ItemTypeNames
