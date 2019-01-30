@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified.</target>
+        <target state="translated">MSBUILD: 錯誤 MSB1058: 只能指定一個輸出結果快取。</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -550,11 +550,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     MSBuild 要讀取組建結果的
+                     來源輸入快取檔案分號分隔清單。
+                     設定此項也會開啟隔離組建 (-isolate)。
+                     (簡短格式: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -568,11 +568,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:[cacheFile]
+                     MSBuild 要在組建結束時寫入
+                     其組建結果快取內容的目標輸出快取檔案。
+                     設定此項也會開啟隔離組建 (-isolate)。
+                     (簡短格式: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate

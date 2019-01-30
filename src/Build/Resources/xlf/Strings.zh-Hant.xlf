@@ -37,10 +37,10 @@
     - the reference was not included in the provided input caches
     - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
     </source>
-        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was not explicitly specified as a ProjectReference item in "{0}"
-    - the reference was not included in the provided input caches
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+        <target state="translated">MSB4252: 專案 "{0}" 具有對 "{1}" 的參考 ({2} 目標)，但是參考的組建結果不在引擎快取中。這在隔離組建中可能表示下列其一：
+    - 未將參考明確指定為 "{0}" 中的 ProjectReference 項目
+    - 參考未包含在提供的輸入快取中
+    - 使用未在 "{0}" 中 ProjectReferenceTargets 項目內指定的目標呼叫參考
     </target>
         <note>
       {StrBegin="MSB4252:"}
@@ -64,22 +64,22 @@
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
-        <target state="new">MSB4257: The specified output result cache file is empty.</target>
+        <target state="translated">MSB4257: 指定的輸出結果快取檔案是空的。</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
-        <target state="new">MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</target>
+        <target state="translated">MSB4256: 從路徑 "{0}" 讀取輸入結果快取檔案發生錯誤: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorWritingCacheFile">
         <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
-        <target state="new">MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</target>
+        <target state="translated">MSB4258: 在路徑 "{0}" 中寫入輸出結果快取檔案發生錯誤: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
-        <target state="new">MSB4255: The following input result cache files do not exist: "{0}"</target>
+        <target state="translated">MSB4255: 下列輸入結果快取檔案不存在: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
@@ -118,7 +118,7 @@
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
-        <target state="new">Using input build results caches: {0}</target>
+        <target state="translated">使用輸入組建結果快取: {0}</target>
         <note>
       LOCALIZATION: {0} is a list of semicolon separated file paths
     </note>
@@ -1632,7 +1632,7 @@
       </trans-unit>
       <trans-unit id="WritingToOutputCache">
         <source>Writing build results caches to: {0}</source>
-        <target state="new">Writing build results caches to: {0}</target>
+        <target state="translated">將組建結果快取寫入: {0}</target>
         <note>
       LOCALIZATION: {0} is a file path
     </note>

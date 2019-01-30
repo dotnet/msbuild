@@ -2285,7 +2285,7 @@
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
-        <target state="new">MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</target>
+        <target state="translated">MSB4803: No se admite la tarea "{0}" en la versión de MSBuild de .NET Core. Use la versión de MSBuild de .NET Framework. Vea https://aka.ms/msbuild/MSB4803 para obtener más información.</target>
         <note>{StrBegin="MSB4803: "}</note>
       </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
