@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli
                     "-s|--serviceable",
                     LocalizableStrings.CmdServiceableDescription,
                     Accept.NoArguments().ForwardAs("-property:Serviceable=true")),
-                CommonOptions.InteractiveOption(),
+                CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }

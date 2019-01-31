@@ -41,14 +41,20 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
         public override int Execute()
         {
             var projects = new ProjectCollection();
-            MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(projects, _fileOrDirectory);
+            bool interactive = CommonOptionResult.GetInteractive(_appliedCommand);
+            MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(
+                projects,
+                _fileOrDirectory,
+                interactive);
 
             var frameworkString = _appliedCommand.ValueOrDefault<string>("framework");
 
-            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
-            List<MsbuildProject> refs = _appliedCommand.Arguments
-                                                       .Select((r) => MsbuildProject.FromFileOrDirectory(projects, r))
-                                                       .ToList();
+            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments,
+                CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
+            List<MsbuildProject> refs =
+                _appliedCommand.Arguments
+                    .Select((r) => MsbuildProject.FromFileOrDirectory(projects, r, interactive))
+                    .ToList();
 
             if (frameworkString == null)
             {

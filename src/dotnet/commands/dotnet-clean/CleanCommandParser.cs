@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli
                 CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                 CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
-                CommonOptions.InteractiveOption(),
+                CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.VerbosityOption());
     }
 }

@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
                         Accept.NoArguments()),
-                    CommonOptions.InteractiveOption(),
+                    CommonOptions.InteractiveMsBuildForwardOption(),
                     CommonOptions.NoRestoreOption(),
                     CommonOptions.VerbosityOption()
                 });

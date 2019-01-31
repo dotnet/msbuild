@@ -72,11 +72,17 @@ namespace Microsoft.DotNet.Cli
                 CommonLocalizableStrings.NoRestoreDescription,
                 Accept.NoArguments());
 
-        public static Option InteractiveOption() =>
+        public static Option InteractiveMsBuildForwardOption() =>
             Create.Option(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription,
                 Accept.NoArguments()
                     .ForwardAs(Utils.Constants.MsBuildInteractiveOption));
+
+        public static Option InteractiveOption() =>
+            Create.Option(
+                "--interactive",
+                CommonLocalizableStrings.CommandInteractiveOptionDescription,
+                Accept.NoArguments());
     }
 }

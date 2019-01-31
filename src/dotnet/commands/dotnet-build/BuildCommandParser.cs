@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli
                     Accept.NoArguments()
                           .ForwardAs("-property:BuildProjectReferences=false")),
                 CommonOptions.NoRestoreOption(),
-                CommonOptions.InteractiveOption(),
+                CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.VerbosityOption());
     }
 }

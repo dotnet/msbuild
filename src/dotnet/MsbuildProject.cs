@@ -8,6 +8,8 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.ProjectExtensions;
@@ -26,27 +28,29 @@ namespace Microsoft.DotNet.Tools
         private List<NuGetFramework> _cachedTfms = null;
         private IEnumerable<string> cachedRuntimeIdentifiers;
         private IEnumerable<string> cachedConfigurations;
+        private bool _interactive = false;
 
-        private MsbuildProject(ProjectCollection projects, ProjectRootElement project)
+        private MsbuildProject(ProjectCollection projects, ProjectRootElement project, bool interactive)
         {
             _projects = projects;
             ProjectRootElement = project;
             ProjectDirectory = PathUtility.EnsureTrailingSlash(ProjectRootElement.DirectoryPath);
+            _interactive = interactive;
         }
 
-        public static MsbuildProject FromFileOrDirectory(ProjectCollection projects, string fileOrDirectory)
+        public static MsbuildProject FromFileOrDirectory(ProjectCollection projects, string fileOrDirectory, bool interactive)
         {
             if (File.Exists(fileOrDirectory))
             {
-                return FromFile(projects, fileOrDirectory);
+                return FromFile(projects, fileOrDirectory, interactive);
             }
             else
             {
-                return FromDirectory(projects, fileOrDirectory);
+                return FromDirectory(projects, fileOrDirectory, interactive);
             }
         }
 
-        public static MsbuildProject FromFile(ProjectCollection projects, string projectPath)
+        public static MsbuildProject FromFile(ProjectCollection projects, string projectPath, bool interactive)
         {
             if (!File.Exists(projectPath))
             {
@@ -59,10 +63,10 @@ namespace Microsoft.DotNet.Tools
                 throw new GracefulException(CommonLocalizableStrings.ProjectIsInvalid, projectPath);
             }
 
-            return new MsbuildProject(projects, project);
+            return new MsbuildProject(projects, project, interactive);
         }
 
-        public static MsbuildProject FromDirectory(ProjectCollection projects, string projectDirectory)
+        public static MsbuildProject FromDirectory(ProjectCollection projects, string projectDirectory, bool interactive)
         {
             FileInfo projectFile = GetProjectFileFromDirectory(projectDirectory);
 
@@ -72,7 +76,7 @@ namespace Microsoft.DotNet.Tools
                 throw new GracefulException(CommonLocalizableStrings.FoundInvalidProject, projectFile.FullName);
             }
 
-            return new MsbuildProject(projects, project);
+            return new MsbuildProject(projects, project,  interactive);
         }
 
         public static FileInfo GetProjectFileFromDirectory(string projectDirectory)
@@ -205,13 +209,35 @@ namespace Microsoft.DotNet.Tools
         {
             try
             {
-                return _projects.LoadProject(ProjectRootElement.FullPath);
+                Project project;
+                if (_interactive)
+                {
+                    // NuGet need this environment variable to call plugin dll
+                    Environment.SetEnvironmentVariable("DOTNET_HOST_PATH", new Muxer().MuxerPath);
+                    // Even during evaluation time, the SDK resolver may need to output auth instructions, so set a logger.
+                    _projects.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Minimal));
+                    project = _projects.LoadProject(
+                        ProjectRootElement.FullPath,
+                        new Dictionary<string, string>
+                            {[Constants.MsBuildInteractivePropertyName] = "true"},
+                        null);
+                }
+                else
+                {
+                    project = _projects.LoadProject(ProjectRootElement.FullPath);
+                }
+
+                return project;
             }
             catch (InvalidProjectFileException e)
             {
                 throw new GracefulException(string.Format(
                     CommonLocalizableStrings.ProjectCouldNotBeEvaluated,
                     ProjectRootElement.FullPath, e.Message));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("DOTNET_HOST_PATH", null);
             }
         }
 
