@@ -114,6 +114,7 @@ function Build-Repo() {
     /p:Publish=$publish `
     /p:Execute=$execute `
     /p:ContinuousIntegrationBuild=$ci `
+    /p:VisualStudioDropName=$vsDropName `
     @properties
 }
 
