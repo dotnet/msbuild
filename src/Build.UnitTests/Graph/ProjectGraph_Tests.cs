@@ -947,6 +947,7 @@ namespace Microsoft.Build.Graph.UnitTests
         [Theory]
         [InlineData(PropertyNames.IsGraphBuild)]
         [InlineData(PropertyNames.GraphBuildEntryTargets)]
+        [InlineData(PropertyNames.GraphBuildDefaultTargets)]
         public void EntryPointsShouldNotHaveReservedStaticGraphGlobalProperties(string reservedPropertyName)
         {
             using (var env = TestEnvironment.Create())
@@ -971,7 +972,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                var file = env.CreateTestProjectWithFiles(@"<Project></Project>").ProjectFile;
+                var file = env.CreateTestProjectWithFiles(@"<Project DefaultTargets='x;y'></Project>").ProjectFile;
                 var graph = new ProjectGraph(file, new Dictionary<string, string> {{"a", "b"}});
 
                 string[] targets = { "foo", "bar" };
@@ -1011,7 +1012,7 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 var file = env.CreateTestProjectWithFiles(
-                    $@"<Project>
+                    $@"<Project DefaultTargets='x;y'>
                                       <Target Name='{TargetNames.BuildTargetsForGraphBuild}'/>
                                    </Project>"
                     ).ProjectFile;
@@ -1027,7 +1028,8 @@ namespace Microsoft.Build.Graph.UnitTests
                 {
                     {"a", "b"},
                     {PropertyNames.IsGraphBuild, "true"},
-                    {PropertyNames.GraphBuildEntryTargets, "foo;bar" }
+                    {PropertyNames.GraphBuildEntryTargets, "foo;bar" },
+                    {PropertyNames.GraphBuildDefaultTargets, "x;y"}
                 });
             }
         }

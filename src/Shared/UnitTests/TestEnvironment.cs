@@ -331,6 +331,11 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(format, args);
             }
         }
+
+        public void DoNotLaunchDebugger()
+        {
+            SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
+        }
     }
 
     /// <summary>

@@ -78,13 +78,15 @@ namespace Microsoft.Build.Graph
 
             IReadOnlyDictionary<string, string> AddEntryTargetsToGlobalProperties()
             {
-                var dictionary = GlobalProperties.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                var globalProperties = GlobalProperties.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-                ErrorUtilities.VerifyThrow(!dictionary.ContainsKey(PropertyNames.GraphBuildEntryTargets), "that property should be reserved, and rejected at graph construction time");
+                ErrorUtilities.VerifyThrow(!globalProperties.ContainsKey(PropertyNames.GraphBuildEntryTargets), "that property should be reserved, and rejected at graph construction time");
+                ErrorUtilities.VerifyThrow(!globalProperties.ContainsKey(PropertyNames.GraphBuildDefaultTargets), "that property should be reserved, and rejected at graph construction time");
 
-                dictionary[PropertyNames.GraphBuildEntryTargets] = string.Join(";", targets);
+                globalProperties[PropertyNames.GraphBuildEntryTargets] = string.Join(";", targets);
+                globalProperties[PropertyNames.GraphBuildDefaultTargets] = string.Join(";", ProjectInstance.DefaultTargets ?? Enumerable.Empty<string>());
 
-                return dictionary;
+                return globalProperties;
             }
         }
 

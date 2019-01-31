@@ -79,6 +79,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal const string CurrentProductVersion = "16.0";
 		
+		/// <summary>
+        /// Symbol used in ProjectReferenceTarget items to represent default targets
+        /// </summary>
+        internal const string DefaultTargetsMarker = ".default";
+		
 		// One-time allocations to avoid implicit allocations for Split(), Trim().
         internal static readonly char[] SemicolonChar = { ';' };
         internal static readonly char[] SpaceChar = { ' ' };
@@ -113,9 +118,14 @@ namespace Microsoft.Build.Shared
         internal const string IsGraphBuild = "IsGraphBuild";
 
         /// <summary>
-        /// Properties used to inject the entry targets such that they are accessible during evaluation
+        /// Project entry targets such that they are accessible during evaluation
         /// </summary>
         internal const string GraphBuildEntryTargets = "GraphBuildEntryTargets";
+
+        /// <summary>
+        /// Project default targets such that they are accessible during evaluation
+        /// </summary>
+        internal const string GraphBuildDefaultTargets = "GraphBuildDefaultTargets";
     }
 
     internal static class ItemTypeNames
@@ -173,5 +183,6 @@ namespace Microsoft.Build.Shared
         internal const string IgnoreVersionForFrameworkReference = "IgnoreVersionForFrameworkReference";
         internal const string frameworkFile = "FrameworkFile";
         internal const string ProjectReferenceTargetsMetadataName = "Targets";
+        internal const string ProjectReferenceTargetsInnerBuild = "InnerBuild";
     }
 }

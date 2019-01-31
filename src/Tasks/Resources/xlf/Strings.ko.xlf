@@ -321,6 +321,13 @@
         <target state="translated">MSB3924: "{0}" 파일을 다운로드하지 못했습니다. {2}ms 후 {1}을(를) 다시 시도합니다. {3}</target>
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
+      <trans-unit id="EntryTargetNotFoundInProjectReferenceTargets">
+        <source>MSB3961: Entry target {0} not found in {1} item.</source>
+        <target state="new">MSB3961: Entry target {0} not found in {1} item.</target>
+        <note>
+      {StrBegin="MSB3961:"}
+    </note>
+      </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
         <target state="translated">MSB3071: A:에서 Z:까지 모든 드라이브 문자가 현재 사용 중입니다. 작업 디렉터리 "{0}"이(가) UNC 경로이므로 "Exec" 작업을 수행하려면 UNC 경로를 매핑하는 데 사용할 수 있는 드라이브 문자가 필요합니다. 하나 이상의 공유 리소스에서 연결을 끊어 사용 가능한 드라이브 문자를 만들거나 로컬 작업 디렉터리를 지정한 다음 이 명령을 다시 실행하세요.</target>
@@ -1276,6 +1283,14 @@
             Normal should not be localized.
             Low should not be localized.</note>
       </trans-unit>
+      <trans-unit id="MismatchedTargetMetadata">
+        <source>MSB3963: Target '{0}' was specified in the {1} item both with and without '{2}=true' metadata. All instances of the target must agree on the same metadata value. </source>
+        <target state="new">MSB3963: Target '{0}' was specified in the {1} item both with and without '{2}=true' metadata. All instances of the target must agree on the same metadata value. </target>
+        <note>
+      {StrBegin="MSB3963:"}
+      {0}, {1}, and {2} represent MSBuild items and metadata
+    </note>
+      </trans-unit>
       <trans-unit id="Move.CreatesDirectory">
         <source>Creating directory "{0}".</source>
         <target state="translated">"{0}" 디렉터리를 만들고 있습니다.</target>
@@ -1361,6 +1376,14 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="translated">다음 조건이 모두 충족되면 StopOnFirstFailure가 효과가 없습니다. 1) 시스템이 다중 프로세스 모드에서 실행 중입니다. 2) BuildInParallel 속성이 true입니다. 3) RunEachTargetSeparately 속성이 false입니다.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
+      </trans-unit>
+      <trans-unit id="ProjectReferenceTargetsMustContainTargets">
+        <source>MSB3962: Items of type {0} must contain the {1} metadata to specify targets.</source>
+        <target state="new">MSB3962: Items of type {0} must contain the {1} metadata to specify targets.</target>
+        <note>
+      {StrBegin="MSB3962:"}
+      {0} and {1} represent MSBuild items and metadata
+    </note>
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>

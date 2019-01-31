@@ -33,13 +33,14 @@ namespace Microsoft.Build.Graph
         private const string SetPlatformMetadataName = "SetPlatform";
         private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
         private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
-        private const string DefaultTargetsMarker = ".default";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
         private static readonly ISet<string> ReservedGlobalProperties = new HashSet<string>
         {
-            PropertyNames.IsGraphBuild, PropertyNames.GraphBuildEntryTargets
+            PropertyNames.IsGraphBuild,
+            PropertyNames.GraphBuildEntryTargets,
+            PropertyNames.GraphBuildDefaultTargets
         };
 
         private readonly ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> _allParsedProjects =
@@ -386,7 +387,7 @@ namespace Microsoft.Build.Graph
                 {
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
                         projectReference,
-                        ExpandDefaultTargets(projectReference.ProjectInstance, targetsToPropagate));
+                        ExpandDefaultTargets(targetsToPropagate, projectReference.ProjectInstance.DefaultTargets));
                     if (encounteredEdges.Add(projectReferenceEdge))
                     {
                         edgesToVisit.Enqueue(projectReferenceEdge);
@@ -428,6 +429,27 @@ namespace Microsoft.Build.Graph
             }
 
             return targetLists;
+        }
+
+        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets)
+        {
+            int i = 0;
+            while (i < targets.Count)
+            {
+                if (targets[i].Equals(MSBuildConstants.DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
+                {
+                    targets = targets
+                        .RemoveAt(i)
+                        .InsertRange(i, defaultTargets);
+                    i += defaultTargets.Count;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            return targets;
         }
 
         /// <summary>
@@ -696,27 +718,6 @@ namespace Microsoft.Build.Graph
             }
 
             return targetsToPropagate;
-        }
-
-        private static ImmutableList<string> ExpandDefaultTargets(ProjectInstance project, ImmutableList<string> targets)
-        {
-            int i = 0;
-            while (i < targets.Count)
-            {
-                if (targets[i].Equals(DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
-                {
-                    targets = targets
-                        .RemoveAt(i)
-                        .InsertRange(i, project.DefaultTargets);
-                    i += project.DefaultTargets.Count;
-                }
-                else
-                {
-                    i++;
-                }
-            }
-
-            return targets;
         }
 
         /// <summary>

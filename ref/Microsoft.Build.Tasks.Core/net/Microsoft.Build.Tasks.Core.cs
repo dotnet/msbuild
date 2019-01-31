@@ -1128,6 +1128,7 @@ namespace Microsoft.Build.Tasks
     public sealed partial class SplitTargetsByOuterAndInnerBuild : Microsoft.Build.Tasks.TaskExtension
     {
         public SplitTargetsByOuterAndInnerBuild() { }
+        public Microsoft.Build.Framework.ITaskItem[] DefaultTargets { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] EntryTargets { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForInnerBuilds { get { throw null; } set { } }

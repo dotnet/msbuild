@@ -2780,6 +2780,26 @@
     <value>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</value>
     <comment>{StrBegin="MSB3954: "}</comment>
   </data>
+  <data name="EntryTargetNotFoundInProjectReferenceTargets" UESanitized="false" Visibility="Public">
+    <value>MSB3961: Entry target {0} not found in {1} item.</value>
+    <comment>
+      {StrBegin="MSB3961:"}
+    </comment>
+  </data>
+  <data name="ProjectReferenceTargetsMustContainTargets" UESanitized="false" Visibility="Public">
+    <value>MSB3962: Items of type {0} must contain the {1} metadata to specify targets.</value>
+    <comment>
+      {StrBegin="MSB3962:"}
+      {0} and {1} represent MSBuild items and metadata
+    </comment>
+  </data>
+  <data name="MismatchedTargetMetadata" UESanitized="false" Visibility="Public">
+    <value>MSB3963: Target '{0}' was specified in the {1} item both with and without '{2}=true' metadata. All instances of the target must agree on the same metadata value. </value>
+    <comment>
+      {StrBegin="MSB3963:"}
+      {0}, {1}, and {2} represent MSBuild items and metadata
+    </comment>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -2863,6 +2883,7 @@
             MSB3931 - MSB3940   Task: Unzip
             MSB3941 - MSB3950   Task: ZipDirectory
             MSB3951 - MSB3960   Task: VerifyFileHash
+            MSB3961 - MSB3970   Task: SplitTargetsByOuterAndInnerBuild
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

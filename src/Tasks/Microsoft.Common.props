@@ -154,7 +154,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <PropertyGroup>
     <ProjectReferenceTargetsForBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
-    <ProjectReferenceTargetsForBuildInnerBuilds>Build;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuildInnerBuilds)</ProjectReferenceTargetsForBuildInnerBuilds>
+    <ProjectReferenceTargetsForBuildInnerBuilds>.default;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuildInnerBuilds)</ProjectReferenceTargetsForBuildInnerBuilds>
 
     <ProjectReferenceTargetsForClean>GetTargetFrameworks;Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
 

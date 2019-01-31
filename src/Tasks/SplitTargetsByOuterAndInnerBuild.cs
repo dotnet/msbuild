@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -46,6 +47,7 @@ namespace Microsoft.Build.Tasks
         private static readonly char[] SemicolonArray = {';'};
         public ITaskItem[] EntryTargets { get; set; }
         public ITaskItem[] ProjectReferenceTargets { get; set; }
+        public ITaskItem[] DefaultTargets { get; set; }
 
         [Output]
         public ITaskItem[] EntryTargetsForOuterBuild { get; set; }
@@ -59,20 +61,27 @@ namespace Microsoft.Build.Tasks
             {
                 ErrorUtilities.VerifyThrowArgumentLength(EntryTargets, nameof(EntryTargets));
                 ErrorUtilities.VerifyThrowArgumentLength(ProjectReferenceTargets, nameof(ProjectReferenceTargets));
-                
+                ErrorUtilities.VerifyThrowArgumentNull(DefaultTargets, nameof(DefaultTargets));
+
+                var defaultTargets = DefaultTargets.Select(d => d.ItemSpec).ToList();
                 var entryTargets = EntryTargets.ToDictionary(k => k.ItemSpec, v => new EntryTargetInfo(v));
 
                 foreach (var projectReferenceTarget in ProjectReferenceTargets)
                 {
                     var metadata = projectReferenceTarget.CloneCustomMetadata();
 
-                    var isInnerBuild = metadata.Contains("InnerBuild") && ((string) metadata["InnerBuild"]).Equals("true", StringComparison.OrdinalIgnoreCase);
+                    var isInnerBuild = metadata.Contains(ItemMetadataNames.ProjectReferenceTargetsInnerBuild) && ((string) metadata[ItemMetadataNames.ProjectReferenceTargetsInnerBuild]).Equals("true", StringComparison.OrdinalIgnoreCase);
 
-                    ErrorUtilities.VerifyThrowArgument(
-                        metadata.Contains(ItemMetadataNames.ProjectReferenceTargetsMetadataName),
-                        "PRT spec must contain Targets");
+                    if (!metadata.Contains(ItemMetadataNames.ProjectReferenceTargetsMetadataName))
+                    {
+                        throw new ArgumentException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectReferenceTargetsMustContainTargets",
+                            ItemTypeNames.ProjectReferenceTargetsItemType,
+                            ItemMetadataNames.ProjectReferenceTargetsMetadataName));
+                    }
 
-                    var specificationTargets = SplitBySemicolon((string) metadata[ItemMetadataNames.ProjectReferenceTargetsMetadataName]);
+                    var specificationTargets = ComputeSpecificationTargets(
+                        (string) metadata[ItemMetadataNames.ProjectReferenceTargetsMetadataName],
+                        defaultTargets);
 
                     foreach (var specificationTarget in specificationTargets)
                     {
@@ -80,9 +89,15 @@ namespace Microsoft.Build.Tasks
                         {
                             var entryTargetInfo = entryTargets[specificationTarget];
 
-                            if (entryTargetInfo.FoundInProjectReferenceTargets)
+                            if (entryTargetInfo.FoundInProjectReferenceTargets && entryTargetInfo.IsInnerBuild != isInnerBuild)
                             {
-                                ErrorUtilities.VerifyThrowArgument(entryTargetInfo.IsInnerBuild == isInnerBuild, "all spec targets must agree on whether a target inner build or not");
+                                throw new ArgumentException(
+                                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                        "MismatchedTargetMetadata",
+                                        entryTargetInfo.TaskItem.ItemSpec,
+                                        ItemTypeNames.ProjectReferenceTargetsItemType,
+                                        ItemMetadataNames.ProjectReferenceTargetsInnerBuild)
+                                    );
                             }
                             else
                             {
@@ -105,20 +120,51 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors;
         }
 
+        private static IEnumerable<string> ComputeSpecificationTargets(string targetSpecification, List<string> defaultTargets)
+        {
+            var specificationTargets = SplitBySemicolon(targetSpecification);
+
+            return ExpandDefaultTargets(specificationTargets, defaultTargets);
+        }
+
         private void CheckAllEntryTargetsAreAccountedFor(Dictionary<string, EntryTargetInfo> entryTargets)
         {
             foreach (var entryTargetInfo in entryTargets.Values)
             {
                 if (!entryTargetInfo.FoundInProjectReferenceTargets)
                 {
-                    Log.LogError("Entry target {0} not found in {1} item", entryTargetInfo.TaskItem.ItemSpec, ItemTypeNames.ProjectReferenceTargetsItemType);
+                    Log.LogErrorFromResources("EntryTargetNotFoundInProjectReferenceTargets", entryTargetInfo.TaskItem.ItemSpec, ItemTypeNames.ProjectReferenceTargetsItemType);
                 }
             }
         }
 
-        private static string[] SplitBySemicolon(string aString)
+        private static ImmutableList<string> SplitBySemicolon(string aString)
         {
-            return aString.Split(SemicolonArray, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
+            return aString.Split(SemicolonArray, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToImmutableList();
+        }
+
+        /// <summary>
+        /// Code duplication with Microsoft.Build.Graph.ProjectGraph.ExpandDefaultTargets
+        /// </summary>
+        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets)
+        {
+            int i = 0;
+            while (i < targets.Count)
+            {
+                if (targets[i].Equals(MSBuildConstants.DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
+                {
+                    targets = targets
+                        .RemoveAt(i)
+                        .InsertRange(i, defaultTargets);
+                    i += defaultTargets.Count;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            return targets;
         }
     }
 }
