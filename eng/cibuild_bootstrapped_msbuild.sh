@@ -53,6 +53,7 @@ then
   InitializeDotNetCli true
 
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
+  DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
   _InitializeBuildToolCommand="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
 else
   echo "Unsupported hostType ($host_type)"
