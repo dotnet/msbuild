@@ -175,12 +175,11 @@ function Build {
 
   local bl=""
   if [[ "$binary_log" == true ]]; then
-    bl="/bl:\"$log_dir/Build_$(date +%s).binlog\""
+    bl="/bl:\"$log_dir/Build.binlog\""
   fi
 
   MSBuild $_InitializeToolset \
     $bl \
-    "/flp9:v=diag;logfile=$log_dir/Build_$(date +%s).log" \
     /p:Configuration=$configuration \
     /p:RepoRoot="$repo_root" \
     /p:Restore=$restore \
