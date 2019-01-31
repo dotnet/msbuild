@@ -32,14 +32,18 @@ namespace Microsoft.NET.ToolPack.Tests
         private string SetupNuGetPackage(
             bool multiTarget,
             [CallerMemberName] string callingMethod = "",
-            Dictionary<string, string> additionalProperty = null)
+            Dictionary<string, string> additionalProperty = null,
+            string targetFramework = null)
         {
-            TestAsset helloWorldAsset = CreateTestAsset(multiTarget, callingMethod, additionalProperty);
+            TestAsset helloWorldAsset = CreateTestAsset(
+                multiTarget,
+                callingMethod + multiTarget + targetFramework,
+                targetFramework,
+                additionalProperty);
 
             _testRoot = helloWorldAsset.TestRoot;
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
-
             packCommand.Execute().Should().Pass();
             _packageId = Path.GetFileNameWithoutExtension(packCommand.ProjectFile);
 
@@ -49,6 +53,7 @@ namespace Microsoft.NET.ToolPack.Tests
         private TestAsset CreateTestAsset(
             bool multiTarget,
             string uniqueName,
+            string targetFramework,
             Dictionary<string, string> additionalProperty = null)
         {
             return _testAssetsManager
@@ -68,75 +73,34 @@ namespace Microsoft.NET.ToolPack.Tests
                             propertyGroup.Add(new XElement(ns + pair.Key, pair.Value));
                         }
                     }
-
-                    if (multiTarget)
-                    {
-                        propertyGroup.Element(ns + "TargetFramework").Remove();
-                        propertyGroup.Add(new XElement(ns + "TargetFrameworks", "netcoreapp2.1"));
-                    }
                 })
+                .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget)
                 .Restore(Log);
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_packs_successfully(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void Given_default_pack_and_result_nugetPackage(bool multiTarget, string targetFramework)
         {
-            var nugetPackage = SetupNuGetPackage(multiTarget);
+            var nugetPackage = SetupNuGetPackage(multiTarget, targetFramework: targetFramework);
             using (var nupkgReader = new PackageArchiveReader(nugetPackage))
             {
-                nupkgReader
-                    .GetToolItems()
-                    .Should().NotBeEmpty();
+                // Combine assertions to reuse setup and save non trivial time
+                It_packs_successfully(nugetPackage);
+                It_contains_dependencies_dll(nupkgReader);
+                It_contains_shim(nupkgReader);
             }
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_contains_dependencies_dll(bool multiTarget)
-        {
-            var nugetPackage = SetupNuGetPackage(multiTarget);
-            using (var nupkgReader = new PackageArchiveReader(nugetPackage))
-            {
-                IEnumerable<NuGetFramework> supportedFrameworks = nupkgReader.GetSupportedFrameworks();
-                supportedFrameworks.Should().NotBeEmpty();
-
-                foreach (NuGetFramework framework in supportedFrameworks)
-                {
-                    var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
-                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/Newtonsoft.Json.dll");
-                }
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_contains_shim(bool multiTarget)
-        {
-            var nugetPackage = SetupNuGetPackage(multiTarget);
-            using (var nupkgReader = new PackageArchiveReader(nugetPackage))
-            {
-                IEnumerable<NuGetFramework> supportedFrameworks = nupkgReader.GetSupportedFrameworks();
-                supportedFrameworks.Should().NotBeEmpty();
-
-                foreach (NuGetFramework framework in supportedFrameworks)
-                {
-                    var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
-                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/win-x64/{_customToolCommandName}.exe",
-                        "Name should be the same as the command name even customized");
-                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/osx.10.12-x64/{_customToolCommandName}",
-                        "RID should be the exact match of the RID in the property, even Apphost only has version of win, osx and linux");
-                }
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_uses_customized_PackagedShimOutputRootDirectory(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void It_uses_customized_PackagedShimOutputRootDirectory(bool multiTarget, string targetFramework)
         {
             string shimoutputPath = Path.Combine(TestContext.Current.TestExecutionDirectory, "shimoutput");
             TestAsset helloWorldAsset = _testAssetsManager
@@ -149,13 +113,8 @@ namespace Microsoft.NET.ToolPack.Tests
                     propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
                     propertyGroup.Add(new XElement(ns + "PackagedShimOutputRootDirectory", shimoutputPath));
-
-                    if (multiTarget)
-                    {
-                        propertyGroup.Element(ns + "TargetFramework").Remove();
-                        propertyGroup.Add(new XElement(ns + "TargetFrameworks", "netcoreapp2.1"));
-                    }
                 })
+                .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget)
                 .Restore(Log);
 
             _testRoot = helloWorldAsset.TestRoot;
@@ -164,58 +123,51 @@ namespace Microsoft.NET.ToolPack.Tests
 
             packCommand.Execute().Should().Pass();
 
-            string windowShimPath = Path.Combine(shimoutputPath, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
+            string windowShimPath = Path.Combine(shimoutputPath, $"shims/{targetFramework}/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
-            string osxShimPath = Path.Combine(shimoutputPath, $"shims/netcoreapp2.1/osx.10.12-x64/{_customToolCommandName}");
+            string osxShimPath = Path.Combine(shimoutputPath, $"shims/{targetFramework}/osx.10.12-x64/{_customToolCommandName}");
             File.Exists(osxShimPath).Should().BeTrue($"Shim {osxShimPath} should exist");
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_uses_outputs_to_bin_by_default(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void It_uses_outputs_to_bin_by_default(bool multiTarget, string targetFramework)
         {
-            TestAsset helloWorldAsset = SetUpHelloWorld(multiTarget);
+            TestAsset helloWorldAsset = CreateTestAsset(
+                multiTarget,
+                nameof(It_uses_outputs_to_bin_by_default)
+                + multiTarget
+                + targetFramework,
+                targetFramework: targetFramework);
 
             _testRoot = helloWorldAsset.TestRoot;
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
-            var outputDirectory = packCommand.GetOutputDirectory("netcoreapp2.1");
+            var outputDirectory = packCommand.GetOutputDirectory(targetFramework);
             packCommand.Execute().Should().Pass();
 
-            string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
+            string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
-            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/osx.10.12-x64/{_customToolCommandName}");
+            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}/osx.10.12-x64/{_customToolCommandName}");
             File.Exists(osxShimPath).Should().BeTrue($"Shim {osxShimPath} should exist");
         }
 
-        private TestAsset SetUpHelloWorld(bool multiTarget, [CallerMemberName] string callingMethod = "")
-        {
-            return _testAssetsManager
-                .CopyTestAsset("PortableTool", callingMethod + multiTarget)
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    XNamespace ns = project.Root.Name.Namespace;
-                    XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
-                    propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
-
-                    if (multiTarget)
-                    {
-                        propertyGroup.Element(ns + "TargetFramework").Remove();
-                        propertyGroup.Add(new XElement(ns + "TargetFrameworks", "netcoreapp2.1"));
-                    }
-                })
-                .Restore(Log);
-        }
-
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void Clean_should_remove_bin_output(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void Clean_should_remove_bin_output(bool multiTarget, string targetFramework)
         {
-            TestAsset helloWorldAsset = SetUpHelloWorld(multiTarget);
+            TestAsset helloWorldAsset = CreateTestAsset(
+                multiTarget,
+                nameof(Clean_should_remove_bin_output)
+                + multiTarget
+                + targetFramework,
+                targetFramework: targetFramework);
 
             _testRoot = helloWorldAsset.TestRoot;
 
@@ -233,19 +185,26 @@ namespace Microsoft.NET.ToolPack.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void Generate_shims_runs_incrementally(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void Generate_shims_runs_incrementally(bool multiTarget, string targetFramework)
         {
-            TestAsset helloWorldAsset = SetUpHelloWorld(multiTarget);
+            TestAsset helloWorldAsset = CreateTestAsset(
+                multiTarget,
+                nameof(Generate_shims_runs_incrementally)
+                + multiTarget
+                + targetFramework,
+                targetFramework: targetFramework);
 
             _testRoot = helloWorldAsset.TestRoot;
 
             var buildCommand = new BuildCommand(Log, helloWorldAsset.TestRoot);
             buildCommand.Execute().Should().Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp2.1");
-            string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}.1/win-x64/{_customToolCommandName}.exe");
 
             DateTime windowShimPathFirstModifiedTime = File.GetLastWriteTimeUtc(windowShimPath);
 
@@ -257,11 +216,13 @@ namespace Microsoft.NET.ToolPack.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_contains_shim_with_no_build(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void It_contains_shim_with_no_build(bool multiTarget, string targetFramework)
         {
-            var testAsset = CreateTestAsset(multiTarget, "shim_with_no_build" + multiTarget);
+            var testAsset = CreateTestAsset(multiTarget, nameof(It_contains_shim_with_no_build) + multiTarget + targetFramework, targetFramework);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand.Execute().Should().Pass();
@@ -288,9 +249,11 @@ namespace Microsoft.NET.ToolPack.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_produces_valid_shims(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void It_produces_valid_shims(bool multiTarget, string targetFramework)
         {
             if (!Environment.Is64BitOperatingSystem)
             {
@@ -298,14 +261,16 @@ namespace Microsoft.NET.ToolPack.Tests
                 return;
             }
 
-            var nugetPackage = SetupNuGetPackage(multiTarget);
+            var nugetPackage = SetupNuGetPackage(multiTarget, targetFramework: targetFramework);
             AssertValidShim(_testRoot, nugetPackage);
         }
 
         [WindowsOnlyTheory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_produces_valid_shims_when_the_first_build_is_wrong(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void It_produces_valid_shims_when_the_first_build_is_wrong(bool multiTarget, string targetFramework)
         {
             // The first build use wrong package id and should embed wrong string to shims. However, the pack should produce correct shim
             // since it includes build target. And the incremental build should consider the shim to be invalid and recreate that.
@@ -316,7 +281,9 @@ namespace Microsoft.NET.ToolPack.Tests
                 return;
             }
 
-            TestAsset helloWorldAsset = CreateTestAsset(multiTarget, "It_produces_valid_shims2" + multiTarget.ToString());
+            TestAsset helloWorldAsset = CreateTestAsset(multiTarget,
+                "It_produces_valid_shims2" + multiTarget + targetFramework,
+                targetFramework: targetFramework);
 
             var testRoot = helloWorldAsset.TestRoot;
 
@@ -334,9 +301,11 @@ namespace Microsoft.NET.ToolPack.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void When_version_and_packageVersion_is_different_It_produces_valid_shims(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void When_version_and_packageVersion_is_different_It_produces_valid_shims(bool multiTarget, string targetFramework)
         {
             if (!Environment.Is64BitOperatingSystem)
             {
@@ -349,15 +318,18 @@ namespace Microsoft.NET.ToolPack.Tests
                 {
                     ["version"] = "1.0.0-rtm",
                     ["packageVersion"] = _packageVersion
-                });
+                },
+                targetFramework: targetFramework);
 
             AssertValidShim(_testRoot, nugetPackage);
         }
 
         [WindowsOnlyTheory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void When_version_and_packageVersion_is_different_It_produces_valid_shims2(bool multiTarget)
+        [InlineData(true, "netcoreapp2.1")]
+        [InlineData(false, "netcoreapp2.1")]
+        [InlineData(true, "netcoreapp3.0")]
+        [InlineData(false, "netcoreapp3.0")]
+        public void When_version_and_packageVersion_is_different_It_produces_valid_shims2(bool multiTarget, string targetFramework)
         {
             if (!Environment.Is64BitOperatingSystem)
             {
@@ -371,9 +343,47 @@ namespace Microsoft.NET.ToolPack.Tests
                 additionalProperty: new Dictionary<string, string>()
                 {
                     ["version"] = "1000",
-                });
+                },
+                targetFramework: targetFramework);
 
             AssertValidShim(_testRoot, nugetPackage);
+        }
+
+        private static void It_packs_successfully(string nugetPackage)
+        {
+            using (var nupkgReader = new PackageArchiveReader(nugetPackage))
+            {
+                nupkgReader
+                    .GetToolItems()
+                    .Should().NotBeEmpty();
+            }
+        }
+
+        private static void It_contains_dependencies_dll(PackageArchiveReader nupkgReader)
+        {
+            IEnumerable<NuGetFramework> supportedFrameworks = nupkgReader.GetSupportedFrameworks();
+            supportedFrameworks.Should().NotBeEmpty();
+
+            foreach (NuGetFramework framework in supportedFrameworks)
+            {
+                var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
+                allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/Newtonsoft.Json.dll");
+            }
+        }
+
+        private static void It_contains_shim(PackageArchiveReader nupkgReader)
+        {
+            IEnumerable<NuGetFramework> supportedFrameworks = nupkgReader.GetSupportedFrameworks();
+            supportedFrameworks.Should().NotBeEmpty();
+
+            foreach (NuGetFramework framework in supportedFrameworks)
+            {
+                var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
+                allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/win-x64/{_customToolCommandName}.exe",
+                    "Name should be the same as the command name even customized");
+                allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/osx.10.12-x64/{_customToolCommandName}",
+                    "RID should be the exact match of the RID in the property, even Apphost only has version of win, osx and linux");
+            }
         }
 
         private void AssertValidShim(string testRoot, string nugetPackage)

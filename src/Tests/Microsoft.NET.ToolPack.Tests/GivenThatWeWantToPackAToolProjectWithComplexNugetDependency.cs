@@ -38,13 +38,8 @@ namespace Microsoft.NET.ToolPack.Tests
 
                                             XNamespace ns = project.Root.Name.Namespace;
                                             XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-
-                                            if (multiTarget)
-                                            {
-                                                propertyGroup.Element(ns + "TargetFramework").Remove();
-                                                propertyGroup.Add(new XElement(ns + "TargetFrameworks", "netcoreapp2.1"));
-                                            }
-                                        });
+                                        })
+                                        .WithTargetFrameworkOrFrameworks("netcoreapp2.1", multiTarget);
 
             helloWorldAsset.Restore(Log);
 

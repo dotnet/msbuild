@@ -93,6 +93,44 @@ namespace Microsoft.NET.TestFramework
 
         public TestAsset WithTargetFramework(string targetFramework, string projectName = null)
         {
+            return WithTargetFramework(
+            p =>
+            {
+                var ns = p.Root.Name.Namespace;
+                p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single().SetValue(targetFramework);
+            },
+            targetFramework,
+            projectName);
+        }
+
+        public TestAsset WithTargetFrameworks(string targetFrameworks, string projectName = null)
+        {
+            return WithTargetFramework(
+            p =>
+            {
+                var ns = p.Root.Name.Namespace;
+                var propertyGroup = p.Root.Elements(ns + "PropertyGroup").First();
+                propertyGroup.Elements(ns + "TargetFramework").SingleOrDefault()?.Remove();
+                propertyGroup.Add(new XElement(ns + "TargetFramework", targetFrameworks));
+            },
+            targetFrameworks,
+            projectName);
+        }
+
+        public TestAsset WithTargetFrameworkOrFrameworks(string targetFrameworkOrFrameworks, bool multitarget, string projectName = null)
+        {
+            if (multitarget)
+            {
+                return WithTargetFrameworks(targetFrameworkOrFrameworks, projectName);
+            }
+            else
+            {
+                return WithTargetFramework(targetFrameworkOrFrameworks, projectName);
+            }
+        }
+
+        private TestAsset WithTargetFramework(Action<XDocument> actionOnProject, string targetFramework, string projectName = null)
+        {
             if (string.IsNullOrEmpty(targetFramework))
             {
                 return this;
@@ -109,7 +147,7 @@ namespace Microsoft.NET.TestFramework
                 }
 
                 var ns = project.Root.Name.Namespace;
-                project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single().SetValue(targetFramework);
+                actionOnProject(project);
             });
         }
 

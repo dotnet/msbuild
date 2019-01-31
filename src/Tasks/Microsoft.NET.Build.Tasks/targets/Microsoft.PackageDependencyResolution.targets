@@ -216,7 +216,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <ItemGroup>
-      <_PackAsToolShimRuntimeIdentifiers Include="$(PackAsToolShimRuntimeIdentifiers)"/>
+      <_PackAsToolShimRuntimeIdentifiers Condition="@(_PackAsToolShimRuntimeIdentifiers) ==''" Include="$(PackAsToolShimRuntimeIdentifiers)"/>
 
       <!-- Pass these packages into the ResolvePackageAssets task to verify that the restored versions of the packages
            match the expected version -->
@@ -250,7 +250,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->
       <Output TaskParameter="Analyzers" ItemName="ResolvedAnalyzers" />
-      <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiers" />
+      <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiersResolvePackageAssets" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
@@ -265,6 +265,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup Condition="'$(UseAppHostFromAssetsFile)' == 'true'">
       <_NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
                                      Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(_ApphostsForShimRuntimeIdentifiers)' == ''">
+      <_ApphostsForShimRuntimeIdentifiers Include="@(_ApphostsForShimRuntimeIdentifiersResolvePackageAssets)"/>
     </ItemGroup>
 
   </Target>

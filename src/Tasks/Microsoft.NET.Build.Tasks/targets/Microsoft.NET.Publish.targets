@@ -648,7 +648,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ComputeEmbeddedApphostPaths">
 
     <ItemGroup>
-      <_PackAsToolShimRuntimeIdentifiers Include="$(PackAsToolShimRuntimeIdentifiers)"/>
+      <_PackAsToolShimRuntimeIdentifiers Condition="@(_PackAsToolShimRuntimeIdentifiers) ==''" Include="$(PackAsToolShimRuntimeIdentifiers)"/>
     </ItemGroup>
 
     <GetEmbeddedApphostPaths
