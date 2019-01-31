@@ -61,6 +61,9 @@ fi
 
 mv $ArtifactsDir $Stage1Dir
 
+# Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
+export MSBUILDDONOTLAUNCHDEBUGGER=true
+
 # Prior to 3.0, the Csc task uses this environment variable to decide whether to run
 # a CLI host or directly execute the compiler.
 export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
