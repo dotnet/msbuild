@@ -1,0 +1,136 @@
+{
+  "products": [
+    {
+      "name": "Microsoft.Build.vsix",
+      "tests": [
+        {
+          "container": "DDRIT.RPS.CSharp",
+          "testCases": [
+            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+          ]
+        }
+      ]
+    }
+  ],
+  "assemblies": [
+    {
+      "assembly": "Microsoft.Build.Conversion.Core.dll",
+      "instrumentationArguments": [
+        {
+          "relativeInstallationFolder": "MSBuild/Current/Bin",
+          "instrumentationExecutable": "Common7/IDE/vsn.exe"
+        }
+      ],
+      "tests": [
+        {
+          "container": "DDRIT.RPS.CSharp",
+          "testCases": [
+            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+          ]
+        }
+      ]
+    },
+    {
+      "assembly": "Microsoft.Build.dll",
+      "instrumentationArguments": [
+        {
+          "relativeInstallationFolder": "MSBuild/Current/Bin",
+          "instrumentationExecutable": "Common7/IDE/vsn.exe"
+        }
+      ],
+      "tests": [
+        {
+          "container": "DDRIT.RPS.CSharp",
+          "testCases": [
+            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+          ]
+        }
+      ]
+    },
+    {
+      "assembly": "Microsoft.Build.Engine.dll",
+      "instrumentationArguments": [
+        {
+          "relativeInstallationFolder": "MSBuild/Current/Bin",
+          "instrumentationExecutable": "Common7/IDE/vsn.exe"
+        }
+      ],
+      "tests": [
+        {
+          "container": "DDRIT.RPS.CSharp",
+          "testCases": [
+            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+          ]
+        }
+      ]
+    },
+    {
+      "assembly": "Microsoft.Build.Framework.dll",
+      "instrumentationArguments": [
+        {
+          "relativeInstallationFolder": "MSBuild/Current/Bin",
+          "instrumentationExecutable": "Common7/IDE/vsn.exe"
+        }
+      ],
+      "tests": [
+        {
+          "container": "DDRIT.RPS.CSharp",
+          "testCases": [
+            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+          ]
+        }
+      ]
+    },
+    {
+      "assembly": "Microsoft.Build.Tasks.Core.dll",
+      "instrumentationArguments": [
+        {
+          "relativeInstallationFolder": "MSBuild/Current/Bin",
+          "instrumentationExecutable": "Common7/IDE/vsn.exe"
+        }
+      ],
+      "tests": [
+        {
+          "container": "DDRIT.RPS.CSharp",
+          "testCases": [
+            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+          ]
+        }
+      ]
+    },
+    {
+      "assembly": "Microsoft.Build.Utilities.Core.dll",
+      "instrumentationArguments": [
+        {
+          "relativeInstallationFolder": "MSBuild/Current/Bin",
+          "instrumentationExecutable": "Common7/IDE/vsn.exe"
+        }
+      ],
+      "tests": [
+        {
+          "container": "DDRIT.RPS.CSharp",
+          "testCases": [
+            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+          ]
+        }
+      ]
+    },
+    {
+      "assembly": "System.Threading.Tasks.Dataflow.dll",
+      "instrumentationArguments": [
+        {
+          "relativeInstallationFolder": "MSBuild/Current/Bin",
+          "instrumentationExecutable": "Common7/IDE/vsn.exe"
+        }
+      ],
+      "tests": [
+        {
+          "container": "DDRIT.RPS.CSharp",
+          "testCases": [
+            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+          ]
+        }
+      ]
+    }
+  ]
+}

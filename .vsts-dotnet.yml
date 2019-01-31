@@ -16,6 +16,14 @@ jobs:
   - group: Publish-Build-Assets
   - name: TeamName
     value: MSBuild
+  - name: VisualStudio.MajorVersion
+    value: 16
+  - name: VisualStudio.BranchName
+    value: 'lab/d16.0stg'
+  - name: VisualStudio.ChannelName
+    value: 'int.d16.0stg'
+  - name: VisualStudio.DropName
+    value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
   steps:
   - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
@@ -29,6 +37,9 @@ jobs:
 
   - script: eng/CIBuild.cmd
               -configuration Release
+              -vsDropName $(VisualStudio.DropName)
+              -vsBranch $(VisualStudio.BranchName)
+              -vsDropAccessToken $(System.AccessToken)
               /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
               /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
               /p:DotNetPublishToBlobFeed=true
@@ -41,24 +52,56 @@ jobs:
     displayName: Build
     condition: succeeded()
 
-  - task: PublishTestResults@2
-    displayName: Publish .NET Framework Test Results
+  # Publish OptProf configuration files
+  - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
     inputs:
-      testRunTitle: 'Windows-on-full Release Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
+      dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
+      buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+      sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
+      toLowerCase: false
+      usePat: false
+    displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
+    condition: succeeded()
+
+  # Build VS bootstrapper
+  # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+  - task: ms-vseng.MicroBuildTasks.0e9d0d4d-71ec-4e4e-ae40-db9896f1ae74.MicroBuildBuildVSBootstrapper@2
     inputs:
-      testRunTitle: 'Windows-on-full Release .NET Core 2.1'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_netcoreapp2.1*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
+      vsMajorVersion: $(VisualStudio.MajorVersion)
+      channelName: $(VisualStudio.ChannelName)
+      manifests: $(VisualStudio.SetupManifestList)
+      outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+    displayName: 'OptProf - Build VS bootstrapper'
+    condition: succeeded()
+
+  # Publish run settings
+  - task: PowerShell@2
+    inputs:
+      filePath: eng\generate-optprof-run-settings.ps1
+      arguments: -configuration $(BuildConfiguration)
+                 -vsDropName $(VisualStudio.DropName)
+                 -bootstrapperInfo $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+      failOnStderr: true
+    displayName: 'OptProf - Generate runsettings file'
+    condition: succeeded()
+
+  # Publish bootstrapper info
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+      ArtifactName: MicroBuildOutputs
+      ArtifactType: Container
+    displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
+    condition: succeeded()
+
+  # Publish scripts to get the branch of VS that this inserts into
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\BranchInfo'
+      ArtifactName: BranchInfo
+      ArtifactType: Container
+    displayName: 'OptProf - Publish Artifact: BranchInfo'
+    condition: succeeded()
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
@@ -91,6 +134,7 @@ jobs:
   - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
     displayName: Upload VSTS Drop
     inputs:
+      DropName: $(VisualStudio.DropName)
       DropFolder: 'artifacts\VSSetup\Release\Insertion'
     condition: succeeded()
 
