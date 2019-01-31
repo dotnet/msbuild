@@ -8,8 +8,10 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
@@ -464,6 +466,56 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             result.ExitCode.Should().Be(0);
+        }
+
+        [Fact]
+        public void ItShouldNotShowImportantMessage()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput();
+
+            // Verify
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().NotContain("Important text");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
+
+        [Fact]
+        public void ItShouldShowImportantMessageWhenInteractiveFlagIsPassed()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("--interactive");
+
+            // Verify
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Important text");
+            }
+
+            result.ExitCode.Should().Be(1);
         }
 
         private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")

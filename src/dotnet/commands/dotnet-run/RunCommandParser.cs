@@ -1,8 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Run;
@@ -28,6 +26,7 @@ namespace Microsoft.DotNet.Cli
                         launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
                         noLaunchProfile: o.HasOption("--no-launch-profile"),
                         noRestore: o.HasOption("--no-restore") || o.HasOption("--no-build"),
+                        interactive: o.HasOption(Utils.Constants.RestoreInteractiveOption),
                         restoreArgs: o.OptionValuesToBeForwarded(),
                         args: o.Arguments
                     )),
@@ -53,6 +52,7 @@ namespace Microsoft.DotNet.Cli
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
                         Accept.NoArguments()),
+                    CommonOptions.InteractiveOption(),
                     CommonOptions.NoRestoreOption(),
                     CommonOptions.VerbosityOption()
                 });

@@ -92,6 +92,7 @@ namespace Microsoft.DotNet.Cli
                         Accept.NoArguments()
                               .ForwardAsSingle(o => "-property:VSTestBlame=true")),
                   CommonOptions.NoRestoreOption(),
+                  CommonOptions.InteractiveOption(),
                   CommonOptions.VerbosityOption());
 
         private static string GetSemiColonEscapedstring(string arg)
