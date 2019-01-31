@@ -65,8 +65,12 @@ namespace Microsoft.NET.Publish.Tests
 
             runAppCommand.Environment["DOTNET_HOME"] = Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath);
 
-            runAppCommand.ToCommand().Execute()
-                .ExitCode.Should().Be(42);
+            var result = runAppCommand.ToCommand()
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute();
+
+            result.ExitCode.Should().Be(42);
 
 
         }
