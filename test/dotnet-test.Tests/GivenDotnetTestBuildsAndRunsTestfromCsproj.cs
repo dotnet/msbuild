@@ -375,6 +375,25 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
+        [Fact]
+        public void ItAcceptsNoLogoAsCliArguments()
+        {
+            // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("14");
+
+            // Call test with logger enable
+            CommandResult result = new DotnetTestCommand()
+                                       .WithWorkingDirectory(testProjectDirectory)
+                                       .ExecuteWithCapturedOutput("--nologo");
+
+            // Verify
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().NotContain("Microsoft (R) Test Execution Command Line Tool Version");
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            }
+        }
+
         [WindowsOnlyFact]
         public void ItCreatesCoverageFileWhenCodeCoverageEnabledByRunsettings()
         {
