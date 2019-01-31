@@ -1,6 +1,6 @@
 trigger:
 - master
-- vs16.0
+- vs*
 
 jobs:
 - job: Windows_NT
