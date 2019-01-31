@@ -21,7 +21,7 @@
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview.19075.2</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-preview.19080.1</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-alpha1-10062</MicrosoftNETSdkRazorPackageVersion>
     <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta5.19066.2</MicrosoftTemplateEngineCliPackageVersion>
