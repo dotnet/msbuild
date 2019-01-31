@@ -1,8 +1,3 @@
-#!/usr/bin/env bash
-
-# Stop script if unbound variable found (use ${var:-} if intentional)
-set -u
-
 # Initialize variables if they aren't already defined.
 
 # CI mode - set to true on CI server for PR validation build or official build.
@@ -34,7 +29,7 @@ fi
 # Configures warning treatment in msbuild.
 warn_as_error=${warn_as_error:-true}
 
-# True to attempt using .NET Core already that meets requirements specified in global.json
+# True to attempt using .NET Core already that meets requirements specified in global.json 
 # installed on the machine instead of downloading one.
 use_installed_dotnet_cli=${use_installed_dotnet_cli:-true}
 
@@ -140,6 +135,13 @@ function InitializeDotNetCli {
   # build steps from using anything other than what we've downloaded.
   export PATH="$dotnet_root:$PATH"
 
+  if [[ $ci == true ]]; then
+    # Make Sure that our bootstrapped dotnet cli is avaliable in future steps of the Azure Pipelines build
+    echo "##vso[task.prependpath]$dotnet_root"
+    echo "##vso[task.setvariable variable=DOTNET_MULTILEVEL_LOOKUP]0"
+    echo "##vso[task.setvariable variable=DOTNET_SKIP_FIRST_TIME_EXPERIENCE]1"
+  fi
+
   # return value
   _InitializeDotNetCli="$dotnet_root"
 }
@@ -151,13 +153,11 @@ function InstallDotNetSdk {
   GetDotNetInstallScript "$root"
   local install_script=$_GetDotNetInstallScript
 
-  bash "$install_script" --version $version --install-dir "$root"
-  local lastexitcode=$?
-
-  if [[ $lastexitcode != 0 ]]; then
-    echo "Failed to install dotnet SDK (exit code '$lastexitcode')." >&2
-    ExitWithExitCode $lastexitcode
-  fi
+  bash "$install_script" --version $version --install-dir "$root" || {
+    local exit_code=$?
+    echo "Failed to install dotnet SDK (exit code '$exit_code')." >&2
+    ExitWithExitCode $exit_code
+  }
 }
 
 function GetDotNetInstallScript {
@@ -186,20 +186,12 @@ function InitializeBuildTool {
   if [[ -n "${_InitializeBuildTool:-}" ]]; then
     return
   fi
-
+  
   InitializeDotNetCli $restore
 
-  # return value
-  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
-}
-
-function InitializeMSBuildToUse {
-  if [[ -n "${_InitializeMSBuildToUse:-}" ]]; then
-    return
-  fi
-
-  # return value
-  _InitializeMSBuildToUse="msbuild"
+  # return values
+  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"  
+  _InitializeBuildToolCommand="msbuild"
 }
 
 function GetNuGetPackageCachePath {
@@ -267,8 +259,8 @@ function ExitWithExitCode {
 
 function StopProcesses {
   echo "Killing running build processes..."
-  pkill -9 "dotnet"
-  pkill -9 "vbcscompiler"
+  pkill -9 "dotnet" || true
+  pkill -9 "vbcscompiler" || true
   return 0
 }
 
@@ -286,20 +278,17 @@ function MSBuild {
   fi
 
   InitializeBuildTool
-  InitializeMSBuildToUse
 
   local warnaserror_switch=""
   if [[ $warn_as_error == true ]]; then
     warnaserror_switch="/warnaserror"
   fi
 
-  "$_InitializeBuildTool" "$_InitializeMSBuildToUse" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error "$@"
-  lastexitcode=$?
-
-  if [[ $lastexitcode != 0 ]]; then
-    echo "Build failed (exit code '$lastexitcode')." >&2
-    ExitWithExitCode $lastexitcode
-  fi
+  "$_InitializeBuildTool" "$_InitializeBuildToolCommand" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error "$@" || {
+    local exit_code=$?
+    echo "Build failed (exit code '$exit_code')." >&2
+    ExitWithExitCode $exit_code
+  }
 }
 
 ResolvePath "${BASH_SOURCE[0]}"
