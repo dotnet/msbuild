@@ -9,6 +9,9 @@ $ErrorActionPreference="Stop"
 
 $VSSetupDir = Join-Path $ArtifactsDir "VSSetup\$configuration"
 
+# Use very short directory name to avoid long path issues (build machines, ibcmerge.exe)
+$IbcOptimizationDataDir = Join-Path $RepoRoot ".o"
+
 function Exec-CommandCore([string]$command, [string]$commandArgs, [switch]$useConsole = $true) {
     if ($useConsole) {
         $exitCode = Exec-Process $command $commandArgs
