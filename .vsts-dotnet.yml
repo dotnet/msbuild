@@ -1,5 +1,6 @@
 trigger:
 - master
+- vs*
 
 jobs:
 - job: Windows_NT
