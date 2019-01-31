@@ -23,7 +23,7 @@
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />
-    <PackageReference Include="NuGet.Packaging.Core" Version="$(NuGetProjectModelVersion)" />
+    <PackageReference Include="NuGet.Packaging" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.LibraryModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetProjectModelVersion)" />
