@@ -61,6 +61,10 @@ fi
 
 mv $ArtifactsDir $Stage1Dir
 
+# Prior to 3.0, the Csc task uses this environment variable to decide whether to run
+# a CLI host or directly execute the compiler.
+export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
+
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests
