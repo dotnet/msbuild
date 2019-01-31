@@ -64,6 +64,7 @@ mv $ArtifactsDir $Stage1Dir
 
 export MSBUILDDONOTLAUNCHDEBUGGER=true
 export RoslynCommandLineLogFile=artifacts/log/Debug/Roslyn_comm.log
+export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
