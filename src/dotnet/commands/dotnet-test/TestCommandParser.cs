@@ -91,6 +91,11 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdBlameDescription,
                         Accept.NoArguments()
                               .ForwardAsSingle(o => "-property:VSTestBlame=true")),
+                  Create.Option(
+                        "--nologo|/nologo",
+                        LocalizableStrings.CmdNoLogo,
+                        Accept.NoArguments()
+                              .ForwardAsSingle(o => "-property:VSTestNoLogo=nologo")),
                   CommonOptions.NoRestoreOption(),
                   CommonOptions.InteractiveMsBuildForwardOption(),
                   CommonOptions.VerbosityOption());
