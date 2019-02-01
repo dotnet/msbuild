@@ -1,3 +1,8 @@
+#
+# Copyright (c) .NET Foundation and contributors. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#
+
 [CmdletBinding(PositionalBinding=$false)]
 Param(
   [string][Alias('c')]$configuration = "Debug",
@@ -6,6 +11,7 @@ Param(
   [string] $msbuildEngine = $null,
   [bool] $warnAsError = $true,
   [bool] $nodeReuse = $true,
+  [switch] $execute,
   [switch][Alias('r')]$restore,
   [switch] $deployDeps,
   [switch][Alias('b')]$build,
@@ -17,14 +23,20 @@ Param(
   [switch] $sign,
   [switch] $pack,
   [switch] $publish,
+  [switch] $publishBuildAssets,
   [switch][Alias('bl')]$binaryLog,
   [switch] $ci,
   [switch] $prepareMachine,
   [switch] $help,
+
+  [string]$vsDropName = "",
+  [string]$vsBranch = "",
+  [string]$vsDropAccessToken = "",
+
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
-. $PSScriptRoot\tools.ps1
+. (Join-Path $PSScriptRoot "build-utils.ps1")
 
 function Print-Usage() {
     Write-Host "Common settings:"
@@ -46,6 +58,7 @@ function Print-Usage() {
     Write-Host "  -performanceTest        Run all performance tests in the solution"
     Write-Host "  -sign                   Sign build outputs"
     Write-Host "  -publish                Publish artifacts (e.g. symbols)"
+    Write-Host "  -publishBuildAssets     Push assets to BAR"
     Write-Host ""
 
     Write-Host "Advanced settings:"
@@ -57,6 +70,7 @@ function Print-Usage() {
     Write-Host "Command line arguments not listed above are passed thru to msbuild."
     Write-Host "The above arguments can be shortened as much as to be unambiguous (e.g. -co for configuration, -t for test, etc.)."
 }
+
 
 function InitializeCustomToolset {
   if (-not $restore) {
@@ -70,10 +84,9 @@ function InitializeCustomToolset {
   }
 }
 
-function Build {
+function Build-Repo() {
   $toolsetBuildProj = InitializeToolset
   InitializeCustomToolset
-
   $bl = if ($binaryLog) { "/bl:" + (Join-Path $LogDir "Build.binlog") } else { "" }
 
   if ($projects) {
@@ -99,8 +112,36 @@ function Build {
     /p:PerformanceTest=$performanceTest `
     /p:Sign=$sign `
     /p:Publish=$publish `
+    /p:Execute=$execute `
     /p:ContinuousIntegrationBuild=$ci `
+    /p:VisualStudioDropName=$vsDropName `
     @properties
+}
+
+function Build-OptProfData() {
+    $insertionDir = Join-Path $VSSetupDir "Insertion"
+
+    $optProfDir = Join-Path $ArtifactsDir "OptProf\$configuration"
+    $optProfDataDir = Join-Path $optProfDir "Data"
+    $optProfBranchDir = Join-Path $optProfDir "BranchInfo"
+
+    $optProfConfigFile = Join-Path $EngRoot "config\OptProf.json"
+    $optProfToolDir = Get-PackageDir "RoslynTools.OptProf"
+    $optProfToolExe = Join-Path $optProfToolDir "tools\roslyn.optprof.exe"
+
+    # This invocation is failing right now. Going to assume we don't need it at the moment.
+    Write-Host "Generating optimization data using '$optProfConfigFile' into '$optProfDataDir'"
+    Exec-Console $optProfToolExe "--configFile $optProfConfigFile --insertionFolder $insertionDir --outputFolder $optProfDataDir"
+
+    # Write out branch we are inserting into
+    Create-Directory $optProfBranchDir
+    $vsBranchFile = Join-Path $optProfBranchDir "vsbranch.txt"
+    $vsBranch >> $vsBranchFile
+
+    # Set VSO variables used by MicroBuildBuildVSBootstrapper pipeline task
+    $manifestList = [string]::Join(',', (Get-ChildItem "$insertionDir\*.vsman"))
+
+    Write-Host "##vso[task.setvariable variable=VisualStudio.SetupManifestList;]$manifestList"
 }
 
 try {
@@ -121,7 +162,9 @@ try {
     . $configureToolsetScript
   }
 
-  Build
+  Build-Repo
+
+  Build-OptProfData
 }
 catch {
   Write-Host $_
