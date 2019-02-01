@@ -89,7 +89,7 @@ phases:
       inputs:
         testRunner: XUnit
         testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'
-        testRunTitle: 'Unit Test Results'
+        testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'
         platform: '$(BuildPlatform)'
         configuration: '$(_BuildConfig)'
       condition: not(succeeded())
