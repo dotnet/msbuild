@@ -109,6 +109,9 @@ try {
   # turn vbcscompiler back on to save on time. It speeds up the build considerably
   $env:UseSharedCompilation="true"
 
+  # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
+  $env:MSBUILDDONOTLAUNCHDEBUGGER=true
+
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Do run tests
