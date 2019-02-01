@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 {
     public static class WebConfigTransform
     {
-        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreModuleName, string aspNetCoreHostingModel, string environmentName)
+        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreModuleName, string aspNetCoreHostingModel, string environmentName, string projectFullPath)
         {
             const string HandlersElementName = "handlers";
             const string aspNetCoreElementName = "aspNetCore";
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                    .Attribute("modules");
 
             var aspNetCoreSection = GetOrCreateChild(webServerSection, aspNetCoreElementName);
-            TransformAspNetCore(aspNetCoreSection, appName, configureForAzure, useAppHost, extension, aspNetCoreModuleNameFinalValue, aspNetCoreHostingModel);
+            TransformAspNetCore(aspNetCoreSection, appName, configureForAzure, useAppHost, extension, aspNetCoreModuleNameFinalValue, aspNetCoreHostingModel, projectFullPath);
             if (!string.IsNullOrEmpty(environmentName))
             {
                 TransformEnvironmentVariables(GetOrCreateChild(aspNetCoreSection, envVariablesElementName), environmentName);
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             SetAttributeValueIfEmpty(aspNetCoreElement, "resourceType", "Unspecified");
         }
 
-        private static void TransformAspNetCore(XElement aspNetCoreElement, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreModuleName, string aspNetCoreHostingModel)
+        private static void TransformAspNetCore(XElement aspNetCoreElement, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreModuleName, string aspNetCoreHostingModelValue, string projectFullPath)
         {
             // Forward slashes currently work neither in AspNetCoreModule nor in dotnet so they need to be
             // replaced with backwards slashes when the application is published on a non-Windows machine
@@ -146,10 +146,34 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             var hostingModelAttributeValue = aspNetCoreElement.Attribute("hostingModel");
-            // Set the hostingmodel attribute only if it is not already set in the web.config and AspNetCoreHostingModel property is set.
-            if (hostingModelAttributeValue == null && !string.IsNullOrEmpty(aspNetCoreHostingModel))
+
+            string projectWebConfigPath = null;
+            if (!string.IsNullOrEmpty(projectFullPath))
             {
-                switch(aspNetCoreHostingModel.ToUpperInvariant())
+                string projectFolder = Path.GetDirectoryName(projectFullPath);
+                projectWebConfigPath = Path.Combine(projectFolder, "web.config");
+            }
+
+            if (File.Exists(projectWebConfigPath))
+            {
+                // Set the hostingmodel attribute only if it not already set in the project's web.config.
+                if (hostingModelAttributeValue == null)
+                {
+                    SetAspNetCoreHostingModel(aspNetCoreHostingModelValue, aspNetCoreModuleName, aspNetCoreElement);
+                }
+            }
+            else
+            {
+                SetAspNetCoreHostingModel(aspNetCoreHostingModelValue, aspNetCoreModuleName, aspNetCoreElement);
+            }
+        }
+
+
+        private static void SetAspNetCoreHostingModel(string aspNetCoreHostingModelValue, string aspNetCoreModuleName, XElement aspNetCoreElement)
+        {
+            if (!string.IsNullOrEmpty(aspNetCoreHostingModelValue))
+            {
+                switch (aspNetCoreHostingModelValue.ToUpperInvariant())
                 {
                     case "INPROCESS":
                         // In process is not supported for AspNetCoreModule.
@@ -157,10 +181,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                         {
                             throw new Exception(Resources.WebConfigTransform_InvalidHostingOption);
                         }
-                        aspNetCoreElement.SetAttributeValue("hostingModel", aspNetCoreHostingModel);
+                        aspNetCoreElement.SetAttributeValue("hostingModel", aspNetCoreHostingModelValue);
                         break;
                     case "OUTOFPROCESS":
-                        aspNetCoreElement.SetAttributeValue("hostingModel", aspNetCoreHostingModel);
+                        aspNetCoreElement.SetAttributeValue("hostingModel", aspNetCoreHostingModelValue);
                         break;
                     default:
                         throw new Exception(Resources.WebConfigTransform_HostingModel_Error);

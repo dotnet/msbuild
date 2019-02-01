@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
@@ -99,7 +99,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             string outputFile = Path.GetFileName(TargetPath);
-            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, UseAppHost, ExecutableExtension, AspNetCoreModuleName, AspNetCoreHostingModel, EnvironmentName);
+            XDocument transformedConfig = WebConfigTransform.Transform(
+                webConfigXml,
+                outputFile,
+                IsAzure,
+                UseAppHost,
+                ExecutableExtension,
+                AspNetCoreModuleName,
+                AspNetCoreHostingModel,
+                EnvironmentName,
+                ProjectFullPath);
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);
