@@ -41,7 +41,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       -->
       
       <!-- TODO: Add this to BundledVersions in dotnet core-sdk, and remove it from here -->
-      <KnownAppHostPack Include="Microsoft.NETCore.App"
+      <KnownAppHostPack Condition="'@(KnownAppHostPack)' == ''"
+                        Include="Microsoft.NETCore.App"
                         TargetFramework="netcoreapp3.0"
                         AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
                         AppHostPackVersion="3.0.0-preview-27218-01"
