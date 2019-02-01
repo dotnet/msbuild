@@ -19,7 +19,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
   <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <UsingTask TaskName="ResolveAppHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="ResolveAppHosts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
     <ItemGroup>
@@ -75,7 +75,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
 
-      <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
+      <Output TaskParameter="PackagesToDownload" ItemName="_PackageReferenceToAdd" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
@@ -83,35 +83,23 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </ResolveFrameworkReferences>
 
-    <ResolveAppHost TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
-                    TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
-                    TargetingPackRoot="$(NetCoreTargetingPackRoot)"
-                    AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
-                    DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
-                    RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
-                    KnownAppHostPacks="@(KnownAppHostPack)">
+    <ResolveAppHosts TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+                     TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
+                     TargetingPackRoot="$(NetCoreTargetingPackRoot)"
+                     AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
+                     PackAsToolShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
+                     DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
+                     RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                     KnownAppHostPacks="@(KnownAppHostPack)">
 
-      <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
+      <Output TaskParameter="PackagesToDownload" ItemName="_PackageReferenceToAdd" />
       <Output TaskParameter="AppHost" ItemName="AppHostPack" />
+      <Output TaskParameter="PackAsToolShimAppHostPacks" ItemName="PackAsToolShimAppHostPack" />
       
-    </ResolveAppHost>
-
-    <ResolveAppHost Condition="'@(_PackAsToolShimRuntimeIdentifiers)' != ''"
-                    TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
-                    TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
-                    TargetingPackRoot="$(NetCoreTargetingPackRoot)"
-                    AppHostRuntimeIdentifier="%(_PackAsToolShimRuntimeIdentifiers.Identity)"
-                    DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
-                    RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
-                    KnownAppHostPacks="@(KnownAppHostPack)">
-
-      <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
-      <Output TaskParameter="AppHost" ItemName="PackAsToolShimAppHostPack" />
-      
-    </ResolveAppHost>
+    </ResolveAppHosts>
 
     <ItemGroup>
-      <PackageReference Include="@(PackageReferenceToAdd)"
+      <PackageReference Include="@(_PackageReferenceToAdd)"
                         IsImplicitlyDefined="true"
                         PrivateAssets="all"
                         ExcludeAssets="all" />
