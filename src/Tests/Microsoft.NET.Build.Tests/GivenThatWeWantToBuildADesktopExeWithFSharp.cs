@@ -58,5 +58,38 @@ namespace Microsoft.NET.Build.Tests
                 "System.ValueTuple.dll",
             });
         }
+
+        [WindowsOnlyFact]
+        public void It_can_customize_the_apphost()
+        {
+            var targetFramework = "netcoreapp3.0";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorldFS")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
+                })
+                .Restore(Log);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute("/p:CopyLocalLockFileAssemblies=false")
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "TestApp.deps.json",
+                "TestApp.dll",
+                "TestApp.exe",
+                "TestApp.pdb",
+                "TestApp.runtimeconfig.dev.json",
+                "TestApp.runtimeconfig.json",
+            });
+        }
     }
 }

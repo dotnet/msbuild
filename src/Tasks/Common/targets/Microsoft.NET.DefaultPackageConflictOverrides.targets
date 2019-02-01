@@ -11,10 +11,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(DisableDefaultPackageConflictOverrides)' != 'true'">
     <PackageConflictOverrides Include="Microsoft.NETCore.App">
       <OverriddenPackages>

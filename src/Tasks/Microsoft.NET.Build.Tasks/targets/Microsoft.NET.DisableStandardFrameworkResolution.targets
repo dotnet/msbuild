@@ -15,8 +15,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GetFrameworkPaths" />
 
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    
     <_TargetFrameworkDirectories />
     <FrameworkPathOverride />
     <TargetFrameworkDirectory />

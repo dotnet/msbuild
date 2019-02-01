@@ -11,10 +11,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-  
   <!--
     ============================================================
                                         PrepOptimizer
@@ -252,13 +248,14 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
                                         _RestoreCrossgen
-Restores netcoreapp and publishes it to a temp directory
+    Restores netcoreapp and publishes it to a temp directory
     ============================================================
     -->
   
   <Target Name="_RestoreCrossgen"
           DependsOnTargets="PrepforRestoreForComposeStore;
                            _SetupStageForCrossgen;
+                           ResolveFrameworkReferences;
                            ApplyImplicitVersions"
           Condition="$(SkipOptimization) != 'true' ">
 
@@ -275,17 +272,18 @@ Restores netcoreapp and publishes it to a temp directory
                              StorePackageName=$(MicrosoftNETPlatformLibrary);
                              StorePackageVersion=%(PackageReferenceForCrossGen.Version);"/>
 
-    <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
-                              AssetsFilePath="$(_CrossProjAssetsFile)"
-                              TargetFramework="$(_TFM)"
-                              RuntimeIdentifier="$(RuntimeIdentifier)"
-                              PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
-                              IsSelfContained="$(SelfContained)"
-                              PreserveStoreLayout="false">
+    <ResolveCopyLocalAssets ProjectPath="$(MSBuildProjectFullPath)"
+                            AssetsFilePath="$(_CrossProjAssetsFile)"
+                            TargetFramework="$(_TFM)"
+                            RuntimeIdentifier="$(RuntimeIdentifier)"
+                            PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                            RuntimeFrameworks="@(RuntimeFramework)"
+                            ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
+                            IsSelfContained="$(SelfContained)"
+                            PreserveStoreLayout="false">
 
-      <Output TaskParameter="AssembliesToPublish" ItemName="CrossgenResolvedAssembliesToPublish" />
-    </ResolvePublishAssemblies>
+      <Output TaskParameter="ResolvedAssets" ItemName="CrossgenResolvedAssembliesToPublish" />
+    </ResolveCopyLocalAssets>
 
     <!-- Copy managed files to  a flat temp directory for passing it as ref for crossgen -->
     <Copy SourceFiles = "@(CrossgenResolvedAssembliesToPublish)"

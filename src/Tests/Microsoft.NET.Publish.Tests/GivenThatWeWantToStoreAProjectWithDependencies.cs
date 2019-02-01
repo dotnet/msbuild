@@ -13,6 +13,7 @@ using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
@@ -171,11 +172,11 @@ namespace Microsoft.NET.Publish.Tests
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "o");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
-            var additonalproj1 = Path.Combine(simpleDependenciesAsset.TestRoot, "NewtonsoftMultipleVersions.xml");
-            var additonalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertion.xml");
+            var additionalproj1 = Path.Combine(simpleDependenciesAsset.TestRoot, "NewtonsoftMultipleVersions.xml");
+            var additionalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertion.xml");
 
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additonalproj1}%3b{additonalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additionalproj1}%3b{additionalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
             DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
@@ -296,6 +297,43 @@ namespace Microsoft.NET.Publish.Tests
                 newtonsoftSymbolsFiles.Length.Should().Be(1);
                 newtonsoftSymbolsFiles[0].Name.Should().StartWith("Newtonsoft.Json").And.EndWith(symbolFileExtension);
             }
+        }
+
+        [CoreMSBuildOnlyFact]
+        public void It_stores_when_targeting_netcoreapp3()
+        {
+            const string TFM = "netcoreapp3.0";
+
+            var testProject = new TestProject()
+            {
+                Name = "Test",
+                IsSdkProject = true,
+                TargetFrameworks = TFM
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            var outputFolder = Path.Combine(testProjectInstance.TestRoot, "o");
+            var workingDir = Path.Combine(testProjectInstance.TestRoot, "w");
+
+            new ComposeStoreCommand(Log, testProjectInstance.TestRoot, testProject.Name)
+                .Execute(
+                    $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(TFM)}",
+                    $"/p:ComposeDir={outputFolder}",
+                    $"/p:ComposeWorkingDir={workingDir}",
+                    "/p:DoNotDecorateComposeDir=true",
+                    "/p:CreateProfilingSymbols=false")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NU1604");
+
+            new DirectoryInfo(outputFolder).Should().OnlyHaveFiles(new List<string> {
+               "artifact.xml",
+               "newtonsoft.json/12.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
+            });
         }
 
         private static HashSet<PackageIdentity> ParseStoreArtifacts(string path)

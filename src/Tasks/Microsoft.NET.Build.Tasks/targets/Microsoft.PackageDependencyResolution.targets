@@ -20,10 +20,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- General Properties -->
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == ''">$(MSBuildProjectExtensionsPath)/project.assets.json</ProjectAssetsFile>
     <ProjectAssetsFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(ProjectAssetsFile)))</ProjectAssetsFile>
     
@@ -31,7 +27,18 @@ Copyright (c) .NET Foundation. All rights reserved.
          be stored in a shared directory next to the assets.json file -->
     <ProjectAssetsCacheFile Condition="'$(ProjectAssetsCacheFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).assets.cache</ProjectAssetsCacheFile>
     <ProjectAssetsCacheFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(ProjectAssetsCacheFile)))</ProjectAssetsCacheFile>
-    
+
+    <!-- Don't copy local for netstandard projects. -->
+    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
+                                            '$(TargetFrameworkIdentifier)' == '.NETStandard'">false</CopyLocalLockFileAssemblies>
+
+    <!-- Don't copy local for netcoreapp projects before 3.0 or non-exe projects. -->
+    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
+                                            '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                                            ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0' or
+                                             '$(HasRuntimeOutput)' != 'true')">false</CopyLocalLockFileAssemblies>
+
+    <!-- All other project types should copy local. -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
 
     <ContentPreprocessorOutputDirectory Condition="'$(ContentPreprocessorOutputDirectory)' == ''">$(IntermediateOutputPath)NuGet\</ContentPreprocessorOutputDirectory>
@@ -120,7 +127,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolvePackageDependenciesForBuildDependsOn>
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
-      ResolveLockFileCopyLocalProjectDeps;
+      ResolveLockFileCopyLocalFiles;
+      ResolveRuntimePackAssets;
       RunProduceContentAssets;
       IncludeTransitiveProjectReferences
     </ResolvePackageDependenciesForBuildDependsOn>
@@ -187,16 +195,28 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ResolvePackageAssets" 
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
+          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
+          DependsOnTargets="ResolveFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary">
 
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                          and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'
+                          and '$(UseAppHostFromAssetsFile)' == ''">
+      <!-- For .NET Core 3.0 and higher, we'll get the apphost from an apphost pack (via ResolveFrameworkReferences) -->
+      <UseAppHostFromAssetsFile>false</UseAppHostFromAssetsFile>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(UseAppHostFromAssetsFile)' == ''">
+      <UseAppHostFromAssetsFile>true</UseAppHostFromAssetsFile>
+    </PropertyGroup>
+    
     <PropertyGroup Condition="'$(EnsureRuntimePackageDependencies)' == ''
                           and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                          and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'
                           and '$(EnsureNETCoreAppRuntime)' != 'false'">
       <EnsureRuntimePackageDependencies>true</EnsureRuntimePackageDependencies>
     </PropertyGroup>
 
     <ItemGroup>
-      <_PackAsToolShimRuntimeIdentifiers Include="$(PackAsToolShimRuntimeIdentifiers)"/>
+      <_PackAsToolShimRuntimeIdentifiers Condition="@(_PackAsToolShimRuntimeIdentifiers) ==''" Include="$(PackAsToolShimRuntimeIdentifiers)"/>
 
       <!-- Pass these packages into the ResolvePackageAssets task to verify that the restored versions of the packages
            match the expected version -->
@@ -213,6 +233,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       EmitAssetsLogMessages="$(EmitAssetsLogMessages)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
+      PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+      RuntimeFrameworks="@(RuntimeFramework)"
+      IsSelfContained="$(SelfContained)"
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"
       DisablePackageAssetsCache="$(DisablePackageAssetsCache)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
@@ -221,39 +244,33 @@ Copyright (c) .NET Foundation. All rights reserved.
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
       VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
-      ExpectedPlatformPackages="@(ExpectedPlatformPackages)"      
-      >
+      ExpectedPlatformPackages="@(ExpectedPlatformPackages)"
+      SatelliteResourceLanguages="$(SatelliteResourceLanguages)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->
       <Output TaskParameter="Analyzers" ItemName="ResolvedAnalyzers" />
-      <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiers" />
+      <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiersResolvePackageAssets" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
       <Output TaskParameter="ResourceAssemblies" ItemName="ResourceCopyLocalItems" />
       <Output TaskParameter="RuntimeAssemblies" ItemName="RuntimeCopyLocalItems" />
-      <Output TaskParameter="RuntimeTargets" ItemName="ResolvedRuntimeTargets" />
+      <Output TaskParameter="RuntimeTargets" ItemName="RuntimeTargetsCopyLocalItems" />
       <Output TaskParameter="CompileTimeAssemblies" ItemName="ResolvedCompileFileDefinitions" />
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
+      <Output TaskParameter="PackageFolders" ItemName="AssetsFilePackageFolder" />
     </ResolvePackageAssets>
 
-
-  </Target>
-
-  <Target Name="FilterSatelliteResources" AfterTargets="ResolvePackageAssets"
-          Condition="'$(SatelliteResourceLanguages)' != ''">
-
-    <JoinItems Left="@(ResourceCopyLocalItems)" LeftKey="Culture" LeftMetadata="*"
-               Right="$(SatelliteResourceLanguages)" RightKey="" RightMetadata=""
-               ItemSpecToUse="Left">
-      <Output TaskParameter="JoinResult" ItemName="FilteredResourceCopyLocalItems" />
-    </JoinItems>
-
-    <ItemGroup>
-      <ResourceCopyLocalItems Remove="@(ResourceCopyLocalItems)" />
-      <ResourceCopyLocalItems Include="@(FilteredResourceCopyLocalItems)" />
+    <ItemGroup Condition="'$(UseAppHostFromAssetsFile)' == 'true'">
+      <_NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
+                                     Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
     </ItemGroup>
+
+    <ItemGroup Condition="'@(_ApphostsForShimRuntimeIdentifiers)' == ''">
+      <_ApphostsForShimRuntimeIdentifiers Include="@(_ApphostsForShimRuntimeIdentifiersResolvePackageAssets)"/>
+    </ItemGroup>
+
   </Target>
 
   <!--
@@ -285,6 +302,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
+
   </Target>
     
   <!--
@@ -309,6 +327,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="SDKReferencesDesignTime" ItemName="_SDKReference" />
     </CollectSDKReferencesDesignTime>
+
   </Target>
 
   <!--
@@ -330,6 +349,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="SDKReferencesDesignTime" ItemName="_ResolvedSDKReference" />
     </CollectSDKReferencesDesignTime>
+
   </Target>
 
   <!--
@@ -352,8 +372,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ContentPreprocessorValues="@(PreprocessorValue)"
       ContentPreprocessorOutputDirectory="$(ContentPreprocessorOutputDirectory)"
       ProduceOnlyPreprocessorFiles="true"
-      ProjectLanguage="$(Language)"
- >
+      ProjectLanguage="$(Language)">
 
       <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />
       <Output TaskParameter="ProcessedContentItems" ItemName="_ProcessedContentItems" />
@@ -365,6 +384,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CreateItem Include="@(_ProcessedContentItems)" Condition="'@(_ProcessedContentItems)' != ''">
       <Output TaskParameter="Include" ItemName="%(_ProcessedContentItems.ProcessedItemType)" />
     </CreateItem>
+
   </Target>
 
   <!--
@@ -448,6 +468,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- Add the references we computed -->
       <Reference Include="@(ResolvedCompileFileDefinitionsToAdd)" />
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -481,29 +502,27 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-    CopyLocal Targets: For populating CopyLocal based on lock file
-     _ComputeLockFileCopyLocal
-    - ResolveLockFileCopyLocalProjectDeps
+    ResolveLockFileCopyLocalFiles
+    Resolves the files from the assets file to copy for build and publish.
     ============================================================
-    -->
-
-  <Target Name="_ComputeLockFileCopyLocal"
-        DependsOnTargets="ResolvePackageAssets;RunProduceContentAssets">
-  
-    <ItemGroup>
-      <AllCopyLocalItems Include="@(NativeCopyLocalItems)" />
-      <AllCopyLocalItems Include="@(RuntimeCopyLocalItems)" />
-      <AllCopyLocalItems Include="@(ResourceCopyLocalItems)" />
-      <AllCopyLocalItems Include="@(_ContentCopyLocalItems)" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="ResolveLockFileCopyLocalProjectDeps"
-          Condition="'$(CopyLocalLockFileAssemblies)' == 'true'"
-          DependsOnTargets="_ComputeLockFileCopyLocal">
+  -->
+  <Target Name="ResolveLockFileCopyLocalFiles"
+          DependsOnTargets="ResolvePackageAssets">
 
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" />
+      <_ResolvedCopyLocalBuildAssets Include="@(RuntimeCopyLocalItems)"
+                                     Condition="'%(RuntimeCopyLocalItems.CopyLocal)' == 'true'" />
+      <_ResolvedCopyLocalBuildAssets Include="@(ResourceCopyLocalItems)"
+                                     Condition="'%(ResourceCopyLocalItems.CopyLocal)' == 'true'" />
+      <!-- Always exclude the apphost executable from copy local assets; we will copy the generated apphost instead. -->
+      <_ResolvedCopyLocalBuildAssets Include="@(NativeCopyLocalItems)"
+                                     Exclude="@(_NativeRestoredAppHostNETCore)"
+                                     Condition="'%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
+      <_ResolvedCopyLocalBuildAssets Include="@(RuntimeTargetsCopyLocalItems)"
+                                     Condition="'%(RuntimeTargetsCopyLocalItems.CopyLocal)' == 'true'" />
+
+      <ReferenceCopyLocalPaths Include="@(_ResolvedCopyLocalBuildAssets)"
+                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true'" />
     </ItemGroup>
 
   </Target>

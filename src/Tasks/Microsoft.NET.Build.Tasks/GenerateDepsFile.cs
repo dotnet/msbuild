@@ -35,6 +35,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string PlatformLibraryName { get; set; }
 
+        public ITaskItem[] RuntimeFrameworks { get; set; }
+
         [Required]
         public string AssemblyName { get; set; }
 
@@ -64,6 +66,8 @@ namespace Microsoft.NET.Build.Tasks
 
         [Required]
         public ITaskItem[] FilesToSkip { get; set; }
+
+        public ITaskItem[] RuntimePackAssets { get; set; }
 
         public ITaskItem CompilerOptions { get; set; }
 
@@ -134,10 +138,14 @@ namespace Microsoft.NET.Build.Tasks
 
             IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
 
+            IEnumerable<RuntimePackAssetInfo> runtimePackAssets = RuntimePackAssets == null ? Enumerable.Empty<RuntimePackAssetInfo>() :
+                RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item));
+
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
                 PlatformLibraryName,
+                RuntimeFrameworks,
                 IsSelfContained);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, IncludeRuntimeFileVersions)
@@ -147,6 +155,7 @@ namespace Microsoft.NET.Build.Tasks
                 .WithDependencyReferences(dependencyReferences)
                 .WithReferenceProjectInfos(referenceProjects)
                 .WithExcludeFromPublishAssets(excludeFromPublishAssets)
+                .WithRuntimePackAssets(runtimePackAssets)
                 .WithCompilationOptions(compilationOptions)
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
                 .WithPackagesThatWhereFiltered(GetFilteredPackages())

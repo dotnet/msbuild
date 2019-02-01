@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tests
             // The repro here is very sensitive to the target framework and packages used. This specific case
             // net46 using only System.Collections.Immutable v1.4.0 will not pull in System.Runtime from a
             // package or from Microsoft.NET.Build.Extensions as a primary reference and so RARs dependency
-            // walk needs to find it in order for ImplictlyExpandDesignTimeFacades to inject it.
+            // walk needs to find it in order for ImplicitlyExpandDesignTimeFacades to inject it.
 
             var netFrameworkLibrary = new TestProject()
             {
@@ -441,6 +441,37 @@ public static class {project.Name}
             DirectoryInfo outputDirectory = referencedbuildCommand.GetOutputDirectory(
                 referencedProject.TargetFrameworks);
             return new FileInfo(Path.Combine(outputDirectory.FullName, referencedProject.Name + ".dll")).FullName;
+        }
+
+        //  Regression test for https://github.com/dotnet/sdk/issues/1730
+        [WindowsOnlyFact]
+        public void A_target_can_depend_on_RunResolvePublishAssemblies()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "DependsOnPublish",
+                IsSdkProject = true,
+                TargetFrameworks = "net461",
+                IsExe = false
+            };
+
+            var testInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var pns = p.Root.Name.Namespace;
+
+                    p.Root.Add(new XElement(pns + "Target",
+                        new XAttribute("Name", "Repro"),
+                        new XAttribute("DependsOnTargets", "RunResolvePublishAssemblies"),
+                        new XAttribute("BeforeTargets", "BeforeBuild")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testInstance.TestRoot, testProject.Name);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
         }
     }
 }

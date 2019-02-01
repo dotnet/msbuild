@@ -19,16 +19,19 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
-        public void GenerateBuildRuntimeConfigurationFiles_runs_incrementally()
+        [Theory]
+        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp3.0")]
+        public void GenerateBuildRuntimeConfigurationFiles_runs_incrementally(string targetFramework)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .Restore(Log);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1").FullName;
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
             var runtimeConfigDevJsonPath = Path.Combine(outputDirectory, "HelloWorld.runtimeconfig.dev.json");
 
             buildCommand.Execute().Should().Pass();
@@ -40,15 +43,17 @@ namespace Microsoft.NET.Build.Tests
             runtimeConfigDevJsonSecondModifiedTime.Should().Be(runtimeConfigDevJsonFirstModifiedTime);
         }
 
-        [Fact]
-        public void ResolvePackageAssets_runs_incrementally()
+        [Theory]
+        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp3.0")]
+        public void ResolvePackageAssets_runs_incrementally(string targetFramework)
         { 
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .Restore(Log);
 
-            var targetFramework = "netcoreapp1.1";
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
             var baseIntermediateOutputDirectory = buildCommand.GetBaseIntermediateDirectory().FullName;
