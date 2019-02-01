@@ -127,11 +127,8 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        if (buffer.Length > 0)
-                        {
-                            Directory.CreateDirectory(directoryPath);
-                            System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
-                        }
+                        Directory.CreateDirectory(directoryPath);
+                        System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
