@@ -8,7 +8,6 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    //  TODO: Rename to ResolveFrameworkAssets?
     public class ResolveTargetingPackAssets : TaskBase
     {
         public ITaskItem[] FrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
