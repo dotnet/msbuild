@@ -86,44 +86,31 @@ namespace Microsoft.Build.Tasks
                     var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
                     if (Overwrite)
                     {
-                        if (buffer.Length == 0)
+                        Directory.CreateDirectory(directoryPath);
+                        string contentsAsString = buffer.ToString();
+                        try
                         {
-                            // File.Delete throws when the directory does not exist.
-                            if (Directory.Exists(directoryPath))
+                            // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
+                            if (WriteOnlyWhenDifferent && FileUtilities.FileExistsNoThrow(File.ItemSpec))
                             {
-                                // if overwrite==true, and there are no lines to write,
-                                // just delete the file to leave everything tidy.
-                                System.IO.File.Delete(File.ItemSpec);
-                            }
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory(directoryPath);
-                            string contentsAsString = buffer.ToString();
-                            try
-                            {
-                                // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
-                                if (WriteOnlyWhenDifferent && FileUtilities.FileExistsNoThrow(File.ItemSpec))
+                                string existingContents = System.IO.File.ReadAllText(File.ItemSpec);
+                                if (existingContents.Length == buffer.Length)
                                 {
-                                    string existingContents = System.IO.File.ReadAllText(File.ItemSpec);
-                                    if (existingContents.Length == buffer.Length)
+                                    if (existingContents.Equals(contentsAsString))
                                     {
-                                        if (existingContents.Equals(contentsAsString))
-                                        {
-                                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
-                                            return true;
-                                        }
+                                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
+                                        return true;
                                     }
                                 }
                             }
-                            catch (IOException)
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
-                            }
-
-
-                            System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
                         }
+                        catch (IOException)
+                        {
+                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                        }
+
+
+                        System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
                     }
                     else
                     {
