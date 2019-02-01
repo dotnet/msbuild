@@ -528,7 +528,7 @@ namespace Microsoft.Build.UnitTests
          * If SkipUnchangedFiles is set to "false" then we should always copy over files that have same dates and sizes.
          * If SkipUnchangedFiles is set to "true" then we should never copy over files that have same dates and sizes.
          */
-        [Theory]
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/4126")]
         [InlineData(false)]
         [InlineData(true)]
         public void DoCopyOverCopiedFile(bool skipUnchangedFiles)
