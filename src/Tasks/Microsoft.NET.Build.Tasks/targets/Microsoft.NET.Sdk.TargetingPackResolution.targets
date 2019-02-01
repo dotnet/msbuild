@@ -55,6 +55,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(EnableTargetingPackDownload)' == ''">
+      <EnableTargetingPackDownload>true</EnableTargetingPackDownload>
+    </PropertyGroup>
+
     <ItemGroup>
       <_PackAsToolShimRuntimeIdentifiers Condition="@(_PackAsToolShimRuntimeIdentifiers) ==''" Include="$(PackAsToolShimRuntimeIdentifiers)"/>
     </ItemGroup>
@@ -68,7 +72,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 SelfContained="$(SelfContained)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
-                                TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)">
+                                TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
+                                EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="PackageReferenceToAdd" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />

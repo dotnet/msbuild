@@ -33,6 +33,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool TargetLatestRuntimePatch { get; set; }
 
+        public bool EnableTargetingPackDownload { get; set; }
+
         public ITaskItem[] FrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem[] KnownFrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
@@ -103,11 +105,14 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    //  Download targeting pack
-                    TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
-                    packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
+                    if (EnableTargetingPackDownload)
+                    {
+                        //  Download targeting pack
+                        TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
+                        packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
 
-                    packagesToDownload.Add(packageToDownload);
+                        packagesToDownload.Add(packageToDownload);
+                    }
                 }
 
                 targetingPacks.Add(targetingPack);
