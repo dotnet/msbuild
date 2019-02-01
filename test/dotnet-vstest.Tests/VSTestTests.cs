@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 .Should().Pass();
 
             var outputDll = testRoot
-                .GetDirectory("bin", configuration, "netcoreapp2.1")
+                .GetDirectory("bin", configuration, "netcoreapp2.2")
                 .GetFile($"{testAppName}.dll");
 
             var argsForVstest = $"\"{outputDll.FullName}\" --logger:console;verbosity=normal";

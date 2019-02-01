@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>List all package references of the project or solution.</source>
+        <target state="needs-review-translation">Wyświetl listę wszystkich odwołań między projektami w projekcie.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK | FRAMEWORK\RID</source>
+        <target state="new">FRAMEWORK | FRAMEWORK\RID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</source>
+        <target state="new">Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutdatedDescription">
+        <source>Lists packages that have newer versions.</source>
+        <target state="new">Lists packages that have newer versions.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTransitiveDescription">
+        <source>Lists transitive and top-level packages.</source>
+        <target state="new">Lists transitive and top-level packages.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsOrSolutions">
+        <source>A project or solution file could not be found in {0}. Specify a project or solution file to use.</source>
+        <target state="new">A project or solution file could not be found in {0}. Specify a project or solution file to use.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfig">
+        <source>CONFIG_FILE</source>
+        <target state="new">CONFIG_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigDescription">
+        <source>The path to the NuGet config file to use. Requires the '--outdated' option.</source>
+        <target state="new">The path to the NuGet config file to use. Requires the '--outdated' option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestMinorDescription">
+        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="new">Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestPatchDescription">
+        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="new">Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPrereleaseDescription">
+        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="new">Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="new">The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedOptionOnly">
+        <source>Option '{0}' requires the '--outdated' option to be specified.</source>
+        <target state="new">Option '{0}' requires the '--outdated' option to be specified.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>Could not find file or directory '{0}'.</source>
+        <target state="new">Could not find file or directory '{0}'.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
