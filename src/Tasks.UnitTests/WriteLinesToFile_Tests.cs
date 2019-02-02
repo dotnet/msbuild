@@ -179,44 +179,56 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        /// <summary>
-        /// Should delete the file when <see cref="WriteLinesToFile.Lines"/> is <c>null</c> and <see cref="WriteLinesToFile.Overwrite"/> is <c>true</c>.
-        /// </summary>
-        [Fact]
-        public void WriteLinesToFileDeleteFileWhenLinesIsNull()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        private void WritingNothingErasesExistingFile(bool useNullLines)
         {
-            WriteLinesToFileDeleteFileCore(null);
-        }
+            ITaskItem[] lines = useNullLines ? null : Array.Empty<ITaskItem>();
 
-        /// <summary>
-        /// Should delete the file when <see cref="WriteLinesToFile.Lines"/> is empty and <see cref="WriteLinesToFile.Overwrite"/> is <c>true</c>.
-        /// </summary>
-        [Fact]
-        public void WriteLinesToFileDeleteFileWhenLinesIsEmpty()
-        {
-            WriteLinesToFileDeleteFileCore(Array.Empty<ITaskItem>());
-        }
-
-        private void WriteLinesToFileDeleteFileCore(ITaskItem[] lines)
-        {
             using (var testEnv = TestEnvironment.Create())
             {
-                var file = testEnv.CreateFile();
+                var file = testEnv.CreateFile("FileToBeEmptied.txt", "Contents that should be erased");
 
-                var WriteLinesToFile = new WriteLinesToFile
+                File.Exists(file.Path).ShouldBeTrue();
+                File.ReadAllText(file.Path).ShouldNotBeEmpty();
+
+                new WriteLinesToFile
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
                     File = new TaskItem(file.Path),
                     Lines = lines
-                };
+                }.Execute().ShouldBeTrue();
 
-                // Verify that the file does exist. Otherwise the test would pass - even it should not.
                 File.Exists(file.Path).ShouldBeTrue();
+                File.ReadAllText(file.Path).ShouldBeEmpty();
+            }
+        }
 
-                WriteLinesToFile.Execute().ShouldBeTrue();
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        private void WritingNothingCreatesNewFile(bool useNullLines)
+        {
+            ITaskItem[] lines = useNullLines ? null : Array.Empty<ITaskItem>();
+
+            using (var testEnv = TestEnvironment.Create())
+            {
+                var file = testEnv.GetTempFile();
 
                 File.Exists(file.Path).ShouldBeFalse();
+
+                new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file.Path),
+                    Lines = lines
+                }.Execute().ShouldBeTrue();
+
+                File.Exists(file.Path).ShouldBeTrue();
+                File.ReadAllText(file.Path).ShouldBeEmpty();
             }
         }
     }
