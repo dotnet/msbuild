@@ -26,7 +26,6 @@
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
   </PropertyGroup>
-
   <PropertyGroup>
     <MicroBuildPluginsSwixBuildVersion>1.0.422</MicroBuildPluginsSwixBuildVersion>
     <RoslynToolsOptProfVersion>1.0.0-beta3.19057.1</RoslynToolsOptProfVersion>
