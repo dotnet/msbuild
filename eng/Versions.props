@@ -21,7 +21,7 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftFSharpCompilerPackageVersion>10.4.0-rtm-190131-04</MicrosoftFSharpCompilerPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>3.0.0-beta3-19067-14</MicrosoftNETCoreCompilersPackageVersion>
-    <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview-19081-03</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview-19101-04</MicrosoftNETSdkRazorPackageVersion>
     <MicrosoftNETSdkWebPackageVersion>3.0.100-preview.19064.1</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
