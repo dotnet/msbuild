@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.Utils
     public class RuntimeConfig 
     { 
         public bool IsPortable { get; } 
-        public RuntimeConfigFramework Framework { get; } 
+        internal RuntimeConfigFramework Framework { get; }
  
         public RuntimeConfig(string runtimeConfigPath) 
         {

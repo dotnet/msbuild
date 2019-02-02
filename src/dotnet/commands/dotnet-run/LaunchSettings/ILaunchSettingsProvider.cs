@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
-    public interface ILaunchSettingsProvider
+    internal interface ILaunchSettingsProvider
     {
         string CommandName { get; }
 

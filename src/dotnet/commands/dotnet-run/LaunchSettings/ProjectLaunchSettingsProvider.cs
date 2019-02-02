@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
-    public class ProjectLaunchSettingsProvider : ILaunchSettingsProvider
+    internal class ProjectLaunchSettingsProvider : ILaunchSettingsProvider
     {
         public static readonly string CommandNameValue = "Project";
 
