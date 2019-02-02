@@ -21,6 +21,13 @@
     <PackageReference Include="System.Data.SqlClient" Version="$(SystemDataSqlClientVersionPackageVersion)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="RunFsc.sh;RunFsc.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <Target Name="MakeFscRunnableAndMoveToPublishDir"
           AfterTargets="Publish"
           BeforeTargets="RemoveFilesAfterPublish">
