@@ -14,6 +14,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var task = new ResolveFrameworkReferences();
 
+            task.EnableTargetingPackDownload = true;
             task.TargetFrameworkIdentifier = ".NETCoreApp";
             task.TargetFrameworkVersion = "3.0";
             task.FrameworkReferences = new[]
