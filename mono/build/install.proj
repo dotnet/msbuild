@@ -94,6 +94,10 @@
             <RemainingMSBuildBinFiles_Relative Include="@(RemainingMSBuildBinFiles -> '$([MSBuild]::MakeRelative('$(MSBuildBinSrcDir)', %(RemainingMSBuildBinFiles.Identity)))' )" />
         </ItemGroup>
 
+        <MakeDir Directories="$(MSBuildInstallBinDir);$(XBuildDir)">
+            <Output TaskParameter="DirectoriesCreated" ItemName="CopiedFiles" />
+        </MakeDir>
+
         <Exec
             WorkingDirectory="$(MonoInstallPrefix)\lib\mono\msbuild"
             Command="ln -s 15.0 Current" />
