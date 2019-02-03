@@ -25,6 +25,7 @@
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
+    <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
   </PropertyGroup>
   <PropertyGroup>
     <DropAppVersion>17.144.28413-buildid7983345</DropAppVersion>
