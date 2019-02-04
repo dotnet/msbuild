@@ -49,6 +49,7 @@
 
     <Exec Condition="!Exists($(PerformanceTestsLocalDirectory))"
           WorkingDirectory="$(RepoRoot)" Command="git clone --quiet $(PerformanceTestsRepoURL) $(PerformanceTestsLocalDirectory)" />
+    <Exec WorkingDirectory="$(PerformanceTestsLocalDirectory)" Command="git fetch --quiet" />
     <Exec WorkingDirectory="$(PerformanceTestsLocalDirectory)" Command="git checkout --quiet $(PerformanceTestsCommit)" />
   </Target>
 
