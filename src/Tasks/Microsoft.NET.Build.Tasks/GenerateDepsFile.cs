@@ -46,28 +46,24 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string AssemblyVersion { get; set; }
 
-        [Required]
-        public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
+        public ITaskItem[] AssemblySatelliteAssemblies { get; set; } = Array.Empty<ITaskItem>();
 
         [Required]
         public bool IncludeMainProject { get; set; }
 
-        [Required]
-        public ITaskItem[] ReferencePaths { get; set; }
 
-        [Required]
-        public ITaskItem[] ReferenceDependencyPaths { get; set; }
+        public ITaskItem[] ReferencePaths { get; set; } = Array.Empty<ITaskItem>();
 
-        [Required]
-        public ITaskItem[] ReferenceSatellitePaths { get; set; }
+        public ITaskItem[] ReferenceDependencyPaths { get; set; } = Array.Empty<ITaskItem>();
 
-        [Required]
-        public ITaskItem[] ReferenceAssemblies { get; set; }
+        public ITaskItem[] ReferenceSatellitePaths { get; set; } = Array.Empty<ITaskItem>();
+
+        public ITaskItem[] ReferenceAssemblies { get; set; } = Array.Empty<ITaskItem>();
 
         [Required]
         public ITaskItem[] FilesToSkip { get; set; }
 
-        public ITaskItem[] RuntimePackAssets { get; set; }
+        public ITaskItem[] RuntimePackAssets { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem CompilerOptions { get; set; }
 
@@ -138,7 +134,7 @@ namespace Microsoft.NET.Build.Tasks
 
             IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
 
-            IEnumerable<RuntimePackAssetInfo> runtimePackAssets = RuntimePackAssets == null ? Enumerable.Empty<RuntimePackAssetInfo>() :
+            IEnumerable<RuntimePackAssetInfo> runtimePackAssets = 
                 RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item));
 
             ProjectContext projectContext = lockFile.CreateProjectContext(

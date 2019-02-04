@@ -48,6 +48,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IsSelfContained { get; set; }
 
+        public bool WriteAdditionalProbingPathsToMainConfig { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         [Output]
@@ -60,9 +62,12 @@ namespace Microsoft.NET.Build.Tasks
         {
             bool writeDevRuntimeConfig = !string.IsNullOrEmpty(RuntimeConfigDevPath);
 
-            if (AdditionalProbingPaths?.Any() == true && !writeDevRuntimeConfig)
+            if (!WriteAdditionalProbingPathsToMainConfig)
             {
-                Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
+                if (AdditionalProbingPaths?.Any() == true && !writeDevRuntimeConfig)
+                {
+                    Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
+                }
             }
 
             LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
@@ -93,6 +98,11 @@ namespace Microsoft.NET.Build.Tasks
             // conflicts the HostConfigurationOptions win. The reasoning is that HostConfigurationOptions
             // can be changed using MSBuild properties, which can be specified at build time.
             AddHostConfigurationOptions(config.RuntimeOptions);
+
+            if (WriteAdditionalProbingPathsToMainConfig)
+            {
+                AddAdditionalProbingPaths(config.RuntimeOptions, projectContext);
+            }
 
             WriteToJsonFile(RuntimeConfigPath, config);
             _filesWritten.Add(new TaskItem(RuntimeConfigPath));
