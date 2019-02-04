@@ -22,10 +22,10 @@
   </PropertyGroup>
   <!-- Repo Toolset Features -->
   <PropertyGroup>
-    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-    <UsingToolVSSDK>true</UsingToolVSSDK>
-    <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
+    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
+    <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
+    <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
   <PropertyGroup>
     <DropAppVersion>17.144.28413-buildid7983345</DropAppVersion>

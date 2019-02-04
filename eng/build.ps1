@@ -174,8 +174,8 @@ function Restore-OptProfData() {
             return
         }
 
-        Write-Host "Internal tool not found: '$dropToolPath'." -ForegroundColor Red
-        Write-Host "Run nuget restore `"$EngRoot\internal\Toolset.csproj`"." -ForegroundColor DarkGray
+        Write-Error "Internal tool not found: '$dropToolPath'." -ForegroundColor Red
+        Write-Error "Run nuget restore `"$EngRoot\internal\Toolset.csproj`"." -ForegroundColor DarkGray
         ExitWithExitCode 1
     }
 
@@ -197,8 +197,8 @@ function Restore-OptProfData() {
 
     Create-Directory $IbcOptimizationDataDir
 
-    $dropServiceUrl = "https://devdiv.artifacts.visualstudio.com"
-    # The branh name here needs to be parameterized.
+    $dropServiceUrl = "https://pkgs.dev.azure.com/devdiv/"
+    # The branch name here needs to be parameterized.
     $dropNamePrefix = "OptimizationData/microsoft/MSBuild/vs16.0"
     $patAuth = if ($officialBuildId) { "--patAuth `"$vsDropAccessToken`"" } else { "" }
 
@@ -259,7 +259,8 @@ try {
     . $configureToolsetScript
   }
 
-  # IBC merge is only invoked in official build, but we want to enable running IBCMerge locally as well.
+  # IBC merge is only invoked in official build, but we want to enable running
+  # IBCMerge locally as well when running with the ci parameter.
   $applyOptimizationData = $ci -and $configuration -eq "Release" -and $msbuildEngine -eq "vs"
 
   if ($applyOptimizationData -and $restore) {
