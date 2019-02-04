@@ -23,20 +23,15 @@
   <!-- Repo Toolset Features -->
   <PropertyGroup>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
-    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
+    <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
   <PropertyGroup>
-    <DropAppVersion>17.144.28413-buildid7983345</DropAppVersion>
-    <MicroBuildPluginsSwixBuildVersion>1.0.422</MicroBuildPluginsSwixBuildVersion>
-    <RoslynToolsOptProfVersion>1.0.0-beta3.19057.1</RoslynToolsOptProfVersion>
-    <RoslynOptProfRunSettingsGeneratorVersion>1.0.0-beta3.19057.1</RoslynOptProfRunSettingsGeneratorVersion>
     <MicrosoftDotNetIBCMergeVersion>4.7.2-alpha-00001</MicrosoftDotNetIBCMergeVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>2.1.401</DotNetCliVersion>
-    <VSWhereVersion>2.2.7</VSWhereVersion>
   </PropertyGroup>
 </Project>
