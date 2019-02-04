@@ -29,6 +29,8 @@ Param(
   [switch] $prepareMachine,
   [switch] $help,
 
+  # official build settings
+  [string]$officialBuildId = "",
   [string]$vsDropName = "",
   [string]$vsBranch = "",
   [string]$vsDropAccessToken = "",
@@ -61,6 +63,13 @@ function Print-Usage() {
     Write-Host "  -publishBuildAssets     Push assets to BAR"
     Write-Host ""
 
+    Write-Host "Official build settings:"
+    Write-Host "  -officialBuildId          An official build id, e.g. 20190102.3"
+    Write-Host "  -vsDropName               Visual Studio product drop name"
+    Write-Host "  -vsBranch                 Visual Studio insertion branch"
+    Write-Host "  -vsDropAccessToken        Visual Studio drop access token"
+    Write-Host ""
+
     Write-Host "Advanced settings:"
     Write-Host "  -projects <value>       Semi-colon delimited list of sln/proj's to build. Globbing is supported (*.sln)"
     Write-Host "  -ci                     Set when running on CI server"
@@ -71,6 +80,35 @@ function Print-Usage() {
     Write-Host "The above arguments can be shortened as much as to be unambiguous (e.g. -co for configuration, -t for test, etc.)."
 }
 
+function Process-Arguments() {
+    if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
+       Print-Usage
+       exit 0
+    }
+
+    if (!$vsBranch) {
+        if ($officialBuildId) {
+            Write-Host "vsBranch must be specified for official builds"
+            exit 1
+        }
+
+        $script:vsBranch = "dummy/ci"
+    }
+
+    if (!$vsDropName) {
+        if ($officialBuildId) {
+            Write-Host "vsDropName must be specified for official builds"
+            exit 1
+        }
+
+        $script:vsDropName = "Products/DummyDrop"
+    }
+
+    if (!$vsDropAccessToken -and $officialBuildId) {
+        Write-Host "vsDropAccessToken must be specified for official builds"
+        exit 1
+    }
+}
 
 function InitializeCustomToolset {
   if (-not $restore) {
@@ -97,6 +135,8 @@ function Build-Repo() {
     $properties = $msbuildArgs
   }
 
+  $optDataDir = if ($applyOptimizationData) { $IbcOptimizationDataDir } else { "" }
+
   MSBuild $toolsetBuildProj `
     $bl `
     /p:Configuration=$configuration `
@@ -115,7 +155,67 @@ function Build-Repo() {
     /p:Execute=$execute `
     /p:ContinuousIntegrationBuild=$ci `
     /p:VisualStudioDropName=$vsDropName `
+    /p:IbcOptimizationDataDir=$optDataDir `
+    /p:OfficialBuildId=$officialBuildId `
     @properties
+}
+
+function Restore-OptProfData() {
+    $dropToolDir = Get-PackageDir "Drop.App"
+    $dropToolPath = Join-Path $dropToolDir "lib\net45\drop.exe"
+
+    if (!(Test-Path $dropToolPath)) {
+
+        # Only report error when running in an official build.
+        # Allows to test optimization data operations locally by running
+        # cibuild.cmd after manually restoring internal tools project.
+        if (!$officialBuildId) {
+            $script:applyOptimizationData = $false
+            return
+        }
+
+        Write-Error "Internal tool not found: '$dropToolPath'." -ForegroundColor Red
+        Write-Error "Run nuget restore `"$EngRoot\internal\Toolset.csproj`"." -ForegroundColor DarkGray
+        ExitWithExitCode 1
+    }
+
+    function find-latest-drop($drops) {
+         $result = $null
+         [DateTime]$latest = [DateTime]::New(0)
+         foreach ($drop in $drops) {
+             $dt = [DateTime]::Parse($drop.CreatedDateUtc)
+             if ($result -eq $null -or ($drop.UploadComplete -and !$drop.DeletePending -and ($dt -gt $latest))) {
+                 $result = $drop
+                 $latest = $dt
+             }
+         }
+
+         return $result
+    }
+
+    Write-Host "Acquiring optimization data"
+
+    Create-Directory $IbcOptimizationDataDir
+
+    $dropServiceUrl = "https://devdiv.artifacts.visualstudio.com"
+    # The branch name here needs to be parameterized.
+    $dropNamePrefix = "OptimizationData/microsoft/MSBuild/vs16.0"
+    $patAuth = if ($officialBuildId) { "--patAuth `"$vsDropAccessToken`"" } else { "" }
+
+    $dropsJsonPath = Join-Path $IbcOptimizationDataDir "AvailableDrops.json"
+    $logFile = Join-Path $LogDir "OptimizationDataAcquisition.log"
+
+    Exec-Console $dropToolPath "list --dropservice `"$dropServiceUrl`" $patAuth --pathPrefixFilter `"$dropNamePrefix`" --toJsonFile `"$dropsJsonPath`" --traceto `"$logFile`""
+    $dropsJson = Get-Content -Raw -Path $dropsJsonPath | ConvertFrom-Json
+    $latestDrop = find-latest-drop($dropsJson)
+
+    if ($latestDrop -eq $null) {
+        Write-Host "No drop matching given name found: $dropServiceUrl/$dropNamePrefix/*" -ForegroundColor Red
+        ExitWithExitCode 1
+    }
+
+    Write-Host "Downloading optimization data from drop $dropServiceUrl/$($latestDrop.Name)"
+    Exec-Console $dropToolPath "get --dropservice `"$dropServiceUrl`" $patAuth --name `"$($latestDrop.Name)`" --dest `"$IbcOptimizationDataDir`" --traceto `"$logFile`""
 }
 
 function Build-OptProfData() {
@@ -145,10 +245,7 @@ function Build-OptProfData() {
 }
 
 try {
-  if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
-    Print-Usage
-    exit 0
-  }
+  Process-Arguments
 
   if ($ci) {
     $binaryLog = $true
@@ -162,9 +259,19 @@ try {
     . $configureToolsetScript
   }
 
+  # IBC merge is only invoked in official build, but we want to enable running
+  # IBCMerge locally as well when running with the ci parameter.
+  $applyOptimizationData = $ci -and $configuration -eq "Release" -and $msbuildEngine -eq "vs"
+
+  if ($applyOptimizationData -and $restore) {
+    Restore-OptProfData
+  }
+
   Build-Repo
 
-  Build-OptProfData
+  if ($applyOptimizationData -and $build) {
+    Build-OptProfData
+  }
 }
 catch {
   Write-Host $_

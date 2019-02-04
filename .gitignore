@@ -241,6 +241,9 @@ Samples/MultiprocessBuild/PortableTask.dll
 # Repo nuget cache
 .packages/
 
+# Optimization Data folder
+.o/
+
 #Stage1 build folder for when doing bootstrap builds
 stage1/
 
