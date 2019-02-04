@@ -5,11 +5,20 @@
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
-  
+
+  <!--
+    Local Developer Mode to find locally built FSharp nuget package Set FSharpCompilerPackage environment variable to path containing F# compiler nuspec
+  -->
+  <PropertyGroup Condition = "'$(FSharpCompilerPackage)' != ''">
+    <RestoreAdditionalProjectSources Condition = "'$(RestoreAdditionalProjectSources)' != ''">$(RestoreAdditionalProjectSources);$(FSharpCompilerPackage)</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSources Condition = "'$(RestoreAdditionalProjectSources)' == ''">$(FSharpCompilerPackage)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NetCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.InteropServices" Version="$(SystemRuntimeInteropServicesPackageVersion)" />
+    <PackageReference Include="System.Data.SqlClient" Version="$(SystemDataSqlClientVersionPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
