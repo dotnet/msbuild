@@ -197,7 +197,7 @@ function Restore-OptProfData() {
 
     Create-Directory $IbcOptimizationDataDir
 
-    $dropServiceUrl = "https://pkgs.dev.azure.com/devdiv/"
+    $dropServiceUrl = "https://devdiv.artifacts.visualstudio.com"
     # The branch name here needs to be parameterized.
     $dropNamePrefix = "OptimizationData/microsoft/MSBuild/vs16.0"
     $patAuth = if ($officialBuildId) { "--patAuth `"$vsDropAccessToken`"" } else { "" }

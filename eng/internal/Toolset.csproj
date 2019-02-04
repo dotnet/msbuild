@@ -10,8 +10,8 @@
   </ItemGroup>
   <PropertyGroup>
     <RestoreSources>
-      https://pkgs.dev.azure.com/devdiv/_packaging/dotnet-core-internal-tooling/nuget/v3/index.json;
-      https://pkgs.dev.azure.com/devdiv/_packaging/VS/nuget/v3/index.json
+      https://devdiv.pkgs.visualstudio.com/_packaging/8f470c7e-ac49-4afe-a6ee-cf784e438b93/nuget/v3/index.json;
+      https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json;
     </RestoreSources>
   </PropertyGroup>
 </Project>
