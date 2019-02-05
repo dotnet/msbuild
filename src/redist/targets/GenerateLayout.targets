@@ -170,7 +170,6 @@
 
     <Exec Command="find $(OutputPath) -type d -exec chmod 755 {} \;" />
     <Exec Command="find $(OutputPath) -type f -exec chmod 644 {} \;" />
-    <Chmod Mode="755" Glob="$(OutputPath)/FSharp/RunFsc.sh" />
   </Target>
 
   <Target Name="DeleteSymbolsFromPublishDir"
