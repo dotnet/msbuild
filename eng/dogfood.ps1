@@ -41,6 +41,7 @@ try {
   $env:DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = $env:MSBuildSDKsPath
   $env:NETCoreSdkBundledVersionsProps = Join-Path $env:DOTNET_INSTALL_DIR "sdk\$env:SDK_CLI_VERSION\Microsoft.NETCoreSdk.BundledVersions.props"
   $env:MicrosoftNETBuildExtensionsTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets"
+  $env:DOTNET_ROOT = $env:DOTNET_INSTALL_DIR
 
   if ($command -eq $null -and $env:DOTNET_SDK_DOGFOOD_SHELL -ne $null) {
     $command = , $env:DOTNET_SDK_DOGFOOD_SHELL

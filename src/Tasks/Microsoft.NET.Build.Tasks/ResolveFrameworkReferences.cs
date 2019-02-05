@@ -57,12 +57,18 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
+            //  Perf optimization: If there are no FrameworkReference items, then don't do anything
+            //  (This means that if you don't have any direct framework references, you won't get any transitive ones either
+            if (FrameworkReferences == null || FrameworkReferences.Length == 0)
+            {
+                return;
+            }
+
             var knownFrameworkReferencesForTargetFramework = KnownFrameworkReferences.Select(item => new KnownFrameworkReference(item))
                 .Where(kfr => kfr.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
                               NormalizeVersion(kfr.TargetFramework.Version) == NormalizeVersion(new Version(TargetFrameworkVersion)))
                 .ToList();
 
-            //  TODO: How to handle duplicate FrameworkReferences
             var frameworkReferenceDict = FrameworkReferences.ToDictionary(fr => fr.ItemSpec);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
@@ -71,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks
             List<ITaskItem> runtimePacks = new List<ITaskItem>();
             List<ITaskItem> unavailableRuntimePacks = new List<ITaskItem>();
 
-            foreach (var knownFrameworkReference in  knownFrameworkReferencesForTargetFramework)
+            foreach (var knownFrameworkReference in knownFrameworkReferencesForTargetFramework)
             {
                 frameworkReferenceDict.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
 
@@ -90,8 +96,6 @@ namespace Microsoft.NET.Build.Tasks
                     targetingPackVersion = knownFrameworkReference.TargetingPackVersion;
                 }
                 targetingPack.SetMetadata(MetadataKeys.PackageVersion, targetingPackVersion);
-
-                targetingPack.SetMetadata(MetadataKeys.RelativePath, "");
 
                 string targetingPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
@@ -117,47 +121,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 targetingPacks.Add(targetingPack);
 
-                //  Precedence order for selecting runtime framework version
-                //  - RuntimeFrameworkVersion metadata on FrameworkReference item
-                //  - RuntimeFrameworkVersion MSBuild property
-                //  - Then, use either the LatestRuntimeFrameworkVersion or the DefaultRuntimeFrameworkVersion of the KnownFrameworkReference, based on
-                //      - The value (if set) of TargetLatestRuntimePatch metadata on the FrameworkReference
-                //      - The TargetLatestRuntimePatch MSBuild property (which defaults to True if SelfContained is true, and False otherwise)
-
-                string runtimeFrameworkVersion = null;
-                if (frameworkReference != null)
-                {
-                    runtimeFrameworkVersion = frameworkReference.GetMetadata("RuntimeFrameworkVersion");
-                }
-                if (string.IsNullOrEmpty(runtimeFrameworkVersion))
-                {
-                    runtimeFrameworkVersion = RuntimeFrameworkVersion;
-                }
-                if (string.IsNullOrEmpty(runtimeFrameworkVersion))
-                {
-                    bool? useLatestRuntimeFrameworkVersion = null;
-                    if (frameworkReference != null)
-                    {
-                        string useLatestRuntimeFrameworkMetadata = frameworkReference.GetMetadata("TargetLatestRuntimePatch");
-                        if (!string.IsNullOrEmpty(useLatestRuntimeFrameworkMetadata))
-                        {
-                            useLatestRuntimeFrameworkVersion = MSBuildUtilities.ConvertStringToBool(useLatestRuntimeFrameworkMetadata,
-                                defaultValue: false);
-                        }
-                    }
-                    if (useLatestRuntimeFrameworkVersion == null)
-                    {
-                        useLatestRuntimeFrameworkVersion = TargetLatestRuntimePatch;
-                    }
-                    if (useLatestRuntimeFrameworkVersion.Value)
-                    {
-                        runtimeFrameworkVersion = knownFrameworkReference.LatestRuntimeFrameworkVersion;
-                    }
-                    else
-                    {
-                        runtimeFrameworkVersion = knownFrameworkReference.DefaultRuntimeFrameworkVersion;
-                    }
-                }
+                var runtimeFrameworkVersion = GetRuntimeFrameworkVersion(frameworkReference, knownFrameworkReference);
 
                 if (SelfContained &&
                     !string.IsNullOrEmpty(RuntimeIdentifier) &&
@@ -218,7 +182,6 @@ namespace Microsoft.NET.Build.Tasks
                 runtimeFrameworks.Add(runtimeFramework);
             }
                                                       
-
             if (packagesToDownload.Any())
             {
                 PackagesToDownload = packagesToDownload.ToArray();
@@ -245,6 +208,54 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private string GetRuntimeFrameworkVersion(ITaskItem frameworkReference, KnownFrameworkReference knownFrameworkReference)
+        {
+            //  Precedence order for selecting runtime framework version
+            //  - RuntimeFrameworkVersion metadata on FrameworkReference item
+            //  - RuntimeFrameworkVersion MSBuild property
+            //  - Then, use either the LatestRuntimeFrameworkVersion or the DefaultRuntimeFrameworkVersion of the KnownFrameworkReference, based on
+            //      - The value (if set) of TargetLatestRuntimePatch metadata on the FrameworkReference
+            //      - The TargetLatestRuntimePatch MSBuild property (which defaults to True if SelfContained is true, and False otherwise)
+
+            string runtimeFrameworkVersion = null;
+
+            if (frameworkReference != null)
+            {
+                runtimeFrameworkVersion = frameworkReference.GetMetadata("RuntimeFrameworkVersion");
+            }
+            if (string.IsNullOrEmpty(runtimeFrameworkVersion))
+            {
+                runtimeFrameworkVersion = RuntimeFrameworkVersion;
+            }
+            if (string.IsNullOrEmpty(runtimeFrameworkVersion))
+            {
+                bool? useLatestRuntimeFrameworkVersion = null;
+                if (frameworkReference != null)
+                {
+                    string useLatestRuntimeFrameworkMetadata = frameworkReference.GetMetadata("TargetLatestRuntimePatch");
+                    if (!string.IsNullOrEmpty(useLatestRuntimeFrameworkMetadata))
+                    {
+                        useLatestRuntimeFrameworkVersion = MSBuildUtilities.ConvertStringToBool(useLatestRuntimeFrameworkMetadata,
+                            defaultValue: false);
+                    }
+                }
+                if (useLatestRuntimeFrameworkVersion == null)
+                {
+                    useLatestRuntimeFrameworkVersion = TargetLatestRuntimePatch;
+                }
+                if (useLatestRuntimeFrameworkVersion.Value)
+                {
+                    runtimeFrameworkVersion = knownFrameworkReference.LatestRuntimeFrameworkVersion;
+                }
+                else
+                {
+                    runtimeFrameworkVersion = knownFrameworkReference.DefaultRuntimeFrameworkVersion;
+                }
+            }
+
+            return runtimeFrameworkVersion;
+        }
+
         internal static Version NormalizeVersion(Version version)
         {
             if (version.Revision == 0)
@@ -262,7 +273,7 @@ namespace Microsoft.NET.Build.Tasks
             return version;
         }
 
-        private class KnownFrameworkReference
+        private struct KnownFrameworkReference
         {
             ITaskItem _item;
             public KnownFrameworkReference(ITaskItem item)
