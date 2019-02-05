@@ -1,13 +1,13 @@
 # Task isolation
 ## Problem definition
 Tasks in MSBuild are dynamically loaded assemblies with potentially separate and colliding dependency trees. Currently MSBuild on .NET Core has no isolation between tasks and as such only one version of any given assembly can be loaded. Prime example of this is Newtonsoft.Json which has multiple versions, but all the tasks must agree on it to work.
-This problem is also described in microsoft/msbuild#1754.
+This problem is also described in #1754.
 
 ## Possible solution
-Use [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-2.2) (ALC) to provide binding isolation for tasks. Each task would be loaded into its own ALC instance.
-* The ALC would resolve all dependencies of the tasks (see dependency resolution below)
-* ALC would fallback to the Default for dependencies which the task doesn't carry with itself (Framework and so on)
-* ALC would probably have to forcefully fallback for MSBuild assemblies since by default lot of tasks will carry these, but the system requires for the MSBuild assemblies to be shared.
+Use [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-2.2) (ALC) to provide binding isolation for task assemblies. Each task assembly would be loaded into its own ALC instance.
+* The ALC would resolve all dependencies of the task assemblies (see dependency resolution below)
+* ALC would fallback to the Default for dependencies which the assembly doesn't carry with itself (frameworks and so on)
+* ALC would probably have to forcefully fallback for MSBuild assemblies since it's possible that tasks will carry these, but the system requires for the MSBuild assemblies to be shared.
 We would probably also want to load groups of tasks which belong together into the same ALC (for example based on their location on disk) to improve performance. This will need some care as there's no guarantee that two random tasks have compatible dependency trees.
 
 ## Potential risks
@@ -32,7 +32,7 @@ In .NET Core 3 there's a new type [`AssemblyDependencyResolver`](https://github.
 It was designed to be used as the underlying piece to implement custom ALC. So it would work nicely with task isolation above.
 
 ## Potential risks
-* Small probability of breaking tasks which have `.deps.json` with them and those are not correct. With this change the file would suddenly be used and coudl cause either load failures or different versions of assemblies to get loaded.
+* Small probability of breaking tasks which have `.deps.json` with them and those are not correct. With this change the file would suddenly be used and could cause either load failures or different versions of assemblies to get loaded.
 
 ## Additional consideration
 * Task dependency resolution requires APIs which are only available in .NET Core 3.0 (no plan to backport), as such MSBuild will have to target netcoreapp3.0 to use these APIs.
