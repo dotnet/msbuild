@@ -107,7 +107,7 @@ namespace Microsoft.Build.Shared
 
     internal static class TargetNames
     {
-        public const string BuildTargetsForGraphBuild = "BuildTargetsForGraphBuild";
+        public const string BuildTargetsForGraphBuild = "_BuildTargetsForGraphBuild";
     }
 
     internal static class PropertyNames
@@ -120,12 +120,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Project entry targets such that they are accessible during evaluation
         /// </summary>
-        internal const string GraphBuildEntryTargets = "GraphBuildEntryTargets";
+        internal const string GraphBuildEntryTargets = "_GraphBuildEntryTargets";
 
         /// <summary>
         /// Project default targets such that they are accessible during evaluation
         /// </summary>
-        internal const string GraphBuildDefaultTargets = "GraphBuildDefaultTargets";
+        internal const string GraphBuildDefaultTargets = "_GraphBuildDefaultTargets";
     }
 
     internal static class ItemTypeNames

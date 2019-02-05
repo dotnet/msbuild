@@ -73,17 +73,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
   </Target>
 
-  <Target Name="BuildTargetsForGraphBuild"
+  <Target Name="_BuildTargetsForGraphBuild"
           DependsOnTargets="_ComputeTargetFrameworkItems">
           
     <ItemGroup>
-      <_GraphBuildEntryTargetsItem Include="$(GraphBuildEntryTargets)" />
-      <_GraphBuildDefaultTargets Include="$(GraphBuildDefaultTargets)" />
+      <_GraphBuildEntryTargetsItem Include="$(_GraphBuildEntryTargets)" />
+      <_GraphBuildDefaultTargetsItem Include="$(_GraphBuildDefaultTargets)" />
     </ItemGroup>
 
     <SplitTargetsByOuterAndInnerBuild EntryTargets="@(_GraphBuildEntryTargetsItem)"
                                       ProjectReferencetargets="@(ProjectReferenceTargets)"
-                                      DefaultTargets="@(_GraphBuildDefaultTargets)">
+                                      DefaultTargets="@(_GraphBuildDefaultTargetsItem)">
       <Output ItemName="_GraphBuildEntryTargetsForOuterBuild" TaskParameter="EntryTargetsForOuterBuild" />
       <Output ItemName="_GraphBuildEntryTargetsForInnerBuilds" TaskParameter="EntryTargetsForInnerBuilds" />
     </SplitTargetsByOuterAndInnerBuild>
@@ -91,13 +91,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MSBuild Projects="$(MSBuildProjectFullPath)"
              Condition="'@(_GraphBuildEntryTargetsForOuterBuild)' != '' "
              Targets="@(_GraphBuildEntryTargetsForOuterBuild)"
-             RemoveProperties="GraphBuildEntryTargets;GraphBuildDefaultTargets">
+             RemoveProperties="_GraphBuildEntryTargets;_GraphBuildDefaultTargets">
     </MSBuild>
 
     <MSBuild Projects="@(_InnerBuildProjects)"
              Condition="'@(_InnerBuildProjects)' != '' and '@(_GraphBuildEntryTargetsForInnerBuilds)' != '' "
              Targets="@(_GraphBuildEntryTargetsForInnerBuilds)"
-             RemoveProperties="GraphBuildEntryTargets;GraphBuildDefaultTargets"
+             RemoveProperties="_GraphBuildEntryTargets;_GraphBuildDefaultTargets"
              BuildInParallel="$(BuildInParallel)">
     </MSBuild>
   </Target>
