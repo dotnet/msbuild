@@ -18,10 +18,24 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
 
+  <UsingTask TaskName="CheckForDuplicateFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveAppHosts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
+    
+    <CheckForDuplicateFrameworkReferences
+        FrameworkReferenceItems="@(FrameworkReference)"
+        MoreInformationLink="https://aka.ms/sdkimplicitrefs">
+      <Output TaskParameter="ItemsToRemove" ItemName="_FrameworkReferenceToRemove" />
+      <Output TaskParameter="ItemsToAdd" ItemName="_FrameworkReferenceToAdd" />
+    </CheckForDuplicateFrameworkReferences>
+    
+    <ItemGroup>
+      <FrameworkReference Remove="@(_FrameworkReferenceToRemove)" />
+      <FrameworkReference Include="@(_FrameworkReferenceToAdd)" />
+    </ItemGroup>
+      
     <ItemGroup>
       <!-- The KnownFrameworkReference items that this target expects will be defined in the bundled
            versions .props file. They should look something like this:
