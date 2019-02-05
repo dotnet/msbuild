@@ -6,13 +6,7 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="RunFsc.sh;RunFsc.cmd">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
+    <PackageReference Include="System.Runtime.InteropServices" Version="$(SystemRuntimeInteropServicesPackageVersion)" />
+    <PackageReference Include="System.Data.SqlClient" Version="$(SystemDataSqlClientVersionPackageVersion)" />
   </ItemGroup>
 </Project>
