@@ -23,6 +23,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public Process CurrentProcess { get; private set; }
 
+        public int TimeoutMiliseconds { get; set; } = Timeout.Infinite;
+
         public Dictionary<string, string> Environment { get; } = new Dictionary<string, string>();
 
         public event DataReceivedEventHandler ErrorDataReceived;
@@ -115,7 +117,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             await completionTask;
 
-            CurrentProcess.WaitForExit();
+            if (!CurrentProcess.WaitForExit(TimeoutMiliseconds))
+            {
+                throw new TimeoutException($"The process failed to exit after {TimeoutMiliseconds / 1000.0} seconds.");
+            }
 
             RemoveNullTerminator(stdOut);
 

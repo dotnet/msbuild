@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private readonly Process _process;
 
         private StreamForwarder _stdOut;
-        
+
         private StreamForwarder _stdErr;
 
         private bool _running = false;
@@ -40,8 +40,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
             _process.EnableRaisingEvents = true;
 
-            Console.CancelKeyPress += HandleCancelKeyPress;
-
 #if DEBUG
             var sw = Stopwatch.StartNew();
             
@@ -51,19 +49,20 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 _process.Start();
 
-                Reporter.Verbose.WriteLine(string.Format(
-                    LocalizableStrings.ProcessId,
-                    _process.Id));
+                using (new ProcessReaper(_process))
+                {
+                    Reporter.Verbose.WriteLine(string.Format(
+                        LocalizableStrings.ProcessId,
+                        _process.Id));
 
-                var taskOut = _stdOut?.BeginRead(_process.StandardOutput);
-                var taskErr = _stdErr?.BeginRead(_process.StandardError);
-                _process.WaitForExit();
+                    var taskOut = _stdOut?.BeginRead(_process.StandardOutput);
+                    var taskErr = _stdErr?.BeginRead(_process.StandardError);
+                    _process.WaitForExit();
 
-                taskOut?.Wait();
-                taskErr?.Wait();
+                    taskOut?.Wait();
+                    taskErr?.Wait();
+                }
             }
-
-            Console.CancelKeyPress -= HandleCancelKeyPress;
 
             var exitCode = _process.ExitCode;
 
@@ -214,12 +213,6 @@ namespace Microsoft.DotNet.Cli.Utils
                     LocalizableStrings.UnableToInvokeMemberNameAfterCommand,
                     memberName));
             }
-        }
-
-        private void HandleCancelKeyPress(object sender, ConsoleCancelEventArgs e)
-        {
-            // Ignore SIGINT/SIGQUIT so that the child can process the signal
-            e.Cancel = true;
         }
     }
 }

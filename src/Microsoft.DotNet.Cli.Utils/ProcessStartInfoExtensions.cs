@@ -21,7 +21,11 @@ namespace Microsoft.DotNet.Cli.Utils
             };
 
             process.Start();
-            process.WaitForExit();
+
+            using (new ProcessReaper(process))
+            {
+                process.WaitForExit();
+            }
 
             return process.ExitCode;
         }
@@ -43,16 +47,19 @@ namespace Microsoft.DotNet.Cli.Utils
 
             process.Start();
 
-            var taskOut = outStream.BeginRead(process.StandardOutput);
-            var taskErr = errStream.BeginRead(process.StandardError);
+            using (new ProcessReaper(process))
+            {
+                var taskOut = outStream.BeginRead(process.StandardOutput);
+                var taskErr = errStream.BeginRead(process.StandardError);
 
-            process.WaitForExit();
+                process.WaitForExit();
 
-            taskOut.Wait();
-            taskErr.Wait();
+                taskOut.Wait();
+                taskErr.Wait();
 
-            stdOut = outStream.CapturedOutput;
-            stdErr = errStream.CapturedOutput;
+                stdOut = outStream.CapturedOutput;
+                stdErr = errStream.CapturedOutput;
+            }
 
             return process.ExitCode;
         }
