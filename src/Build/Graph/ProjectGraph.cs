@@ -337,6 +337,20 @@ namespace Microsoft.Build.Graph
         public IReadOnlyCollection<ProjectGraphNode> GraphRoots { get; }
 
         /// <summary>
+        /// Gets the build information required for every project in the graph, given a particular target list for the entry projects.
+        /// </summary>
+        /// <remarks>
+        /// This method uses the ProjectReferenceTargets items to determine the targets to run per node. The results can then be used
+        /// to start building each project individually, assuming a given project is built after its references.
+        /// </remarks>
+        /// <param name="entryProjectTargets">The target list for the entry project. May be null or empty, in which case the entry projects' default targets will be used.</param>
+        /// <returns>A dictionary containing the target list for each node.</returns>
+        public IReadOnlyDictionary<ProjectGraphNode, BuildData> GetBuildData(ICollection<string> entryProjectTargets)
+        {
+            return GetTargetLists(entryProjectTargets).ToDictionary(kvp => kvp.Key, kvp => kvp.Key.ComputeBuildData(kvp.Value));
+        }
+
+        /// <summary>
         /// Gets the target list to be executed for every project in the graph, given a particular target list for the entry project.
         /// </summary>
         /// <remarks>
@@ -345,7 +359,7 @@ namespace Microsoft.Build.Graph
         /// </remarks>
         /// <param name="entryProjectTargets">The target list for the entry project. May be null or empty, in which case the entry projects' default targets will be used.</param>
         /// <returns>A dictionary containing the target list for each node.</returns>
-        public IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(ICollection<string> entryProjectTargets)
+        internal IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(ICollection<string> entryProjectTargets)
         {
             // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
             Dictionary<ProjectGraphNode, ImmutableList<string>> targetLists = ProjectNodes.ToDictionary(node => node, node => ImmutableList<string>.Empty);

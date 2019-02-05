@@ -452,7 +452,7 @@ namespace Microsoft.Build.Execution
         /// Deep clone of this object.
         /// Useful for compiling a single file; or for keeping resolved assembly references between builds.
         /// </summary>
-        private ProjectInstance(ProjectInstance that, bool isImmutable, RequestedProjectState filter = null)
+        private ProjectInstance(ProjectInstance that, bool isImmutable, RequestedProjectState filter = null, IReadOnlyDictionary<string, string> additionalGlobalProperties = null)
         {
             ErrorUtilities.VerifyThrow(filter == null || isImmutable,
                 "The result of a filtered ProjectInstance clone must be immutable.");
@@ -486,6 +486,12 @@ namespace Microsoft.Build.Execution
                 foreach (ProjectPropertyInstance globalProperty in that.GlobalPropertiesDictionary)
                 {
                     _globalProperties.Set(globalProperty.DeepClone(_isImmutable));
+                }
+
+                foreach (var additionalGlobalProperty in additionalGlobalProperties ?? new Dictionary<string, string>(0))
+                {
+                    _globalProperties.Set(ProjectPropertyInstance.Create(additionalGlobalProperty.Key, additionalGlobalProperty.Value, ElementLocation.EmptyLocation, IsImmutable));
+                    _properties.Set(ProjectPropertyInstance.Create(additionalGlobalProperty.Key, additionalGlobalProperty.Value, ElementLocation.EmptyLocation, IsImmutable));
                 }
 
                 _environmentVariableProperties =
@@ -1562,6 +1568,11 @@ namespace Microsoft.Build.Execution
         public ProjectInstance FilteredCopy(RequestedProjectState filter)
         {
             return new ProjectInstance(this, true, filter);
+        }
+
+        internal ProjectInstance DeepCopy(IReadOnlyDictionary<string, string> additionalGlobalProperties)
+        {
+            return new ProjectInstance(this, this.IsImmutable, null, additionalGlobalProperties);
         }
 
         /// <summary>

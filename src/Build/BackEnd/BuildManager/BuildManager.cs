@@ -1452,7 +1452,7 @@ namespace Microsoft.Build.Execution
                         });
                 }
 
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
+                var buildDataForNodes = projectGraph.GetBuildData(submission.BuildRequestData.TargetNames);
 
                 var waitHandle = new AutoResetEvent(true);
                 var graphBuildStateLock = new object();
@@ -1472,8 +1472,9 @@ namespace Microsoft.Build.Execution
                             .ToList();
                         foreach (var node in unblockedNodes)
                         {
-                            var targetList = targetLists[node];
-                            if (targetList.Count == 0)
+                            var buildData = buildDataForNodes[node];
+
+                            if (!buildData.ShouldRunBuild)
                             {
                                 // An empty target list here means "no targets" instead of "default targets", so don't even build it.
                                 finishedNodes.Add(node);
@@ -1484,9 +1485,13 @@ namespace Microsoft.Build.Execution
                                 continue;
                             }
 
+                            var projectInstance = buildData.GlobalProperties.Any()
+                                ? node.ProjectInstance.DeepCopy(buildData.GlobalProperties)
+                                : node.ProjectInstance;
+
                             var request = new BuildRequestData(
-                                node.ProjectInstance,
-                                targetList.ToArray(),
+                                projectInstance,
+                                buildData.Targets.ToArray(),
                                 submission.BuildRequestData.HostServices,
                                 submission.BuildRequestData.Flags);
 

@@ -13,11 +13,16 @@ namespace Microsoft.Build.Graph
     {
         public IReadOnlyCollection<string> Targets { get; }
         public IReadOnlyDictionary<string, string> GlobalProperties { get; }
+        public bool ShouldRunBuild { get; }
 
         public BuildData(IReadOnlyCollection<string> targets, IReadOnlyDictionary<string, string> globalProperties)
         {
+            ErrorUtilities.VerifyThrowInternalNull(targets, nameof(targets));
+            ErrorUtilities.VerifyThrowInternalNull(globalProperties, nameof(globalProperties));
+
             Targets = targets;
             GlobalProperties = globalProperties;
+            ShouldRunBuild = Targets.Count > 0;
         }
     }
 
