@@ -1127,7 +1127,7 @@ namespace Microsoft.Build.BackEnd
                         // we receive the configuration response before we enter the wait state.
                         newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(),
                             request.Config.ConfigurationId, request.Targets, issuingEntry.Request.HostServices,
-                            issuingEntry.Request.BuildEventContext, issuingEntry.Request,
+                            issuingEntry.Request.CurrentMSBuildTask ?? issuingEntry.Request.BuildEventContext, issuingEntry.Request,
                             buildRequestDataFlags);
 
                         issuingEntry.WaitForResult(newRequest);

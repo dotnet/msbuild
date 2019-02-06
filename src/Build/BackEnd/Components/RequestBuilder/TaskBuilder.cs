@@ -420,6 +420,11 @@ namespace Microsoft.Build.BackEnd
                     if (requirements != null)
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        if (taskLoggingContext.TaskName == "MSBuild")
+                        {
+                            _buildRequestEntry.Request.CurrentMSBuildTask = taskLoggingContext.BuildEventContext;
+                        }
+
                         try
                         {
                             if (
@@ -461,6 +466,8 @@ namespace Microsoft.Build.BackEnd
                         }
                         finally
                         {
+                            _buildRequestEntry.Request.CurrentMSBuildTask = null;
+
                             // Flag the completion of the task.
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
 

@@ -267,6 +267,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        public BuildEventContext CurrentMSBuildTask { get; set; }
+
         /// <summary>
         /// The set of flags specified in the BuildRequestData for this request.
         /// </summary>
