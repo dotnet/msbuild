@@ -6,7 +6,6 @@
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
       <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
-      <RoslynDependenciesOptimizationDataVersion Condition="'$(RoslynDependenciesOptimizationDataVersion)' == ''">2.11.0-beta3.20181025.2</RoslynDependenciesOptimizationDataVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +21,6 @@
     <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
     <PackageReference Update="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
-    <PackageReference Update="RoslynDependencies.OptimizationData" Version="$(RoslynDependenciesOptimizationDataVersion)" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
     <PackageReference Update="SourceLink.Create.CommandLine" Version="2.1.2" />
     <PackageReference Update="System.CodeDom" Version="4.4.0" />
