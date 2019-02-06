@@ -11,7 +11,8 @@ jobs:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'eng/common/cibuild.cmd'
+      filename: 'eng/cibuild.cmd'
+      arguments: '-test'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -129,8 +130,8 @@ jobs:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'eng/common/cibuild.cmd'
-      arguments: '-configuration Release'
+      filename: 'eng/cibuild.cmd'
+      arguments: '-configuration Release -test'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:

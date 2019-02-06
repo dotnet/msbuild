@@ -15,7 +15,7 @@
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
-    <UsingToolIbcOptimization>$(ShouldUseIBCOptimization)</UsingToolIbcOptimization>
+    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
   </PropertyGroup>
 
   <ItemGroup>
@@ -974,7 +974,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
-    <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="..\..\15.0\Bin\Roslyn" />
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 

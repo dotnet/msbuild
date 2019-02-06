@@ -11,7 +11,6 @@ Param(
   [string] $msbuildEngine = $null,
   [bool] $warnAsError = $true,
   [bool] $nodeReuse = $true,
-  [switch] $execute,
   [switch][Alias('r')]$restore,
   [switch] $deployDeps,
   [switch][Alias('b')]$build,
@@ -23,71 +22,92 @@ Param(
   [switch] $sign,
   [switch] $pack,
   [switch] $publish,
-  [switch] $publishBuildAssets,
   [switch][Alias('bl')]$binaryLog,
   [switch] $ci,
   [switch] $prepareMachine,
   [switch] $help,
 
-  [string]$vsDropName = "",
-  [string]$vsBranch = "",
-  [string]$vsDropAccessToken = "",
+  # official build settings
+  [string]$officialBuildId = "",
+  [string]$officialSkipApplyOptimizationData = "",
 
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
-. (Join-Path $PSScriptRoot "build-utils.ps1")
-
 function Print-Usage() {
-    Write-Host "Common settings:"
-    Write-Host "  -configuration <value>  Build configuration: 'Debug' or 'Release' (short: -c)"
-    Write-Host "  -verbosity <value>      Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
-    Write-Host "  -binaryLog              Output binary log (short: -bl)"
-    Write-Host "  -help                   Print help and exit"
-    Write-Host ""
-
-    Write-Host "Actions:"
-    Write-Host "  -restore                Restore dependencies (short: -r)"
-    Write-Host "  -build                  Build solution (short: -b)"
-    Write-Host "  -rebuild                Rebuild solution"
-    Write-Host "  -deploy                 Deploy built VSIXes"
-    Write-Host "  -deployDeps             Deploy dependencies (e.g. VSIXes for integration tests)"
-    Write-Host "  -test                   Run all unit tests in the solution"
-    Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
-    Write-Host "  -integrationTest        Run all integration tests in the solution"
-    Write-Host "  -performanceTest        Run all performance tests in the solution"
-    Write-Host "  -sign                   Sign build outputs"
-    Write-Host "  -publish                Publish artifacts (e.g. symbols)"
-    Write-Host "  -publishBuildAssets     Push assets to BAR"
-    Write-Host ""
-
-    Write-Host "Advanced settings:"
-    Write-Host "  -projects <value>       Semi-colon delimited list of sln/proj's to build. Globbing is supported (*.sln)"
-    Write-Host "  -ci                     Set when running on CI server"
-    Write-Host "  -prepareMachine         Prepare machine for CI run"
-    Write-Host "  -msbuildEngine <value>  Msbuild engine to use to run build ('dotnet', 'vs', or unspecified)."
-    Write-Host ""
-    Write-Host "Command line arguments not listed above are passed thru to msbuild."
-    Write-Host "The above arguments can be shortened as much as to be unambiguous (e.g. -co for configuration, -t for test, etc.)."
+  Write-Host "Common settings:"
+  Write-Host "  -configuration <value>  Build configuration: 'Debug' or 'Release' (short: -c)"
+  Write-Host "  -verbosity <value>      Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
+  Write-Host "  -binaryLog              Output binary log (short: -bl)"
+  Write-Host ""
+ 
+  Write-Host "Actions:"
+  Write-Host "  -restore                Restore dependencies (short: -r)"
+  Write-Host "  -build                  Build solution (short: -b)"
+  Write-Host "  -rebuild                Rebuild solution"
+  Write-Host "  -deploy                 Deploy built VSIXes"
+  Write-Host "  -deployDeps             Deploy dependencies (e.g. VSIXes for integration tests)"
+  Write-Host "  -test                   Run all unit tests in the solution"
+  Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
+  Write-Host "  -help                   Print help and exit"
+  Write-Host "  -integrationTest        Run all integration tests in the solution"
+  Write-Host "  -performanceTest        Run all performance tests in the solution"
+  Write-Host "  -sign                   Sign build outputs"
+  Write-Host "  -publish                Publish artifacts (e.g. symbols)"
+  Write-Host ""
+ 
+  Write-Host "Advanced settings:"
+  Write-Host "  -projects <value>       Semi-colon delimited list of sln/proj's to build. Globbing is supported (*.sln)"
+  Write-Host "  -ci                     Set when running on CI server"
+  Write-Host "  -prepareMachine         Prepare machine for CI run"
+  Write-Host "  -msbuildEngine <value>  Msbuild engine to use to run build ('dotnet', 'vs', or unspecified)."
+  Write-Host ""
+ 
+  Write-Host "Official build settings:"
+  Write-Host "  -officialBuildId                            An official build id, e.g. 20190102.3"
+  Write-Host "  -officialSkipApplyOptimizationData <bool>   Pass 'true' to not apply optimization data"
+  Write-Host ""
+  Write-Host "Command line arguments not listed above are passed thru to msbuild."
+  Write-Host "The above arguments can be shortened as much as to be unambiguous (e.g. -co for configuration, -t for test, etc.)."
 }
 
-
-function InitializeCustomToolset {
-  if (-not $restore) {
-    return
+function Process-Arguments() {
+  function OfficialBuildOnly([string]$argName) {
+    if ((Get-Variable $argName -Scope Script).Value) {
+      if (!$officialBuildId) {
+        Write-Host "$argName can only be specified for official builds"
+        exit 1
+      }
+    } else {
+      if ($officialBuildId) {
+        Write-Host "$argName must be specified in official builds"
+        exit 1
+      }
+    }
   }
 
-  $script = Join-Path $EngRoot "restore-toolset.ps1"
+  if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
+    Print-Usage
+    exit 0
+  }
 
-  if (Test-Path $script) {
-    . $script
+  OfficialBuildOnly "officialSkipApplyOptimizationData"
+
+  if ($officialBuildId) {
+    $script:applyOptimizationData = ![System.Boolean]::Parse($officialSkipApplyOptimizationData)
+  } else {
+    $script:applyOptimizationData = $false
+  }
+
+  if ($ci) {
+    $script:binaryLog = $true
+    $script:nodeReuse = $false
   }
 }
 
 function Build-Repo() {
-  $toolsetBuildProj = InitializeToolset
-  InitializeCustomToolset
   $bl = if ($binaryLog) { "/bl:" + (Join-Path $LogDir "Build.binlog") } else { "" }
+  $toolsetBuildProj = InitializeToolset
 
   if ($projects) {
     # Re-assign properties to a new variable because PowerShell doesn't let us append properties directly for unclear reasons.
@@ -96,6 +116,9 @@ function Build-Repo() {
     $msbuildArgs += "/p:Projects=$projects"
     $properties = $msbuildArgs
   }
+
+  # Do not set this property to true explicitly, since that would override values set in projects.
+  $suppressPartialNgenOptimization = if (!$applyOptimizationData) { "/p:ApplyPartialNgenOptimization=false" } else { "" }
 
   MSBuild $toolsetBuildProj `
     $bl `
@@ -112,59 +135,33 @@ function Build-Repo() {
     /p:PerformanceTest=$performanceTest `
     /p:Sign=$sign `
     /p:Publish=$publish `
-    /p:Execute=$execute `
     /p:ContinuousIntegrationBuild=$ci `
-    /p:VisualStudioDropName=$vsDropName `
+    /p:OfficialBuildId=$officialBuildId `
+    $suppressPartialNgenOptimization `
     @properties
 }
 
-function Build-OptProfData() {
-    $insertionDir = Join-Path $VSSetupDir "Insertion"
-
-    $optProfDir = Join-Path $ArtifactsDir "OptProf\$configuration"
-    $optProfDataDir = Join-Path $optProfDir "Data"
-    $optProfBranchDir = Join-Path $optProfDir "BranchInfo"
-
-    $optProfConfigFile = Join-Path $EngRoot "config\OptProf.json"
-    $optProfToolDir = Get-PackageDir "RoslynTools.OptProf"
-    $optProfToolExe = Join-Path $optProfToolDir "tools\roslyn.optprof.exe"
-
-    # This invocation is failing right now. Going to assume we don't need it at the moment.
-    Write-Host "Generating optimization data using '$optProfConfigFile' into '$optProfDataDir'"
-    Exec-Console $optProfToolExe "--configFile $optProfConfigFile --insertionFolder $insertionDir --outputFolder $optProfDataDir"
-
-    # Write out branch we are inserting into
-    Create-Directory $optProfBranchDir
-    $vsBranchFile = Join-Path $optProfBranchDir "vsbranch.txt"
-    $vsBranch >> $vsBranchFile
-
-    # Set VSO variables used by MicroBuildBuildVSBootstrapper pipeline task
-    $manifestList = [string]::Join(',', (Get-ChildItem "$insertionDir\*.vsman"))
-
-    Write-Host "##vso[task.setvariable variable=VisualStudio.SetupManifestList;]$manifestList"
+# Set VSO variables used by MicroBuildBuildVSBootstrapper pipeline task
+function Set-OptProfVariables() {
+  $insertionDir = Join-Path $VSSetupDir "Insertion"
+  $manifestList = [string]::Join(',', (Get-ChildItem "$insertionDir\*.vsman"))
+  Write-Host "##vso[task.setvariable variable=VisualStudio.SetupManifestList;]$manifestList"
 }
 
 try {
-  if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
-    Print-Usage
-    exit 0
-  }
+  Process-Arguments
+ 
+  # Import Arcade functions
+  . (Join-Path $PSScriptRoot "common\tools.ps1")
+  . (Join-Path $PSScriptRoot "configure-toolset.ps1")
 
-  if ($ci) {
-    $binaryLog = $true
-    $nodeReuse = $false
-  }
-
-  # Import custom tools configuration, if present in the repo.
-  # Note: Import in global scope so that the script set top-level variables without qualification.
-  $configureToolsetScript = Join-Path $EngRoot "configure-toolset.ps1"
-  if (Test-Path $configureToolsetScript) {
-    . $configureToolsetScript
-  }
+  $VSSetupDir = Join-Path $ArtifactsDir "VSSetup\$configuration"
 
   Build-Repo
 
-  Build-OptProfData
+  if ($ci -and $build) {
+    Set-OptProfVariables
+  }
 }
 catch {
   Write-Host $_
