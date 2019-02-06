@@ -2295,7 +2295,7 @@
       </trans-unit>
       <trans-unit id="TlbImp.NoInputFileSpecified">
         <source>MSB3662: No input file has been passed to the task, exiting.</source>
-        <target state="translated">MSB3662: Plik danych wejściowych nie został przekazany do zadania, kończenie.</target>
+        <target state="translated">MSB3662: Plik wejściowy nie został przekazany do zadania, kończenie.</target>
         <note>{StrBegin="MSB3662: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotCreateFile">

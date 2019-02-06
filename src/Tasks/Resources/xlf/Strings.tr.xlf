@@ -2630,7 +2630,7 @@
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputFileError">
         <source>MSB3733: Input file "{0}" cannot be opened. {1}</source>
-        <target state="translated">MSB3733: "{0}" girdi dosyası açılamıyor. {1}</target>
+        <target state="translated">MSB3733: "{0}" giriş dosyası açılamıyor. {1}</target>
         <note>{StrBegin="MSB3733: "}</note>
       </trans-unit>
       <trans-unit id="XmlPeekPoke.XPathError">
