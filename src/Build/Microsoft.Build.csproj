@@ -159,9 +159,9 @@
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
-    <Compile Include="BackEnd\BuildManager\GraphBuildResult.cs" />
-    <Compile Include="BackEnd\BuildManager\GraphBuildSubmission.cs" />
-    <Compile Include="BackEnd\BuildManager\GraphBuildRequestData.cs" />
+    <Compile Include="Experimental.Graph\GraphBuildResult.cs" />
+    <Compile Include="Experimental.Graph\GraphBuildSubmission.cs" />
+    <Compile Include="Experimental.Graph\GraphBuildRequestData.cs" />
     <Compile Include="BackEnd\BuildManager\BuildSubmission.cs" />
     <Compile Include="BackEnd\BuildManager\LegacyThreadingData.cs" />
     <Compile Include="BackEnd\BuildManager\RequestedProjectState.cs" />
@@ -254,9 +254,9 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
-    <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
-    <Compile Include="Graph\ProjectGraph.cs" />
-    <Compile Include="Graph\ProjectGraphNode.cs" />
+    <Compile Include="Experimental.Graph\ProjectGraphEntryPoint.cs" />
+    <Compile Include="Experimental.Graph\ProjectGraph.cs" />
+    <Compile Include="Experimental.Graph\ProjectGraphNode.cs" />
     <Compile Include="Logging\EvaluationLocationIdAgnosticComparer.cs" />
     <Compile Include="Logging\ProfilerLogger.cs" />
     <Compile Include="Evaluation\Profiler\ProfilerResultPrettyPrinter.cs" />

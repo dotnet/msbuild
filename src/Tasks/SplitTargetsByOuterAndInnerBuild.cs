@@ -7,9 +7,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
-namespace Microsoft.Build.Tasks
+namespace Microsoft.Build.Experimental.Tasks
 {
     /// <summary>
     ///     Task to separate entry targets for outer builds and inner builds
@@ -144,7 +145,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Code duplication with Microsoft.Build.Graph.ProjectGraph.ExpandDefaultTargets
+        /// Code duplication with Microsoft.Build.Experimental.Graph.ProjectGraph.ExpandDefaultTargets
         /// </summary>
         private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets)
         {

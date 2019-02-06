@@ -1,5 +1,20 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+namespace Microsoft.Build.Experimental.Tasks
+{
+    public sealed partial class SplitTargetsByOuterAndInnerBuild : Microsoft.Build.Tasks.TaskExtension
+    {
+        public SplitTargetsByOuterAndInnerBuild() { }
+        public Microsoft.Build.Framework.ITaskItem[] DefaultTargets { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargets { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForInnerBuilds { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForOuterBuild { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] ProjectReferenceTargets { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
+}
 namespace Microsoft.Build.Tasks
 {
     public partial class AL : Microsoft.Build.Tasks.ToolTaskExtension
@@ -1123,18 +1138,6 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem SigningTarget { get { throw null; } set { } }
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public string TimestampUrl { get { throw null; } set { } }
-        public override bool Execute() { throw null; }
-    }
-    public sealed partial class SplitTargetsByOuterAndInnerBuild : Microsoft.Build.Tasks.TaskExtension
-    {
-        public SplitTargetsByOuterAndInnerBuild() { }
-        public Microsoft.Build.Framework.ITaskItem[] DefaultTargets { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskItem[] EntryTargets { get { throw null; } set { } }
-        [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForInnerBuilds { get { throw null; } set { } }
-        [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForOuterBuild { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskItem[] ProjectReferenceTargets { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task

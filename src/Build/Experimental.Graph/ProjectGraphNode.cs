@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Graph
+namespace Microsoft.Build.Experimental.Graph
 {
     public readonly struct BuildData
     {

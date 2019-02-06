@@ -14,7 +14,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
-namespace Microsoft.Build.Graph.UnitTests
+namespace Microsoft.Build.Experimental.Graph.UnitTests
 {
     public class ProjectGraphTests
     {

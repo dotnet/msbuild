@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.Build.Graph;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Execution
+namespace Microsoft.Build.Experimental.Graph
 {
     /// <summary>
     /// GraphBuildRequestData encapsulates all of the data needed to submit a graph build request.

@@ -1,5 +1,20 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+namespace Microsoft.Build.Experimental.Tasks
+{
+    public sealed partial class SplitTargetsByOuterAndInnerBuild : Microsoft.Build.Tasks.TaskExtension
+    {
+        public SplitTargetsByOuterAndInnerBuild() { }
+        public Microsoft.Build.Framework.ITaskItem[] DefaultTargets { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargets { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForInnerBuilds { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForOuterBuild { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] ProjectReferenceTargets { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
+}
 namespace Microsoft.Build.Tasks
 {
     public partial class AssignCulture : Microsoft.Build.Tasks.TaskExtension
@@ -663,18 +678,6 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITask CreateTask(Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
         public Microsoft.Build.Framework.TaskPropertyInfo[] GetTaskParameters() { throw null; }
         public bool Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> parameterGroup, string taskBody, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
-    }
-    public sealed partial class SplitTargetsByOuterAndInnerBuild : Microsoft.Build.Tasks.TaskExtension
-    {
-        public SplitTargetsByOuterAndInnerBuild() { }
-        public Microsoft.Build.Framework.ITaskItem[] DefaultTargets { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskItem[] EntryTargets { get { throw null; } set { } }
-        [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForInnerBuilds { get { throw null; } set { } }
-        [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] EntryTargetsForOuterBuild { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskItem[] ProjectReferenceTargets { get { throw null; } set { } }
-        public override bool Execute() { throw null; }
     }
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task
     {
