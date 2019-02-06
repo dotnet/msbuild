@@ -24,7 +24,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        <ImportUserLocationsByWildcardAfterMicrosoftCSharpTargets Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCSharpTargets)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftCSharpTargets>
     </PropertyGroup>
 
-    <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.CSharp.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCSharpTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.CSharp.targets\ImportBefore')"/>
+    <Import Project="$(MSBuildUserExtensionsPath)\$(VisualStudioVersion)\Microsoft.CSharp.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCSharpTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(VisualStudioVersion)\Microsoft.CSharp.targets\ImportBefore')"/>
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.CSharp.targets\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftCSharpTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.CSharp.targets\ImportBefore')"/>
 
     <PropertyGroup>
@@ -371,6 +371,6 @@ using System.Reflection%3b
     <Import Project="$(CustomAfterMicrosoftCSharpTargets)" Condition="'$(CustomAfterMicrosoftCSharpTargets)' != '' and Exists('$(CustomAfterMicrosoftCSharpTargets)')" />
 
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.CSharp.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftCSharpTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.CSharp.targets\ImportAfter')"/>
-    <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.CSharp.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCSharpTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.CSharp.targets\ImportAfter')"/>
+    <Import Project="$(MSBuildUserExtensionsPath)\$(VisualStudioVersion)\Microsoft.CSharp.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCSharpTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(VisualStudioVersion)\Microsoft.CSharp.targets\ImportAfter')"/>
 
 </Project>

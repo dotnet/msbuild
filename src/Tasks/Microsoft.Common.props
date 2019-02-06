@@ -73,7 +73,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             is already a file named "Microsoft.Common.props" in this directory so we have to have a slightly different
             directory name to hold extensions.
         -->
-    <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore')"/>
+    <Import Project="$(MSBuildUserExtensionsPath)\$(VisualStudioVersion)\Imports\Microsoft.Common.props\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(VisualStudioVersion)\Imports\Microsoft.Common.props\ImportBefore')"/>
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore')"/>
   </ImportGroup>
 
@@ -171,7 +171,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         treated as 4.0)
     -->
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' != ''">
-    <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
+    <Import Project="$(MSBuildUserExtensionsPath)\$(VisualStudioVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(VisualStudioVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
   </ImportGroup>
 </Project>
