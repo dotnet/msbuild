@@ -59,7 +59,8 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     if (assetPath.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase) ||
                         assetPath.EndsWith(".map", StringComparison.OrdinalIgnoreCase) ||
-                        assetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                        assetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
+                        assetPath.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                     {
                         //  Don't add assets for these files (shouldn't be necessary if/once we have a manifest in the runtime pack
                         //  https://github.com/dotnet/cli/issues/10442
