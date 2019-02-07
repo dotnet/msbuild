@@ -147,6 +147,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       
     </ItemGroup>
 
+    <!-- For design-time builds, don't generate an error if a targeting pack isn't available (ie because it hasn't been restored yet) -->
     <PropertyGroup Condition="'$(GenerateErrorForMissingTargetingPacks)' == ''">
       <GenerateErrorForMissingTargetingPacks>true</GenerateErrorForMissingTargetingPacks>
       <GenerateErrorForMissingTargetingPacks Condition="'$(DesignTimeBuild)' == 'true'">false</GenerateErrorForMissingTargetingPacks>

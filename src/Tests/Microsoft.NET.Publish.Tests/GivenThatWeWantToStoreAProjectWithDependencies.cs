@@ -161,7 +161,7 @@ namespace Microsoft.NET.Publish.Tests
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
-        [CoreMSBuildOnlyFact(Skip = "Consider dropping support for dotnet store in .NET Core 3.0")]
+        [CoreMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
         public void compose_multifile()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -300,7 +300,7 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        [CoreMSBuildOnlyFact(Skip ="Not sure we have to support this")]
+        [CoreMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
         public void It_stores_when_targeting_netcoreapp3()
         {
             const string TFM = "netcoreapp3.0";
