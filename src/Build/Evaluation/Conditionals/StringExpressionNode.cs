@@ -42,11 +42,21 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override double NumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
+            if (ShouldBeTreatedAsVisualStudioVersion())
+            {
+                return ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
+            }
+
             return ConversionUtilities.ConvertDecimalOrHexToDouble(GetExpandedValue(state));
         }
 
         internal override Version VersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
+            if (ShouldBeTreatedAsVisualStudioVersion())
+            {
+                return Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
+            }
+
             return Version.Parse(GetExpandedValue(state));
         }
 
@@ -57,13 +67,22 @@ namespace Microsoft.Build.Evaluation
 
         internal override bool CanNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
+            if (ShouldBeTreatedAsVisualStudioVersion())
+            {
+                return true;
+            }
+
             return ConversionUtilities.ValidDecimalOrHexNumber(GetExpandedValue(state));
         }
 
         internal override bool CanVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            Version unused;
-            return Version.TryParse(GetExpandedValue(state), out unused);
+            if (ShouldBeTreatedAsVisualStudioVersion())
+            {
+                return true;
+            }
+
+            return Version.TryParse(GetExpandedValue(state), out _);
         }
 
         /// <summary>
@@ -140,6 +159,19 @@ namespace Microsoft.Build.Evaluation
         {
             _cachedExpandedValue = null;
         }
+
+        /// <summary>
+        /// Should this node be treated as an expansion of VisualStudioVersion, rather than
+        /// its literal meaning?
+        /// </summary>
+        /// <remarks>
+        /// Needed to provide a compat shim for numeric/version comparisons
+        /// on MSBuildToolsVersion, which were fine when it was a number
+        /// but now cause the project to throw InvalidProjectException when
+        /// ToolsVersion is "Current". https://github.com/Microsoft/msbuild/issues/4150
+        /// </remarks>
+        private bool ShouldBeTreatedAsVisualStudioVersion() =>
+            string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
 
         internal override string DebuggerDisplay => $"\"{_value}\"";
     }
