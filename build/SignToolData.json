@@ -30,7 +30,6 @@
         "NuGet.DependencyResolver.Core.dll",
         "NuGet.Frameworks.dll",
         "NuGet.LibraryModel.dll",
-        "NuGet.Packaging.Core.dll",
         "NuGet.Packaging.dll",
         "NuGet.ProjectModel.dll",
         "NuGet.Protocol.dll",
