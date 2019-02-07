@@ -33,6 +33,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("'15.0' &lt; '$(MSBuildToolsVersion)'")]
         [InlineData("'14.0.0.0' &lt; '$(MSBuildToolsVersion)'")]
         [InlineData("'15.0' &lt;= '$(MSBuildToolsVersion)'")]
+        [InlineData("'$(MSBuildToolsVersion)' == '$(VisualStudioVersion)'")]
         public void TrueComparisonsInvolvingMSBuildToolsVersion(string condition)
         {
             MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
@@ -55,6 +56,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("'$(MSBuildToolsVersion)' == ''")]
         [InlineData("'$(MSBuildToolsVersion)' == 'Incorrect'")]
         [InlineData("'14.3' &gt; '$(MSBuildToolsVersion)'")]
+        [InlineData("'Current' == '$(VisualStudioVersion)'")] // comparing the string representation of MSBuildToolsVersion directly doesn't match
         public void FalseComparisonsInvolvingMSBuildToolsVersion(string condition)
         {
             MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
