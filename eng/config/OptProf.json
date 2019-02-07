@@ -4,9 +4,9 @@
       "name": "Microsoft.Build.vsix",
       "tests": [
         {
-          "container": "DDRIT.RPS.CSharp",
+          "container": "TeamEng",
           "testCases": [
-            "DDRIT.RPS.CSharp.CSharpTest.BuildAndDebugging"
+            "TeamEng.OptProfTest.vs_debugger_interop_managedclient"
           ]
         }
       ]
