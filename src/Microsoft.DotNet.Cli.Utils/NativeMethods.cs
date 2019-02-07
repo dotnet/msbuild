@@ -68,6 +68,9 @@ namespace Microsoft.DotNet.Cli.Utils
         internal static class Posix
         {
             [DllImport("libc", SetLastError = true)]
+            internal static extern int getpgid(int pid);
+
+            [DllImport("libc", SetLastError = true)]
             internal static extern int kill(int pid, int sig);
 
             internal const int SIGINT = 2;
