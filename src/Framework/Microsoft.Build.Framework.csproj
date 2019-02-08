@@ -1,19 +1,20 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
-    <CreateTlb>true</CreateTlb>
+    <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="BinaryWriterExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
-    <PackageReference Include="System.Threading.Thread" Version="4.0.0" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <PackageReference Include="System.Threading.Thread" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Reference Include="System.Xaml" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

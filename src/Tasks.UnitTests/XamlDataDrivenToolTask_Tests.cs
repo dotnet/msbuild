@@ -233,7 +233,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <param name="expected"></param>
         /// <param name="actual"></param>
         /// <returns>true if the two are the same, false if they are different</returns>
-        public void CheckCommandLine(string expected, string actual)
+        private void CheckCommandLine(string expected, string actual)
         {
             Assert.Equal(expected, actual);
         }

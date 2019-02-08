@@ -699,7 +699,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">不再支援 &lt;{0}&gt; 標記做為 &lt;Project&gt; 項目的子系。請將這個標記置放於目標中，然後將目標的名稱加入 &lt;Project&gt; 項目的 "InitialTargets" 屬性中。</target>
+        <target state="translated">不再支援 &lt;{0}&gt; 標籤做為 &lt;Project&gt; 項目的子系。請將這個標籤置放於目標中，然後將目標的名稱加入 &lt;Project&gt; 項目的 "InitialTargets" 屬性中。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">&lt;{0}&gt; 標記為 [&lt; 專案 &gt; 項目的子系已不再受到支援。將這個標記放目標，並加入目標的名稱"InitialTargets"屬性的 [&lt; 專案 &gt; 項目。</target>
@@ -993,9 +993,9 @@
       <trans-unit id="InvalidMessageImportance">
         <source>MSB4071: The value Importance="{0}" in the &lt;Message&gt; element is invalid. Valid values are: High, Normal and Low.</source>
         <target state="translated">MSB4071: &lt;Message&gt; 項目中的值 Importance="{0}" 無效。有效值為: High、Normal 和 Low。</target>
-        <note>{StrBegin="MSB4071: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.  
+        <note>{StrBegin="MSB4071: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
     The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
-    LOCALIZATION: "Importance" should not be localized.  
+    LOCALIZATION: "Importance" should not be localized.
                   "Message" should not be localized.
                   High should not be localized.
                   Normal should not be localized.
@@ -1272,7 +1272,7 @@
       </trans-unit>
       <trans-unit id="MSBuildVersionAttributeDeprecated">
         <source>MSB4031: The "MSBuildVersion" attribute is deprecated. If the project is authored in the MSBuild 2003 format, please remove the attribute from the &lt;Project&gt; tag. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4031: "MSBuildVersion" 屬性已被取代。如果使用 MSBuild 2003 格式設計專案，請將該屬性從 &lt;Project&gt; 標記中移除。如果使用舊版的 1.0 或 1.2 格式設計專案，請將專案轉換成 MSBuild 2003 的格式。</target>
+        <target state="translated">MSB4031: "MSBuildVersion" 屬性已被取代。如果使用 MSBuild 2003 格式設計專案，請將該屬性從 &lt;Project&gt; 標籤中移除。如果使用舊版的 1.0 或 1.2 格式設計專案，請將專案轉換成 MSBuild 2003 的格式。</target>
         <note>{StrBegin="MSB4031: "}UE: This message is shown for projects that still contain the "MSBuildVersion" attribute in their &lt;Project&gt;
     tag. We no longer need this attribute because the project's XML namespace (i.e. the "xmlns" attribute) gives us all the
     version information we need.

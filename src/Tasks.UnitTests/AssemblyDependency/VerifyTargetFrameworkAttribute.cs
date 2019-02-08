@@ -3,6 +3,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -11,13 +12,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class VerifyTargetFrameworkAttribute : ResolveAssemblyReferenceTestFixture
     {
+        public VerifyTargetFrameworkAttribute(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Verify there are no warnings if the target framework identifier passed to rar and the target framework identifier in the dll do not match.
         /// </summary>
         [Fact]
         public void FrameworksDoNotMatch()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -34,7 +39,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -44,7 +49,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void LowerVersionSameFrameworkDirect()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -61,7 +66,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -71,7 +76,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SameVersionSameFrameworkDirect()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -88,7 +93,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -98,7 +103,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherVersionButSpecificVersionDirect()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("DependsOnFoo45Framework, Version=4.5.0.0, PublicKeyToken=null, Culture=Neutral");
             item.SetMetadata("SpecificVersion", "true");
@@ -118,7 +123,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -128,7 +133,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void LowerVersionSameFrameworkInDirect()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -145,8 +150,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo35Framework.dll"))); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -157,7 +162,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SameVersionSameFrameworkInDirect()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -174,8 +179,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo4Framework.dll"))); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -186,7 +191,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherVersionButSpecificVersionInDirect()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("IndirectDependsOnFoo45Framework, Version=0.0.0.0, PublicKeyToken=null, Culture=Neutral");
             item.SetMetadata("SpecificVersion", "true");
@@ -206,8 +211,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -218,7 +223,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherVersionInDirect()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("IndirectDependsOnFoo45Framework, Version=0.0.0.0, PublicKeyToken=null, Culture=Neutral");
 
@@ -238,8 +243,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // "One warning expected in this scenario."
             e.AssertLogContains("MSB3275");
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(0, t.ResolvedFiles.Length);
-            Assert.Equal(0, t.ResolvedDependencyFiles.Length);
+            Assert.Empty(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedDependencyFiles);
         }
 
         /// <summary>
@@ -248,7 +253,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherVersionInDirectIgnoreMismatch()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("IndirectDependsOnFoo45Framework, Version=0.0.0.0, PublicKeyToken=null, Culture=Neutral");
 
@@ -268,8 +273,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -280,7 +285,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherVersionDirectIgnoreMismatch()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("DependsOnFoo45Framework");
 
@@ -301,7 +306,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -312,7 +317,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherVersionDirect()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("DependsOnFoo45Framework");
 
@@ -332,8 +337,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // "One warning expected in this scenario."
             e.AssertLogContains("MSB3274");
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(0, t.ResolvedFiles.Length);
-            Assert.Equal(0, t.ResolvedDependencyFiles.Length);
+            Assert.Empty(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedDependencyFiles);
         }
 
         /// <summary>
@@ -345,7 +350,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void HigherVersionDirectDependenciesFalse()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("DependsOnFoo45Framework");
 
@@ -387,8 +392,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(0, e.Warnings); // "No warning expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.Equal(0, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
     }

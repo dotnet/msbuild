@@ -11,6 +11,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.BackEnd
@@ -119,7 +120,7 @@ namespace Microsoft.Build.BackEnd
             }
             catch (IOException)
             {
-                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceString("CantWriteBuildPlan", planName));
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CantWriteBuildPlan", planName));
             }
         }
 
@@ -165,15 +166,15 @@ namespace Microsoft.Build.BackEnd
             }
             catch (IOException)
             {
-                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceString("CantReadBuildPlan", planName));
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CantReadBuildPlan", planName));
             }
             catch (InvalidDataException)
             {
-                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceString("BuildPlanCorrupt", planName));
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildPlanCorrupt", planName));
             }
             catch (FormatException)
             {
-                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceString("BuildPlanCorrupt", planName));
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildPlanCorrupt", planName));
             }
         }
 
@@ -472,7 +473,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                string[] values = line.Split(new char[] { ' ' });
+                string[] values = line.Split(MSBuildConstants.SpaceChar);
                 if (values.Length < 1)
                 {
                     throw new InvalidDataException("Too few values in hierarchy");
@@ -503,7 +504,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                string[] values = line.Split(new char[] { ' ' });
+                string[] values = line.Split(MSBuildConstants.SemicolonChar);
                 if (values.Length < 3)
                 {
                     throw new InvalidDataException("Too few values in build plan.");

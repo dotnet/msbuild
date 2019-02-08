@@ -310,7 +310,7 @@ namespace Microsoft.Build.Tasks
                                     itemTypeLib.SetMetadata(ComReferenceItemMetadataNames.wrapperTool, ComReferenceTypes.tlbimp);
                                     itemTypeLib.SetMetadata(ComReferenceItemMetadataNames.guid, typelib.TlbId);
                                     itemTypeLib.SetMetadata(ComReferenceItemMetadataNames.lcid, "0");
-                                    string[] verMajorAndMinor = typelib.Version.Split('.');
+                                    string[] verMajorAndMinor = typelib.Version.Split(MSBuildConstants.DotChar);
                                     // UNDONE: are major and minor version numbers in base 10 or 16?
                                     itemTypeLib.SetMetadata(ComReferenceItemMetadataNames.versionMajor, verMajorAndMinor[0]);
                                     itemTypeLib.SetMetadata(ComReferenceItemMetadataNames.versionMinor, verMajorAndMinor[1]);

@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             AssertWhiteSpacePreservation(projectContents, updatedProject, (pe, p) =>
             {
-                var itemGroup = pe.AddItemGroup();
+                pe.AddItemGroup();
 
                 Assert.True(p.IsDirty);
             });
@@ -512,7 +512,7 @@ multi-line comment here
             else
             {
                 // Ensure we did not add \r\n
-                Assert.Equal(0, Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline).Count);
+                Assert.Empty(Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline));
             }
         }
     }

@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
             path = path.TrimEnd(Path.DirectorySeparatorChar);
-            return path.Split(Path.DirectorySeparatorChar);
+            return path.Split(MSBuildConstants.DirectorySeparatorChar);
         }
 
         //Resolves the path, and if path is a url also canonicalizes it.

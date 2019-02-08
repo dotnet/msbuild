@@ -251,7 +251,7 @@ namespace Microsoft.Build.Tasks
                         continue;
                     }
 
-                    var oldVersionRange = oldVersionAttribute.Value.Split('-');
+                    var oldVersionRange = oldVersionAttribute.Value.Split(MSBuildConstants.HyphenChar);
                     if (oldVersionRange.Length == 0 || oldVersionRange.Length > 2)
                     {
                         continue;

@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var task = GetTaskInstance(@"<t1 a=''/>");
 
-            Assert.Equal(1, task.Parameters.Count);
+            Assert.Single(task.Parameters);
         }
 
         /// <summary>

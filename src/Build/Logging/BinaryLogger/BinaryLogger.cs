@@ -127,7 +127,7 @@ namespace Microsoft.Build.Logging
             {
                 string errorCode;
                 string helpKeyword;
-                string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
                 throw new LoggerException(message, e, errorCode, helpKeyword);
             }
 
@@ -226,10 +226,10 @@ namespace Microsoft.Build.Logging
         {
             if (Parameters == null)
             {
-                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", ""));
+                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
-            var parameters = Parameters.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
                 if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
@@ -256,7 +256,7 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
-                    throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", parameter));
+                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
                 }
             }
 
@@ -273,7 +273,7 @@ namespace Microsoft.Build.Logging
             {
                 string errorCode;
                 string helpKeyword;
-                string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
                 throw new LoggerException(message, e, errorCode, helpKeyword);
             }
         }

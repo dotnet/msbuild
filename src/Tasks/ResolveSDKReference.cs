@@ -49,7 +49,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Split char for the appx attribute
         /// </summary>
-        private static readonly char[] s_appxSplitChar = { '-' };
+        private static readonly char[] s_appxSplitChar = MSBuildConstants.HyphenChar;
 
         /// <summary>
         /// SDKName
@@ -60,11 +60,6 @@ namespace Microsoft.Build.Tasks
         /// PlatformVersion
         /// </summary>
         private const string SDKPlatformVersion = "PlatformVersion";
-
-        /// <summary>
-        /// Split char for strings
-        /// </summary>
-        private static readonly char[] s_semicolonSplitChar = { ';' };
 
         /// <summary>
         /// Default target platform version
@@ -535,7 +530,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!String.IsNullOrEmpty(dependsOnSDK))
             {
-                return dependsOnSDK.Split(s_semicolonSplitChar, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(y => y.Length > 0).ToList<string>();
+                return dependsOnSDK.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(y => y.Length > 0).ToList<string>();
             }
 
             return new List<string>();
@@ -594,7 +589,7 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (Tuple<string, object[]> message in reference.StatusMessages)
                     {
-                        string formattedMessage = ResourceUtilities.FormatResourceString(message.Item1, message.Item2);
+                        string formattedMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(message.Item1, message.Item2);
                         Log.LogMessage("  " + formattedMessage);
                     }
                 }
@@ -647,7 +642,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Delimiter for supported architectures
             /// </summary>
-            private static readonly char[] s_supportedArchitecturesSplitChars = { ';' };
+            private static readonly char[] s_supportedArchitecturesSplitChars = MSBuildConstants.SemicolonChar;
 
             /// <summary>
             /// Delimiter used to delimit the supported architectures in the error message
@@ -1015,7 +1010,7 @@ namespace Microsoft.Build.Tasks
 
                     if (_sdkManifest.ReadError)
                     {
-                        AddResolutionErrorOrWarning("ResolveSDKReference.ErrorResolvingSDK", ReferenceItem.ItemSpec, ResourceUtilities.FormatResourceString("ResolveSDKReference.ErrorReadingManifest", _sdkManifestPath, _sdkManifest.ReadErrorMessage));
+                        AddResolutionErrorOrWarning("ResolveSDKReference.ErrorResolvingSDK", ReferenceItem.ItemSpec, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveSDKReference.ErrorReadingManifest", _sdkManifestPath, _sdkManifest.ReadErrorMessage));
                     }
                 }
 

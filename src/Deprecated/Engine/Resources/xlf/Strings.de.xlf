@@ -699,7 +699,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Die &lt;{0}&gt;-Kennung wird nicht mehr als untergeordnetes Element des &lt;Project&gt;-Elements unterstützt. Platzieren Sie diese Kennung in einem Ziel, und fügen Sie den Namen des Ziels dem InitialTargets-Attribut des &lt;Project&gt;-Elements hinzu.</target>
+        <target state="translated">Das &lt;{0}&gt;-Tag wird nicht mehr als untergeordnetes Element des &lt;Project&gt;-Elements unterstützt. Platzieren Sie dieses Tag in einem Ziel, und fügen Sie den Namen des Ziels dem InitialTargets-Attribut des &lt;Project&gt;-Elements hinzu.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">Das &lt;{0}&gt;-Tag nicht als untergeordnetes Element des &lt; Project &gt;-Elements unterstützt. Platzieren Sie dieses Tag in einem Ziel und fügen Sie den Namen des Ziels InitialTargets-Attribut des &lt; Project &gt;-Elements hinzu.</target>
@@ -993,9 +993,9 @@
       <trans-unit id="InvalidMessageImportance">
         <source>MSB4071: The value Importance="{0}" in the &lt;Message&gt; element is invalid. Valid values are: High, Normal and Low.</source>
         <target state="translated">MSB4071: Der Wert Importance={0} im &lt;Message&gt;-Element ist ungültig. Gültige Werte sind: High, Normal und Low.</target>
-        <note>{StrBegin="MSB4071: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.  
+        <note>{StrBegin="MSB4071: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
     The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
-    LOCALIZATION: "Importance" should not be localized.  
+    LOCALIZATION: "Importance" should not be localized.
                   "Message" should not be localized.
                   High should not be localized.
                   Normal should not be localized.
@@ -1272,7 +1272,7 @@
       </trans-unit>
       <trans-unit id="MSBuildVersionAttributeDeprecated">
         <source>MSB4031: The "MSBuildVersion" attribute is deprecated. If the project is authored in the MSBuild 2003 format, please remove the attribute from the &lt;Project&gt; tag. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4031: Das MSBuildVersion-Attribut ist veraltet. Wenn das Projekt im Format MSBuild 2003 erstellt wurde, löschen Sie das Attribut aus der &lt;Project&gt;-Kennung. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
+        <target state="translated">MSB4031: Das MSBuildVersion-Attribut ist veraltet. Wenn das Projekt im Format MSBuild 2003 erstellt wurde, löschen Sie das Attribut aus dem &lt;Project&gt;-Tag. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
         <note>{StrBegin="MSB4031: "}UE: This message is shown for projects that still contain the "MSBuildVersion" attribute in their &lt;Project&gt;
     tag. We no longer need this attribute because the project's XML namespace (i.e. the "xmlns" attribute) gives us all the
     version information we need.

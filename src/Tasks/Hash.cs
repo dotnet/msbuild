@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -16,13 +18,18 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class Hash : TaskExtension
     {
-        private const string ItemSeparatorCharacter = "\u2028";
+        private const char ItemSeparatorCharacter = '\u2028';
 
         /// <summary>
         /// Items from which to generate a hash.
         /// </summary>
         [Required]
         public ITaskItem[] ItemsToHash { get; set; }
+
+        /// <summary>
+        /// When true, will generate a case-insensitive hash.
+        /// </summary>
+        public bool IgnoreCase { get; set; }
 
         /// <summary>
         /// Hash of the ItemsToHash ItemSpec.
@@ -37,29 +44,55 @@ namespace Microsoft.Build.Tasks
         {
             if (ItemsToHash != null && ItemsToHash.Length > 0)
             {
-                StringBuilder hashInput = new StringBuilder();
-
-                foreach (var item in ItemsToHash)
-                {
-                    hashInput.Append(item.ItemSpec);
-                    hashInput.Append(ItemSeparatorCharacter);
-                }
-
                 using (var sha1 = SHA1.Create())
                 {
-                    var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(hashInput.ToString()));
-                    var hashResult = new StringBuilder(hash.Length*2);
+                    var concatenatedItemStringSize = ComputeStringSize(ItemsToHash);
 
-                    foreach (byte b in hash)
+                    var hashStringSize = sha1.HashSize;
+
+                    using (var stringBuilder = new ReuseableStringBuilder(Math.Max(concatenatedItemStringSize, hashStringSize)))
                     {
-                        hashResult.Append(b.ToString("x2"));
-                    }
+                        foreach (var item in ItemsToHash)
+                        {
+                            string itemSpec = item.ItemSpec;
+                            stringBuilder.Append(IgnoreCase ? itemSpec.ToUpperInvariant() : itemSpec);
+                            stringBuilder.Append(ItemSeparatorCharacter);
+                        }
 
-                    HashResult = hashResult.ToString();
+                        var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
+
+                        stringBuilder.Clear();
+
+                        foreach (var b in hash)
+                        {
+                            stringBuilder.Append(b.ToString("x2"));
+                        }
+
+                        HashResult = stringBuilder.ToString();
+                    }
                 }
             }
 
             return true;
+        }
+
+        private int ComputeStringSize(ITaskItem[] itemsToHash)
+        {
+            if (itemsToHash.Length == 0)
+            {
+                return 0;
+            }
+
+            var totalItemSize = 0;
+
+            foreach (var item in itemsToHash)
+            {
+                totalItemSize += item.ItemSpec.Length;
+            }
+
+            var separatorSize = itemsToHash.Length - 1;
+
+            return totalItemSize + separatorSize;
         }
     }
 }

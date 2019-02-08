@@ -107,7 +107,7 @@ namespace Microsoft.Build.Logging
             {
                 string errorCode;
                 string helpKeyword;
-                string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, e.Message);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, e.Message);
                 _fileWriter?.Dispose();
 
                 throw new LoggerException(message, e.InnerException, errorCode, helpKeyword);
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Logging
             {
                 string errorCode;
                 string helpKeyword;
-                string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, ex.Message);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, ex.Message);
                 _fileWriter?.Dispose();
 
                 throw new LoggerException(message, ex.InnerException, errorCode, helpKeyword);
@@ -258,12 +258,12 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// File logger parameters delimiters.
         /// </summary>
-        private static readonly char[] s_fileLoggerParameterDelimiters = { ';' };
+        private static readonly char[] s_fileLoggerParameterDelimiters = MSBuildConstants.SemicolonChar;
 
         /// <summary>
         /// File logger parameter value split character.
         /// </summary>
-        private static readonly char[] s_fileLoggerParameterValueSplitCharacter = { '=' };
+        private static readonly char[] s_fileLoggerParameterValueSplitCharacter = MSBuildConstants.EqualsChar;
 
         #endregion
     }

@@ -1,8 +1,8 @@
 # MSBuild evaluation profiling
 
-This branch contains an evaluation profiler, which can help analyze which parts of a project (and any .targets/etc that it imports) are taking the most time to evaluate.
+MSBuild 15.6 and higher contains an evaluation profiler, which can help analyze which parts of a project (and any .targets/etc that it imports) are taking the most time to evaluate.
 
-The profiler is enabled when passing /profileevaluation:<filename> as a command-line argument to MSBuild. The provided filename is used for generating a profiler report that looks like the following:
+The profiler is enabled when passing `/profileevaluation:<filename>` as a command-line argument to MSBuild. After the build, the specified file will contain a profiler report. If the specified filename does not end in `.md`, it will be a tab-separated value (TSV) table suitable for loading into a spreadsheet. If the filename ends in `.md`, it will be a Markdown file that looks like the following:
 
 Pass|File|Line #|Expression|Inc (ms)|Inc (%)|Exc (ms)|Exc (%)|#|Bug
 ---|---|---:|---|---:|---:|---:|---:|---:|---

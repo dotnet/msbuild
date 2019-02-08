@@ -44,7 +44,7 @@ namespace Microsoft.Build.Shared
             }
             catch (System.ArgumentException e)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("General.InvalidAttributeMetadata", item.ItemSpec, itemMetadataName, metadataValue, "bool"), e);
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.InvalidAttributeMetadata", item.ItemSpec, itemMetadataName, metadataValue, "bool"), e);
             }
         }
 

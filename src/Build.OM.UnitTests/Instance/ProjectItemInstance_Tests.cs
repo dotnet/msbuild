@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.Equal("i", item.ItemType);
             Assert.Equal("i1", item.EvaluatedInclude);
-            Assert.Equal(false, item.Metadata.GetEnumerator().MoveNext());
+            Assert.False(item.Metadata.GetEnumerator().MoveNext());
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void GetMissingMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
-            Assert.Equal(null, item.GetMetadata("X"));
+            Assert.Null(item.GetMetadata("X"));
             Assert.Equal(String.Empty, item.GetMetadataValue("X"));
         }
 
@@ -217,22 +217,22 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.SetMetadata("m;", "m%3b1");
             ITaskItem2 taskItem = (ITaskItem2)item;
 
-            Assert.Equal(taskItem.EvaluatedIncludeEscaped, "esca%20ped%3bitem");
-            Assert.Equal(taskItem.ItemSpec, "esca ped;item");
+            Assert.Equal("esca%20ped%3bitem", taskItem.EvaluatedIncludeEscaped);
+            Assert.Equal("esca ped;item", taskItem.ItemSpec);
 
-            Assert.Equal(taskItem.GetMetadata("m;"), "m;1");
-            Assert.Equal(taskItem.GetMetadataValueEscaped("m;"), "m%3b1");
-            Assert.Equal(taskItem.GetMetadataValueEscaped("m"), "m1");
+            Assert.Equal("m;1", taskItem.GetMetadata("m;"));
+            Assert.Equal("m%3b1", taskItem.GetMetadataValueEscaped("m;"));
+            Assert.Equal("m1", taskItem.GetMetadataValueEscaped("m"));
 
-            Assert.Equal(taskItem.EvaluatedIncludeEscaped, "esca%20ped%3bitem");
-            Assert.Equal(taskItem.ItemSpec, "esca ped;item");
+            Assert.Equal("esca%20ped%3bitem", taskItem.EvaluatedIncludeEscaped);
+            Assert.Equal("esca ped;item", taskItem.ItemSpec);
 
             ITaskItem2 taskItem2 = new Microsoft.Build.Utilities.TaskItem(taskItem);
 
             taskItem2.SetMetadataValueLiteral("m;", "m;2");
 
-            Assert.Equal(taskItem2.GetMetadataValueEscaped("m;"), "m%3b2");
-            Assert.Equal(taskItem2.GetMetadata("m;"), "m;2");
+            Assert.Equal("m%3b2", taskItem2.GetMetadataValueEscaped("m;"));
+            Assert.Equal("m;2", taskItem2.GetMetadata("m;"));
 
             IDictionary<string, string> taskItem2Metadata = (IDictionary<string, string>)taskItem2.CloneCustomMetadata();
             Assert.Equal(3, taskItem2Metadata.Count);
@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.Equal("i", item.ItemType);
             Assert.Equal("i1", item.EvaluatedInclude);
-            Assert.Equal(false, item.Metadata.GetEnumerator().MoveNext());
+            Assert.False(item.Metadata.GetEnumerator().MoveNext());
             Assert.Equal(0 + BuiltInMetadataCount, Helpers.MakeList(item.MetadataNames).Count);
             Assert.Equal(0 + BuiltInMetadataCount, item.MetadataCount);
         }

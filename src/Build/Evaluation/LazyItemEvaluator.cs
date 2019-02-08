@@ -36,13 +36,6 @@ namespace Microsoft.Build.Evaluation
 
         private int _nextElementOrder = 0;
 
-
-        /// <summary>
-        /// The CultureInfo from the invariant culture. Used to avoid allocations for
-        /// perfoming IndexOf etc.
-        /// </summary>
-        private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
-
         private Dictionary<string, LazyItemList> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
@@ -248,11 +241,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _cache[globsToIgnore] = items;
-            }
-
-            private bool IsCached(ISet<string> globsToIgnore)
-            {
-                return _cache != null && _cache.ContainsKey(globsToIgnore);
             }
         }
 

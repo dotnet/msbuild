@@ -389,7 +389,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 {
                     if (String.Equals(attribute.Name, tasksAttribute, StringComparison.OrdinalIgnoreCase))
                     {
-                        importTasks = attribute.InnerText.Split(';');
+                        importTasks = attribute.InnerText.Split(MSBuildConstants.SemicolonChar);
                     }
                 }
                 _isImport = true;
@@ -568,7 +568,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private void LogError(string messageResourceName, params object[] messageArgs)
         {
-            ErrorLog.AddLast(ResourceUtilities.FormatResourceString(messageResourceName, messageArgs));
+            ErrorLog.AddLast(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(messageResourceName, messageArgs));
             ErrorCount++;
         }
 

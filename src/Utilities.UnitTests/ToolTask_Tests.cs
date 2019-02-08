@@ -618,8 +618,7 @@ namespace Microsoft.Build.UnitTests
 
             result.ShouldBe(true);
             task.ExecuteCalled.ShouldBe(true);
-            Assert.Equal(
-                true,
+            Assert.True(
 #if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
                 task.StartInfo.Environment["PATH"].Length > 0);
 #else

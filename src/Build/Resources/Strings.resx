@@ -193,8 +193,8 @@
     <comment>{StrBegin="MSB4162: "}</comment>
   </data>
   <data name="ChildExitedPrematurely" UESanitized="false" Visibility="Public">
-    <value>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</value>
-    <comment>{StrBegin="MSB4166: "}</comment>
+    <value>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</value>
+    <comment>{StrBegin="MSB4166: "} {2} is exception text if any</comment>
   </data>
   <data name="ChooseMustContainWhen" UESanitized="false" Visibility="Public">
     <value>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</value>
@@ -527,7 +527,7 @@
     </comment>
   </data>
   <data name="InvalidFunctionStaticMethodSyntax" UESanitized="false" Visibility="Public">
-    <value>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). </value>
+    <value>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</value>
     <comment>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -1700,13 +1700,76 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
+  <data name="ProjectGraphDoesNotSupportProjectReferenceWithToolset" UESanitized="false" Visibility="Public">
+    <value>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</value>
+    <comment>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </comment>
+  </data>
+  <data name="CircularDependencyInProjectGraph" UESanitized="false" Visibility="Public">
+    <value>MSB4251: There is a circular dependency involving the following projects: {0}</value>
+    <comment>
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </comment>
+  </data>
+  <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" UESanitized="false" Visibility="Public">
+    <value>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </value>
+    <comment>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </comment>
+  </data>
+  <data name="NullReferenceFromProjectInstanceFactory" UESanitized="false" Visibility="Public">
+    <value>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</value>
+    <comment>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </comment>
+  </data>
+  <data name="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds" UESanitized="false" Visibility="Public">
+    <value>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</value>
+    <comment>
+      {StrBegin="MSB4254:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
+    </comment>
+  </data>
+  <data name="ErrorReadingCacheFile" UESanitized="false" Visibility="Public">
+    <value>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</value>
+  </data>
+  <data name="InputCacheFilesDoNotExist" UESanitized="false" Visibility="Public">
+    <value>MSB4255: The following input result cache files do not exist: "{0}"</value>
+  </data>
+  <data name="EmptyOutputCacheFile" UESanitized="false" Visibility="Public">
+    <value>MSB4257: The specified output result cache file is empty.</value>
+  </data>
+  <data name="ErrorWritingCacheFile" UESanitized="false" Visibility="Public">
+    <value>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</value>
+  </data>
+  <data name="UsingInputCaches" UESanitized="false" Visibility="Public">
+    <value>Using input build results caches: {0}</value>
+    <comment>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
+    </comment>
+  </data>
+  <data name="WritingToOutputCache" UESanitized="false" Visibility="Public">
+    <value>Writing build results caches to: {0}</value>
+    <comment>
+      LOCALIZATION: {0} is a file path
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
 
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4250.
+        Next message code should be MSB4259.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

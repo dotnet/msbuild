@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Build.Framework
 {
     public delegate void AnyEventHandler(object sender, Microsoft.Build.Framework.BuildEventArgs e);
@@ -354,14 +356,14 @@ namespace Microsoft.Build.Framework
     {
         public ProjectEvaluationFinishedEventArgs() { }
         public ProjectEvaluationFinishedEventArgs(string message, params object[] messageArgs) { }
-        public System.Nullable<Microsoft.Build.Framework.Profiler.ProfilerResult> ProfilerResult { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Nullable<Microsoft.Build.Framework.Profiler.ProfilerResult> ProfilerResult { get { throw null; } set { } }
+        public string ProjectFile { get { throw null; } set { } }
     }
     public partial class ProjectEvaluationStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         public ProjectEvaluationStartedEventArgs() { }
         public ProjectEvaluationStartedEventArgs(string message, params object[] messageArgs) { }
-        public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ProjectFile { get { throw null; } set { } }
     }
     public partial class ProjectFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -376,9 +378,9 @@ namespace Microsoft.Build.Framework
     {
         public ProjectImportedEventArgs() { }
         public ProjectImportedEventArgs(int lineNumber, int columnNumber, string message, params object[] messageArgs) { }
-        public string ImportedProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public bool ImportIgnored { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public string UnexpandedProject { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ImportedProjectFile { get { throw null; } set { } }
+        public bool ImportIgnored { get { throw null; } set { } }
+        public string UnexpandedProject { get { throw null; } set { } }
     }
     public partial class ProjectStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -433,9 +435,9 @@ namespace Microsoft.Build.Framework
     public sealed partial class SdkReference : System.IEquatable<Microsoft.Build.Framework.SdkReference>
     {
         public SdkReference(string name, string version, string minimumVersion) { }
-        public string MinimumVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string Version { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string MinimumVersion { get { throw null; } }
+        public string Name { get { throw null; } }
+        public string Version { get { throw null; } }
         public bool Equals(Microsoft.Build.Framework.SdkReference other) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -452,20 +454,20 @@ namespace Microsoft.Build.Framework
     public abstract partial class SdkResolverContext
     {
         protected SdkResolverContext() { }
-        public virtual bool Interactive { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
-        public virtual Microsoft.Build.Framework.SdkLogger Logger { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
-        public virtual System.Version MSBuildVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
-        public virtual string ProjectFilePath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
-        public virtual string SolutionFilePath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
-        public virtual object State { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public virtual bool Interactive { get { throw null; } protected set { } }
+        public virtual Microsoft.Build.Framework.SdkLogger Logger { get { throw null; } protected set { } }
+        public virtual System.Version MSBuildVersion { get { throw null; } protected set { } }
+        public virtual string ProjectFilePath { get { throw null; } protected set { } }
+        public virtual string SolutionFilePath { get { throw null; } protected set { } }
+        public virtual object State { get { throw null; } set { } }
     }
     public abstract partial class SdkResult
     {
         protected SdkResult() { }
-        public virtual string Path { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
-        public virtual Microsoft.Build.Framework.SdkReference SdkReference { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
-        public virtual bool Success { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
-        public virtual string Version { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
+        public virtual string Path { get { throw null; } protected set { } }
+        public virtual Microsoft.Build.Framework.SdkReference SdkReference { get { throw null; } protected set { } }
+        public virtual bool Success { get { throw null; } protected set { } }
+        public virtual string Version { get { throw null; } protected set { } }
     }
     public abstract partial class SdkResultFactory
     {
@@ -497,10 +499,10 @@ namespace Microsoft.Build.Framework
     {
         public TargetSkippedEventArgs() { }
         public TargetSkippedEventArgs(string message, params object[] messageArgs) { }
-        public Microsoft.Build.Framework.TargetBuiltReason BuildReason { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public string ParentTarget { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public string TargetFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public string TargetName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Framework.TargetBuiltReason BuildReason { get { throw null; } set { } }
+        public string ParentTarget { get { throw null; } set { } }
+        public string TargetFile { get { throw null; } set { } }
+        public string TargetName { get { throw null; } set { } }
     }
     public partial class TargetStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -537,10 +539,10 @@ namespace Microsoft.Build.Framework
     public partial class TaskPropertyInfo
     {
         public TaskPropertyInfo(string name, System.Type typeOfParameter, bool output, bool required) { }
-        public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public bool Output { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public System.Type PropertyType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public bool Required { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string Name { get { throw null; } }
+        public bool Output { get { throw null; } }
+        public System.Type PropertyType { get { throw null; } }
+        public bool Required { get { throw null; } }
     }
     public partial class TaskStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -555,8 +557,8 @@ namespace Microsoft.Build.Framework
     public sealed partial class TelemetryEventArgs : Microsoft.Build.Framework.BuildEventArgs
     {
         public TelemetryEventArgs() { }
-        public string EventName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public System.Collections.Generic.IDictionary<string, string> Properties { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string EventName { get { throw null; } set { } }
+        public System.Collections.Generic.IDictionary<string, string> Properties { get { throw null; } set { } }
     }
     public delegate void TelemetryEventHandler(object sender, Microsoft.Build.Framework.TelemetryEventArgs e);
 }
@@ -568,17 +570,17 @@ namespace Microsoft.Build.Framework.Profiler
         public EvaluationLocation(Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
         public EvaluationLocation(long id, System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
         public EvaluationLocation(System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
-        public string ElementDescription { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string ElementName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public static Microsoft.Build.Framework.Profiler.EvaluationLocation EmptyLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public Microsoft.Build.Framework.Profiler.EvaluationPass EvaluationPass { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string EvaluationPassDescription { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string File { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public long Id { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string ElementDescription { get { throw null; } }
+        public string ElementName { get { throw null; } }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation EmptyLocation { get { throw null; } }
+        public Microsoft.Build.Framework.Profiler.EvaluationPass EvaluationPass { get { throw null; } }
+        public string EvaluationPassDescription { get { throw null; } }
+        public string File { get { throw null; } }
+        public long Id { get { throw null; } }
         public bool IsEvaluationPass { get { throw null; } }
-        public Microsoft.Build.Framework.Profiler.EvaluationLocationKind Kind { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public System.Nullable<int> Line { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public System.Nullable<long> ParentId { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocationKind Kind { get { throw null; } }
+        public System.Nullable<int> Line { get { throw null; } }
+        public System.Nullable<long> ParentId { get { throw null; } }
         public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForAggregatedGlob() { throw null; }
         public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForCondition(System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string condition) { throw null; }
         public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForGlob(System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string globDescription) { throw null; }
@@ -615,9 +617,9 @@ namespace Microsoft.Build.Framework.Profiler
     public partial struct ProfiledLocation
     {
         public ProfiledLocation(System.TimeSpan inclusiveTime, System.TimeSpan exclusiveTime, int numberOfHits) { throw null;}
-        public System.TimeSpan ExclusiveTime { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public System.TimeSpan InclusiveTime { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public int NumberOfHits { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.TimeSpan ExclusiveTime { get { throw null; } }
+        public System.TimeSpan InclusiveTime { get { throw null; } }
+        public int NumberOfHits { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
@@ -626,7 +628,7 @@ namespace Microsoft.Build.Framework.Profiler
     public partial struct ProfilerResult
     {
         public ProfilerResult(System.Collections.Generic.IDictionary<Microsoft.Build.Framework.Profiler.EvaluationLocation, Microsoft.Build.Framework.Profiler.ProfiledLocation> profiledLocations) { throw null;}
-        public System.Collections.Generic.IReadOnlyDictionary<Microsoft.Build.Framework.Profiler.EvaluationLocation, Microsoft.Build.Framework.Profiler.ProfiledLocation> ProfiledLocations { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Collections.Generic.IReadOnlyDictionary<Microsoft.Build.Framework.Profiler.EvaluationLocation, Microsoft.Build.Framework.Profiler.ProfiledLocation> ProfiledLocations { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
     }

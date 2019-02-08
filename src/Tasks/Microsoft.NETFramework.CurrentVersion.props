@@ -26,8 +26,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportBefore')"/>
 
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
     <!-- By default we want to replace subsets with profiles, but we do need a way to turning off this "upgrade" in case a user needs to target a subset-->
     <UpgradeSubsetToProfile Condition="'$(UpgradeSubsetToProfile)' == '' ">true</UpgradeSubsetToProfile>
 

@@ -11,7 +11,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Class representing a reference to a project import path with property fall-back
     /// </summary>
-    internal class ProjectImportPathMatch : INodePacketTranslatable
+    internal class ProjectImportPathMatch : ITranslatable
     {
         /// <summary>
         /// ProjectImportPathMatch instance representing no fall-back
@@ -28,9 +28,9 @@ namespace Microsoft.Build.Evaluation
             MsBuildPropertyFormat = $"$({PropertyName})";
         }
 
-        public ProjectImportPathMatch(INodePacketTranslator translator)
+        public ProjectImportPathMatch(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public List<string> SearchPaths;
 
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref PropertyName);
             translator.Translate(ref MsBuildPropertyFormat);
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static ProjectImportPathMatch FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectImportPathMatch FactoryForDeserialization(ITranslator translator)
         {
             return new ProjectImportPathMatch(translator);
         }

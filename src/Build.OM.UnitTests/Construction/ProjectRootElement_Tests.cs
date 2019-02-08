@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal(string.Empty, project.DefaultTargets);
             Assert.Equal(string.Empty, project.InitialTargets);
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
-            Assert.Equal(true, project.HasUnsavedChanges); // it is indeed unsaved
+            Assert.True(project.HasUnsavedChanges); // it is indeed unsaved
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             project.DefaultTargets = "dt";
             Assert.Equal("dt", project.DefaultTargets);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             project.InitialTargets = "it";
             Assert.Equal("it", project.InitialTargets);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             project.ToolsVersion = "tv";
             Assert.Equal("tv", project.ToolsVersion);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(projectXml1.FullPath);
 
-            Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
-            Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
-            Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
-            Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
-            Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -364,7 +364,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
             content = content.Replace("`", "\"");
-            MockLogger logger = new MockLogger();
             bool exceptionThrown = false;
             try
             {
@@ -375,7 +374,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 exceptionThrown = true;
 
                 // MSB4068: The element <msb:Project> is unrecognized, or not supported in this context.
-                Assert.NotEqual(ex.ErrorCode, "MSB4068");
+                Assert.NotEqual("MSB4068", ex.ErrorCode);
 
                 // MSB4041: The default XML namespace of the project must be the MSBuild XML namespace.
                 Assert.Equal("MSB4041", ex.ErrorCode);
@@ -474,8 +473,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 var reader2 = XmlReader.Create(path);
                 ProjectRootElement root2 = ProjectRootElement.Create(reader2);
 
-                Assert.Equal(1, root1.Items.Count);
-                Assert.Equal(0, root2.Items.Count);
+                Assert.Single(root1.Items);
+                Assert.Empty(root2.Items);
 
                 reader1.Dispose();
                 reader2.Dispose();
@@ -938,7 +937,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                     File.SetAccessControl(solutionFile, security);
 
-                    ProjectRootElement p = ProjectRootElement.Open(solutionFile);
+                    ProjectRootElement.Open(solutionFile);
                 }
                 catch (PrivilegeNotHeldException)
                 {
@@ -953,7 +952,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                     File.Delete(solutionFile);
                     File.Delete(tempFileSentinel);
-                    Assert.Equal(false, File.Exists(solutionFile));
+                    Assert.False(File.Exists(solutionFile));
                 }
             }
            );
@@ -989,7 +988,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                     File.SetAccessControl(projectFile, security);
 
-                    ProjectRootElement p = ProjectRootElement.Open(projectFile);
+                    ProjectRootElement.Open(projectFile);
                 }
                 catch (PrivilegeNotHeldException)
                 {
@@ -1003,7 +1002,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     }
 
                     File.Delete(projectFile);
-                    Assert.Equal(false, File.Exists(projectFile));
+                    Assert.False(File.Exists(projectFile));
                 }
             }
            );
@@ -1031,7 +1030,7 @@ Project(""{";
 
                     File.WriteAllText(solutionFile, content);
 
-                    ProjectRootElement p = ProjectRootElement.Open(solutionFile);
+                    ProjectRootElement.Open(solutionFile);
                 }
                 finally
                 {
@@ -1110,7 +1109,7 @@ Project(""{";
 
                 done.WaitOne();
 
-                Assert.Equal(0, collection.LoadedProjects.Count);
+                Assert.Empty(collection.LoadedProjects);
             }
             finally
             {
@@ -1213,11 +1212,11 @@ Project(""{";
             var id = idg.AddItemDefinition("SomeType");
             id.AddMetadata("sm", "sv");
 
-            var ut = pre.AddUsingTask("name", "assembly", null);
+            pre.AddUsingTask("name", "assembly", null);
 
             var inlineUt = pre.AddUsingTask("anotherName", "somefile", null);
             inlineUt.TaskFactory = "SomeFactory";
-            var utb = inlineUt.AddUsingTaskBody("someEvaluate", "someTaskBody");
+            inlineUt.AddUsingTaskBody("someEvaluate", "someTaskBody");
 
             var choose = pre.CreateChooseElement();
             pre.AppendChild(choose);
@@ -1274,6 +1273,14 @@ Project(""{";
             var project =
 @"<?xml version=`1.0` encoding=`utf-8`?>
   <Project xmlns = 'msbuildnamespace'>
+
+    <ItemDefinitionGroup>
+      <Compile A=`a`/>
+      <B M1=`dv1`>
+        <M2>dv2</M2>
+      </B>
+      <C/>
+    </ItemDefinitionGroup>
 
     <ItemGroup>
       <Compile Include=`Class1.cs` A=`a` />
@@ -1917,14 +1924,6 @@ true, true, true)]
             {
                 Assert.Equal(xml, projectElement.RawXml);
             }
-        }
-
-        private static string SaveToString(ProjectRootElement project)
-        {
-            var writer = new EncodingStringWriter();
-            project.Save(writer);
-
-            return writer.ToString();
         }
 
         /// <summary>

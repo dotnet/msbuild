@@ -14,11 +14,6 @@ namespace Microsoft.Build.UnitTests
     public class BuildMessageEventArgs_Tests
     {
         /// <summary>
-        /// Default event to use in tests.
-        /// </summary>
-        private BuildMessageEventArgs _baseMessageEvent = new BuildMessageEventArgs("Message", "HelpKeyword", "Sender", MessageImportance.Low);
-
-        /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
         [Fact]

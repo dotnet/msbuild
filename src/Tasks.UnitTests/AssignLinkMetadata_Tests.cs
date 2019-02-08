@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.OutputItems.Length);
+            Assert.Empty(t.OutputItems);
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.OutputItems.Length);
+            Assert.Empty(t.OutputItems);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(1, t.OutputItems.Length);
+            Assert.Single(t.OutputItems);
             Assert.Equal(item.ItemSpec, t.OutputItems[0].ItemSpec);
 
             // Link metadata should have been added by the task, and OriginalItemSpec was added by the copy 
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(1, t.OutputItems.Length);
+            Assert.Single(t.OutputItems);
             Assert.Equal(item2.ItemSpec, t.OutputItems[0].ItemSpec);
 
             // Link metadata should have been added by the task, and OriginalItemSpec was added by the copy 
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.OutputItems.Length);
+            Assert.Empty(t.OutputItems);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.OutputItems.Length);
+            Assert.Empty(t.OutputItems);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.OutputItems.Length);
+            Assert.Empty(t.OutputItems);
         }
 
         /// <summary>

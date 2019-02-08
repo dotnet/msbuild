@@ -244,8 +244,8 @@ namespace Microsoft.Build.Logging
 
             var pair = idTable[parentId.Value];
 
-            // We go up the parent relationship until we find an item that is either an evaluation pass or a big enough regular item
-            while (!pair.Key.IsEvaluationPass || IsTooSmall(pair.Value))
+            // We go up the parent relationship until we find an item that is an evaluation pass and is big enough
+            while (!pair.Key.IsEvaluationPass && IsTooSmall(pair.Value))
             {
                 Debug.Assert(pair.Key.ParentId.HasValue,
                     "A location that is not an evaluation pass should always have a parent");
@@ -282,7 +282,7 @@ namespace Microsoft.Build.Logging
         {
             try
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("WritingProfilerReport", FileToLog));
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("WritingProfilerReport", FileToLog));
 
                 // If the extension of the file is 'md', markdown content is produced. For any other case,
                 // a tab separated format is generated
@@ -296,19 +296,19 @@ namespace Microsoft.Build.Logging
             }
             catch (DirectoryNotFoundException ex)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
             }
             catch (IOException ex)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
             }
             catch (UnauthorizedAccessException ex)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
             }
             catch (SecurityException ex)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
             }
         }
     }

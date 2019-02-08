@@ -17,6 +17,7 @@ using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
 using System.Collections.ObjectModel;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
@@ -611,7 +612,7 @@ namespace Microsoft.Build.Construction
             // as users such as blend opening a dev10 project cannot do anything about it.
             if (Version > slnFileMaxVersion)
             {
-                SolutionParserComments.Add(ResourceUtilities.FormatResourceString("UnrecognizedSolutionComment", Version));
+                SolutionParserComments.Add(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedSolutionComment", Version));
             }
         }
 
@@ -801,7 +802,7 @@ namespace Microsoft.Build.Construction
             catch (SecurityException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -810,7 +811,7 @@ namespace Microsoft.Build.Construction
             catch (NotSupportedException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -819,7 +820,7 @@ namespace Microsoft.Build.Construction
             catch (IOException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -828,7 +829,7 @@ namespace Microsoft.Build.Construction
             catch (UnauthorizedAccessException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -837,7 +838,7 @@ namespace Microsoft.Build.Construction
             catch (XmlException e)
             {
                 // Log a warning 
-                string warning = ResourceUtilities.FormatResourceString(out string errorCode, out _, "Shared.InvalidProjectFile",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.InvalidProjectFile",
                    etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -1033,7 +1034,7 @@ namespace Microsoft.Build.Construction
                 // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;" 
                 if (string.Compare(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    string[] projectReferenceEntries = propertyValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] projectReferenceEntries = propertyValue.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
 
                     foreach (string projectReferenceEntry in projectReferenceEntries)
                     {
@@ -1225,7 +1226,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ParseSolutionConfigurations()
         {
-            var nameValueSeparators = new[] { '=' };
+            var nameValueSeparators = MSBuildConstants.EqualsChar;
             var configPlatformSeparators = new[] { SolutionConfigurationInSolution.ConfigurationPlatformSeparator };
 
             do
@@ -1307,7 +1308,7 @@ namespace Microsoft.Build.Construction
                     continue;
                 }
 
-                string[] nameValue = str.Split('=');
+                string[] nameValue = str.Split(MSBuildConstants.EqualsChar);
 
                 // There should be exactly one '=' character, separating the name and value. 
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(nameValue.Length == 2, "SubCategoryForSolutionParsingErrors",
@@ -1333,8 +1334,6 @@ namespace Microsoft.Build.Construction
             // parts of the entry name string. This could lead to ambiguous results if we tried to parse 
             // the entry name instead of constructing it and looking it up. Although it's pretty unlikely that
             // this would ever be a problem, it's safer to do it the same way VS IDE does it.
-            char[] configPlatformSeparators = { SolutionConfigurationInSolution.ConfigurationPlatformSeparator };
-
             foreach (ProjectInSolution project in _projectsInOrder)
             {
                 // Solution folders don't have configurations
@@ -1357,7 +1356,7 @@ namespace Microsoft.Build.Construction
 
                         if (rawProjectConfigurationsEntries.TryGetValue(entryNameActiveConfig, out string configurationPlatform))
                         {
-                            string[] configurationPlatformParts = configurationPlatform.Split(configPlatformSeparators);
+                            string[] configurationPlatformParts = configurationPlatform.Split(SolutionConfigurationInSolution.ConfigurationPlatformSeparatorArray);
 
                             // Project configuration may not necessarily contain the platform part. Some project support only the configuration part.
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(configurationPlatformParts.Length <= 2, "SubCategoryForSolutionParsingErrors",

@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
         public void NullMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
-            string s = EventArgsFormatting.FormatEventMessage("error", "CS",
+            EventArgsFormatting.FormatEventMessage("error", "CS",
                       null, "312", "source.cs", 233, 236, 4, 8, 0);
             // No exception was thrown
 
@@ -161,7 +161,7 @@ namespace Microsoft.Build.UnitTests
             {
                 MyLogger l = new MyLogger();
                 BuildErrorEventArgs beea = null;
-                string s = l.FormatErrorEvent(beea);
+                l.FormatErrorEvent(beea);
             }
            );
         }
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
             {
                 MyLogger l = new MyLogger();
                 BuildWarningEventArgs bwea = null;
-                string s = l.FormatWarningEvent(bwea);
+                l.FormatWarningEvent(bwea);
             }
            );
         }

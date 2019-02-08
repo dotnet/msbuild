@@ -62,8 +62,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.Equal(expected: true, actual: result);
-            Assert.Equal(expected: null, actual: resolvedRuleSet);
+            Assert.True(result);
+            Assert.Null(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.Equal(expected: true, actual: result);
+                Assert.True(result);
                 Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
@@ -105,8 +105,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.Equal(expected: true, actual: result);
-            Assert.Equal(expected: null, actual: resolvedRuleSet);
+            Assert.True(result);
+            Assert.Null(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.Equal(expected: true, actual: result);
+                Assert.True(result);
                 Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
@@ -156,8 +156,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.Equal(expected: true, actual: result);
-            Assert.Equal(expected: null, actual: resolvedRuleSet);
+            Assert.True(result);
+            Assert.Null(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.Equal(expected: true, actual: result);
+                Assert.True(result);
                 Assert.Equal(expected: ruleSetFullPath, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
@@ -206,8 +206,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.Equal(expected: true, actual: result);
-            Assert.Equal(expected: null, actual: resolvedRuleSet);
+            Assert.True(result);
+            Assert.Null(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
@@ -230,8 +230,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.Equal(expected: true, actual: result);
-            Assert.Equal(expected: null, actual: resolvedRuleSet);
+            Assert.True(result);
+            Assert.Null(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.Equal(expected: true, actual: result);
+                Assert.True(result);
                 Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
@@ -283,8 +283,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.Equal(expected: true, actual: result);
-            Assert.Equal(expected: null, actual: resolvedRuleSet);
+            Assert.True(result);
+            Assert.Null(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
@@ -302,8 +302,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.Equal(expected: true, actual: result);
-            Assert.Equal(expected: null, actual: resolvedRuleSet);
+            Assert.True(result);
+            Assert.Null(resolvedRuleSet);
             mockEngine.AssertLogDoesntContain("MSB3884");
         }
 
@@ -321,8 +321,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.Equal(expected: true, actual: result);
-            Assert.Equal(expected: null, actual: resolvedRuleSet);
+            Assert.True(result);
+            Assert.Null(resolvedRuleSet);
             mockEngine.AssertLogDoesntContain("MSB3884");
         }
     }

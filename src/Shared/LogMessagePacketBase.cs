@@ -187,7 +187,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        protected LogMessagePacketBase(INodePacketTranslator translator)
+        protected LogMessagePacketBase(ITranslator translator)
         {
             Translate(translator);
         }
@@ -199,7 +199,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Delegate for translating TargetFinishedEventArgs
         /// </summary>
-        internal delegate void TargetFinishedTranslator(INodePacketTranslator translator, TargetFinishedEventArgs finishedEvent);
+        internal delegate void TargetFinishedTranslator(ITranslator translator, TargetFinishedEventArgs finishedEvent);
 
         /// <summary>
         /// Delegate representing a method on the BuildEventArgs classes used to write to a stream.
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Reads/writes this packet
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.TranslateEnum(ref _eventType, (int)_eventType);
             translator.Translate(ref _sinkId);
@@ -271,7 +271,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Writes the logging packet to the translator.
         /// </summary>
-        internal void WriteToStream(INodePacketTranslator translator)
+        internal void WriteToStream(ITranslator translator)
         {
             if (_eventType != LoggingEventType.CustomEvent)
             {
@@ -326,7 +326,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Reads the logging packet from the translator.
         /// </summary>
-        internal void ReadFromStream(INodePacketTranslator translator)
+        internal void ReadFromStream(ITranslator translator)
         {
             if (LoggingEventType.CustomEvent != _eventType)
             {
@@ -560,7 +560,7 @@ namespace Microsoft.Build.Shared
         /// Given a build event that is presumed to be 2.0 (due to its lack of a "WriteToStream" method) and its 
         /// LoggingEventType, serialize that event to the stream. 
         /// </summary>
-        private void WriteEventToStream(BuildEventArgs buildEvent, LoggingEventType eventType, INodePacketTranslator translator)
+        private void WriteEventToStream(BuildEventArgs buildEvent, LoggingEventType eventType, ITranslator translator)
         {
             string message = buildEvent.Message;
             string helpKeyword = buildEvent.HelpKeyword;
@@ -600,7 +600,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Serialize ExternalProjectFinished Event Argument to the stream
         /// </summary>
-        private void WriteExternalProjectFinishedEventToStream(ExternalProjectFinishedEventArgs externalProjectFinishedEventArgs, INodePacketTranslator translator)
+        private void WriteExternalProjectFinishedEventToStream(ExternalProjectFinishedEventArgs externalProjectFinishedEventArgs, ITranslator translator)
         {
             string projectFile = externalProjectFinishedEventArgs.ProjectFile;
             translator.Translate(ref projectFile);
@@ -612,7 +612,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// ExternalProjectStartedEvent
         /// </summary>
-        private void WriteExternalProjectStartedEventToStream(ExternalProjectStartedEventArgs externalProjectStartedEventArgs, INodePacketTranslator translator)
+        private void WriteExternalProjectStartedEventToStream(ExternalProjectStartedEventArgs externalProjectStartedEventArgs, ITranslator translator)
         {
             string projectFile = externalProjectStartedEventArgs.ProjectFile;
             translator.Translate(ref projectFile);
@@ -626,7 +626,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Write Build Warning Log message into the translator
         /// </summary>
-        private void WriteBuildWarningEventToStream(BuildWarningEventArgs buildWarningEventArgs, INodePacketTranslator translator)
+        private void WriteBuildWarningEventToStream(BuildWarningEventArgs buildWarningEventArgs, ITranslator translator)
         {
             string code = buildWarningEventArgs.Code;
             translator.Translate(ref code);
@@ -653,7 +653,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Write a Build Error message into the translator
         /// </summary>
-        private void WriteBuildErrorEventToStream(BuildErrorEventArgs buildErrorEventArgs, INodePacketTranslator translator)
+        private void WriteBuildErrorEventToStream(BuildErrorEventArgs buildErrorEventArgs, ITranslator translator)
         {
             string code = buildErrorEventArgs.Code;
             translator.Translate(ref code);
@@ -680,7 +680,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Write Task Command Line log message into the translator
         /// </summary>
-        private void WriteTaskCommandLineEventToStream(TaskCommandLineEventArgs taskCommandLineEventArgs, INodePacketTranslator translator)
+        private void WriteTaskCommandLineEventToStream(TaskCommandLineEventArgs taskCommandLineEventArgs, ITranslator translator)
         {
             MessageImportance importance = taskCommandLineEventArgs.Importance;
             translator.TranslateEnum(ref importance, (int)importance);
@@ -695,7 +695,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Write a "standard" Message Log the translator 
         /// </summary>
-        private void WriteBuildMessageEventToStream(BuildMessageEventArgs buildMessageEventArgs, INodePacketTranslator translator)
+        private void WriteBuildMessageEventToStream(BuildMessageEventArgs buildMessageEventArgs, ITranslator translator)
         {
             MessageImportance importance = buildMessageEventArgs.Importance;
             translator.TranslateEnum(ref importance, (int)importance);
@@ -709,7 +709,7 @@ namespace Microsoft.Build.Shared
         /// Given a build event that is presumed to be 2.0 (due to its lack of a "ReadFromStream" method) and its 
         /// LoggingEventType, read that event from the stream. 
         /// </summary>
-        private BuildEventArgs ReadEventFromStream(LoggingEventType eventType, INodePacketTranslator translator)
+        private BuildEventArgs ReadEventFromStream(LoggingEventType eventType, ITranslator translator)
         {
             string message = null;
             string helpKeyword = null;
@@ -751,7 +751,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Read and reconstruct a ProjectFinishedEventArgs from the stream
         /// </summary>
-        private ExternalProjectFinishedEventArgs ReadExternalProjectFinishedEventFromStream(INodePacketTranslator translator, string message, string helpKeyword, string senderName)
+        private ExternalProjectFinishedEventArgs ReadExternalProjectFinishedEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
             string projectFile = null;
             translator.Translate(ref projectFile);
@@ -773,7 +773,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Read and reconstruct a ProjectStartedEventArgs from the stream
         /// </summary>
-        private ExternalProjectStartedEventArgs ReadExternalProjectStartedEventFromStream(INodePacketTranslator translator, string message, string helpKeyword, string senderName)
+        private ExternalProjectStartedEventArgs ReadExternalProjectStartedEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
             string projectFile = null;
             translator.Translate(ref projectFile);
@@ -795,7 +795,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Read and reconstruct a BuildWarningEventArgs from the stream
         /// </summary>
-        private BuildWarningEventArgs ReadBuildWarningEventFromStream(INodePacketTranslator translator, string message, string helpKeyword, string senderName)
+        private BuildWarningEventArgs ReadBuildWarningEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
             string code = null;
             translator.Translate(ref code);
@@ -837,7 +837,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Read and reconstruct a BuildErrorEventArgs from the stream
         /// </summary>
-        private BuildErrorEventArgs ReadTaskBuildErrorEventFromStream(INodePacketTranslator translator, string message, string helpKeyword, string senderName)
+        private BuildErrorEventArgs ReadTaskBuildErrorEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
             string code = null;
             translator.Translate(ref code);
@@ -879,7 +879,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Read and reconstruct a TaskCommandLineEventArgs from the stream
         /// </summary>
-        private TaskCommandLineEventArgs ReadTaskCommandLineEventFromStream(INodePacketTranslator translator, string message, string helpKeyword, string senderName)
+        private TaskCommandLineEventArgs ReadTaskCommandLineEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
             MessageImportance importance = MessageImportance.Normal;
             translator.TranslateEnum(ref importance, (int)importance);
@@ -897,7 +897,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Read and reconstruct a BuildMessageEventArgs from the stream 
         /// </summary>
-        private BuildMessageEventArgs ReadBuildMessageEventFromStream(INodePacketTranslator translator, string message, string helpKeyword, string senderName)
+        private BuildMessageEventArgs ReadBuildMessageEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
             MessageImportance importance = MessageImportance.Normal;
 

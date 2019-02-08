@@ -422,7 +422,7 @@ namespace Microsoft.Build.Shared
 
                         if (!EndsWithSlash(modifiedItemSpec))
                         {
-                            ErrorUtilities.VerifyThrow(FileUtilitiesRegex.UNCPattern.IsMatch(modifiedItemSpec),
+                            ErrorUtilities.VerifyThrow(FileUtilitiesRegex.StartsWithUncPattern.IsMatch(modifiedItemSpec),
                                 "Only UNC shares should be missing trailing slashes.");
 
                             // restore/append trailing slash if Path.GetPathRoot() has either removed it, or failed to add it
@@ -471,19 +471,26 @@ namespace Microsoft.Build.Shared
 
                         if (NativeMethodsShared.IsWindows)
                         {
-                            Match root = FileUtilitiesRegex.DrivePattern.Match(modifiedItemSpec);
-
-                            if (!root.Success)
+                            int length = -1;
+                            if (FileUtilitiesRegex.StartWithDrivePattern.IsMatch(modifiedItemSpec))
                             {
-                                root = FileUtilitiesRegex.UNCPattern.Match(modifiedItemSpec);
+                                length = 2;
+                            }
+                            else
+                            {
+                                var match = FileUtilitiesRegex.StartsWithUncPattern.Match(modifiedItemSpec);
+                                if (match.Success)
+                                {
+                                    length = match.Length;
+                                }
                             }
 
-                            if (root.Success)
+                            if (length != -1)
                             {
-                                ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > root.Length) && IsSlash(modifiedItemSpec[root.Length]),
+                                ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && IsSlash(modifiedItemSpec[length]),
                                                            "Root directory must have a trailing slash.");
 
-                                modifiedItemSpec = modifiedItemSpec.Substring(root.Length + 1);
+                                modifiedItemSpec = modifiedItemSpec.Substring(length + 1);
                             }
                         }
                         else

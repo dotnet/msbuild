@@ -45,6 +45,8 @@ namespace Microsoft.Build.UnitTests
                 return; // "COM is only found on Windows"
             }
 
+            Assert.Null(ComReference.StripTypeLibNumberFromPath(null, new FileExists(FileExistsMock)));
+            Assert.Equal("", ComReference.StripTypeLibNumberFromPath("", new FileExists(FileExistsMock)));
             Assert.Equal(@"C:\test\typelib1.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib1.dll", new FileExists(FileExistsMock)));
             Assert.Equal(@"C:\test\typelib2\2.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib2\2.dll", new FileExists(FileExistsMock)));
             Assert.Equal(@"C:\test\typelib3.\3dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib3.\3dll", new FileExists(FileExistsMock)));

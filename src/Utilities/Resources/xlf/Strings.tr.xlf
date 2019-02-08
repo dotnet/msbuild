@@ -67,6 +67,11 @@
         <target state="translated">MSB6004: Belirtilen "{0}" görev yürütülebilir dosyası konumu geçersiz.</target>
         <note>{StrBegin="MSB6004: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.ValidateParametersFailed">
+        <source>MSB6011: Invalid parameters passed to the {0} task.</source>
+        <target state="translated">MSB6011: {0} görevine geçersiz parametreler geçirildi.</target>
+        <note>{StrBegin="MSB6011: "}</note>
+      </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
         <target state="translated">"{0}" yeniden dağıtım liste dosyası okunurken bir hata oluştu. {1}</target>
@@ -99,7 +104,7 @@
       </trans-unit>
       <trans-unit id="Tracking_MissingInputs">
         <source>Missing input files detected, minimal rebuild will be disabled.</source>
-        <target state="translated">Eksik girdi dosyaları algılandı, en az yeniden oluşturma devre dışı bırakılacak.</target>
+        <target state="translated">Eksik giriş dosyaları algılandı, en az yeniden oluşturma devre dışı bırakılacak.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_MissingOutputs">

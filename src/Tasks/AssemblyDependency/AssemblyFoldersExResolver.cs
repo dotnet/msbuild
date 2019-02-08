@@ -3,7 +3,6 @@
 #if FEATURE_WIN32_REGISTRY
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -148,7 +147,7 @@ namespace Microsoft.Build.Tasks
                         string value = conditions.Value.Trim();
 
                         // Parse the condition statement for OSVersion and Platform
-                        foreach (string c in value.Split(':'))
+                        foreach (string c in value.Split(MSBuildConstants.ColonChar))
                         {
                             if (String.Compare(c, 0, "OSVERSION=", 0, 10, StringComparison.OrdinalIgnoreCase) == 0)
                             {
@@ -208,7 +207,7 @@ namespace Microsoft.Build.Tasks
             string[] executableExtensions,
             string hintPath,
             string assemblyFolderKey,
-            ArrayList assembliesConsideredAndRejected,
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
             out bool userRequestedSpecificFile
         )

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -138,6 +138,11 @@ namespace Microsoft.Build.Utilities
         /// it's unneeded (at least by the 16.0 timeframe).
         /// </summary>
         public readonly bool UseCaseSensitiveItemNames = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1";
+
+        /// <summary>
+        /// Disable the use of paths longer than Windows MAX_PATH limits (260 characters) when running on a long path enabled OS.
+        /// </summary>
+        public readonly bool DisableLongPaths = Environment.GetEnvironmentVariable("MSBUILDDISABLELONGPATHS") == "1";
 
         /// <summary>
         /// Disable the use of any caching when resolving SDKs.

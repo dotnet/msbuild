@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, arg));
 
-                    ((INodePacketTranslatable)packet).Translate(TranslationHelpers.GetWriteTranslator());
+                    ((ITranslatable)packet).Translate(TranslationHelpers.GetWriteTranslator());
                     INodePacket tempPacket = LogMessagePacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator()) as LogMessagePacket;
 
                     LogMessagePacket deserializedPacket = tempPacket as LogMessagePacket;

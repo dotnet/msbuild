@@ -6,6 +6,7 @@ using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Collections;
@@ -186,7 +187,7 @@ namespace Microsoft.Build.Internal
             // (single child node with a trivial value or no child nodes)
             if (!node.HasChildNodes)
             {
-                return string.Empty;
+                return String.Empty;
             }
 
             if (node.ChildNodes.Count == 1 && (node.FirstChild.NodeType == XmlNodeType.Text || node.FirstChild.NodeType == XmlNodeType.CDATA))
@@ -345,14 +346,12 @@ namespace Microsoft.Build.Internal
             {
                 if (s_shouldTreatHigherToolsVersionsAsCurrent)
                 {
-                    Version toolsVersionAsVersion;
-
-                    if (Version.TryParse(toolsVersionFromProject, out toolsVersionAsVersion))
+                    if (Version.TryParse(toolsVersionFromProject, out var toolsVersionAsVersion))
                     {
-                        // This is higher than the current toolsversion
-                        // Therefore we need to enter best effort mode
-                        // and present the current one. 
-                        if (toolsVersionAsVersion > MSBuildConstants.CurrentToolsVersionAsVersion)
+                        // This is higher than the 'legacy' toolsversion values.
+                        // Therefore we need to enter best effort mode and
+                        // present the current one.
+                        if (toolsVersionAsVersion > new Version(15,0))
                         {
                             toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
                         }
@@ -452,7 +451,7 @@ namespace Microsoft.Build.Internal
         private static bool UsingDifferentToolsVersionFromProjectFile(string toolsVersionFromProject, string toolsVersionToUse, bool explicitToolsVersionSpecified)
         {
             return (!explicitToolsVersionSpecified &&
-                    !string.IsNullOrEmpty(toolsVersionFromProject) &&
+                    !String.IsNullOrEmpty(toolsVersionFromProject) &&
                     !String.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -555,28 +554,25 @@ namespace Microsoft.Build.Internal
             string userExtensionsPath = Path.Combine(localAppData, ReservedPropertyNames.userExtensionsPathSuffix);
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
 
-            if (environmentVariablesBag != null)
+            foreach (KeyValuePair<string, string> environmentVariable in environmentVariablesBag)
             {
-                foreach (KeyValuePair<string, string> environmentVariable in environmentVariablesBag)
+                // We're going to just skip environment variables that contain names
+                // with characters we can't handle. There's no logger registered yet
+                // when this method is called, so we can't really log anything.
+                string environmentVariableName = environmentVariable.Key;
+
+                if (XmlUtilities.IsValidElementName(environmentVariableName) &&
+                    !XMakeElements.ReservedItemNames.Contains(environmentVariableName) &&
+                    !ReservedPropertyNames.IsReservedProperty(environmentVariableName))
                 {
-                    // We're going to just skip environment variables that contain names
-                    // with characters we can't handle. There's no logger registered yet
-                    // when this method is called, so we can't really log anything.
-                    string environmentVariableName = environmentVariable.Key;
+                    ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);
 
-                    if (XmlUtilities.IsValidElementName(environmentVariableName) &&
-                        !XMakeElements.ReservedItemNames.Contains(environmentVariableName) &&
-                        !ReservedPropertyNames.IsReservedProperty(environmentVariableName))
-                    {
-                        ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);
-
-                        environmentProperties.Set(environmentProperty);
-                    }
-                    else
-                    {
-                        // The name was invalid, so we just didn't add the environment variable.
-                        // That's fine, continue for the next one.
-                    }
+                    environmentProperties.Set(environmentProperty);
+                }
+                else
+                {
+                    // The name was invalid, so we just didn't add the environment variable.
+                    // That's fine, continue for the next one.
                 }
             }
 
@@ -603,6 +599,19 @@ namespace Microsoft.Build.Internal
             {
                 yield return entry.Value;
             }
+        }
+
+        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
+        {
+            while (enumerator.MoveNext())
+            {
+                yield return enumerator.Current;
+            }
+        }
+
+        public static T[] ToArray<T>(this IEnumerator<T> enumerator)
+        {
+            return enumerator.ToEnumerable().ToArray();
         }
     }
 }

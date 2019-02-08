@@ -40,8 +40,8 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(currentDirectory);
             }
 
-            Assert.Equal(1, t.AbsolutePaths.Length);
-            Assert.Equal(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
+            Assert.Single(t.AbsolutePaths);
+            Assert.EndsWith(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -73,8 +73,8 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(currentDirectory);
             }
 
-            Assert.Equal(1, t.AbsolutePaths.Length);
-            Assert.Equal(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
+            Assert.Single(t.AbsolutePaths);
+            Assert.EndsWith(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(currentDirectory);
             }
 
-            Assert.Equal(1, t.AbsolutePaths.Length);
+            Assert.Single(t.AbsolutePaths);
             Assert.Equal(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(t.Execute()); // "success"
 
-            Assert.Equal(1, t.AbsolutePaths.Length);
+            Assert.Single(t.AbsolutePaths);
         }
     }
 }

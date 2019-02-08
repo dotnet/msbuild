@@ -1,9 +1,12 @@
 ﻿<Project>
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <NuspecFile>VS.ExternalAPIs.MSBuild.nuspec</NuspecFile>
+    <IsShipping>false</IsShipping>
     <PlatformTarget>x86</PlatformTarget>
+    <DisableSemVer2>true</DisableSemVer2>
+    <IsVisualStudioInsertionPackage>true</IsVisualStudioInsertionPackage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,9 +18,9 @@
 
   <Import Project="..\NuspecProject.targets" />
 
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
 
-  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
     <AllowedReferenceRelatedFileExtensions>$(AllowedReferenceRelatedFileExtensions);.tlb</AllowedReferenceRelatedFileExtensions>
