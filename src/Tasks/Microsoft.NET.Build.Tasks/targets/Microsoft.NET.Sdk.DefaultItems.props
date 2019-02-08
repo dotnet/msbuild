@@ -22,6 +22,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                TargetingPackName="Microsoft.NETCore.App.Ref"
                                TargetingPackVersion="3.0.0-preview-27406-5"
                                />
+    <KnownFrameworkReference Update="Microsoft.AspNetCore.App"
+                               TargetingPackName="Microsoft.AspNetCore.App.Ref"
+                               TargetingPackVersion="3.0.0-preview-19108-04"
+                               />
   </ItemGroup>
 
   <PropertyGroup>
