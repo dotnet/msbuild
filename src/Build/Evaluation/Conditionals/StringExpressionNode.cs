@@ -158,6 +158,7 @@ namespace Microsoft.Build.Evaluation
         internal override void ResetState()
         {
             _cachedExpandedValue = null;
+            _shouldBeTreatedAsVisualStudioVersion = null;
         }
 
         private bool? _shouldBeTreatedAsVisualStudioVersion = null;
