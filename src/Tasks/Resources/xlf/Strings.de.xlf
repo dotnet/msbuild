@@ -1021,7 +1021,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
         <source>MSB3562: The "[strings]" tag is no longer necessary in text resources; please remove it.</source>
-        <target state="translated">MSB3562: Die [strings]-Kennung ist in Textressourcen nicht mehr erforderlich. Entfernen Sie es.</target>
+        <target state="translated">MSB3562: Das [strings]-Tag ist in Textressourcen nicht mehr erforderlich. Entfernen Sie es.</target>
         <note>{StrBegin="MSB3562: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnexpectedInfBracket">

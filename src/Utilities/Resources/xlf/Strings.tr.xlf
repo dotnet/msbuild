@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="Tracking_MissingInputs">
         <source>Missing input files detected, minimal rebuild will be disabled.</source>
-        <target state="translated">Eksik girdi dosyaları algılandı, en az yeniden oluşturma devre dışı bırakılacak.</target>
+        <target state="translated">Eksik giriş dosyaları algılandı, en az yeniden oluşturma devre dışı bırakılacak.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_MissingOutputs">

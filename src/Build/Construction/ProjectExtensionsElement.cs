@@ -108,7 +108,11 @@ namespace Microsoft.Build.Construction
                     XmlElement.AppendChild(idElement);
                 }
 
-                if (idElement.InnerXml != value)
+                // The actual InnerXml may have the MSBuild namespace but be otherwise identical
+                // to the setting, in which case the namespace was probably inherited from the
+                // document and should be ignored.
+                if (idElement.InnerXml != value &&
+                    idElement.InnerXml.Replace(ProjectRootElement.EmptyProjectFileXmlNamespace, string.Empty) != value)
                 {
                     if (value.Length == 0)
                     {
