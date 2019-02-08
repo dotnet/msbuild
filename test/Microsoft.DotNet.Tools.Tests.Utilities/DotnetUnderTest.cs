@@ -26,12 +26,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 {
                     _pathToDotnetUnderTest = Path.Combine(
                         new RepoDirectoriesProvider().DotnetRoot,
-                        "dotnet");
-
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    {
-                        _pathToDotnetUnderTest = $"{_pathToDotnetUnderTest}.exe";
-                    }
+                        $"dotnet{Constants.ExeSuffix}");
                 }
                 
                 return _pathToDotnetUnderTest;
