@@ -5,6 +5,10 @@ package name=Microsoft.Build
         vs.package.chip=neutral
         vs.package.language=neutral
 
+vs.dependencies
+  vs.dependency id=Microsoft.VisualStudio.NuGet.BuildTools
+                version=[15.0,17.0)
+
 folder InstallDir:\MSBuild\Current
   file source=$(X86BinPath)Microsoft.Common.props
   file source=$(X86BinPath)Microsoft.VisualStudioVersion.v15.Common.props
