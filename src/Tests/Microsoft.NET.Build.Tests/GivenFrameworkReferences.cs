@@ -204,6 +204,72 @@ namespace FrameworkReferenceTest
         }
 
         [Fact]
+        public void BuildFailsIfRuntimePackIsNotAvailableForRuntimeIdentifier()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "RuntimePackNotAvailable",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true,
+                RuntimeIdentifier = "linux-x64"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+
+                    var frameworkReference = new XElement(ns + "FrameworkReference",
+                                               new XAttribute("Include", "Microsoft.WindowsDesktop.App"));
+                    itemGroup.Add(frameworkReference);
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
+                .Execute("/clp:summary")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1082")
+                .And
+                .HaveStdOutContaining("1 Error(s)");
+        }
+
+        [Fact]
+        public void BuildFailsIfInvalidRuntimeIdentifierIsSpecified()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "RuntimePackNotAvailable",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true,
+                RuntimeIdentifier = "invalid-rid"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            restoreCommand
+                //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
+                .Execute("/clp:summary")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1083")
+                .And
+                .HaveStdOutContaining("1 Error(s)");
+        }
+
+        [Fact]
         public void RuntimeFrameworkVersionCanBeSpecifiedOnFrameworkReference()
         {
             var testProject = new TestProject();

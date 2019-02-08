@@ -225,7 +225,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GetPackageDirectory>    
     
     <ResolveRuntimePackAssets FrameworkReferences="@(FrameworkReference)"
-                              ResolvedRuntimePacks="@(ResolvedRuntimePack)">
+                              ResolvedRuntimePacks="@(ResolvedRuntimePack)"
+                              UnavailableRuntimePacks="@(UnavailableRuntimePack)">
       <Output TaskParameter="RuntimePackAssets" ItemName="RuntimePackAsset" />
     </ResolveRuntimePackAssets>
     

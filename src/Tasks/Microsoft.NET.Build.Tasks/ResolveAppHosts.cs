@@ -129,7 +129,7 @@ namespace Microsoft.NET.Build.Tasks
                 else
                 {
                     //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
-                    Log.LogError(Strings.UnsupportedRuntimeIdentifier, runtimeIdentifier);
+                    Log.LogError(Strings.RuntimeIdentifierNotRecognized, runtimeIdentifier);
                 }
                 return null;
             }

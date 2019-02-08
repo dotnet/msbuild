@@ -77,6 +77,8 @@ namespace Microsoft.NET.Build.Tasks
             List<ITaskItem> runtimePacks = new List<ITaskItem>();
             List<ITaskItem> unavailableRuntimePacks = new List<ITaskItem>();
 
+            bool reportedUnrecognizedRuntimeIdentifier = false;
+
             foreach (var knownFrameworkReference in knownFrameworkReferencesForTargetFramework)
             {
                 frameworkReferenceDict.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
@@ -148,10 +150,11 @@ namespace Microsoft.NET.Build.Tasks
                                 unavailableRuntimePack.SetMetadata(MetadataKeys.RuntimeIdentifier, RuntimeIdentifier);
                                 unavailableRuntimePacks.Add(unavailableRuntimePack);
                             }
-                            else
+                            else if (!reportedUnrecognizedRuntimeIdentifier)
                             {
                                 //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
-                                Log.LogError(Strings.UnsupportedRuntimeIdentifier, RuntimeIdentifier);
+                                Log.LogError(Strings.RuntimeIdentifierNotRecognized, RuntimeIdentifier);
+                                reportedUnrecognizedRuntimeIdentifier = true;
                             }
                         }
                         else
