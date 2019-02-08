@@ -45,7 +45,13 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var frameworkReference in FrameworkReferences)
             {
                 ITaskItem targetingPack;
-                if (!resolvedTargetingPacks.TryGetValue(frameworkReference.ItemSpec, out targetingPack))
+                string targetingPackRoot = null;
+                resolvedTargetingPacks.TryGetValue(frameworkReference.ItemSpec, out targetingPack);
+                if (targetingPack != null)
+                {
+                    targetingPackRoot = targetingPack.GetMetadata("Path");
+                }
+                if (targetingPack == null || !Directory.Exists(targetingPackRoot))
                 {
                     if (GenerateErrorForMissingTargetingPacks)
                     {
@@ -54,7 +60,6 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    string targetingPackRoot = targetingPack.GetMetadata("Path");
                     foreach (var dll in Directory.GetFiles(Path.Combine(targetingPackRoot, "ref", "netcoreapp3.0"), "*.dll"))
                     {
                         var reference = new TaskItem(dll);

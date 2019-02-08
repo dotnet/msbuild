@@ -19,6 +19,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string AppHostRuntimeIdentifier { get; set; }
 
+        public string RuntimeFrameworkVersion { get; set; }
+
         public ITaskItem[] PackAsToolShimRuntimeIdentifiers { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
@@ -105,6 +107,11 @@ namespace Microsoft.NET.Build.Tasks
             string appHostRuntimeIdentifiers = selectedAppHostPack.GetMetadata("AppHostRuntimeIdentifiers");
             string appHostPackPattern = selectedAppHostPack.GetMetadata("AppHostPackNamePattern");
             string appHostPackVersion = selectedAppHostPack.GetMetadata("AppHostPackVersion");
+
+            if (!string.IsNullOrEmpty(RuntimeFrameworkVersion))
+            {
+                appHostPackVersion = RuntimeFrameworkVersion;
+            }
 
             string bestAppHostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
                 new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath),

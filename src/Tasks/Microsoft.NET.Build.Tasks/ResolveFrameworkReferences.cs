@@ -113,7 +113,7 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         //  Download targeting pack
                         TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
-                        packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
+                        packageToDownload.SetMetadata(MetadataKeys.Version, targetingPackVersion);
 
                         packagesToDownload.Add(packageToDownload);
                     }
