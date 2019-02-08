@@ -42,7 +42,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override double NumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion())
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
             {
                 return ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
             }
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Evaluation
 
         internal override Version VersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion())
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
             {
                 return Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
             }
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Evaluation
 
         internal override bool CanNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion())
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
             {
                 return true;
             }
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Evaluation
 
         internal override bool CanVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion())
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
             {
                 return true;
             }
@@ -160,6 +160,8 @@ namespace Microsoft.Build.Evaluation
             _cachedExpandedValue = null;
         }
 
+        private bool? _shouldBeTreatedAsVisualStudioVersion = null;
+
         /// <summary>
         /// Should this node be treated as an expansion of VisualStudioVersion, rather than
         /// its literal meaning?
@@ -170,8 +172,27 @@ namespace Microsoft.Build.Evaluation
         /// but now cause the project to throw InvalidProjectException when
         /// ToolsVersion is "Current". https://github.com/Microsoft/msbuild/issues/4150
         /// </remarks>
-        private bool ShouldBeTreatedAsVisualStudioVersion() =>
-            string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
+        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
+        {
+            if (!_shouldBeTreatedAsVisualStudioVersion.HasValue)
+            {
+                // Treat specially if the node would expand to "Current".
+
+                // Do this check first, because if it's not (common) we can early-out and the next
+                // expansion will be cheap because this will populate the cached expanded value.
+                if (string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
+                {
+                    // and it is just an expansion of MSBuildToolsVersion
+                    _shouldBeTreatedAsVisualStudioVersion = string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    _shouldBeTreatedAsVisualStudioVersion = false;
+                }
+            }
+
+            return _shouldBeTreatedAsVisualStudioVersion.Value;
+        }
 
         internal override string DebuggerDisplay => $"\"{_value}\"";
     }
