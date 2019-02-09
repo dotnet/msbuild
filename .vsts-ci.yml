@@ -1,5 +1,6 @@
 trigger:
 - master
+- release/*
 
 variables:
   teamName: Roslyn-Project-System
