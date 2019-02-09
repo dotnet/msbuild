@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tasks
                               NormalizeVersion(kfr.TargetFramework.Version) == NormalizeVersion(new Version(TargetFrameworkVersion)))
                 .ToList();
 
-            var frameworkReferenceDict = FrameworkReferences.ToDictionary(fr => fr.ItemSpec);
+            var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
             List<ITaskItem> runtimeFrameworks = new List<ITaskItem>();
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var knownFrameworkReference in knownFrameworkReferencesForTargetFramework)
             {
-                frameworkReferenceDict.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
+                frameworkReferenceMap.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
 
                 //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                 TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);

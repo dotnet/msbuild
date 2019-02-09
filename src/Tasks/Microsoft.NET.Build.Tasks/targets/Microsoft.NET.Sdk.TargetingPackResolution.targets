@@ -25,7 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
     
     <CheckForDuplicateFrameworkReferences
-        FrameworkReferenceItems="@(FrameworkReference)"
+        FrameworkReferences="@(FrameworkReference)"
         MoreInformationLink="https://aka.ms/sdkimplicitrefs">
       <Output TaskParameter="ItemsToRemove" ItemName="_FrameworkReferenceToRemove" />
       <Output TaskParameter="ItemsToAdd" ItemName="_FrameworkReferenceToAdd" />

@@ -9,7 +9,7 @@ namespace Microsoft.NET.Build.Tasks
     public class CheckForDuplicateFrameworkReferences : TaskBase
     {
         [Required]
-        public ITaskItem[] FrameworkReferenceItems { get; set; }
+        public ITaskItem[] FrameworkReferences { get; set; }
 
         [Required]
         public string MoreInformationLink { get; set; }
@@ -23,7 +23,12 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            var duplicateItems = FrameworkReferenceItems.GroupBy(i => i.ItemSpec, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1);
+            if (FrameworkReferences == null || FrameworkReferences.Length == 0)
+            {
+                return;
+            }
+
+            var duplicateItems = FrameworkReferences.GroupBy(i => i.ItemSpec, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1);
 
             if (duplicateItems.Any())
             {
@@ -55,7 +60,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 ItemsToAdd = itemsToAdd.ToArray();
                 ItemsToRemove = itemsToRemove.ToArray();
-                
             }
         }
     }
