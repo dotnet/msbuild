@@ -175,11 +175,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="HelpMessage_37_LowPrioritySwitch">
         <source>  -lowPriority[:True|False]
-                     Causes MSBuild and it's sub-processes to run at low priority.
+                     Causes MSBuild to run at low priority.
                      (Short form: -low)
     </source>
         <target state="new">  -lowPriority[:True|False]
-                     Causes MSBuild and it's sub-processes to run at low priority.
+                     Causes MSBuild to run at low priority.
                      (Short form: -low)
     </target>
         <note>
