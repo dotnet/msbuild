@@ -232,6 +232,16 @@
         <target state="translated">NETSDK1052: 프레임워크 목록 파일 경로 '{0}'이(가) 루트에서 시작하지 않습니다. 전체 경로만 지원됩니다.</target>
         <note>{StrBegin="NETSDK1052: "}</note>
       </trans-unit>
+      <trans-unit id="FrameworkReferenceDuplicateError">
+        <source>NETSDK1085: Multiple FrameworkReference items for '{0}' were included in the project.</source>
+        <target state="new">NETSDK1085: Multiple FrameworkReference items for '{0}' were included in the project.</target>
+        <note>{StrBegin="NETSDK1085: "}</note>
+      </trans-unit>
+      <trans-unit id="FrameworkReferenceOverrideWarning">
+        <source>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
+        <target state="new">NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</target>
+        <note>{StrBegin="NETSDK1086: "}</note>
+      </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
         <target state="translated">NETSDK1049: 확인된 파일의 이미지가 잘못되었거나, 메타데이터가 없거나, 파일 자체에 액세스할 수 없습니다. {0} {1}</target>

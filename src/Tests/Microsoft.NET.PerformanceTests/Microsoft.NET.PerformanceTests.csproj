@@ -40,7 +40,8 @@
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
-  <Target Name="PopulatePerformanceTestsFromGitHub" BeforeTargets="CoreCompile">
+  <Target Name="PopulatePerformanceTestsFromGitHub" BeforeTargets="CoreCompile"
+          Condition="'$(DesignTimeBuild)' != 'true'">
     <PropertyGroup>
       <PerformanceTestsRepoURL>https://github.com/dotnet/BuildPerformanceTestAssets</PerformanceTestsRepoURL>
       <PerformanceTestsCommit>c967e0f</PerformanceTestsCommit>

@@ -551,6 +551,7 @@ TestLibrary.dll"
 @"TestApp.dll
 Microsoft.CSharp.dll
 Microsoft.VisualBasic.dll
+Microsoft.VisualBasic.Core.dll
 Microsoft.Win32.Primitives.dll
 mscorlib.dll
 netstandard.dll

@@ -232,6 +232,16 @@
         <target state="translated">NETSDK1052: 架構清單路徑 '{0}' 並非根目錄。只支援完整路徑。</target>
         <note>{StrBegin="NETSDK1052: "}</note>
       </trans-unit>
+      <trans-unit id="FrameworkReferenceDuplicateError">
+        <source>NETSDK1085: Multiple FrameworkReference items for '{0}' were included in the project.</source>
+        <target state="new">NETSDK1085: Multiple FrameworkReference items for '{0}' were included in the project.</target>
+        <note>{StrBegin="NETSDK1085: "}</note>
+      </trans-unit>
+      <trans-unit id="FrameworkReferenceOverrideWarning">
+        <source>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
+        <target state="new">NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</target>
+        <note>{StrBegin="NETSDK1086: "}</note>
+      </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
         <target state="translated">NETSDK1049: 解析的檔案含有毀損的映像、沒有中繼資料，或有其他無法存取的情況。{0} {1}</target>

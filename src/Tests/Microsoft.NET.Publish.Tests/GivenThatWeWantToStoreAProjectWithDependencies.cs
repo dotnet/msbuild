@@ -161,7 +161,7 @@ namespace Microsoft.NET.Publish.Tests
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
-        [CoreMSBuildOnlyFact]
+        [CoreMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
         public void compose_multifile()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -169,6 +169,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
             var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
+            storeCommand.WorkingDirectory = simpleDependenciesAsset.Path;
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "o");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -176,7 +177,7 @@ namespace Microsoft.NET.Publish.Tests
             var additionalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertion.xml");
 
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additionalproj1}%3b{additionalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
+                .Execute("/bl:store.binlog", $"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additionalproj1}%3b{additionalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
             DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
@@ -299,7 +300,7 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        [CoreMSBuildOnlyFact]
+        [CoreMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
         public void It_stores_when_targeting_netcoreapp3()
         {
             const string TFM = "netcoreapp3.0";

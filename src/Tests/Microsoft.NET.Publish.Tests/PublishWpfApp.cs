@@ -63,10 +63,14 @@ namespace Microsoft.NET.Publish.Tests
                 FileName = Path.Combine(publishDirectory.FullName, Path.GetFileName(testDir.Path) + ".exe")
             };
 
-            runAppCommand.Environment["DOTNET_HOME"] = Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath);
+            runAppCommand.Environment["DOTNET_ROOT"] = Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath);
 
-            runAppCommand.ToCommand().Execute()
-                .ExitCode.Should().Be(42);
+            var result = runAppCommand.ToCommand()
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute();
+
+            result.ExitCode.Should().Be(42);
 
 
         }

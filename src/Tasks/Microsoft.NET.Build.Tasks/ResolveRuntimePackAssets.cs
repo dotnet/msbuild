@@ -12,6 +12,10 @@ namespace Microsoft.NET.Build.Tasks
     {
         public ITaskItem[] ResolvedRuntimePacks { get; set; }
 
+        public ITaskItem[] FrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
+
+        public ITaskItem[] UnavailableRuntimePacks { get; set; } = Array.Empty<ITaskItem>();
+
         [Output]
         public ITaskItem[] RuntimePackAssets { get; set; }
 
@@ -19,8 +23,27 @@ namespace Microsoft.NET.Build.Tasks
         {
             List<TaskItem> runtimePackAssets = new List<TaskItem>();
 
+            HashSet<string> frameworkReferenceNames = new HashSet<string>(FrameworkReferences.Select(item => item.ItemSpec), StringComparer.OrdinalIgnoreCase);
+
+            foreach (var unavailableRuntimePack in UnavailableRuntimePacks)
+            {
+                if (frameworkReferenceNames.Contains(unavailableRuntimePack.ItemSpec))
+                {
+                    //  This is a runtime pack that should be used, but wasn't available for the specified RuntimeIdentifier
+                    //  NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.
+                    Log.LogError(Strings.NoRuntimePackAvailable, unavailableRuntimePack.ItemSpec,
+                        unavailableRuntimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+                }
+            }
+
             foreach (var runtimePack in ResolvedRuntimePacks)
             {
+                if (!frameworkReferenceNames.Contains(runtimePack.GetMetadata(MetadataKeys.FrameworkName)))
+                {
+                    //  This is a runtime pack for a shared framework that ultimately wasn't referenced, so don't include its assets
+                    continue;
+                }
+
                 string runtimePackRoot = runtimePack.GetMetadata(MetadataKeys.PackageDirectory);
                 string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
@@ -36,7 +59,8 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     if (assetPath.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase) ||
                         assetPath.EndsWith(".map", StringComparison.OrdinalIgnoreCase) ||
-                        assetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                        assetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
+                        assetPath.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                     {
                         //  Don't add assets for these files (shouldn't be necessary if/once we have a manifest in the runtime pack
                         //  https://github.com/dotnet/cli/issues/10442

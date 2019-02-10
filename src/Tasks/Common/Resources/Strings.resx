@@ -452,4 +452,12 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</value>
     <comment>{StrBegin="NETSDK1083: "}</comment>
   </data>
+  <data name="FrameworkReferenceOverrideWarning" xml:space="preserve">
+    <value>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</value>
+    <comment>{StrBegin="NETSDK1086: "}</comment>
+  </data>
+  <data name="FrameworkReferenceDuplicateError" xml:space="preserve">
+    <value>NETSDK1085: Multiple FrameworkReference items for '{0}' were included in the project.</value>
+    <comment>{StrBegin="NETSDK1085: "}</comment>
+  </data>
 </root>

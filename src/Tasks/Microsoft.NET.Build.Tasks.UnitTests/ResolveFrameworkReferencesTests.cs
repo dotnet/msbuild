@@ -14,6 +14,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var task = new ResolveFrameworkReferences();
 
+            task.EnableTargetingPackDownload = true;
             task.TargetFrameworkIdentifier = ".NETCoreApp";
             task.TargetFrameworkVersion = "3.0";
             task.FrameworkReferences = new[]
@@ -42,8 +43,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.RuntimeFrameworks.Length.Should().Be(1);
             task.RuntimeFrameworks[0].ItemSpec.Should().Be("Microsoft.AspNetCore.App");
             task.RuntimeFrameworks[0].GetMetadata(MetadataKeys.Version).Should().Be("1.9.5");
-
-            task.UnresolvedFrameworkReferences.Should().BeNull();
         }
 
         [Fact]
@@ -76,9 +75,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             task.PackagesToDownload.Should().BeNull();
             task.RuntimeFrameworks.Should().BeNull();
-
-            task.UnresolvedFrameworkReferences.Length.Should().Be(1);
-
         }
     }
 }
