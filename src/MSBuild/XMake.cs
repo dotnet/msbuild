@@ -564,6 +564,7 @@ namespace Microsoft.Build.CommandLine
                 bool interactive = false;
                 bool isolateProjects = false;
                 bool graphBuild = false;
+                bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
 
@@ -600,6 +601,7 @@ namespace Microsoft.Build.CommandLine
                         ref graphBuild,
                         ref inputResultsCaches,
                         ref outputResultsCache,
+                        ref lowPriority,
                         recursing: false
                         ))
                 {
@@ -661,7 +663,8 @@ namespace Microsoft.Build.CommandLine
                                     isolateProjects,
                                     graphBuild,
                                     inputResultsCaches,
-                                    outputResultsCache))
+                                    outputResultsCache,
+                                    lowPriority))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -969,7 +972,8 @@ namespace Microsoft.Build.CommandLine
             bool isolateProjects,
             bool graphBuild,
             string[] inputResultsCaches,
-            string outputResultsCache
+            string outputResultsCache,
+            bool lowPriority
         )
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
@@ -1131,6 +1135,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.IsolateProjects = isolateProjects;
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
+                    parameters.LowPriority = lowPriority;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -2023,6 +2028,7 @@ namespace Microsoft.Build.CommandLine
             ref bool graphBuild,
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
+            ref bool lowPriority,
             bool recursing
         )
         {
@@ -2138,6 +2144,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref graphBuild,
                                                                ref inputResultsCaches,
                                                                ref outputResultsCache,
+                                                               ref lowPriority,
                                                                recursing: true
                                                              );
                         }
@@ -2193,6 +2200,11 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
                     {
                         graphBuild = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild], defaultValue: true, resourceName: "InvalidGraphBuildValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
+                    {
+                        lowPriority = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority], defaultValue: true, resourceName: "InvalidLowPriorityValue");
                     }
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
@@ -3672,6 +3684,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_InputCachesFiles"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_OutputCacheFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_37_LowPrioritySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

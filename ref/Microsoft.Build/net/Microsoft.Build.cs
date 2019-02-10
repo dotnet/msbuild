@@ -964,6 +964,7 @@ namespace Microsoft.Build.Execution
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> Loggers { get { throw null; } set { } }
         public bool LogInitialPropertiesAndItems { get { throw null; } set { } }
         public bool LogTaskInputs { get { throw null; } set { } }
+        public bool LowPriority { get { throw null; } set { } }
         public int MaxNodeCount { get { throw null; } set { } }
         public int MemoryUseLimit { get { throw null; } set { } }
         public string NodeExeLocation { get { throw null; } set { } }

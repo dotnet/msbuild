@@ -216,6 +216,11 @@ namespace Microsoft.Build.Execution
         private string _outputResultsCacheFile;
 
         /// <summary>
+        /// When true, the build should run at low priroity.
+        /// </summary>
+        private bool _lowPriority;
+
+        /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
         public BuildParameters()
@@ -296,6 +301,7 @@ namespace Microsoft.Build.Execution
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
             DiscardBuildResults = other.DiscardBuildResults;
+            _lowPriority = other._lowPriority;
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -769,6 +775,14 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public bool DiscardBuildResults { get; set; } = false;
 
+        /// Gets or sets a value indicating whether the build process should run as low privilege.
+        /// </summary>
+        public bool LowPriority
+        {
+            get => _lowPriority;
+            set => _lowPriority = value;
+        }
+
         /// <summary>
         /// Retrieves a toolset.
         /// </summary>
@@ -827,6 +841,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
             translator.Translate(ref _interactive);
             translator.Translate(ref _isolateProjects);
+            translator.Translate(ref _lowPriority);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

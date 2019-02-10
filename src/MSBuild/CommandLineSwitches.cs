@@ -104,6 +104,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuild,
             InputResultsCaches,
             OutputResultsCache,
+            LowPriority,
             NumberOfParameterizedSwitches,
         }
 
@@ -272,6 +273,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "inputResultsCaches", "irc" },         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true   ),
+            new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false  ),
         };
 
         /// <summary>

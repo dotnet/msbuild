@@ -404,6 +404,12 @@ namespace Microsoft.Build.BackEnd
             {
                 creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
             }
+            else if (_componentHost.BuildParameters.LowPriority)
+            {
+                // Honor user request to run the build at low priority.
+                //
+                creationFlags = BackendNativeMethods.BELOW_NORMAL_PRIORITY_CLASS;
+            }
 
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
             {

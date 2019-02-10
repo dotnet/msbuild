@@ -28,6 +28,12 @@ namespace Microsoft.Build.BackEnd
         internal const uint NORMALPRIORITYCLASS = 0x0020;
 
         /// <summary>
+        /// Start the process with a priority above IDLE_PRIORITY_CLASS
+        /// but below NORMAL_PRIORITY_CLASS.
+        /// </summary>
+        internal const uint BELOW_NORMAL_PRIORITY_CLASS = 0x00004000;
+
+        /// <summary>
         /// Do not create a window
         /// </summary>
         internal const uint CREATENOWINDOW = 0x08000000;
@@ -212,7 +218,7 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// A value that can be used to identify a process.
-            /// The value is valid from the time the process is created until all handles to the process are closed and 
+            /// The value is valid from the time the process is created until all handles to the process are closed and
             /// the process object is freed; at this point, the identifier may be reused.
             /// </summary>
             public int dwProcessId;
