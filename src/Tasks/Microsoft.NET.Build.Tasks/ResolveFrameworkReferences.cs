@@ -64,9 +64,11 @@ namespace Microsoft.NET.Build.Tasks
                 return;
             }
 
+            var normalizedTargetFrameworkVersion = NormalizeVersion(new Version(TargetFrameworkVersion));
+
             var knownFrameworkReferencesForTargetFramework = KnownFrameworkReferences.Select(item => new KnownFrameworkReference(item))
                 .Where(kfr => kfr.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
-                              NormalizeVersion(kfr.TargetFramework.Version) == NormalizeVersion(new Version(TargetFrameworkVersion)))
+                              NormalizeVersion(kfr.TargetFramework.Version) == normalizedTargetFrameworkVersion)
                 .ToList();
 
             var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec);
@@ -129,10 +131,11 @@ namespace Microsoft.NET.Build.Tasks
                     !string.IsNullOrEmpty(RuntimeIdentifier) &&
                     !string.IsNullOrEmpty(knownFrameworkReference.RuntimePackNamePatterns))
                 {
+                    var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
                     foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
                     {
                         string runtimePackRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
-                            new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath),
+                            runtimeGraph,
                             RuntimeIdentifier,
                             knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';'),
                             out bool wasInGraph);
