@@ -156,7 +156,7 @@
   <data name="CmdLoggerDescription" xml:space="preserve">
     <value>The logger to use for test results.
                                         Examples:
-                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</value>
   </data>
@@ -204,6 +204,9 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
   </data>
   <data name="FrameworkOptionDescription" xml:space="preserve">
     <value>The target framework to run tests for. The target framework must also be specified in the project file.</value>
+  </data>
+  <data name="RuntimeOptionDescription" xml:space="preserve">
+    <value>The target runtime to test for.</value>
   </data>
   <data name="ConfigurationOptionDescription" xml:space="preserve">
     <value>The configuration to use for running tests. The default for most projects is 'Debug'.</value>
