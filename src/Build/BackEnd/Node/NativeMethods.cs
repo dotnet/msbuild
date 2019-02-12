@@ -212,7 +212,7 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// A value that can be used to identify a process.
-            /// The value is valid from the time the process is created until all handles to the process are closed and
+            /// The value is valid from the time the process is created until all handles to the process are closed and 
             /// the process object is freed; at this point, the identifier may be reused.
             /// </summary>
             public int dwProcessId;
