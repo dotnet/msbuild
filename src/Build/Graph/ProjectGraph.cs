@@ -33,9 +33,6 @@ namespace Microsoft.Build.Experimental.Graph
         private const string SetPlatformMetadataName = "SetPlatform";
         private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
         private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
-        private const string ProjectReferenceTargetsItemType = "ProjectReferenceTargets";
-        private const string ProjectReferenceTargetsMetadataName = "Targets";
-        private const string DefaultTargetsMarker = ".default";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
@@ -211,12 +208,20 @@ namespace Microsoft.Build.Experimental.Graph
             foreach (var entryPoint in entryPoints)
             {
                 PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary = CreatePropertyDictionary(entryPoint.GlobalProperties);
+
+                AddGraphBuildGlobalVariable(globalPropertyDictionary);
+
                 var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
                 projectsToEvaluate.Enqueue(configurationMetadata);
                 entryPointConfigurationMetadata.Add(configurationMetadata);
             }
 
-            if (LoadGraph(projectsToEvaluate, projectCollection, tasksInProgress, projectInstanceFactory, out List<Exception> exceptions))
+            if (LoadGraph(
+                projectsToEvaluate,
+                projectCollection,
+                tasksInProgress,
+                projectInstanceFactory,
+                out List<Exception> exceptions))
             {
                 foreach (var configurationMetadata in entryPointConfigurationMetadata)
                 {
@@ -245,6 +250,14 @@ namespace Microsoft.Build.Experimental.Graph
             else
             {
                 throw new AggregateException(exceptions);
+            }
+
+            void AddGraphBuildGlobalVariable(PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary)
+            {
+                if (globalPropertyDictionary.GetProperty(PropertyNames.IsGraphBuild) == null)
+                {
+                    globalPropertyDictionary[PropertyNames.IsGraphBuild] = ProjectPropertyInstance.Create(PropertyNames.IsGraphBuild, "true");
+                }
             }
         }
 
@@ -354,7 +367,7 @@ namespace Microsoft.Build.Experimental.Graph
                 {
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
                         projectReference,
-                        ExpandDefaultTargets(projectReference.ProjectInstance, targetsToPropagate));
+                        ExpandDefaultTargets(targetsToPropagate, projectReference.ProjectInstance.DefaultTargets));
                     if (encounteredEdges.Add(projectReferenceEdge))
                     {
                         edgesToVisit.Enqueue(projectReferenceEdge);
@@ -396,6 +409,27 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             return targetLists;
+        }
+
+        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets)
+        {
+            int i = 0;
+            while (i < targets.Count)
+            {
+                if (targets[i].Equals(MSBuildConstants.DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
+                {
+                    targets = targets
+                        .RemoveAt(i)
+                        .InsertRange(i, defaultTargets);
+                    i += defaultTargets.Count;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            return targets;
         }
 
         /// <summary>
@@ -473,6 +507,7 @@ namespace Microsoft.Build.Experimental.Graph
         {
             var exceptionsInTasks = new ConcurrentBag<Exception>();
             var evaluationWaitHandle = new AutoResetEvent(false);
+
             while (projectsToEvaluate.Count != 0 || tasksInProgress.Count != 0)
             {
                 ConfigurationMetadata projectToEvaluate;
@@ -482,7 +517,7 @@ namespace Microsoft.Build.Experimental.Graph
                     var task = new Task(() =>
                     {
                         ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory);
-                        IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(MSBuildConstants.ProjectReferenceItemName);
+                        IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
                         foreach (var projectReferenceToParse in projectReferenceItems)
                         {
                             if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
@@ -562,7 +597,7 @@ namespace Microsoft.Build.Experimental.Graph
             PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
             nodeState[node] = NodeState.InProcess;
-            IEnumerable<ProjectItemInstance> projectReferenceItems = node.ProjectInstance.GetItems(MSBuildConstants.ProjectReferenceItemName);
+            IEnumerable<ProjectItemInstance> projectReferenceItems = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
             foreach (var projectReferenceToParse in projectReferenceItems)
             {
                 string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
@@ -649,41 +684,20 @@ namespace Microsoft.Build.Experimental.Graph
         private static ImmutableList<string> DetermineTargetsToPropagate(ProjectGraphNode node, ImmutableList<string> entryTargets)
         {
             var targetsToPropagate = ImmutableList<string>.Empty;
-            ICollection<ProjectItemInstance> projectReferenceTargets = node.ProjectInstance.GetItems(ProjectReferenceTargetsItemType);
+            ICollection<ProjectItemInstance> projectReferenceTargets = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceTargetsItemType);
             foreach (var entryTarget in entryTargets)
             {
                 foreach (var projectReferenceTarget in projectReferenceTargets)
                 {
                     if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
                     {
-                        string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetsMetadataName);
+                        string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         targetsToPropagate = targetsToPropagate.AddRange(ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue));
                     }
                 }
             }
 
             return targetsToPropagate;
-        }
-
-        private static ImmutableList<string> ExpandDefaultTargets(ProjectInstance project, ImmutableList<string> targets)
-        {
-            int i = 0;
-            while (i < targets.Count)
-            {
-                if (targets[i].Equals(DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
-                {
-                    targets = targets
-                        .RemoveAt(i)
-                        .InsertRange(i, project.DefaultTargets);
-                    i += project.DefaultTargets.Count;
-                }
-                else
-                {
-                    i++;
-                }
-            }
-
-            return targets;
         }
 
         /// <summary>
