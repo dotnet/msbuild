@@ -139,12 +139,6 @@ function InitializeDotNetCli {
   # Add dotnet to PATH. This prevents any bare invocation of dotnet in custom
   # build steps from using anything other than what we've downloaded.
   export PATH="$dotnet_root:$PATH"
-
-  curl --retry 10 -s -SL -f --create-dirs -o $DOTNET_INSTALL_DIR/buildtools.tar.gz https://aspnetcore.blob.core.windows.net/buildtools/netfx/4.6.1/netfx.4.6.1.tar.gz
-  [ -d "$DOTNET_INSTALL_DIR/buildtools/net461" ] || mkdir -p $DOTNET_INSTALL_DIR/buildtools/net461
-  tar -zxf $DOTNET_INSTALL_DIR/buildtools.tar.gz -C $DOTNET_INSTALL_DIR/buildtools/net461
-
-  export ReferenceAssemblyRoot=$DOTNET_INSTALL_DIR/buildtools/net461
   
   # return value
   _InitializeDotNetCli="$dotnet_root"

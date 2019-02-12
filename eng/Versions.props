@@ -3,6 +3,7 @@
   <!-- Opt out of certain Arcade features -->
   <PropertyGroup>
     <UsingToolXliff>false</UsingToolXliff>
+    <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
   </PropertyGroup>
  <PropertyGroup>
     <VersionPrefix>3.0.100</VersionPrefix>
