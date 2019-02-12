@@ -17,7 +17,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Graph
+namespace Microsoft.Build.Experimental.Graph
 {
     /// <summary>
     /// Represents a graph of evaluated projects.
