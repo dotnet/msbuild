@@ -60,48 +60,75 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    string targetingPackAssetPath = Path.Combine(targetingPackRoot, "data");
-                    string platformManifestPath;
-                    if (Directory.Exists(targetingPackAssetPath))
+                    string targetingPackFormat = targetingPack.GetMetadata("TargetingPackFormat");
+                    string targetingPackTargetFramework = targetingPack.GetMetadata("TargetFramework");
+
+                    if (targetingPackFormat.Equals("NETStandardLegacy", StringComparison.OrdinalIgnoreCase))
                     {
-                        platformManifestPath = Path.Combine(targetingPackAssetPath,
-                                    targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
+                        string targetingPackAssetPath = Path.Combine(targetingPackRoot, "build", targetingPackTargetFramework, "ref");
+
+                        foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
+                        {
+                            var reference = new TaskItem(dll);
+                            reference.SetMetadata(MetadataKeys.Private, "false");
+                            reference.SetMetadata("Visible", "false");
+                            reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.PackageName));
+                            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.PackageVersion));
+
+                            if (!Path.GetFileName(dll).Equals("netstandard.dll", StringComparison.OrdinalIgnoreCase))
+                            {
+                                reference.SetMetadata("Facade", "true");
+                            }
+
+                            referencesToAdd.Add(reference);
+                        }
                     }
                     else
                     {
-                        targetingPackAssetPath = Path.Combine(targetingPackRoot, "ref", "netcoreapp3.0");
-                        platformManifestPath = Path.Combine(targetingPackRoot, "build", "netcoreapp3.0",
-                            targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
-                    }
-                    foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
-                    {
-                        var reference = new TaskItem(dll);
 
-                        reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
-                        reference.SetMetadata(MetadataKeys.Private, "false");
+                        string targetingPackAssetPath = Path.Combine(targetingPackRoot, "data");
+                        string platformManifestPath;
+                        if (Directory.Exists(targetingPackAssetPath))
+                        {
+                            platformManifestPath = Path.Combine(targetingPackAssetPath,
+                                        targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
+                        }
+                        else
+                        {
+                            targetingPackAssetPath = Path.Combine(targetingPackRoot, "ref", "netcoreapp3.0");
+                            platformManifestPath = Path.Combine(targetingPackRoot, "build", "netcoreapp3.0",
+                                targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
+                        }
+                        foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
+                        {
+                            var reference = new TaskItem(dll);
 
-                        //  TODO: Once we work out what metadata we should use here to display these references grouped under the targeting pack
-                        //  in solution explorer, set that metadata here.These metadata values are based on what PCLs were using.
-                        //  https://github.com/dotnet/sdk/issues/2802
-                        reference.SetMetadata("WinMDFile", "false");
-                        reference.SetMetadata("ReferenceGroupingDisplayName", targetingPack.ItemSpec);
-                        reference.SetMetadata("ReferenceGrouping", targetingPack.ItemSpec);
-                        reference.SetMetadata("ResolvedFrom", "TargetingPack");
-                        reference.SetMetadata("IsSystemReference", "true");
+                            reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
+                            reference.SetMetadata(MetadataKeys.Private, "false");
 
-                        referencesToAdd.Add(reference);
-                    }
+                            //  TODO: Once we work out what metadata we should use here to display these references grouped under the targeting pack
+                            //  in solution explorer, set that metadata here.These metadata values are based on what PCLs were using.
+                            //  https://github.com/dotnet/sdk/issues/2802
+                            reference.SetMetadata("WinMDFile", "false");
+                            reference.SetMetadata("ReferenceGroupingDisplayName", targetingPack.ItemSpec);
+                            reference.SetMetadata("ReferenceGrouping", targetingPack.ItemSpec);
+                            reference.SetMetadata("ResolvedFrom", "TargetingPack");
+                            reference.SetMetadata("IsSystemReference", "true");
 
-                    if (File.Exists(platformManifestPath))
-                    {
-                        platformManifests.Add(new TaskItem(platformManifestPath));
-                    }
+                            referencesToAdd.Add(reference);
+                        }
 
-                    if (targetingPack.ItemSpec.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //  Hardcode this for now.  Load this from the targeting pack once we have "real" targeting packs
-                        //  https://github.com/dotnet/cli/issues/10581
-                        PackageConflictPreferredPackages = "Microsoft.NETCore.App;runtime.linux-x64.Microsoft.NETCore.App;runtime.linux-x64.Microsoft.NETCore.App;runtime.linux-musl-x64.Microsoft.NETCore.App;runtime.linux-musl-x64.Microsoft.NETCore.App;runtime.rhel.6-x64.Microsoft.NETCore.App;runtime.rhel.6-x64.Microsoft.NETCore.App;runtime.osx-x64.Microsoft.NETCore.App;runtime.osx-x64.Microsoft.NETCore.App;runtime.freebsd-x64.Microsoft.NETCore.App;runtime.freebsd-x64.Microsoft.NETCore.App;runtime.win-x86.Microsoft.NETCore.App;runtime.win-x86.Microsoft.NETCore.App;runtime.win-arm.Microsoft.NETCore.App;runtime.win-arm.Microsoft.NETCore.App;runtime.win-arm64.Microsoft.NETCore.App;runtime.win-arm64.Microsoft.NETCore.App;runtime.linux-arm.Microsoft.NETCore.App;runtime.linux-arm.Microsoft.NETCore.App;runtime.linux-arm64.Microsoft.NETCore.App;runtime.linux-arm64.Microsoft.NETCore.App;runtime.tizen.4.0.0-armel.Microsoft.NETCore.App;runtime.tizen.4.0.0-armel.Microsoft.NETCore.App;runtime.tizen.5.0.0-armel.Microsoft.NETCore.App;runtime.tizen.5.0.0-armel.Microsoft.NETCore.App;runtime.win-x64.Microsoft.NETCore.App;runtime.win-x64.Microsoft.NETCore.App";
+                        if (File.Exists(platformManifestPath))
+                        {
+                            platformManifests.Add(new TaskItem(platformManifestPath));
+                        }
+
+                        if (targetingPack.ItemSpec.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //  Hardcode this for now.  Load this from the targeting pack once we have "real" targeting packs
+                            //  https://github.com/dotnet/cli/issues/10581
+                            PackageConflictPreferredPackages = "Microsoft.NETCore.App;runtime.linux-x64.Microsoft.NETCore.App;runtime.linux-x64.Microsoft.NETCore.App;runtime.linux-musl-x64.Microsoft.NETCore.App;runtime.linux-musl-x64.Microsoft.NETCore.App;runtime.rhel.6-x64.Microsoft.NETCore.App;runtime.rhel.6-x64.Microsoft.NETCore.App;runtime.osx-x64.Microsoft.NETCore.App;runtime.osx-x64.Microsoft.NETCore.App;runtime.freebsd-x64.Microsoft.NETCore.App;runtime.freebsd-x64.Microsoft.NETCore.App;runtime.win-x86.Microsoft.NETCore.App;runtime.win-x86.Microsoft.NETCore.App;runtime.win-arm.Microsoft.NETCore.App;runtime.win-arm.Microsoft.NETCore.App;runtime.win-arm64.Microsoft.NETCore.App;runtime.win-arm64.Microsoft.NETCore.App;runtime.linux-arm.Microsoft.NETCore.App;runtime.linux-arm.Microsoft.NETCore.App;runtime.linux-arm64.Microsoft.NETCore.App;runtime.linux-arm64.Microsoft.NETCore.App;runtime.tizen.4.0.0-armel.Microsoft.NETCore.App;runtime.tizen.4.0.0-armel.Microsoft.NETCore.App;runtime.tizen.5.0.0-armel.Microsoft.NETCore.App;runtime.tizen.5.0.0-armel.Microsoft.NETCore.App;runtime.win-x64.Microsoft.NETCore.App;runtime.win-x64.Microsoft.NETCore.App";
+                        }
                     }
                 }
             }

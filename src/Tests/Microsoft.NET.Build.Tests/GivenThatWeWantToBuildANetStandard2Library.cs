@@ -24,17 +24,19 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
-        public void It_builds_a_netstandard2_library_successfully()
+        [Theory]
+        [InlineData("netstandard2.0")]
+        [InlineData("netstandard2.1")]
+        public void It_builds_a_netstandard2_library_successfully(string targetFramework)
         {
             TestProject project = new TestProject()
             {
                 Name = "NetStandard2Library",
-                TargetFrameworks = "netstandard2.0",
+                TargetFrameworks = targetFramework,
                 IsSdkProject = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(project)
+            var testAsset = _testAssetsManager.CreateTestProject(project, identifier: targetFramework)
                 .Restore(Log, project.Name);
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);

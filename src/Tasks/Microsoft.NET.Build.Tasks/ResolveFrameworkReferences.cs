@@ -100,6 +100,8 @@ namespace Microsoft.NET.Build.Tasks
                     targetingPackVersion = knownFrameworkReference.TargetingPackVersion;
                 }
                 targetingPack.SetMetadata(MetadataKeys.PackageVersion, targetingPackVersion);
+                targetingPack.SetMetadata("TargetingPackFormat", knownFrameworkReference.TargetingPackFormat);
+                targetingPack.SetMetadata("TargetFramework", knownFrameworkReference.TargetFramework.GetShortFolderName());
 
                 string targetingPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
@@ -180,12 +182,15 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
 
-                TaskItem runtimeFramework = new TaskItem(knownFrameworkReference.RuntimeFrameworkName);
+                if (!string.IsNullOrEmpty(knownFrameworkReference.RuntimeFrameworkName))
+                {
+                    TaskItem runtimeFramework = new TaskItem(knownFrameworkReference.RuntimeFrameworkName);
 
-                runtimeFramework.SetMetadata(MetadataKeys.Version, runtimeFrameworkVersion);
-                runtimeFramework.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
+                    runtimeFramework.SetMetadata(MetadataKeys.Version, runtimeFrameworkVersion);
+                    runtimeFramework.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
 
-                runtimeFrameworks.Add(runtimeFramework);
+                    runtimeFrameworks.Add(runtimeFramework);
+                }
             }
                                                       
             if (packagesToDownload.Any())
@@ -299,6 +304,7 @@ namespace Microsoft.NET.Build.Tasks
             //  The ID of the targeting pack NuGet package to reference
             public string TargetingPackName => _item.GetMetadata("TargetingPackName");
             public string TargetingPackVersion => _item.GetMetadata("TargetingPackVersion");
+            public string TargetingPackFormat => _item.GetMetadata("TargetingPackFormat");
 
             public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
 

@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tests
             var project = new TestProject
             {
                 Name = "packagethatwillgomissing",
-                TargetFrameworks = targetFrameworkIdentifier ==  ".NETCoreApp" ? "netcoreapp2.0" : "netstandard2.0",
+                TargetFrameworks = targetFrameworkIdentifier ==  ".NETCoreApp" ? "netcoreapp3.0" : "netstandard2.1",
                 IsSdkProject = true,
             };
 
@@ -63,7 +63,7 @@ namespace Microsoft.NET.Build.Tests
             string expectedTFM = $"{targetFrameworkIdentifier},Version=v{maximumVersion}";
 
             supportedFrameworks.Should().Contain(expectedTFM,
-                because: $"Microsoft.NET.SupportedTargetFrameworks.targets should include an entry for {expectedTFM}");
+                because: $"Microsoft.NET.SupportedTargetFrameworks.props should include an entry for {expectedTFM}");
         }
     }
 }
