@@ -622,8 +622,8 @@ namespace Microsoft.Build.CommandLine
                         Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
                     }
 
-					// Honor the low priority flag, be place our selves below normal
-					// priority and letting sub processes inherit that priority.
+					// Honor the low priority flag, we place our selves below normal
+					// priority and let sub processes inherit that priority.
 					if (lowPriority)
 					{
 						Process currentProc = Process.GetCurrentProcess();
