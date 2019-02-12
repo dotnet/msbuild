@@ -622,6 +622,14 @@ namespace Microsoft.Build.CommandLine
                         Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
                     }
 
+					// Honor the low priority flag, be place our selves below normal
+					// priority and letting sub processes inherit that priority.
+					if (lowPriority)
+					{
+						Process currentProc = Process.GetCurrentProcess();
+						currentProc.PriorityClass = ProcessPriorityClass.BelowNormal;
+					}
+
                     DateTime t1 = DateTime.Now;
 
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
@@ -663,8 +671,7 @@ namespace Microsoft.Build.CommandLine
                                     isolateProjects,
                                     graphBuild,
                                     inputResultsCaches,
-                                    outputResultsCache,
-                                    lowPriority))
+                                    outputResultsCache))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -972,8 +979,7 @@ namespace Microsoft.Build.CommandLine
             bool isolateProjects,
             bool graphBuild,
             string[] inputResultsCaches,
-            string outputResultsCache,
-            bool lowPriority
+            string outputResultsCache
         )
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
@@ -1135,7 +1141,6 @@ namespace Microsoft.Build.CommandLine
                     parameters.IsolateProjects = isolateProjects;
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
-                    parameters.LowPriority = lowPriority;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -2202,7 +2207,7 @@ namespace Microsoft.Build.CommandLine
                         graphBuild = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild], defaultValue: true, resourceName: "InvalidGraphBuildValue");
                     }
 
-                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LowPriority))
                     {
                         lowPriority = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority], defaultValue: true, resourceName: "InvalidLowPriorityValue");
                     }
