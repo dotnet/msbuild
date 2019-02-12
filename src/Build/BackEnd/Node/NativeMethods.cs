@@ -28,12 +28,6 @@ namespace Microsoft.Build.BackEnd
         internal const uint NORMALPRIORITYCLASS = 0x0020;
 
         /// <summary>
-        /// Start the process with a priority above IDLE_PRIORITY_CLASS
-        /// but below NORMAL_PRIORITY_CLASS.
-        /// </summary>
-        internal const uint BELOW_NORMAL_PRIORITY_CLASS = 0x00004000;
-
-        /// <summary>
         /// Do not create a window
         /// </summary>
         internal const uint CREATENOWINDOW = 0x08000000;
