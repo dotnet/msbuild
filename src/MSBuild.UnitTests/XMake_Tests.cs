@@ -1239,7 +1239,8 @@ namespace Microsoft.Build.UnitTests
 
             string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: arguments);
 
-            logContents.ShouldContain(string.Format(@"Task priority is ""{0}""", expectedPrority));
+            string expected = string.Format(@"Task priority is ""{0}""", expectedPrority);
+            logContents.ShouldContain(expected, () => logContents);
         }
 
 #region IgnoreProjectExtensionTests
