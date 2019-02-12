@@ -60,7 +60,20 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    foreach (var dll in Directory.GetFiles(Path.Combine(targetingPackRoot, "ref", "netcoreapp3.0"), "*.dll"))
+                    string targetingPackAssetPath = Path.Combine(targetingPackRoot, "data");
+                    string platformManifestPath;
+                    if (Directory.Exists(targetingPackAssetPath))
+                    {
+                        platformManifestPath = Path.Combine(targetingPackAssetPath,
+                                    targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
+                    }
+                    else
+                    {
+                        targetingPackAssetPath = Path.Combine(targetingPackRoot, "ref", "netcoreapp3.0");
+                        platformManifestPath = Path.Combine(targetingPackRoot, "build", "netcoreapp3.0",
+                            targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
+                    }
+                    foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
                     {
                         var reference = new TaskItem(dll);
 
@@ -78,9 +91,6 @@ namespace Microsoft.NET.Build.Tasks
 
                         referencesToAdd.Add(reference);
                     }
-
-                    var platformManifestPath = Path.Combine(targetingPackRoot, "build", "netcoreapp3.0",
-                        targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
 
                     if (File.Exists(platformManifestPath))
                     {
