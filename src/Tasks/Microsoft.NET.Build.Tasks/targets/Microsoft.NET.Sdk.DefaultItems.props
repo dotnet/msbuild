@@ -17,7 +17,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(NETCoreSdkBundledVersionsProps)" Condition="Exists('$(NETCoreSdkBundledVersionsProps)')" />
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseRefTargetingPacks)' == 'true'">
     <KnownFrameworkReference Update="Microsoft.NETCore.App"
                                TargetingPackName="Microsoft.NETCore.App.Ref"
                                TargetingPackVersion="3.0.0-preview-27406-5"

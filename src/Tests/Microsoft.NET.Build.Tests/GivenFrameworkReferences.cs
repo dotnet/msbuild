@@ -427,6 +427,7 @@ namespace FrameworkReferenceTest
             testProject.IsSdkProject = true;
             testProject.IsExe = true;
             testProject.AdditionalProperties["DisableImplicitFrameworkReferences"] = "true";
+            testProject.AdditionalProperties["UseRefTargetingPacks"] = "true";
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier)
