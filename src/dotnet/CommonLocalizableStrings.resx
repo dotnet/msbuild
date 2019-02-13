@@ -646,4 +646,7 @@ setx PATH "%PATH%;{0}"
   <data name="VersionSuffixArgumentName" xml:space="preserve">
     <value>VERSION_SUFFIX</value>
   </data>
+  <data name="CommandInteractiveOptionDescription" xml:space="preserve">
+    <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
+  </data>
 </root>
