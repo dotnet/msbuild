@@ -12,55 +12,53 @@ namespace Microsoft.NET.Build.Tasks
     //  but not PackageDirectory metadata specified
     public class GetPackageDirectory : TaskBase
     {
-        public ITaskItem[] Items { get; set; }
+        public ITaskItem[] Items { get; set; } = Array.Empty<ITaskItem>();
 
-        [Required]
-        public string ProjectPath { get; set; }
-
-        [Required]
-        public string [] PackageFolders { get; set; }
+        public string[] PackageFolders { get; set; } = Array.Empty<string>();
 
         [Output]
         public ITaskItem[] Output { get; set; }
 
         protected override void ExecuteCore()
         {
-            if (Items != null)
+            if (Items.Length == 0 || PackageFolders.Length == 0)
             {
-                NuGetPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(PackageFolders, ProjectPath);
+                Output = Items;
+                return;
+            }
 
-                var updatedItems = new List<ITaskItem>();
+            var packageResolver = NuGetPackageResolver.CreateResolver(PackageFolders);
 
-                foreach (var item in Items)
+            int index = 0;
+            var updatedItems = new ITaskItem[Items.Length];
+
+            foreach (var item in Items)
+            {
+                string packageName = item.GetMetadata(MetadataKeys.PackageName);
+                string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
+
+                if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion)
+                    || !string.IsNullOrEmpty(item.GetMetadata(MetadataKeys.PackageDirectory)))
                 {
-                    string packageName = item.GetMetadata(MetadataKeys.PackageName);
-                    string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
-                    if (!string.IsNullOrEmpty(packageName) && !string.IsNullOrEmpty(packageVersion)
-                        && string.IsNullOrEmpty(item.GetMetadata(MetadataKeys.PackageDirectory)))
-                    {
-                        var newItem = new TaskItem(item);
-
-                        //  Gracefully handle case where we don't have a packageResolver because we don't have an assets
-                        //  file, which happens for design-time builds
-                        if (packageResolver != null)
-                        {
-                            var parsedPackageVersion = NuGetVersion.Parse(packageVersion);
-
-                            string packageDirectory = packageResolver.GetPackageDirectory(packageName, parsedPackageVersion);
-                            
-                            newItem.SetMetadata(MetadataKeys.PackageDirectory, packageDirectory);
-                        }
-
-                        updatedItems.Add(newItem);
-                    }
-                    else
-                    {
-                        updatedItems.Add(item);
-                    }
+                    updatedItems[index++] = item;
+                    continue;
                 }
 
-                Output = updatedItems.ToArray();
+                var parsedPackageVersion = NuGetVersion.Parse(packageVersion);
+                string packageDirectory = packageResolver.GetPackageDirectory(packageName, parsedPackageVersion);
+
+                if (packageDirectory == null)
+                {
+                    updatedItems[index++] = item;
+                    continue;
+                }
+
+                var newItem = new TaskItem(item);
+                newItem.SetMetadata(MetadataKeys.PackageDirectory, packageDirectory);
+                updatedItems[index++] = newItem;
             }
+
+            Output = updatedItems;
         }
     }
 }

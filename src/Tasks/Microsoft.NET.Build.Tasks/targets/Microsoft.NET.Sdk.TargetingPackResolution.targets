@@ -134,7 +134,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <GetPackageDirectory
       Items="@(TargetingPack)"
-      ProjectPath="$(MSBuildProjectFullPath)"
       PackageFolders="@(AssetsFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedTargetingPack" />
@@ -142,8 +141,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GetPackageDirectory>    
     
     <ItemGroup>
-      <ResolvedTargetingPack>
-        <Path Condition="'%(ResolvedTargetingPack.Path)' == ''">%(PackageDirectory)</Path>
+      <ResolvedTargetingPack Condition="'%(ResolvedTargetingPack.Path)' == '' and '%(ResolvedTargetingPack.PackageDirectory)' != ''">
+        <Path>%(ResolvedTargetingPack.PackageDirectory)</Path>
       </ResolvedTargetingPack>
       
     </ItemGroup>
@@ -176,7 +175,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <GetPackageDirectory
       Items="@(AppHostPack)"
-      ProjectPath="$(MSBuildProjectFullPath)"
       PackageFolders="@(AssetsFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedAppHostPack" />
@@ -185,7 +183,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <GetPackageDirectory
       Items="@(PackAsToolShimAppHostPack)"
-      ProjectPath="$(MSBuildProjectFullPath)"
       PackageFolders="@(AssetsFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="_ApphostsForShimRuntimeIdentifiersGetPackageDirectory" />
@@ -199,8 +196,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup>
-      <ResolvedAppHostPack>
-        <Path Condition="'%(ResolvedAppHostPack.Path)' == ''">%(PackageDirectory)\%(RelativePath)</Path>
+      <ResolvedAppHostPack Condition="'%(ResolvedAppHostPack.Path)' == '' and '%(ResolvedAppHostPack.PackageDirectory)' != ''">
+        <Path>%(ResolvedAppHostPack.PackageDirectory)\%(ResolvedAppHostPack.RelativePath)</Path>
       </ResolvedAppHostPack>      
     </ItemGroup>
 
@@ -217,7 +214,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     
       <GetPackageDirectory
         Items="@(RuntimePack)"
-        ProjectPath="$(MSBuildProjectFullPath)"
         PackageFolders="@(AssetsFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedRuntimePack" />

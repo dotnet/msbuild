@@ -45,13 +45,10 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var frameworkReference in FrameworkReferences)
             {
                 ITaskItem targetingPack;
-                string targetingPackRoot = null;
                 resolvedTargetingPacks.TryGetValue(frameworkReference.ItemSpec, out targetingPack);
-                if (targetingPack != null)
-                {
-                    targetingPackRoot = targetingPack.GetMetadata("Path");
-                }
-                if (targetingPack == null || !Directory.Exists(targetingPackRoot))
+                string targetingPackRoot = targetingPack?.GetMetadata("Path");
+ 
+                if (string.IsNullOrEmpty(targetingPackRoot) || !Directory.Exists(targetingPackRoot))
                 {
                     if (GenerateErrorForMissingTargetingPacks)
                     {

@@ -48,7 +48,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 //  This is used to look up the paths to package files on disk, which is only needed in this class if
                 //  it needs to read the file versions
-                _packageResolver = NuGetPackageResolver.CreateResolver(projectContext.LockFile, mainProjectInfo.ProjectPath);
+                _packageResolver = NuGetPackageResolver.CreateResolver(projectContext.LockFile);
             }
         }
 

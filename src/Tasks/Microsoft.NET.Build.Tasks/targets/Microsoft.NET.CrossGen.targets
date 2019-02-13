@@ -272,8 +272,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                              StorePackageName=$(MicrosoftNETPlatformLibrary);
                              StorePackageVersion=%(PackageReferenceForCrossGen.Version);"/>
 
-    <ResolveCopyLocalAssets ProjectPath="$(MSBuildProjectFullPath)"
-                            AssetsFilePath="$(_CrossProjAssetsFile)"
+    <ResolveCopyLocalAssets AssetsFilePath="$(_CrossProjAssetsFile)"
                             TargetFramework="$(_TFM)"
                             RuntimeIdentifier="$(RuntimeIdentifier)"
                             PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"

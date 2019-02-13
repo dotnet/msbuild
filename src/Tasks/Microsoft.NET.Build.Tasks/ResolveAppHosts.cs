@@ -151,6 +151,7 @@ namespace Microsoft.NET.Build.Tasks
                 if (appHostPackPath != null && Directory.Exists(appHostPackPath))
                 {
                     //  Use AppHost from packs folder
+                    appHostItem.SetMetadata(MetadataKeys.PackageDirectory, appHostPackPath);
                     appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, appHostRelativePathInPackage));
                 }
                 else

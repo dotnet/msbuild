@@ -106,8 +106,9 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 if (targetingPackPath != null && Directory.Exists(targetingPackPath))
                 {
-                    targetingPack.SetMetadata(MetadataKeys.Path, targetingPackPath);
+                    // Use targeting pack from packs folder
                     targetingPack.SetMetadata(MetadataKeys.PackageDirectory, targetingPackPath);
+                    targetingPack.SetMetadata(MetadataKeys.Path, targetingPackPath);
                 }
                 else
                 {
