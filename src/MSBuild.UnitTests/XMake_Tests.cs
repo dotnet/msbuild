@@ -1204,7 +1204,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LowPriorityBuild()
         {
-            RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low");
+            RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low /nr:false");
         }
 
         /// <summary>
@@ -1213,7 +1213,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NormalPriorityBuild()
         {
-            RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.Normal);
+            RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.Normal, arguments: "/nr:false");
         }
 
         private void RunPriorityBuildTest(ProcessPriorityClass expectedPrority, params string[] arguments)
@@ -1228,13 +1228,10 @@ namespace Microsoft.Build.UnitTests
             // Set our test environment variables:
             //  - Disable in proc build to make sure priority is inherited by subprocesses.
             //  - Enable property functions so we can easily read our priority class.
-            //  - Disable node reuse, so tests don't accidently execute on a previously
-            //    launched node with a different priority.
             IDictionary<string, string> environmentVars = new Dictionary<string, string>
             {
                 { "MSBUILDNOINPROCNODE", "1"},
                 { "MSBUILDENABLEALLPROPERTYFUNCTIONS", "1" },
-                { "MSBUILDDISABLENODEREUSE", "1" }
             };
 
             string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: arguments);
