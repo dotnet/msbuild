@@ -24,7 +24,9 @@
       <PackagePath>tools\net46</PackagePath>
     </Content>
 
-    <Content Include="$(RepoRoot)\build\WebDeploy\**\*.*" Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net46\$(RuntimeIdenfier)\Microsoft.Web.Deployment.dll;
+                      $(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net46\$(RuntimeIdenfier)\Microsoft.Web.Delegation.dll"
+             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
       <PackagePath>tools\net46</PackagePath>
     </Content>
