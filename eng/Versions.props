@@ -14,7 +14,7 @@
   <PropertyGroup>
     <MicrosoftDotNetCliRuntimePackageVersion>3.0.100-preview3.19113.3</MicrosoftDotNetCliRuntimePackageVersion>
     <MicrosoftNETSdkPackageVersion>3.0.100-preview3.19112.2</MicrosoftNETSdkPackageVersion>
-    <MicrosoftBuildPackageVersion>16.1.0-preview.4</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>16.0.0-preview.441</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
