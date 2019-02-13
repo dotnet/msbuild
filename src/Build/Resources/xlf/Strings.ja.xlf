@@ -662,7 +662,7 @@
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
         <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
-        <target state="needs-review-translation">MSB4186: 無効な静的メソッド呼び出し構文: "{0}"。{1} 静的メソッド呼び出しは $([FullTypeName]::Method()) の形式である必要があります。例: $([System.IO.Path]::Combine(`a`, `b`)) </target>
+        <target state="translated">MSB4186: 無効な静的メソッド呼び出し構文: "{0}"。{1} 静的メソッド呼び出しは $([FullTypeName]::Method()) という形式である必要があります。例: $([System.IO.Path]::Combine(`a`, `b`))。 すべてのパラメーターが指定され、それらの型と指定順序が正しいことを確認してください。</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
