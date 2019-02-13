@@ -97,21 +97,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private void HandleProcessExit(object sender, EventArgs args)
         {
-            var currentPid = Process.GetCurrentProcess().Id;
-            bool sendChildSIGTERM = true;
-
-            // First, try to SIGTERM our process group
-            // If the pgid is not the same as pid, then this process is not the root of the group
-            if (NativeMethods.Posix.getpgid(currentPid) == currentPid)
-            {
-                if (NativeMethods.Posix.kill(-currentPid, NativeMethods.Posix.SIGTERM) == 0)
-                {
-                    // Successfully sent the signal to the entire group; don't send again to child
-                    sendChildSIGTERM = false;
-                }
-            }
-
-            if (sendChildSIGTERM && NativeMethods.Posix.kill(_process.Id, NativeMethods.Posix.SIGTERM) != 0)
+            if (!_process.WaitForExit(0) && NativeMethods.Posix.kill(_process.Id, NativeMethods.Posix.SIGTERM) != 0)
             {
                 // Couldn't send the signal, don't wait
                 return;
