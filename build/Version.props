@@ -2,7 +2,7 @@
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
     <VersionMinor>2</VersionMinor>
-    <VersionPatch>104</VersionPatch>
+    <VersionPatch>105</VersionPatch>
     <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">rtm</ReleaseSuffix>
 
     <MajorMinorVersion>$(VersionMajor).$(VersionMinor)</MajorMinorVersion>
