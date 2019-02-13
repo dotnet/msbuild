@@ -1,4 +1,5 @@
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.PackageReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -13,7 +14,11 @@ namespace Microsoft.DotNet.Cli
                 Accept.ExactlyOneArgument()
                       .With(name: Tools.Add.PackageReference.LocalizableStrings.CmdPackage,
                             description: LocalizableStrings.AppHelpText),
-                CommonOptions.HelpOption());
+                CommonOptions.HelpOption(),
+                Create.Option("--interactive",
+                                 CommonLocalizableStrings.CommandInteractiveOptionDescription,
+                                 Accept.NoArguments()
+                                   .ForwardAs("--interactive")));
         }
     }
 }
