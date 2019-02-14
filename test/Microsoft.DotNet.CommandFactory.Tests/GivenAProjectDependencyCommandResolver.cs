@@ -30,8 +30,7 @@ namespace Microsoft.DotNet.Tests
             MSBuildTestProjectInstance =
                 TestAssets.Get("TestAppWithProjDepTool")
                     .CreateInstance()
-                    .WithSourceFiles()
-                    .WithRestoreFiles();
+                    .WithSourceFiles();
             
             new BuildCommand()
                 .WithProjectDirectory(MSBuildTestProjectInstance.Root)
@@ -66,8 +65,7 @@ namespace Microsoft.DotNet.Tests
             MSBuildTestProjectInstance =
                 TestAssets.Get("TestAppWithProjDepTool")
                     .CreateInstance()
-                    .WithSourceFiles()
-                    .WithRestoreFiles();
+                    .WithSourceFiles();
             
             new BuildCommand()
                 .WithProjectDirectory(MSBuildTestProjectInstance.Root)
