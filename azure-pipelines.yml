@@ -1,3 +1,14 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - release/3*
+
+pr:
+- master
+- release/3*
+
 variables:
   # Cannot use key:value syntax in root defined variables
   - name: _TeamName
@@ -16,7 +27,7 @@ jobs:
     enablePublishTestResults: true
     enablePublishBuildAssets: true
     enableTelemetry: true
-    helixRepo: dotnet/websdk
+    helixRepo: aspnet/websdk
     jobs:
     - job: Windows_NT
       pool:
@@ -85,7 +96,7 @@ jobs:
     name: OSX
     enableTelemetry: true
     enablePublishBuildArtifacts: true
-    helixRepo: dotnet/arcade-minimalci-sample
+    helixRepo: aspnet/websdk
     pool:
       name: Hosted macOS
     strategy:
@@ -107,7 +118,7 @@ jobs:
     name: Linux
     enableTelemetry: true
     enablePublishBuildArtifacts: true
-    helixRepo: dotnet/arcade-minimalci-sample
+    helixRepo: aspnet/websdk
     pool:
       name: Hosted Ubuntu 1604
     container: LinuxContainer
