@@ -36,6 +36,26 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
+        public void ItDoesNotFindMSBuildSdkThatIsMissingFromLocatedNETCoreSdk()
+        {
+            var environment = new TestEnvironment();
+            var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.97");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.SdkThatDoesNotExist", null, null),
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
+                new MockFactory());
+
+            result.Success.Should().BeFalse();
+            result.Path.Should().BeNull();
+            result.Version.Should().BeNull();
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().NotBeEmpty();
+        }
+
+        [Fact]
         public void ItFindsTheVersionSpecifiedInGlobalJson()
         {
             var environment = new TestEnvironment();
