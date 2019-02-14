@@ -31,6 +31,48 @@ function InitializeCustomSDKToolset {
   InstallDotNetSharedFramework "1.1.2"
   InstallDotNetSharedFramework "2.0.0"
   InstallDotNetSharedFramework "2.1.0"
+
+  CreateBuildEnvScript
+  CreateTestEnvScript
+}
+
+function CreateBuildEnvScript()
+{
+  InitializeBuildTool | Out-Null # Make sure DOTNET_INSTALL_DIR is set
+
+  Create-Directory $ArtifactsDir
+  $scriptPath = Join-Path $ArtifactsDir "cli-build-env.bat"
+  $scriptContents = @"
+@echo off
+title CLI Build ($RepoRoot)
+set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+set DOTNET_MULTILEVEL_LOOKUP=0
+
+set PATH=$env:DOTNET_INSTALL_DIR;%PATH%
+set NUGET_PACKAGES=$env:NUGET_PACKAGES
+"@
+
+  Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII
+}
+
+function CreateTestEnvScript()
+{
+  InitializeBuildTool | Out-Null # Make sure DOTNET_INSTALL_DIR is set
+
+  Create-Directory $ArtifactsDir
+  $scriptPath = Join-Path $ArtifactsDir "cli-test-env.bat"
+  $dotnetUnderTest = Join-Path $ArtifactsDir "tmp\Debug\dotnet"
+  $scriptContents = @"
+@echo off
+title CLI Test ($RepoRoot)
+set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+set DOTNET_MULTILEVEL_LOOKUP=0
+
+set PATH=$dotnetUnderTest;%PATH%
+set NUGET_PACKAGES=$env:NUGET_PACKAGES
+"@
+
+  Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII
 }
 
 function InstallDotNetSharedFramework([string]$version) {
