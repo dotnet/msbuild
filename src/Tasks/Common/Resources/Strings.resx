@@ -440,10 +440,6 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</value>
     <comment>{StrBegin="NETSDK1081: "}</comment>
   </data>
-  <data name="NoAppHostAvailable" xml:space="preserve">
-    <value>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</value>
-    <comment>{StrBegin="NETSDK1084: "}</comment>
-  </data>
   <data name="NoRuntimePackAvailable" xml:space="preserve">
     <value>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</value>
     <comment>{StrBegin="NETSDK1082: "}</comment>
@@ -451,5 +447,13 @@ The following are names of parameters or literal values and should not be transl
   <data name="RuntimeIdentifierNotRecognized" xml:space="preserve">
     <value>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</value>
     <comment>{StrBegin="NETSDK1083: "}</comment>
+  </data>
+  <data name="NoAppHostAvailable" xml:space="preserve">
+    <value>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</value>
+    <comment>{StrBegin="NETSDK1084: "}</comment>
+  </data>
+  <data name="NoBuildRequested" xml:space="preserve">
+    <value>NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</value>
+    <comment>{StrBegin="NETSDK1085: "}</comment>
   </data>
 </root>

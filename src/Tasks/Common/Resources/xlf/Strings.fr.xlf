@@ -296,6 +296,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1084 : Aucun hôte d'application disponible pour le RuntimeIdentifier '{0}' spécifié.</target>
         <note>{StrBegin="NETSDK1084: "}</note>
       </trans-unit>
+      <trans-unit id="NoBuildRequested">
+        <source>NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</source>
+        <target state="new">NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</target>
+        <note>{StrBegin="NETSDK1085: "}</note>
+      </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
         <target state="translated">NETSDK1002: Le projet '{0}' cible '{2}'. Il ne peut pas être référencé par un projet qui cible '{1}'.</target>
