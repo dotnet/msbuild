@@ -7,6 +7,10 @@ namespace Microsoft.DotNet.Cli
 {
     public abstract class CommandBase
     {
+        protected CommandBase()
+        {
+        }
+
         protected CommandBase(ParseResult parseResult)
         {
             ShowHelpOrErrorIfAppropriate(parseResult);
