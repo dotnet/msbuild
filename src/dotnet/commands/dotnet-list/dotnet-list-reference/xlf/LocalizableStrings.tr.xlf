@@ -12,11 +12,6 @@
         <target state="translated">Projeden projeye başvuruları listeleme komutu</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">{1} projesinde {0} başvurusu yok.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

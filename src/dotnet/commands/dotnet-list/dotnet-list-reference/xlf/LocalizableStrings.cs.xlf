@@ -12,11 +12,6 @@
         <target state="translated">Příkaz pro zobrazení seznamu odkazů mezi projekty</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">Projekt {1} neobsahuje odkazy na {0}.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

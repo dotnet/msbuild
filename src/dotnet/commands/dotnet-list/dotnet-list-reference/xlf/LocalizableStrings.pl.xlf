@@ -12,11 +12,6 @@
         <target state="translated">Polecenie służące do wyświetlania listy odwołań między projektami</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">Brak odwołań do elementu typu {0} w projekcie {1}.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

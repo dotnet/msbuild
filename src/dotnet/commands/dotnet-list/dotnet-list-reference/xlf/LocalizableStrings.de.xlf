@@ -12,11 +12,6 @@
         <target state="translated">Befehl zum Auflisten von Projekt-zu-Projekt-Verweisen</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">In Projekt "{1}" liegen keine {0}-Verweise vor.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

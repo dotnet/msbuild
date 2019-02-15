@@ -12,11 +12,6 @@
         <target state="translated">プロジェクト間参照を一覧表示するコマンド</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">プロジェクト {1} 内に {0} 参照がありません。</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

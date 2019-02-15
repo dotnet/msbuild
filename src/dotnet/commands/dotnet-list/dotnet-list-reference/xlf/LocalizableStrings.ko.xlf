@@ -12,11 +12,6 @@
         <target state="translated">프로젝트 간 참조를 나열하기 위한 명령입니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">{1} 프로젝트에 {0} 참조가 없습니다.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

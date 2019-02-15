@@ -12,11 +12,6 @@
         <target state="translated">用以列出專案對專案參考的命令</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">專案 {1} 中沒有任何 {0} 參考。</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

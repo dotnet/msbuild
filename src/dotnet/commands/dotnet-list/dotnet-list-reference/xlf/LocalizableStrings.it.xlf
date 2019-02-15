@@ -12,11 +12,6 @@
         <target state="translated">Comando per elencare i riferimenti P2P (da progetto a progetto)</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">Non ci sono riferimenti a {0} nel progetto {1}.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

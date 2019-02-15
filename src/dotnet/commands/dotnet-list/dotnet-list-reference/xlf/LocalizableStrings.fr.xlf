@@ -12,11 +12,6 @@
         <target state="translated">Commande permettant de répertorier les références projet à projet</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">Il n'existe aucune référence {0} dans le projet {1}.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

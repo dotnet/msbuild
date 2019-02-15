@@ -12,11 +12,6 @@
         <target state="translated">Comando para enumerar las referencias de proyecto a proyecto</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">No hay referencias de {0} en el proyecto {1}.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>
