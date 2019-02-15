@@ -231,7 +231,7 @@ namespace Microsoft.Build.Experimental.Graph
 
                     if (!nodeStates.ContainsKey(entryPointNode))
                     {
-                        CreateEdgesAndDetectCycles(entryPointNode, nodeStates, projectCollection, entrypointConfig.GlobalProperties);
+                        CreateEdgesAndDetectCycles(entryPointNode, nodeStates);
                     }
                     else
                     {
@@ -526,31 +526,14 @@ namespace Microsoft.Build.Experimental.Graph
                     var task = new Task(() =>
                     {
                         var parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory);
-                        IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
-                        foreach (var projectReferenceToParse in projectReferenceItems)
+
+                        foreach (var referenceConfig in GetReferenceConfigs(parsedProject.ProjectInstance))
                         {
-                            if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
+                            if (!tasksInProgress.ContainsKey(referenceConfig))
                             {
-                                throw new InvalidOperationException(string.Format(
-                                    CultureInfo.InvariantCulture,
-                                    ResourceUtilities.GetResourceString(
-                                        "ProjectGraphDoesNotSupportProjectReferenceWithToolset"),
-                                    projectReferenceToParse.EvaluatedInclude,
-                                    parsedProject.ProjectInstance.FullPath));
-                            }
-
-                            var projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
-
-                            var projectReferenceGlobalProperties =
-                                GetProjectReferenceGlobalProperties(projectReferenceToParse, projectToEvaluate.GlobalProperties);
-
-                            var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
-
-                            if (!tasksInProgress.ContainsKey(projectReferenceConfigurationMetadata))
-                            {
-                                if (!_allParsedProjects.ContainsKey(projectReferenceConfigurationMetadata))
+                                if (!_allParsedProjects.ContainsKey(referenceConfig))
                                 {
-                                    projectsToEvaluate.Enqueue(projectReferenceConfigurationMetadata);
+                                    projectsToEvaluate.Enqueue(referenceConfig);
                                     evaluationWaitHandle.Set();
                                 }
                             }
@@ -591,6 +574,31 @@ namespace Microsoft.Build.Experimental.Graph
             return true;
         }
 
+        private static IEnumerable<ConfigurationMetadata> GetReferenceConfigs(ProjectInstance requesterInstance)
+        {
+            IEnumerable<ProjectItemInstance> projectReferenceItems = requesterInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
+            foreach (var projectReferenceToParse in projectReferenceItems)
+            {
+                if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            ResourceUtilities.GetResourceString(
+                                "ProjectGraphDoesNotSupportProjectReferenceWithToolset"),
+                            projectReferenceToParse.EvaluatedInclude,
+                            requesterInstance.FullPath));
+                }
+
+                var projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
+
+                var projectReferenceGlobalProperties =
+                    GetProjectReferenceGlobalProperties(projectReferenceToParse, requesterInstance.GlobalPropertiesDictionary);
+
+                yield return new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
+            }
+        }
+
         private enum NodeState
         {
             // the project has been evaluated and its project references are being processed
@@ -606,18 +614,13 @@ namespace Microsoft.Build.Experimental.Graph
         /// </remarks>
         private (bool success, List<string> projectsInCycle) CreateEdgesAndDetectCycles(
             ProjectGraphNode node,
-            Dictionary<ProjectGraphNode, NodeState> nodeState,
-            ProjectCollection projectCollection,
-            PropertyDictionary<ProjectPropertyInstance> globalProperties)
+            Dictionary<ProjectGraphNode, NodeState> nodeState)
         {
             nodeState[node] = NodeState.InProcess;
-            IEnumerable<ProjectItemInstance> projectReferenceItems = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
-            foreach (var projectReferenceToParse in projectReferenceItems)
+
+            foreach (var referenceConfig in GetReferenceConfigs(node.ProjectInstance))
             {
-                var projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
-                var projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, globalProperties);
-                var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
-                var referenceNode = _allParsedProjects[projectReferenceConfigurationMetadata];
+                var referenceNode = _allParsedProjects[referenceConfig];
 
                 if (nodeState.TryGetValue(referenceNode, out var projectReferenceNodeState))
                 {
@@ -637,7 +640,7 @@ namespace Microsoft.Build.Experimental.Graph
                         {
                             // the project being evaluated has a circular dependency involving multiple projects
                             // add this project to the list of projects involved in cycle 
-                            var projectsInCycle = new List<string> { projectReferenceConfigurationMetadata.ProjectFullPath };
+                            var projectsInCycle = new List<string> { referenceConfig.ProjectFullPath };
                             return (false, projectsInCycle);
                         }
                     }
@@ -645,14 +648,13 @@ namespace Microsoft.Build.Experimental.Graph
                 else
                 {
                     // recursively process newly discovered references
-                    var loadReference = CreateEdgesAndDetectCycles(referenceNode, nodeState, projectCollection,
-                        projectReferenceGlobalProperties);
+                    var loadReference = CreateEdgesAndDetectCycles(referenceNode, nodeState);
                     if (!loadReference.success)
                     {
                         if (loadReference.projectsInCycle[0].Equals(node.ProjectInstance.FullPath))
                         {
                             // we have reached the nth project in the cycle, form error message and throw
-                            loadReference.projectsInCycle.Add(projectReferenceConfigurationMetadata.ProjectFullPath);
+                            loadReference.projectsInCycle.Add(referenceConfig.ProjectFullPath);
                             loadReference.projectsInCycle.Add(node.ProjectInstance.FullPath);
                             var errorMessage = FormatCircularDependencyError(loadReference.projectsInCycle);
                             throw new CircularDependencyException(string.Format(
@@ -663,16 +665,17 @@ namespace Microsoft.Build.Experimental.Graph
                         {
                             // this is one of the projects in the circular dependency
                             // update the list of projects in cycle and return the list to the caller
-                            loadReference.projectsInCycle.Add(projectReferenceConfigurationMetadata.ProjectFullPath);
+                            loadReference.projectsInCycle.Add(referenceConfig.ProjectFullPath);
                             return (false, loadReference.projectsInCycle);
                         }
                     }
                 }
 
-                var parsedProjectReference = _allParsedProjects[projectReferenceConfigurationMetadata];
+                var parsedProjectReference = _allParsedProjects[referenceConfig];
                 node.AddProjectReference(parsedProjectReference);
                 parsedProjectReference.AddReferencingProject(node);
             }
+
             nodeState[node] = NodeState.Processed;
             return (true, null);
         }
