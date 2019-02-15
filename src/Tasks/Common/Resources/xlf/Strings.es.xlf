@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
-        <target state="new">NETSDK1070: The application configuration file must have root configuration element.</target>
+        <target state="translated">NETSDK1070: El archivo de configuración de la aplicación debe tener el elemento de configuración raíz.</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
+        <target state="translated">NETSDK1071: Un PackageReference a "{0}" especificó una versión de "{1}". No se recomienda especificar la versión de este paquete. Para obtener más información, consulte https://aka.ms/sdkimplicitrefs</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -262,11 +262,6 @@
         <target state="translated">NETSDK1046: El valor de TargetFramework "{0}" no es válido. Para varios destinos, use en su lugar la propiedad "TargetFrameworks".</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
-      <trans-unit id="SkippingAdditionalProbingPaths">
-        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="translated">NETSDK1048: Se especificaron valores adicionales de "AdditionalProbingPaths" para GenerateRuntimeConfigurationFiles, pero se van a omitir porque el valor de "RuntimeConfigDevPath" está vacío.</target>
-        <note>{StrBegin="NETSDK1048: "}</note>
-      </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
         <target state="translated">NETSDK1049: El archivo resuelto tiene una imagen incorrecta, no tiene metadatos o no es posible su acceso. {0} {1}</target>
@@ -276,6 +271,11 @@
         <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
         <target state="translated">NETSDK1050: En la versión de Microsoft.NET.Sdk que utiliza este proyecto no se admiten referencias a bibliotecas cuyo destino sea .NET Standard 1.5 o posterior. Instale la versión 2.0 o posterior del SDK de .NET Core.</target>
         <note>{StrBegin="NETSDK1050: "}</note>
+      </trans-unit>
+      <trans-unit id="SkippingAdditionalProbingPaths">
+        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
+        <target state="translated">NETSDK1048: Se especificaron valores adicionales de "AdditionalProbingPaths" para GenerateRuntimeConfigurationFiles, pero se van a omitir porque el valor de "RuntimeConfigDevPath" está vacío.</target>
+        <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
@@ -304,7 +304,7 @@
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
         <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: Está trabajando con una versión preliminar del SDK de .NET Core. Puede definir la versión del SDK mediante un archivo .json global en el proyecto actual. Más información en https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <target state="translated">NETSDK1057: Está utilizando una versión preliminar de .NET Core. Vea: https://aka.ms/dotnet-core-preview</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
