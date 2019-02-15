@@ -684,8 +684,7 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Fail()
-                .And.HaveStdOutContaining("NETSDK1085");
-
+                .And.HaveStdOutContaining("NETSDK1087");
         }
 
         [Theory]
