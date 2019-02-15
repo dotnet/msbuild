@@ -61,64 +61,46 @@ namespace Microsoft.NET.Build.Tasks
                 else
                 {
                     string targetingPackFormat = targetingPack.GetMetadata("TargetingPackFormat");
-                    string targetingPackTargetFramework = targetingPack.GetMetadata("TargetFramework");
 
                     if (targetingPackFormat.Equals("NETStandardLegacy", StringComparison.OrdinalIgnoreCase))
                     {
-                        string targetingPackAssetPath = Path.Combine(targetingPackRoot, "build", targetingPackTargetFramework, "ref");
-
-                        foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
-                        {
-                            var reference = new TaskItem(dll);
-                            reference.SetMetadata(MetadataKeys.Private, "false");
-                            reference.SetMetadata("Visible", "false");
-                            reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.PackageName));
-                            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.PackageVersion));
-
-                            if (!Path.GetFileName(dll).Equals("netstandard.dll", StringComparison.OrdinalIgnoreCase))
-                            {
-                                reference.SetMetadata("Facade", "true");
-                            }
-
-                            referencesToAdd.Add(reference);
-                        }
+                        AddNetStandardTargetingPackAssets(targetingPack, targetingPackRoot, referencesToAdd);
                     }
                     else
                     {
-
-                        string targetingPackAssetPath = Path.Combine(targetingPackRoot, "data");
-                        string platformManifestPath;
-                        if (Directory.Exists(targetingPackAssetPath))
+                        string targetingPackTargetFramework = targetingPack.GetMetadata("TargetFramework");
+                        if (string.IsNullOrEmpty(targetingPackTargetFramework))
                         {
-                            platformManifestPath = Path.Combine(targetingPackAssetPath,
-                                        targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
+                            targetingPackTargetFramework = "netcoreapp3.0";
                         }
-                        else
-                        {
-                            targetingPackAssetPath = Path.Combine(targetingPackRoot, "ref", "netcoreapp3.0");
-                            platformManifestPath = Path.Combine(targetingPackRoot, "build", "netcoreapp3.0",
-                                targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt");
-                        }
-                        foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
-                        {
-                            var reference = new TaskItem(dll);
 
-                            reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
-                            reference.SetMetadata(MetadataKeys.Private, "false");
+                        string targetingPackDataPath = Path.Combine(targetingPackRoot, "data");
+                        string[] possibleDllPaths = new[]
+                        {
+                            Path.Combine(targetingPackRoot, "ref", targetingPackTargetFramework),
+                            targetingPackDataPath
+                        };
 
-                            //  TODO: Once we work out what metadata we should use here to display these references grouped under the targeting pack
-                            //  in solution explorer, set that metadata here.These metadata values are based on what PCLs were using.
-                            //  https://github.com/dotnet/sdk/issues/2802
-                            reference.SetMetadata("WinMDFile", "false");
-                            reference.SetMetadata("ReferenceGroupingDisplayName", targetingPack.ItemSpec);
-                            reference.SetMetadata("ReferenceGrouping", targetingPack.ItemSpec);
-                            reference.SetMetadata("ResolvedFrom", "TargetingPack");
-                            reference.SetMetadata("IsSystemReference", "true");
+                        string[] possibleManifestPaths = new[]
+                        {
+                            Path.Combine(targetingPackRoot, "build", targetingPackTargetFramework,
+                                targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt"),
+                            Path.Combine(targetingPackDataPath, "PlatformManifest.txt"),
+                            Path.Combine(targetingPackDataPath,
+                                        targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt"),
+                        };
+
+                        string targetingPackDllPath = possibleDllPaths.First(path => Directory.GetFiles(path, "*.dll").Any());
+                        string platformManifestPath = possibleManifestPaths.FirstOrDefault(File.Exists);
+
+                        foreach (var dll in Directory.GetFiles(targetingPackDllPath, "*.dll"))
+                        {
+                            var reference = CreateReferenceItem(dll, targetingPack);
 
                             referencesToAdd.Add(reference);
                         }
 
-                        if (File.Exists(platformManifestPath))
+                        if (platformManifestPath != null)
                         {
                             platformManifests.Add(new TaskItem(platformManifestPath));
                         }
@@ -133,6 +115,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            //  Remove RuntimeFramework items for shared frameworks which weren't referenced
             HashSet<string> frameworkReferenceNames = new HashSet<string>(FrameworkReferences.Select(fr => fr.ItemSpec), StringComparer.OrdinalIgnoreCase);
             RuntimeFrameworksToRemove = RuntimeFrameworks.Where(rf => !frameworkReferenceNames.Contains(rf.GetMetadata(MetadataKeys.FrameworkName)))
                                         .ToArray();
@@ -140,6 +123,46 @@ namespace Microsoft.NET.Build.Tasks
             ReferencesToAdd = referencesToAdd.ToArray();
             PlatformManifests = platformManifests.ToArray();
             PackageConflictOverrides = packageConflictOverrides.ToArray();
+        }
+
+        private void AddNetStandardTargetingPackAssets(ITaskItem targetingPack, string targetingPackRoot, List<TaskItem> referencesToAdd)
+        {
+            string targetingPackTargetFramework = targetingPack.GetMetadata("TargetFramework");
+            string targetingPackAssetPath = Path.Combine(targetingPackRoot, "build", targetingPackTargetFramework, "ref");
+
+            foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
+            {
+                var reference = CreateReferenceItem(dll, targetingPack);
+
+                if (!Path.GetFileName(dll).Equals("netstandard.dll", StringComparison.OrdinalIgnoreCase))
+                {
+                    reference.SetMetadata("Facade", "true");
+                }
+
+                referencesToAdd.Add(reference);
+            }
+        }
+
+        private TaskItem CreateReferenceItem(string dll, ITaskItem targetingPack)
+        {
+            var reference = new TaskItem(dll);
+
+            reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
+            reference.SetMetadata(MetadataKeys.Private, "false");
+            reference.SetMetadata("Visible", "false");
+            reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.PackageName));
+            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.PackageVersion));
+
+            //  TODO: Once we work out what metadata we should use here to display these references grouped under the targeting pack
+            //  in solution explorer, set that metadata here.These metadata values are based on what PCLs were using.
+            //  https://github.com/dotnet/sdk/issues/2802
+            reference.SetMetadata("WinMDFile", "false");
+            reference.SetMetadata("ReferenceGroupingDisplayName", targetingPack.ItemSpec);
+            reference.SetMetadata("ReferenceGrouping", targetingPack.ItemSpec);
+            reference.SetMetadata("ResolvedFrom", "TargetingPack");
+            reference.SetMetadata("IsSystemReference", "true");
+            
+            return reference;
         }
     }
 }

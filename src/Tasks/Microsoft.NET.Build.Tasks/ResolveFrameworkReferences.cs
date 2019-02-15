@@ -134,12 +134,13 @@ namespace Microsoft.NET.Build.Tasks
                     !string.IsNullOrEmpty(knownFrameworkReference.RuntimePackNamePatterns))
                 {
                     var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
+                    var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';');
                     foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
                     {
                         string runtimePackRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
                             runtimeGraph,
                             RuntimeIdentifier,
-                            knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';'),
+                            knownFrameworkReferenceRuntimePackRuntimeIdentifiers,
                             out bool wasInGraph);
 
                         if (runtimePackRuntimeIdentifier == null)
