@@ -83,6 +83,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <CoreBuildDependsOn>
+      _CheckForBuildWithNoBuild;
       $(CoreBuildDependsOn);
       GenerateBuildDependencyFile;
       GenerateBuildRuntimeConfigurationFiles
@@ -102,6 +103,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(RebuildDependsOn)
     </RebuildDependsOn>
   </PropertyGroup>
+
+  <!-- TODO: this target should not check GeneratePackageOnBuild.
+             remove when https://github.com/NuGet/Home/issues/7801 is fixed.
+    -->
+  <Target Name="_CheckForBuildWithNoBuild"
+          Condition="'$(NoBuild)' == 'true' and '$(GeneratePackageOnBuild)' != 'true'">
+    <NETSdkError ResourceName="NoBuildRequested" />
+  </Target>
 
   <!--
     ============================================================
@@ -238,6 +247,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation"
                                     Condition="'$(TieredCompilation)' != ''"
                                     Value="$(TieredCompilation)" />
+
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.DisableTier0Jit"
+                                    Condition="'$(DisableTier0Jit)' != ''"
+                                    Value="$(DisableTier0Jit)" />
 
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
                                     Condition="'$(ThreadPoolMinThreads)' != ''"
