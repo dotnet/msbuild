@@ -1435,7 +1435,6 @@ namespace Microsoft.Build.Experimental.Graph
     public sealed partial class ProjectGraphNode
     {
         internal ProjectGraphNode() { }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> GlobalProperties { get { throw null; } }
         public Microsoft.Build.Execution.ProjectInstance ProjectInstance { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> ProjectReferences { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> ReferencingProjects { get { throw null; } }

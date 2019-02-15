@@ -460,6 +460,11 @@ namespace Microsoft.Build.Experimental.Graph
         /// using <see cref="Project.CreateProjectInstance()"/> with the flag
         /// <see cref="ProjectInstanceSettings.Immutable"/>, the resulting ProjectGraph
         /// nodes might not be buildable.
+        ///
+        /// To avoid corruption of the graph and subsequent builds based on the graph:
+        /// - all callback parameters must be utilized for creating the ProjectInstance, without any mutations
+        /// - the project instance should not be mutated in any way, its state should be a
+        /// full fidelity representation of the project file
         /// </remarks>
         public delegate ProjectInstance ProjectInstanceFactoryFunc(
             string projectPath,
@@ -496,8 +501,7 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             var graphNode = new ProjectGraphNode(
-                projectInstance,
-                globalProperties);
+                projectInstance);
             _allParsedProjects[configurationMetadata] = graphNode;
             return graphNode;
         }
@@ -529,6 +533,10 @@ namespace Microsoft.Build.Experimental.Graph
 
                         foreach (var referenceConfig in GetReferenceConfigs(parsedProject.ProjectInstance))
                         {
+                             /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
+                             meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
+                             and duplicates the information, leading to wasted work
+                             */
                             if (!tasksInProgress.ContainsKey(referenceConfig))
                             {
                                 if (!_allParsedProjects.ContainsKey(referenceConfig))

@@ -15,12 +15,9 @@ namespace Microsoft.Build.Experimental.Graph
         private readonly List<ProjectGraphNode> _referencingProjects = new List<ProjectGraphNode>();
 
         // No public creation.
-        internal ProjectGraphNode(
-            ProjectInstance projectInstance,
-            IReadOnlyDictionary<string, string> globalProperties)
+        internal ProjectGraphNode(ProjectInstance projectInstance)
         {
             ProjectInstance = projectInstance;
-            GlobalProperties = globalProperties;
         }
 
         /// <summary>
@@ -37,13 +34,6 @@ namespace Microsoft.Build.Experimental.Graph
         /// Gets the evaluated project instance represented by this node in the graph.
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
-
-        /// <summary>
-        /// Gets the global properties which should be used to evaluate and execute this node in the graph.
-        /// <summary>
-        /// The global properties this node was evaluated with. See <see cref="ComputeBuildData"/> for the global properties to use when building this node.
-        /// </summary>
-        public IReadOnlyDictionary<string, string> GlobalProperties { get; }
 
         internal void AddProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Add(projectGraphNode);
 
