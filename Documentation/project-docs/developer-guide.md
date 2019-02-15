@@ -152,7 +152,7 @@ The CLI will then treat the remainder of the tool name as a `dotnet` command.  F
 
 ### MSBuild tasks & targets
 
-NuGet allows adding tasks and targets to a project through a NuGet package. This mechanism, in fact, is how all .NET Core projects pull in the .NET SDK. Extending the CLI through this model has several advantages:
+NuGet allows adding tasks and targets to a project through a NuGet package.  Extending the CLI through this model has several advantages:
 
 1. Targets have access to the MSBuild Project Context, allowing them to reason about the files and properties being used to build a particular project.
 2. Targets are not CLI-specific, making them easy to share across command-line and IDE environments
