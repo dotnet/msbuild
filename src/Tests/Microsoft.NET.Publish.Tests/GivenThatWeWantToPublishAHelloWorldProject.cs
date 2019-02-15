@@ -438,5 +438,36 @@ public static class Program
 
             publishResult.Should().Pass();
         }
+
+        [Fact]
+        public void It_fails_if_nobuild_was_requested_but_build_was_invoked()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "InvokeBuildOnPublish",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.0",
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    project.Root.Add(XElement.Parse(@"<Target Name=""InvokeBuild"" DependsOnTargets=""Build"" BeforeTargets=""Publish"" />"));
+                })
+                .Restore(Log, testProject.Name);
+
+            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+
+            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute("/p:NoBuild=true")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1085");
+        }
     }
 }
