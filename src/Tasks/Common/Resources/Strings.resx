@@ -461,7 +461,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1086: "}</comment>
   </data>
   <data name="FrameworkReferenceDuplicateError" xml:space="preserve">
-    <value>NETSDK1085: Multiple FrameworkReference items for '{0}' were included in the project.</value>
+    <value>NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</value>
     <comment>{StrBegin="NETSDK1087: "}</comment>
   </data>
 </root>
