@@ -201,13 +201,12 @@ namespace Microsoft.Build.Experimental.Graph
             projectInstanceFactory = projectInstanceFactory ?? DefaultProjectInstanceFactory;
 
             var nodeStates = new Dictionary<ProjectGraphNode, NodeState>();
-            var entryPointNodes = new List<ProjectGraphNode>();
             var tasksInProgress = new ConcurrentDictionary<ConfigurationMetadata, object>();
             var projectsToEvaluate = new ConcurrentQueue<ConfigurationMetadata>();
             var entryPointConfigurationMetadata = new List<ConfigurationMetadata>();
             foreach (var entryPoint in entryPoints)
             {
-                PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary = CreatePropertyDictionary(entryPoint.GlobalProperties);
+                var globalPropertyDictionary = CreatePropertyDictionary(entryPoint.GlobalProperties);
 
                 AddGraphBuildGlobalVariable(globalPropertyDictionary);
 
@@ -216,19 +215,29 @@ namespace Microsoft.Build.Experimental.Graph
                 entryPointConfigurationMetadata.Add(configurationMetadata);
             }
 
-            if (LoadGraph(
+            if (FindGraphNodes(
                 projectsToEvaluate,
                 projectCollection,
                 tasksInProgress,
                 projectInstanceFactory,
-                out List<Exception> exceptions))
+                out var exceptions))
             {
-                foreach (var configurationMetadata in entryPointConfigurationMetadata)
+                var entryPointNodes = new List<ProjectGraphNode>(entryPointConfigurationMetadata.Count);
+
+                foreach (var entrypointConfig in entryPointConfigurationMetadata)
                 {
-                    entryPointNodes.Add(_allParsedProjects[configurationMetadata]);
-                    if (!nodeStates.TryGetValue(_allParsedProjects[configurationMetadata], out var _))
+                    var entryPointNode = _allParsedProjects[entrypointConfig];
+                    entryPointNodes.Add(entryPointNode);
+
+                    if (!nodeStates.ContainsKey(entryPointNode))
                     {
-                        DetectCycles(_allParsedProjects[configurationMetadata], nodeStates, projectCollection, configurationMetadata.GlobalProperties);
+                        CreateEdgesAndDetectCycles(entryPointNode, nodeStates, projectCollection, entrypointConfig.GlobalProperties);
+                    }
+                    else
+                    {
+                        ErrorUtilities.VerifyThrow(
+                            nodeStates[entryPointNode] == NodeState.Processed,
+                            "entrypoints should get processed after a call to detect cycles");
                     }
                 }
 
@@ -251,7 +260,7 @@ namespace Microsoft.Build.Experimental.Graph
             {
                 throw new AggregateException(exceptions);
             }
-
+            
             void AddGraphBuildGlobalVariable(PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary)
             {
                 if (globalPropertyDictionary.GetProperty(PropertyNames.IsGraphBuild) == null)
@@ -328,7 +337,7 @@ namespace Microsoft.Build.Experimental.Graph
         public IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(ICollection<string> entryProjectTargets)
         {
             // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
-            Dictionary<ProjectGraphNode, ImmutableList<string>> targetLists = ProjectNodes.ToDictionary(node => node, node => ImmutableList<string>.Empty);
+            var targetLists = ProjectNodes.ToDictionary(node => node, node => ImmutableList<string>.Empty);
 
             var encounteredEdges = new HashSet<ProjectGraphBuildRequest>();
             var edgesToVisit = new Queue<ProjectGraphBuildRequest>();
@@ -336,7 +345,7 @@ namespace Microsoft.Build.Experimental.Graph
             // Initial state for the graph roots
             foreach (var entryPointNode in GraphRoots)
             {
-                ImmutableList<string> entryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
+                var entryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
                     ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)
                     : ImmutableList.CreateRange(entryProjectTargets);
                 var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
@@ -347,9 +356,9 @@ namespace Microsoft.Build.Experimental.Graph
             // Traverse the entire graph, visiting each edge once.
             while (edgesToVisit.Count > 0)
             {
-                ProjectGraphBuildRequest buildRequest = edgesToVisit.Dequeue();
-                ProjectGraphNode node = buildRequest.Node;
-                ImmutableList<string> requestedTargets = buildRequest.RequestedTargets;
+                var buildRequest = edgesToVisit.Dequeue();
+                var node = buildRequest.Node;
+                var requestedTargets = buildRequest.RequestedTargets;
 
                 targetLists[node] = targetLists[node].AddRange(requestedTargets);
 
@@ -360,7 +369,7 @@ namespace Microsoft.Build.Experimental.Graph
                 }
 
                 // Based on the entry points of this project, determine which targets to propagate down to project references.
-                ImmutableList<string> targetsToPropagate = DetermineTargetsToPropagate(node, requestedTargets);
+                var targetsToPropagate = DetermineTargetsToPropagate(node, requestedTargets);
 
                 // Queue the project references for visitation, if the edge hasn't already been traversed.
                 foreach (var projectReference in node.ProjectReferences)
@@ -376,13 +385,13 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             // Dedupe target lists
-            List<KeyValuePair<ProjectGraphNode, ImmutableList<string>>> entriesToUpdate = new List<KeyValuePair<ProjectGraphNode, ImmutableList<string>>>();
-            foreach (KeyValuePair<ProjectGraphNode, ImmutableList<string>> pair in targetLists)
+            var entriesToUpdate = new List<KeyValuePair<ProjectGraphNode, ImmutableList<string>>>();
+            foreach (var pair in targetLists)
             {
-                ImmutableList<string> targetList = pair.Value;
+                var targetList = pair.Value;
 
-                SortedSet<string> seenTargets = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
-                int i = 0;
+                var seenTargets = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+                var i = 0;
                 while (i < targetList.Count)
                 {
                     if (seenTargets.Add(targetList[i]))
@@ -403,7 +412,7 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             // Update in a separate pass to avoid modifying a collection while iterating it.
-            foreach (KeyValuePair<ProjectGraphNode, ImmutableList<string>> pair in entriesToUpdate)
+            foreach (var pair in entriesToUpdate)
             {
                 targetLists[pair.Key] = pair.Value;
             }
@@ -413,7 +422,7 @@ namespace Microsoft.Build.Experimental.Graph
 
         private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets)
         {
-            int i = 0;
+            var i = 0;
             while (i < targets.Count)
             {
                 if (targets[i].Equals(MSBuildConstants.DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
@@ -498,7 +507,7 @@ namespace Microsoft.Build.Experimental.Graph
         /// Maintain a queue of projects to be processed and evaluate projects in parallel
         /// Returns false if loading the graph is not successful 
         /// </summary>
-        private bool LoadGraph(
+        private bool FindGraphNodes(
             ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate,
             ProjectCollection projectCollection,
             ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress,
@@ -516,7 +525,7 @@ namespace Microsoft.Build.Experimental.Graph
                     projectToEvaluate = projectsToEvaluate.Dequeue();
                     var task = new Task(() =>
                     {
-                        ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory);
+                        var parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory);
                         IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
                         foreach (var projectReferenceToParse in projectReferenceItems)
                         {
@@ -530,9 +539,13 @@ namespace Microsoft.Build.Experimental.Graph
                                     parsedProject.ProjectInstance.FullPath));
                             }
 
-                            string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
-                            PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, projectToEvaluate.GlobalProperties);
+                            var projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
+
+                            var projectReferenceGlobalProperties =
+                                GetProjectReferenceGlobalProperties(projectReferenceToParse, projectToEvaluate.GlobalProperties);
+
                             var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
+
                             if (!tasksInProgress.ContainsKey(projectReferenceConfigurationMetadata))
                             {
                                 if (!_allParsedProjects.ContainsKey(projectReferenceConfigurationMetadata))
@@ -587,11 +600,12 @@ namespace Microsoft.Build.Experimental.Graph
         }
 
         /// <remarks>
-        /// Traverse an evaluated graph
-        /// Maintain the state of each node (InProcess and Processed) to detect cycles
-        /// returns false if loading the graph is not successful
+        /// Traverse the found nodes and add edges.
+        /// Maintain the state of each node (InProcess and Processed) to detect cycles.
+        /// Returns false if cycles were detected.
         /// </remarks>
-        private (bool success, List<string> projectsInCycle) DetectCycles(ProjectGraphNode node,
+        private (bool success, List<string> projectsInCycle) CreateEdgesAndDetectCycles(
+            ProjectGraphNode node,
             Dictionary<ProjectGraphNode, NodeState> nodeState,
             ProjectCollection projectCollection,
             PropertyDictionary<ProjectPropertyInstance> globalProperties)
@@ -600,17 +614,18 @@ namespace Microsoft.Build.Experimental.Graph
             IEnumerable<ProjectItemInstance> projectReferenceItems = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
             foreach (var projectReferenceToParse in projectReferenceItems)
             {
-                string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
-                PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, globalProperties);
+                var projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
+                var projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, globalProperties);
                 var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
-                ProjectGraphNode projectReference = _allParsedProjects[projectReferenceConfigurationMetadata];
-                if (nodeState.TryGetValue(projectReference, out NodeState projectReferenceNodeState))
+                var referenceNode = _allParsedProjects[projectReferenceConfigurationMetadata];
+
+                if (nodeState.TryGetValue(referenceNode, out var projectReferenceNodeState))
                 {
                     // Because this is a depth-first search, we should only encounter new nodes or nodes whose subgraph has been completely processed.
                     // If we encounter a node that is currently being processed(InProcess state), it must be one of the ancestors in a circular dependency.
                     if (projectReferenceNodeState == NodeState.InProcess)
                     {
-                        if (node.Equals(projectReference))
+                        if (node.Equals(referenceNode))
                         {
                             // the project being evaluated has a reference to itself
                             var selfReferencingProjectString = FormatCircularDependencyError(new List<string> { node.ProjectInstance.FullPath, node.ProjectInstance.FullPath });
@@ -630,7 +645,7 @@ namespace Microsoft.Build.Experimental.Graph
                 else
                 {
                     // recursively process newly discovered references
-                    var loadReference = DetectCycles(projectReference, nodeState, projectCollection,
+                    var loadReference = CreateEdgesAndDetectCycles(referenceNode, nodeState, projectCollection,
                         projectReferenceGlobalProperties);
                     if (!loadReference.success)
                     {
@@ -653,7 +668,8 @@ namespace Microsoft.Build.Experimental.Graph
                         }
                     }
                 }
-                ProjectGraphNode parsedProjectReference = _allParsedProjects[projectReferenceConfigurationMetadata];
+
+                var parsedProjectReference = _allParsedProjects[projectReferenceConfigurationMetadata];
                 node.AddProjectReference(parsedProjectReference);
                 parsedProjectReference.AddReferencingProject(node);
             }
@@ -666,7 +682,7 @@ namespace Microsoft.Build.Experimental.Graph
             const int MAX_PATH = 260;
             var errorMessage = new StringBuilder(projectsInCycle.Count * MAX_PATH);
             errorMessage.AppendLine();
-            for (int i = projectsInCycle.Count - 1; i >= 0; i--)
+            for (var i = projectsInCycle.Count - 1; i >= 0; i--)
             {
                 if (i != 0)
                 {
@@ -684,14 +700,14 @@ namespace Microsoft.Build.Experimental.Graph
         private static ImmutableList<string> DetermineTargetsToPropagate(ProjectGraphNode node, ImmutableList<string> entryTargets)
         {
             var targetsToPropagate = ImmutableList<string>.Empty;
-            ICollection<ProjectItemInstance> projectReferenceTargets = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceTargetsItemType);
+            var projectReferenceTargets = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceTargetsItemType);
             foreach (var entryTarget in entryTargets)
             {
                 foreach (var projectReferenceTarget in projectReferenceTargets)
                 {
                     if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
                     {
-                        string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                        var targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         targetsToPropagate = targetsToPropagate.AddRange(ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue));
                     }
                 }
@@ -708,18 +724,18 @@ namespace Microsoft.Build.Experimental.Graph
         /// </remarks>
         private static PropertyDictionary<ProjectPropertyInstance> GetProjectReferenceGlobalProperties(ProjectItemInstance projectReference, PropertyDictionary<ProjectPropertyInstance> requesterGlobalProperties)
         {
-            string propertiesString = projectReference.GetMetadataValue(PropertiesMetadataName);
-            string additionalPropertiesString = projectReference.GetMetadataValue(AdditionalPropertiesMetadataName);
-            string undefinePropertiesString = projectReference.GetMetadataValue(UndefinePropertiesMetadataName);
-            string globalPropertiesToRemoveString = projectReference.GetMetadataValue(GlobalPropertiesToRemoveMetadataName);
+            var propertiesString = projectReference.GetMetadataValue(PropertiesMetadataName);
+            var additionalPropertiesString = projectReference.GetMetadataValue(AdditionalPropertiesMetadataName);
+            var undefinePropertiesString = projectReference.GetMetadataValue(UndefinePropertiesMetadataName);
+            var globalPropertiesToRemoveString = projectReference.GetMetadataValue(GlobalPropertiesToRemoveMetadataName);
 
             // The properties on the project reference supersede the ones from the MSBuild task instad of appending.
             if (string.IsNullOrEmpty(propertiesString))
             {
                 // TODO: Mimic AssignProjectConfiguration's behavior for determining the values for these.
-                string setConfigurationString = projectReference.GetMetadataValue(SetConfigurationMetadataName);
-                string setPlatformString = projectReference.GetMetadataValue(SetPlatformMetadataName);
-                string setTargetFrameworkString = projectReference.GetMetadataValue(SetTargetFrameworkMetadataName);
+                var setConfigurationString = projectReference.GetMetadataValue(SetConfigurationMetadataName);
+                var setPlatformString = projectReference.GetMetadataValue(SetPlatformMetadataName);
+                var setTargetFrameworkString = projectReference.GetMetadataValue(SetTargetFrameworkMetadataName);
 
                 if (!string.IsNullOrEmpty(setConfigurationString) || !string.IsNullOrEmpty(setPlatformString) || !string.IsNullOrEmpty(setTargetFrameworkString))
                 {
@@ -758,7 +774,7 @@ namespace Microsoft.Build.Experimental.Graph
             else
             {
                 propertyDictionary = new PropertyDictionary<ProjectPropertyInstance>(properties.Count);
-                foreach (KeyValuePair<string, string> entry in properties)
+                foreach (var entry in properties)
                 {
                     propertyDictionary[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
                 }
@@ -779,9 +795,9 @@ namespace Microsoft.Build.Experimental.Graph
                     null,
                     null,
                     propertyNameAndValuesString.Split(PropertySeparator, StringSplitOptions.RemoveEmptyEntries),
-                    out Dictionary<string, string> propertiesTable))
+                    out var propertiesTable))
                 {
-                    foreach (KeyValuePair<string, string> pair in propertiesTable)
+                    foreach (var pair in propertiesTable)
                     {
                         properties[pair.Key] = ProjectPropertyInstance.Create(pair.Key, pair.Value);
                     }
@@ -804,7 +820,7 @@ namespace Microsoft.Build.Experimental.Graph
             if (!string.IsNullOrEmpty(propertyNamesString))
             {
                 var propertiesToRemove = propertyNamesString.Split(PropertySeparator, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string propertyName in propertiesToRemove)
+                foreach (var propertyName in propertiesToRemove)
                 {
                     properties.Remove(propertyName);
                 }
@@ -832,7 +848,7 @@ namespace Microsoft.Build.Experimental.Graph
                 }
 
                 // Target order is important
-                for (int i = 0; i < RequestedTargets.Count; i++)
+                for (var i = 0; i < RequestedTargets.Count; i++)
                 {
                     if (!RequestedTargets[i].Equals(other.RequestedTargets[i], StringComparison.OrdinalIgnoreCase))
                     {
@@ -850,8 +866,8 @@ namespace Microsoft.Build.Experimental.Graph
                 unchecked
                 {
                     const int salt = 397;
-                    int hashCode = Node.GetHashCode() * salt;
-                    for (int i = 0; i < RequestedTargets.Count; i++)
+                    var hashCode = Node.GetHashCode() * salt;
+                    for (var i = 0; i < RequestedTargets.Count; i++)
                     {
                         hashCode *= salt;
                         hashCode ^= StringComparer.OrdinalIgnoreCase.GetHashCode(RequestedTargets[i]);
