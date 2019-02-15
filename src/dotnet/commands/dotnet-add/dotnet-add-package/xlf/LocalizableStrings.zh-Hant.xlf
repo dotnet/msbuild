@@ -82,6 +82,11 @@
         <target state="translated">無法產生專案 '{0}' 的暫存檔案。無法新增套件參考。請清除暫存目錄並再試一次。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

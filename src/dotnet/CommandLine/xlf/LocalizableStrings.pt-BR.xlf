@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="UsageArgumentsToken">
         <source> [arguments]</source>
-        <target state="translated"> [arguments]</target>
+        <target state="translated"> [argumentos]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageArgumentsHeader">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="UsageOptionsToken">
         <source> [options]</source>
-        <target state="translated"> [options]</target>
+        <target state="translated"> [opções]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageOptionsHeader">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="UsageCommandToken">
         <source> [command]</source>
-        <target state="translated"> [command]</target>
+        <target state="translated"> [comando]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandsHeader">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="UsageCommandArgs">
         <source> [args]</source>
-        <target state="translated"> [args]</target>
+        <target state="translated">[args]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandAdditionalArgs">
         <source> [[--] &lt;additional arguments&gt;...]]</source>
-        <target state="translated"> [[--] &lt;additional arguments&gt;...]]</target>
+        <target state="translated">[[--] &lt;argumentos adicionais&gt;...]]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandsAdditionalArgsHeader">

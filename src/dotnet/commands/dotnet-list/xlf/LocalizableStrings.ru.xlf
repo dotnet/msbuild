@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="NetListCommand">
         <source>List references or packages of a .NET project.</source>
-        <target state="needs-review-translation">Вывод списка ссылок для проекта .NET.</target>
+        <target state="translated">Выводит список ссылок или пакетов для проекта .NET.</target>
         <note />
       </trans-unit>
     </body>

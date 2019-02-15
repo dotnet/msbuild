@@ -82,6 +82,11 @@
         <target state="translated">Impossible de générer un fichier temporaire pour le projet '{0}'. Impossible d'ajouter une référence de package. Effacez le répertoire temporaire et réessayez.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permet à la commande de s'arrêter et d'attendre une entrée ou une action de l'utilisateur (par exemple pour effectuer une authentification).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

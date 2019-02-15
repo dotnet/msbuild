@@ -722,18 +722,16 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Каталог инструментов "{0}" сейчас отсутствует в переменной среды PATH.
-Если вы используете Bash, вы можете добавить его в профиль, выполнив следующую команду:
+        <target state="translated">Каталог инструментов '{0}' отсутствует в переменной среды PATH. Если вы используете bash, то можете добавить этот каталог в профиль, выполнив следующую команду:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Вы можете добавить его в текущий сеанс, выполнив следующую команду:
+Чтобы добавить этот каталог в текущий сеанс, выполните команду:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -749,18 +747,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Каталог инструментов "{0}" сейчас отсутствует в переменной среды PATH.
-Если вы используете Bash, вы можете добавить его в профиль, выполнив следующую команду:
+        <target state="translated">Каталог инструментов '{0}' отсутствует в переменной среды PATH.
+Если вы используете bash, то можете добавить этот каталог в профиль, выполнив следующую команду:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Вы можете добавить его в текущий сеанс, выполнив следующую команду:
+Чтобы добавить этот каталог в текущий сеанс, выполните команду:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -895,12 +892,12 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
         <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">Файл проекта или решения. Если файл не указан, команда будет искать его в текущем каталоге.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="new">PROJECT | SOLUTION</target>
+        <target state="translated">ПРОЕКТ | РЕШЕНИЕ</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">

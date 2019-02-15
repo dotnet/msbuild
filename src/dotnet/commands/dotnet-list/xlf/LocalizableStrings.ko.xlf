@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="NetListCommand">
         <source>List references or packages of a .NET project.</source>
-        <target state="needs-review-translation">.NET 프로젝트의 참조를 나열합니다.</target>
+        <target state="translated">.NET 프로젝트의 참조 또는 패키지를 나열합니다.</target>
         <note />
       </trans-unit>
     </body>
