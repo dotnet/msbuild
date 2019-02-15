@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 
@@ -544,7 +545,20 @@ namespace Microsoft.Build.Logging
             foreach (string metadataName in customMetadata.Keys)
             {
                 Write(metadataName);
-                Write(item.GetMetadata(metadataName));
+                string valueOrError;
+
+                try
+                {
+                    valueOrError = item.GetMetadata(metadataName);
+                }
+                catch (InvalidProjectFileException e)
+                {
+                    valueOrError = e.Message;
+                    //valueOrError = $"{{Error logging expanded metadata. Raw value: {customMetadata[metadataName]}}}";
+                    // valueOrError = (string)customMetadata[metadataName];
+                }
+
+                Write(valueOrError);
             }
         }
 
