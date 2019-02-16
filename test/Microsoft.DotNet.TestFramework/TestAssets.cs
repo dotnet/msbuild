@@ -77,11 +77,8 @@ namespace Microsoft.DotNet.TestFramework
 
         private string GetTestDestinationDirectoryPath(string testProjectName, string callingMethod, string identifier)
         {
-#if NET451
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-#else
             string baseDirectory = AppContext.BaseDirectory;
-#endif
+
             //  Find the name of the assembly the test comes from based on the the base directory and how the output path has been constructed
             string testAssemblyName = new DirectoryInfo(baseDirectory).Parent.Parent.Name;
 

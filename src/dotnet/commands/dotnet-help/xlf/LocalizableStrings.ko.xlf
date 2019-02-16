@@ -297,6 +297,11 @@
         <target state="translated">.NET Core 응용 프로그램을 실행합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FsiDefinition">
+        <source>Start F# Interactive / execute F# scripts.</source>
+        <target state="new">Start F# Interactive / execute F# scripts.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
