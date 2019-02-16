@@ -20,7 +20,7 @@
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftFSharpCompilerPackageVersion>10.4.1-rtm-190201-03</MicrosoftFSharpCompilerPackageVersion>
-    <MicrosoftNETCoreCompilersPackageVersion>3.1.0-beta1-19115-09</MicrosoftNETCoreCompilersPackageVersion>
+    <MicrosoftNETCoreCompilersPackageVersion>3.1.0-beta1-19115-11</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview3.19115.4</MicrosoftNETSdkRazorPackageVersion>
     <MicrosoftNETSdkWebPackageVersion>3.0.100-preview3.19114.6</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
