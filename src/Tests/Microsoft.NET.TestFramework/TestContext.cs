@@ -89,7 +89,7 @@ namespace Microsoft.NET.TestFramework
             }
 
             string repoRoot = null;
-            string repoConfiguration = null;
+            string repoConfiguration = "Debug";
 
             if (commandLine.SDKRepoPath != null)
             {
@@ -202,6 +202,24 @@ namespace Microsoft.NET.TestFramework
                     }
                 }
                 currentPath = parent.FullName;
+            }
+        }
+
+        public void WriteGlobalJson(string path)
+        {
+            WriteGlobalJson(path, this.SdkVersion);
+        }
+
+        public static void WriteGlobalJson(string path, string sdkVersion)
+        {
+            if (!string.IsNullOrEmpty(sdkVersion))
+            {
+                string globalJsonPath = System.IO.Path.Combine(path, "global.json");
+                File.WriteAllText(globalJsonPath, @"{
+  ""sdk"": {
+    ""version"": """ + sdkVersion + @"""
+  }
+}");
             }
         }
     }

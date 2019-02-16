@@ -12,34 +12,36 @@ using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    internal class NuGetPackageResolver : IPackageResolver
+    internal sealed class NuGetPackageResolver : IPackageResolver
     {
         private readonly FallbackPackagePathResolver _packagePathResolver;
 
-        public NuGetPackageResolver(INuGetPathContext pathContext)
+        // Used when no package folders are provided, finds no packages.
+        private static readonly NuGetPackageResolver s_noPackageFolderResolver = new NuGetPackageResolver();
+
+        private NuGetPackageResolver()
         {
-            _packagePathResolver = new FallbackPackagePathResolver(pathContext);
         }
 
-        public NuGetPackageResolver(string userPackageFolder, IEnumerable<string> fallbackPackageFolders)
+        private NuGetPackageResolver(string userPackageFolder, IEnumerable<string> fallbackPackageFolders)
         {
             _packagePathResolver = new FallbackPackagePathResolver(userPackageFolder, fallbackPackageFolders);
         }
 
         public string GetPackageDirectory(string packageId, NuGetVersion version)
-        {
-            string  packageRoot = null;
-            return GetPackageDirectory(packageId, version, out packageRoot);
-        }
+            => _packagePathResolver?.GetPackageDirectory(packageId, version);
+        
         public string GetPackageDirectory(string packageId, NuGetVersion version, out string packageRoot)
         {
-            packageRoot = null;
-            var pkginfo = _packagePathResolver.GetPackageInfo(packageId,version);
-            if (pkginfo != null)
+            var packageInfo = _packagePathResolver?.GetPackageInfo(packageId, version);
+            if (packageInfo == null)
             {
-                packageRoot = pkginfo.PathResolver.GetVersionListPath("");  //TODO Remove Once Nuget is updated to use FallbackPackagePathInfo.PathResolver.RootPath
+                packageRoot = null;
+                return null;
             }
-            return _packagePathResolver.GetPackageDirectory(packageId, version);
+
+            packageRoot = packageInfo.PathResolver.RootPath;
+            return packageInfo.PathResolver.GetInstallPath(packageId, version);
         }
 
         public string ResolvePackageAssetPath(LockFileTargetLibrary package, string relativePath)
@@ -56,30 +58,21 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         public static string NormalizeRelativePath(string relativePath)
-                => relativePath.Replace('/', Path.DirectorySeparatorChar);
+            => relativePath.Replace('/', Path.DirectorySeparatorChar);
 
-        public static NuGetPackageResolver CreateResolver(LockFile lockFile, string projectPath)
+        public static NuGetPackageResolver CreateResolver(LockFile lockFile)
+            => CreateResolver(lockFile.PackageFolders.Select(f => f.Path));
+
+        public static NuGetPackageResolver CreateResolver(IEnumerable<string> packageFolders)
         {
-            return CreateResolver(lockFile.PackageFolders.Select(f => f.Path), projectPath);
-        }
-
-        public static NuGetPackageResolver CreateResolver(IEnumerable<string> packageFolders, string projectPath)
-        {
-            NuGetPackageResolver packageResolver;
-
             string userPackageFolder = packageFolders.FirstOrDefault();
-            if (userPackageFolder != null)
+
+            if (userPackageFolder == null)
             {
-                var fallBackFolders = packageFolders.Skip(1);
-                packageResolver = new NuGetPackageResolver(userPackageFolder, fallBackFolders);
-            }
-            else
-            {
-                NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(projectPath));
-                packageResolver = new NuGetPackageResolver(nugetPathContext);
+                return s_noPackageFolderResolver;
             }
 
-            return packageResolver;
+            return new NuGetPackageResolver(userPackageFolder, packageFolders.Skip(1));
         }
     }
 }

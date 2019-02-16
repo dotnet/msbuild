@@ -18,9 +18,6 @@ namespace Microsoft.NET.Build.Tasks
     {
         private readonly List<ITaskItem> _resolvedAssets = new List<ITaskItem>();
 
-        [Required]
-        public string ProjectPath { get; set; }
-
         public string AssetsFilePath { get; set; }
 
         [Required]
@@ -68,7 +65,7 @@ namespace Microsoft.NET.Build.Tasks
             projectContext.PackagesToBeFiltered = packagestoBeFiltered;
 
             var assetsFileResolver =
-                new AssetsFileResolver(NuGetPackageResolver.CreateResolver(lockFile, ProjectPath))
+                new AssetsFileResolver(NuGetPackageResolver.CreateResolver(lockFile))
                     .WithExcludedPackages(PackageReferenceConverter.GetPackageIds(ExcludedPackageReferences))
                     .WithPreserveStoreLayout(PreserveStoreLayout);
 

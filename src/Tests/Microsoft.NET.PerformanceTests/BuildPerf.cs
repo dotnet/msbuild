@@ -71,6 +71,7 @@ namespace Microsoft.NET.Perf.Tests
             var testDir = _testAssetsManager.CreateTestDirectory("WebLarge", identifier: operation.ToString());
             Console.WriteLine($"Mirroring {sourceProject} to {testDir}...");
             FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
+            TestContext.Current.WriteGlobalJson(testDir.Path);
             Console.WriteLine("Done");
 
             TestProject(Path.Combine(testDir.Path, "mvc"), "Build Web Large", operation);
@@ -85,6 +86,7 @@ namespace Microsoft.NET.Perf.Tests
             var testDir = _testAssetsManager.CreateTestDirectory("WebLarge30", identifier: operation.ToString());
             Console.WriteLine($"Mirroring {sourceProject} to {testDir}...");
             FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
+            TestContext.Current.WriteGlobalJson(testDir.Path);
             Console.WriteLine("Done");
 
             TestProject(Path.Combine(testDir.Path, "mvc"), "Build Web Large 3.0", operation);
@@ -119,6 +121,7 @@ namespace Microsoft.NET.Perf.Tests
             string sourceProject = Path.Combine(@"C:\MSBPerf\3", name);
             var testDir = _testAssetsManager.CreateTestDirectory("Perf_" + name, identifier: operation.ToString());
             FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
+            TestContext.Current.WriteGlobalJson(testDir.Path);
 
             //  The generated projects target .NET Core 2.1, retarget them to .NET Core 2.0
             foreach (var projFile in Directory.GetFiles(testDir.Path, "*.csproj", SearchOption.AllDirectories))
@@ -151,6 +154,7 @@ namespace Microsoft.NET.Perf.Tests
             var testDir = _testAssetsManager.CreateTestDirectory("Perf_Roslyn", identifier: operation.ToString());
             Console.WriteLine($"Mirroring {sourceProject} to {testDir.Path}...");
             FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
+            TestContext.Current.WriteGlobalJson(testDir.Path);
             Console.WriteLine("Done");
 
             //  Override global.json from repo

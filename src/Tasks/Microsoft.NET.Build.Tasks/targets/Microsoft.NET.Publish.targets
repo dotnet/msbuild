@@ -277,8 +277,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _DefaultMicrosoftNETPlatformLibrary;
                             ResolveRuntimePackAssets">
 
-      <ResolveCopyLocalAssets ProjectPath="$(MSBuildProjectFullPath)"
-                              AssetsFilePath="$(ProjectAssetsFile)"
+      <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"

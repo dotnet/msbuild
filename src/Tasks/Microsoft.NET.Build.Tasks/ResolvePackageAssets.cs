@@ -601,7 +601,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 _task = task;
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
-                _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile, _task.ProjectPath);
+                _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile);
                 _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, runtime: null);
                 _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, _task.RuntimeIdentifier);
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);

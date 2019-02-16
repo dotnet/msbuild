@@ -22,10 +22,6 @@ namespace Microsoft.NET.Build.Tasks
 
         public string TargetingPackRoot { get; set; }
 
-        public string AppHostRuntimeIdentifier { get; set; }
-
-        public ITaskItem[] PackAsToolShimAppHostRuntimeIdentifiers { get; set; }
-
         [Required]
         public string RuntimeGraphPath { get; set; }
 
@@ -33,11 +29,11 @@ namespace Microsoft.NET.Build.Tasks
 
         public string RuntimeIdentifier { get; set; }
 
-        /// <summary>
-        /// The file name of Apphost asset.
-        /// </summary>
-        [Required]
-        public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
+        public string RuntimeFrameworkVersion { get; set; }
+
+        public bool TargetLatestRuntimePatch { get; set; }
+
+        public bool EnableTargetingPackDownload { get; set; }
 
         public ITaskItem[] FrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
 
@@ -55,168 +51,141 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] RuntimePacks { get; set; }
 
-        //  There should only be one AppHost item, but we use an item here so we can attach metadata to it
-        //  (ie the apphost pack name and version, and the relative path to the apphost inside of it so
-        //  we can resolve the full path later)
+        //  Runtime packs which aren't available for the specified RuntimeIdentifier
         [Output]
-        public ITaskItem[] AppHost { get; set; }
-
-        [Output]
-        public ITaskItem[] PackAsToolShimAppHosts { get; set; }
-
-        [Output]
-        public string[] UnresolvedFrameworkReferences { get; set; }
+        public ITaskItem[] UnavailableRuntimePacks { get; set; }
 
         protected override void ExecuteCore()
         {
-            var knownFrameworkReferences = KnownFrameworkReferences.Select(item => new KnownFrameworkReference(item))
+            //  Perf optimization: If there are no FrameworkReference items, then don't do anything
+            //  (This means that if you don't have any direct framework references, you won't get any transitive ones either
+            if (FrameworkReferences == null || FrameworkReferences.Length == 0)
+            {
+                return;
+            }
+
+            var knownFrameworkReferencesForTargetFramework = KnownFrameworkReferences.Select(item => new KnownFrameworkReference(item))
                 .Where(kfr => kfr.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
                               NormalizeVersion(kfr.TargetFramework.Version) == NormalizeVersion(new Version(TargetFrameworkVersion)))
-                .ToDictionary(kfr => kfr.Name);
+                .ToList();
+
+            var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
             List<ITaskItem> runtimeFrameworks = new List<ITaskItem>();
             List<ITaskItem> targetingPacks = new List<ITaskItem>();
             List<ITaskItem> runtimePacks = new List<ITaskItem>();
-            List<string> unresolvedFrameworkReferences = new List<string>();
+            List<ITaskItem> unavailableRuntimePacks = new List<ITaskItem>();
 
-            string appHostPackPattern = null;
-            string appHostPackVersion = null;
-            string appHostRuntimeIdentifiers = null;
+            bool reportedUnrecognizedRuntimeIdentifier = false;
 
-            foreach (var frameworkReference in FrameworkReferences)
+            foreach (var knownFrameworkReference in knownFrameworkReferencesForTargetFramework)
             {
-                KnownFrameworkReference knownFrameworkReference;
-                if (knownFrameworkReferences.TryGetValue(frameworkReference.ItemSpec, out knownFrameworkReference))
+                frameworkReferenceMap.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
+
+                //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
+                TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
+                targetingPack.SetMetadata(MetadataKeys.PackageName, knownFrameworkReference.TargetingPackName);
+
+                string targetingPackVersion = null;
+                if (frameworkReference != null)
                 {
-                    if (!string.IsNullOrEmpty(knownFrameworkReference.AppHostPackNamePattern))
-                    {
-                        if (appHostPackPattern == null)
-                        {
-                            appHostPackPattern = knownFrameworkReference.AppHostPackNamePattern;
-                            appHostPackVersion = knownFrameworkReference.LatestRuntimeFrameworkVersion;
-                            appHostRuntimeIdentifiers = knownFrameworkReference.AppHostRuntimeIdentifiers;
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Multiple FrameworkReferences defined an AppHostPack, which is not supposed to happen");
-                        }
-                    }
+                    //  Allow targeting pack version to be overridden via metadata on FrameworkReference
+                    targetingPackVersion = frameworkReference.GetMetadata("TargetingPackVersion");
+                }
+                if (string.IsNullOrEmpty(targetingPackVersion))
+                {
+                    targetingPackVersion = knownFrameworkReference.TargetingPackVersion;
+                }
+                targetingPack.SetMetadata(MetadataKeys.PackageVersion, targetingPackVersion);
 
-                    //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
-                    TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
-                    targetingPack.SetMetadata(MetadataKeys.PackageName, knownFrameworkReference.TargetingPackName);
-                    targetingPack.SetMetadata(MetadataKeys.PackageVersion, knownFrameworkReference.TargetingPackVersion);
-                    targetingPack.SetMetadata(MetadataKeys.RelativePath, "");
-
-                    string targetingPackPath = null;
-                    if (!string.IsNullOrEmpty(TargetingPackRoot))
-                    {
-                        targetingPackPath = GetPackPath(knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion);
-                    }
-                    if (targetingPackPath != null && Directory.Exists(targetingPackPath))
-                    {
-                        targetingPack.SetMetadata(MetadataKeys.Path, targetingPackPath);
-                        targetingPack.SetMetadata(MetadataKeys.PackageDirectory, targetingPackPath);
-                    }
-                    else
-                    {
-                        //  Download targeting pack
-                        TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
-                        packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
-
-                        packagesToDownload.Add(packageToDownload);
-                    }
-
-                    targetingPacks.Add(targetingPack);
-
-                    if (SelfContained &&
-                        !string.IsNullOrEmpty(RuntimeIdentifier) &&
-                        !string.IsNullOrEmpty(knownFrameworkReference.RuntimePackNamePatterns))
-                    {
-                        foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
-                        {
-                            string runtimePackRuntimeIdentifier = GetBestRuntimeIdentifier(RuntimeIdentifier, knownFrameworkReference.RuntimePackRuntimeIdentifiers,
-                                                                                            out bool wasInGraph);
-                            if (runtimePackRuntimeIdentifier == null)
-                            {
-                                if (wasInGraph)
-                                {
-                                    //  NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.
-                                    Log.LogError(Strings.NoRuntimePackAvailable, knownFrameworkReference.Name, RuntimeIdentifier);
-                                }
-                                else
-                                {
-                                    //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
-                                    Log.LogError(Strings.UnsupportedRuntimeIdentifier, RuntimeIdentifier);
-                                }
-                            }
-                            else
-                            {
-                                string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
-
-                                TaskItem runtimePackItem = new TaskItem(runtimePackName);
-                                runtimePackItem.SetMetadata(MetadataKeys.PackageName, runtimePackName);
-                                runtimePackItem.SetMetadata(MetadataKeys.PackageVersion, knownFrameworkReference.LatestRuntimeFrameworkVersion);
-                                runtimePackItem.SetMetadata("FrameworkReference", knownFrameworkReference.Name);
-                                runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
-
-                                runtimePacks.Add(runtimePackItem);
-
-                                TaskItem packageToDownload = new TaskItem(runtimePackName);
-                                packageToDownload.SetMetadata(MetadataKeys.Version, knownFrameworkReference.LatestRuntimeFrameworkVersion);
-
-                                packagesToDownload.Add(packageToDownload);
-                            }
-                        }
-                    }
-
-                    TaskItem runtimeFramework = new TaskItem(knownFrameworkReference.RuntimeFrameworkName);
-
-                    //  Use default (non roll-forward) version for now.  Eventually we'll need to add support for rolling
-                    //  forward, and for publishing assets from a runtime pack for self-contained apps
-                    runtimeFramework.SetMetadata(MetadataKeys.Version, knownFrameworkReference.DefaultRuntimeFrameworkVersion);
-
-                    runtimeFrameworks.Add(runtimeFramework);
+                string targetingPackPath = null;
+                if (!string.IsNullOrEmpty(TargetingPackRoot))
+                {
+                    targetingPackPath = Path.Combine(TargetingPackRoot, knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion);
+                }
+                if (targetingPackPath != null && Directory.Exists(targetingPackPath))
+                {
+                    // Use targeting pack from packs folder
+                    targetingPack.SetMetadata(MetadataKeys.PackageDirectory, targetingPackPath);
+                    targetingPack.SetMetadata(MetadataKeys.Path, targetingPackPath);
                 }
                 else
                 {
-                    unresolvedFrameworkReferences.Add(frameworkReference.ItemSpec);
-                }
-            }
-
-            ITaskItem apphostTaskItem = GetAppHostItem(appHostPackPattern,
-                                                       appHostRuntimeIdentifiers,
-                                                       appHostPackVersion,
-                                                       packagesToDownload,
-                                                       AppHostRuntimeIdentifier,
-                                                       "AppHost");
-            if (apphostTaskItem != null)
-            {
-                AppHost = new ITaskItem[] { apphostTaskItem };
-            }
-
-            if (PackAsToolShimAppHostRuntimeIdentifiers != null)
-            {
-                List<ITaskItem> packAsToolShimAppHostsList = new List<ITaskItem>();
-                foreach (var packAsToolShimAppHostRuntimeIdentifier in PackAsToolShimAppHostRuntimeIdentifiers)
-                {
-                    var packAsToolShimAppHosts = GetAppHostItem(
-                            appHostPackPattern,
-                            appHostRuntimeIdentifiers,
-                            appHostPackVersion,
-                            packagesToDownload,
-                            packAsToolShimAppHostRuntimeIdentifier.ItemSpec,
-                            "PackAsToolShimAppHost");
-
-                    if (packAsToolShimAppHosts != null)
+                    if (EnableTargetingPackDownload)
                     {
-                        packAsToolShimAppHostsList.Add(packAsToolShimAppHosts);
+                        //  Download targeting pack
+                        TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
+                        packageToDownload.SetMetadata(MetadataKeys.Version, targetingPackVersion);
+
+                        packagesToDownload.Add(packageToDownload);
                     }
                 }
-                PackAsToolShimAppHosts = packAsToolShimAppHostsList.ToArray();
-            }
 
+                targetingPacks.Add(targetingPack);
+
+                var runtimeFrameworkVersion = GetRuntimeFrameworkVersion(frameworkReference, knownFrameworkReference);
+
+                if (SelfContained &&
+                    !string.IsNullOrEmpty(RuntimeIdentifier) &&
+                    !string.IsNullOrEmpty(knownFrameworkReference.RuntimePackNamePatterns))
+                {
+                    foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
+                    {
+                        string runtimePackRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
+                            new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath),
+                            RuntimeIdentifier,
+                            knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';'),
+                            out bool wasInGraph);
+
+                        if (runtimePackRuntimeIdentifier == null)
+                        {
+                            if (wasInGraph)
+                            {
+                                //  Report this as an error later, if necessary.  This is because we try to download
+                                //  all available runtime packs in case there is a transitive reference to a shared
+                                //  framework we don't directly reference.  But we don't want to immediately error out
+                                //  here if a runtime pack that we might not need to reference isn't available for the
+                                //  targeted RID (e.g. Microsoft.WindowsDesktop.App for a linux RID).
+                                var unavailableRuntimePack = new TaskItem(knownFrameworkReference.Name);
+                                unavailableRuntimePack.SetMetadata(MetadataKeys.RuntimeIdentifier, RuntimeIdentifier);
+                                unavailableRuntimePacks.Add(unavailableRuntimePack);
+                            }
+                            else if (!reportedUnrecognizedRuntimeIdentifier)
+                            {
+                                //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
+                                Log.LogError(Strings.RuntimeIdentifierNotRecognized, RuntimeIdentifier);
+                                reportedUnrecognizedRuntimeIdentifier = true;
+                            }
+                        }
+                        else
+                        {
+                            string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
+
+                            TaskItem runtimePackItem = new TaskItem(runtimePackName);
+                            runtimePackItem.SetMetadata(MetadataKeys.PackageName, runtimePackName);
+                            runtimePackItem.SetMetadata(MetadataKeys.PackageVersion, runtimeFrameworkVersion);
+                            runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
+                            runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
+
+                            runtimePacks.Add(runtimePackItem);
+
+                            TaskItem packageToDownload = new TaskItem(runtimePackName);
+                            packageToDownload.SetMetadata(MetadataKeys.Version, runtimeFrameworkVersion);
+
+                            packagesToDownload.Add(packageToDownload);
+                        }
+                    }
+                }
+
+                TaskItem runtimeFramework = new TaskItem(knownFrameworkReference.RuntimeFrameworkName);
+
+                runtimeFramework.SetMetadata(MetadataKeys.Version, runtimeFrameworkVersion);
+                runtimeFramework.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
+
+                runtimeFrameworks.Add(runtimeFramework);
+            }
+                                                      
             if (packagesToDownload.Any())
             {
                 PackagesToDownload = packagesToDownload.ToArray();
@@ -237,99 +206,61 @@ namespace Microsoft.NET.Build.Tasks
                 RuntimePacks = runtimePacks.ToArray();
             }
 
-            if (unresolvedFrameworkReferences.Any())
+            if (unavailableRuntimePacks.Any())
             {
-                UnresolvedFrameworkReferences = unresolvedFrameworkReferences.ToArray();
+                UnavailableRuntimePacks = unavailableRuntimePacks.ToArray();
             }
         }
 
-        private ITaskItem GetAppHostItem(
-            string appHostPackPattern, 
-            string appHostRuntimeIdentifiers,
-            string appHostPackVersion, List<ITaskItem> packagesToDownload, 
-            string appHostRuntimeIdentifier, 
-            string itemName)
+        private string GetRuntimeFrameworkVersion(ITaskItem frameworkReference, KnownFrameworkReference knownFrameworkReference)
         {
-            if (!string.IsNullOrEmpty(appHostRuntimeIdentifier) && !string.IsNullOrEmpty(appHostPackPattern))
-            {
-                //  Choose AppHost RID as best match of the specified RID
-                string bestAppHostRuntimeIdentifier =
-                    GetBestRuntimeIdentifier(appHostRuntimeIdentifier, appHostRuntimeIdentifiers, out bool wasInGraph);
+            //  Precedence order for selecting runtime framework version
+            //  - RuntimeFrameworkVersion metadata on FrameworkReference item
+            //  - RuntimeFrameworkVersion MSBuild property
+            //  - Then, use either the LatestRuntimeFrameworkVersion or the DefaultRuntimeFrameworkVersion of the KnownFrameworkReference, based on
+            //      - The value (if set) of TargetLatestRuntimePatch metadata on the FrameworkReference
+            //      - The TargetLatestRuntimePatch MSBuild property (which defaults to True if SelfContained is true, and False otherwise)
 
-                if (bestAppHostRuntimeIdentifier == null)
+            string runtimeFrameworkVersion = null;
+
+            if (frameworkReference != null)
+            {
+                runtimeFrameworkVersion = frameworkReference.GetMetadata("RuntimeFrameworkVersion");
+            }
+            if (string.IsNullOrEmpty(runtimeFrameworkVersion))
+            {
+                runtimeFrameworkVersion = RuntimeFrameworkVersion;
+            }
+            if (string.IsNullOrEmpty(runtimeFrameworkVersion))
+            {
+                bool? useLatestRuntimeFrameworkVersion = null;
+                if (frameworkReference != null)
                 {
-                    if (wasInGraph)
+                    string useLatestRuntimeFrameworkMetadata = frameworkReference.GetMetadata("TargetLatestRuntimePatch");
+                    if (!string.IsNullOrEmpty(useLatestRuntimeFrameworkMetadata))
                     {
-                        //  NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.
-                        Log.LogError(Strings.NoAppHostAvailable, appHostRuntimeIdentifier);
+                        useLatestRuntimeFrameworkVersion = MSBuildUtilities.ConvertStringToBool(useLatestRuntimeFrameworkMetadata,
+                            defaultValue: false);
                     }
-                    else
-                    {
-                        //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
-                        Log.LogError(Strings.UnsupportedRuntimeIdentifier, appHostRuntimeIdentifier);
-                    }
+                }
+                if (useLatestRuntimeFrameworkVersion == null)
+                {
+                    useLatestRuntimeFrameworkVersion = TargetLatestRuntimePatch;
+                }
+                if (useLatestRuntimeFrameworkVersion.Value)
+                {
+                    runtimeFrameworkVersion = knownFrameworkReference.LatestRuntimeFrameworkVersion;
                 }
                 else
                 {
-                    string appHostPackName = appHostPackPattern.Replace("**RID**", bestAppHostRuntimeIdentifier);
-
-                    string appHostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
-                        DotNetAppHostExecutableNameWithoutExtension +
-                        ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier));
-
-
-                    TaskItem appHostItem = new TaskItem(itemName);
-                    string appHostPackPath = null;
-                    if (!string.IsNullOrEmpty(TargetingPackRoot))
-                    {
-                        appHostPackPath = GetPackPath(appHostPackName, appHostPackVersion);
-                    }
-
-                    if (appHostPackPath != null && Directory.Exists(appHostPackPath))
-                    {
-                        //  Use AppHost from packs folder
-                        appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, appHostRelativePathInPackage));
-                    }
-                    else
-                    {
-                        //  Download apphost pack
-                        TaskItem packageToDownload = new TaskItem(appHostPackName);
-                        packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);
-                        packagesToDownload.Add(packageToDownload);
-
-                        appHostItem.SetMetadata(MetadataKeys.RuntimeIdentifier, appHostRuntimeIdentifier);
-                        appHostItem.SetMetadata(MetadataKeys.PackageName, appHostPackName);
-                        appHostItem.SetMetadata(MetadataKeys.PackageVersion, appHostPackVersion);
-                        appHostItem.SetMetadata(MetadataKeys.RelativePath, appHostRelativePathInPackage);
-                    }
-
-                    return appHostItem;
+                    runtimeFrameworkVersion = knownFrameworkReference.DefaultRuntimeFrameworkVersion;
                 }
             }
-            return null;
+
+            return runtimeFrameworkVersion;
         }
 
-        private string GetBestRuntimeIdentifier(string targetRuntimeIdentifier, string availableRuntimeIdentifiers, out bool wasInGraph)
-        {
-            if (targetRuntimeIdentifier == null || availableRuntimeIdentifiers == null)
-            {
-                wasInGraph = false;
-                return null;
-            }
-
-            return NuGetUtils.GetBestMatchingRid(
-                new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath),
-                targetRuntimeIdentifier,
-                availableRuntimeIdentifiers.Split(';'),
-                out wasInGraph);
-        }
-
-        private string GetPackPath(string name, string version)
-        {
-            return Path.Combine(TargetingPackRoot, name, version);
-        }
-
-        private static Version NormalizeVersion(Version version)
+        internal static Version NormalizeVersion(Version version)
         {
             if (version.Revision == 0)
             {
@@ -346,7 +277,7 @@ namespace Microsoft.NET.Build.Tasks
             return version;
         }
 
-        private class KnownFrameworkReference
+        private struct KnownFrameworkReference
         {
             ITaskItem _item;
             public KnownFrameworkReference(ITaskItem item)
@@ -366,10 +297,6 @@ namespace Microsoft.NET.Build.Tasks
             //  The ID of the targeting pack NuGet package to reference
             public string TargetingPackName => _item.GetMetadata("TargetingPackName");
             public string TargetingPackVersion => _item.GetMetadata("TargetingPackVersion");
-
-            public string AppHostPackNamePattern => _item.GetMetadata("AppHostPackNamePattern");
-
-            public string AppHostRuntimeIdentifiers => _item.GetMetadata("AppHostRuntimeIdentifiers");
 
             public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
 
