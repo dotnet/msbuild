@@ -189,6 +189,7 @@
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\CallTarget.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\IntrinsicChooseTask.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\IntrinsicTaskFactory.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\ItemGroupLoggingHelper.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\MSBuild.cs">
@@ -258,6 +259,9 @@
     <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
+    <Compile Include="Instance\ProjectChooseTaskInstance.cs" />
+    <Compile Include="Instance\ProjectChooseTaskOtherwiseInstance.cs" />
+    <Compile Include="Instance\ProjectChooseTaskWhenInstance.cs" />
     <Compile Include="Logging\EvaluationLocationIdAgnosticComparer.cs" />
     <Compile Include="Logging\ProfilerLogger.cs" />
     <Compile Include="Evaluation\Profiler\ProfilerResultPrettyPrinter.cs" />

@@ -634,6 +634,15 @@ namespace Microsoft.Build.Construction
                         child = ParseProjectItemGroupElement(childElement, target);
                         break;
 
+                    case XMakeElements.choose:
+                        if (onError != null)
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(onError.Location, "NodeMustBeLastUnderElement", XMakeElements.onError, XMakeElements.target, childElement.Name);
+                        }
+
+                        child = ParseProjectChooseElement(childElement, target, 0);
+                        break;
+
                     case XMakeElements.onError:
                         // Previous OM accidentally didn't verify ExecuteTargets on parse,
                         // but we do, as it makes no sense

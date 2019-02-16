@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Globalization;
 using System.Collections;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd.Components.RequestBuilder.IntrinsicTasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd.Logging;
@@ -77,15 +78,19 @@ namespace Microsoft.Build.BackEnd
             {
                 return new PropertyGroupIntrinsicTask(taskInstance as ProjectPropertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
             }
-            else if (taskInstance is ProjectItemGroupTaskInstance)
+
+            if (taskInstance is ProjectItemGroupTaskInstance)
             {
                 return new ItemGroupIntrinsicTask(taskInstance as ProjectItemGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
             }
-            else
+
+            if (taskInstance is ProjectChooseTaskInstance)
             {
-                ErrorUtilities.ThrowInternalError("Unhandled intrinsic task type {0}", taskInstance.GetType().GetTypeInfo().BaseType);
-                return null;
+                return new IntrinsicChooseTask(taskInstance as ProjectChooseTaskInstance, loggingContext, projectInstance, logTaskInputs);
             }
+
+            ErrorUtilities.ThrowInternalError("Unhandled intrinsic task type {0}", taskInstance.GetType().GetTypeInfo().BaseType);
+            return null;
         }
 
         /// <summary>

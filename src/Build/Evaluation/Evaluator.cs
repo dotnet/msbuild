@@ -36,6 +36,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using ProjectChooseElement = Microsoft.Build.Construction.ProjectChooseElement;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #if (!STANDALONEBUILD)
@@ -508,6 +509,88 @@ namespace Microsoft.Build.Evaluation
             return itemGroup;
         }
 
+        private static ProjectChooseTaskInstance ReadChooseUnderTargetElement(ProjectChooseElement chooseElement)
+        {
+            List<ProjectChooseTaskWhenInstance> whenInstances = new List<ProjectChooseTaskWhenInstance>();
+
+            foreach (ProjectWhenElement whenElement in chooseElement.WhenElements)
+            {
+                List<ProjectTargetInstanceChild> children = ReadNestedElements(whenElement.Children);
+
+                whenInstances.Add(
+                    new ProjectChooseTaskWhenInstance(whenElement.Condition, whenElement.Location,
+                        whenElement.ConditionLocation, children)
+                    );
+            }
+
+            ProjectChooseTaskOtherwiseInstance otherwise = null;
+
+            ProjectOtherwiseElement otherwiseElement = chooseElement.OtherwiseElement;
+
+            if (otherwiseElement != null)
+            {
+                List<ProjectTargetInstanceChild> children = ReadNestedElements(otherwiseElement.Children);
+                otherwise = new ProjectChooseTaskOtherwiseInstance(otherwiseElement.Location, children);
+            }
+
+            ProjectChooseTaskInstance chooseTaskInstance =
+                new ProjectChooseTaskInstance(chooseElement.Location, whenInstances, otherwise);
+
+            return chooseTaskInstance;
+
+            List<ProjectTargetInstanceChild> ReadNestedElements(ICollection<ProjectElement> elements)
+            {
+                List<ProjectTargetInstanceChild> children = new List<ProjectTargetInstanceChild>(elements.Count);
+                foreach (var targetChildElement in elements)
+                {
+                    ProjectTaskElement task = targetChildElement as ProjectTaskElement;
+
+                    if (task != null)
+                    {
+                        ProjectTaskInstance taskInstance = ReadTaskElement(task);
+
+                        children.Add(taskInstance);
+                        continue;
+                    }
+
+                    ProjectPropertyGroupElement propertyGroup = targetChildElement as ProjectPropertyGroupElement;
+
+                    if (propertyGroup != null)
+                    {
+                        ProjectPropertyGroupTaskInstance propertyGroupInstance =
+                            ReadPropertyGroupUnderTargetElement(propertyGroup);
+
+                        children.Add(propertyGroupInstance);
+                        continue;
+                    }
+
+                    ProjectItemGroupElement itemGroup = targetChildElement as ProjectItemGroupElement;
+
+                    if (itemGroup != null)
+                    {
+                        ProjectItemGroupTaskInstance itemGroupInstance = ReadItemGroupUnderTargetElement(itemGroup);
+
+                        children.Add(itemGroupInstance);
+                        continue;
+                    }
+
+                    ProjectChooseElement choose = targetChildElement as ProjectChooseElement;
+
+                    if (choose != null)
+                    {
+                        ProjectChooseTaskInstance nestedChooseTaskInstance = ReadChooseUnderTargetElement(choose);
+
+                        children.Add(nestedChooseTaskInstance);
+                        continue;
+                    }
+
+                    ErrorUtilities.ThrowInternalError("Unexpected child");
+                }
+
+                return children;
+            }
+        }
+
         /// <summary>
         /// Read the provided target into a target instance.
         /// Do not evaluate anything: this occurs during build.
@@ -548,6 +631,16 @@ namespace Microsoft.Build.Evaluation
                         ProjectItemGroupTaskInstance itemGroupInstance = ReadItemGroupUnderTargetElement(itemGroup);
 
                         targetChildren.Add(itemGroupInstance);
+                        continue;
+                    }
+
+                    ProjectChooseElement choose = targetChildElement as ProjectChooseElement;
+
+                    if (choose != null)
+                    {
+                        ProjectChooseTaskInstance chooseTaskInstance = ReadChooseUnderTargetElement(choose);
+
+                        targetChildren.Add(chooseTaskInstance);
                         continue;
                     }
 

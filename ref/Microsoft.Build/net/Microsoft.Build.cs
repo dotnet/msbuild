@@ -1082,6 +1082,29 @@ namespace Microsoft.Build.Execution
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
     }
+    public partial class ProjectChooseTaskInstance : Microsoft.Build.Execution.ProjectTargetInstanceChild
+    {
+        internal ProjectChooseTaskInstance() { }
+        public override string Condition { get { throw null; } }
+        public override Microsoft.Build.Construction.ElementLocation ConditionLocation { get { throw null; } }
+        public override Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
+        public Microsoft.Build.Execution.ProjectChooseTaskOtherwiseInstance Otherwise { get { throw null; } }
+        public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectChooseTaskWhenInstance> WhenInstances { get { throw null; } }
+    }
+    public partial class ProjectChooseTaskOtherwiseInstance
+    {
+        internal ProjectChooseTaskOtherwiseInstance() { }
+        public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectTargetInstanceChild> Children { get { throw null; } }
+        public Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
+    }
+    public partial class ProjectChooseTaskWhenInstance
+    {
+        internal ProjectChooseTaskWhenInstance() { }
+        public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectTargetInstanceChild> Children { get { throw null; } }
+        public string Condition { get { throw null; } }
+        public Microsoft.Build.Construction.ElementLocation ConditionLocation { get { throw null; } }
+        public Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
+    }
     public partial class ProjectInstance
     {
         public ProjectInstance(Microsoft.Build.Construction.ProjectRootElement xml) { }
