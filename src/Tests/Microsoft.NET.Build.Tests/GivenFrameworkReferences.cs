@@ -270,6 +270,47 @@ namespace FrameworkReferenceTest
         }
 
         [Fact]
+        public void BuildFailsIfRuntimePackHasNotBeenRestored()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "RuntimePackNotRestored",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+            
+            //  Use a test-specific packages folder
+            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
+
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            restoreCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            //  If we do the work in https://github.com/dotnet/cli/issues/10528,
+            //  then we should add a new error message here indicating that the runtime pack hasn't
+            //  been downloaded.
+            string expectedErrorCode = "NETSDK1047";
+
+            buildCommand
+                .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(expectedErrorCode);
+
+        }
+
+        [Fact]
         public void RuntimeFrameworkVersionCanBeSpecifiedOnFrameworkReference()
         {
             var testProject = new TestProject();

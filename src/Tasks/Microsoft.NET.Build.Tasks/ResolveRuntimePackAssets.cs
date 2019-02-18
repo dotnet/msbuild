@@ -45,6 +45,16 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 string runtimePackRoot = runtimePack.GetMetadata(MetadataKeys.PackageDirectory);
+
+                if (string.IsNullOrEmpty(runtimePackRoot) || !Directory.Exists(runtimePackRoot))
+                {
+                    //  If we do the work in https://github.com/dotnet/cli/issues/10528,
+                    //  then we should add a new error message here indicating that the runtime pack hasn't
+                    //  been downloaded, and that restore should be run with that runtime identifier.
+                    Log.LogError(Strings.NoRuntimePackAvailable, runtimePack.ItemSpec,
+                        runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+                }
+
                 string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
                 //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened

@@ -90,7 +90,10 @@ namespace Microsoft.NET.Build.Tasks
                                         targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt"),
                         };
 
-                        string targetingPackDllPath = possibleDllPaths.First(path => Directory.GetFiles(path, "*.dll").Any());
+                        string targetingPackDllPath = possibleDllPaths.First(path =>
+                                    Directory.Exists(path) &&
+                                    Directory.GetFiles(path, "*.dll").Any());
+
                         string platformManifestPath = possibleManifestPaths.FirstOrDefault(File.Exists);
 
                         foreach (var dll in Directory.GetFiles(targetingPackDllPath, "*.dll"))

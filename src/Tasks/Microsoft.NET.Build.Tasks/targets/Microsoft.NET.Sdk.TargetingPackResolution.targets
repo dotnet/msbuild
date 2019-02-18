@@ -89,6 +89,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                                 SelfContained="$(SelfContained)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
+                                RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                                 TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
