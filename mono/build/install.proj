@@ -99,14 +99,14 @@
         </MakeDir>
 
         <Exec
-            WorkingDirectory="$(MonoInstallPrefix)\lib\mono\msbuild"
-            Command="ln -s 15.0 Current" />
+            WorkingDirectory="$(XBuildDir)"
+            Command="ln -sfh Current 15.0" />
         <Exec
-            WorkingDirectory="$(MonoInstallPrefix)\lib\mono\xbuild"
-            Command="ln -s 15.0 Current" />
+            WorkingDirectory="$(MonoInstallPrefix)\lib\mono\msbuild"
+            Command="ln -s Current 15.0" />
         <ItemGroup>
-            <CopiedFiles Include="$(MonoInstallPrefix)\bin\xbuild\Current" />
-            <CopiedFiles Include="$(MonoInstallPrefix)\bin\msbuild\Current" />
+            <CopiedFiles Include="$(MonoInstallPrefix)\bin\msbuild\15.0" />
+            <CopiedFiles Include="$(XBuildDir)\15.0" />
         </ItemGroup>
 
         <Copy SourceFiles="@(MSBuildFiles)" DestinationFolder="$(MSBuildInstallBinDir)">
