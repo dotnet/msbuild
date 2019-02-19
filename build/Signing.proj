@@ -97,6 +97,9 @@
       <FilesToSign Include="$(SdkResolverOutputDirectory)/Microsoft.DotNet.MSBuildSdkResolver.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
+      <FilesToSign Include="$(SdkResolverOutputDirectory)/*/Microsoft.DotNet.MSBuildSdkResolver.resources.dll">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
     </ItemGroup>
   </Target>
 
