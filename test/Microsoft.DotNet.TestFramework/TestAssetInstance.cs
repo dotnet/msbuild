@@ -294,7 +294,9 @@ namespace Microsoft.DotNet.TestFramework
 
                 Console.WriteLine(commandResult.StdErr);
 
-                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}");
+                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}" + Environment.NewLine +
+                    commandResult.StdOut + Environment.NewLine +
+                    commandResult.StdErr);
 
                 throw new Exception(message);
             }
