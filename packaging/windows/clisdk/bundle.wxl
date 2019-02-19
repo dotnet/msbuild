@@ -74,6 +74,6 @@ Resources
   <String Id="InstallationNoteTitle">Installation note</String>
   <String Id="InstallationNote">A command will be run during the install process that will improve project restore speed and enable offline access. It will take up to a minute to complete.
   </String>
-  <String Id="VisualStudioWarning">If you plan to use .NET Core 2.2 with Visual Studio, Visual Studio 2017 15.9 or newer is recommended. &lt;A HREF=&quot;https://go.microsoft.com/fwlink/?linkid=866799&quot;&gt;Learn More&lt;/A&gt;.
+  <String Id="VisualStudioWarning">If you plan to use this version of the .NET Core SDK for .NET Core 2.2 with Visual Studio, Visual Studio 2019 or newer is recommended. &lt;A HREF=&quot;https://go.microsoft.com/fwlink/?linkid=866799&quot;&gt;Learn More&lt;/A&gt;.
   </String>
 </WixLocalization>
