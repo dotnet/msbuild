@@ -40,6 +40,11 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.FrameworkOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.FrameworkOptionName)),
+                Create.Option(
+                    "--version",
+                    LocalizableStrings.VersionOptionDescription,
+                    Accept.ExactlyOneArgument()
+                        .With(name: LocalizableStrings.VersionOptionName)),
                 ToolCommandRestorePassThroughOptions.DisableParallelOption(),
                 ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption(),
                 ToolCommandRestorePassThroughOptions.NoCacheOption(),

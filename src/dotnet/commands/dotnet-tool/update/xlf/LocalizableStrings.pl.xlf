@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
         <target state="translated">PACKAGE_ID</target>
@@ -17,9 +22,14 @@
         <target state="translated">Określ jeden identyfikator pakietu narzędzia do zaktualizowania.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateToLowerVersion">
+        <source>The requested version {0} is lower than existing version {1}.</source>
+        <target state="new">The requested version {0} is lower than existing version {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionOptionDescription">
-        <source>Version of the tool package in NuGet.</source>
-        <target state="translated">Wersja pakietu narzędzia w pakiecie NuGet.</target>
+        <source>The version range of the tool package to update to.</source>
+        <target state="needs-review-translation">Wersja pakietu narzędzia w pakiecie NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
@@ -115,6 +125,11 @@
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tool to update.</source>
         <target state="translated">Katalog zawierający narzędzie do zaktualizowania.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="new">VERSION</target>
         <note />
       </trans-unit>
     </body>

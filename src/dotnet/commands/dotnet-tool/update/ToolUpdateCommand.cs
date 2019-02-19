@@ -14,6 +14,7 @@ using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Update
 {
@@ -38,6 +39,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private readonly string _verbosity;
         private readonly string _toolPath;
         private readonly IEnumerable<string> _forwardRestoreArguments;
+        private readonly string _packageVersion;
 
         public ToolUpdateCommand(AppliedOption appliedCommand,
             ParseResult parseResult,
@@ -55,6 +57,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
             _additionalFeeds = appliedCommand.ValueOrDefault<string[]>("add-source");
+            _packageVersion = appliedCommand.SingleArgumentOrDefault("version");
             _global = appliedCommand.ValueOrDefault<bool>("global");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
@@ -78,6 +81,15 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             if (_toolPath != null)
             {
                 toolPath = new DirectoryPath(_toolPath);
+            }
+
+            VersionRange versionRange = null;
+            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
+            {
+                throw new GracefulException(
+                    string.Format(
+                        LocalizableStrings.InvalidNuGetVersionRange,
+                        _packageVersion));
             }
 
             (IToolPackageStore toolPackageStore,
@@ -112,7 +124,10 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                         new PackageLocation(nugetConfig: GetConfigFile(), additionalFeeds: _additionalFeeds),
                         packageId: _packageId,
                         targetFramework: _framework,
+                        versionRange: versionRange,
                         verbosity: _verbosity);
+
+                    EnsureVersionIsHigher(oldPackageNullable, newInstalledPackage);
 
                     foreach (RestoredCommand command in newInstalledPackage.Commands)
                     {
@@ -126,6 +141,21 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             }
 
             return 0;
+        }
+
+        private static void EnsureVersionIsHigher(IToolPackage oldPackageNullable, IToolPackage newInstalledPackage)
+        {
+            if (oldPackageNullable != null && (newInstalledPackage.Version < oldPackageNullable.Version))
+            {
+                throw new GracefulException(
+                    new[]
+                    {
+                        string.Format(LocalizableStrings.UpdateToLowerVersion,
+                            newInstalledPackage.Version.ToNormalizedString(),
+                            oldPackageNullable.Version.ToNormalizedString())
+                    },
+                    isUserError: false);
+            }
         }
 
         private void ValidateArguments()
