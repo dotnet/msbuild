@@ -8,6 +8,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -102,15 +103,17 @@ namespace Microsoft.NET.Build.Tasks
 
                 Directory.CreateDirectory(packagedShimOutputDirectoryAndRid);
 
+                // per https://github.com/dotnet/cli/issues/9870 nuget layout (as in {packageid}/{packageversion}/tools/)is normalized version
+                var normalizedPackageVersion = NuGetVersion.Parse(PackageVersion).ToNormalizedString();
                 // This is the embedded string. We should normalize it on forward slash, so the file won't be different according to
                 // build machine.
                 var appBinaryFilePath = string.Join("/",
                     new[] {
                         ".store",
                         PackageId.ToLowerInvariant(),
-                        PackageVersion,
+                        normalizedPackageVersion,
                         PackageId.ToLowerInvariant(),
-                        PackageVersion,
+                        normalizedPackageVersion,
                         "tools",
                         targetFramework.GetShortFolderName(),
                         "any",
