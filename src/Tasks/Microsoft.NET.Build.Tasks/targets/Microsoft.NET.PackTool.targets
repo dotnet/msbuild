@@ -105,7 +105,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ApphostsForShimRuntimeIdentifiers="@(_ApphostsForShimRuntimeIdentifiers)"
       PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
       PackageId="$(PackageId)"
-      PackageVersion="$(Version)"
+      PackageVersion="$(PackageVersion)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       ToolCommandName="$(ToolCommandName)"

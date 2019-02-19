@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
-        <target state="new">NETSDK1070: The application configuration file must have root configuration element.</target>
+        <target state="translated">NETSDK1070: 應用程式組態檔必須有根組態元素。</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
+        <target state="translated">NETSDK1071: '{0}' 的 PackageReference 指定了 `{1}` 版本。不建議指定這個套件版本。如需詳細資訊，請參閱 https://aka.ms/sdkimplicitrefs</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -304,7 +304,7 @@
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
         <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: 您目前正使用 .NET Core SDK 的預覽版本。您可透過目前專案中的 global.json 檔案，定義 SDK 版本。如需更多項目，請前往 https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <target state="translated">NETSDK1057: 您使用的是 .NET Core 預覽版。請參閱: https://aka.ms/dotnet-core-preview</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">

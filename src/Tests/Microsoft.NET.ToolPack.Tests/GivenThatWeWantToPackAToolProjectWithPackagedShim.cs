@@ -22,16 +22,19 @@ namespace Microsoft.NET.ToolPack.Tests
     {
         private string _testRoot;
         private string _packageId;
-        private readonly string _packageVersion = "1.0.0";
+        private string _packageVersion = "1.0.0";
         private const string _customToolCommandName = "customToolCommandName";
 
         public GivenThatWeWantToPackAToolProjectWithPackagedShim(ITestOutputHelper log) : base(log)
         {
         }
 
-        private string SetupNuGetPackage(bool multiTarget, [CallerMemberName] string callingMethod = "")
+        private string SetupNuGetPackage(
+            bool multiTarget,
+            [CallerMemberName] string callingMethod = "",
+            Dictionary<string, string> additionalProperty = null)
         {
-            TestAsset helloWorldAsset = CreateTestAsset(multiTarget, callingMethod);
+            TestAsset helloWorldAsset = CreateTestAsset(multiTarget, callingMethod, additionalProperty);
 
             _testRoot = helloWorldAsset.TestRoot;
 
@@ -40,10 +43,13 @@ namespace Microsoft.NET.ToolPack.Tests
             packCommand.Execute().Should().Pass();
             _packageId = Path.GetFileNameWithoutExtension(packCommand.ProjectFile);
 
-            return packCommand.GetNuGetPackage();
+            return packCommand.GetNuGetPackage(packageVersion: _packageVersion);
         }
 
-        private TestAsset CreateTestAsset(bool multiTarget, string uniqueName)
+        private TestAsset CreateTestAsset(
+            bool multiTarget,
+            string uniqueName,
+            Dictionary<string, string> additionalProperty = null)
         {
             return _testAssetsManager
                 .CopyTestAsset("PortableTool", uniqueName)
@@ -54,6 +60,14 @@ namespace Microsoft.NET.ToolPack.Tests
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
+
+                    if (additionalProperty != null)
+                    {
+                        foreach (KeyValuePair<string, string> pair in additionalProperty)
+                        {
+                            propertyGroup.Add(new XElement(ns + pair.Key, pair.Value));
+                        }
+                    }
 
                     if (multiTarget)
                     {
@@ -317,6 +331,49 @@ namespace Microsoft.NET.ToolPack.Tests
             _packageId = Path.GetFileNameWithoutExtension(packCommand.ProjectFile);
 
             AssertValidShim(testRoot, nugetPackage);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void When_version_and_packageVersion_is_different_It_produces_valid_shims(bool multiTarget)
+        {
+            if (!Environment.Is64BitOperatingSystem)
+            {
+                // only sample test on win-x64 since shims are RID specific
+                return;
+            }
+
+            var nugetPackage = SetupNuGetPackage(multiTarget,
+                additionalProperty: new Dictionary<string, string>()
+                {
+                    ["version"] = "1.0.0-rtm",
+                    ["packageVersion"] = _packageVersion
+                });
+
+            AssertValidShim(_testRoot, nugetPackage);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void When_version_and_packageVersion_is_different_It_produces_valid_shims2(bool multiTarget)
+        {
+            if (!Environment.Is64BitOperatingSystem)
+            {
+                // only sample test on win-x64 since shims are RID specific
+                return;
+            }
+
+            _packageVersion = "1000.0.0";
+
+            var nugetPackage = SetupNuGetPackage(multiTarget,
+                additionalProperty: new Dictionary<string, string>()
+                {
+                    ["version"] = "1000",
+                });
+
+            AssertValidShim(_testRoot, nugetPackage);
         }
 
         private void AssertValidShim(string testRoot, string nugetPackage)

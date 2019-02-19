@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
-        <target state="new">NETSDK1070: The application configuration file must have root configuration element.</target>
+        <target state="translated">NETSDK1070: Plik konfiguracji aplikacji musi mieć główny element konfiguracji.</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
+        <target state="translated">NETSDK1071: Odwołanie PackageReference do pakietu „{0}” określiło wersję „{1}”. Określanie wersji tego pakietu nie jest zalecane. Aby uzyskać więcej informacji, zobacz https://aka.ms/sdkimplicitrefs</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -304,7 +304,7 @@
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
         <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: Korzystasz z zestawu .NET Core SDK w wersji zapoznawczej. Możesz zdefiniować wersję zestawu SDK za pomocą pliku global.json w bieżącym projekcie. Więcej informacji można znaleźć na stronie https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <target state="translated">NETSDK1057: Korzystasz z wersji zapoznawczej platformy .NET Core. Zobacz: https://aka.ms/dotnet-core-preview</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
