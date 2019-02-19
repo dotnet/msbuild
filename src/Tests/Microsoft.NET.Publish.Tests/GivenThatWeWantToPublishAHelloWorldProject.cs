@@ -438,5 +438,30 @@ public static class Program
 
             publishResult.Should().Pass();
         }
+
+        [Fact]
+        public void It_preserves_newest_files_on_publish()
+        {
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .Restore(Log);
+
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+                .Execute("-v:n")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Copying");
+
+            publishCommand
+                .Execute("-v:n")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("Copying");
+        }
     }
 }

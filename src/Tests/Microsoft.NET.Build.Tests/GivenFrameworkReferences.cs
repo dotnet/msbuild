@@ -270,6 +270,47 @@ namespace FrameworkReferenceTest
         }
 
         [Fact]
+        public void BuildFailsIfRuntimePackHasNotBeenRestored()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "RuntimePackNotRestored",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+            
+            //  Use a test-specific packages folder
+            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
+
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            restoreCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            //  If we do the work in https://github.com/dotnet/cli/issues/10528,
+            //  then we should add a new error message here indicating that the runtime pack hasn't
+            //  been downloaded.
+            string expectedErrorCode = "NETSDK1047";
+
+            buildCommand
+                .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(expectedErrorCode);
+
+        }
+
+        [Fact]
         public void RuntimeFrameworkVersionCanBeSpecifiedOnFrameworkReference()
         {
             var testProject = new TestProject();
@@ -291,7 +332,7 @@ namespace FrameworkReferenceTest
                 });
 
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(runtimeFrameworkVersion);
-            resolvedVersions.PackageDownload["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
+            resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
                 .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
                 .Single();
@@ -314,7 +355,7 @@ namespace FrameworkReferenceTest
             var resolvedVersions = GetResolvedVersions(testProject);
 
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(runtimeFrameworkVersion);
-            resolvedVersions.PackageDownload["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
+            resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
                 .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
                 .Single();
@@ -350,7 +391,7 @@ namespace FrameworkReferenceTest
             string expectedRuntimeFrameworkVersion = attributeValue ? "3.0.0-latestversion" : "3.0.0-defaultversion";
 
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(expectedRuntimeFrameworkVersion);
-            resolvedVersions.PackageDownload["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
+            resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
                 .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
                 .Single();
@@ -376,7 +417,7 @@ namespace FrameworkReferenceTest
             string expectedRuntimeFrameworkVersion = propertyValue ? "3.0.0-latestversion" : "3.0.0-defaultversion";
 
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(expectedRuntimeFrameworkVersion);
-            resolvedVersions.PackageDownload["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
+            resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
                 .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
                 .Single();
@@ -407,7 +448,7 @@ namespace FrameworkReferenceTest
             string expectedRuntimeFrameworkVersion = "3.0.0-latestversion";
 
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(expectedRuntimeFrameworkVersion);
-            resolvedVersions.PackageDownload["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
+            resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
                 .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
                 .Single();
@@ -427,6 +468,7 @@ namespace FrameworkReferenceTest
             testProject.IsSdkProject = true;
             testProject.IsExe = true;
             testProject.AdditionalProperties["DisableImplicitFrameworkReferences"] = "true";
+            testProject.AdditionalProperties["UseRefTargetingPacks"] = "true";
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier)

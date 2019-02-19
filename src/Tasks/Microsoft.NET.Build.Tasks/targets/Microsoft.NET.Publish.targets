@@ -213,51 +213,60 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedFileToPublish Include="@(IntermediateAssembly)"
                              Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
         <RelativePath>@(IntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
       <!-- Copy the deps file if using the build deps file. -->
       <ResolvedFileToPublish Include="$(ProjectDepsFilePath)"
                              Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' == 'true'">
         <RelativePath>$(ProjectDepsFileName)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
       <!-- Copy the runtime config file. -->
       <ResolvedFileToPublish Include="$(ProjectRuntimeConfigFilePath)"
                              Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'">
         <RelativePath>$(ProjectRuntimeConfigFileName)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
       
       <!-- Copy the app.config (if any) -->
       <ResolvedFileToPublish Include="@(AppConfigWithTargetPath)"
                              Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
         <RelativePath>@(AppConfigWithTargetPath->'%(TargetPath)')</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
       <!-- Copy the debug information file (.pdb), if any -->
       <ResolvedFileToPublish Include="@(_DebugSymbolsIntermediatePath)"
                              Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
         <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
       <!-- Copy satellite assemblies. -->
       <ResolvedFileToPublish Include="@(IntermediateSatelliteAssembliesWithTargetPath)">
         <RelativePath>%(IntermediateSatelliteAssembliesWithTargetPath.Culture)\%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
       <!-- Copy the resolved copy local publish assets. -->
       <ResolvedFileToPublish Include="@(_ResolvedCopyLocalPublishAssets)">
         <RelativePath>%(_ResolvedCopyLocalPublishAssets.DestinationSubDirectory)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
       <!-- Copy the xml documentation (if enabled) -->
       <ResolvedFileToPublish Include="@(FinalDocFile)"
                               Condition="'$(PublishDocumentationFile)' == 'true'">
         <RelativePath>@(FinalDocFile->'%(Filename)%(Extension)')</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
       <!-- Copy all PackAsTool shims (if any) -->
       <ResolvedFileToPublish Include="@(_EmbeddedApphostPaths)">
         <RelativePath>shims/%(_EmbeddedApphostPaths.ShimRuntimeIdentifier)/%(_EmbeddedApphostPaths.Filename)%(_EmbeddedApphostPaths.Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
     </ItemGroup>
 
