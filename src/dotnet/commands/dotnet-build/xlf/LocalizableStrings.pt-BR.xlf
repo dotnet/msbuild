@@ -12,6 +12,11 @@
         <target state="translated">Construtor do .NET</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
         <target state="translated">Não criar referências de projeto para projeto e criar somente o projeto especificado.</target>
