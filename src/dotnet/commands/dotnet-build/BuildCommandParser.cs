@@ -37,6 +37,11 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.NoDependenciesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("-property:BuildProjectReferences=false")),
+                Create.Option(
+                    "--nologo|/nologo",
+                    LocalizableStrings.CmdNoLogo,
+                    Accept.NoArguments()
+                          .ForwardAs("-nologo")),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.VerbosityOption());
