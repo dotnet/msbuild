@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="UsageCommandArgs">
         <source> [args]</source>
-        <target state="translated">[args]</target>
+        <target state="translated"> [args]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandAdditionalArgs">
         <source> [[--] &lt;additional arguments&gt;...]]</source>
-        <target state="translated">[[--] &lt;argumentos adicionais&gt;...]]</target>
+        <target state="translated"> [[--] &lt;argumentos adicionais&gt;...]]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandsAdditionalArgsHeader">

@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="UsageCommandArgs">
         <source> [args]</source>
-        <target state="translated">[args]</target>
+        <target state="translated"> [args]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandAdditionalArgs">
