@@ -17,11 +17,15 @@ namespace Microsoft.DotNet.Tests
     {
         private TestAssetInstance MSBuildTestProjectInstance;
 
+        private string _configuration;
+
         public GivenAProjectDependencyCommandResolver()
         {
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
                 Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "MSBuild.dll"));
+
+            _configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
         }
 
         [Fact]
@@ -34,7 +38,7 @@ namespace Microsoft.DotNet.Tests
             
             new BuildCommand()
                 .WithProjectDirectory(MSBuildTestProjectInstance.Root)
-                .WithConfiguration("Debug")
+                .WithConfiguration(_configuration)
                 .Execute()
                 .Should().Pass();
 
@@ -43,7 +47,7 @@ namespace Microsoft.DotNet.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
-                Configuration = "Debug",
+                Configuration = _configuration,
                 ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
                 Framework = NuGetFrameworks.NetCoreApp30
             };
@@ -69,7 +73,7 @@ namespace Microsoft.DotNet.Tests
             
             new BuildCommand()
                 .WithProjectDirectory(MSBuildTestProjectInstance.Root)
-                .WithConfiguration("Debug")
+                .WithConfiguration(_configuration)
                 .Execute()
                 .Should().Pass();
 
@@ -78,7 +82,7 @@ namespace Microsoft.DotNet.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
-                Configuration = "Debug",
+                Configuration = _configuration,
                 ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
                 Framework = NuGetFrameworks.NetCoreApp30
             };
