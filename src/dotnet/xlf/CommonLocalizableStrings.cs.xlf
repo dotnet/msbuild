@@ -903,7 +903,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">Umožňuje, aby se příkaz zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
         <note />
       </trans-unit>
     </body>
