@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
         <source>The path to an application .dll file to execute.</source>
-        <target state="translated">실행할 응용 프로그램 .dll 파일의 경로입니다.</target>
+        <target state="translated">실행할 애플리케이션 .dll 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
@@ -214,22 +214,22 @@
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
-        <target state="translated">검색할 검색 정책 및 어셈블리를 포함하는 경로입니다.</target>
+        <target state="translated">프로브할 프로빙 정책 및 어셈블리를 포함하는 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;응용 프로그램&gt;.deps.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;애플리케이션&gt;.deps.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;응용 프로그램&gt;.runtimeconfig.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;애플리케이션&gt;.runtimeconfig.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
-        <target state="translated">응용 프로그램을 실행하는 데 사용할 설치된 공유 프레임워크의 버전입니다.</target>
+        <target state="translated">애플리케이션을 실행하는 데 사용할 설치된 공유 프레임워크의 버전입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
@@ -294,12 +294,12 @@
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET Core application.</source>
-        <target state="translated">.NET Core 응용 프로그램을 실행합니다.</target>
+        <target state="translated">.NET Core 애플리케이션을 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">
-        <source>Start F# Interective / execute F# scripts.</source>
-        <target state="new">Start F# Interective / execute F# scripts.</target>
+        <source>Start F# Interactive / execute F# scripts.</source>
+        <target state="translated">F# 대화형 시작/F# 스크립트를 실행합니다.</target>
         <note />
       </trans-unit>
     </body>
