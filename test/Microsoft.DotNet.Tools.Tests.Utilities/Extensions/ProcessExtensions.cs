@@ -12,11 +12,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     internal static class ProcessExtensions
     {
-#if NET451
-        private static readonly bool _isWindows = true;
-#else
         private static readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-#endif
         private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(30);
 
         public static void KillTree(this Process process)

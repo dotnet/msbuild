@@ -25,7 +25,8 @@ namespace Microsoft.DotNet.Cli
                     Create.Option("-s|--source", Parser.CompletionOnlyDescription, Accept.ExactlyOneArgument()),
                     Create.Option("--non-interactive", Parser.CompletionOnlyDescription),
                     Create.Option("-k|--api-key", Parser.CompletionOnlyDescription, Accept.ExactlyOneArgument()),
-                    Create.Option("--no-service-endpoint", Parser.CompletionOnlyDescription)),
+                    Create.Option("--no-service-endpoint", Parser.CompletionOnlyDescription),
+                    Create.Option("--interactive", Parser.CompletionOnlyDescription)),
                 Create.Command(
                     "locals",
                     Parser.CompletionOnlyDescription,
@@ -33,6 +34,7 @@ namespace Microsoft.DotNet.Cli
                         "all",
                         "http-cache",
                         "global-packages",
+                        "plugins-cache",
                         "temp"),
                     Create.Option("-h|--help", Parser.CompletionOnlyDescription),
                     Create.Option("--force-english-output", Parser.CompletionOnlyDescription),
@@ -51,6 +53,8 @@ namespace Microsoft.DotNet.Cli
                     Create.Option("-sk|--symbol-api-key", Parser.CompletionOnlyDescription, Accept.ExactlyOneArgument()),
                     Create.Option("-d|--disable-buffering", Parser.CompletionOnlyDescription),
                     Create.Option("-n|--no-symbols", Parser.CompletionOnlyDescription),
-                    Create.Option("--no-service-endpoint", Parser.CompletionOnlyDescription)));
+                    Create.Option("--no-service-endpoint", Parser.CompletionOnlyDescription),
+                    Create.Option("--interactive", Parser.CompletionOnlyDescription)
+                    ));
     }
 }
