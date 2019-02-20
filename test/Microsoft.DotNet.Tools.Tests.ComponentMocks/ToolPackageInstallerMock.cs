@@ -41,12 +41,9 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             _packagedShimsMap = packagedShimsMap ?? new Dictionary<PackageId, IReadOnlyList<FilePath>>();
         }
 
-        public IToolPackage InstallPackage(PackageId packageId,
+        public IToolPackage InstallPackage(PackageLocation packageLocation, PackageId packageId,
             VersionRange versionRange = null,
             string targetFramework = null,
-            FilePath? nugetConfig = null,
-            DirectoryPath? rootConfigDirectory = null,
-            string[] additionalFeeds = null,
             string verbosity = null)
         {
             var packageRootDirectory = _store.GetRootPackageDirectory(packageId);
@@ -68,7 +65,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     // Perform a restore on the fake project
                     _projectRestorer.Restore(
                         tempProject,
-                        nugetConfig,
+                        packageLocation,
                         verbosity);
 
                     if (_installCallback != null)
