@@ -155,11 +155,5 @@
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
 
-  <PropertyGroup>
-    <!-- Use IBC optimization data if available. Depends on a property defined in the CentralPackageVersions import -->
-    <IbcOptimizationDataDir>$(NuGetPackageRoot)\RoslynDependencies.OptimizationData\$(RoslynDependenciesOptimizationDataVersion)\content\OptimizationData\</IbcOptimizationDataDir>
-  </PropertyGroup>
-
   <Import Project="$(RepoRoot)\mono\targets\$(MSBuildProjectName).Mono.targets" Condition="Exists('$(RepoRoot)\mono\targets\$(MSBuildProjectName).Mono.targets') and '$(MonoBuild)' == 'true'" />
-
 </Project>

@@ -851,7 +851,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        -pp:out.txt
     </source>
         <target state="translated">  -preprocess[:file]
-                     Erstellt eine einzelne, zusammengesetzte Projektdatei
+                     Erstellt eine einzelne aggregierte Projektdatei
                      durch Einbeziehen aller Dateien, die beim Erstellen
                      importiert werden würden, mit gekennzeichneten Grenzen. Dies kann
                      sinnvoll sein, um zu ermitteln, welche Dateien

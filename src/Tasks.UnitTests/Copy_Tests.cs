@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
@@ -432,7 +432,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destinationFolder),
                     OverwriteReadOnlyFiles = true,
@@ -497,7 +497,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
@@ -528,7 +528,7 @@ namespace Microsoft.Build.UnitTests
          * If SkipUnchangedFiles is set to "false" then we should always copy over files that have same dates and sizes.
          * If SkipUnchangedFiles is set to "true" then we should never copy over files that have same dates and sizes.
          */
-        [Theory]
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/4126")]
         [InlineData(false)]
         [InlineData(true)]
         public void DoCopyOverCopiedFile(bool skipUnchangedFiles)
@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests
                 // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
                 for (var i = 0; i < 2; i++)
                 {
-                    var engine = new MockEngine();
+                    var engine = new MockEngine(_testOutputHelper);
                     var t = new Copy
                     {
                         RetryDelayMilliseconds = 1,  // speed up tests!
@@ -632,7 +632,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
@@ -673,7 +673,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -719,7 +719,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.Delete(destinationFile);
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -765,7 +765,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.Delete(destinationFile);
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -876,7 +876,7 @@ namespace Microsoft.Build.UnitTests
                 dSecurity.AddAccessRule(denyDirectory);
                 Directory.SetAccessControl(tempDirectory, dSecurity);
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -930,7 +930,7 @@ namespace Microsoft.Build.UnitTests
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -974,7 +974,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -1046,7 +1046,7 @@ namespace Microsoft.Build.UnitTests
                     fs2?.Dispose();
                 }
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -1127,7 +1127,7 @@ namespace Microsoft.Build.UnitTests
                     fs?.Dispose();
                 }
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -1147,7 +1147,7 @@ namespace Microsoft.Build.UnitTests
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries, nothing to do
 
-                engine = new MockEngine();
+                engine = new MockEngine(_testOutputHelper);
                 t = new Copy
                 {
                     BuildEngine = engine,
@@ -1198,7 +1198,7 @@ namespace Microsoft.Build.UnitTests
                     fs?.Dispose();
                 }
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1, // speed up tests!
@@ -1252,7 +1252,7 @@ namespace Microsoft.Build.UnitTests
                     fs?.Dispose();
                 }
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -1312,7 +1312,7 @@ namespace Microsoft.Build.UnitTests
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
-                var me = new MockEngine();
+                var me = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -1385,7 +1385,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true,
@@ -1449,7 +1449,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 RetryDelayMilliseconds = 1, // speed up tests!
-                BuildEngine = new MockEngine(),
+                BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFolder = new TaskItem(Path.Combine(tempPath, "foo")),
                 UseHardlinksIfPossible = UseHardLinks,
@@ -1515,7 +1515,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 RetryDelayMilliseconds = 1,  // speed up tests!
-                BuildEngine = new MockEngine(),
+                BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFiles = destFiles,
                 UseHardlinksIfPossible = UseHardLinks,
@@ -1579,7 +1579,7 @@ namespace Microsoft.Build.UnitTests
                     fs2?.Dispose();
                 }
 
-                var engine = new MockEngine();
+                var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -1631,7 +1631,7 @@ namespace Microsoft.Build.UnitTests
                 var t = new Copy
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     UseHardlinksIfPossible = UseHardLinks,
@@ -1669,7 +1669,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 RetryDelayMilliseconds = 1, // speed up tests!
-                BuildEngine = new MockEngine(),
+                BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFiles = destinationFiles,
                 UseHardlinksIfPossible = UseHardLinks,
@@ -1694,7 +1694,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 RetryDelayMilliseconds = 1,  // speed up tests!
-                BuildEngine = new MockEngine(),
+                BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = new ITaskItem[] { new TaskItem("foo | bar") },
                 DestinationFolder = new TaskItem("dest"),
                 UseHardlinksIfPossible = UseHardLinks,

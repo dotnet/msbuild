@@ -5,6 +5,8 @@ host_type="core"
 build_stage1=true
 run_tests="--test"
 run_restore="--restore"
+properties=
+extra_properties=
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -89,7 +91,12 @@ export artifacts_dir="$artifacts_dir/2"
 
 if [ $host_type = "core" ]
 then
-	_InitializeMSBuildToUse="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
+  . "$ScriptRoot/common/tools.sh"
+
+  InitializeDotNetCli true
+
+  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
+  _InitializeBuildToolCommand="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
 elif [ $host_type = "mono" ]
 then
   export _InitializeBuildTool="mono"
@@ -105,6 +112,13 @@ else
   echo "Unsupported hostType ($host_type)"
   exit 1
 fi
+
+# Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
+export MSBUILDDONOTLAUNCHDEBUGGER=true
+
+# Prior to 3.0, the Csc task uses this environment variable to decide whether to run
+# a CLI host or directly execute the compiler.
+export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)

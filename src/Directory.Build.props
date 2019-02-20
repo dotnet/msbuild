@@ -6,10 +6,6 @@
       <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup>
-      <ShouldUseIBCOptimization Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and !( '$(BUILD_REASON)' == 'PullRequest' or '$(BUILD_REASON)' == 'IndividualCI' )">true</ShouldUseIBCOptimization>
-  </PropertyGroup>
-
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(ShouldUseIBCOptimization)' == 'true'" />
 
   <!-- Override project defaults provided by Repo toolset -->
