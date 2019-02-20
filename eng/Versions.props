@@ -20,9 +20,11 @@
     <VersionBase>15.1.0</VersionBase>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <UseShippingAssemblyVersion>true</UseShippingAssemblyVersion>
+
+    <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(MonoBuild)' != 'true'">
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>

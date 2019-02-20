@@ -72,7 +72,7 @@ if [ $host_type = "mono" ] ; then
   DownloadMSBuildForMono
 
   export _InitializeBuildTool="mono"
-  export _InitializeMSBuildToUse="$mono_msbuild_dir/MSBuild.dll"
+  export _InitializeBuildToolCommand="$mono_msbuild_dir/MSBuild.dll"
 
   configuration="$configuration-MONO"
   extn_path="$mono_msbuild_dir/Extensions"
@@ -100,7 +100,7 @@ then
 elif [ $host_type = "mono" ]
 then
   export _InitializeBuildTool="mono"
-  export _InitializeMSBuildToUse="$bootstrapRoot/net472/MSBuild/Current/Bin/MSBuild.dll"
+  export _InitializeBuildToolCommand="$bootstrapRoot/net472/MSBuild/Current/Bin/MSBuild.dll"
 
   # FIXME: remove this once we move to a newer version of Arcade with a fix for $MonoTool
   # https://github.com/dotnet/arcade/commit/f6f14c169ba19cd851120e0d572cd1c5619205b3

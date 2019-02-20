@@ -6,7 +6,7 @@
 
     <!-- VS Insertion -->
     <TargetVsixContainerName>Microsoft.Build.vsix</TargetVsixContainerName>
-    <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
+    <VisualStudioInsertionComponent Condition="'$(MonoBuild)' != 'true'">Microsoft.Build</VisualStudioInsertionComponent>
 
     <ShouldSkipProject>false</ShouldSkipProject>
     <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
