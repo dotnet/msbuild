@@ -111,19 +111,22 @@ namespace Microsoft.Build.Shared
         /// Specifies whether the current evaluation / build is happening during a graph build
         /// </summary>
         internal const string IsGraphBuild = "IsGraphBuild";
+
+        internal const string InnerBuildProperty = "InnerBuildProperty";
+        internal const string InnerBuildPropertyValues = "InnerBuildPropertyValues";
     }
 
     internal static class ItemTypeNames
     {
         /// <summary>
-        /// The name of the item used to specify references to other msbuild projects
+        /// References to other msbuild projects
         /// </summary>
-        internal const string ProjectReferenceItemName = "ProjectReference";
+        internal const string ProjectReference = "ProjectReference";
 
         /// <summary>
-        /// The name of the item used to statically specify what targets a project calls on its references
+        /// Statically specifies what targets a project calls on its references
         /// </summary>
-        internal const string ProjectReferenceTargetsItemType = "ProjectReferenceTargets";
+        internal const string ProjectReferenceTargets = "ProjectReferenceTargets";
     }
 
     /// <summary>
@@ -168,5 +171,8 @@ namespace Microsoft.Build.Shared
         internal const string IgnoreVersionForFrameworkReference = "IgnoreVersionForFrameworkReference";
         internal const string frameworkFile = "FrameworkFile";
         internal const string ProjectReferenceTargetsMetadataName = "Targets";
+        internal const string PropertiesMetadataName = "Properties";
+        internal const string UndefinePropertiesMetadataName = "UndefineProperties";
+        internal const string AdditionalPropertiesMetadataName = "AdditionalProperties";
     }
 }

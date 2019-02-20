@@ -12,21 +12,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project>
    <!-- 
-        We are doing a cross-targeting build if there is no list of target frameworks specified
-        nor is there a current target framework being built individually. In that case, a crosstargeting
+        We are doing a cross-targeting build if there is a non-empty list of target frameworks specified
+        and there is no current target framework being built individually. In that case, a crosstargeting
         project file like Microsoft.<language>.CrossTargeting.targets gets imported.
    -->
    <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
       <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
-      <IsOuterBuild>true</IsOuterBuild>
+   </PropertyGroup>
+
+   <PropertyGroup>
+      <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+      <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
    </PropertyGroup>
 
    <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
-      <!-- Microsoft.Net.Sdk adds all transitive project references to @ProjectReference. It does this at build time
+      <!-- Microsoft.Net.Sdk adds all transitive project references to ProjectReference. It does this at build time
            via a target. This fails the undeclared msbuild reference /isolate constraint, so disable transitive
            references.
            Do not disable transitive references if BuildProjectReferences is false. If building references is false,
-           then msbuild won't try to build the transitive references, which won't trigger undeclared reference constraints.
+           then MSBuild won't try to build the transitive references, which won't trigger undeclared reference constraints.
           -->
       <DisableTransitiveProjectReferences Condition="'$(BuildProjectReferences)' != 'false'">true</DisableTransitiveProjectReferences>
    </PropertyGroup>

@@ -995,7 +995,7 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            var projectReferenceItems = _taskExecutionHost.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceItemName);
+            var projectReferenceItems = _taskExecutionHost.ProjectInstance.GetItems(ItemTypeNames.ProjectReference);
 
             var declaredProjects = new HashSet<string>(projectReferenceItems.Count);
 

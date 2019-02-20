@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
             foreach (KeyValuePair<string, string> entry in project.GlobalProperties)
             {
-                GlobalProperties[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
+                _globalProperties[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
             }
 
             _toolsVersion = project.ToolsVersion;

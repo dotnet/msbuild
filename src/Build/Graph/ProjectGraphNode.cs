@@ -37,6 +37,10 @@ namespace Microsoft.Build.Experimental.Graph
 
         internal void AddProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Add(projectGraphNode);
 
+        internal void RemoveReferences() => _projectReferences.Clear();
+
+        internal void RemoveProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Remove(projectGraphNode);
+
         internal void AddReferencingProject(ProjectGraphNode projectGraphNode) => _referencingProjects.Add(projectGraphNode);
     }
 }
