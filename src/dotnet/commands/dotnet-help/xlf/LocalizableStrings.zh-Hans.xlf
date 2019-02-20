@@ -219,12 +219,12 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">指向 &lt;应用程序&gt;.deps.json 文件的路径。</target>
+        <target state="translated">&lt;application&gt;.deps.json 文件的路径。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">指向 &lt;应用程序&gt;.runtimeconfig.json 文件的路径。</target>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json 文件的路径。</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
@@ -298,8 +298,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">
-        <source>Start F# Interective / execute F# scripts.</source>
-        <target state="new">Start F# Interective / execute F# scripts.</target>
+        <source>Start F# Interactive / execute F# scripts.</source>
+        <target state="translated">启动 F# 交互式/执行 F# 脚本。</target>
         <note />
       </trans-unit>
     </body>
