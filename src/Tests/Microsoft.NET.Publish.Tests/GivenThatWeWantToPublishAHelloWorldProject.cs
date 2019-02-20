@@ -464,6 +464,7 @@ public static class Program
                 .NotHaveStdOutContaining("Copying");
         }
 
+        [Fact]
         public void It_fails_if_nobuild_was_requested_but_build_was_invoked()
         {
             var testProject = new TestProject()
