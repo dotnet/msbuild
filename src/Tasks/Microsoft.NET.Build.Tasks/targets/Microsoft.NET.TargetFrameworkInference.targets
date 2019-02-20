@@ -146,7 +146,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
-    <NETStandardMaximumVersion>$(BundledNETStandardTargetFrameworkVersion)</NETStandardMaximumVersion>
+    <!--<NETStandardMaximumVersion>$(BundledNETStandardTargetFrameworkVersion)</NETStandardMaximumVersion>-->
+    <NETStandardMaximumVersion>2.1</NETStandardMaximumVersion>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedNETStandardVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"

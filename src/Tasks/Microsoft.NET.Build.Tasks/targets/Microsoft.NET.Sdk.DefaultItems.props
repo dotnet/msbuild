@@ -17,6 +17,31 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(NETCoreSdkBundledVersionsProps)" Condition="Exists('$(NETCoreSdkBundledVersionsProps)')" />
 
+  <ItemGroup Condition="'$(UseRefTargetingPacks)' == 'true'">
+    <KnownFrameworkReference Update="Microsoft.NETCore.App"
+                               TargetingPackName="Microsoft.NETCore.App.Ref"
+                               TargetingPackVersion="3.0.0-preview-27406-5"
+                               />
+    <KnownFrameworkReference Update="Microsoft.AspNetCore.App"
+                               TargetingPackName="Microsoft.AspNetCore.App.Ref"
+                               TargetingPackVersion="3.0.0-preview-19108-04"
+                               />
+  </ItemGroup>
+
+  <ItemGroup>
+    <KnownFrameworkReference Include="NETStandard.Library"
+                              TargetFramework="netstandard2.1"
+                              RuntimeFrameworkName=""
+                              DefaultRuntimeFrameworkVersion=""
+                              LatestRuntimeFrameworkVersion=""
+                              TargetingPackName="NETStandard.Library"
+                              TargetingPackVersion="2.1.0-prerelease.19078.1"
+                              TargetingPackFormat="NETStandardLegacy"
+                              RuntimePackNamePatterns=""
+                              RuntimePackRuntimeIdentifiers=""
+                              />
+  </ItemGroup>
+
   <PropertyGroup>
     <!-- Disable web SDK implicit package versions for ASP.NET packages, since the .NET SDK now handles that -->
     <EnableWebSdkImplicitPackageVersions>false</EnableWebSdkImplicitPackageVersions>
@@ -36,7 +61,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Automatically reference NETStandard.Library or Microsoft.NETCore.App package if targeting the corresponding target framework.
       We can refer here in the .props file to properties set in the .targets files because items and their conditions are
       evaluated in the second pass of evaluation, after all properties have been evaluated. -->
-  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard'">
+  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1'">
     <PackageReference Include="NETStandard.Library" Version="$(NETStandardImplicitPackageVersion)" IsImplicitlyDefined="true" />
 
     <!-- If targeting .NET Standard 2.0 or higher, then don't include a dependency on NETStandard.Library in the package produced by pack -->
@@ -44,6 +69,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                       Condition=" ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0') "
                       PrivateAssets="All" 
                       Publish="true" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(_TargetFrameworkVersionWithoutV)' >= '2.1'">
+    <FrameworkReference Include="NETStandard.Library" IsImplicitlyDefined="true" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">

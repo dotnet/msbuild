@@ -33,5 +33,6 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedTargetFramework Include=".NETStandard,Version=v1.5" DisplayName=".NET Standard 1.5" />
         <SupportedTargetFramework Include=".NETStandard,Version=v1.6" DisplayName=".NET Standard 1.6" />
         <SupportedTargetFramework Include=".NETStandard,Version=v2.0" DisplayName=".NET Standard 2.0" />
+        <SupportedTargetFramework Include=".NETStandard,Version=v2.1" DisplayName=".NET Standard 2.1" />
     </ItemGroup>
 </Project>
