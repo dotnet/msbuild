@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFrameworks>netstandard2.0;net46</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(CliTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(CliTargetFramework)</TargetFrameworks>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -19,6 +19,10 @@
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingPackageVersion)" />
+    <!-- nuget moved all type from NuGet.Packaging.Core to NuGet.Packaging and added type forwarding in 5.0.0-rtm.5821.
+        However to allow old msbuild tasks like Arcade tasks still function without recompile, NuGet.Packaging.Core need
+        to be referenced explicitly so the NuGet.Packaging.Core.dll will be part of the SDK and be available for type forwarding -->
+    <PackageReference Include="NuGet.Packaging.Core" Version="$(NuGetPackagingPackageVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
@@ -27,8 +31,8 @@
     <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETStandard' ">
-    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
