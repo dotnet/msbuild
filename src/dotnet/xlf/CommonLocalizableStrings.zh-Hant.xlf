@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../CommonLocalizableStrings.resx">
     <body>
@@ -723,17 +723,16 @@ You can add it to the current session by running the following command:
 export PATH="$PATH:{0}"
 </source>
         <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數上。
-若您正在使用 Bash，您可執行下列命令將其新增至您的設定檔:
+若您使用 Bash，可以透過執行下列命令，將其新增到您的設定檔:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-您可執行下列命令將其新增至目前的工作階段:
+您可透過執行下列命令，將其新增到目前的工作階段:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -750,17 +749,16 @@ You can add it to the current session by running the following command:
 export PATH="$PATH:{0}"
 </source>
         <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數上。
-若您正在使用 Bash，您可執行下列命令將其新增至您的設定檔:
+若您使用 Bash，可以執行下列命令將其新增到您的設定檔:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-您可執行下列命令將其新增至目前的工作階段:
+您可執行下列命令將其新增到目前的工作階段:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -895,17 +893,17 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
         <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">要操作的專案或解決方案。若未指定檔案，命令就會在目前的目錄中搜尋一個檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="new">PROJECT | SOLUTION</target>
+        <target state="translated">專案 | 解決方案</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
         <note />
       </trans-unit>
     </body>

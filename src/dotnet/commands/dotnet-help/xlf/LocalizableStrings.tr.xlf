@@ -214,17 +214,17 @@
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
-        <target state="translated">Araştırma ilkesini ve araştırılacak bütünleştirilmiş kodları içeren yol.</target>
+        <target state="translated">Yoklama ilkesini ve yoklanacak bütünleştirilmiş kodları içeren yol.</target>
         <note />
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;uygulama&gt;.deps.json dosyasının yolu.</target>
+        <target state="translated">&lt;Uygulama&gt;.deps.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;uygulama&gt;.runtimeconfig.json dosyasının yolu.</target>
+        <target state="translated">&lt;Uygulama&gt;.runtimeconfig.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="new">Start F# Interactive / execute F# scripts.</target>
+        <target state="translated">F# Interactive'i başlatın / F# betiklerini yürütün.</target>
         <note />
       </trans-unit>
     </body>

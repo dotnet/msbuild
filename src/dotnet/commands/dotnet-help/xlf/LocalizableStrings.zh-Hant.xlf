@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="new">Start F# Interactive / execute F# scripts.</target>
+        <target state="translated">啟動 F# 互動/執行 F# 指令碼。</target>
         <note />
       </trans-unit>
     </body>
