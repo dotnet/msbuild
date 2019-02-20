@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -14,6 +15,8 @@ namespace Microsoft.Build.Experimental.Graph
         public IReadOnlyCollection<string> Targets { get; }
         public IReadOnlyDictionary<string, string> GlobalProperties { get; }
         public bool ShouldRunBuild { get; }
+
+        public static BuildData Empty { get; } = new BuildData(new string[0], new Dictionary<string, string>());
 
         public BuildData(IReadOnlyCollection<string> targets, IReadOnlyDictionary<string, string> globalProperties)
         {
@@ -64,9 +67,14 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         /// <param name="targets"></param>
         /// <returns></returns>
-        public BuildData ComputeBuildData(IReadOnlyCollection<string> targets)
+        internal BuildData ComputeBuildData(IReadOnlyCollection<string> targets)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targets, nameof(targets));
+            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
+
+            if (targets.Count == 0)
+            {
+                return BuildData.Empty;
+            }
 
             if (targets.Contains(TargetNames.BuildTargetsForGraphBuild))
             {
