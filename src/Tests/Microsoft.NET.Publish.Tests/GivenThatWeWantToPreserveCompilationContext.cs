@@ -114,7 +114,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
 
                 dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
-                dependencyContext.CompilationOptions.LanguageVersion.Should().Be("");
+                dependencyContext.CompilationOptions.LanguageVersion.Should().BeOneOf("", "preview");
                 dependencyContext.CompilationOptions.Platform.Should().Be("x86");
                 dependencyContext.CompilationOptions.Optimize.Should().Be(false);
                 dependencyContext.CompilationOptions.KeyFile.Should().Be("");
