@@ -1,6 +1,7 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
+  <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
@@ -10,10 +11,11 @@
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
-    <CreateTlb>true</CreateTlb>
+    <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
   </PropertyGroup>
 
   <ItemGroup>
@@ -332,6 +334,7 @@
     <Compile Include="CommandLineBuilderExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ResolveComReference.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
     <Compile Include="FileIO\GetFileHash.cs" />
@@ -608,7 +611,6 @@
     </Compile>
     <Compile Include="ResGen.cs" />
     <Compile Include="ResGenDependencies.cs" />
-    <Compile Include="ResolveComReference.cs" />
     <Compile Include="ResolveComReferenceCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -972,7 +974,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
-    <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="..\..\15.0\Bin\Roslyn" />
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
@@ -1002,9 +1003,4 @@
     -->
     <Content Update="@(Content)" Pack="false" />
   </ItemGroup>
-
-  <Target Name="CopyMscorlib" AfterTargets="Build">
-    <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\netstandard.dll" DestinationFolder="$(ArtifactsBinDir)/MSBuild/$(TargetFramework)/ref" />
-    <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\mscorlib.dll" DestinationFolder="$(ArtifactsBinDir)/MSBuild/$(TargetFramework)/ref" />
-  </Target>
 </Project>

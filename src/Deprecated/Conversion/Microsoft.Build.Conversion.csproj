@@ -1,13 +1,12 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
-    <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -38,5 +37,5 @@
     <ProjectReference Include="..\Engine\Microsoft.Build.Engine.csproj" />
   </ItemGroup>
 
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
 </Project>

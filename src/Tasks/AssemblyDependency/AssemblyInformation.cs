@@ -46,17 +46,17 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
+#if FEATURE_ASSEMBLY_LOADFROM
         // Borrowed from genman.
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
         private const int GENMAN_ENUM_TOKEN_BUF_SIZE = 16; // 128 from genman seems too big.
 
-#if FEATURE_ASSEMBLY_LOADFROM
         static AssemblyInformation()
         {
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ReflectionOnlyAssemblyResolve;
         }
-#endif
+#endif // FEATURE_ASSEMBLY_LOADFROM
 
         /// <summary>
         /// Construct an instance for a source file.
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM
         private static Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            string[] nameParts = args.Name.Split(',');
+            string[] nameParts = args.Name.Split(MSBuildConstants.CommaChar);
             Assembly assembly = null;
 
             if (args.RequestingAssembly != null && !string.IsNullOrEmpty(args.RequestingAssembly.Location) && nameParts.Length > 0)
@@ -369,11 +369,8 @@ namespace Microsoft.Build.Tasks
 
                     foreach (var handle in assemblyReferences)
                     {
-                        ret.Add(
-                            new AssemblyNameExtension(
-                                metadataReader
-                                .GetAssemblyReference(handle)
-                                .GetAssemblyName()));
+                        var assemblyName = GetAssemblyName(metadataReader, handle);
+                        ret.Add(new AssemblyNameExtension(assemblyName));
                     }
 
                     _assemblyDependencies = ret.ToArray();
@@ -416,6 +413,42 @@ namespace Microsoft.Build.Tasks
 
                 _metadataRead = true;
             }
+        }
+
+        // https://github.com/Microsoft/msbuild/issues/4002
+        // https://github.com/dotnet/corefx/issues/34008
+        //
+        // We do not use AssemblyReference.GetAssemblyName() here because its behavior
+        // is different from other code paths with respect to neutral culture. We will
+        // get unspecified culture instead of explicitly neutral culture. This in turn
+        // leads string comparisons of assembly-name-modulo-version in RAR to false
+        // negatives that break its conflict resolution and binding redirect generation.
+        private static AssemblyName GetAssemblyName(MetadataReader metadataReader, AssemblyReferenceHandle handle)
+        {
+            var entry = metadataReader.GetAssemblyReference(handle);
+
+            var assemblyName = new AssemblyName
+            {
+                Name = metadataReader.GetString(entry.Name),
+                Version = entry.Version,
+                CultureName = metadataReader.GetString(entry.Culture)
+            };
+
+            var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
+            if (publicKeyOrToken != null)
+            {
+                if (publicKeyOrToken.Length <= 8)
+                {
+                    assemblyName.SetPublicKeyToken(publicKeyOrToken);
+                }
+                else
+                {
+                    assemblyName.SetPublicKey(publicKeyOrToken);
+                }
+            }
+
+            assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+            return assemblyName;
         }
 #endif
 

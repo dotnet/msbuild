@@ -13,6 +13,8 @@
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);STANDALONEBUILD</DefineConstants>
     <DefineConstants Condition="'$(DisableNerdbankVersioning)' != 'true'">$(DefineConstants);THISASSEMBLY</DefineConstants>
+
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) Or $(TargetFramework.StartsWith('net3'))">
@@ -54,7 +56,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_LEGACY_GETCURRENTDIRECTORY</DefineConstants>
     <!-- Path.GetFullPath The pre .Net 4.6.2 implementation of Path.GetFullPath is slow and creates strings in its work. -->
     <DefineConstants>$(DefineConstants);FEATURE_LEGACY_GETFULLPATH</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPES_FULL_DUPLEX</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_PERFORMANCE_COUNTERS</DefineConstants>
@@ -89,7 +90,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_MULTIPLE_TOOLSETS</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_TYPE_INVOKEMEMBER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETINTERFACE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_USERINTERACTIVE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_USERDOMAINNAME</DefineConstants>
@@ -101,7 +101,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_XML_LOADPATH</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
-    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_WORKINGSET</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
@@ -129,15 +128,9 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPES_FULL_DUPLEX</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SPAN</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
-    <IBCMergeBranch>lab/vsuml</IBCMergeBranch>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' != 'true'">

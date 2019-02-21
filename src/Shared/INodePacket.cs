@@ -184,7 +184,7 @@ namespace Microsoft.Build.BackEnd
     /// This interface represents a packet which may be transmitted using an INodeEndpoint.
     /// Implementations define the serialized form of the data.
     /// </summary>
-    internal interface INodePacket : INodePacketTranslatable
+    internal interface INodePacket : ITranslatable
     {
         #region Properties
         /// <summary>

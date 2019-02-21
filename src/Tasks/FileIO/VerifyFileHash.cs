@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks
         public string HashEncoding { get; set; } = GetFileHash._hashEncodingHex;
 
         /// <summary>
-        /// The hasing algorithm to use. Allowed values: SHA256, SHA384, SHA512. Default = SHA256
+        /// The hashing algorithm to use. Allowed values: SHA256, SHA384, SHA512. Default = SHA256.
         /// </summary>
         public string Algorithm { get; set; } = GetFileHash._defaultFileHashAlgorithm;
 

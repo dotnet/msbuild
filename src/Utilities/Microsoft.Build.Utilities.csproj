@@ -1,6 +1,7 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
+  <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
@@ -13,13 +14,13 @@
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is used to implement custom MSBuild tasks.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">

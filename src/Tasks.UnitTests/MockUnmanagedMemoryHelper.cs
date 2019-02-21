@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public void AssertAllHandlesReleased()
         {
-            Assert.Equal(0, _allocatedHandles.Count);
+            Assert.Empty(_allocatedHandles);
         }
     }
 }

@@ -171,11 +171,11 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
             p.Namespaces = "<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />";
-            Assert.True(p.Namespaces.Equals("<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />"));
+            Assert.Equal("<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />", p.Namespaces);
             p.Value = new TaskItem("Nur");
 
             bool executeResult = p.Execute();
-            Assert.True(engine.Log.Contains("MSB3731"));
+            Assert.Contains("MSB3731", engine.Log);
             Assert.False(executeResult); // "Execution should've failed"
         }
 

@@ -2,11 +2,6 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
-    <!-- Repeat setting DebugType (already set in Directory.Build.props, but repeat here because because xunit.core.targets overrides it) -->
-    <DebugType Condition=" '$(TargetFramework)' == '' and '$(DebugType)' == ''">full</DebugType>
-    <DebugType Condition=" '$(TargetFramework)' != '' and '$(DebugType)' == ''">embedded</DebugType>
-    <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
@@ -37,8 +32,11 @@
 
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
 
-    <XUnitRunnerAdditionalArguments>$(XunitOptions)</XUnitRunnerAdditionalArguments>
+    <XunitOptions>$(XunitOptions) -notrait category=failing</XunitOptions>
+
+    <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
     
+    <PackageOutputPath Condition="'$(IsVisualStudioInsertionPackage)' == 'true'">$(DevDivPackagesDir)</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
@@ -109,7 +107,7 @@
     </ItemGroup>
   </Target>
 
-  <Import Project="$([System.IO.Path]::Combine('$(RepoRoot)', 'build', 'GetBuildVersionStub.proj'))" Condition="'$(DisableNerdbankVersioning)' == 'true'" />
+  <Import Project="$([System.IO.Path]::Combine('$(RepoRoot)', 'eng', 'GetBuildVersionStub.proj'))" Condition="'$(DisableNerdbankVersioning)' == 'true'" />
 
   <Target Name="GetNuGetPackageVersionEx"
     BeforeTargets="GenerateNuspec"
@@ -136,7 +134,7 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and '$(OsEnvironment)' == 'windows' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and '$(OsEnvironment)' == 'windows' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' != 'Core'">
     <!-- Provide a mechanism for turning on verbose TlbExp output for diagnosing issues -->
     <PropertyGroup>
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' == 'true'">/verbose</TlbExpVerbosity>
@@ -151,7 +149,7 @@
       <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
     </ItemGroup>
 
-    <Exec Command="tlbexp.exe $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
+    <Exec Command="&quot;$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToDotNetFrameworkSdkFile('tlbexp.exe'))&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
   </Target>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />

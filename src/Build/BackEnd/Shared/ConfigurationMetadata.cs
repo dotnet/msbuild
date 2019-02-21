@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// A struct representing the uniquely-identifying portion of a BuildRequestConfiguration.  Used for lookups.
     /// </summary>
-    internal class ConfigurationMetadata : IEquatable<ConfigurationMetadata>
+    internal class ConfigurationMetadata : IEquatable<ConfigurationMetadata>, ITranslatable
     {
         /// <summary>
         /// Constructor over a BuildRequestConfiguration.
@@ -22,9 +22,9 @@ namespace Microsoft.Build.BackEnd
         public ConfigurationMetadata(BuildRequestConfiguration configuration)
         {
             ErrorUtilities.VerifyThrowArgumentNull(configuration, nameof(configuration));
-            GlobalProperties = new PropertyDictionary<ProjectPropertyInstance>(configuration.GlobalProperties);
-            ProjectFullPath = FileUtilities.NormalizePath(configuration.ProjectFullPath);
-            ToolsVersion = configuration.ToolsVersion;
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(configuration.GlobalProperties);
+            _projectFullPath = FileUtilities.NormalizePath(configuration.ProjectFullPath);
+            _toolsVersion = configuration.ToolsVersion;
         }
 
         /// <summary>
@@ -33,20 +33,42 @@ namespace Microsoft.Build.BackEnd
         public ConfigurationMetadata(Project project)
         {
             ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
-            GlobalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
             foreach (KeyValuePair<string, string> entry in project.GlobalProperties)
             {
                 GlobalProperties[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
             }
 
-            ToolsVersion = project.ToolsVersion;
-            ProjectFullPath = FileUtilities.NormalizePath(project.FullPath);
+            _toolsVersion = project.ToolsVersion;
+            _projectFullPath = FileUtilities.NormalizePath(project.FullPath);
         }
+
+        /// <summary>
+        /// Constructor taking individual arguments.
+        /// </summary>
+        public ConfigurationMetadata(string projectFullPath, PropertyDictionary<ProjectPropertyInstance> globalProperties)
+        {
+            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath, nameof(projectFullPath));
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
+
+            _projectFullPath = projectFullPath;
+            _toolsVersion = MSBuildConstants.CurrentToolsVersion;
+            _globalProperties = globalProperties;
+        }
+
+        public ConfigurationMetadata(ITranslator translator)
+        {
+            Translate(translator);
+        }
+
+        private string _projectFullPath;
 
         /// <summary>
         /// The full path to the project to build.
         /// </summary>
-        public string ProjectFullPath { get; }
+        public string ProjectFullPath => _projectFullPath;
+
+        private string _toolsVersion;
 
         /// <summary>
         /// The tools version specified for the configuration.
@@ -54,12 +76,14 @@ namespace Microsoft.Build.BackEnd
         /// May have originated from a /tv switch, or an MSBuild task,
         /// or a Project tag, or the default.
         /// </summary>
-        public string ToolsVersion { get; }
+        public string ToolsVersion => _toolsVersion;
+
+        private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
         /// <summary>
         /// The set of global properties which should be used when building this project.
         /// </summary>
-        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties { get; }
+        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties => _globalProperties;
 
         /// <summary>
         /// This override is used to provide a hash code for storage in dictionaries and the like.
@@ -73,6 +97,18 @@ namespace Microsoft.Build.BackEnd
         public override int GetHashCode()
         {
             return StringComparer.OrdinalIgnoreCase.GetHashCode(ProjectFullPath) ^ StringComparer.OrdinalIgnoreCase.GetHashCode(ToolsVersion);
+        }
+
+        public void Translate(ITranslator translator)
+        {
+            translator.Translate(ref _projectFullPath);
+            translator.Translate(ref _toolsVersion);
+            translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+        }
+
+        public static ConfigurationMetadata FactoryForDeserialization(ITranslator translator)
+        {
+            return new ConfigurationMetadata(translator);
         }
 
         /// <summary>

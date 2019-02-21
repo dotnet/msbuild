@@ -91,12 +91,6 @@ namespace Microsoft.Build.Shared
         private static readonly Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool> FileExistenceCache = new Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 #endif
         private static readonly IFileSystem DefaultFileSystem = FileSystems.Default;
-        private enum GetFileAttributesResult
-        {
-            Directory,
-            Error,
-            File,
-        }
 
         /// <summary>
         /// Retrieves the MSBuild runtime cache directory
@@ -342,7 +336,7 @@ namespace Microsoft.Build.Shared
 
                 if (IsPathTooLong(uncheckedFullPath))
                 {
-                    string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, (int)NativeMethodsShared.OSMaxPathLimit);
+                    string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);
                     throw new PathTooLongException(message);
                 }
 
@@ -358,6 +352,7 @@ namespace Microsoft.Build.Shared
             return Path.GetFullPath(path);
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         private static bool IsUNCPath(string path)
         {
             if (!NativeMethodsShared.IsWindows || !path.StartsWith(@"\\", StringComparison.Ordinal))
@@ -392,6 +387,7 @@ namespace Microsoft.Build.Shared
             */
             return isUNC || path.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1;
         }
+#endif // FEATURE_LEGACY_GETFULLPATH
 
         internal static string FixFilePath(string path)
         {
@@ -432,6 +428,7 @@ namespace Microsoft.Build.Shared
             return shouldAdjust ? newValue.ToString() : value;
         }
 
+#if !FEATURE_SPAN
         private static string ConvertToUnixSlashes(string path)
         {
             if (path.IndexOf('\\') == -1)
@@ -473,8 +470,7 @@ namespace Microsoft.Build.Shared
 
             return hasQuotes ? path.Substring(1, endId - 1) : path;
         }
-
-#if FEATURE_SPAN
+#else
         private static Span<char> ConvertToUnixSlashes(Span<char> path)
         {
             return path.IndexOf('\\') == -1 ? path : CollapseSlashes(path);
@@ -646,11 +642,8 @@ namespace Microsoft.Build.Shared
 
             if (NativeMethodsShared.IsWindows && !EndsWithSlash(fullPath))
             {
-                Match drive = FileUtilitiesRegex.DrivePattern.Match(fileSpec);
-                Match UNCShare = FileUtilitiesRegex.UNCPattern.Match(fullPath);
-
-                if ((drive.Success && (drive.Length == fileSpec.Length)) ||
-                    (UNCShare.Success && (UNCShare.Length == fullPath.Length)))
+                if (FileUtilitiesRegex.DrivePattern.IsMatch(fileSpec) ||
+                    FileUtilitiesRegex.UncPattern.IsMatch(fullPath))
                 {
                     // append trailing slash if Path.GetFullPath failed to (this happens with drive-specs and UNC shares)
                     fullPath += Path.DirectorySeparatorChar;
@@ -1066,13 +1059,13 @@ namespace Microsoft.Build.Shared
         private static bool IsPathTooLong(string path)
         {
             // >= not > because MAX_PATH assumes a trailing null
-            return path.Length >= (int)NativeMethodsShared.OSMaxPathLimit;
+            return path.Length >= NativeMethodsShared.MaxPath;
         }
 
         private static bool IsPathTooLongIfRooted(string path)
         {
-            bool hasMaxPath = NativeMethodsShared.OSMaxPathLimit != NativeMethodsShared.MaxPathLimits.None;
-            int maxPath = (int)NativeMethodsShared.OSMaxPathLimit;
+            bool hasMaxPath = NativeMethodsShared.HasMaxPath;
+            int maxPath = NativeMethodsShared.MaxPath;
             // >= not > because MAX_PATH assumes a trailing null
             return hasMaxPath && !IsRootedNoThrow(path) && NativeMethodsShared.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= maxPath;
         }
@@ -1142,6 +1135,11 @@ namespace Microsoft.Build.Shared
         internal static string ToSlash(this string s)
         {
             return s.Replace('\\', '/');
+        }
+
+        internal static string ToBackslash(this string s)
+        {
+            return s.Replace('/', '\\');
         }
 
         /// <summary>
@@ -1331,6 +1329,14 @@ namespace Microsoft.Build.Shared
             string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file, fileSystem);
 
             return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
+        }
+
+        internal static void EnsureDirectoryExists(string directoryPath)
+        {
+            if (directoryPath != null && !DefaultFileSystem.DirectoryExists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
         }
 
         // Method is simple set of function calls and may inline;

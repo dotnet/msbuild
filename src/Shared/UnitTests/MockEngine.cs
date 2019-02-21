@@ -10,6 +10,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -205,8 +207,6 @@ namespace Microsoft.Build.UnitTests
             IDictionary targetOutputs
             )
         {
-            ILogger[] loggers = { MockLogger, new ConsoleLogger() };
-
             return BuildProjectFile(projectFileName, targetNames, globalPropertiesPassedIntoTask, targetOutputs, null);
         }
 
@@ -443,7 +443,7 @@ namespace Microsoft.Build.UnitTests
                 _output.WriteLine(logText);
             }
 
-            Assert.Equal(-1, logText.IndexOf(contains, StringComparison.OrdinalIgnoreCase));
+            logText.ShouldNotContain(contains, Case.Insensitive);
 
             // If we do not contain this string than pass it to
             // MockLogger. Since MockLogger is also registered as

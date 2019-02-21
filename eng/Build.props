@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+
+  <ItemGroup>
+	<!-- Remove all sln files globbed by arcade so far and add only MSBuild.sln to the build.
+	Without this, arcade tries to build all three MSBuild solution at once, which leads to
+	locked file errors. -->
+    <ProjectToBuild Remove="@(ProjectToBuild)" />
+    <ProjectToBuild Include="$(RepoRoot)MSBuild.sln" />
+  </ItemGroup>
+
+</Project>

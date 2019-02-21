@@ -1021,7 +1021,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
         <source>MSB3562: The "[strings]" tag is no longer necessary in text resources; please remove it.</source>
-        <target state="translated">MSB3562: Die [strings]-Kennung ist in Textressourcen nicht mehr erforderlich. Entfernen Sie es.</target>
+        <target state="translated">MSB3562: Das [strings]-Tag ist in Textressourcen nicht mehr erforderlich. Entfernen Sie es.</target>
         <note>{StrBegin="MSB3562: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnexpectedInfBracket">
@@ -2282,6 +2282,11 @@
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
         <target state="translated">MSB3353: Der für die verzögerte Signierung erforderliche öffentliche Schlüssel wurde nicht angegeben.</target>
         <note>{StrBegin="MSB3353: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
+        <target state="translated">MSB4803: Die Aufgabe "{0}" wird für die .NET Core-Version von MSBuild nicht unterstützt. Verwenden Sie die .NET Framework-Version von MSBuild. Weitere Informationen finden Sie unter https://aka.ms/msbuild/MSB4803.</target>
+        <note>{StrBegin="MSB4803: "}</note>
       </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>

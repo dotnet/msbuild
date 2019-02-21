@@ -15,6 +15,7 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Experimental.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -245,23 +246,29 @@ namespace Microsoft.Build.UnitTests
 
         public static void AssertItems(string[] expectedItems, IList<TestItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
         {
-            Assert.Equal(expectedItems.Length, items.Count);
+            if (items.Count != 0 || expectedDirectMetadataPerItem.Length != 0)
+            {
+                expectedItems.ShouldNotBeEmpty();
+            }
 
-            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
-
-            for (int i = 0; i < expectedItems.Length; i++)
+            for (var i = 0; i < expectedItems.Length; i++)
             {
                 if (!normalizeSlashes)
                 {
-                    Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                    items[i].EvaluatedInclude.ShouldBe(expectedItems[i]);
                 }
                 else
                 {
-                    Assert.Equal(NormalizeSlashes(expectedItems[i]), items[i].EvaluatedInclude);
+                    var normalizedItem = NormalizeSlashes(expectedItems[i]);
+                    items[i].EvaluatedInclude.ShouldBe(normalizedItem);
                 }
 
                 AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
             }
+
+            items.Count.ShouldBe(expectedItems.Length);
+
+            expectedItems.Length.ShouldBe(expectedDirectMetadataPerItem.Length);
         }
 
         /// <summary>
@@ -463,7 +470,7 @@ namespace Microsoft.Build.UnitTests
 
             // First, parse this massive string that we've been given, and create an ITaskItem[] out of it,
             // so we can more easily compare it against the actual items.
-            string[] expectedItemsStringSplit = expectedItemsString.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] expectedItemsStringSplit = expectedItemsString.Split(MSBuildConstants.CrLf, StringSplitOptions.RemoveEmptyEntries);
             foreach (string singleExpectedItemString in expectedItemsStringSplit)
             {
                 string singleExpectedItemStringTrimmed = singleExpectedItemString.Trim();
@@ -486,7 +493,7 @@ namespace Microsoft.Build.UnitTests
 
                         ITaskItem expectedItem = new Utilities.TaskItem(itemSpec);
 
-                        string[] itemMetadataPieces = itemMetadataString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] itemMetadataPieces = itemMetadataString.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
                         foreach (string itemMetadataPiece in itemMetadataPieces)
                         {
                             string itemMetadataPieceTrimmed = itemMetadataPiece.Trim();
@@ -1135,7 +1142,7 @@ namespace Microsoft.Build.UnitTests
         internal static int Count(IEnumerable enumerable)
         {
             int i = 0;
-            foreach (object o in enumerable)
+            foreach (object _ in enumerable)
             {
                 i++;
             }
@@ -1313,40 +1320,53 @@ namespace Microsoft.Build.UnitTests
             result = project.Build(loggers);
         }
 
-        public static MockLogger BuildProjectUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
+        public static MockLogger BuildProjectContentUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
         {
             var logger = new MockLogger();
 
-            var result = BuildProjectUsingBuildManager(content, logger);
+            var result = BuildProjectContentUsingBuildManager(content, logger);
 
             result.OverallResult.ShouldBe(expectedResult);
 
             return logger;
         }
 
-        public static BuildResult BuildProjectUsingBuildManager(string content, MockLogger logger)
+        public static BuildResult BuildProjectContentUsingBuildManager(string content, MockLogger logger, BuildParameters parameters = null)
         {
             // Replace the crazy quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            List<ILogger> loggers = new List<ILogger>();
-
             using (var env = TestEnvironment.Create())
-            using (var buildManager = new BuildManager())
             {
                 var testProject = env.CreateTestProjectWithFiles(content.Cleanup());
 
+                return BuildProjectFileUsingBuildManager(testProject.ProjectFile, logger, parameters);
+            }
+        }
+
+        public static BuildResult BuildProjectFileUsingBuildManager(string projectFile, MockLogger logger = null, BuildParameters parameters = null)
+        {
+            using (var buildManager = new BuildManager())
+            {
+                parameters = parameters ?? new BuildParameters();
+
+                if (logger != null)
+                {
+                    parameters.Loggers = parameters.Loggers == null
+                        ? new[] {logger}
+                        : parameters.Loggers.Concat(new[] {logger});
+                }
+
+                var request = new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string>(),
+                    MSBuildConstants.CurrentToolsVersion,
+                    new string[] {},
+                    null);
+
                 var result = buildManager.Build(
-                    new BuildParameters()
-                    {
-                        Loggers = new []{logger}
-                    },
-                    new BuildRequestData(
-                        testProject.ProjectFile,
-                        new Dictionary<string, string>(),
-                        MSBuildConstants.CurrentToolsVersion,
-                        new string[] {},
-                        null));
+                    parameters,
+                    request);
 
                 return result;
             }
@@ -1491,11 +1511,126 @@ namespace Microsoft.Build.UnitTests
             return result;
         }
 
+        internal delegate TransientTestFile CreateProjectFileDelegate(
+            TestEnvironment env,
+            int projectNumber,
+            int[] projectReferences = null,
+            Dictionary<string, string[]> projectReferenceTargets = null,
+            string defaultTargets = null,
+            string extraContent = null);
+
+        internal static TransientTestFile CreateProjectFile(
+            TestEnvironment env,
+            int projectNumber,
+            int[] projectReferences = null,
+            Dictionary<string, string[]> projectReferenceTargets = null,
+            string defaultTargets = null,
+            string extraContent = null
+            )
+        {
+            var sb = new StringBuilder(64);
+
+            sb.Append(
+                defaultTargets == null
+                    ? "<Project>"
+                    : $"<Project DefaultTargets=\"{defaultTargets}\">");
+
+            sb.Append("<ItemGroup>");
+
+            if (projectReferences != null)
+            {
+                foreach (int projectReference in projectReferences)
+                {
+                    sb.AppendFormat("<ProjectReference Include=\"{0}.proj\" />", projectReference);
+                }
+            }
+
+            if (projectReferenceTargets != null)
+            {
+                foreach (KeyValuePair<string, string[]> pair in projectReferenceTargets)
+                {
+                    sb.AppendFormat("<ProjectReferenceTargets Include=\"{0}\" Targets=\"{1}\" />", pair.Key, string.Join(";", pair.Value));
+                }
+            }
+
+            sb.Append("</ItemGroup>");
+
+            
+            foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
+            {
+                sb.Append($"<Target Name='{defaultTarget}'/>");
+            }
+
+            sb.Append(extraContent ?? string.Empty);
+
+            sb.Append("</Project>");
+
+            return env.CreateFile(projectNumber + ".proj", sb.ToString());
+        }
+
+        internal static ProjectGraph CreateProjectGraph(
+            TestEnvironment env,
+            // direct dependencies that the kvp.key node has on the nodes represented by kvp.value
+            Dictionary<int, int[]> dependencyEdges,
+            CreateProjectFileDelegate createProjectFile = null)
+        {
+            createProjectFile = createProjectFile ?? CreateProjectFile;
+
+            var nodes = new Dictionary<int, (bool IsRoot, string ProjectPath)>();
+
+            // add nodes with dependencies
+            foreach (var nodeDependencies in dependencyEdges)
+            {
+                var parent = nodeDependencies.Key;
+
+                if (!nodes.ContainsKey(parent))
+                {
+                    var file = createProjectFile(env, parent, nodeDependencies.Value);
+                    nodes[parent] = (IsRoot(parent), file.Path);
+                }
+            }
+
+            // add what's left, nodes without dependencies
+            foreach (var nodeDependencies in dependencyEdges)
+            {
+                if (nodeDependencies.Value == null)
+                {
+                    continue;
+                }
+
+                foreach (var reference in nodeDependencies.Value)
+                {
+                    if (!nodes.ContainsKey(reference))
+                    {
+                        var file = createProjectFile(env, reference);
+                        nodes[reference] = (false, file.Path);
+                    }
+                }
+            }
+
+            return new ProjectGraph(
+                nodes.Where(nodeEntry => nodeEntry.Value.IsRoot)
+                    .Select(nodeEntry => nodeEntry.Value.ProjectPath));
+
+            bool IsRoot(int node)
+            {
+                foreach (var nodeDependencies in dependencyEdges)
+                {
+                    if (nodeDependencies.Value != null && nodeDependencies.Value.Contains(node))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+
         private static string[] SplitPathIntoFragments(string path)
         {
             // Both Path.AltDirectorSeparatorChar and Path.DirectorySeparator char return '/' on OSX,
             // which renders them useless for the following case where I want to split a path that may contain either separator
-            var splits = path.Split('/', '\\');
+            var splits = path.Split(MSBuildConstants.ForwardSlashBackslash);
 
             // if the path is rooted then the first split is either empty (Unix) or 'c:' (Windows)
             // in this case the root must be restored back to '/' (Unix) or 'c:\' (Windows)

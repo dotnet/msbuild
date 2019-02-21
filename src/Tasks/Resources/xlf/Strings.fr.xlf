@@ -2283,6 +2283,11 @@
         <target state="translated">MSB3353: La clé publique nécessaire à la signature différée n'a pas été spécifiée.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
+        <target state="translated">MSB4803: La tâche "{0}" n'est pas prise en charge dans la version .NET Core de MSBuild. Utilisez la version du .NET Framework de MSBuild. Pour plus d'informations, consultez https://aka.ms/msbuild/MSB4803.</target>
+        <note>{StrBegin="MSB4803: "}</note>
+      </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>
         <target state="translated">MSB3661: Une valeur '{0}' non valide a été passée à la propriété Transform.</target>

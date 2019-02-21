@@ -66,12 +66,6 @@ namespace Microsoft.Build.UnitTests
                 _simulatedConsole.Append(s);
             }
 
-            internal void WriteLine(string s)
-            {
-                Write(s);
-                Write(Environment.NewLine);
-            }
-
             internal void SetColor(ConsoleColor c)
             {
                 switch (c)
@@ -115,12 +109,6 @@ namespace Microsoft.Build.UnitTests
 
         private sealed class MyCustomBuildEventArgs : CustomBuildEventArgs
         {
-            internal MyCustomBuildEventArgs()
-                : base()
-            {
-                // do nothing
-            }
-
             internal MyCustomBuildEventArgs(string message)
                 : base(message, null, null)
             {
@@ -496,18 +484,14 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [InlineData("error", "red", false, MessageImportance.Normal)]
-        [InlineData("error", "red", true, MessageImportance.Normal)]
-        [InlineData("warning", "yellow", false, MessageImportance.Normal)]
-        [InlineData("warning", "yellow", true, MessageImportance.Normal)]
-        [InlineData("message", "darkgray", false, MessageImportance.High)]
-        [InlineData("message", "darkgray", true, MessageImportance.High)]
-        [InlineData("message", "darkgray", false, MessageImportance.Normal)]
-        [InlineData("message", "darkgray", true, MessageImportance.Normal)]
-        [InlineData("message", "darkgray", false, MessageImportance.Low)]
-        [InlineData("message", "darkgray", true, MessageImportance.Low)]
+        [InlineData("error", "red", false)]
+        [InlineData("error", "red", true)]
+        [InlineData("warning", "yellow", false)]
+        [InlineData("warning", "yellow", true)]
+        [InlineData("message", "darkgray", false)]
+        [InlineData("message", "darkgray", true)]
         [Theory]
-        public void ColorTest(string expectedMessageType, string expectedColor, bool parallel, MessageImportance messageImportance)
+        public void ColorTest(string expectedMessageType, string expectedColor, bool parallel)
         {
             const string subcategory = "VBC";
             const string code = "31415";

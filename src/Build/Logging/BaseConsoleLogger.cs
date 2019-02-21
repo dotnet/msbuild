@@ -1123,12 +1123,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Console logger parameters delimiters.
         /// </summary>
-        internal static readonly char[] parameterDelimiters = { ';' };
+        internal static readonly char[] parameterDelimiters = MSBuildConstants.SemicolonChar;
 
         /// <summary>
         /// Console logger parameter value split character.
         /// </summary>
-        private static readonly char[] s_parameterValueSplitCharacter = { '=' };
+        private static readonly char[] s_parameterValueSplitCharacter = MSBuildConstants.EqualsChar;
 
         /// <summary>
         /// When true, accumulate performance numbers.

@@ -830,6 +830,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterBuild
     </BuildDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+  </ItemGroup>
+
   <Target
       Name="Build"
       Condition=" '$(_InvalidConfigurationWarning)' != 'true' "
@@ -917,6 +922,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterRebuild;
     </RebuildDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+  </ItemGroup>
 
   <Target
       Name="Rebuild"
@@ -3417,9 +3426,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
       <CoreCompileCache Include="@(Compile)" />
       <CoreCompileCache Include="@(ReferencePath)" />
+      <CoreCompileCache Include="$(DefineConstants)" />
     </ItemGroup>
 
-    <Hash ItemsToHash="@(CoreCompileCache)">
+    <Hash 
+      ItemsToHash="@(CoreCompileCache)" 
+      IgnoreCase="$([MSBuild]::ValueOrDefault(`$(CoreCompileCacheIgnoreCase)`, `true`))">
       <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
     </Hash>
 
@@ -4965,6 +4977,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterClean
     </CleanDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
+  </ItemGroup>
+
   <Target
       Name="Clean"
       Condition=" '$(_InvalidConfigurationWarning)' != 'true' "
@@ -5989,6 +6006,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </ReferenceCopyLocalPathsOutputGroupOutput>
     </ItemGroup>
 
+  </Target>
+
+  <!--
+    ============================================================
+         DesignerRuntimeImplementationProjectOutputGroup
+
+    Exposes build items to be used by designer. The default is empty, but
+    SDKs can override it as appropriate. The empty stub is required so that
+    the project system can always rely on calling it even if it is not
+    overridden.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+      $(DesignerRuntimeImplementationProjectOutputGroupDependsOn);
+      $(CommonOutputGroupsDependsOn)
+    </DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+  </PropertyGroup>
+
+  <Target
+      Name="DesignerRuntimeImplementationProjectOutputGroup"
+      DependsOnTargets="$(DesignerRuntimeImplementationProjectOutputGroupDependsOn)"
+      Returns="@(DesignerRuntimeImplementationProjectOutputGroupOutput)">
   </Target>
 
   <PropertyGroup>

@@ -5,6 +5,10 @@ package name=Microsoft.Build
         vs.package.chip=neutral
         vs.package.language=neutral
 
+vs.dependencies
+  vs.dependency id=Microsoft.VisualStudio.NuGet.BuildTools
+                version=[15.0,17.0)
+
 folder InstallDir:\MSBuild\Current
   file source=$(X86BinPath)Microsoft.Common.props
   file source=$(X86BinPath)Microsoft.VisualStudioVersion.v15.Common.props
@@ -23,8 +27,6 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(TaskHostBinPath)MSBuildTaskHost.exe.config
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.IO.Compression.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Runtime.InteropServices.RuntimeInformation.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
@@ -159,8 +161,6 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.IO.Compression.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Runtime.InteropServices.RuntimeInformation.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks

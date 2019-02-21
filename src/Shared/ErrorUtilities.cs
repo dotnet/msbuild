@@ -148,6 +148,16 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        public static void VerifyThrowInternalLength<T>(T[] parameterValue, string parameterName)
+        {
+            VerifyThrowInternalNull(parameterValue, parameterName);
+
+            if (parameterValue.Length == 0)
+            {
+                ThrowInternalError("{0} unexpectedly empty", parameterName);
+            }
+        }
+
         /// <summary>
         /// Helper to throw an InternalErrorException when the specified parameter is not a rooted path.
         /// This should be used ONLY if this would indicate a bug in MSBuild rather than

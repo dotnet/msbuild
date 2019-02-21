@@ -8,6 +8,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
+#if MICROSOFT_BUILD_TASKS
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+#else
+using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
+#endif
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -230,26 +236,6 @@ namespace Microsoft.Build.Shared
             /// The error message text (localized)
             /// </summary>
             internal string text;
-
-#if NEVER
-            internal new string ToString()
-            {
-                return String.Format
-                (
-                     "Origin='{0}'\n"
-                    +"Filename='{1}'\n"
-                    +"Line='{2}'\n"
-                    +"Column='{3}'\n"
-                    +"EndLine='{4}'\n"
-                    +"EndColumn='{5}'\n"
-                    +"Category='{6}'\n"
-                    +"Subcategory='{7}'\n"
-                    +"Text='{8}'\n"
-                    , origin, line, column, endLine, endColumn, category.ToString(), subcategory, code, text
-                );
-
-            }
-#endif
         }
 
         /// <summary>
@@ -354,7 +340,7 @@ namespace Microsoft.Build.Shared
                 parsedMessage.text = (match.Groups["TEXT"].Value + messageOverflow).Trim();
                 parsedMessage.origin = match.Groups["FILENAME"].Value.Trim();
 
-                string[] explodedText = parsedMessage.text.Split(new char[] {'\''}, StringSplitOptions.RemoveEmptyEntries);
+                string[] explodedText = parsedMessage.text.Split(MSBuildConstants.SingleQuoteChar, StringSplitOptions.RemoveEmptyEntries);
                 if (explodedText.Length > 0)
                 {
                     parsedMessage.code = "G" + explodedText[0].GetHashCode().ToString("X8");

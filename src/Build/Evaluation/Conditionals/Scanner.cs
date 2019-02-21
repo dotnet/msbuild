@@ -51,7 +51,6 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private Scanner() { }
         //
         // Constructor takes the string to parse and the culture.
         //

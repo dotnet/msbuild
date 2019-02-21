@@ -53,9 +53,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration config = new BuildRequestConfiguration(data, "2.0");
             FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(config, new string[1] { "foo" }, true);
             Assert.Equal(request.Config, config);
-            Assert.Equal(request.Targets.Length, 1);
-            Assert.Equal(request.Targets[0], "foo");
-            Assert.Equal(request.ResultsNeeded, true);
+            Assert.Single(request.Targets);
+            Assert.Equal("foo", request.Targets[0]);
+            Assert.True(request.ResultsNeeded);
         }
     }
 }

@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 string cache = null;
-                string modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"http://www.microsoft.com", String.Empty, FileUtilities.ItemSpecModifiers.RootDir, ref cache);
+                FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"http://www.microsoft.com", String.Empty, FileUtilities.ItemSpecModifiers.RootDir, ref cache);
             }
             catch (Exception e)
             {
@@ -238,7 +238,6 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData("foo.txt",      new[] { ".txt" })]
         [InlineData("foo.txt",      new[] { ".TXT" })]
-        [InlineData("foo.txt",      new[] { ".TXT"})]
         [InlineData("foo.txt",      new[] { ".EXE", ".TXT" })]
         public void HasExtension_WhenFileNameHasExtension_ReturnsTrue(string fileName, string[] allowedExtensions)
         {
@@ -436,7 +435,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                Assert.Equal(null, FileUtilities.NormalizePath(null, null));
+                Assert.Null(FileUtilities.NormalizePath(null, null));
             }
            );
         }
@@ -446,7 +445,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                Assert.Equal(null, FileUtilities.NormalizePath(String.Empty));
+                Assert.Null(FileUtilities.NormalizePath(String.Empty));
             }
            );
         }
@@ -458,7 +457,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                Assert.Equal(null, FileUtilities.NormalizePath(@"\\"));
+                Assert.Null(FileUtilities.NormalizePath(@"\\"));
             }
            );
         }
@@ -470,7 +469,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                Assert.Equal(null, FileUtilities.NormalizePath(@"\\XXX\"));
+                Assert.Null(FileUtilities.NormalizePath(@"\\XXX\"));
             }
            );
         }
@@ -517,7 +516,7 @@ namespace Microsoft.Build.UnitTests
                    // is available here - we don't want managed apps mucking
                    // with this for security reasons.
                  * */
-                Assert.Equal(null, FileUtilities.NormalizePath(@"\\?\globalroot\XXX"));
+                Assert.Null(FileUtilities.NormalizePath(@"\\?\globalroot\XXX"));
             }
            );
         }
@@ -541,17 +540,17 @@ namespace Microsoft.Build.UnitTests
         {
             var isWindows = NativeMethodsShared.IsWindows;
 
-            Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow("||"));
-            Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow(isWindows ? @"c:\doesnot_exist" : "/doesnot_exist"));
-            Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(isWindows ? @"c:\" : "/"));
-            Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(Path.GetTempPath()));
+            Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow("||"));
+            Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow(isWindows ? @"c:\doesnot_exist" : "/doesnot_exist"));
+            Assert.True(FileUtilities.FileOrDirectoryExistsNoThrow(isWindows ? @"c:\" : "/"));
+            Assert.True(FileUtilities.FileOrDirectoryExistsNoThrow(Path.GetTempPath()));
 
             string path = null;
 
             try
             {
                 path = FileUtilities.GetTemporaryFile();
-                Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(path));
+                Assert.True(FileUtilities.FileOrDirectoryExistsNoThrow(path));
             }
             finally
             {
@@ -574,8 +573,8 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(inputPath.Length);
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
-            Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath));
-            Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
+            Assert.True(FileUtilities.FileOrDirectoryExistsNoThrow(inputPath));
+            Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
         }
 
         [Fact]
@@ -597,8 +596,8 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
-                Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath));
-                Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
+                Assert.True(FileUtilities.FileOrDirectoryExistsNoThrow(inputPath));
+                Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
             }
             finally
             {
@@ -629,7 +628,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(inputPath.Length);
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
-            Assert.Equal(true, FileUtilities.DirectoryExistsNoThrow(inputPath));
+            Assert.True(FileUtilities.DirectoryExistsNoThrow(inputPath));
         }
 
         [Fact]
@@ -651,8 +650,8 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
-                Assert.Equal(true, FileUtilities.DirectoryExistsNoThrow(inputPath));
-                Assert.Equal(false, FileUtilities.DirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
+                Assert.True(FileUtilities.DirectoryExistsNoThrow(inputPath));
+                Assert.False(FileUtilities.DirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
             }
             finally
             {
@@ -673,7 +672,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(inputPath);
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
-            Assert.Equal(true, FileUtilities.FileExistsNoThrow(inputPath));
+            Assert.True(FileUtilities.FileExistsNoThrow(inputPath));
         }
 
         [Fact]
@@ -695,8 +694,8 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
-                Assert.Equal(true, FileUtilities.FileExistsNoThrow(inputPath));
-                Assert.Equal(false, FileUtilities.FileExistsNoThrow(inputPath.Replace('\\', 'X')));
+                Assert.True(FileUtilities.FileExistsNoThrow(inputPath));
+                Assert.False(FileUtilities.FileExistsNoThrow(inputPath.Replace('\\', 'X')));
             }
             finally
             {
@@ -716,8 +715,8 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(inputPath.Length);
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
-            Assert.Equal(true, FileUtilities.GetFileInfoNoThrow(inputPath) != null);
-            Assert.Equal(false, FileUtilities.GetFileInfoNoThrow(inputPath.Replace('\\', 'X')) != null);
+            Assert.True(FileUtilities.GetFileInfoNoThrow(inputPath) != null);
+            Assert.False(FileUtilities.GetFileInfoNoThrow(inputPath.Replace('\\', 'X')) != null);
         }
 
         [Fact]
@@ -739,8 +738,8 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
-                Assert.Equal(true, FileUtilities.GetFileInfoNoThrow(inputPath) != null);
-                Assert.Equal(false, FileUtilities.GetFileInfoNoThrow(inputPath.Replace('\\', 'X')) != null);
+                Assert.True(FileUtilities.GetFileInfoNoThrow(inputPath) != null);
+                Assert.False(FileUtilities.GetFileInfoNoThrow(inputPath.Replace('\\', 'X')) != null);
             }
             finally
             {
@@ -761,9 +760,9 @@ namespace Microsoft.Build.UnitTests
             {
                 path = FileUtilities.GetTemporaryFile();
 
-                Assert.Equal(true, path.EndsWith(".tmp"));
-                Assert.Equal(true, File.Exists(path));
-                Assert.Equal(true, path.StartsWith(Path.GetTempPath()));
+                Assert.EndsWith(".tmp", path);
+                Assert.True(File.Exists(path));
+                Assert.StartsWith(Path.GetTempPath(), path);
             }
             finally
             {
@@ -783,9 +782,9 @@ namespace Microsoft.Build.UnitTests
             {
                 path = FileUtilities.GetTemporaryFile(".bat");
 
-                Assert.Equal(true, path.EndsWith(".bat"));
-                Assert.Equal(true, File.Exists(path));
-                Assert.Equal(true, path.StartsWith(Path.GetTempPath()));
+                Assert.EndsWith(".bat", path);
+                Assert.True(File.Exists(path));
+                Assert.StartsWith(Path.GetTempPath(), path);
             }
             finally
             {
@@ -806,9 +805,9 @@ namespace Microsoft.Build.UnitTests
             {
                 path = FileUtilities.GetTemporaryFile(directory, ".bat");
 
-                Assert.Equal(true, path.EndsWith(".bat"));
-                Assert.Equal(true, File.Exists(path));
-                Assert.Equal(true, path.StartsWith(directory));
+                Assert.EndsWith(".bat", path);
+                Assert.True(File.Exists(path));
+                Assert.StartsWith(directory, path);
             }
             finally
             {
@@ -829,9 +828,9 @@ namespace Microsoft.Build.UnitTests
             {
                 path = FileUtilities.GetTemporaryFile("bat");
 
-                Assert.Equal(true, path.EndsWith(".bat"));
-                Assert.Equal(true, File.Exists(path));
-                Assert.Equal(true, path.StartsWith(Path.GetTempPath()));
+                Assert.EndsWith(".bat", path);
+                Assert.True(File.Exists(path));
+                Assert.StartsWith(Path.GetTempPath(), path);
             }
             finally
             {
@@ -1013,6 +1012,8 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@".\", true)]
         [InlineData(@"\..", true)]
         [InlineData(@"\.", true)]
+        [InlineData(@"..\..\a", true)]
+        [InlineData(@"..\..\..\a", true)]
         [InlineData(@"b..\", false)]
         [InlineData(@"b.\", false)]
         [InlineData(@"\b..", false)]

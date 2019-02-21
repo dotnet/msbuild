@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -12,9 +11,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Compare two ITaskItems by the file name in their ItemSpec.
     /// </summary>
-    internal sealed class TaskItemSpecFilenameComparer : IComparer, IComparer<ITaskItem>
+    internal sealed class TaskItemSpecFilenameComparer : IComparer<ITaskItem>
     {
-        internal static readonly IComparer Comparer = new TaskItemSpecFilenameComparer();
         internal static readonly IComparer<ITaskItem> GenericComparer = new TaskItemSpecFilenameComparer();
 
         /// <summary>

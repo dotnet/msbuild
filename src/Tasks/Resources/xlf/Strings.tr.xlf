@@ -2283,6 +2283,11 @@
         <target state="translated">MSB3353: Gecikmeli imzalama için gerekli olan ortak anahtar belirtilmemiş.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
+        <target state="translated">MSB4803: MSBuild’in .NET Core sürümünde "{0}" görevi desteklenmiyor. Lütfen MSBuild’in .NET Framework sürümünü kullanın. Daha ayrıntılı bilgi için bkz. https://aka.ms/msbuild/MSB4803.</target>
+        <note>{StrBegin="MSB4803: "}</note>
+      </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>
         <target state="translated">MSB3661: Transform özelliğine geçersiz '{0}' değeri iletildi.</target>
@@ -2625,7 +2630,7 @@
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputFileError">
         <source>MSB3733: Input file "{0}" cannot be opened. {1}</source>
-        <target state="translated">MSB3733: "{0}" girdi dosyası açılamıyor. {1}</target>
+        <target state="translated">MSB3733: "{0}" giriş dosyası açılamıyor. {1}</target>
         <note>{StrBegin="MSB3733: "}</note>
       </trans-unit>
       <trans-unit id="XmlPeekPoke.XPathError">

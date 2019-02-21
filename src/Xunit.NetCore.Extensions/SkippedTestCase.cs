@@ -40,6 +40,13 @@ namespace Xunit.NetCore.Extensions
 
         public string UniqueID { get { return _testCase.UniqueID; } }
 
+        public int Timeout { get { return _testCase.Timeout; } }
+
+        public Exception InitializationException
+        {
+            get { return _testCase.InitializationException; }
+        }
+
         public void Deserialize(IXunitSerializationInfo info) { _testCase.Deserialize(info); }
 
         public Task<RunSummary> RunAsync(

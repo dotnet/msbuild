@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             int exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, "/q", out string log);
 
             Assert.Equal(1, exit);
-            Assert.True(log.Contains("TRK0000")); // bad arg
+            Assert.Contains("TRK0000", log); // bad arg
         }
 
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
                 Assert.Equal(9, exit);
                 // It's OK to look for the English message since that's all we're capable of printing when we can't find
                 // our resource dll. 
-                Assert.True(log.Contains("FileTracker : ERROR : Could not load UI satellite dll 'TrackerUI.dll'"));
+                Assert.Contains("FileTracker : ERROR : Could not load UI satellite dll 'TrackerUI.dll'", log);
             }
             finally
             {
@@ -156,8 +156,8 @@ namespace Microsoft.Build.UnitTests.FileTracking
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
 
             // but it should still be reported
-            Assert.True(log.Contains("Tracker.exe:"));
-            Assert.True(log.Contains("abc.rsp"));
+            Assert.Contains("Tracker.exe:", log);
+            Assert.Contains("abc.rsp", log);
         }
 
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
                 exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, trackerCommand, out string log);
                 Console.WriteLine("");
                 Assert.Equal(0, exit);
-                Assert.True(log.Contains("FTK1011")); // could not create new log:  the file exists.
+                Assert.Contains("FTK1011", log); // could not create new log:  the file exists.
             }
             finally
             {
@@ -840,44 +840,44 @@ class X
             Console.WriteLine("Test: FileTrackerFileIsUnderPath");
 
             // YES: Both refer to something under baz, so yes this is on the path
-            Assert.Equal(true, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\", @"c:\foo\bar\baz\"));
+            Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\", @"c:\foo\bar\baz\"));
 
             // NO: Not under the path, since this *is* the path
-            Assert.Equal(false, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz", @"c:\foo\bar\baz\"));
+            Assert.False(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz", @"c:\foo\bar\baz\"));
 
             // NO: Not under the path, since the path is below
-            Assert.Equal(false, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz", @"c:\foo\bar\baz\"));
+            Assert.False(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz", @"c:\foo\bar\baz\"));
 
             // YES: Since the first parameter is a filename the extra '\' indicates we are referring to something
             // other than the actual directory - so this would be under the path
-            Assert.Equal(true, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\", @"c:\foo\bar\baz"));
+            Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\", @"c:\foo\bar\baz"));
 
             // YES: this is under the path
-            Assert.Equal(true, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits.tmp", @"c:\foo\bar\baz\"));
+            Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits.tmp", @"c:\foo\bar\baz\"));
 
             // YES: this is under the path
-            Assert.Equal(true, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits.tmp", @"c:\foo\bar\baz"));
+            Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits.tmp", @"c:\foo\bar\baz"));
 
             // YES: this is under the path
-            Assert.Equal(true, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits", @"c:\foo\bar\baz\"));
+            Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits", @"c:\foo\bar\baz\"));
 
             // YES: this is under the path
-            Assert.Equal(true, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits", @"c:\foo\bar\baz"));
+            Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits", @"c:\foo\bar\baz"));
 
             // YES: this is under the path
-            Assert.Equal(true, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\bootle\hobbits.tmp", @"c:\foo\bar\baz\"));
+            Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\bootle\hobbits.tmp", @"c:\foo\bar\baz\"));
 
             // NO: this is not under the path
-            Assert.Equal(false, FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits.tmp", @"c:\boo1\far\chaz\"));
+            Assert.False(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\hobbits.tmp", @"c:\boo1\far\chaz\"));
 
             // NO: this is not under the path
-            Assert.Equal(false, FileTracker.FileIsUnderPath(@"c:\foo1.cpp", @"c:\averyveryverylongtemp\path\this\is"));
+            Assert.False(FileTracker.FileIsUnderPath(@"c:\foo1.cpp", @"c:\averyveryverylongtemp\path\this\is"));
 
             // NO: this is not under the path
-            Assert.Equal(false, FileTracker.FileIsUnderPath(@"c:\foo\rumble.cpp", @"c:\foo\rumble"));
+            Assert.False(FileTracker.FileIsUnderPath(@"c:\foo\rumble.cpp", @"c:\foo\rumble"));
 
             // NO: this is not under the path
-            Assert.Equal(false, FileTracker.FileIsUnderPath(@"c:\foo\rumble.cpp", @"c:\foo\rumble\"));
+            Assert.False(FileTracker.FileIsUnderPath(@"c:\foo\rumble.cpp", @"c:\foo\rumble\"));
         }
 
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
@@ -911,27 +911,27 @@ class X
 
             // This file's NOT excluded from dependencies
             testFile = @"c:\foo\bar\baz";
-            Assert.Equal(false, FileTracker.FileIsExcludedFromDependencies(testFile));
+            Assert.False(FileTracker.FileIsExcludedFromDependencies(testFile));
 
             // This file IS excluded from dependencies
             testFile = Path.Combine(applicationDataPath, "blah.log");
-            Assert.Equal(true, FileTracker.FileIsExcludedFromDependencies(testFile));
+            Assert.True(FileTracker.FileIsExcludedFromDependencies(testFile));
 
             // This file IS excluded from dependencies
             testFile = Path.Combine(localApplicationDataPath, "blah.log");
-            Assert.Equal(true, FileTracker.FileIsExcludedFromDependencies(testFile));
+            Assert.True(FileTracker.FileIsExcludedFromDependencies(testFile));
 
             // This file IS excluded from dependencies
             testFile = Path.Combine(localLowApplicationDataPath, "blah.log");
-            Assert.Equal(true, FileTracker.FileIsExcludedFromDependencies(testFile));
+            Assert.True(FileTracker.FileIsExcludedFromDependencies(testFile));
 
             // This file IS excluded from dependencies
             testFile = Path.Combine(tempShortPath, "blah.log");
-            Assert.Equal(true, FileTracker.FileIsExcludedFromDependencies(testFile));
+            Assert.True(FileTracker.FileIsExcludedFromDependencies(testFile));
 
             // This file IS excluded from dependencies
             testFile = Path.Combine(tempLongPath, "blah.log");
-            Assert.Equal(true, FileTracker.FileIsExcludedFromDependencies(testFile));
+            Assert.True(FileTracker.FileIsExcludedFromDependencies(testFile));
         }
 
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
@@ -1194,7 +1194,7 @@ class X
                 Assert.Equal(Path.GetFullPath(sourceFile).ToUpperInvariant(), lines[1]);
                 Assert.Equal(Path.GetFullPath(sourceFile3).ToUpperInvariant(), lines[2]);
                 Assert.Equal("^" + rootMarker, lines2[1]);
-                Assert.True(string.Equals(rootMarker, lines2[2], StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(rootMarker, lines2[2]);
             }
             finally
             {
@@ -1574,8 +1574,8 @@ class X
             FileTracker.WriteContextTLogs(Path.GetFullPath("."), tlogRootName); // parent will write an explicit tlog
 
             FileTracker.StopTrackingAndCleanup();
-            Assert.Equal(false, File.Exists(tlogWriteFile));
-            Assert.Equal(false, File.Exists(tlogChildRootName));
+            Assert.False(File.Exists(tlogWriteFile));
+            Assert.False(File.Exists(tlogChildRootName));
             string[] writtenlines = FileTrackerTestHelper.ReadLinesFromFile(sourceFile);
             Assert.Equal(2, writtenlines.Length);
             Assert.Equal("parent thread", writtenlines[0]);
@@ -1610,7 +1610,7 @@ class X
             FileTracker.WriteContextTLogs(Path.GetFullPath("."), tlogRootName); // parent will write an explicit tlog
 
             FileTracker.StopTrackingAndCleanup();
-            Assert.Equal(false, File.Exists(tlogWriteFile));
+            Assert.False(File.Exists(tlogWriteFile));
             string[] writtenlines = FileTrackerTestHelper.ReadLinesFromFile(sourceFile);
             string[] childLines = FileTrackerTestHelper.ReadLinesFromFile(tlogChildWriteFile);
             Assert.Equal(2, childLines.Length);
@@ -1687,12 +1687,12 @@ class X
 
                 if (envLine.StartsWith("TESTVAR=", StringComparison.OrdinalIgnoreCase) && varValue == null)
                 {
-                    string[] varVal = envLine.Split('=');
+                    string[] varVal = envLine.Split(MSBuildConstants.EqualsChar);
                     varValue = varVal[1];
                 }
                 else if (envLine.StartsWith("TRACKER_TOOLCHAIN=", StringComparison.OrdinalIgnoreCase) && toolChainValue == null)
                 {
-                    string[] varVal = envLine.Split('=');
+                    string[] varVal = envLine.Split(MSBuildConstants.EqualsChar);
                     toolChainValue = varVal[1];
                 }
             }

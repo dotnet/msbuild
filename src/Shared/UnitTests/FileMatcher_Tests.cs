@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Gets the test data
             /// </summary>
-            public static IEnumerable<object> GetTestData()
+            public static IEnumerable<object[]> GetTestData()
             {
                 yield return new object[]
                 {
@@ -724,7 +724,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -742,7 +742,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -765,7 +765,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -783,7 +783,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -806,7 +806,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -1213,8 +1213,8 @@ namespace Microsoft.Build.UnitTests
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
-            Assert.False(result.Contains("**"));
-            Assert.True(result.Contains("MyFile.txt"));
+            Assert.DoesNotContain("**", result);
+            Assert.Contains("MyFile.txt", result);
         }
 
         [Fact]
@@ -1233,7 +1233,7 @@ namespace Microsoft.Build.UnitTests
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
-            Assert.Equal(1, files.Length);
+            Assert.Single(files);
         }
 
         [Fact]
@@ -1278,7 +1278,7 @@ namespace Microsoft.Build.UnitTests
         {
             string[] strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file" };
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/").ToArray();
-            Assert.Equal(strings[0], "1.file");
+            Assert.Equal("1.file", strings[0]);
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directory\\1.file" : "/directory/1.file"};
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/").ToArray();
@@ -1286,7 +1286,7 @@ namespace Microsoft.Build.UnitTests
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directory\\1.file" : "/directory/1.file" };
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory").ToArray();
-            Assert.Equal(strings[0], "1.file");
+            Assert.Equal("1.file", strings[0]);
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file" };
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory" ).ToArray();
@@ -1300,23 +1300,23 @@ namespace Microsoft.Build.UnitTests
             {
                 strings = new string[1] { "\\Machine\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine").ToArray();
-                Assert.Equal(strings[0], "1.file");
+                Assert.Equal("1.file", strings[0]);
 
                 strings = new string[1] { "\\Machine\\directory\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine").ToArray();
-                Assert.Equal(strings[0], "directory\\1.file");
+                Assert.Equal("directory\\1.file", strings[0]);
 
                 strings = new string[1] { "\\Machine\\directory\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
-                Assert.Equal(strings[0], "1.file");
+                Assert.Equal("1.file", strings[0]);
 
                 strings = new string[1] { "\\Machine\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
-                Assert.Equal(strings[0], "\\Machine\\1.file");
+                Assert.Equal("\\Machine\\1.file", strings[0]);
 
                 strings = new string[1] { "\\Machine\\directorymorechars\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
-                Assert.Equal(strings[0], "\\Machine\\directorymorechars\\1.file");
+                Assert.Equal("\\Machine\\directorymorechars\\1.file", strings[0]);
             }
         }
 

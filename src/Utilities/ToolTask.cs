@@ -1252,7 +1252,7 @@ namespace Microsoft.Build.Utilities
         {
             // Get path from the environment and split path separator
             return Environment.GetEnvironmentVariable("PATH")?
-                .Split(Path.PathSeparator)?
+                .Split(MSBuildConstants.PathSeparatorChar)?
                 .Where(path =>
                 {
                     try
@@ -1279,10 +1279,15 @@ namespace Microsoft.Build.Utilities
         /// <returns>true, if task executes successfully</returns>
         public override bool Execute()
         {
-            // Let the tool validate its parameters. ToolTask is responsible for logging
-            // useful information about what was wrong with the parameters.
+            // Let the tool validate its parameters.
             if (!ValidateParameters())
             {
+                // The ToolTask is responsible for logging useful information about what was wrong with the
+                // parameters; if it didn't, at least emit a generic message.
+                if (!Log.HasLoggedErrors)
+                {
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.ValidateParametersFailed", this.GetType().FullName);
+                }
                 return false;
             }
 
@@ -1585,7 +1590,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Splitter for environment variables
         /// </summary>
-        private static readonly char[] s_equalsSplitter = new char[] { '=' };
+        private static readonly char[] s_equalsSplitter = MSBuildConstants.EqualsChar;
 
         /// <summary>
         /// The actual importance at which standard out messages will be logged 

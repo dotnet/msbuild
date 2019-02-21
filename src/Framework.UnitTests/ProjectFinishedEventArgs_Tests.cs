@@ -13,11 +13,6 @@ namespace Microsoft.Build.UnitTests
     public class ProjectFinishedEventArgs_Tests
     {
         /// <summary>
-        /// Default event to use in tests.
-        /// </summary>
-        private ProjectFinishedEventArgs _baseProjectFinishedEvent = new ProjectFinishedEventArgs("Message", "HelpKeyword", "ProjectFile", true);
-        
-        /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
         [Fact]

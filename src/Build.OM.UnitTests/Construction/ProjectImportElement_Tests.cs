@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
-            Assert.Equal(null, project.Imports.GetEnumerator().Current);
+            Assert.Null(project.Imports.GetEnumerator().Current);
         }
 
         /// <summary>

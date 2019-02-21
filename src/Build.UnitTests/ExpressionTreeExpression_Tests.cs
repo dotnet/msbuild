@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
 
         private readonly Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
 
-        public static readonly IEnumerable<string[]> TrueTests = new []
+        public static readonly IEnumerable<object[]> TrueTests = new []
         {
             "true or (SHOULDNOTEVALTHIS)", // short circuit
             "(true and false) or true",
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
             "'1" + new String('0', 500) + "'=='" + "1" + new String('0', 500) + "'" /* too big for double, eval as string */
         }.Select(s => new[] {s});
 
-        public static readonly IEnumerable<string[]> FalseTests = new [] {
+        public static readonly IEnumerable<object[]> FalseTests = new [] {
             "false and SHOULDNOTEVALTHIS", // short circuit
             "$(a)!=no",
             "$(b)==1.1",
@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests
 
             foreach (string file in FilesWithExistenceChecks)
             {
-                using (StreamWriter sw = File.CreateText(file)) {; }
+                using (File.CreateText(file)) { }
             }
         }
 
@@ -501,7 +501,7 @@ namespace Microsoft.Build.UnitTests
                         FileSystems.Default
                         );
 
-                var value = tree.Evaluate(state);
+                tree.Evaluate(state);
             }
             catch (InvalidProjectFileException ex)
             {

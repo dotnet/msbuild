@@ -65,7 +65,7 @@ namespace Microsoft.Build.BackEnd
         /// Translates the packet to/from binary form.
         /// </summary>
         /// <param name="translator">The translator to use.</param>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref _prepareForReuse);
         }
@@ -73,7 +73,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static NodeBuildComplete FactoryForDeserialization(INodePacketTranslator translator)
+        internal static NodeBuildComplete FactoryForDeserialization(ITranslator translator)
         {
             NodeBuildComplete packet = new NodeBuildComplete();
             packet.Translate(translator);

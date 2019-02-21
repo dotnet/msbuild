@@ -14,11 +14,6 @@ namespace Microsoft.Build.UnitTests
     public class TargetStartedEventArgs_Tests
     {
         /// <summary>
-        /// Default event to use in tests.
-        /// </summary>
-        private TargetStartedEventArgs _baseTargetStartedEvent = new TargetStartedEventArgs("Message", "HelpKeyword", "TargetName", "ProjectFile", "TargetFile");
-
-        /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
         [Fact]

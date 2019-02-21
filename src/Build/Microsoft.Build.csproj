@@ -1,12 +1,13 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
+  <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <!-- Node reuse requires an API new to .NET Core 2.1 not yet available
          in .NETStandard. -->
     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);netcoreapp2.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
@@ -17,10 +18,11 @@
     <EnableDefaultItems>false</EnableDefaultItems>
 
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
-    <CreateTlb>true</CreateTlb>
+    <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
 
     <!-- Do not generate a warning that our 'stable' package should not have a prerelease dependency. -->
     <NoWarn>$(NoWarn);NU5104</NoWarn>
@@ -30,8 +32,6 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
 
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.IO.Compression" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
@@ -39,7 +39,8 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
-    <Reference Include="System.Configuration" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -53,40 +54,6 @@
     <PackageReference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
 
-  <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
-       The code here was generally copied from the .NET Framework reference source and
-       modified to compile for .NET Core.
-       
-       After retargeting to .NET Standard 2.0, many of these can probably be removed -->
-  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
-    <Compile Include="..\Shared\Compat\Base64Encoder.cs">
-      <Link>SharedUtilities\Compat\Base64Encoder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\BinHexEncoder.cs">
-      <Link>SharedUtilities\Compat\BinHexEncoder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\SecureStringHasher.cs">
-      <Link>SharedUtilities\Compat\SecureStringHasher.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\TypeExtensions.cs">
-      <Link>SharedUtilities\Compat\TypeExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\ValidateNames.cs">
-      <Link>SharedUtilities\Compat\ValidateNames.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlCharType.cs">
-      <Link>SharedUtilities\Compat\XmlCharType.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlReservedNs.cs">
-      <Link>SharedUtilities\Compat\XmlReservedNs.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlTextEncoder.cs">
-      <Link>SharedUtilities\Compat\XmlTextEncoder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\defaultbinder.cs">
-      <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared\BinaryWriterExtensions.cs" Link="BinaryWriterExtensions.cs" />
     <Compile Include="..\Shared\EncodingUtilities.cs">
@@ -159,9 +126,9 @@
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\INodePacketTranslatable.cs" />
-    <Compile Include="..\Shared\INodePacketTranslator.cs" />
-    <Compile Include="..\Shared\NodePacketTranslator.cs" />
+    <Compile Include="..\Shared\ITranslatable.cs" />
+    <Compile Include="..\Shared\ITranslator.cs" />
+    <Compile Include="..\Shared\BinaryTranslator.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
@@ -189,6 +156,12 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
+    <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
+    <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
+    <Compile Include="Graph\GraphBuildResult.cs" />
+    <Compile Include="Graph\GraphBuildSubmission.cs" />
+    <Compile Include="Graph\GraphBuildRequestData.cs" />
     <Compile Include="BackEnd\BuildManager\BuildSubmission.cs" />
     <Compile Include="BackEnd\BuildManager\LegacyThreadingData.cs" />
     <Compile Include="BackEnd\BuildManager\RequestedProjectState.cs" />
@@ -281,6 +254,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
+    <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
     <Compile Include="Logging\EvaluationLocationIdAgnosticComparer.cs" />
@@ -305,7 +279,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCache.cs" />
     <Compile Include="BackEnd\Components\Caching\IPropertyCache.cs" />
     <Compile Include="BackEnd\Components\Caching\IResultsCache.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodePacketTranslatorExtensions.cs" />
+    <Compile Include="BackEnd\Components\Communications\TranslatorExtensions.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" />

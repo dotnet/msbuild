@@ -1,6 +1,7 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
+  <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -34,6 +35,8 @@
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AddAppConfigToBuildOutputs>false</AddAppConfigToBuildOutputs>
+
+    <DebugType Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">full</DebugType><!-- Work around arcade stomping on symbols for same-program-different-arches. -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
@@ -120,9 +123,9 @@
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\INodePacketTranslatable.cs" />
-    <Compile Include="..\Shared\INodePacketTranslator.cs" />
-    <Compile Include="..\Shared\NodePacketTranslator.cs" />
+    <Compile Include="..\Shared\ITranslatable.cs" />
+    <Compile Include="..\Shared\ITranslator.cs" />
+    <Compile Include="..\Shared\BinaryTranslator.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\OpportunisticIntern.cs" />
@@ -245,17 +248,37 @@
     </ItemGroup>
   </Target>
 
+  <!-- Redistribute core assemblies so that RoslynCodeTaskFactory can reference
+       them when creating assemblies at build time.
+
+       Don't add these to the Content list before RAR, because that might result
+       in resolving references using them instead of the correct build-time references.
+       Instead, add them just afterward, before assigning target paths/copying to
+       the bin folder. -->
+  <Target Name="AddRefAssemblies"
+          DependsOnTargets="ResolveAssemblyReferences"
+          BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\netstandard.dll"
+               Link="ref\netstandard.dll"
+               CopyToOutputDirectory="PreserveNewest" />
+      <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\mscorlib.dll"
+               Link="ref\mscorlib.dll"
+               CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="GetCustomPackageFiles" BeforeTargets="_GetPackageFiles" DependsOnTargets="RemoveSatelliteDllsFromBuildOutputInPackage">
 
     <ItemGroup>
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\MSBuild.exe.config" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Data.Entity.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.ServiceModel.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WinFx.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WorkflowBuildExtensions.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Xaml.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.VisualBasic.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\MSBuild.exe.config" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Data.Entity.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.ServiceModel.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WinFx.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WorkflowBuildExtensions.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Xaml.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.VisualBasic.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
     </ItemGroup>
 
     <ItemGroup>

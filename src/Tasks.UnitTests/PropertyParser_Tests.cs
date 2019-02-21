@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
             //      =================   =========================
             //      Configuration       Debug
 
-            Assert.Equal(1, propertiesTable.Count);
+            Assert.Single(propertiesTable);
             Assert.Equal("Debug", propertiesTable["Configuration"]);
         }
 
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
             //      =================   =========================
             //      Depends On          Clean; Build
 
-            Assert.Equal(1, propertiesTable.Count);
+            Assert.Single(propertiesTable);
             Assert.Equal("Clean; Build", propertiesTable["DependsOn"]);
         }
 
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests
             //      =================   =========================
             //      Depends On          CleanBuild
 
-            Assert.Equal(1, propertiesTable.Count);
+            Assert.Single(propertiesTable);
             Assert.Equal("CleanBuild", propertiesTable["Depends On"]);
         }
 

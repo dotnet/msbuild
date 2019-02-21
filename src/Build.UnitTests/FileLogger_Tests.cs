@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             project.ProjectCollection.UnregisterAllLoggers();
 
             string log = File.ReadAllText(logFile);
-            Assert.True(log.Contains("Hello world from the FileLogger")); // "Log should have contained message"
+            Assert.Contains("Hello world from the FileLogger", log); // "Log should have contained message"
 
             File.Delete(logFile);
         }
@@ -421,8 +421,8 @@ namespace Microsoft.Build.UnitTests
                 actualContent = sr.ReadToEnd();
             }
 
-            string[] actualLines = actualContent.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] expectedLines = expectedContent.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] actualLines = actualContent.Split(MSBuildConstants.NewlineChar, StringSplitOptions.RemoveEmptyEntries);
+            string[] expectedLines = expectedContent.Split(MSBuildConstants.NewlineChar, StringSplitOptions.RemoveEmptyEntries);
 
             Assert.Equal(expectedLines.Length, actualLines.Length);
 

@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Tasks
             string[] executableExtensions,
             string hintPath,
             string assemblyFolderKey,
-            ArrayList assembliesConsideredAndRejected,
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
             out bool userRequestedSpecificFile
         );
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Tasks
             bool isPrimaryProjectReference,
             bool wantSpecificVersion,
             bool allowMismatchBetweenFusionNameAndFileName,
-            ArrayList assembliesConsideredAndRejected
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected
         )
         {
             ResolutionSearchLocation considered = null;
@@ -295,7 +295,7 @@ namespace Microsoft.Build.Tasks
             bool wantSpecificVersion,
             string[] executableExtensions,
             string directory,
-            ArrayList assembliesConsideredAndRejected
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected
         )
         {
             if (assemblyName == null)

@@ -79,10 +79,12 @@ namespace Microsoft.Build.Utilities
         // need to store the actual task instance.
         private readonly ITask _taskInstance;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Object to make this class thread-safe.
         /// </summary>
         private readonly Object _locker = new Object();
+#endif // FEATURE_APPDOMAIN
 
         /// <summary>
         /// Gets the name of the parent task.
@@ -154,9 +156,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public bool HasLoggedErrors { get; private set; }
 
-        #endregion
+#endregion
 
-        #region Utility methods
+#region Utility methods
 
         /// <summary>
         /// Extracts the message code (if any) prefixed to the given message string. Message code prefixes must match the
@@ -233,9 +235,9 @@ namespace Microsoft.Build.Utilities
             string resourceString = FormatResourceString(resourceName, null);
             return resourceString;
         }
-        #endregion
+#endregion
 
-        #region Message logging methods
+#region Message logging methods
 
         /// <summary>
         /// Logs a message using the specified string.
@@ -471,9 +473,9 @@ namespace Microsoft.Build.Utilities
 #endif
         }
 
-        #endregion
+#endregion
 
-        #region ExternalProjectStarted/Finished logging methods
+#region ExternalProjectStarted/Finished logging methods
 
         /// <summary>
         /// Small helper for logging the custom ExternalProjectStarted build event
@@ -517,9 +519,9 @@ namespace Microsoft.Build.Utilities
             BuildEngine.LogCustomEvent(epf);
         }
 
-        #endregion
+#endregion
 
-        #region Command line logging methods
+#region Command line logging methods
 
         /// <summary>
         /// Logs the command line for a task's underlying tool/executable/shell command.
@@ -557,9 +559,9 @@ namespace Microsoft.Build.Utilities
             BuildEngine.LogMessageEvent(e);
         }
 
-        #endregion
+#endregion
 
-        #region Error logging methods
+#region Error logging methods
 
         /// <summary>
         /// Logs an error using the specified string.
@@ -610,13 +612,11 @@ namespace Microsoft.Build.Utilities
             // we can do is throw.
             ErrorUtilities.VerifyThrowInvalidOperation(BuildEngine != null, "LoggingBeforeTaskInitialization", message);
 
-#if false
             // All of our errors should have an error code, so the user has something
             // to look up in the documentation. To help find errors without error codes,
             // temporarily uncomment this line and run the unit tests.
             //if (null == errorCode) File.AppendAllText("c:\\errorsWithoutCodes", message + "\n");
             // We don't have a Debug.Assert for this, because it would be triggered by <Error> and <Warning> tags.
-#endif
 
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
@@ -877,9 +877,9 @@ namespace Microsoft.Build.Utilities
             LogError(null, null, null, file, 0, 0, 0, 0, message);
         }
 
-        #endregion
+#endregion
 
-        #region Warning logging methods
+#region Warning logging methods
 
         /// <summary>
         /// Logs a warning using the specified string.
@@ -930,13 +930,11 @@ namespace Microsoft.Build.Utilities
             // we can do is throw.
             ErrorUtilities.VerifyThrowInvalidOperation(BuildEngine != null, "LoggingBeforeTaskInitialization", message);
 
-#if false
             // All of our warnings should have an error code, so the user has something
             // to look up in the documentation. To help find warnings without error codes,
             // temporarily uncomment this line and run the unit tests.
             //if (null == warningCode) File.AppendAllText("c:\\warningsWithoutCodes", message + "\n");
             // We don't have a Debug.Assert for this, because it would be triggered by <Error> and <Warning> tags.
-#endif
 
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
@@ -1155,9 +1153,9 @@ namespace Microsoft.Build.Utilities
             LogWarning(message);
         }
 
-        #endregion
+#endregion
 
-        #region Bulk logging methods
+#region Bulk logging methods
 
         /// <summary>
         /// Logs errors/warnings/messages for each line of text in the given file. Errors/warnings are only logged for lines that
@@ -1310,9 +1308,9 @@ namespace Microsoft.Build.Utilities
             return isError;
         }
 
-        #endregion
+#endregion
 
-        #region Telemetry logging methods
+#region Telemetry logging methods
 
         /// <summary>
         /// Logs telemetry with the specified event name and properties.
@@ -1324,10 +1322,10 @@ namespace Microsoft.Build.Utilities
             (BuildEngine as IBuildEngine5)?.LogTelemetry(eventName, properties);
         }
 
-        #endregion
+#endregion
 
 #if FEATURE_APPDOMAIN
-        #region AppDomain Code
+#region AppDomain Code
 
         /// <summary>
         /// InitializeLifetimeService is called when the remote object is activated. 
@@ -1413,7 +1411,7 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-        #endregion
+#endregion
 #endif
     }
 }
