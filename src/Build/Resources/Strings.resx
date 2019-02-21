@@ -740,6 +740,9 @@
     <value>MSB4192: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</value>
     <comment>{StrBegin="MSB4192: "} LOC: ".vcproj" should not be localized</comment>
   </data>
+  <data name="PropertyAssignment" UESanitized="false" Visibility="Public">
+    <value>Property initial value: $({0})="{1}" at {2}</value>
+  </data>
   <data name="PropertyListHeader" UESanitized="false" Visibility="Public">
     <value>Initial Properties:</value>
   </data>

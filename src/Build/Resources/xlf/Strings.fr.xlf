@@ -48,6 +48,11 @@
         <target state="translated">Impossible d'effectuer l'opération car la méthode BeginBuild n'a pas encore été appelée.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>Property initial value: $({0})="{1}" at {2}</source>
+        <target state="new">Property initial value: $({0})="{1}" at {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
         <target state="translated">Impossible d'effectuer l'opération car la méthode EndBuild a déjà été appelée, mais les soumissions existantes ne sont pas encore terminées.</target>

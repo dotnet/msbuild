@@ -697,6 +697,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 bool result = project.Build();
                 Assert.Equal(true, result);
                 logger.AssertLogContains("Evaluation started");
+                logger.AssertLogContains("Property initial value");
                 logger.AssertLogContains("Property reassignment");
                 logger.AssertLogContains("Evaluation finished");
                 logger.AssertLogContains("Prop");

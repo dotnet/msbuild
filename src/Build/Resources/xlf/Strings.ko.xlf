@@ -48,6 +48,11 @@
         <target state="translated">BeginBuild가 아직 호출되지 않았으므로 작업을 완료할 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>Property initial value: $({0})="{1}" at {2}</source>
+        <target state="new">Property initial value: $({0})="{1}" at {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
         <target state="translated">EndBuild가 이미 호출되었지만 기존 전송이 아직 완료되지 않았으므로 작업을 완료할 수 없습니다.</target>

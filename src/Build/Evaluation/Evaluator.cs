@@ -172,7 +172,7 @@ namespace Microsoft.Build.Evaluation
         /// The current build submission ID.
         /// </summary>
         private readonly int _submissionId;
-        
+
         private readonly EvaluationContext _evaluationContext;
 
         /// <summary>
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.Evaluation
         private void EvaluatePropertyGroupElement(ProjectPropertyGroupElement propertyGroupElement)
         {
             using (_evaluationProfiler.TrackElement(propertyGroupElement))
-            { 
+            {
                 if (EvaluateConditionCollectingConditionedProperties(propertyGroupElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                 {
                     foreach (ProjectPropertyElement propertyElement in propertyGroupElement.Properties)
@@ -1484,19 +1484,25 @@ namespace Microsoft.Build.Evaluation
 
                 P property = _data.SetProperty(propertyElement, evaluatedValue, predecessor);
 
-                if (predecessor != null)
-                {
-                    LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
-                }
+                LogPropertyAssignment(predecessor, property, propertyElement.Location.LocationString);
             }
         }
 
-        private void LogPropertyReassignment(P predecessor, P property, string location)
+        private void LogPropertyAssignment(P predecessor, P property, string location)
         {
             string newValue = property.EvaluatedValue;
-            string oldValue = predecessor.EvaluatedValue;
+            string oldValue = predecessor?.EvaluatedValue;
 
-            if (newValue != oldValue)
+            if (oldValue == null)
+            {
+                _evaluationLoggingContext.LogComment(
+                    MessageImportance.Low,
+                    "PropertyAssignment",
+                    property.Name,
+                    newValue,
+                    location);
+            }
+            else if (newValue != oldValue)
             {
                 _evaluationLoggingContext.LogComment(
                     MessageImportance.Low,
@@ -1842,7 +1848,7 @@ namespace Microsoft.Build.Evaluation
                 foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
                 {
                     _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
-                    
+
                     PerformDepthFirstPass(importedProjectRootElement);
                 }
             }
@@ -2010,7 +2016,7 @@ namespace Microsoft.Build.Evaluation
             var pathsToSearch = new string[fallbackSearchPathMatch.SearchPaths.Count + 1];
             pathsToSearch[0] = prop?.EvaluatedValue;                       // The actual value of the property, with no fallbacks
             fallbackSearchPathMatch.SearchPaths.CopyTo(pathsToSearch, 1);  // The list of fallbacks, in order
-            
+
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
             _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
@@ -2509,7 +2515,7 @@ namespace Microsoft.Build.Evaluation
                     // can store the unescaped value. The only purpose of escaping is to 
                     // avoid undesired splitting or expansion.
                     _importsSeen.Add(importFileUnescaped, importElement);
-                } 
+                }
             }
 
             if (imports.Count > 0)
@@ -2772,10 +2778,7 @@ namespace Microsoft.Build.Evaluation
                     isGlobalProperty: false,
                     mayBeReserved: false);
 
-                if (oldValue != null)
-                {
-                    LogPropertyReassignment(oldValue, newValue, String.Empty);
-                }
+                LogPropertyAssignment(oldValue, newValue, String.Empty);
             }
         }
     }
