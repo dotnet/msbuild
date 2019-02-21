@@ -3683,6 +3683,12 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionIndexOfAny()
+        {
+            TestPropertyFunction("$(prop.IndexOfAny('y'))", "prop", "x-y-z", "2");
+        }
+
+        [Fact]
         public void PropertyFunctionStringArrayIndexerGetter()
         {
             TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");

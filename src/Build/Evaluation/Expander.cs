@@ -3387,6 +3387,14 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(string.IndexOfAny), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.IndexOfAny(arg0.ToCharArray());
+                            return true;
+                        }
+                    }
                     else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
                     {
                         if (args.Length == 0)
