@@ -63,11 +63,5 @@ using System.Windows.Markup;
 #endif
 
 [assembly: ComVisible(false)]
-
 [assembly: CLSCompliant(true)]
 
-[assembly: AssemblyTitle("Microsoft.Build.Framework.dll")]
-[assembly: AssemblyDescription("Microsoft.Build.Framework.dll")]
-[assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("Microsoft® Build Tools®")]
-[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]

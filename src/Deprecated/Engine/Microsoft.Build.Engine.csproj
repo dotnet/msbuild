@@ -11,7 +11,7 @@
     <DefineConstants Condition="'$(MSBUILDENABLEVSPROFILING)' != ''">$(DefineConstants);MSBUILDENABLEVSPROFILING</DefineConstants>
     <CopyToSuiteBin>true</CopyToSuiteBin>
     <IsPackable>true</IsPackable>
-    <Description>This package contains the $(MSBuildProjectName) assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</Description>
+    <PackageDescription>This package contains the $(MSBuildProjectName) assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
   </PropertyGroup>
   

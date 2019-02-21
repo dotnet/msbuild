@@ -31,9 +31,3 @@ using System.Runtime.CompilerServices;
 [assembly: ComVisible(false)]
 
 [assembly: CLSCompliant(true)]
-
-[assembly: AssemblyTitle("Microsoft.Build.Tasks.Core.dll")]
-[assembly: AssemblyDescription("Microsoft.Build.Tasks.Core.dll")]
-[assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("Microsoft® Build Tools®")]
-[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]
