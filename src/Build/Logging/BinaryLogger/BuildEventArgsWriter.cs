@@ -554,8 +554,6 @@ namespace Microsoft.Build.Logging
                 catch (InvalidProjectFileException e)
                 {
                     valueOrError = e.Message;
-                    //valueOrError = $"{{Error logging expanded metadata. Raw value: {customMetadata[metadataName]}}}";
-                    // valueOrError = (string)customMetadata[metadataName];
                 }
 
                 Write(valueOrError);
