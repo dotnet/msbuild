@@ -109,8 +109,8 @@
     </note>
       </trans-unit>
       <trans-unit id="PropertyAssignment">
-        <source>Property initial value: $({0})="{1}" at {2}</source>
-        <target state="new">Property initial value: $({0})="{1}" at {2}</target>
+        <source>Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
@@ -2096,8 +2096,8 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
-        <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
-        <target state="translated">Ponowny przydział właściwości: $({0})=„{1}” (poprzednia wartość: „{2}”) w {3}</target>
+        <source>Property reassignment: $({0})="{1}" (previous value: "{2}") Source: {3}</source>
+        <target state="needs-review-translation">Ponowny przydział właściwości: $({0})=„{1}” (poprzednia wartość: „{2}”) w {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveSdk">

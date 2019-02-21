@@ -741,7 +741,7 @@
     <comment>{StrBegin="MSB4192: "} LOC: ".vcproj" should not be localized</comment>
   </data>
   <data name="PropertyAssignment" UESanitized="false" Visibility="Public">
-    <value>Property initial value: $({0})="{1}" at {2}</value>
+    <value>Property initial value: $({0})="{1}" Source: {2}</value>
   </data>
   <data name="PropertyListHeader" UESanitized="false" Visibility="Public">
     <value>Initial Properties:</value>
@@ -751,7 +751,7 @@
     <comment>{StrBegin="MSB4148: "}</comment>
   </data>
   <data name="PropertyReassignment" UESanitized="false" Visibility="Public">
-    <value>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</value>
+    <value>Property reassignment: $({0})="{1}" (previous value: "{2}") Source: {3}</value>
   </data>
   <data name="QualifiedMetadataInTransformNotAllowed" UESanitized="false" Visibility="Public">
     <value>MSB4043: The item metadata reference "{0}" is invalid because it is qualified with an item name. Item metadata referenced in transforms do not need to be qualified, because the item name is automatically deduced from the items being transformed. Change "{0}" to "%({1})".</value>

@@ -604,7 +604,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
         {
-            string projectFile;
+            string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
+
+            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
+
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
@@ -634,9 +637,7 @@ namespace Microsoft.Build.Evaluation
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass0End);
 #endif
-                projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
 
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
@@ -1256,8 +1257,10 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance environmentProperty in _environmentProperties)
             {
+                P predecessor = _data.GetProperty(environmentProperty.Name);
                 P property = _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
                 environmentPropertiesList.Add(property);
+                LogPropertyAssignment(predecessor, property, "Environment");
             }
 
             return environmentPropertiesList;
@@ -1272,8 +1275,10 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance toolsetProperty in _data.Toolset.Properties.Values)
             {
+                P predecessor = _data.GetProperty(toolsetProperty.Name);
                 P property = _data.SetProperty(toolsetProperty.Name, ((IProperty)toolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
                 toolsetProperties.Add(property);
+                LogPropertyAssignment(predecessor, property, "Toolset");
             }
 
             if (_data.SubToolsetVersion == null)
@@ -1282,8 +1287,10 @@ namespace Microsoft.Build.Evaluation
                 // is most likely not a subtoolset now, we need to add VisualStudioVersion if its not already a property.
                 if (!_data.Properties.Contains(Constants.VisualStudioVersionPropertyName))
                 {
+                    P subToolsetVersionPredecessor = _data.GetProperty(Constants.VisualStudioVersionPropertyName);
                     P subToolsetVersionProperty = _data.SetProperty(Constants.VisualStudioVersionPropertyName, MSBuildConstants.CurrentVisualStudioVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
                     toolsetProperties.Add(subToolsetVersionProperty);
+                    LogPropertyAssignment(subToolsetVersionPredecessor, subToolsetVersionProperty, "Toolset");
                 }
             }
             else
@@ -1295,16 +1302,20 @@ namespace Microsoft.Build.Evaluation
                 // set the property even if there is no matching sub-toolset.  
                 if (!_data.Properties.Contains(Constants.SubToolsetVersionPropertyName))
                 {
+                    P subToolsetVersionPredecessor = _data.GetProperty(Constants.SubToolsetVersionPropertyName);
                     P subToolsetVersionProperty = _data.SetProperty(Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
                     toolsetProperties.Add(subToolsetVersionProperty);
+                    LogPropertyAssignment(subToolsetVersionPredecessor, subToolsetVersionProperty, "Toolset");
                 }
 
                 if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out subToolset))
                 {
                     foreach (ProjectPropertyInstance subToolsetProperty in subToolset.Properties.Values)
                     {
+                        P predecessor = _data.GetProperty(subToolsetProperty.Name);
                         P property = _data.SetProperty(subToolsetProperty.Name, ((IProperty)subToolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
                         toolsetProperties.Add(property);
+                        LogPropertyAssignment(predecessor, property, "Toolset");
                     }
                 }
             }
@@ -1326,8 +1337,10 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
             {
+                P predecessor = _data.GetProperty(globalProperty.Name);
                 P property = _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */);
                 globalProperties.Add(property);
+                LogPropertyAssignment(predecessor, property, "Global");
             }
 
             return globalProperties;

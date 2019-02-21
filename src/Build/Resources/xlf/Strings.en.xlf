@@ -109,8 +109,8 @@
     </note>
       </trans-unit>
       <trans-unit id="PropertyAssignment">
-        <source>Property initial value: $({0})="{1}" at {2}</source>
-        <target state="new">Property initial value: $({0})="{1}" at {2}</target>
+        <source>Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
@@ -983,8 +983,8 @@
         <note>{StrBegin="MSB4148: "}</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
-        <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
-        <target state="new">Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</target>
+        <source>Property reassignment: $({0})="{1}" (previous value: "{2}") Source: {3}</source>
+        <target state="new">Property reassignment: $({0})="{1}" (previous value: "{2}") Source: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="QualifiedMetadataInTransformNotAllowed">
