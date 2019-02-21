@@ -28,20 +28,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                                />
   </ItemGroup>
 
-  <ItemGroup>
-    <KnownFrameworkReference Include="NETStandard.Library"
-                              TargetFramework="netstandard2.1"
-                              RuntimeFrameworkName=""
-                              DefaultRuntimeFrameworkVersion=""
-                              LatestRuntimeFrameworkVersion=""
-                              TargetingPackName="NETStandard.Library"
-                              TargetingPackVersion="2.1.0-prerelease.19078.1"
-                              TargetingPackFormat="NETStandardLegacy"
-                              RuntimePackNamePatterns=""
-                              RuntimePackRuntimeIdentifiers=""
-                              />
-  </ItemGroup>
-
   <PropertyGroup>
     <!-- Disable web SDK implicit package versions for ASP.NET packages, since the .NET SDK now handles that -->
     <EnableWebSdkImplicitPackageVersions>false</EnableWebSdkImplicitPackageVersions>
