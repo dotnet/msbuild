@@ -31,7 +31,7 @@
     <ContentTargetFolders>contentFiles</ContentTargetFolders>
     <BuildOutputTargetFolder>contentFiles\any\</BuildOutputTargetFolder>
     <PackageId>Microsoft.Build.Runtime</PackageId>
-    <Description>This package delivers a complete executable copy of MSBuild. Reference this package only if your application needs to load projects or execute in-process builds without requiring installation of MSBuild. Successfully evaluating projects using this package requires aggregating additional components (like the compilers) into an application directory.</Description>
+    <PackageDescription>This package delivers a complete executable copy of MSBuild. Reference this package only if your application needs to load projects or execute in-process builds without requiring installation of MSBuild. Successfully evaluating projects using this package requires aggregating additional components (like the compilers) into an application directory.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AddAppConfigToBuildOutputs>false</AddAppConfigToBuildOutputs>
