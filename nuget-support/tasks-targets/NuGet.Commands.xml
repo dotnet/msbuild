@@ -870,6 +870,24 @@
             Child node.
             </summary>
         </member>
+        <member name="M:NuGet.Commands.RestoreCommand.VerifyAssetsFileMatchesProject">
+            <summary>
+            Accounts for using the restore commands on 2 projects living in the same path
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCommand.EvaluatePackagesLockFileAsync(System.String,NuGet.DependencyResolver.RemoteWalkContext,NuGet.Common.TelemetryActivity)">
+            <summary>
+            Evaluate packages.lock.json file if available and accordingly return result.
+            </summary>
+            <param name="packagesLockFilePath"></param>
+            <param name="contextForProject"></param>
+            <returns>result of packages.lock.json file evaluation where
+            Item1 is the status of evaluating packages lock file if false, then bail restore
+            Item2 is also a tuple which has 2 parts -
+                Item1 tells whether lock file is still valid to be consumed for this restore
+                Item2 is the PackagesLockFile instance
+            </returns>
+        </member>
         <member name="M:NuGet.Commands.RestoreCommand.ValidateRestoreGraphsAsync(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreTargetGraph},NuGet.Common.ILogger)">
             <summary>
             Check if the given graphs are valid and log errors/warnings.
@@ -984,11 +1002,6 @@
             </summary>
             <remarks>RIDs are case sensitive.</remarks>
         </member>
-        <member name="P:NuGet.Commands.RestoreRequest.PackageSaveMode">
-            <summary>
-            Gets or sets the <see cref="T:NuGet.Packaging.PackageSaveMode" />.
-            </summary>
-        </member>
         <member name="P:NuGet.Commands.RestoreRequest.FallbackRuntimes">
             <summary>
             These Runtime Ids will be used if <see cref="P:NuGet.Commands.RestoreRequest.RequestedRuntimes" /> and the project runtimes
@@ -1027,15 +1040,15 @@
             Display Errors and warnings as they occur
             </summary>
         </member>
-        <member name="P:NuGet.Commands.RestoreRequest.PackageSignatureVerifier">
+        <member name="P:NuGet.Commands.RestoreRequest.PackageSaveMode">
             <summary>
-            Package Signature verifier
-            </summary>
+            Gets or sets the <see cref="T:NuGet.Packaging.PackageSaveMode" />. 
+            </summary> 
         </member>
-        <member name="P:NuGet.Commands.RestoreRequest.SignedPackageVerifierSettings">
-            <summary>
-            SignedPackageVerifierSettings to be used when verifying signed packages.
-            </summary>
+        <member name="P:NuGet.Commands.RestoreRequest.SignedPackageVerifier">
+            <remarks>
+            This property should only be used to override the default verifier on tests.
+            </remarks>
         </member>
         <member name="P:NuGet.Commands.RestoreResult.LockFilePath">
             <summary>
@@ -1081,6 +1094,16 @@
         <member name="P:NuGet.Commands.RestoreResult.CacheFilePath">
             <summary>
             Cache File path. The file path where the cache is written out
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreResult.NewPackagesLockFilePath">
+            <summary>
+            New Packages lock file path
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreResult.NewPackagesLockFile">
+            <summary>
+            NuGet lock file which is either generated or updated to lock down NuGet packages version
             </summary>
         </member>
         <member name="M:NuGet.Commands.RestoreResult.GetAllInstalled">
@@ -1188,7 +1211,7 @@
             <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
             <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="cacheContext" /> is <c>null</c>.</exception>
         </member>
-        <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.#ctor(NuGet.Protocol.Core.Types.SourceRepository,NuGet.Common.ILogger,NuGet.Protocol.Core.Types.SourceCacheContext,System.Boolean,System.Boolean,NuGet.Protocol.LocalPackageFileCache)">
+        <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.#ctor(NuGet.Protocol.Core.Types.SourceRepository,NuGet.Common.ILogger,NuGet.Protocol.Core.Types.SourceCacheContext,System.Boolean,System.Boolean,NuGet.Protocol.LocalPackageFileCache,System.Boolean)">
             <summary>
             Initializes a new <see cref="T:NuGet.Commands.SourceRepositoryDependencyProvider" /> class.
             </summary>
@@ -1524,12 +1547,6 @@
             Return the parsed version or 1.0.0 if the property does not exist.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.MSBuildRestoreUtility.PersistDGFileIfDebugging(NuGet.ProjectModel.DependencyGraphSpec,NuGet.Common.ILogger)">
-            <summary>
-            Write the dg file to a temp location if NUGET_PERSIST_DG.
-            </summary>
-            <remarks>This is a noop if NUGET_PERSIST_DG is not set to true.</remarks>
-        </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.FixSourcePath(System.String)">
             <summary>
             Convert http:/url to http://url 
@@ -1586,17 +1603,6 @@
             Calculates the hash value, used for the no-op optimization, for the request
             This methods handles the deduping of tools
             Handles the ignoring of RestoreSettings
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.NoOpRestoreUtilities.PersistHashedDGFileIfDebugging(NuGet.ProjectModel.DependencyGraphSpec,NuGet.Common.ILogger)">
-            <summary>
-            Write the dg file to a temp location if NUGET_PERSIST_NOOP_DG.
-            </summary>
-            <remarks>This is a noop if NUGET_PERSIST_NOOP_DG is not set to true.</remarks>
-        </member>
-        <member name="M:NuGet.Commands.NoOpRestoreUtilities.IsPersistDGSet">
-            <summary>
-            True if NUGET_PERSIST_NOOP_DG is set to true.
             </summary>
         </member>
         <member name="M:NuGet.Commands.NoOpRestoreUtilities.UpdateRequestBestMatchingToolPathsIfAvailable(NuGet.Commands.RestoreRequest)">
@@ -1825,6 +1831,11 @@
               Looks up a localized string similar to Add file '{0}' to package as '{1}'.
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.ArgumentCannotBeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to The argument cannot be null or empty..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.BuildingProjectTargetingFramework">
             <summary>
               Looks up a localized string similar to Building project '{0}' for target framework '{1}'..
@@ -1835,6 +1846,11 @@
               Looks up a localized string similar to '{0}' cannot be used in conjunction with other values..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_AuthorTrustExpectedAuthorSignature">
+            <summary>
+              Looks up a localized string similar to Unable to add trusted author. The package is not author signed..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_BuildFailed">
             <summary>
               Looks up a localized string similar to Failed to build using '{0} {1}'..
@@ -1843,6 +1859,36 @@
         <member name="P:NuGet.Commands.Strings.Error_CannotFindMsbuild">
             <summary>
               Looks up a localized string similar to Cannot find version of msbuild..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_CannotTrustOwnersForAuthor">
+            <summary>
+              Looks up a localized string similar to Trusted owners are not supported in trusted author items..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_CouldNotAdd">
+            <summary>
+              Looks up a localized string similar to Could not add the trusted signer: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_CouldNotList">
+            <summary>
+              Looks up a localized string similar to Could not list the trusted signers: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_CouldNotRemove">
+            <summary>
+              Looks up a localized string similar to Could not remove the trusted signer: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_CouldNotSync">
+            <summary>
+              Looks up a localized string similar to Could not sync the trusted repository: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_EmptyCertificateListInRepository">
+            <summary>
+              Looks up a localized string similar to The repository with the service index '{0}' does not list any trusted certificates..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_EmptySourceFilePath">
@@ -1865,6 +1911,16 @@
               Looks up a localized string similar to PackageTargetFallback and AssetTargetFallback cannot be used together. Remove PackageTargetFallback(deprecated) references from the project environment..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidCertificateInformationFromServer">
+            <summary>
+              Looks up a localized string similar to Invalid certificate information from the service index '{0}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidCombinationOfArguments">
+            <summary>
+              Looks up a localized string similar to Invalid combination of arguments..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInput">
             <summary>
               Looks up a localized string similar to Invalid input '{0}'. The file type was not recognized..
@@ -1885,9 +1941,19 @@
               Looks up a localized string similar to Package version constraints for '{0}' return a version range that is empty..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidLockFileInput">
+            <summary>
+              Looks up a localized string similar to Invalid restore input where RestorePackagesWithLockFile property is set to false and also exist a packages lock file at {0}..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidProjectPackageCombo">
             <summary>
               Looks up a localized string similar to Invalid project-package combination for {0} {1}. DotnetToolReference project style can only contain references of the DotnetTool type.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidSymbolPackageFormat">
+            <summary>
+              Looks up a localized string similar to The provided SymbolPackageFormat value {0} is invalid. Allowed values : 'snupkg', 'symbols.nupkg'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidTargetFramework">
@@ -1900,6 +1966,11 @@
               Looks up a localized string similar to Source parameter was not specified..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_NoMatchingCertificate">
+            <summary>
+              Looks up a localized string similar to The package signature did not match any of the allowed certificate fingerprints..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_NoPackageVersionsExist">
             <summary>
               Looks up a localized string similar to Unable to find package {0}. No packages exist with this id in source(s): {1}.
@@ -1910,9 +1981,24 @@
               Looks up a localized string similar to Unable to find package {0} with version {1}.
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_NoSignatureTrustedForPackage">
+            <summary>
+              Looks up a localized string similar to No signature to be trusted was specified for the package '{0}'. Please specify either Author or Repository..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_NoSourcesInformation">
+            <summary>
+              Looks up a localized string similar to Unable to get package sources information..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_NoStablePackageVersionsExist">
             <summary>
               Looks up a localized string similar to Unable to find a stable package {0} with version {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_NotSupportedHashAlgorithm">
+            <summary>
+              Looks up a localized string similar to '{0}' is not a supported hash algorithm..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_PackageCommandNoFilesForLibPackage">
@@ -1923,6 +2009,16 @@
         <member name="P:NuGet.Commands.Strings.Error_PackageCommandNoFilesForSymbolsPackage">
             <summary>
               Looks up a localized string similar to Failed to build package. Ensure '{0}' includes source and symbol files. For help on building symbols package, visit {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_PackageNotSigned">
+            <summary>
+              Looks up a localized string similar to The package is not signed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_PackageValidationFailed">
+            <summary>
+              Looks up a localized string similar to The package {0} sha512 validation failed. The package is different than the last restore..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_PackFailed">
@@ -1945,14 +2041,54 @@
               Looks up a localized string similar to Project {0} must have a single package reference(s)..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_PropertyCannotBeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to Property '{0}' should not be null or empty..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_RepoTrustExpectedRepoSignature">
+            <summary>
+              Looks up a localized string similar to Unable to add trusted repository. The package is not repository signed or countersigned..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_RestoreInLockedMode">
+            <summary>
+              Looks up a localized string similar to The packages lock file is inconsistent with the project dependencies so restore can't be run in locked mode. Please disable RestoreLockedMode MSBuild property or pass explicit --force-evaluate flag to run restore to update the lock file..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_ServiceIndexShouldBeHttps">
+            <summary>
+              Looks up a localized string similar to The repository service index '{0}' is not a valid HTTPS url..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_ToolsPackageWithExtraPackageTypes">
             <summary>
               Looks up a localized string similar to Invalid tools package {0} {1}. Tools packages cannot contain more than one PackageType..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_TrustedAuthorNoOwners">
+            <summary>
+              Looks up a localized string similar to A trusted author cannot have owners..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_TrustedRepoAlreadyExists">
+            <summary>
+              Looks up a localized string similar to A trusted repository with the service index '{0}' already exists..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_TrustedRepositoryDoesNotExist">
+            <summary>
+              Looks up a localized string similar to A trusted repository '{0}' does not exist..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_TrustedSignerAlreadyExists">
+            <summary>
+              Looks up a localized string similar to A trusted signer '{0}' already exists..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_UnableToFindProjectInfo">
             <summary>
-              Looks up a localized string similar to Unable to find project information for '{0}'. The project file may be invalid or missing targets required for restore..
+              Looks up a localized string similar to Unable to find project information for '{0}'. Inside Visual Studio, this may be because the project is unloaded or not part of current solution so please run a restore from command-line. Otherwise the project file may be invalid or missing targets required for restore..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_UnableToLocateBuildOutput">
@@ -1975,9 +2111,19 @@
               Looks up a localized string similar to Unable to sign package..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_UnavailableSource">
+            <summary>
+              Looks up a localized string similar to Source '{0}' does not exist or cannot be retrived..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_UnknownBuildAction">
             <summary>
               Looks up a localized string similar to Package '{0}' specifies an invalid build action '{1}' for file '{2}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_UnsupportedTrustTarget">
+            <summary>
+              Looks up a localized string similar to The trust target '{0}' is unsupported..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_WriteResolvedNuSpecOverwriteOriginal">
@@ -2311,9 +2457,19 @@
               Looks up a localized string similar to Restore completed in {0} for {1}..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoreCompleteDotnetTool">
+            <summary>
+              Looks up a localized string similar to Restore completed in {0}..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoreFailed">
             <summary>
               Looks up a localized string similar to Restore failed in {0} for {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoreFailedDotnetTool">
+            <summary>
+              Looks up a localized string similar to Restore failed in {0}..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoreNoOpDGChanged">
@@ -2334,11 +2490,6 @@
         <member name="P:NuGet.Commands.Strings.Log_RestoringPackagesForCompat">
             <summary>
               Looks up a localized string similar to Restoring packages for {0} to determine compatibility....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_RestoringToolPackages">
-            <summary>
-              Looks up a localized string similar to Restoring packages for tool '{0}' in {1}....
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RunningNonParallelRestore">
@@ -2386,14 +2537,14 @@
               Looks up a localized string similar to Tool assets file has not changed. Skipping assets file write. Path: {0}.
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Log_ToolWritingAssetsFile">
+            <summary>
+              Looks up a localized string similar to Writing tool assets file to disk. Path: {0}.
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Log_ToolWritingCacheFile">
             <summary>
               Looks up a localized string similar to Writing tool cache file to disk. Path: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ToolWritingLockFile">
-            <summary>
-              Looks up a localized string similar to Writing tool lock file to disk. Path: {0}.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_UnknownCompatibilityProfile">
@@ -2421,14 +2572,19 @@
               Looks up a localized string similar to Version conflict detected for {0}. Install/reference {1} directly to project {2} to resolve this issue..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Log_WritingAssetsFile">
+            <summary>
+              Looks up a localized string similar to Writing assets file to disk. Path: {0}.
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Log_WritingCacheFile">
             <summary>
               Looks up a localized string similar to Writing cache file to disk. Path: {0}.
             </summary>
         </member>
-        <member name="P:NuGet.Commands.Strings.Log_WritingLockFile">
+        <member name="P:NuGet.Commands.Strings.Log_WritingPackagesLockFile">
             <summary>
-              Looks up a localized string similar to Writing lock file to disk. Path: {0}.
+              Looks up a localized string similar to Writing packages lock file at disk. Path: {0}.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.MissingRequiredProperty">
@@ -2449,6 +2605,16 @@
         <member name="P:NuGet.Commands.Strings.NonMatchingProperties">
             <summary>
               Looks up a localized string similar to Properties '{0}':'{1}' and '{2}':'{3}' do not match..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.NoTrustedSigners">
+            <summary>
+              Looks up a localized string similar to There are no trusted signers..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.NoTrustedSignersMatching">
+            <summary>
+              Looks up a localized string similar to No trusted signers with the name: '{0}' were found..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.NuGetDocs">
@@ -2484,6 +2650,11 @@
         <member name="P:NuGet.Commands.Strings.PropertyNotAllowedForProjectType">
             <summary>
               Looks up a localized string similar to Invalid input combination. Property '{0}' is not allowed for project type '{1}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.RegsiteredTrustedSigners">
+            <summary>
+              Looks up a localized string similar to Registered trusted signers:.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.ResolverRequest_ToStringFormat">
@@ -2591,6 +2762,61 @@
               Looks up a localized string similar to Restore request does not contain any projects to restore..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.SuccessfullUpdatedTrustedSigner">
+            <summary>
+              Looks up a localized string similar to Successfully updated the trusted signer '{0}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SuccessfullyAddedTrustedAuthor">
+            <summary>
+              Looks up a localized string similar to Successfully added a trusted author '{0}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SuccessfullyAddedTrustedRepository">
+            <summary>
+              Looks up a localized string similar to Successfully added a trusted repository '{0}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SuccessfullyRemovedTrustedSigner">
+            <summary>
+              Looks up a localized string similar to Successfully removed the trusted signer '{0}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SuccessfullySynchronizedTrustedRepository">
+            <summary>
+              Looks up a localized string similar to Successfully synchronized the trusted repository '{0}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.TrustedSignerLogCertificates">
+            <summary>
+              Looks up a localized string similar to Certificate fingerprint(s):.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.TrustedSignerLogCertificateSummaryAllowUntrustedRoot">
+            <summary>
+              Looks up a localized string similar to [U] {0} - {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.TrustedSignerLogCertificateSummaryUnallowUntrustedRoot">
+            <summary>
+              Looks up a localized string similar to {0} - {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.TrustedSignerLogOwners">
+            <summary>
+              Looks up a localized string similar to Trusted owners: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.TrustedSignerLogServiceIndex">
+            <summary>
+              Looks up a localized string similar to Service Index: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.TrustedSignerLogTitle">
+            <summary>
+              Looks up a localized string similar to {0} [{1}].
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.UnableToExtractAssemblyMetadata">
             <summary>
               Looks up a localized string similar to Unable to extract metadata from '{0}'..
@@ -2599,6 +2825,11 @@
         <member name="P:NuGet.Commands.Strings.UnableToFindBuildOutput">
             <summary>
               Looks up a localized string similar to Unable to find '{0}'. Make sure the project has been built..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.UnsupportedHashAlgorithm">
+            <summary>
+              Looks up a localized string similar to The hash algorithm is unsupported:  '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.UnsupportedProject">
@@ -2701,11 +2932,6 @@
               Looks up a localized string similar to Project dependency {0} does not contain an inclusive lower bound. Include a lower bound in the dependency version to ensure consistent restore results..
             </summary>
         </member>
-        <member name="P:NuGet.Commands.Strings.Warning_SemanticVersion">
-            <summary>
-              Looks up a localized string similar to Version "{0}" does not follow semantic versioning guidelines. Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org..
-            </summary>
-        </member>
         <member name="P:NuGet.Commands.Strings.Warning_UnresolvedFilePath">
             <summary>
               Looks up a localized string similar to '{0}' was included in the project but the path could not be resolved. Skipping....
@@ -2719,6 +2945,115 @@
         <member name="P:NuGet.Commands.Strings.Warning_VersionAboveUpperBound">
             <summary>
               Looks up a localized string similar to Detected package version outside of dependency constraint: {0} requires {1} but version {2} was resolved..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignerActionsProvider.ServiceIndexSourceRepository">
+            <summary>
+            Internal SourceRepository useful for overriding on tests to get
+            mocked responses from the server
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.TrustedSignerActionsProvider.SyncTrustedRepositoryAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Refresh the certificates of a repository item with the ones the server is announcing.
+            </summary>
+            <param name="name">Name of the repository item to refresh.</param>
+            <param name="token">Cancellation token</param>
+            <exception cref="T:System.InvalidOperationException">When a repository item with the given name is not found.</exception>
+        </member>
+        <member name="M:NuGet.Commands.TrustedSignerActionsProvider.AddTrustedSignerAsync(System.String,NuGet.Packaging.Signing.ISignedPackageReader,NuGet.Packaging.Signing.VerificationTarget,System.Boolean,System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Adds a trusted signer item to the settings based a signed package.
+            </summary>
+            <param name="name">Name of the trusted signer.</param>
+            <param name="package">Package to read signature from.</param>
+            <param name="trustTarget">Signature to trust from package.</param>
+            <param name="allowUntrustedRoot">Specifies if allowUntrustedRoot should be set to true.</param>
+            <param name="owners">Trusted owners that should be set when trusting a repository.</param>
+            <param name="token">Cancellation token for async request</param>
+        </member>
+        <member name="M:NuGet.Commands.TrustedSignerActionsProvider.AddOrUpdateTrustedSigner(System.String,System.String,NuGet.Common.HashAlgorithmName,System.Boolean)">
+            <summary>
+            Updates the certificate list of a trusted signer by adding the given certificate.
+            If the signer does not exists it creates a new one.
+            </summary>
+            <remarks>This method defaults to adding a trusted author if the signer doesn't exist.</remarks>
+            <param name="name">Name of the trusted author.</param>
+            <param name="fingerprint">Fingerprint to be added to the certificate entry.</param>
+            <param name="hashAlgorithm">Hash algorithm used to calculate <paramref name="fingerprint" />.</param>
+            <param name="allowUntrustedRoot">Specifies if allowUntrustedRoot should be set to true in the certificate entry.</param>
+        </member>
+        <member name="M:NuGet.Commands.TrustedSignerActionsProvider.AddTrustedRepositoryAsync(System.String,System.Uri,System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Adds a trusted repository with information from <paramref name="serviceIndex" />
+            </summary>
+            <param name="name">Name of the trusted repository.</param>
+            <param name="serviceIndex">Service index of the trusted repository. Trusted certificates information will be gotten from here.</param>
+            <param name="owners">Owners to be trusted from the repository.</param>
+            <param name="token">Cancellation token</param>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.Action">
+            <summary>
+            Action to be performed by the trusted signers command.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.Name">
+            <summary>
+            Name of the trusted signer.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.ServiceIndex">
+            <summary>
+            Service index of the trusted repository.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.CertificateFingerprint">
+            <summary>
+            Fingerprint of certificate added to a trusted signer
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.FingerprintAlgorithm">
+            <summary>
+            Algorithm used to calculate fingerprint. <see cref="P:NuGet.Commands.TrustedSignersArgs.CertificateFingerprint" />
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.AllowUntrustedRoot">
+            <summary>
+            Specifies if the certificate to be added to a trusted signer
+            should allow to chain to an untrusted root.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.Author">
+            <summary>
+            Specifies if the signature to be trusted is the author signature.
+            Only valid when specifying a packge path <see cref="P:NuGet.Commands.TrustedSignersArgs.PackagePath" />
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.Repository">
+            <summary>
+            Specifies if the signature to be trusted is the repository signature or countersignature.
+            Only valid when specifying a packge path <see cref="P:NuGet.Commands.TrustedSignersArgs.PackagePath" />
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.Owners">
+            <summary>
+            Owners to be trusted from a specific repository.
+            Only valid when adding trust for a repository.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.PackagePath">
+            <summary>
+            Path to the signed package to be trusted.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.TrustedSignersArgs.Logger">
+            <summary>
+            Logger to be used to display the logs during the execution of sign command.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.TrustedSignersCommandRunner">
+            <summary>
+            Command Runner used to run the business logic for nuget trusted-signers command
             </summary>
         </member>
         <member name="M:NuGet.Commands.AssetTargetFallbackUtility.EnsureValidFallback(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.String)">
@@ -2997,4 +3332,4 @@
             </summary>
         </member>
     </members>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>AdFoxbYqYkMUqt21EgfL0x/c2mk=</DigestValue></Reference></SignedInfo><SignatureValue>OXeqH7a9CeoCFKR+jq4sEaa9QY1sazIQoS9qB2DI4yEAQPDVZM1J+kOGYmPGJh/z1oIwPNGSMY3YmSmZoq3IBUq5AwuZbkVmPWdBlqLOSmlZHKnCMnIX8ZVgltrJ/HR2wsV7hQkN1JRK2n1dk06DZHyFc8TojcXA12MD9qx+xboMxdguO5nOBi+x5FyCh1Gdap4ohAsz3/+d79x1kROiIOgbwDtaM8etbvbbrSCUZHB+ytXoELTnfD9nHUg6eHLVDaU60uPvpU3BI+rKLnnEsNnMQN2YObqD9FKCSAb5Zj19M6Xn6Gu0ymXNjIR5uZlWgLSmTBf48IOfXKqwkkjqXA==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>m1K+Tyy0HVPLPV0jHraDo5/A5UrgV7PC+C3WipFfzBLODN0Ct0Z49Gub3ufLICGP1D4OJZRyOnhjZi61X+Hbl/2IjqiIl1VMHR4+qWlJLRNj+X7DparTv3/CBzkhMGY2lZdvp96rpRL2heloKGkmmxqet6/sU3hvw8wxMIf29zYrMEBZSEaAUajNDIDd40qeLXRV7OanRHrVE770wiR9DP0zzeYjX5rN1CltAtUyWmonz7DJAYuUr+UMi3offSITg4byWkvThGNXGmtJeDpU6Y/hhcblP5Yl5175yMvHofLyGw0iW7kv/Izp2yjEVRe26PTXes/9nNOP7ul2KoKMoQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE2zCCA8OgAwIBAgITMwAAAbHd7bpU6WW4XwABAAABsTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xODA3MTIyMDExMTlaFw0xOTA3MjYyMDExMTlaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xHjAcBgNVBAMTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJtSvk8stB1Tyz1dIx62g6OfwOVK4Fezwvgt1oqRX8wSzgzdArdGePRrm97nyyAhj9Q+DiWUcjp4Y2YutV/h25f9iI6oiJdVTB0ePqlpSS0TY/l+w6Wq079/wgc5ITBmNpWXb6feq6US9oXpaChpJpsanrev7FN4b8PMMTCH9vc2KzBAWUhGgFGozQyA3eNKni10Vezmp0R61RO+9MIkfQz9M83mI1+azdQpbQLVMlpqJ8+wyQGLlK/lDIt6H30iE4OG8lpL04RjVxprSXg6VOmP4YXG5T+WJede+cjLx6Hy8hsNIlu5L/yM6dsoxFUXtuj013rP/ZzTj+7pdiqCjKECAwEAAaOCAV8wggFbMBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBREE7QCnXc+kFVx9eQcf6wXFM8+czBQBgNVHREESTBHpEUwQzEpMCcGA1UECxMgTWljcm9zb2Z0IE9wZXJhdGlvbnMgUHVlcnRvIFJpY28xFjAUBgNVBAUTDTIyOTgwMys0Mzc5NTAwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAIOp8qYzxaF7HNJegK7spKbD6ShdVyUjjd0lCWlw6E1pFi+UuwXZm4DsWdBoZBuDNKjcz2ONnWt2APV7r0J0B8X8kcDirEUzll2x/fqORrJJ4kMGGZiFcXjTnunblRZBMTRwLEOWogJ3qS89YUpjWfGXfdFSlWCFqLwbRQc/2cGP91D1uX4IieRCxFiOQcCVOEkf1x34ME8pLztHWZI37pch7RdmkBwvLW1r/wt15aoS3fqvxBG04CEyWr8FzkX5P41Wrs5R1syufQQZMBLyv59IJpwOAA0oraXeRC3M1If/lEmVVwxNNJwjCt3DjTIJ9L01KMXe0Ig/qRIToTBwoBE=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIE2jCCA8KgAwIBAgITMwAAARSWmg34leRxSQAAAAABFDANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTgwODIzMjAyMDQ4WhcNMTkxMTIzMjAyMDQ4WjCByjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjElMCMGA1UECxMcTWljcm9zb2Z0IEFtZXJpY2EgT3BlcmF0aW9uczEmMCQGA1UECxMdVGhhbGVzIFRTUyBFU046QzNCMC0wRjZBLTQxMTExJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDWEwe92HYCn9y3DgyVWA51NYXv0achFhmbaVjtoucsc6xlTqQcyh4q90v1eRNGORVjGPG+6IDzNCSQCSfSP275nD9QdOpcpS4a3JKU25+cH3APzpeTr5UuiQX9SeGTTINBJ2kXKmwS0QdU9myWlQFfZxHUIo3Zlo0XnHOVXR0GG2EHVbEaTH1cyyHQ1FmlTBOy2kKPphXNRcrhNLu6gSQsZxv3T9ZonXI9ugfm+Ff7Fy1oNPy/Mr4nuULb9gnVyb2O6g38RTWGQ/LGhkiwRlIukzk9pL8Mi2M0UdSy0ejZmr0iWKyCBBp3Ar/pXXeby6Y8rhm+/Z2twW0Qsbh3XeHbAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUSjou83SWD9oSIYvohHk0q86M7CkwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAI/s7zUgfoZrgux4yJtZmRzSqsIeV3I5oxelzy7Oc9oU+G+jky0xRskmcwvxxI9ou4xjS/cV3AUrg4aBai5xY4u449c/6W8CpsZLKlKNCrrYpXjNPoVOYAlNARVMKyPlAjoVpZ3tCO+7+5WdZf+VhjWeMyRUftRBIIL1cjwN3HvlbqbCOO+fdsEODSpKNkonLNMtl6dheAiwwui8FDS5tcoKNdEOixcesRub0o2X9DqE9Hug+/1x2cRNLwkDztDuODOQiHiz0QVbaDOsoPtmQmNpBukY7cRancXmBd+kY0OFMV02OQIzbc0ji6fF7N2odGCX3bNvbw/p2F12Eb287rg==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>IQDIZmRXhA98DNqp3lOKGF8OJAA=</DigestValue></Reference></SignedInfo><SignatureValue>S0BrqTHX+8rRKwMOl2zd22cdVjKMA6zvGKorNV3+Ri+5WnXnBJO52TehatNE/RwRHjTIDHX+iGxO4JNM7SJTk0okvn8MxsisGV01WklQk8nE1kw2VeCkNswFsJNu5j5cCwUMr+nQzsB0auYDj1cNYeo7bjW9/o4aT5aEwVuLehellGwhn/Z7lp3ROrH2rEZQ0IuJHlitJSr7U4qAvBboe5LAOfvS/JlHpNNNXnXvjvYbRlZ7EJEo16lqRZgW2BzY8l2cDlQLKp5yUGAhroaLUTJMVDyORVeZcQ/OYB5nRn6RtQKOCUctdK3TGNCSCy+dMhXBQ9phR401rAOUGxLc1Q==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>m1K+Tyy0HVPLPV0jHraDo5/A5UrgV7PC+C3WipFfzBLODN0Ct0Z49Gub3ufLICGP1D4OJZRyOnhjZi61X+Hbl/2IjqiIl1VMHR4+qWlJLRNj+X7DparTv3/CBzkhMGY2lZdvp96rpRL2heloKGkmmxqet6/sU3hvw8wxMIf29zYrMEBZSEaAUajNDIDd40qeLXRV7OanRHrVE770wiR9DP0zzeYjX5rN1CltAtUyWmonz7DJAYuUr+UMi3offSITg4byWkvThGNXGmtJeDpU6Y/hhcblP5Yl5175yMvHofLyGw0iW7kv/Izp2yjEVRe26PTXes/9nNOP7ul2KoKMoQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE2zCCA8OgAwIBAgITMwAAAbHd7bpU6WW4XwABAAABsTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xODA3MTIyMDExMTlaFw0xOTA3MjYyMDExMTlaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xHjAcBgNVBAMTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJtSvk8stB1Tyz1dIx62g6OfwOVK4Fezwvgt1oqRX8wSzgzdArdGePRrm97nyyAhj9Q+DiWUcjp4Y2YutV/h25f9iI6oiJdVTB0ePqlpSS0TY/l+w6Wq079/wgc5ITBmNpWXb6feq6US9oXpaChpJpsanrev7FN4b8PMMTCH9vc2KzBAWUhGgFGozQyA3eNKni10Vezmp0R61RO+9MIkfQz9M83mI1+azdQpbQLVMlpqJ8+wyQGLlK/lDIt6H30iE4OG8lpL04RjVxprSXg6VOmP4YXG5T+WJede+cjLx6Hy8hsNIlu5L/yM6dsoxFUXtuj013rP/ZzTj+7pdiqCjKECAwEAAaOCAV8wggFbMBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBREE7QCnXc+kFVx9eQcf6wXFM8+czBQBgNVHREESTBHpEUwQzEpMCcGA1UECxMgTWljcm9zb2Z0IE9wZXJhdGlvbnMgUHVlcnRvIFJpY28xFjAUBgNVBAUTDTIyOTgwMys0Mzc5NTAwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAIOp8qYzxaF7HNJegK7spKbD6ShdVyUjjd0lCWlw6E1pFi+UuwXZm4DsWdBoZBuDNKjcz2ONnWt2APV7r0J0B8X8kcDirEUzll2x/fqORrJJ4kMGGZiFcXjTnunblRZBMTRwLEOWogJ3qS89YUpjWfGXfdFSlWCFqLwbRQc/2cGP91D1uX4IieRCxFiOQcCVOEkf1x34ME8pLztHWZI37pch7RdmkBwvLW1r/wt15aoS3fqvxBG04CEyWr8FzkX5P41Wrs5R1syufQQZMBLyv59IJpwOAA0oraXeRC3M1If/lEmVVwxNNJwjCt3DjTIJ9L01KMXe0Ig/qRIToTBwoBE=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>MIIE2jCCA8KgAwIBAgITMwAAARvDptTNO1zhBQAAAAABGzANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTgxMDI0MjEwNzM0WhcNMjAwMTEwMjEwNzM0WjCByjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjElMCMGA1UECxMcTWljcm9zb2Z0IEFtZXJpY2EgT3BlcmF0aW9uczEmMCQGA1UECxMdVGhhbGVzIFRTUyBFU046MTJCQy1FM0FFLTc0RUIxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCi7tz+K6zwKZXmpOh38vef24yJGw8Q2KBTTenzjGcJQCrdIUzd0oBlGJvOuT55rX6MGzParSANogexFLMKqJDS4n4XxcnXPnj6VXRFCNAKeZiE6JpaGfTU3Xg6sElxJHzs3YG/FKCnspd4lxr4u5eg2APw9VSHuOF8t4gvZfjszxnFHQ9orF/9hR0MZsPkuzwlAk/OtjqayqgstmiewltKxf6kk3IC+KbJXuIJ4kPfaaBlo7xZrEStV0vyZQGj8ps3096oyqWAhKoyZSwYSr8oJ0MeeVXukKIT78nJlnzxwUXOcxP3z63s+igvObEVJnGnPs1Q5X1CuEYgR8uwGEsbAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUPE98rm9XhoANXm6ggp3sfBKBToowHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAMlHg07m4HsDnyrR2ijcfGCjIt5OuDHAKsNON9GkI/sMakd9VNAa79NQakczz65JaFCa/Cxn8rCK4Sb9msBACGBUagcaNz/G4VzD4NgeVBUZUdrsg4QQk29H4luQgqr9eeo/7werwwdRm7Alg0bGNkennOYQvrM/ZMJ1i/ckPPCVtncmkfjC5n5OOjVeyjqtzN//ge/vlBAQ9GshMCVdzXDm9IJ+hcrbtTGUvafFmRNG8yC3lma87e2idOk5mUIScF/JC5PTmvqFPD2Vhvn7hAdHjxfhUqnvbnvPUYJPEc4NM4bgmjPzDCpeUseawLxLkWDwC6EJODgVog8GajwsAJA==</X509Certificate><X509Certificate>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</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>

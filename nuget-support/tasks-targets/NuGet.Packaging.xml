@@ -66,6 +66,16 @@
             Pattern used to identify Tools assets for global tools
             </summary>
         </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.EmbedAssemblies">
+            <summary>
+            Pattern used to locate embed interop types assemblies
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.MSBuildTransitiveFiles">
+            <summary>
+            Pattern used to identify MSBuild transitive targets and props files
+            </summary>
+        </member>
         <member name="P:NuGet.ContentModel.ContentItemCollection.HasContract">
             <summary>
             True if lib/contract exists
@@ -159,6 +169,633 @@
         <member name="P:NuGet.ContentModel.PatternTableEntry.Value">
             <summary>
             Item replacement value
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.IPackageIdentityComparer">
+            <summary>
+            Compares the id and version of a package
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Core.PackageDependencyComparer.Default">
+            <summary>
+            Default comparer
+            Null ranges and the All range are treated as equal.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependencyInfoComparer.Default">
+            <summary>
+            Default comparer
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageIdentityComparer">
+            <summary>
+            Compares the Id, Version, and Version release label. Version build metadata is ignored.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.#ctor">
+            <summary>
+            Default version range comparer.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.#ctor(NuGet.Versioning.VersionComparison)">
+            <summary>
+            Compare versions with a specific VersionComparison
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.#ctor(NuGet.Versioning.IVersionComparer)">
+            <summary>
+            Compare versions with a specific IVersionComparer
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentityComparer.Default">
+            <summary>
+            Default comparer that compares on the id, version, and version release labels.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.Equals(NuGet.Packaging.Core.PackageIdentity,NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            True if the package identities are the same when ignoring build metadata.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.GetHashCode(NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            Hash code of the id and version
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.Compare(NuGet.Packaging.Core.PackageIdentity,NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            Compares on the Id first, then version
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.ContentFilesEntry">
+            <summary>
+            metadata/contentFiles/files entry from a nuspec
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.Include">
+            <summary>
+            Included files
+            </summary>
+            <remarks>Required</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.Exclude">
+            <summary>
+            Excluded files
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.BuildAction">
+            <summary>
+            Build action
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.CopyToOutput">
+            <summary>
+            If true the item will be copied to the output folder.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.Flatten">
+            <summary>
+            If true the content items will keep the same folder structure in the output
+            folder.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.ExtractPackageFileDelegate">
+            <summary>
+            Callback invoked to extract a package file.
+            </summary>
+            <param name="sourceFile">The path of the file in the package.</param>
+            <param name="targetPath">The path to write to.</param>
+            <param name="fileStream">The file <see cref="T:System.IO.Stream" />.</param>
+            <returns>The file name if the file was written; otherwise <c>null</c>.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.IAsyncPackageCoreReader">
+            <summary>
+            A basic asynchronous package reader that provides the identity, min client version, and file access.
+            </summary>
+            <remarks>Higher level concepts used for normal development nupkgs should go at a higher level</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetIdentityAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets the identity of the package.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.Packaging.Core.PackageIdentity" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetMinClientVersionAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets the minimum client version needed to consume the package.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.Versioning.NuGetVersion" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetPackageTypesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets zero or more package types from the .nuspec.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IReadOnlyList`1" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetStreamAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns a file stream from the package.
+            </summary>
+            <param name="path">The file path in the package.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.IO.Stream" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetFilesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets all files in the package.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetFilesAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets files in a folder in the package.
+            </summary>
+            <param name="folder">A folder path in the package.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" /> for files under the specified folder.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetNuspecAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a nuspec stream.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.IO.Stream" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetNuspecFileAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a nuspec file path.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.String" />
+            representing the nuspec file path.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.CopyFilesAsync(System.String,System.Collections.Generic.IEnumerable{System.String},NuGet.Packaging.Core.ExtractPackageFileDelegate,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously copies files from a package to a new location.
+            </summary>
+            <param name="destination">The destination path to copy to.</param>
+            <param name="packageFiles">The package files to copy.</param>
+            <param name="extractFile">A package file extraction delegate.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns am
+            <see cref="T:System.Collections.Generic.IEnumerable`1" /> for the copied file paths.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="T:NuGet.Packaging.Core.INuspecCoreReader">
+            <summary>
+            A basic nuspec reader that understands ONLY the id, version, and min client version of a package.
+            </summary>
+            <remarks>Higher level concepts used for normal development nupkgs should go at a higher level</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetId">
+            <summary>
+            Package Id
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetVersion">
+            <summary>
+            Package Version
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetMinClientVersion">
+            <summary>
+            Minimum client version needed to consume the package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetIdentity">
+            <summary>
+            Id and Version of a package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetMetadata">
+            <summary>
+            Package metadata in the nuspec
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.IPackageCoreReader">
+            <summary>
+            Basic package reader that provides the identity, min client version, and file access.
+            </summary>
+            <remarks>Higher level concepts used for normal development nupkgs should go at a higher level</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetIdentity">
+            <summary>
+            Gets the package identity.
+            </summary>
+            <returns>A package identity.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetMinClientVersion">
+            <summary>
+            Gets the minimum client version needed to consume the package.
+            </summary>
+            <returns>A NuGet version.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+            <returns>A readonly list of package types.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetStream(System.String)">
+            <summary>
+            Gets a file stream from the package.
+            </summary>
+            <returns>A stream for a file in the package.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetFiles">
+            <summary>
+            Gets all files in the package.
+            </summary>
+            <returns>An enumerable of files in the package.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetFiles(System.String)">
+            <summary>
+            Gets files in a folder in the package.
+            </summary>
+            <param name="folder">Folder path</param>
+            <returns>An enumerable of files under specified folder.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetNuspec">
+            <summary>
+            Gets a nuspec stream.
+            </summary>
+            <returns>A stream for the nuspec.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetNuspecFile">
+            <summary>
+            Gets a nuspec file path.
+            </summary>
+            <returns>The nuspec file path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.CopyFiles(System.String,System.Collections.Generic.IEnumerable{System.String},NuGet.Packaging.Core.ExtractPackageFileDelegate,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Copies files from a package to a new location.
+            </summary>
+            <param name="destination">The destination folder path.</param>
+            <param name="packageFiles">The package files to copy.</param>
+            <param name="extractFile">A package file extraction delegate.</param>
+            <param name="logger">A logger.</param>
+            <param name="token">A cancellation token.</param>
+            <returns>An enumerable of paths of files copied to the destination.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecCoreReader">
+            <summary>
+            A basic nuspec reader that understand id, version, and a flat list of dependencies.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.#ctor(System.IO.Stream)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Reads a nuspec from XML
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.GetDependencies">
+            <summary>
+            Returns a flat list of dependencies from a nuspec
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecCoreReaderBase">
+            <summary>
+            A very basic Nuspec reader that understands the Id, Version, PackageType, and MinClientVersion of a package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.String)">
+            <summary>
+            Read a nuspec from a path.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.IO.Stream)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.IO.Stream,System.Boolean)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Reads a nuspec from XML
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetId">
+            <summary>
+            Id of the package
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetVersion">
+            <summary>
+            Version of the package
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMinClientVersion">
+            <summary>
+            The minimum client version this package supports.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.IsServiceable">
+            <summary>
+            Returns if the package is serviceable.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetDevelopmentDependency">
+            <summary>
+            The developmentDependency attribute
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMetadata">
+            <summary>
+            Nuspec Metadata
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMetadataValue(System.String)">
+            <summary>
+            Returns a nuspec metadata value or string.Empty.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.NuspecCoreReaderBase.MetadataValues">
+            <summary>
+            Indexed metadata values of the XML elements in the nuspec.
+            If duplicate keys exist only the first is used.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.NuspecCoreReaderBase.Xml">
+            <summary>
+            Raw XML doc
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecUtility">
+            <summary>
+            Until NuspecReader and Manifest are unified, this is a place to share implementations of
+            reading and parsing specific elements out of the .nuspec XML.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecUtility.GetPackageTypes(System.Xml.Linq.XElement,System.Boolean)">
+            <summary>
+            Gets the package types from a .nuspec metadata XML element.
+            </summary>
+            <param name="metadataNode">The metadata XML element.</param>
+            <param name="useMetadataNamespace">
+            Whether or not to use the metadata element's namespace when finding the package type
+            nodes. If false is specified, only the local names of the package type nodes are used
+            for comparison. If true is specified, the package type nodes must have the same
+            namespace as the metadata node.
+            </param>
+            <returns>
+            A list of package types. If no package types are found in the metadata node, an empty
+            list is returned.
+            </returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecUtility.IsServiceable(System.Xml.Linq.XElement)">
+            <summary>
+            Gets the value of serviceable element from a .nuspec metadata XML element.
+            </summary>
+            <param name="metadataNode">The metadata XML element.</param>
+            <returns>
+            true if the serviceable element is set in the .nuspec file as true, else false.
+            </returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageDependency">
+            <summary>
+            Represents a package dependency Id and allowed version range.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.Id">
+            <summary>
+            Dependency package Id
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.Include">
+            <summary>
+            Types to include from the dependency package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.Exclude">
+            <summary>
+            Types to exclude from the dependency package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.VersionRange">
+            <summary>
+            Range of versions allowed for the depenency
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependency.GetHashCode">
+            <summary>
+            Hash code from the default PackageDependencyComparer
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependency.ToString">
+            <summary>
+            Id and Version range string
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageDependencyInfo">
+            <summary>
+            Represents a package identity and the dependencies of a package.
+            </summary>
+            <remarks>
+            This class does not support groups of dependencies, the group will need to be selected before
+            populating this.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependencyInfo.#ctor(System.String,NuGet.Versioning.NuGetVersion,System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependency})">
+            <summary>
+            Represents a package identity and the dependencies of a package.
+            </summary>
+            <param name="id">package name</param>
+            <param name="version">package version</param>
+            <param name="dependencies">package dependencies</param>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependencyInfo.Dependencies">
+            <summary>
+            Package dependencies
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependencyInfo.GetHashCode">
+            <summary>
+            Hash code from the default PackageDependencyInfoComparer
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependencyInfo.ToString">
+            <summary>
+            Example: Id : Dependency1, Dependency2
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageIdentity">
+            <summary>
+            Represents the core identity of a nupkg.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.#ctor(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Creates a new package identity.
+            </summary>
+            <param name="id">name</param>
+            <param name="version">version</param>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentity.Id">
+            <summary>
+            Package name
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentity.Version">
+            <summary>
+            Package Version
+            </summary>
+            <remarks>can be null</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentity.HasVersion">
+            <summary>
+            True if the version is non-null
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.Equals(NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            True if the package identities are the same.
+            </summary>
+            <param name="other"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.Equals(NuGet.Packaging.Core.PackageIdentity,NuGet.Versioning.VersionComparison)">
+            <summary>
+            True if the identity objects are equal based on the given comparison mode.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.CompareTo(NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            Sorts based on the id, then version
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.Equals(System.Object)">
+            <summary>
+            Compare using the default comparer.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.GetHashCode">
+            <summary>
+            Creates a hash code using the default comparer.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentity.Comparer">
+            <summary>
+            An equality comparer that checks the id, version, and version release label.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.ToString">
+            <summary>
+            PackageIdentity.ToString returns packageId.packageVersion"
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageType">
+             It is important that this type remains immutable due to the cloning of package specs
+            
+        </member>
+        <member name="F:NuGet.Packaging.Core.PackagingCoreConstants.EmptyFolder">
+            <summary>
+            _._ denotes an empty folder since OPC does not allow an
+            actual empty folder.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Core.PackagingCoreConstants.ForwardSlashEmptyFolder">
+            <summary>
+            /_._ can be used to check empty folders from package readers where the / is normalized.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.FrameworkSpecificGroup">
+            <summary>
+            A group of items/files from a nupkg with the same target framework.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.FrameworkSpecificGroup.#ctor(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Framework specific group
+            </summary>
+            <param name="targetFramework">group target framework</param>
+            <param name="items">group items</param>
+        </member>
+        <member name="P:NuGet.Packaging.FrameworkSpecificGroup.TargetFramework">
+            <summary>
+            Group target framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.FrameworkSpecificGroup.Items">
+            <summary>
+            Item relative paths
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackageDependencyGroup">
+            <summary>
+            Package dependencies grouped to a target framework.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageDependencyGroup.#ctor(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependency})">
+            <summary>
+            Dependency group
+            </summary>
+            <param name="targetFramework">target framework</param>
+            <param name="packages">dependant packages</param>
+        </member>
+        <member name="P:NuGet.Packaging.PackageDependencyGroup.TargetFramework">
+            <summary>
+            Dependency group target framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageDependencyGroup.Packages">
+            <summary>
+            Package dependencies
             </summary>
         </member>
         <member name="T:NuGet.Packaging.IAsyncPackageContentReader">
@@ -463,6 +1100,262 @@
             <param name="version">Package version.</param>
             <returns>Returns the package info if the package exists in any of the folders. Null if the package does not exist.</returns>
         </member>
+        <member name="T:NuGet.Packaging.IHashFunction">
+            <summary>
+            Provides incremental hashing.
+            
+            This is non-private only to facilitate unit testing.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IHashFunction.GetHash">
+             <summary>
+             Gets the hash.
+            
+             Once GetHash is called, no further hash updates are allowed.
+             </summary>
+             <returns>A base64-encoded hash.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.IHashFunction.Update(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Incrementally updates the hash.
+            </summary>
+            <param name="data">The data to be included in the hash.</param>
+            <param name="offset">The offset from which data should be read.</param>
+            <param name="count">The count of bytes to read.</param>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.LicenseExpressionToken">
+            <summary>
+            Represents a token of a parsed license expression. The tokens are either operators, parentheses or values. 
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.LicenseExpressionToken.TokenType">
+            <summary>
+            The token type
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.LicenseExpressionToken.Value">
+            <summary>
+            The value of this token.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.LicenseExpressionTokenizer.#ctor(System.String)">
+            <summary>
+            A tokenizer for a license expression.
+            This implementation assumes that the input has been sanitized and that there are no invalid characters.
+            </summary>
+            <param name="value">value to be tokenized</param>
+            <exception cref="T:System.ArgumentException">If the string is null or whitespace.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.LicenseExpressionTokenizer.HasValidCharacters">
+            <summary>
+            The valid characters for a license identifier are a-zA-Z0-9.-+
+            The valid characters for a license expression are the above whitespace and ().
+            </summary>
+            <returns>Whether the value has valid characters.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.LicenseExpressionTokenizer.Tokenize">
+            <summary>
+            Given a string, tokenizes by space into operators and values. The considered operators are, AND, OR, WITH, (, and ). 
+            </summary>
+            <returns>tokens, <see cref="T:NuGet.Packaging.Licenses.LicenseExpressionToken" />/&gt;</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.LicenseExpressionTokenizer.ParseTokenType(System.String)">
+            <summary>
+            Parses a token type given a string.
+            This method assumes that the brackets have been parsed out. 
+            </summary>
+            <param name="token">The token</param>
+            <returns>A parsed token, operator or value.</returns>
+            <remarks>This method assumes the brackets have already been parsed.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.LicenseExpressionType">
+            <summary>
+            Represents the expression type of a <see cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpression" />.
+            License type means that it's a <see cref="T:NuGet.Packaging.Licenses.NuGetLicense" />. Operator means that it's a <see cref="T:NuGet.Packaging.Licenses.LicenseOperator" />
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.LicenseOperator">
+            <summary>
+            A NuGetLicenseOperator. The operator options are: WITH or Logical operator, AND and OR.
+            This is an abstract class so based on the NuGetLicenseOperatorType, it can be either a <see cref="T:NuGet.Packaging.Licenses.WithOperator" /> or a <see cref="T:NuGet.Packaging.Licenses.LogicalOperator" />.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.LicenseOperator.OperatorType">
+            <summary>
+            The operator type.
+            LogicalOperator means it's AND or OR and <see cref="T:NuGet.Packaging.Licenses.LogicalOperator" />
+            NuGetLicenseWithOperator means it's the WITH operator and <see cref="T:NuGet.Packaging.Licenses.WithOperator" />
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.LicenseOperatorType">
+            <summary>
+            Represents the type of <see cref="T:NuGet.Packaging.Licenses.LicenseOperator" /> <see cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpression" />.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.LicenseTokenType">
+            <summary>
+            The valid token types in a license expression. These are ordered by priority, be aware when changing them. See <seealso cref="T:NuGet.Packaging.Licenses.LicenseTokenTypeExtensions" />
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.LogicalOperator">
+            <summary>
+            A Logical Operator NuGetLicenseExpression.
+            It is either an OR or an AND operator, represented by <see cref="P:NuGet.Packaging.Licenses.LogicalOperator.LogicalOperatorType" />.
+            This operator will always have a left and a right side, both of which are <see cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpression" /> and never null. 
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.LogicalOperator.LogicalOperatorType">
+            <summary>
+            Represents the logical operator type of NuGetLicenseExpression.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.LogicalOperatorType">
+            <summary>
+            Represents the logical operator type of a <see cref="T:NuGet.Packaging.Licenses.LogicalOperator" />.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.NuGetLicense">
+            <summary>
+            NuGet's internal representation of a license identifier. 
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.NuGetLicense.Identifier">
+            <summary>
+            Identifier
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.NuGetLicense.Plus">
+            <summary>
+            Signifies whether the plus operator has been specified on this license
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.NuGetLicense.IsStandardLicense">
+            <summary>
+            Signifies whether this is a standard license known by the NuGet APIs.
+            Pack for example should warn for these.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.NuGetLicense.ParseIdentifier(System.String,System.Boolean)">
+            <summary>
+            Parse a licenseIdentifier. If a licenseIdentifier is deprecated, this will throw. Non-standard licenses get parsed into a object model as well.
+            </summary>
+            <param name="licenseIdentifier">license identifier to be parsed</param>
+            <param name="allowUnlicensed">Whether the parser allows the UNLICENSED identifier</param>
+            <returns>Prased NuGetLicense object</returns>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the identifier is deprecated, contains invalid characters or is an exception identifier.</exception>
+            <exception cref="T:System.ArgumentException">If it's null or empty.</exception>
+            <remarks>The purpose of the <paramref name="allowUnlicensed" /> switch is to allow the expression parser communicate at which operand location the unlicensed identifier is legal. </remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.NuGetLicense.HasValidCharacters(System.String)">
+            <summary>
+            The valid characters for a license identifier are a-zA-Z0-9.-
+            This method assumes that the trailing + operator has been stripped out.
+            </summary>
+            <param name="value">The value to be validated.</param>
+            <returns>whether the value has valid characters</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.NuGetLicenseException">
+            <summary>
+            NuGet's internal representation of a license exception identifier. 
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.NuGetLicenseException.Identifier">
+            <summary>
+            The Exception's identifier
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.NuGetLicenseException.ParseIdentifier(System.String)">
+            <summary>
+            Parse an exceptionIdentifier. If the exceptionIdentifier is deprecated, this will throw. Non-standard exception do not get parsed into an object model.
+            </summary>
+            <param name="exceptionIdentifier">Exception identifier to be parsed.</param>
+            <returns>Parsed License Exception</returns>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the identifier is deprecated, is a license or simply does not exist.</exception>
+            <exception cref="T:System.ArgumentException">If it's null or empty.</exception>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.NuGetLicenseExpression">
+            <summary>
+            Represents a parsed NuGetLicenseExpression.
+            This is an abstract class so based on the Type, it can be either a <see cref="T:NuGet.Packaging.Licenses.NuGetLicense" /> or a <see cref="T:NuGet.Packaging.Licenses.LicenseOperator" />.
+            <seealso cref="T:NuGet.Packaging.Licenses.LicenseExpressionType" />
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.NuGetLicenseExpression.Type">
+            <summary>
+            The type of the NuGetLicenseExpression.
+            License type means that it's a <see cref="T:NuGet.Packaging.Licenses.NuGetLicense" />.
+            Operator means that it's a <see cref="T:NuGet.Packaging.Licenses.LicenseOperator" />
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.NuGetLicenseExpression.Parse(System.String)">
+            <summary>
+            Parses a License Expression if valid.
+            The expression would be parsed correct, even if non-standard exceptions are encountered.
+            The non-standard Licenses/Exceptions have metadata on them with which the caller can make decisions.
+            </summary>
+            <param name="expression">The expression to be parsed.</param>
+            <returns>Parsed NuGet License Expression model.</returns>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the expression is empty or null.</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the expression has invalid characters</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the expression itself is invalid. Example: MIT OR OR Apache-2.0, or the MIT or Apache-2.0, because the expressions are case sensitive.</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the expression's brackets are mismatched.</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the licenseIdentifier is deprecated.</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the exception identifier is deprecated.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.NuGetLicenseExpressionExtensions.HasOnlyStandardIdentifiers(NuGet.Packaging.Licenses.NuGetLicenseExpression)">
+            <summary>
+            Determines whether all the licenses and exceptions are not deprecated.
+            </summary>
+            <param name="expression">expression to be validated</param>
+            <returns>Whether this expression consists of licenses with standard identifiers</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.NuGetLicenseExpressionExtensions.OnEachLeafNode(NuGet.Packaging.Licenses.NuGetLicenseExpression,System.Action{NuGet.Packaging.Licenses.NuGetLicense},System.Action{NuGet.Packaging.Licenses.NuGetLicenseException})">
+            <summary>
+            A leaf node in an expression can only be a License or an Exception. Run a func on each one.
+            </summary>
+            <param name="expression">The expression to be walked.</param>
+            <param name="licenseProcessor">A processor for the licenses.</param>
+            <param name="exceptionProcessor">A processor for the exceptions.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.NuGetLicenseExpressionParser.Parse(System.String)">
+            <summary>
+            Parses a License Expression if valid.
+            The expression would be parsed correct, even if non-standard exceptions are encountered. The non-standard Licenses/Exceptions have metadata on them with which the caller can make decisions.
+            Based on the Shunting Yard algorithm. <see href="https://en.wikipedia.org/wiki/Shunting-yard_algorithm" />
+            This method first creates an postfix expression by separating the operators and operands.
+            Later the postfix expression is evaluated into an object model that represents the expression. Note that brackets are dropped in this conversion and this is not round-trippable.
+            The token precedence helps make sure that the expression is a valid infix one. 
+            </summary>
+            <param name="expression">The expression to be parsed.</param>
+            <returns>Parsed NuGet License Expression model.</returns>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the expression is empty or null.</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the expression has invalid characters</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the expression itself is invalid. Example: MIT OR OR Apache-2.0, or the MIT or Apache-2.0, because the expressions are case sensitive.</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the expression's brackets are mismatched.</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the licenseIdentifier is deprecated.</exception>
+            <exception cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpressionParsingException">If the exception identifier is deprecated.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Licenses.NuGetLicenseExpressionParser.GetTokens(System.String)">
+            <summary>
+            Tokenizes the expression as per the license expression rules. Throws if the string contains invalid characters.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Licenses.WithOperator">
+            <summary>
+            Represents a <see cref="T:NuGet.Packaging.Licenses.NuGetLicenseExpression" /> that's a WITH operator.
+            It has a License and Exception.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.WithOperator.License">
+            <summary>
+            The license.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Licenses.WithOperator.Exception">
+            <summary>
+            The exception.
+            </summary>
+        </member>
         <member name="T:NuGet.Packaging.LocalPackageArchiveDownloader">
             <summary>
             A package downloader for local archive packages.
@@ -704,6 +1597,15 @@
             Source control repository information.
             </summary>
         </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetLicenseMetadata">
+            <summary>
+            Parses the license object if specified.
+            The metadata can be of 2 types, Expression and File.
+            The method will not fail if it sees values that invalid (empty/unparseable license etc), but it will rather add validation errors/warnings. 
+            </summary>
+            <remarks>This method never throws. Bad data is still parsed. </remarks>
+            <returns>The licensemetadata if specified</returns>
+        </member>
         <member name="M:NuGet.Packaging.NuspecReader.GetRequireLicenseAcceptance">
             <summary>
             Require license acceptance when installing the package.
@@ -817,6 +1719,37 @@
             Returns sets of Content Files specified in the manifest.
             </summary>
         </member>
+        <member name="T:NuGet.Packaging.LicenseMetadata">
+            <summary>
+            Represents the Package LicenseMetadata details.
+            All the relevant warnings and errors should parsed into this model and ideally the readers of this metadata never throw. 
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.LicenseMetadata.Type">
+            <summary>
+            The LicenseType, never null
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.LicenseMetadata.License">
+            <summary>
+            The license, never null, could be empty.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.LicenseMetadata.LicenseExpression">
+            <summary>
+            The license expression, could be null if the version is higher than the current supported or if the expression is not parseable.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.LicenseMetadata.WarningsAndErrors">
+            <summary>
+            Non-null when the expression parsing yielded some issues. This will be used to display the errors/warnings in the UI. Only populated when the metadata element is returned by the nuspec reader;
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.LicenseMetadata.Version">
+            <summary>
+            LicenseMetadata (expression) version. Never null.
+            </summary>
+        </member>
         <member name="M:NuGet.Packaging.Manifest.Save(System.IO.Stream)">
             <summary>
             Saves the current manifest to the specified stream.
@@ -927,123 +1860,143 @@
         </member>
         <member name="T:NuGet.Packaging.PackageCreation.Resources.NuGetResources">
             <summary>
-               A strongly-typed resource class, for looking up localized strings, etc.
+              A strongly-typed resource class, for looking up localized strings, etc.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.ResourceManager">
             <summary>
-               Returns the cached ResourceManager instance used by this class.
+              Returns the cached ResourceManager instance used by this class.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Culture">
             <summary>
-               Overrides the current thread's CurrentUICulture property for all
-               resource lookups using this strongly typed resource class.
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.CannotCreateEmptyPackage">
             <summary>
-               Looks up a localized string similar to Cannot create a package that has no dependencies nor content..
+              Looks up a localized string similar to Cannot create a package that has no dependencies nor content..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.DependencyHasInvalidVersion">
             <summary>
-               Looks up a localized string similar to Dependency '{0}' has an invalid version..
+              Looks up a localized string similar to Dependency '{0}' has an invalid version..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.DuplicateDependenciesDefined">
             <summary>
-               Looks up a localized string similar to '{0}' already has a dependency defined for '{1}'..
+              Looks up a localized string similar to '{0}' already has a dependency defined for '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.IncompatibleSchema">
             <summary>
-               Looks up a localized string similar to The schema version of '{0}' is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942..
+              Looks up a localized string similar to The schema version of '{0}' is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.InvalidPackageId">
             <summary>
-               Looks up a localized string similar to The package ID '{0}' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'..
+              Looks up a localized string similar to The package ID '{0}' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_DependenciesHasMixedElements">
             <summary>
-               Looks up a localized string similar to &lt;dependencies&gt; element must not contain both &lt;group&gt; and &lt;dependency&gt; child elements..
+              Looks up a localized string similar to &lt;dependencies&gt; element must not contain both &lt;group&gt; and &lt;dependency&gt; child elements..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_ExcludeContainsInvalidCharacters">
             <summary>
-               Looks up a localized string similar to Exclude path '{0}' contains invalid characters..
+              Looks up a localized string similar to Exclude path '{0}' contains invalid characters..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_IdMaxLengthExceeded">
             <summary>
-               Looks up a localized string similar to Id must not exceed 100 characters..
+              Looks up a localized string similar to Id must not exceed 100 characters..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidMinClientVersion">
             <summary>
-               Looks up a localized string similar to The 'minClientVersion' attribute in the package manifest has invalid value. It must be a valid version string..
+              Looks up a localized string similar to The 'minClientVersion' attribute in the package manifest has invalid value. It must be a valid version string..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidReference">
             <summary>
-               Looks up a localized string similar to Invalid assembly reference '{0}'. Ensure that a file named '{0}' exists in the lib directory..
+              Looks up a localized string similar to Invalid assembly reference '{0}'. Ensure that a file named '{0}' exists in the lib directory..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidReferenceFile">
             <summary>
-               Looks up a localized string similar to Assembly reference '{0}' contains invalid characters..
+              Looks up a localized string similar to Assembly reference '{0}' contains invalid characters..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_LicenseFileExtensionIsInvalid">
+            <summary>
+              Looks up a localized string similar to The license file '{0}' has an invalid extension. Valid options are .txt, .md or none..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_LicenseFileIsNotInNupkg">
+            <summary>
+              Looks up a localized string similar to The license file '{0}' does not exist in the package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_LicenseUrlCannotBeUsedWithLicenseMetadata">
+            <summary>
+              Looks up a localized string similar to The licenseUrl and license elements cannot be used together..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_PropertyValueReadFailure">
+            <summary>
+              Looks up a localized string similar to An error occured while trying to parse the value '{0}' of property '{1}' in the manifest file..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_ReferencesHasMixedElements">
             <summary>
-               Looks up a localized string similar to &lt;references&gt; element must not contain both &lt;group&gt; and &lt;reference&gt; child elements..
+              Looks up a localized string similar to &lt;references&gt; element must not contain both &lt;group&gt; and &lt;reference&gt; child elements..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_ReferencesIsEmpty">
             <summary>
-               Looks up a localized string similar to The element package\metadata\references\group must contain at least one &lt;reference&gt; child element..
+              Looks up a localized string similar to The element package\metadata\references\group must contain at least one &lt;reference&gt; child element..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_RequiredElementMissing">
             <summary>
-               Looks up a localized string similar to The required element '{0}' is missing from the manifest..
+              Looks up a localized string similar to The required element '{0}' is missing from the manifest..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_RequiredMetadataMissing">
             <summary>
-               Looks up a localized string similar to {0} is required..
+              Looks up a localized string similar to {0} is required..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_RequireLicenseAcceptanceRequiresLicenseUrl">
             <summary>
-               Looks up a localized string similar to Enabling license acceptance requires a license url..
+              Looks up a localized string similar to Enabling license acceptance requires a license or a licenseUrl to be specified. The licenseUrl will be deprecated, consider using the license metadata..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_SourceContainsInvalidCharacters">
             <summary>
-               Looks up a localized string similar to Source path '{0}' contains invalid characters..
+              Looks up a localized string similar to Source path '{0}' contains invalid characters..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_TargetContainsInvalidCharacters">
             <summary>
-               Looks up a localized string similar to Target path '{0}' contains invalid characters..
+              Looks up a localized string similar to Target path '{0}' contains invalid characters..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_UriCannotBeEmpty">
             <summary>
-               Looks up a localized string similar to {0} cannot be empty..
+              Looks up a localized string similar to {0} cannot be empty..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.PackageAuthoring_FileNotFound">
             <summary>
-               Looks up a localized string similar to File not found: '{0}'..
+              Looks up a localized string similar to File not found: '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.UnknownSchemaVersion">
             <summary>
-               Looks up a localized string similar to Unknown schema version '{0}'..
+              Looks up a localized string similar to Unknown schema version '{0}'..
             </summary>
         </member>
         <member name="M:NuGet.Packaging.FrameworkNameUtility.ParseFrameworkFolderName(System.String,System.Boolean,System.String@)">
@@ -1059,6 +2012,12 @@
             <summary>
             Gets or sets the <see cref="!:PackageExtraction.XmlDocFileSaveMode" />.
             </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageExtractionContext.SignedPackageVerifier">
+            <remarks>
+            This property should only be used to override the default verifier on tests.
+            It is public only so that NuGet.Commands.RestoreRequest can pass this property through
+            </remarks>
         </member>
         <member name="M:NuGet.Packaging.PackageHelper.GetSatellitePackageInfoAsync(NuGet.Packaging.Core.IAsyncPackageCoreReader,System.Threading.CancellationToken)">
             <summary>
@@ -1229,6 +2188,11 @@
             <summary>
             Validate file entry in package is not traversed outside of the expected extraction path.
             Eg: file entry like ../../foo.dll can get outside of the expected extraction path.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.GetContentHash(System.Threading.CancellationToken,System.Func{System.String})">
+            <summary>
+            Get contenthash for a package.
             </summary>
         </member>
         <member name="T:NuGet.Packaging.PackageReference">
@@ -1521,6 +2485,11 @@
               Looks up a localized string similar to The folder '{0}' under 'lib' is not recognized as a valid framework name or a supported culture identifier. Rename it to a valid framework name or culture identifier..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.InvalidPlaceholderFileWarning">
+            <summary>
+              Looks up a localized string similar to The file at '{0}' uses the symbol for empty directory '_._', but it is present in a directory that contains other files. Please remove this file from directories that contain other files..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.InvalidPrereleaseDependencyWarning">
             <summary>
               Looks up a localized string similar to A stable release of a package should not have a prerelease dependency. Either modify the version spec of dependency "{0}" or update the version field in the nuspec..
@@ -1529,6 +2498,11 @@
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.LegacyVersionWarning">
             <summary>
               Looks up a localized string similar to The package version '{0}' uses SemVer 2.0.0 or components of SemVer 1.0.0 that are not supported on legacy clients. Change the package version to a SemVer 1.0.0 string. If the version contains a release label it must start with a letter. This message can be ignored if the package is not intended for older clients..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.LicenseUrlDeprecationWarning">
+            <summary>
+              Looks up a localized string similar to The 'licenseUrl' element will be deprecated. Consider using the 'license' element instead..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_AssemblyDirectlyUnderLibWarning">
@@ -1571,6 +2545,11 @@
               Looks up a localized string similar to The script file '{0}' is outside the 'tools' folder and hence will not be executed during installation of this package. Move it into the 'tools' folder..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.UnrecognizedLicenseIdentifier">
+            <summary>
+              Looks up a localized string similar to The license identifier '{0}' is not recognized by the current toolset..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.UnrecognizedScriptWarning">
             <summary>
               Looks up a localized string similar to The script file '{0}' is not recognized by NuGet and hence will not be executed during installation of this package. Rename it to install.ps1, uninstall.ps1 or init.ps1 and place it directly under 'tools'..
@@ -1600,6 +2579,13 @@
         <member name="P:NuGet.Packaging.Rules.MisplacedAssemblyUnderLibRule.ValidFolders">
             <summary>
             Folders that are expected to have .dll and .winmd files
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Sha512HashFunction">
+            <summary>
+            A SHA-512 hash function that supports incremental hashing.
+            
+            This is non-private only to facilitate unit testing.
             </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata">
@@ -1669,26 +2655,49 @@
             <param name="position">Position to stop copying data.</param>
         </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadAndHashUntilPosition(System.IO.BinaryReader,System.Security.Cryptography.HashAlgorithm,System.Int64)">
+             <summary>
+             Read bytes from a BinaryReader and hash them with a given HashAlgorithm and stop when the provided position
+             is the current position of the BinaryReader's base stream. It does not hash the byte in the provided position.
+            
+             TODO: Once we start supporting signing in Net core, then we should move to another ReadAndHashUntilPosition api which takes Sha512HashFunction which is wrapper
+              over HashAlgorithm and works for desktop as well as net core. 
+             </summary>
+             <param name="reader">Read bytes from this stream</param>
+             <param name="hashAlgorithm">HashAlgorithm used to hash contents</param>
+             <param name="position">Position to stop copying data</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.HashBytes(System.Security.Cryptography.HashAlgorithm,System.Byte[])">
+             <summary>
+             Hashes given byte array with a specified HashAlgorithm
+            
+             TODO: Once we start supporting signing in Net core, then we should move to another HashBytes api which takes Sha512HashFunction which is wrapper
+              over HashAlgorithm and works for desktop as well as net core. 
+             </summary>
+             <param name="hashAlgorithm">HashAlgorithm used to hash contents</param>
+             <param name="bytes">Content to hash</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadAndHashUntilPosition(System.IO.BinaryReader,NuGet.Packaging.Sha512HashFunction,System.Int64)">
             <summary>
-            Read bytes from a BinaryReader and hash them with a given HashAlgorithm and stop when the provided position
+            Read bytes from a BinaryReader and hash them with a given HashAlgorithm wrapper and stop when the provided position
             is the current position of the BinaryReader's base stream. It does not hash the byte in the provided position.
             </summary>
             <param name="reader">Read bytes from this stream</param>
-            <param name="hashAlgorithm">HashAlgorithm used to hash contents</param>
+            <param name="hashFunc">HashAlgorithm wrapper used to hash contents cross platform</param>
             <param name="position">Position to stop copying data</param>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.HashBytes(System.Security.Cryptography.HashAlgorithm,System.Byte[])">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.HashBytes(NuGet.Packaging.Sha512HashFunction,System.Byte[])">
             <summary>
-            Hashes given byte array with a specified HashAlgorithm
+            Hashes given byte array with a specified HashAlgorithm wrapper which works cross platform.
             </summary>
-            <param name="hashAlgorithm">HashAlgorithm used to hash contents</param>
+            <param name="hashFunc">HashAlgorithm wrapper used to hash contents cross platform</param>
             <param name="bytes">Content to hash</param>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadSignedArchiveMetadata(System.IO.BinaryReader)">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadSignedArchiveMetadata(System.IO.BinaryReader,System.Boolean)">
             <summary>
             Read ZIP's offsets and positions of offsets.
             </summary>
             <param name="reader">binary reader to zip archive</param>
+            <param name="validateSignatureEntry">boolean to skip validate signature entry</param>
             <returns>metadata with offsets and positions for entries</returns>
         </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.AssertSignatureEntryMetadata(System.IO.BinaryReader,NuGet.Packaging.Signing.SignedPackageArchiveMetadata)">
@@ -1819,13 +2828,16 @@
             <param name="writer">BinaryWriter to be used to write the signature into the zip.</param>
         </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveUtility.VerifySignedPackageIntegrity(System.IO.BinaryReader,System.Security.Cryptography.HashAlgorithm,System.Byte[])">
-            <summary>
-            Verifies that a signed package archive's signature is valid and it has not been tampered with.
-            </summary>
-            <param name="reader">Signed package to verify</param>
-            <param name="hashAlgorithm">Hash algorithm to be used to hash data.</param>
-            <param name="expectedHash">Hash value of the original data.</param>
-            <returns>True if package archive's hash matches the expected hash</returns>
+             <summary>
+             Verifies that a signed package archive's signature is valid and it has not been tampered with.
+            
+             TODO: When we work to support signing for netcore then we should use GetPackageContentHash api to calculate package hash
+             which works for desktop as well as netcore.
+             </summary>
+             <param name="reader">Signed package to verify</param>
+             <param name="hashAlgorithm">Hash algorithm to be used to hash data.</param>
+             <param name="expectedHash">Hash value of the original data.</param>
+             <returns>True if package archive's hash matches the expected hash</returns>
         </member>
         <member name="P:NuGet.Packaging.Signing.AuthorSignPackageRequest.SignatureType">
             <summary>
@@ -2408,6 +3420,23 @@
             <param name="signatureContent">SignatureContent with expected hash value and hash algorithm used</param>
             <returns></returns>
         </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.GetContentHash(System.Threading.CancellationToken,System.Func{System.String})">
+            <summary>
+            Get the hash of the package content excluding signature context for signed package.
+            If the package is not signed it calculates it from the whole package.
+            </summary>
+            <param name="token">Cancellation token.</param>
+            <param name="GetUnsignedPackageHash">Function to return the hash in case the package is not signed.</param>
+            <remarks>The method takes an optional function to get the hash of an unsigned package instead of calculating it.</remarks>
+            <returns>hash of the unsigned content of the package.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.CanVerifySignedPackages(NuGet.Packaging.Signing.SignedPackageVerifierSettings)">
+            <summary>
+            Indicates if the the ISignedPackageReader instance can verify signed packages.
+            </summary>
+            <param name="verifierSettings">Package verification settings. Include information about what is allowed.</param>
+            <exception cref="T:NuGet.Packaging.Signing.SignatureException">if the ISignedPackageReader does not support signed packages</exception>
+        </member>
         <member name="T:NuGet.Packaging.Signing.ISignedPackageWriter">
             <summary>
             A writer that only allows editing for the package signature.
@@ -2443,7 +3472,7 @@
             A nupkg that supports both reading and writing signatures.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageArchive.ZipWriteStream">
+        <member name="F:NuGet.Packaging.Signing.SignedPackageArchive._zipWriteStream">
             <summary>
             Stream underlying the ZipArchive. Used to do signature verification on a SignedPackageArchive.
             If this is null then we cannot perform signature verification.
@@ -2669,6 +3698,11 @@
         <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.ReportUnknownRevocation">
             <summary>
             Indicates if unknown revocation status should be reported.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.ReportUntrustedRoot">
+            <summary>
+            Indicates if a signing certificate that chains to an untrusted root should be reported.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.RevocationMode">
@@ -2924,6 +3958,23 @@
         <member name="T:NuGet.Packaging.Signing.TstInfo">
             <remarks>This is public only to facilitate testing.</remarks>
         </member>
+        <member name="M:NuGet.Packaging.Signing.ITrustedSignersProvider.GetTrustedSigners">
+            <summary>
+            Get a list of all the trusted signer entries under the computer trusted signers section.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ITrustedSignersProvider.AddOrUpdateTrustedSigner(NuGet.Configuration.TrustedSignerItem)">
+            <summary>
+            Adds a new trusted signer or updates an existing one in the settings.
+            </summary>
+            <param name="trustedSigners">Trusted signers to be added or updated</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ITrustedSignersProvider.Remove(System.Collections.Generic.IReadOnlyList{NuGet.Configuration.TrustedSignerItem})">
+            <summary>
+            Removes trusted signers from the settings.
+            </summary>
+            <param name="trustedSigners">Trusted signers to be removed</param>
+        </member>
         <member name="M:NuGet.Packaging.Signing.AttributeUtility.CreateCommitmentTypeIndication(NuGet.Packaging.Signing.SignatureType)">
             <summary>
             Create a CommitmentTypeIndication attribute.
@@ -3146,6 +4197,14 @@
             <param name="hashAlgorithm">Hash algorithm for fingerprint</param>
             <returns>A byte array representing the certificate hash.</returns>
         </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.GetHashString(System.Security.Cryptography.X509Certificates.X509Certificate2,NuGet.Common.HashAlgorithmName)">
+            <summary>
+            Gets the certificate fingerprint string with the given hashing algorithm
+            </summary>
+            <param name="certificate">X509Certificate2 to be compute fingerprint</param>
+            <param name="hashAlgorithm">Hash algorithm for fingerprint</param>
+            <returns>A string representing the certificate hash.</returns>
+        </member>
         <member name="M:NuGet.Packaging.Signing.CertificateUtility.IsSelfIssued(System.Security.Cryptography.X509Certificates.X509Certificate2)">
             <summary>
             Determines if a certificate is self-issued.
@@ -3240,13 +4299,20 @@
             finalizer impact.
             </remarks>
         </member>
-        <member name="M:NuGet.Packaging.Signing.AllowListVerificationProvider.VerifyAllowList(NuGet.Packaging.Signing.AllowListVerificationProvider.CertificateListVerificationRequest,System.Boolean)">
+        <member name="P:NuGet.Packaging.Signing.ClientPolicyContext.Policy">
             <summary>
-            Verify an allow list with a given request
+            Current policy the client is on.
             </summary>
-            <param name="request">Information about the allow list verification to perform</param>
-            <remarks>This method should never return a status unknown. Min is used to take the most severe status in <see cref="M:NuGet.Packaging.Signing.AllowListVerificationProvider.GetValidity(System.Collections.Generic.IEnumerable{NuGet.Packaging.Signing.PackageVerificationResult})" />
-            therefore, if unknown is returned the verification process will return an unknown status for the whole operation</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.ClientPolicyContext.VerifierSettings">
+            <summary>
+            Verification settings corresponding the current client policy.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.ClientPolicyContext.AllowList">
+            <summary>
+            List of signatures allowed in verification.
+            </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.IPackageSignatureVerifier">
             <summary>
@@ -3543,16 +4609,6 @@
             Report unknown revocation status.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoRepositoryCertificateList">
-            <summary>
-            Allow an empty or null RepositoryCertificateList.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoClientCertificateList">
-            <summary>
-            Allow an empty or null ClientCertificateList.
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.VerificationTarget">
             <summary>
             Gets the verification target(s).
@@ -3573,34 +4629,34 @@
             Gets how the revocation verification should be performed.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.RepositoryCertificateList">
-            <summary>
-            Allowlist of repository certificates hashes.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.ClientCertificateList">
-            <summary>
-            Allowlist of client side certificate hashes.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetDefault(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetDefault">
             <summary>
             Default settings.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetAcceptModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetAcceptModeDefaultPolicy">
             <summary>
             The accept mode policy.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetRequireModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetRequireModeDefaultPolicy">
             <summary>
             The require mode policy.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetVerifyCommandDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetVerifyCommandDefaultPolicy">
             <summary>
             Default policy for nuget.exe verify --signatures command.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TrustedSignerAllowListEntry.Owners">
+            <summary>
+            List of allowed owners for a repository signature
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TrustedSignerAllowListEntry.AllowUntrustedRoot">
+            <summary>
+            Describe if the certificate should be allowed to chain to an untrusted certificate
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.VerificationAllowListEntry.Target">
@@ -3620,6 +4676,11 @@
             <remarks>This target makes no assumption about the placement of the signature.
             It only refers to author or repository type of signature.
             If a specific placement is needed use the <see cref="T:NuGet.Packaging.Signing.SignaturePlacement" /> enum.</remarks>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.VerificationTarget.None">
+            <summary>
+            Don't target any signatures.
+            </summary>
         </member>
         <member name="F:NuGet.Packaging.Signing.VerificationTarget.Unknown">
             <summary>
@@ -3646,12 +4707,12 @@
             Collection of signature verification results.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Valid">
+        <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.IsValid">
             <summary>
             True if signature is valid.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Signed">
+        <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.IsSigned">
             <summary>
             True if the package is signed.
             </summary>
@@ -3762,29 +4823,49 @@
               Looks up a localized string similar to The commitment-type-indication attribute contains an invalid combination of values..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.ConflictingAllowUntrustedRoot">
+            <summary>
+              Looks up a localized string similar to There are two certificates with conflicting allowUntrustedRoot attributes in the computed settings. The allowUntrustedRoot attribute is going to be set to false. Certificate: {0}-{1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.DefaultError_EmptyAllowList">
+            <summary>
+              Looks up a localized string similar to A list of trusted signers is required but none was found..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.DefaultError_NoMatchInAllowList">
+            <summary>
+              Looks up a localized string similar to The package signature certificate fingerprint does not match any certificate fingerprint in the allow list..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.Error_InvalidTargetFramework">
             <summary>
               Looks up a localized string similar to Unsupported targetFramework value '{0}'..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.Error_LoadingHashFile">
+            <summary>
+              Looks up a localized string similar to Error parsing nupkg metadata file {0} : {1}.
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.Error_NoClientAllowList">
             <summary>
-              Looks up a localized string similar to A list of trusted signers is required by the client but none was found..
+              Looks up a localized string similar to signatureValidationMode is set to require, so packages are allowed only if signed by trusted signers; however, no trusted signers were specified..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_NoMatchingClientCertificate">
             <summary>
-              Looks up a localized string similar to The package signature certificate fingerprint does not match any certificate fingerprint in client allow list..
+              Looks up a localized string similar to This package is signed but not by a trusted signer..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_NoMatchingRepositoryCertificate">
             <summary>
-              Looks up a localized string similar to The package signature certificate fingerprint does not match any certificate fingerprint in repository allow list..
+              Looks up a localized string similar to This package was not repository signed with a certificate listed by this repository..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_NoRepoAllowList">
             <summary>
-              Looks up a localized string similar to A repository announced that their packages should be signed but an empty list of trusted certificates was found..
+              Looks up a localized string similar to This repository indicated that all its packages are repository signed; however, it listed no signing certificates..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_NotOnePrimarySignature">
@@ -3797,9 +4878,19 @@
               Looks up a localized string similar to The package signature contains multiple repository countersignatures..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.Error_RepositorySettings_UnsignedPackage">
+            <summary>
+              Looks up a localized string similar to This repository indicated that all its packages are repository signed; however, this package is unsigned..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.Error_RepositorySignatureMustNotHaveARepositoryCountersignature">
             <summary>
               Looks up a localized string similar to A repository primary signature must not have a repository countersignature..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_RequireMode_UnsignedPackage">
+            <summary>
+              Looks up a localized string similar to signatureValidationMode is set to require, so packages are allowed only if signed by trusted signers; however, this package is unsigned..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorAuthorTargetCannotBeACountersignature">
@@ -3912,6 +5003,11 @@
               Looks up a localized string similar to The {0} attribute must have exactly one attribute value..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.ExtractionLog_InformationPrefix">
+            <summary>
+              Looks up a localized string similar to Package '{0} {1}' from source '{2}': {3}.
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.FailedFileTime">
             <summary>
               Looks up a localized string similar to Failed to update file time for {0}: {1}.
@@ -3945,6 +5041,11 @@
         <member name="P:NuGet.Packaging.Strings.InvalidAsn1">
             <summary>
               Looks up a localized string similar to The ASN.1 data is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidLicenseExppressionVersion_VersionTooHigh">
+            <summary>
+              Looks up a localized string similar to The version string '{0}' is not supported by this toolset. The highest supported version is '{1}'. Either use a lower version or upgrade your toolset..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidNuspecElement">
@@ -3992,6 +5093,11 @@
               Looks up a localized string similar to The local file header field '{0}' has an invalid value ({1})..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageTypeVersion">
+            <summary>
+              Looks up a localized string similar to Nuspec file contains a package type with an invalid package version '{0}'..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.InvalidPrimarySignature">
             <summary>
               Looks up a localized string similar to The primary signature is invalid..
@@ -4027,9 +5133,19 @@
               Looks up a localized string similar to MinClientVersion already exists in packages.config.
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.MissingMetadataNode">
+            <summary>
+              Looks up a localized string similar to Nuspec file does not contain the '{0}' node..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.MissingNuspec">
             <summary>
               Looks up a localized string similar to Nuspec file does not exist in package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MissingPackageTypeName">
+            <summary>
+              Looks up a localized string similar to Nuspec file contains a package type that is missing the name attribute..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.MultipleAttributesDisallowed">
@@ -4047,6 +5163,11 @@
               Looks up a localized string similar to The package contains multiple package signature files..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.MultiplePackageTypes">
+            <summary>
+              Looks up a localized string similar to Nuspec file contains multiple package types. Zero or one package type nodes are allowed..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.MustContainAbsolutePath">
             <summary>
               Looks up a localized string similar to '{0}' must contain an absolute path '{1}'..
@@ -4060,6 +5181,101 @@
         <member name="P:NuGet.Packaging.Strings.NoRepositoryCountersignature">
             <summary>
               Looks up a localized string similar to Verification settings require a repository countersignature, but the package does not have a repository countersignature..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicense_InvalidLicenseExpression">
+            <summary>
+              Looks up a localized string similar to The license expression '{0}' cannot be parsed succesfully..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicense_InvalidLicenseExpressionVersion">
+            <summary>
+              Looks up a localized string similar to The license version string '{0}'  is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicense_InvalidLicenseType">
+            <summary>
+              Looks up a localized string similar to Unrecognized license type '{0}'.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicense_LicenseElementMissingValue">
+            <summary>
+              Looks up a localized string similar to The license element value is empty. This is likely due to an authoring error. .
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicense_LicenseExpressionVersionTooHigh">
+            <summary>
+              Looks up a localized string similar to The license version string '{0}' is higher than the one supported by this toolset '{1}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicense_MissingRequiredValue">
+            <summary>
+              Looks up a localized string similar to The element 'license' cannot be empty. .
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_DeprecatedIdentifier">
+            <summary>
+              Looks up a localized string similar to The identifier '{0}' is deprecated..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_ExceptionIdentifierIsLicense">
+            <summary>
+              Looks up a localized string similar to The identifier '{0}' is a license. It cannot be used as an exception..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_IllegalUnlicensedOperator">
+            <summary>
+              Looks up a localized string similar to The 'UNLICENSED' license identifier cannot be combined with the '+' operator..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_InvalidCharacters">
+            <summary>
+              Looks up a localized string similar to The license expression '{0}' contains invalid characters..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_InvalidExceptionIdentifier">
+            <summary>
+              Looks up a localized string similar to The identifier '{0}' is not a standard exception..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_InvalidExpression">
+            <summary>
+              Looks up a localized string similar to The license expression is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_InvalidToken">
+            <summary>
+              Looks up a localized string similar to Invalid element '{0}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_LicenseIdentifierIsException">
+            <summary>
+              Looks up a localized string similar to The identifier '{0}' is an exception. It cannot be used as a license..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_LicenseInvalidCharacters">
+            <summary>
+              Looks up a localized string similar to The license identifier '{0}' contains invalid characters..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_MismatchedParentheses">
+            <summary>
+              Looks up a localized string similar to Mismatched parentheses in the expression..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_NonStandardIdentifier">
+            <summary>
+              Looks up a localized string similar to The license identifier(s) '{0}' is(are) not recognized by the current toolset..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_UnexpectedIdentifier">
+            <summary>
+              Looks up a localized string similar to Unexpected license identifier '{0}'. The identifier is not allowed in this context..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetLicenseExpression_UnlicensedPackageWarning">
+            <summary>
+              Looks up a localized string similar to The owner has marked this package as 'UNLICENSED'. This means that there is no license that allows this package to be used outside of the copyright owner..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.NuGetPackageOwners">
@@ -4330,6 +5546,11 @@
         <member name="P:NuGet.Packaging.Strings.SigningError_NotYetValid">
             <summary>
               Looks up a localized string similar to The signing certificate is not yet valid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningWouldRequireZip64">
+            <summary>
+              Looks up a localized string similar to The package cannot be signed as it would require the Zip64 format..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.StreamMustBeReadable">
@@ -4633,6 +5854,14 @@
             <param name="version">The package version.</param>
             <returns>The hash file name.</returns>
         </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetNupkgMetadataPath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the new hash file path which represents the original hash of the package.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The hash file path.</returns>
+        </member>
         <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetVersionListDirectory(System.String)">
             <summary>
             Gets the version list directory.
@@ -4892,4 +6121,4 @@
             </summary>
         </member>
     </members>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>4Oq6h0vv8HfUO82aK2ztWxP/iTU=</DigestValue></Reference></SignedInfo><SignatureValue>c2QKhziIaHTSwBDgRc12+46cC0s3ma17ZdCrZknJ6jMn1YSiZJfJmGYPY3+x9lovgGxr4jJGhajSeVWOLDTloDiwEKl2fOq1p0OpLhBQ1mcwxI7BiGb8mzy8FAkBjiIM341LSqFnXcqeSnQ6k0Wd4aW0vBZVnl6UMUX3XEXfo40+TLjCeyZzbPA2fQwsjByLh2CDGFET9MVEPpnWKEtgpLLZdy57HnH5ffgi7OcRvQevozk4xpLBfemRJGR4idNZZC/NQ3AEt14Hsigg43RQlWECqICWpU2miozzMutpMNnn2rcylqHaHHNzHEWf+1jd81SbYfKMO4sLPsX/O5GEig==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>m1K+Tyy0HVPLPV0jHraDo5/A5UrgV7PC+C3WipFfzBLODN0Ct0Z49Gub3ufLICGP1D4OJZRyOnhjZi61X+Hbl/2IjqiIl1VMHR4+qWlJLRNj+X7DparTv3/CBzkhMGY2lZdvp96rpRL2heloKGkmmxqet6/sU3hvw8wxMIf29zYrMEBZSEaAUajNDIDd40qeLXRV7OanRHrVE770wiR9DP0zzeYjX5rN1CltAtUyWmonz7DJAYuUr+UMi3offSITg4byWkvThGNXGmtJeDpU6Y/hhcblP5Yl5175yMvHofLyGw0iW7kv/Izp2yjEVRe26PTXes/9nNOP7ul2KoKMoQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE2zCCA8OgAwIBAgITMwAAAbHd7bpU6WW4XwABAAABsTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xODA3MTIyMDExMTlaFw0xOTA3MjYyMDExMTlaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xHjAcBgNVBAMTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJtSvk8stB1Tyz1dIx62g6OfwOVK4Fezwvgt1oqRX8wSzgzdArdGePRrm97nyyAhj9Q+DiWUcjp4Y2YutV/h25f9iI6oiJdVTB0ePqlpSS0TY/l+w6Wq079/wgc5ITBmNpWXb6feq6US9oXpaChpJpsanrev7FN4b8PMMTCH9vc2KzBAWUhGgFGozQyA3eNKni10Vezmp0R61RO+9MIkfQz9M83mI1+azdQpbQLVMlpqJ8+wyQGLlK/lDIt6H30iE4OG8lpL04RjVxprSXg6VOmP4YXG5T+WJede+cjLx6Hy8hsNIlu5L/yM6dsoxFUXtuj013rP/ZzTj+7pdiqCjKECAwEAAaOCAV8wggFbMBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBREE7QCnXc+kFVx9eQcf6wXFM8+czBQBgNVHREESTBHpEUwQzEpMCcGA1UECxMgTWljcm9zb2Z0IE9wZXJhdGlvbnMgUHVlcnRvIFJpY28xFjAUBgNVBAUTDTIyOTgwMys0Mzc5NTAwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAIOp8qYzxaF7HNJegK7spKbD6ShdVyUjjd0lCWlw6E1pFi+UuwXZm4DsWdBoZBuDNKjcz2ONnWt2APV7r0J0B8X8kcDirEUzll2x/fqORrJJ4kMGGZiFcXjTnunblRZBMTRwLEOWogJ3qS89YUpjWfGXfdFSlWCFqLwbRQc/2cGP91D1uX4IieRCxFiOQcCVOEkf1x34ME8pLztHWZI37pch7RdmkBwvLW1r/wt15aoS3fqvxBG04CEyWr8FzkX5P41Wrs5R1syufQQZMBLyv59IJpwOAA0oraXeRC3M1If/lEmVVwxNNJwjCt3DjTIJ9L01KMXe0Ig/qRIToTBwoBE=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIE2jCCA8KgAwIBAgITMwAAAO87PT5gr0llIAAAAAAA7zANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTgwODIzMjAxOTQ0WhcNMTkxMTIzMjAxOTQ0WjCByjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjElMCMGA1UECxMcTWljcm9zb2Z0IEFtZXJpY2EgT3BlcmF0aW9uczEmMCQGA1UECxMdVGhhbGVzIFRTUyBFU046RDIzNi0zN0RBLTk3NjExJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDKAoM+JZXt2QHAW0fzq1A+Eo16GzOcOwaU0Md9QcQgH4vFA7R5Xec8Y0+rH89t/hcWGC9zFc900QCAia3VZgM7i6bRFRL5A0YUMv6F7UPWTqppirccYGjVrs7RiJtGbPUKaKCKhhTZ1NA1FC6QwsWmyo+a/R1gFtcoHdCN6xn0RMvh4RcIGSIiDr6VmtdW3N0qDDo8/TXxDS1roCh5bOTIFjSlNAFbqYnp7L8zPYwdizWy/URm75I+dxfNhngTgGj7KyJhksgIlSzko0XdKRnyaF22PL806UaXylklK5SDdTDk05GaAyV8e+tIsMdVQ0hwgh05BGExE0R06NHjnxUrAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUlB6M3h0tMwUDjaUAKcF+hH9WAQUwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAOyvqWaVgRVzte8SCJjkB4tn6LHoWT+a3vrtOckmUgC4Lmz0dxCRsixSVnz4RXwM3Y9i3Yry65S570jHbUM2Cw2ZN9Z86wjSwn7S4XGgFPSh+Q1l0fyqpDm7pHKk+B1maKEeqfQxFVIcrGmaVfRm/l0OWSplyxZ70Z2EfK6nVruSbELs/2HMPJh5pcc+w7xKGGWpnIVwYHj6ahacDbIyD72HqpFqHkRv4ufWFbAzgoW+2eXXDSi5Eg54PYjXzRGTkj3d1MGlLJaRiwsf5ZHty2uZlComeJ/bNoCCWuyBmxY/1mmWo6hGvFcOoxxjauDui4lOJYhgXue6OUzSnH1vdLQ==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>3T0MeqcRJEdK3X9UObpftD59nFc=</DigestValue></Reference></SignedInfo><SignatureValue>DbL7Whd3nqLHn8m+HkXOa9y4kq0UvEFw3hSBCFl9TIcWOX/GaFA6wbb2qplxh6LEzBN8ENJXI+IdaiTZe0A+XqivRZFtL8XIM5PXppCkhUtN7m3S4XxiR8fDs/CKjGQ4WUOqVIfYaVeUKfgpPYxk1rSl553VuAncfo5k/EZGRldzfiwLCXHnWqbiwRN9XfLSKMekXcDmXpwlkc72rPzUj6KG8PGh5K1HRF2m9k/4g6VG+2Al9id3mZA5yneh+5F3tQ8geP8cB6tt3ZPU6FIAyTB+RbYLEyvHbkayFbW5Oi/H1Fak3dzIVHJNAszSBu3ngdzJQrOZamY5vQ1sdz8UWw==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>m1K+Tyy0HVPLPV0jHraDo5/A5UrgV7PC+C3WipFfzBLODN0Ct0Z49Gub3ufLICGP1D4OJZRyOnhjZi61X+Hbl/2IjqiIl1VMHR4+qWlJLRNj+X7DparTv3/CBzkhMGY2lZdvp96rpRL2heloKGkmmxqet6/sU3hvw8wxMIf29zYrMEBZSEaAUajNDIDd40qeLXRV7OanRHrVE770wiR9DP0zzeYjX5rN1CltAtUyWmonz7DJAYuUr+UMi3offSITg4byWkvThGNXGmtJeDpU6Y/hhcblP5Yl5175yMvHofLyGw0iW7kv/Izp2yjEVRe26PTXes/9nNOP7ul2KoKMoQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE2zCCA8OgAwIBAgITMwAAAbHd7bpU6WW4XwABAAABsTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xODA3MTIyMDExMTlaFw0xOTA3MjYyMDExMTlaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xHjAcBgNVBAMTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJtSvk8stB1Tyz1dIx62g6OfwOVK4Fezwvgt1oqRX8wSzgzdArdGePRrm97nyyAhj9Q+DiWUcjp4Y2YutV/h25f9iI6oiJdVTB0ePqlpSS0TY/l+w6Wq079/wgc5ITBmNpWXb6feq6US9oXpaChpJpsanrev7FN4b8PMMTCH9vc2KzBAWUhGgFGozQyA3eNKni10Vezmp0R61RO+9MIkfQz9M83mI1+azdQpbQLVMlpqJ8+wyQGLlK/lDIt6H30iE4OG8lpL04RjVxprSXg6VOmP4YXG5T+WJede+cjLx6Hy8hsNIlu5L/yM6dsoxFUXtuj013rP/ZzTj+7pdiqCjKECAwEAAaOCAV8wggFbMBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBREE7QCnXc+kFVx9eQcf6wXFM8+czBQBgNVHREESTBHpEUwQzEpMCcGA1UECxMgTWljcm9zb2Z0IE9wZXJhdGlvbnMgUHVlcnRvIFJpY28xFjAUBgNVBAUTDTIyOTgwMys0Mzc5NTAwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAIOp8qYzxaF7HNJegK7spKbD6ShdVyUjjd0lCWlw6E1pFi+UuwXZm4DsWdBoZBuDNKjcz2ONnWt2APV7r0J0B8X8kcDirEUzll2x/fqORrJJ4kMGGZiFcXjTnunblRZBMTRwLEOWogJ3qS89YUpjWfGXfdFSlWCFqLwbRQc/2cGP91D1uX4IieRCxFiOQcCVOEkf1x34ME8pLztHWZI37pch7RdmkBwvLW1r/wt15aoS3fqvxBG04CEyWr8FzkX5P41Wrs5R1syufQQZMBLyv59IJpwOAA0oraXeRC3M1If/lEmVVwxNNJwjCt3DjTIJ9L01KMXe0Ig/qRIToTBwoBE=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>MIIE2jCCA8KgAwIBAgITMwAAARhuSzTqYe0wLAAAAAABGDANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTgxMDI0MjEwNzMxWhcNMjAwMTEwMjEwNzMxWjCByjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjElMCMGA1UECxMcTWljcm9zb2Z0IEFtZXJpY2EgT3BlcmF0aW9uczEmMCQGA1UECxMdVGhhbGVzIFRTUyBFU046RDZCRC1FM0U3LTE2ODUxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCNm8DGT1JXc44SEnc6lxrk9H6rADjsN9xAECOEuBYAzLZpBdOmJRlMX0xuCsHtqE2t/tlnGXWvKTGexEwKbuYUHfsa2o/ulylRVrZcOv+YItq9b6/YcDd5b9r+IDotDPlZXXi3CE2oTgRFCXcGSlNbBdiGfZ/mKyTU8LVSG4MaQ5DFAHM5PvgqxjFLIHlyG+icfgyVxKgqai1kK77bm5Xyn09oz6W+zc24U2XRdnKPYqQ92cRVSkS/Vb/OhmcX0+5wGFrcT23ztr1uskuypuW0Uut64nlkKZJEZjtSeisQbwj1hPLLqBMfu62fw6Cv3EL5RpQW7PK7+uSSgf47v5mfAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUai3c2GNzocCUXoSXVqn54PKU4SYwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEALSq4iUHNMoQmFfUfmYukbW+hMP9apO2W/XhJUBDP/yCoEU25WTmWXNjLGRWfInH4Ld4+pYxaU8hoHYkk7zVrXoyRtjdsoOlnweE8MVJdhz7MuVBXzvadp4MjEuh9BH6wS7nqHxGoEZiesQNSwV6Yhki0GVryo3GOZYuqAcpx0J6tZpVCzz6QrUJrH1V+9KER344Sv+2t1lUcYV9R2L9Yl1SN3RnAC+rfHBR6tT+ISeInTAJUytYL1gkmm0gYGvR6faUn1pbDyxoyOZY0Fchq8CA5ubyMCBx7W8zRhl2MYhDqrckauGb0oX4yk8wXKMnkSGgq8hv0EjsDaVDZ+/OyHg==</X509Certificate><X509Certificate>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</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>
