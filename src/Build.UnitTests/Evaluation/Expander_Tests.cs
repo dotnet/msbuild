@@ -3689,6 +3689,12 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionLastIndexOf()
+        {
+            TestPropertyFunction("$(prop.LastIndexOf('y'))", "prop", "x-x-y-y-y-z", "8");
+        }
+
+        [Fact]
         public void PropertyFunctionStringArrayIndexerGetter()
         {
             TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");
