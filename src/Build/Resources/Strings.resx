@@ -1751,6 +1751,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ErrorWritingCacheFile" UESanitized="false" Visibility="Public">
     <value>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</value>
   </data>
+  <data name="InvalidSdkResolverDocumentNode" UESanitized="false" Visibility="Public">
+    <value>MSB4259: Unable to find node {0} in the SDK Resolver XML document</value>
+  </data>
   <data name="UsingInputCaches" UESanitized="false" Visibility="Public">
     <value>Using input build results caches: {0}</value>
     <comment>
@@ -1769,7 +1772,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4259.
+        Next message code should be MSB4260.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
