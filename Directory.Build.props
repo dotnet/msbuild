@@ -1,19 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <!-- Leave this file here, even if it's empty. It stops chaining imports. -->
-  <PropertyGroup>
-    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
+  <PropertyGroup Condition="'$(CopyrightMicrosoft)' != ''">
+    <Copyright>$(CopyrightMicrosoft)</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)eng\WebSdk.snk</AssemblyOriginatorKeyFile>
     <LangVersion>7.3</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup>
-      <!-- <RestoreSources>$(RestoreSources);http://api.nuget.org/v3/index.json;</RestoreSources> -->
-
-      <!-- aspnetcore-dev feed for internal packages like Microsoft.Extensions.Logging.Testing -->
-      <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json</RestoreSources>
-      <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/dotnet-core/api/v3/index.json</RestoreSources>
   </PropertyGroup>
 
   <PropertyGroup Label="Package and Assembly Metadata">
@@ -27,6 +23,4 @@
     -->
     <NoWarn>$(NoWarn);NU5125</NoWarn>
   </PropertyGroup>
-
-  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 </Project>
