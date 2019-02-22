@@ -1,0 +1,34 @@
+﻿<!--
+***********************************************************************************************
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+This file defines common build logic for all managed languaged: C#, VisualBasic, F#
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project>
+   <!-- 
+        We are doing a cross-targeting build if there is no list of target frameworks specified
+        nor is there a current target framework being built individually. In that case, a crosstargeting
+        project file like Microsoft.<language>.CrossTargeting.targets gets imported.
+   -->
+   <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
+      <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
+      <IsOuterBuild>true</IsOuterBuild>
+   </PropertyGroup>
+
+   <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
+      <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+   </PropertyGroup>
+
+  <ItemGroup>
+      <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+      <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+      <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
+  </ItemGroup>
+
+</Project>
