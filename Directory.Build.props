@@ -40,12 +40,13 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <!-- https://github.com/dotnet/cli/issues/10637: frequent CI failures when test output is captured -->
     <TestCaptureOutput>false</TestCaptureOutput>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
-  </PropertyGroup>
-
+  
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
+    <Copyright>$(CopyrightNetFoundation)</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
 
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/MSBuildExtensions.props" />
