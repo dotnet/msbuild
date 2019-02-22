@@ -11,14 +11,17 @@
 
     <Target Name="Build" DependsOnTargets="FetchAndUpdateSdksAndNuGets" />
 
-    <Target Name="FetchAndUpdateSdksAndNuGets">
-        <Delete Files="$(SdkVersionsFile)" />
-
-        <Exec Command="curl -s $(CLIBlobBaseURL)/build/%(FilesToDownload.Identity) -o %(FilesToDownload.Identity)"/>
-
-        <WriteLinesToFile File="$(SdkVersionsFile)" Lines="OldCLICommitHash=$(CLICommitHash)%3B" />
-
+    <Target Name="FetchAndUpdateSdksAndNuGets" DependsOnTargets="FetchVersionsFiles">
         <MSBuild Projects="sdks_and_nugets/update_sdks_and_nugets.proj" Properties="_RunningFromBuildProject=true"/>
     </Target>
 
+    <Target Name="GenerateCommitMessage" DependsOnTargets="FetchVersionsFiles">
+        <MSBuild Projects="sdks_and_nugets/update_sdks_and_nugets.proj" Properties="_RunningFromBuildProject=true" Targets="GenerateCommitMessage" />
+    </Target>
+
+    <Target Name="FetchVersionsFiles">
+        <Delete Files="$(SdkVersionsFile)" />
+        <Exec Command="curl -s $(CLIBlobBaseURL)/build/%(FilesToDownload.Identity) -o %(FilesToDownload.Identity)"/>
+        <WriteLinesToFile File="$(SdkVersionsFile)" Lines="OldCLICommitHash=$(CLICommitHash)%3B" />
+    </Target>
 </Project>
