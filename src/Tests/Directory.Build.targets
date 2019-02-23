@@ -26,6 +26,36 @@
     
   </ItemGroup>
 
+  <Target Name="TestAsTool" DependsOnTargets="_InnerGetTestsToRun">
+    <PropertyGroup>
+      <TestLocalToolFolder>$(ArtifactsTmpDir)$(ToolCommandName)\</TestLocalToolFolder>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(TestLocalToolFolder)" />
+    <MakeDir Directories="$(TestLocalToolFolder)" />
+
+    <MakeDir Directories="$(ArtifactsTestResultsDir)" />
+
+    <Exec Command="dotnet new tool-manifest"
+      WorkingDirectory="$(TestLocalToolFolder)"/>
+    
+    <Exec Command="dotnet tool install --local $(ToolCommandName) --version $(PackageVersion) --add-source $(ArtifactsShippingPackagesDir)"
+      WorkingDirectory="$(TestLocalToolFolder)"/>
+
+    <PropertyGroup>
+      <ResultsXmlPath>$(ArtifactsTestResultsDir)$(_ResultFileNameNoExt).xml</ResultsXmlPath>
+      <ResultsHtmlPath>$(ArtifactsTestResultsDir)$(_ResultFileNameNoExt).html</ResultsHtmlPath>
+      <!--<ResultsStdOutPath>$(ArtifactsLogDir)$(_ResultFileNameNoExt).log</ResultsStdOutPath>-->
+
+      <TestArgs>-noautoreporters -noRepoInference</TestArgs>
+      <TestArgs>$(TestArgs) -xml "$(ResultsXmlPath)"</TestArgs>
+      <TestArgs>$(TestArgs) -html "$(ResultsHtmlPath)" $(TestRunnerAdditionalArguments)</TestArgs>
+    </PropertyGroup>
+
+    <Exec Command="dotnet tool run $(ToolCommandName) $(TestArgs)"
+          WorkingDirectory="$(TestLocalToolFolder)" />
+  </Target>
+
   <Import Project="..\..\Directory.Build.targets" />
 
 </Project>
