@@ -22,7 +22,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    </PropertyGroup>
 
    <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
-      <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+      <!-- Microsoft.Net.Sdk adds all transitive project references to @ProjectReference. It does this at build time
+           via a target. This fails the undeclared msbuild reference /isolate constraint, so disable transitive
+           references.
+           Do not disable transitive references if BuildProjectReferences is false. If building references is false,
+           then msbuild won't try to build the transitive references, which won't trigger undeclared reference constraints.
+          -->
+      <DisableTransitiveProjectReferences Condition="'$(BuildProjectReferences)' != 'false'">true</DisableTransitiveProjectReferences>
    </PropertyGroup>
 
   <ItemGroup>
