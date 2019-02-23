@@ -29,7 +29,7 @@ phases:
         _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
         _PublishArgs: /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
                   /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
-                  /p:DotNetPublishBlobFeedKey=$(dotnetcli-storage-key)
+                  /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                   /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                   /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                   /p:PB_PublishType=$(_PublishType)
