@@ -26,7 +26,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    </PropertyGroup>
 
    <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
-      <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+      <DisableTransitiveProjectReferences Condition="'$(BuildProjectReferences)' != 'false'">true</DisableTransitiveProjectReferences>
    </PropertyGroup>
 
   <ItemGroup>
