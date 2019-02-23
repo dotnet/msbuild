@@ -192,11 +192,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public ICommand EnvironmentVariable(string name, string value)
         {
-#if NET451
-            _process.StartInfo.EnvironmentVariables[name] = value;
-#else
             _process.StartInfo.Environment[name] = value;
-#endif
             return this;
         }
 

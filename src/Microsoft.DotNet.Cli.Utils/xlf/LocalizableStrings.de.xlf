@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
         <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
-        <target state="translated">Die Datei "deps.json" kann nicht generiert werden, möglicherweise wurde sie bereits generiert. Sie können zur Diagnoseausgabe die Option "-d" vor dem Toolnamen angeben (Beispiel: "dotnet -d &lt;toolname&gt;": {0}).</target>
+        <target state="translated">"deps.json" kann nicht generiert werden, möglicherweise wurde die Datei bereits generiert. Sie können die Option "-d" vor dem Toolnamen angeben, um eine Diagnoseausgabe zu erhalten (Beispiel: "dotnet -d &lt;Toolname&gt;": {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -206,7 +206,7 @@
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} wurde nach {2} ms mit {1} beendet.</target>
+        <target state="translated">&lt; {0} wurde mit {1} in {2} ms beendet.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">

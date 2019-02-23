@@ -14,11 +14,12 @@ namespace Microsoft.DotNet.Cli
             "list",
             LocalizableStrings.NetListCommand,
             Accept.ZeroOrOneArgument()
-                .With(
-                    name: CommonLocalizableStrings.ProjectArgumentName,
-                    description: CommonLocalizableStrings.ProjectArgumentDescription)
-                .DefaultToCurrentDirectory(),
-            CommonOptions.HelpOption(),
-            ListProjectToProjectReferencesCommandParser.ListProjectToProjectReferences());
+            .With(
+                    name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
+                    description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription)
+            .DefaultToCurrentDirectory(),
+            ListPackageReferencesCommandParser.ListPackageReferences(),
+            ListProjectToProjectReferencesCommandParser.ListProjectToProjectReferences(),
+            CommonOptions.HelpOption());
     }
 }

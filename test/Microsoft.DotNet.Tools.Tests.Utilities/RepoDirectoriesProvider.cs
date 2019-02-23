@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _stage2WithBackwardsCompatibleRuntimesDirectory;
         private string _testPackages;
         private string _testWorkingFolder;
+        private string _testArtifactsFolder;
 
         public static string RepoRoot
         {
@@ -32,11 +33,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                     return s_repoRoot;
                 }
 
-#if NET451
-                string directory = AppDomain.CurrentDomain.BaseDirectory;
-#else
                 string directory = AppContext.BaseDirectory;
-#endif
 
                 while (directory != null)
                 {
@@ -92,6 +89,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public string Stage2WithBackwardsCompatibleRuntimesDirectory => _stage2WithBackwardsCompatibleRuntimesDirectory;
         public string TestPackages => _testPackages;
         public string TestWorkingFolder => _testWorkingFolder;
+        public string TestArtifactsFolder => _testArtifactsFolder;
 
         public RepoDirectoriesProvider(
             string artifacts = null,
@@ -122,6 +120,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 _testPackages = Path.Combine(_artifacts, "test", "packages");
             }
+
+            _testArtifactsFolder = Path.Combine(_artifacts, "test", "artifacts");
 
             _testWorkingFolder = Path.Combine(RepoRoot,
                                               "bin",

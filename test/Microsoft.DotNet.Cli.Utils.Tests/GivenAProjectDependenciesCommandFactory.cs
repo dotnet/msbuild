@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 .Should().Pass();
 
             var factory = new ProjectDependenciesCommandFactory(
-                NuGetFrameworks.NetCoreApp21,
+                NuGetFrameworks.NetCoreApp22,
                 configuration,
                 null,
                 null,
@@ -199,7 +199,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var command = factory.Create("dotnet-tool-with-output-name", null);
 
             command.CommandArgs.Should().Contain(
-                Path.Combine("toolwithoutputname", "1.0.0", "lib", "netcoreapp2.1", "dotnet-tool-with-output-name.dll"));
+                Path.Combine("toolwithoutputname", "1.0.0", "lib", "netcoreapp2.2", "dotnet-tool-with-output-name.dll"));
         }
     }
 }
