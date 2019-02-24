@@ -27,7 +27,12 @@
     
   </ItemGroup>
 
-  <Target Name="TestAsTool" DependsOnTargets="Pack;_InnerGetTestsToRun">
+  <Target Name="LayoutSdk">
+    <MSBuild Projects="$(RepoRoot)\src\LayoutSdk\LayoutSdk.proj"
+             Targets="LayoutSdk"/>
+  </Target>
+
+  <Target Name="TestAsTool" DependsOnTargets="Pack;LayoutSdk;_InnerGetTestsToRun">
     <PropertyGroup>
       <TestLocalToolFolder>$(ArtifactsTmpDir)$(ToolCommandName)\</TestLocalToolFolder>
     </PropertyGroup>
@@ -49,6 +54,7 @@
       <!--<ResultsStdOutPath>$(ArtifactsLogDir)$(_ResultFileNameNoExt).log</ResultsStdOutPath>-->
 
       <TestArgs>-noautoreporters -noRepoInference</TestArgs>
+      <TestArgs>$(TestArgs) -dotnetPath $(SdkLayoutDirectory)\dotnet</TestArgs>
       <TestArgs>$(TestArgs) -xml "$(ResultsXmlPath)"</TestArgs>
       <TestArgs>$(TestArgs) -html "$(ResultsHtmlPath)" $(TestRunnerAdditionalArguments)</TestArgs>
     </PropertyGroup>
