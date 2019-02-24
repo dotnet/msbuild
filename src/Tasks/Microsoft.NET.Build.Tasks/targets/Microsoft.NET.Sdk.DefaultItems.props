@@ -84,7 +84,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PackageReference Include="Microsoft.NETCore.Platforms" 
                       Version="$(BundledNETCorePlatformsPackageVersion)"
                       IsImplicitlyDefined="true"
-                      Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
+                      Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"
+                      PrivateAssets="All"
+                      Publish="true" />
   </ItemGroup>
 
 </Project>
