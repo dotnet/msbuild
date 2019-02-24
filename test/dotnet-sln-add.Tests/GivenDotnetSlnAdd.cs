@@ -623,12 +623,11 @@ EndGlobal
             solutionFolders["{DDF3765C-59FB-4AA6-BE83-779ED13AA64A}"]
                 .Should().Be("{72BFCA87-B033-4721-8712-4D12166B4A39}");
 
-            var newlyAddedSrcFolder = solutionFolderProjects.Where(
-                p => p.Id != "{72BFCA87-B033-4721-8712-4D12166B4A39}").Single();
+            var newlyAddedSrcFolder = solutionFolderProjects.Single(p => p.Id != "{72BFCA87-B033-4721-8712-4D12166B4A39}");
             solutionFolders[newlyAddedSrcFolder.Id]
                 .Should().Be("{72BFCA87-B033-4721-8712-4D12166B4A39}");
 
-            var libProject = slnFile.Projects.Where(p => p.Name == "Lib").Single();
+            var libProject = slnFile.Projects.Single(p => p.Name == "Lib");
             solutionFolders[libProject.Id]
                 .Should().Be(newlyAddedSrcFolder.Id);
         }
@@ -700,7 +699,6 @@ EndGlobal
                 .FullName;
 
             var projectToAdd = "Lib/Lib.csproj";
-            var projectPath = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
@@ -730,7 +728,6 @@ EndGlobal
                 .FullName;
 
             var projectToAdd = "Lib/Library.cs";
-            var projectPath = Path.Combine("Lib", "Library.cs");
             var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
             var expectedNumberOfProjects = slnFile.Projects.Count();
 
@@ -1023,7 +1020,6 @@ EndGlobal
                 .Root
                 .FullName;
 
-            var slnFullPath = Path.Combine(solutionDirectory, "App.sln");
             var projectToAdd = Path.Combine("MultitargetedCS", "MultitargetedCS.csproj");
 
             new DotnetCommand()
@@ -1045,7 +1041,6 @@ EndGlobal
                 .Root
                 .FullName;
 
-            var slnFullPath = Path.Combine(solutionDirectory, "App.sln");
             var projectToAdd = Path.Combine("MultitargetedVB", "MultitargetedVB.vbproj");
 
             new DotnetCommand()
