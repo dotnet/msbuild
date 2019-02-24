@@ -16,6 +16,9 @@ namespace Microsoft.DotNet.Tools.Sln.Add
     {
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
+        private readonly bool _noSolutionFolders;
+        
+        private const string NoSolutionFoldersOption = "no-solution-folders";
 
         public AddProjectToSolutionCommand(
             AppliedOption appliedCommand, 
@@ -29,6 +32,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             _appliedCommand = appliedCommand;
 
             _fileOrDirectory = fileOrDirectory;
+            _noSolutionFolders = appliedCommand.ValueOrDefault<bool>(NoSolutionFoldersOption);
         }
 
         public override int Execute()
@@ -53,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
             foreach (var fullProjectPath in fullProjectPaths)
             {
-                slnFile.AddProject(fullProjectPath);
+                slnFile.AddProject(fullProjectPath, _noSolutionFolders);
             }
 
             if (slnFile.Projects.Count > preAddProjectCount)

@@ -162,4 +162,7 @@
   <data name="ProjectsHeader" xml:space="preserve">
     <value>Project(s)</value>
   </data>
+  <data name="NoSolutionFolders" xml:space="preserve">
+    <value>Do not create solution folders. Create project at root of solution.</value>
+  </data>
 </root>

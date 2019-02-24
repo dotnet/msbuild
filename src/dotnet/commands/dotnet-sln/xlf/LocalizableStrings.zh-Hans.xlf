@@ -22,6 +22,11 @@
         <target state="translated">将一个或多个项目添加到解决方案文件。</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoSolutionFolders">
+        <source>Do not create solution folders. Create project at root of solution.</source>
+        <target state="new">Do not create solution folders. Create project at root of solution.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
         <target state="translated">从解决方案文件中删除一个或多个项目。</target>

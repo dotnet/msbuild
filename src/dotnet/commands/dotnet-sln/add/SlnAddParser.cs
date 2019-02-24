@@ -15,6 +15,10 @@ namespace Microsoft.DotNet.Cli
                            Accept.OneOrMoreArguments(o => CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd)
                                  .With(name: LocalizableStrings.AddProjectPathArgumentName,
                                        description: LocalizableStrings.AddProjectPathArgumentDescription),
+                           Create.Option(
+                               "--no-solution-folders",
+                               LocalizableStrings.NoSolutionFolders,
+                               Accept.NoArguments()),
                            CommonOptions.HelpOption());
     }
 }

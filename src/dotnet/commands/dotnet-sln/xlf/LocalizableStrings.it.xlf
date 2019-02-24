@@ -22,6 +22,11 @@
         <target state="translated">Consente di aggiungere uno o più progetti a un file di soluzione.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoSolutionFolders">
+        <source>Do not create solution folders. Create project at root of solution.</source>
+        <target state="new">Do not create solution folders. Create project at root of solution.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
         <target state="translated">Consente di rimuovere uno o più progetti da un file di soluzione.</target>
