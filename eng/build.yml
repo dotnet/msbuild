@@ -72,7 +72,20 @@ phases:
           PublishType: $(_PublishType)
           TestFullMSBuild: 'true'
 
-    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework') }}:
+    - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
+      - script: eng\common\CIBuild.cmd 
+                  -configuration $(_BuildConfig)
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
+                  /p:RunTestsAsTool=true
+        displayName: Build
+        env:
+          BuildConfig: $(_BuildConfig)
+          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+          PublishType: $(_PublishType)
+
+    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools') }}:
       - script: eng/common/cibuild.sh 
                   --configuration $(_BuildConfig)
                   $(_PublishArgs)

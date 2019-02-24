@@ -15,4 +15,11 @@
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <!-- Optionally override arcade's test target with one which will run the tests as tools.
+       Conditionally overriding a target requires a conditional import of another (.targets)
+       file. -->
+  <Import Project="OverrideTest.targets"
+          Condition="'$(RunTestsAsTool)' == 'true' And '$(CanRunTestAsTool)' == 'true'"/>
+
 </Project>
