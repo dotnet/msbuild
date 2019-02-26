@@ -64,7 +64,8 @@
     </PropertyGroup>
 
     <Exec Command="dotnet tool run $(ToolCommandName) $(TestArgs)"
-          WorkingDirectory="$(TestLocalToolFolder)" />
+          WorkingDirectory="$(TestLocalToolFolder)"
+          IgnoreStandardErrorWarningFormat="true" />
   </Target>
 
   <Import Project="..\..\Directory.Build.targets" />
