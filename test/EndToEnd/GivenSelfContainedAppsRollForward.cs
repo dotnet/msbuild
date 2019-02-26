@@ -15,7 +15,7 @@ namespace EndToEnd
     public partial class GivenSelfContainedAppsRollForward : TestBase
     {
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/cli/issues/10879")]
         //  MemberData is used instead of InlineData here so we can access it in another test to
         //  verify that we are covering the latest release of .NET Core
         [ClassData(typeof(SupportedNetCoreAppVersions))]
