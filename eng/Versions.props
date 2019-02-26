@@ -8,24 +8,24 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionPrefix>3.0.100</VersionPrefix>
-    <PreReleaseVersionLabel>preview3</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>preview4</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <MicrosoftDotNetCliRuntimePackageVersion>3.0.100-preview3.19125.1</MicrosoftDotNetCliRuntimePackageVersion>
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview3.19124.1</MicrosoftNETSdkPackageVersion>
-    <MicrosoftBuildPackageVersion>16.0.443</MicrosoftBuildPackageVersion>
+    <MicrosoftDotNetCliRuntimePackageVersion>3.0.100-preview4.19122.1</MicrosoftDotNetCliRuntimePackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-preview4.19125.2</MicrosoftNETSdkPackageVersion>
+    <MicrosoftBuildPackageVersion>16.1.0-preview.4</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftFSharpCompilerPackageVersion>10.4.1-rtm-190201-03</MicrosoftFSharpCompilerPackageVersion>
-    <MicrosoftNETCoreCompilersPackageVersion>3.1.0-beta1-19126-08</MicrosoftNETCoreCompilersPackageVersion>
-    <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview3.19126.8</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>10.4.2-rtm-190219-02</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftNETCoreCompilersPackageVersion>3.1.0-beta1-19125-02</MicrosoftNETCoreCompilersPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview4.19123.2</MicrosoftNETSdkRazorPackageVersion>
     <MicrosoftNETSdkWebPackageVersion>3.0.100-preview3.19114.6</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
-    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-preview3-27426-35</MicrosoftNETSdkWindowsDesktopPackageVersion>
+    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-preview4-27425-13</MicrosoftNETSdkWindowsDesktopPackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <NuGetBuildTasksPackageVersion>5.0.0-rtm.5821</NuGetBuildTasksPackageVersion>
     <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>

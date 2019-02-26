@@ -1,19 +1,15 @@
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
-    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
-
-    <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
-    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
-  </PropertyGroup>
-
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
+    <Copyright>$(CopyrightNetFoundation)</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
   
   <PropertyGroup>
+    <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
+    
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
