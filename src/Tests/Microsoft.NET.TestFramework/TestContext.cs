@@ -163,7 +163,7 @@ namespace Microsoft.NET.TestFramework
 
             while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
             {
-                directory = Directory.GetParent(directory).FullName;
+                directory = Directory.GetParent(directory)?.FullName;
             }
 
             if (directory == null)
