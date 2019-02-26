@@ -155,9 +155,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                    ResourceName="AspNetCoreUsesFrameworkReference" />
     
   </Target>
-  
-  <Target Name="ApplyImplicitVersions" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences"
-          DependsOnTargets="UpdateAspNetToFrameworkReference;CheckForImplicitPackageReferenceOverrides">
+
+  <Target Name="ApplyImplicitVersions" 
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;ResolveFrameworkReferences"
+          DependsOnTargets="UpdateAspNetToFrameworkReference;CheckForImplicitPackageReferenceOverrides"
+          Condition="'@(PackageReference)' != ''">
+    
     <ApplyImplicitVersions TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                            TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
                            PackageReferences="@(PackageReference)"
@@ -178,6 +181,22 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PackageReference Condition="'%(PackageReference.Identity)' == 'Microsoft.NETCore.App'">
         <Version Condition="'%(PackageReference.Version)' == ''">$(_TargetFrameworkVersionWithoutV)</Version>
       </PackageReference>
+
+      <!-- Reference the Platforms package in order to supply the RID graph to NuGet.
+           This can be removed once we do https://github.com/dotnet/cli/issues/10528 or
+           https://github.com/NuGet/Home/issues/7351 
+            
+           We only do this here when there are PackageReferences. If the only references 
+           are FrameworkReferences, then we do not need to provide this package to NuGet. -->
+      <PackageReference Include="Microsoft.NETCore.Platforms"
+                        Version="$(BundledNETCorePlatformsPackageVersion)"
+                        IsImplicitlyDefined="true"
+                        Condition="'$(DisableImplicitFrameworkReferences)' != 'true'
+                                    and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                                    and '$(_TargetFrameworkVersionWithoutV)' != ''
+                                    and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'"
+                        PrivateAssets="All"
+                        Publish="true" />
     </ItemGroup>
   </Target>
   
