@@ -604,23 +604,23 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
-
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
-            _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
+            using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
+            {
+                ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
+
+                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
+                _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
 
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass0End);
 #endif
 
-            _evaluationLoggingContext.LogProjectEvaluationStarted();
+                _evaluationLoggingContext.LogProjectEvaluationStarted();
 
-            ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
+                ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-            using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
-            {
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
                 ICollection<P> builtInProperties;

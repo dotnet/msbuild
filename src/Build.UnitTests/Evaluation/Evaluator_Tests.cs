@@ -670,6 +670,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string testtargets = ObjectModelHelpers.CleanupFileContents(@"
                                 <Project xmlns='msbuildnamespace'>
                                      <PropertyGroup>
+                                         <GlobalProp>FinalValue</GlobalProp>
                                          <Prop>OldValue</Prop>
                                          <Prop>NewValue</Prop>
                                      </PropertyGroup>
@@ -682,23 +683,35 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string testTargetPath = Path.Combine(targetDirectory, "test.proj");
 
             bool originalValue = BuildParameters.WarnOnUninitializedProperty;
+
+            string oldEnvironmentValue = Environment.GetEnvironmentVariable("GlobalProp");
+
             try
             {
+                Environment.SetEnvironmentVariable("GlobalProp", "EnvironmentValue");
+
                 BuildParameters.WarnOnUninitializedProperty = true;
                 Directory.CreateDirectory(targetDirectory);
                 File.WriteAllText(testTargetPath, testtargets);
 
                 MockLogger logger = new MockLogger();
                 logger.Verbosity = LoggerVerbosity.Diagnostic;
-                ProjectCollection pc = new ProjectCollection();
+                ProjectCollection pc = new ProjectCollection(new Dictionary<string, string>
+                {
+                    ["GlobalProp"] = "GlobalValue"
+                });
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(testTargetPath);
 
                 bool result = project.Build();
                 Assert.True(result);
                 logger.AssertLogContains("Evaluation started");
-                logger.AssertLogContains("Property initial value");
-                logger.AssertLogContains("Property reassignment");
+                logger.AssertLogContains("Property initial value: $(GlobalProp)=\"EnvironmentValue\" Source: Environment");
+                logger.AssertLogContains("Property reassignment: $(GlobalProp)=\"GlobalValue\" (previous value: \"EnvironmentValue\") Source: Global");
+                logger.AssertLogContains("The \"GlobalProp\" property is a global property, and cannot be modified.");
+                logger.AssertLogContains($"Property initial value: $(Prop)=\"OldValue\" Source: {testTargetPath}");
+                logger.AssertLogContains($"Property reassignment: $(Prop)=\"NewValue\" (previous value: \"OldValue\") Source: {testTargetPath}");
+                logger.AssertLogContains($"Property initial value: $(VisualStudioVersion)=\"{MSBuildConstants.CurrentVisualStudioVersion}\" Source: Toolset");
                 logger.AssertLogContains("Evaluation finished");
                 logger.AssertLogContains("Prop");
                 logger.AssertLogContains("OldValue");
@@ -708,6 +721,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 BuildParameters.WarnOnUninitializedProperty = originalValue;
                 FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
+                Environment.SetEnvironmentVariable("GlobalProp", oldEnvironmentValue);
             }
         }
 
@@ -4389,10 +4403,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(primaryProject, projectContents);
                 File.WriteAllText(import, importContents);
 
-                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>( () =>
-                    {
-                        Project unused = new Project(primaryProject, null, null);
-                    })
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
+                   {
+                       Project unused = new Project(primaryProject, null, null);
+                   })
                 ;
 
                 Assert.Contains("<AnInvalidTopLevelElement>", ex.Message);
