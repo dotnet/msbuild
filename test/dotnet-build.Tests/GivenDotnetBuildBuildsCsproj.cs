@@ -141,5 +141,25 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             cmd.Should().Pass();
             cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(expectedBuildSummary);
         }
+
+        [Fact]
+        public void ItDoesNotPrintCopyrightInfo()
+        {
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var cmd = new BuildCommand()
+               .WithWorkingDirectory(testInstance.Root)
+               .ExecuteWithCapturedOutput("--nologo");
+
+            cmd.Should().Pass();
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                cmd.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
+            }
+        }
     }
 }
