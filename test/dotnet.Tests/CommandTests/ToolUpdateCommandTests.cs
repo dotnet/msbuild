@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Tests.Commands
         private readonly List<MockFeed> _mockFeeds;
         private const string LowerPackageVersion = "1.0.4";
         private const string HigherPackageVersion = "1.0.5";
+        private const string HigherPreviewPackageVersion = "1.0.5-preview3";
         private readonly string _shimsDirectory;
         private readonly string _toolsDirectory;
 
@@ -61,6 +62,12 @@ namespace Microsoft.DotNet.Tests.Commands
                         {
                             PackageId = _packageId.ToString(),
                             Version = HigherPackageVersion,
+                            ToolCommandName = "SimulatorCommand"
+                        },
+                        new MockFeedPackage
+                        {
+                            PackageId = _packageId.ToString(),
+                            Version = HigherPreviewPackageVersion,
                             ToolCommandName = "SimulatorCommand"
                         }
                     }
@@ -118,6 +125,41 @@ namespace Microsoft.DotNet.Tests.Commands
             _reporter.Lines.First().Should().Contain(string.Format(
                 LocalizableStrings.UpdateSucceeded,
                 _packageId, LowerPackageVersion, HigherPackageVersion));
+        }
+
+        [Fact]
+        public void GivenAnExistedLowerversionInstallationWhenCallWithWildCardVersionItCanPrintSuccessMessage()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var command = CreateUpdateCommand($"-g {_packageId} --version 1.0.5-*");
+
+            command.Execute();
+
+            _reporter.Lines.First().Should().Contain(string.Format(
+                LocalizableStrings.UpdateSucceeded,
+                _packageId, LowerPackageVersion, HigherPreviewPackageVersion));
+        }
+
+        [Fact]
+        public void GivenAnExistedHigherVersionInstallationWhenCallWithLowerVersionItThrowsAndRollsBack()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {HigherPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var command = CreateUpdateCommand($"-g {_packageId} --version {LowerPackageVersion}");
+
+            Action a = () => command.Execute();
+
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(
+                    string.Format(LocalizableStrings.UpdateToLowerVersion,
+                        LowerPackageVersion,
+                        HigherPackageVersion));
+
+            _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
+                .Be(HigherPackageVersion);
         }
 
         [Fact]
