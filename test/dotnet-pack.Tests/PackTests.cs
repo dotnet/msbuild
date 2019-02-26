@@ -288,6 +288,26 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
                 .Should().HaveFilesMatching("*.nupkg", SearchOption.AllDirectories);
         }
 
+        [Fact]
+        public void ItDoesNotPrintCopyrightInfo()
+        {
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var result = new PackCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("--nologo");
+
+            result.Should().Pass();
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
+            }
+        }
+
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {
             // copy all the files to temp dir
