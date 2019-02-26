@@ -18,7 +18,7 @@ namespace EndToEnd
         public const string AspNetCoreAppPackageName = "Microsoft.AspNetCore.App";
         public const string AspNetCoreAllPackageName = "Microsoft.AspNetCore.All";
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/cli/issues/10879")]
         //  MemberData is used instead of InlineData here so we can access it in another test to
         //  verify that we are covering the latest release of .NET Core
         [ClassData(typeof(SupportedNetCoreAppVersions))]
@@ -27,14 +27,14 @@ namespace EndToEnd
             ItRollsForwardToTheLatestVersion(NETCorePackageName, minorVersion);
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/cli/issues/10879")]
         [ClassData(typeof(SupportedAspNetCoreVersions))]
         public void ItRollsForwardToTheLatestAspNetCoreAppVersion(string minorVersion)
         {
             ItRollsForwardToTheLatestVersion(AspNetCoreAppPackageName, minorVersion);
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/cli/issues/10879")]
         [ClassData(typeof(SupportedAspNetCoreVersions))]
         public void ItRollsForwardToTheLatestAspNetCoreAllVersion(string minorVersion)
         {
