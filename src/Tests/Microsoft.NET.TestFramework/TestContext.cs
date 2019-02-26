@@ -70,6 +70,10 @@ namespace Microsoft.NET.TestFramework
         {
             Environment.SetEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");
 
+            //  Reset this environment variable so that if the dotnet under test is different than the
+            //  one running the tests, it won't interfere
+            Environment.SetEnvironmentVariable("MSBuildSdksPath", null);
+
             TestContext testContext = new TestContext();
             
             bool runAsTool = false;

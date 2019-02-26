@@ -42,6 +42,10 @@
 
     <MakeDir Directories="$(ArtifactsTestResultsDir)" />
 
+    <!-- Remove tool package from NuGet cache, so that local changes will be reflected if the package version
+         hasn't changed. -->
+    <RemoveDir Directories="$(NuGetPackageRoot)$(ToolCommandName)\$(PackageVersion)" />
+
     <Exec Command="dotnet new tool-manifest"
       WorkingDirectory="$(TestLocalToolFolder)"/>
     
