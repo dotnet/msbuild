@@ -192,6 +192,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                         Version="$(BundledNETCorePlatformsPackageVersion)"
                         IsImplicitlyDefined="true"
                         Condition="'$(DisableImplicitFrameworkReferences)' != 'true'
+                                    and '$(DisableImplicitNETCorePlatformsReference)' != 'true'
                                     and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                                     and '$(_TargetFrameworkVersionWithoutV)' != ''
                                     and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'"
