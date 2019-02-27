@@ -148,5 +148,16 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--interactive");
         }
+
+        [Fact]
+        public void UpdateToolParserCanParseVersionOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update -g console.test.app --version 1.2");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+
+            appliedOptions.SingleArgumentOrDefault("version").Should().Be("1.2");
+        }
     }
 }

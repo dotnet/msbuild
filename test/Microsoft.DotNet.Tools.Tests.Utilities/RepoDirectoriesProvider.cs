@@ -30,11 +30,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                     return s_repoRoot;
                 }
 
-#if NET451
-                string directory = AppDomain.CurrentDomain.BaseDirectory;
-#else
                 string directory = AppContext.BaseDirectory;
-#endif
 
                 while (directory != null)
                 {

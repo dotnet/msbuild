@@ -3,7 +3,7 @@
     <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AssetTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(AssetTargetFallback);portable-net45+win8;dnxcore50;netcoreapp2.1</AssetTargetFallback>
-    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(RestoreAdditionalProjectSources);$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>

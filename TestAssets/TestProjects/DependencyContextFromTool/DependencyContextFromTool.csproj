@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <AssetTargetFallback>$(AssetTargetFallback);dnxcore50;portable-net45+win8</AssetTargetFallback>
-    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(RestoreAdditionalProjectSources);$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>
