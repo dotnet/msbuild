@@ -17,7 +17,7 @@
       <Uri>https://github.com/microsoft/visualfsharp</Uri>
       <Sha>51a53a16e8915983ce11783da45af0aa14328586</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.1.0-beta1-19127-05">
+    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.1.0-beta1-19127-06">
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>3ef46d8367f4ae1cb20d1aa473e450ec27d3d795</Sha>
     </Dependency>
