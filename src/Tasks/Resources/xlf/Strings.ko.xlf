@@ -2464,8 +2464,8 @@
         <note>{StrBegin="MSB3643: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-        <source>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</source>
-        <target state="translated">MSB3644: "{0}" 프레임워크에 대한 참조 어셈블리를 찾을 수 없습니다. 이 문제를 해결하려면 이 프레임워크 버전에 대한 SDK 또는 타기팅 팩을 설치하거나 애플리케이션의 대상을 SDK 또는 타기팅 팩을 설치한 프레임워크 버전으로 변경하세요. 어셈블리는 GAC(전역 어셈블리 캐시)에서 확인되며 참조 어셈블리 대신 사용됩니다. 따라서 어셈블리의 대상이 사용자가 의도하는 프레임워크로 올바르게 지정되지 않을 수 있습니다.</target>
+        <source>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</source>
+        <target state="needs-review-translation">MSB3644: "{0}" 프레임워크에 대한 참조 어셈블리를 찾을 수 없습니다. 이 문제를 해결하려면 이 프레임워크 버전에 대한 SDK 또는 타기팅 팩을 설치하거나 애플리케이션의 대상을 SDK 또는 타기팅 팩을 설치한 프레임워크 버전으로 변경하세요. 어셈블리는 GAC(전역 어셈블리 캐시)에서 확인되며 참조 어셈블리 대신 사용됩니다. 따라서 어셈블리의 대상이 사용자가 의도하는 프레임워크로 올바르게 지정되지 않을 수 있습니다.</target>
         <note>{StrBegin="MSB3644: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">

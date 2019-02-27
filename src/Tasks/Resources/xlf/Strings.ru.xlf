@@ -2464,8 +2464,8 @@
         <note>{StrBegin="MSB3643: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-        <source>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</source>
-        <target state="translated">MSB3644: ссылочные сборки для платформы "{0}" не найдены. Чтобы устранить эту ошибку, установите пакет SDK или пакет нацеливания для этой версии платформы или измените целевую платформу приложения на версию, для которой установлен SDK или пакет нацеливания. Учтите, что сборки будут разрешаться из глобального кэша сборок (GAC) и использоваться вместо ссылочных сборок. Поэтому они могут неправильно использовать выбранную платформу в качестве целевой.</target>
+        <source>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</source>
+        <target state="needs-review-translation">MSB3644: ссылочные сборки для платформы "{0}" не найдены. Чтобы устранить эту ошибку, установите пакет SDK или пакет нацеливания для этой версии платформы или измените целевую платформу приложения на версию, для которой установлен SDK или пакет нацеливания. Учтите, что сборки будут разрешаться из глобального кэша сборок (GAC) и использоваться вместо ссылочных сборок. Поэтому они могут неправильно использовать выбранную платформу в качестве целевой.</target>
         <note>{StrBegin="MSB3644: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">

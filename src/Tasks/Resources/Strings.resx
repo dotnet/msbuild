@@ -2117,7 +2117,7 @@
     <comment>{StrBegin="MSB3643: "}</comment>
   </data>
   <data name="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-    <value>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</value>
+    <value>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</value>
     <comment>{StrBegin="MSB3644: "}</comment>
   </data>
   <data name="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">

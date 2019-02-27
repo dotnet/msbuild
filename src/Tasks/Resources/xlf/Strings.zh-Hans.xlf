@@ -2464,8 +2464,8 @@
         <note>{StrBegin="MSB3643: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-        <source>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</source>
-        <target state="translated">MSB3644: 未找到框架“{0}”的引用程序集。若要解决此问题，请安装此框架版本的 SDK 或 Targeting Pack，或将应用程序的目标重新指向已装有 SDK 或 Targeting Pack 的框架版本。请注意，将从全局程序集缓存(GAC)解析程序集，并将使用这些程序集替换引用程序集。因此，程序集的目标可能未正确指向您所预期的框架。</target>
+        <source>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</source>
+        <target state="needs-review-translation">MSB3644: 未找到框架“{0}”的引用程序集。若要解决此问题，请安装此框架版本的 SDK 或 Targeting Pack，或将应用程序的目标重新指向已装有 SDK 或 Targeting Pack 的框架版本。请注意，将从全局程序集缓存(GAC)解析程序集，并将使用这些程序集替换引用程序集。因此，程序集的目标可能未正确指向您所预期的框架。</target>
         <note>{StrBegin="MSB3644: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">
