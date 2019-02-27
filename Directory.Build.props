@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+
+  <PropertyGroup>
+    <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
+    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
+  </PropertyGroup>
+
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
   <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
