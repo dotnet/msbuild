@@ -78,15 +78,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FrameworkReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true"
                     Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
 
-    <!-- Reference the Platforms package in order to supply the RID graph to NuGet.
-         This can be removed once we do https://github.com/dotnet/cli/issues/10528 or
-         https://github.com/NuGet/Home/issues/7351 -->
-    <PackageReference Include="Microsoft.NETCore.Platforms" 
-                      Version="$(BundledNETCorePlatformsPackageVersion)"
-                      IsImplicitlyDefined="true"
-                      Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"
-                      PrivateAssets="All"
-                      Publish="true" />
   </ItemGroup>
 
 </Project>

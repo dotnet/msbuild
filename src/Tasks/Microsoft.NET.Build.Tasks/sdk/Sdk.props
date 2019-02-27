@@ -28,6 +28,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildProjectExtensionsPath>$(ProjectExtensionsPathForSpecifiedProject)</MSBuildProjectExtensionsPath>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <Import Project="$(AlternateCommonProps)" Condition="'$(AlternateCommonProps)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(AlternateCommonProps)' == ''"/>
   <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.props"  />  
 </Project>

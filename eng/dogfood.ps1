@@ -2,7 +2,6 @@
 Param(
   [string] $configuration = "Debug",
   [string] $projects = "",
-  [string] $msbuildEngine = 'vs',
   [switch] $help,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$command
 )
