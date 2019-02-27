@@ -401,8 +401,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
@@ -418,7 +417,6 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
-#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]

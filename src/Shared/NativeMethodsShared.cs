@@ -501,12 +501,12 @@ namespace Microsoft.Build.Shared
             {
                 if (osMaxPathLimit == MaxPathLimits.Unknown)
                 {
-                    osMaxPathLimit = IsMaxPathLimitLegacyWindows() ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
+                    osMaxPathLimit = IsMaxPathLegacyWindows() ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
                 }
             }
         }
 
-        private static bool IsMaxPathLimitLegacyWindows()
+        internal static bool IsMaxPathLegacyWindows()
         {
             try
             {
