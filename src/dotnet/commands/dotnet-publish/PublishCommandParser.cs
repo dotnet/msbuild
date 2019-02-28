@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.Cli
                 "publish",
                 LocalizableStrings.AppDescription,
                 Accept.ZeroOrMoreArguments()
-                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
-                            description: CommonLocalizableStrings.ProjectArgumentDescription),
+                      .With(name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
+                            description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
