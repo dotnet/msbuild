@@ -607,6 +607,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Include="CrossPlatformExecutable" Condition="'$(_IsExecutable)' == 'true'" />
   </ItemGroup>
 
+  <!-- NETStandard capabilities -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <ProjectCapability Remove="ReferenceManagerCOM" />
+  </ItemGroup>
+
   <!-- Publish capabilities -->
   <ItemGroup>
     <ProjectCapability Include="FolderPublish" />
