@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Web", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Publish.Tasks.Tests", "test\Publish\Tasks\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj", "{E4ED9184-8FE6-43CF-8BB6-D708CC720748}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Worker", "src\Worker\Package\Microsoft.NET.Sdk.Worker.csproj", "{20FEB920-8607-4AFF-A12A-E6544931D0D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{E4ED9184-8FE6-43CF-8BB6-D708CC720748}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4ED9184-8FE6-43CF-8BB6-D708CC720748}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4ED9184-8FE6-43CF-8BB6-D708CC720748}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20FEB920-8607-4AFF-A12A-E6544931D0D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20FEB920-8607-4AFF-A12A-E6544931D0D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20FEB920-8607-4AFF-A12A-E6544931D0D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20FEB920-8607-4AFF-A12A-E6544931D0D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{5B7EEFB0-219E-46F2-A712-B5BF67A09E9D} = {C94883D7-3DFE-4BAC-AC41-4A2C78C5133D}
 		{EA642164-F6F3-4295-83A7-25D934770D5C} = {C94883D7-3DFE-4BAC-AC41-4A2C78C5133D}
 		{E4ED9184-8FE6-43CF-8BB6-D708CC720748} = {B51A634A-41CB-49BA-8B7D-C7E693B8B71F}
+		{20FEB920-8607-4AFF-A12A-E6544931D0D0} = {C94883D7-3DFE-4BAC-AC41-4A2C78C5133D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {56D5F4DA-F710-4026-8F49-4A903BCAA9B5}

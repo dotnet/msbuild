@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ProjectSystemRoot Condition="'$(ProjectSystemRoot)' == ''">$(RepoRoot)\src\ProjectSystem\</ProjectSystemRoot>
+    <WorkerRoot Condition="'$(WorkerRoot)' == ''">$(RepoRoot)\src\Worker\</WorkerRoot>
   </PropertyGroup>
 
   <Import Project="$(RepositoryEngineeringDir)\Package.props" />
@@ -12,12 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(ProjectSystemRoot)\Targets\netstandard1.0\**\*.*">
+    <Content Include="$(WorkerRoot)\Targets\netstandard1.0\**\*.*">
       <Pack>true</Pack>
       <PackagePath>build\netstandard1.0</PackagePath>
     </Content>
 
-    <Content Include="$(ProjectSystemRoot)\Targets\Sdk.*">
+    <Content Include="$(WorkerRoot)\Targets\Sdk.*">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
     </Content>
