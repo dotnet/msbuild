@@ -25,7 +25,7 @@
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
       <Sha>0863d08bf0cec7897e96e5c38602f7e0687aea53</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview3-27428-11">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview3-27428-9">
       <Uri>https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</Uri>
       <Sha>0f9c492272517b3e01290e899df7a986b1e52da3</Sha>
     </Dependency>
