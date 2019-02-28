@@ -1,7 +1,6 @@
 <Project>
 
   <PropertyGroup>
-      <MicrosoftNETCoreCompilersVersion>2.10.0</MicrosoftNETCoreCompilersVersion>
       <NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-rtm.5362</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
@@ -14,8 +13,7 @@
     <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="3.0.0-beta1-61516-01" />
     <PackageReference Update="Microsoft.DotNet.BuildTools.GenAPI" Version="2.1.0-prerelease-02404-02" />
     <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
-    <PackageReference Update="Microsoft.Net.Compilers" Version="$(MicrosoftNetCompilersVersion)" />
-    <PackageReference Update="Microsoft.NETCore.Compilers" Version="$(MicrosoftNetCoreCompilersVersion)" />
+    <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
     <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
