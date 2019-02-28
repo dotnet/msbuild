@@ -3695,6 +3695,16 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringCopy()
+        {
+            string propertyFunction = @"$([System.String]::Copy($(X)).LastIndexOf(
+                                                '.designer.cs',
+                                                System.StringComparison.OrdinalIgnoreCase))";
+            TestPropertyFunction(propertyFunction,
+                                "X", "test.designer.cs", "4");
+        }
+
+        [Fact]
         public void PropertyFunctionStringArrayIndexerGetter()
         {
             TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");

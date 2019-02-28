@@ -3328,7 +3328,6 @@ namespace Microsoft.Build.Evaluation
             private bool TryExecuteWellKnownFunction(out object returnVal, object objectInstance, object[] args)
             {
                 returnVal = null;
-
                 if (objectInstance is string text)
                 {
                     if (string.Equals(_methodMethodName, nameof(string.StartsWith), StringComparison.OrdinalIgnoreCase))
@@ -3495,7 +3494,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                else if (objectInstance == null)
+                else if (objectInstance == null) // Calling a well-known static function
                 {
                     if (_receiverType == typeof(string))
                     {
@@ -3512,6 +3511,14 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArg(args, out string arg0))
                             {
                                 returnVal = string.IsNullOrEmpty(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(string.Copy), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = string.Copy(arg0);
                                 return true;
                             }
                         }
