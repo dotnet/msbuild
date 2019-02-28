@@ -600,13 +600,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
   -->
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_IsExecutable)' == 'true'">
-    <ProjectCapability Include="CrossPlatformExecutable" />
-  </ItemGroup>
-
-  <!-- Reference Manager capabilities -->
+  <!-- NETCoreApp capabilities -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <ProjectCapability Remove="ReferenceManagerAssemblies" />
+    <ProjectCapability Remove="ReferenceManagerCOM" Condition="$(_TargetFrameworkVersionWithoutV) &lt; '3.0'" />
+    <ProjectCapability Include="CrossPlatformExecutable" Condition="'$(_IsExecutable)' == 'true'" />
   </ItemGroup>
 
   <!-- Publish capabilities -->
