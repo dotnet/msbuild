@@ -3841,5 +3841,50 @@ $(
             string result = expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             result.ShouldBe(expected);
         }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_GetPathsOfAllFilesAbove()
+        {
+            // Directory structure:
+            // <temp>\
+            //    .squiggle
+            //    alpha\
+            //        One.cs
+            //        beta\
+            //            .squiggle
+            //            Two.cs
+            //            Three.cs
+            //        gamma\
+            //            .squiggle
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+                var rootSquiggle = env.CreateFile(root, ".squiggle", string.Empty);
+
+                var alpha = root.CreateDirectory("alpha");
+                var projectFile = env.CreateFile(alpha, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <Compile Include=""One.cs"" />
+    <Compile Include=""beta\Two.cs"" />
+    <Compile Include=""beta\Three.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Squiggle Include=""@(Compile->GetPathsOfAllFilesAbove('.squiggle'))"" />
+  </ItemGroup>
+</Project>");
+
+                var beta = alpha.CreateDirectory("beta");
+                var betaSquiggle = env.CreateFile(beta, ".squiggle", string.Empty);
+
+                var gamma = alpha.CreateDirectory("gamma");
+                var gammaSquiggle = env.CreateFile(gamma, ".squiggle", string.Empty);
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Squiggle");
+
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { rootSquiggle.Path, betaSquiggle.Path }, Case.Insensitive);
+            }
+        }
     }
 }
