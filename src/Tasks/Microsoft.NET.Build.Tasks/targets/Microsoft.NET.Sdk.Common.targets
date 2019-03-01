@@ -26,7 +26,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
     <DefaultImplicitPackages>Microsoft.NETCore.App;NETStandard.Library</DefaultImplicitPackages>
   </PropertyGroup>
-
+  
   <!--
      Some versions of Microsoft.NET.Test.Sdk.targets change the OutputType after we've set _IsExecutable and
      HasRuntimeOutput default in Microsoft.NET.Sdk.BeforeCommon.targets. Refresh these value here for backwards

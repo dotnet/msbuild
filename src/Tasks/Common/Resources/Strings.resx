@@ -464,4 +464,29 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</value>
     <comment>{StrBegin="NETSDK1087: "}</comment>
   </data>
+    <data name="ClsidMapExportedTypesRequireExplicitGuid" xml:space="preserve">
+    <value>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</value>
+    <comment>{StrBegin="NETSDK1088: "}
+{0} - The ComVisible class that doesn't have a GuidAttribute on it.</comment>
+  </data>
+  <data name="ClsidMapConflictingGuids" xml:space="preserve">
+    <value>NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</value>
+    <comment>{StrBegin="NETSDK1089: "}
+{0} - The first type with the conflicting guid.
+{1} - The second type with the conflicting guid.
+{2} - The guid the two types have.</comment>
+  </data>
+  <data name="ClsidMapInvalidAssembly" xml:space="preserve">
+    <value>NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</value>
+    <comment>{StrBegin="NETSDK1090: "}
+{0} - The path to the invalid assembly.</comment>
+  </data>
+  <data name="CannotFindComhost" xml:space="preserve">
+    <value>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</value>
+    <comment>{StrBegin="NETSDK1091: "}</comment>
+  </data>
+  <data name="CannotEmbedClsidMapIntoComhost" xml:space="preserve">
+    <value>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</value>
+    <comment>{StrBegin="NETSDK1092: "}</comment>
+  </data>
 </root>

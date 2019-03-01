@@ -37,7 +37,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true' ">true</GenerateRuntimeConfigurationFiles>
+    <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and ('$(HasRuntimeOutput)' == 'true' or '$(UseComHost)' == 'true') ">true</GenerateRuntimeConfigurationFiles>
     <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
     <GenerateSatelliteAssembliesForCore Condition=" '$(GenerateSatelliteAssembliesForCore)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">true</GenerateSatelliteAssembliesForCore>
     <ComputeNETCoreBuildOutputFiles Condition=" '$(ComputeNETCoreBuildOutputFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</ComputeNETCoreBuildOutputFiles>
@@ -65,11 +65,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_NativeLibraryExtension Condition="'$(_NativeLibraryExtension)' == ''">.so</_NativeLibraryExtension>
 
     <_NativeExecutableExtension Condition="'$(_NativeExecutableExtension)' == '' and ($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win')))">.exe</_NativeExecutableExtension>
+    <_ComHostLibraryExtension Condition="'$(_ComHostLibraryExtension)' == '' and ($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win')))">.dll</_ComHostLibraryExtension>
 
     <_DotNetHostExecutableName>dotnet$(_NativeExecutableExtension)</_DotNetHostExecutableName>
     <_DotNetAppHostExecutableNameWithoutExtension>apphost</_DotNetAppHostExecutableNameWithoutExtension>
     <_DotNetAppHostExecutableName>$(_DotNetAppHostExecutableNameWithoutExtension)$(_NativeExecutableExtension)</_DotNetAppHostExecutableName>
 
+    <_DotNetComHostLibraryNameWithoutExtension>comhost</_DotNetComHostLibraryNameWithoutExtension>
+    <_DotNetComHostLibraryName>$(_DotNetComHostLibraryNameWithoutExtension)$(_ComHostLibraryExtension)</_DotNetComHostLibraryName>
     <_DotNetHostPolicyLibraryName>$(_NativeLibraryPrefix)hostpolicy$(_NativeLibraryExtension)</_DotNetHostPolicyLibraryName>
     <_DotNetHostFxrLibraryName>$(_NativeLibraryPrefix)hostfxr$(_NativeLibraryExtension)</_DotNetHostFxrLibraryName>
   </PropertyGroup>
@@ -282,6 +285,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CompileDependsOn>
       $(CompileDependsOn);
       _CreateAppHost;
+      _CreateComHost;
     </CompileDependsOn>
   </PropertyGroup>
 
@@ -337,6 +341,96 @@ Copyright (c) .NET Foundation. All rights reserved.
     
   </Target>
 
+  <ItemGroup>
+    <ClsidMap Include="$(IntermediateOutputPath)$(AssemblyName).clsidmap" />
+    <RegFreeComManifest Include="$(IntermediateOutputPath)$(AssemblyName).X.manifest" />
+  </ItemGroup>
+  
+  <!--
+      ============================================================
+                                        _GenerateClsidMap
+
+    Generates a *.clsidmap file from the built assembly.
+    ============================================================
+  -->
+  <UsingTask TaskName="GenerateClsidMap" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="_GenerateClsidMap"
+          Inputs="@(IntermediateAssembly)"
+          Outputs="@(ClsidMap)"
+          DependsOnTargets="CoreCompile"
+          Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and
+                     '$(UseComHost)' == 'true'">
+    <GenerateClsidMap
+        IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
+        CLsidMapDestinationPath="@(ClsidMap->'%(FullPath)')" />
+  </Target>
+
+  <UsingTask TaskName="CreateComHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!--
+    ============================================================
+                                        _CreateComHost
+    If we found a restored comhost, create the modified destination apphost
+    with options from the project.
+    ============================================================
+     -->
+  <Target Name="_CreateComHost"
+          Inputs="@(IntermediateAssembly);$(ComHostSourcePath)"
+          Outputs="$(ComHostIntermediatePath)"
+          DependsOnTargets="_GetComHostPaths;CoreCompile;_GenerateClsidMap;_GenerateRegFreeComManifest"
+          Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and
+                     '$(ComHostIntermediatePath)' != '' and
+                     Exists('@(IntermediateAssembly)') and
+                     Exists('$(ComHostSourcePath)')">
+    <CreateComHost
+      ComHostSourcePath="$(ComHostSourcePath)"
+      ComHostDestinationPath="$(ComHostIntermediatePath)"
+      ClsidMapPath="@(ClsidMap)" />
+  </Target>
+
+  <UsingTask TaskName="GenerateRegFreeComManifest" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <!-- 
+    ============================================================
+                                        _GenerateRegFreeComManifest
+
+    Gets the path to the restored comhost, and if the restored comhost
+    was present, computes the path for the destination comhost.
+    ============================================================
+  -->
+  <Target Name="_GenerateRegFreeComManifest"
+          DependsOnTargets="_GenerateClsidMap;_GetComHostPaths"
+          Inputs="@(ClsidMap);@(IntermediateAssembly)"
+          Outputs="@(RegFreeComManifest)"
+          Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and
+                     '$(UseComHost)' == 'true' and
+                     '$(EnableRegFreeCom)' == 'true'">
+    <GenerateRegFreeComManifest
+      IntermediateAssembly="@(IntermediateAssembly)"
+      ComHostName="$(ComHostFileName)"
+      ClsidMapPath="@(ClsidMap)"
+      ComManifestPath="@(RegFreeComManifest)" />
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GetComHostPaths
+
+    Gets the path to the restored comhost, and if the restored comhost
+    was present, computes the path for the destination comhost.
+    ============================================================
+     -->
+  <Target Name="_GetComHostPaths"
+          DependsOnTargets="ResolvePackageAssets"
+          Condition="'$(UseComHost)' == 'true' and '$(_IsExecutable)' != 'true'">
+    <PropertyGroup>
+      <ComHostFileName>$(AssemblyName).comhost$(_ComHostLibraryExtension)</ComHostFileName>
+      <ComHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)$(ComHostFileName)'))</ComHostIntermediatePath>
+    </PropertyGroup>
+
+    <NETSdkError Condition="'$(ComHostSourcePath)' == '' or !Exists('$(ComHostSourcePath)')"
+             ResourceName="CannotFindComhost" />
+  </Target>
+  
   <!--
     ============================================================
                                         _ComputeNETCoreBuildOutputFiles
@@ -345,7 +439,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="_GetAppHostPaths"
+          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths"
           BeforeTargets="AssignTargetPaths"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
@@ -383,6 +477,20 @@ Copyright (c) .NET Foundation. All rights reserved.
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </None>
+    </ItemGroup>
+    
+    <ItemGroup Condition="'$(ComHostIntermediatePath)' != ''">
+      <None Include="$(ComHostIntermediatePath)">
+        <Link>$(AssemblyName).$(_DotNetComHostLibraryName)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </None>
+      <None Include="@(RegFreeComManifest)" Condition="'$(EnableRegFreeCom)' == 'true'">
+        <Link>%(FileName)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </None>
+
     </ItemGroup>
   </Target>
 
