@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli.Sln.Internal;
@@ -27,68 +28,69 @@ namespace Microsoft.DotNet.Tools.Common
                 fullProjectPath);
 
             if (slnFile.Projects.Any((p) =>
-                string.Equals(p.FilePath, relativeProjectPath, StringComparison.OrdinalIgnoreCase)))
+                    string.Equals(p.FilePath, relativeProjectPath, StringComparison.OrdinalIgnoreCase)))
             {
                 Reporter.Output.WriteLine(string.Format(
                     CommonLocalizableStrings.SolutionAlreadyContainsProject,
                     slnFile.FullPath,
                     relativeProjectPath));
-                return;
             }
-
-            ProjectRootElement rootElement = null;
-            ProjectInstance projectInstance = null;
-            try
+            else
             {
-                rootElement = ProjectRootElement.Open(fullProjectPath);
-                projectInstance = new ProjectInstance(rootElement);
+                ProjectRootElement rootElement = null;
+                ProjectInstance projectInstance = null;
+                try
+                {
+                    rootElement = ProjectRootElement.Open(fullProjectPath);
+                    projectInstance = new ProjectInstance(rootElement);
+                }
+                catch (InvalidProjectFileException e)
+                {
+                    Reporter.Error.WriteLine(string.Format(
+                        CommonLocalizableStrings.InvalidProjectWithExceptionMessage,
+                        fullProjectPath,
+                        e.Message));
+                    return;
+                }
+
+                var slnProject = new SlnProject
+                {
+                    Id = projectInstance.GetProjectId(),
+                    TypeGuid = rootElement.GetProjectTypeGuid() ?? projectInstance.GetDefaultProjectTypeGuid(),
+                    Name = Path.GetFileNameWithoutExtension(relativeProjectPath),
+                    FilePath = relativeProjectPath
+                };
+
+                if (string.IsNullOrEmpty(slnProject.TypeGuid))
+                {
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            CommonLocalizableStrings.UnsupportedProjectType,
+                            projectInstance.FullPath));
+                    return;
+                }
+
+                // NOTE: The order you create the sections determines the order they are written to the sln
+                // file. In the case of an empty sln file, in order to make sure the solution configurations
+                // section comes first we need to add it first. This doesn't affect correctness but does
+                // stop VS from re-ordering things later on. Since we are keeping the SlnFile class low-level
+                // it shouldn't care about the VS implementation details. That's why we handle this here.
+                slnFile.AddDefaultBuildConfigurations();
+
+                slnFile.MapSolutionConfigurationsToProject(
+                    projectInstance,
+                    slnFile.ProjectConfigurationsSection.GetOrCreatePropertySet(slnProject.Id));
+
+                if (!noSolutionFolders)
+                {
+                    slnFile.AddSolutionFolders(slnProject);
+                }
+
+                slnFile.Projects.Add(slnProject);
+
+                Reporter.Output.WriteLine(
+                    string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, relativeProjectPath));
             }
-            catch (InvalidProjectFileException e)
-            {
-                Reporter.Error.WriteLine(string.Format(
-                    CommonLocalizableStrings.InvalidProjectWithExceptionMessage,
-                    fullProjectPath,
-                    e.Message));
-                return;
-            }
-
-            var slnProject = new SlnProject
-            {
-                Id = projectInstance.GetProjectId(),
-                TypeGuid = rootElement.GetProjectTypeGuid() ?? projectInstance.GetDefaultProjectTypeGuid(),
-                Name = Path.GetFileNameWithoutExtension(relativeProjectPath),
-                FilePath = relativeProjectPath
-            };
-
-            if (string.IsNullOrEmpty(slnProject.TypeGuid))
-            {
-                Reporter.Error.WriteLine(
-                    string.Format(
-                        CommonLocalizableStrings.UnsupportedProjectType,
-                        projectInstance.FullPath));
-                return;
-            }
-
-            // NOTE: The order you create the sections determines the order they are written to the sln
-            // file. In the case of an empty sln file, in order to make sure the solution configurations
-            // section comes first we need to add it first. This doesn't affect correctness but does
-            // stop VS from re-ordering things later on. Since we are keeping the SlnFile class low-level
-            // it shouldn't care about the VS implementation details. That's why we handle this here.
-            slnFile.AddDefaultBuildConfigurations();
-
-            slnFile.MapSolutionConfigurationsToProject(
-                projectInstance,
-                slnFile.ProjectConfigurationsSection.GetOrCreatePropertySet(slnProject.Id));
-
-            if (!noSolutionFolders)
-            {
-                slnFile.AddSolutionFolders(slnProject);
-            }
-
-            slnFile.Projects.Add(slnProject);
-
-            Reporter.Output.WriteLine(
-                string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, relativeProjectPath));
         }
 
         private static void AddDefaultBuildConfigurations(this SlnFile slnFile)
@@ -121,8 +123,7 @@ namespace Microsoft.DotNet.Tools.Common
             ProjectInstance projectInstance,
             SlnPropertySet solutionProjectConfigs)
         {
-            var (projectConfigurations, defaultProjectConfiguration) =
-                GetKeysDictionary(projectInstance.GetConfigurations());
+            var (projectConfigurations, defaultProjectConfiguration) = GetKeysDictionary(projectInstance.GetConfigurations());
             var (projectPlatforms, defaultProjectPlatform) = GetKeysDictionary(projectInstance.GetPlatforms());
 
             foreach (var solutionConfigKey in slnFile.SolutionConfigurationsSection.Keys)
@@ -195,8 +196,7 @@ namespace Microsoft.DotNet.Tools.Common
                 return null;
             }
 
-            var projectConfiguration =
-                GetMatchingProjectKey(projectConfigurations, pair[0]) ?? defaultProjectConfiguration;
+            var projectConfiguration = GetMatchingProjectKey(projectConfigurations, pair[0]) ?? defaultProjectConfiguration;
             if (projectConfiguration == null)
             {
                 return null;
@@ -249,7 +249,6 @@ namespace Microsoft.DotNet.Tools.Common
                         {
                             nestedProjectsSection.Properties[solutionFolder.Id] = parentDirGuid;
                         }
-
                         parentDirGuid = solutionFolder.Id;
                     }
                 }
@@ -292,7 +291,7 @@ namespace Microsoft.DotNet.Tools.Common
             var projectPathNormalized = PathUtility.GetPathWithDirectorySeparator(projectPath);
 
             var projectsToRemove = slnFile.Projects.Where((p) =>
-                string.Equals(p.FilePath, projectPathNormalized, StringComparison.OrdinalIgnoreCase)).ToList();
+                    string.Equals(p.FilePath, projectPathNormalized, StringComparison.OrdinalIgnoreCase)).ToList();
 
             bool projectRemoved = false;
             if (projectsToRemove.Count == 0)
