@@ -24,7 +24,7 @@ Arguments:
   <PROJECT_PATH>   The paths to the projects to add to the solution.
 
 Options:
-  --no-solution-folders   Do not create solution folders. Create project at root of solution.
+  --no-solution-folders   Add project to the root of the solution without creating any solution folders.
   -h, --help              Show command line help.";
 
         private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
