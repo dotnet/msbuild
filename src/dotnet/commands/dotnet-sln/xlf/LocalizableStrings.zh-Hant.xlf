@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoSolutionFolders">
-        <source>Add project to the root of the solution without creating any solution folders.</source>
-        <target state="new">Add project to the root of the solution without creating any solution folders.</target>
+        <source>Place project in root of the solution, rather than creating a solution folder.</source>
+        <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">

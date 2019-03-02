@@ -163,6 +163,6 @@
     <value>Project(s)</value>
   </data>
   <data name="NoSolutionFolders" xml:space="preserve">
-    <value>Add project to the root of the solution without creating any solution folders.</value>
+    <value>Place project in root of the solution, rather than creating a solution folder.</value>
   </data>
 </root>

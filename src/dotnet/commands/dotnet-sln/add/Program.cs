@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly string _fileOrDirectory;
         private readonly bool _noSolutionFolders;
         
-        private const string NoSolutionFoldersOption = "no-solution-folders";
+        private const string NoSolutionFoldersOption = "place-project-in-root";
 
         public AddProjectToSolutionCommand(
             AppliedOption appliedCommand, 
