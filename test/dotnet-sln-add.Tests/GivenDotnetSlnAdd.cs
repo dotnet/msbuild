@@ -320,7 +320,7 @@ Global
 EndGlobal
 ";
 
-    private const string ExpectedSlnFileAfterAddingProjectWithNoSolutionFoldersOption = @"
+    private const string ExpectedSlnFileAfterAddingProjectWithPlaceProjectInRootOption = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26006.2
@@ -1124,7 +1124,7 @@ EndGlobal
         }
 
         [Fact]
-        public void WhenNestedProjectIsAddedAndNoSolutionFoldersOptionIsPassedNoSolutionFoldersAreCreated()
+        public void WhenNestedProjectIsAddedAndPlaceProjectInRootOptionIsPassedNoSolutionFoldersAreCreated()
         {
             var projectDirectory = TestAssets
                 .Get("TestAppWithSlnAndCsprojInSubDir")
@@ -1140,7 +1140,7 @@ EndGlobal
             cmd.Should().Pass();
             
             var slnPath = Path.Combine(projectDirectory, "App.sln");
-            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithNoSolutionFoldersOption);
+            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithPlaceProjectInRootOption);
             File.ReadAllText(slnPath)
                 .Should().BeVisuallyEquivalentTo(expectedSlnContents);
         }
