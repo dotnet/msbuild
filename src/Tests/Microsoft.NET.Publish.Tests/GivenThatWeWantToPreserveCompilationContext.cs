@@ -642,6 +642,7 @@ System.Resources.ResourceManager.dll
 System.Resources.Writer.dll
 System.Runtime.CompilerServices.VisualC.dll
 System.Runtime.dll
+System.Runtime.CompilerServices.Unsafe.dll
 System.Runtime.Extensions.dll
 System.Runtime.Handles.dll
 System.Runtime.InteropServices.dll
