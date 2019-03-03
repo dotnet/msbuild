@@ -22,7 +22,7 @@
         <target state="translated">1 つ以上のプロジェクトをソリューション ファイルに追加します。</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSolutionFolders">
+      <trans-unit id="PlaceProjectInRoot">
         <source>Place project in root of the solution, rather than creating a solution folder.</source>
         <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
         <note />

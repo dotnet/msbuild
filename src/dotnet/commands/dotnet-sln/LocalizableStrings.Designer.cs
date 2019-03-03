@@ -136,9 +136,9 @@ namespace Microsoft.DotNet.Cli.commands {
             }
         }
         
-        public static string NoSolutionFolders {
+        public static string PlaceProjectInRoot {
             get {
-                return ResourceManager.GetString("NoSolutionFolders", resourceCulture);
+                return ResourceManager.GetString("PlaceProjectInRoot", resourceCulture);
             }
         }
     }

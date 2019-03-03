@@ -22,7 +22,7 @@
         <target state="translated">Agrega uno o varios proyectos a un archivo de solución.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSolutionFolders">
+      <trans-unit id="PlaceProjectInRoot">
         <source>Place project in root of the solution, rather than creating a solution folder.</source>
         <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
         <note />

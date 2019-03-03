@@ -22,7 +22,7 @@
         <target state="translated">Добавление проектов в файл решения.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSolutionFolders">
+      <trans-unit id="PlaceProjectInRoot">
         <source>Place project in root of the solution, rather than creating a solution folder.</source>
         <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
         <note />

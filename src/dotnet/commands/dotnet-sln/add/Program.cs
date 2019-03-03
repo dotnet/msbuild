@@ -16,9 +16,9 @@ namespace Microsoft.DotNet.Tools.Sln.Add
     {
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
-        private readonly bool _noSolutionFolders;
+        private readonly bool _placeProjectInRoot;
         
-        private const string NoSolutionFoldersOption = "place-project-in-root";
+        private const string PlaceProjectInRootOption = "place-project-in-root";
 
         public AddProjectToSolutionCommand(
             AppliedOption appliedCommand, 
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             _appliedCommand = appliedCommand;
 
             _fileOrDirectory = fileOrDirectory;
-            _noSolutionFolders = appliedCommand.ValueOrDefault<bool>(NoSolutionFoldersOption);
+            _placeProjectInRoot = appliedCommand.ValueOrDefault<bool>(PlaceProjectInRootOption);
         }
 
         public override int Execute()
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
             foreach (var fullProjectPath in fullProjectPaths)
             {
-                slnFile.AddProject(fullProjectPath, _noSolutionFolders);
+                slnFile.AddProject(fullProjectPath, _placeProjectInRoot);
             }
 
             if (slnFile.Projects.Count > preAddProjectCount)

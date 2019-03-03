@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli
                                        description: LocalizableStrings.AddProjectPathArgumentDescription),
                            Create.Option(
                                "--place-project-in-root",
-                               LocalizableStrings.NoSolutionFolders,
+                               LocalizableStrings.PlaceProjectInRoot,
                                Accept.NoArguments()),
                            CommonOptions.HelpOption());
     }
