@@ -202,11 +202,12 @@ namespace Microsoft.NET.Build.Tasks
 
                     packagesToDownload.Add(packageToDownload);
 
-                    appHostItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
                     appHostItem.SetMetadata(MetadataKeys.PackageName, hostPackName);
                     appHostItem.SetMetadata(MetadataKeys.PackageVersion, appHostPackVersion);
-                    appHostItem.SetMetadata(MetadataKeys.RelativePath, hostRelativePathInPackage);
                 }
+
+                appHostItem.SetMetadata(MetadataKeys.RelativePath, hostRelativePathInPackage);
+                appHostItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
 
                 return appHostItem;
             }
