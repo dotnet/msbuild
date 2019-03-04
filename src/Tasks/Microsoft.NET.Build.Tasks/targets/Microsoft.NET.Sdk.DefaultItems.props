@@ -17,17 +17,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(NETCoreSdkBundledVersionsProps)" Condition="Exists('$(NETCoreSdkBundledVersionsProps)')" />
 
-  <ItemGroup Condition="'$(UseRefTargetingPacks)' == 'true'">
-    <KnownFrameworkReference Update="Microsoft.NETCore.App"
-                               TargetingPackName="Microsoft.NETCore.App.Ref"
-                               TargetingPackVersion="3.0.0-preview-27406-5"
-                               />
-    <KnownFrameworkReference Update="Microsoft.AspNetCore.App"
-                               TargetingPackName="Microsoft.AspNetCore.App.Ref"
-                               TargetingPackVersion="3.0.0-preview-19108-04"
-                               />
-  </ItemGroup>
-
   <PropertyGroup>
     <!-- Disable web SDK implicit package versions for ASP.NET packages, since the .NET SDK now handles that -->
     <EnableWebSdkImplicitPackageVersions>false</EnableWebSdkImplicitPackageVersions>
@@ -78,13 +67,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FrameworkReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true"
                     Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
 
-    <!-- Reference the Platforms package in order to supply the RID graph to NuGet.
-         This can be removed once we do https://github.com/dotnet/cli/issues/10528 or
-         https://github.com/NuGet/Home/issues/7351 -->
-    <PackageReference Include="Microsoft.NETCore.Platforms" 
-                      Version="$(BundledNETCorePlatformsPackageVersion)"
-                      IsImplicitlyDefined="true"
-                      Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
   </ItemGroup>
 
 </Project>

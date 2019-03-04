@@ -109,11 +109,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                      RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                      PackAsToolShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
                      DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
+                     DotNetComHostLibraryNameWithoutExtension="$(_DotNetComHostLibraryNameWithoutExtension)"
                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                      KnownAppHostPacks="@(KnownAppHostPack)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageReferenceToAdd" />
       <Output TaskParameter="AppHost" ItemName="AppHostPack" />
+      <Output TaskParameter="ComHost" ItemName="ComHostPack" />
       <Output TaskParameter="PackAsToolShimAppHostPacks" ItemName="PackAsToolShimAppHostPack" />
       
     </ResolveAppHosts>
@@ -190,6 +192,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </GetPackageDirectory>
 
+    <GetPackageDirectory
+      Items="@(ComHostPack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedComHostPack" />
+
+    </GetPackageDirectory>
+
     <ItemGroup>
       <_ApphostsForShimRuntimeIdentifiers Include="%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.PackageDirectory)\%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.RelativePath)" >
         <RuntimeIdentifier>%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.RuntimeIdentifier)</RuntimeIdentifier>
@@ -204,6 +214,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup Condition="'@(ResolvedAppHostPack)' != '' And '$(AppHostSourcePath)' == ''">
       <AppHostSourcePath>@(ResolvedAppHostPack->'%(Path)')</AppHostSourcePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ResolvedComHostPack Condition="'%(ResolvedComHostPack.Path)' == '' and '%(ResolvedComHostPack.PackageDirectory)' != ''">
+        <Path>%(ResolvedComHostPack.PackageDirectory)\%(ResolvedComHostPack.RelativePath)</Path>
+      </ResolvedComHostPack>
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(ResolvedComHostPack)' != '' And '$(ComHostSourcePath)' == ''">
+      <ComHostSourcePath>@(ResolvedComHostPack->'%(Path)')</ComHostSourcePath>
     </PropertyGroup>
 
   </Target>

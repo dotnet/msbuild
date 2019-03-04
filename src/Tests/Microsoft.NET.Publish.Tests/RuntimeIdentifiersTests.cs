@@ -25,7 +25,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var testProject = new TestProject()
             {
-                Name = "BuildWithRuntimeIdentifier",
+                Name = "BuildWithRid",
                 TargetFrameworks = "netcoreapp3.0",
                 IsSdkProject = true,
                 IsExe = true
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var testProject = new TestProject()
             {
-                Name = "PublishWithRuntimeIdentifier",
+                Name = "PublishWithRid",
                 TargetFrameworks = "netcoreapp3.0",
                 IsSdkProject = true,
                 IsExe = true

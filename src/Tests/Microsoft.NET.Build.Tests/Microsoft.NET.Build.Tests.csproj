@@ -27,7 +27,6 @@
     <PackageReference Include="NuGet.LibraryModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Configuration" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Packaging" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Common" Version="$(NuGetProjectModelVersion)" />
 

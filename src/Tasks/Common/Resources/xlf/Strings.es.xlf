@@ -77,10 +77,20 @@
         <target state="translated">NETSDK1001: Debe especificarse al menos una plataforma de destino posible.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
+      <trans-unit id="CannotEmbedClsidMapIntoComhost">
+        <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
+        <target state="new">NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</target>
+        <note>{StrBegin="NETSDK1092: "}</note>
+      </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
         <source>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
         <target state="translated">NETSDK1065: No se encuentra el host de la aplicación {0}. {0} puede ser un identificador de tiempo de ejecución no válido. Para obtener más información al respecto, consulte https://aka.ms/rid-catalog.</target>
         <note>{StrBegin="NETSDK1065: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotFindComhost">
+        <source>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
+        <target state="new">NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
@@ -126,6 +136,26 @@
         <source>NETSDK1036: Choosing '{0}' because it comes from a package that is preferred.</source>
         <target state="translated">NETSDK1036: Se elegirá "{0}" porque viene de un paquete que es preferido.</target>
         <note>{StrBegin="NETSDK1036: "}</note>
+      </trans-unit>
+      <trans-unit id="ClsidMapConflictingGuids">
+        <source>NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</source>
+        <target state="new">NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</target>
+        <note>{StrBegin="NETSDK1089: "}
+{0} - The first type with the conflicting guid.
+{1} - The second type with the conflicting guid.
+{2} - The guid the two types have.</note>
+      </trans-unit>
+      <trans-unit id="ClsidMapExportedTypesRequireExplicitGuid">
+        <source>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</source>
+        <target state="new">NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</target>
+        <note>{StrBegin="NETSDK1088: "}
+{0} - The ComVisible class that doesn't have a GuidAttribute on it.</note>
+      </trans-unit>
+      <trans-unit id="ClsidMapInvalidAssembly">
+        <source>NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</source>
+        <target state="new">NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</target>
+        <note>{StrBegin="NETSDK1090: "}
+{0} - The path to the invalid assembly.</note>
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
         <source>NETSDK1037: Could not determine winner due to equal file and assembly versions.</source>
