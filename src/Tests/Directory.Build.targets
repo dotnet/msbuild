@@ -53,14 +53,15 @@
       WorkingDirectory="$(TestLocalToolFolder)"/>
 
     <PropertyGroup>
-      <ResultsXmlPath>$(ArtifactsTestResultsDir)$(_ResultFileNameNoExt).xml</ResultsXmlPath>
-      <ResultsHtmlPath>$(ArtifactsTestResultsDir)$(_ResultFileNameNoExt).html</ResultsHtmlPath>
-      <!--<ResultsStdOutPath>$(ArtifactsLogDir)$(_ResultFileNameNoExt).log</ResultsStdOutPath>-->
+      <ResultsXmlPath>@(TestToRun->'%(ResultsXmlPath)')</ResultsXmlPath>
+      <ResultsHtmlPath>@(TestToRun->'%(ResultsHtmlPath)')</ResultsHtmlPath>
+      <ResultsStdOutPath>@(TestToRun->'%(ResultsStdOutPath)')</ResultsStdOutPath>
 
       <TestArgs>-noautoreporters -noRepoInference</TestArgs>
       <TestArgs>$(TestArgs) -dotnetPath $(SdkLayoutDirectory)\dotnet</TestArgs>
       <TestArgs>$(TestArgs) -xml "$(ResultsXmlPath)"</TestArgs>
       <TestArgs>$(TestArgs) -html "$(ResultsHtmlPath)" $(TestRunnerAdditionalArguments)</TestArgs>
+      <TestArgs>$(TestArgs) &gt; $(ResultsStdOutPath)</TestArgs>
     </PropertyGroup>
 
     <Exec Command="dotnet tool run $(ToolCommandName) $(TestArgs)"
