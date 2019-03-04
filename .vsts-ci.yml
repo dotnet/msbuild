@@ -67,10 +67,6 @@ phases:
             _BuildConfig: Debug
             _PublishType: none
             _SignType: test
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
 
   - template: /eng/build.yml
     parameters:

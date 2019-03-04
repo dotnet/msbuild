@@ -1,16 +1,9 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project Sdk="Microsoft.NET.Sdk">
   <Target Name="LayoutSdk">
-    <ItemGroup>
-      <Stage0SdkPaths Include="$([System.IO.Directory]::GetDirectories(&quot;$(_DotNetRoot)sdk\&quot;))"/>
-    </ItemGroup>
-    <PropertyGroup>
-      <!-- Reverse list, and put in property -->
-      <Stage0SdkPaths>@(Stage0SdkPaths->Reverse())</Stage0SdkPaths>
-      <!-- Get first path in reversed list, which should hopefully be the latest version -->
-      <Stage0SdkPath>$(Stage0SdkPaths.Split($([System.Convert]::ToString(";").ToCharArray())).GetValue($([System.Convert]::ToInt32(0))))</Stage0SdkPath>
-      <Stage0SdkVersion>$([System.IO.Path]::GetFileName('$(Stage0SdkPath)'))</Stage0SdkVersion>
-    </PropertyGroup>
+    <Exec Command="$(_DotNetRoot)/dotnet --version" ConsoleToMsBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="Stage0SdkVersion"/>
+    </Exec>
 
     <ItemGroup>
       <Stage0FilestToCopy Include="$(_DotNetRoot)/**/*.*"
