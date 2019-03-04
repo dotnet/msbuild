@@ -606,6 +606,28 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
+        public void GetTargetsListsShouldApplyDefaultTargetsOnlyToGraphRoots()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var root1 = CreateProjectFile(env, 1, new[] {2}, new Dictionary<string, string[]> {{"A", new[] {"B"}}}, "A").Path;
+                var root2 = CreateProjectFile(env, 2, new[] {3}, new Dictionary<string, string[]> {{"B", new[] {"C"}}, {"X", new[] {"Y"}}}, "X").Path;
+                CreateProjectFile(env, 3);
+                
+
+                var projectGraph = new ProjectGraph(new []{root1, root2});
+                projectGraph.ProjectNodes.Count.ShouldBe(3);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(null);
+
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "A" });
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBe(new[] { "B" });
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 3)].ShouldBe(new[] { "C" });
+            }
+        }
+
+        [Fact]
         public void GetTargetListsDefaultTargetsAreExpanded()
         {
             using (var env = TestEnvironment.Create())
