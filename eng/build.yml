@@ -40,7 +40,7 @@ phases:
         inputs:
           azureSubscription: 'DotNet-Engineering-Services_KeyVault'
           KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnetcli-storage-key,microsoft-symbol-server-pat,symweb-symbol-server-pat'
+          SecretsFilter: 'dotnetcli-storage-key,dotnetfeed-storage-access-key-1,microsoft-symbol-server-pat,symweb-symbol-server-pat'
         condition: succeeded()
       - task: AzureKeyVault@1
         inputs:
