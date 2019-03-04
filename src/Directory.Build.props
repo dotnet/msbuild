@@ -36,7 +36,6 @@
     <!-- Create English satellite assemblies (which shouldn't be required, but preserves previous build behavior) -->
     <XlfLanguages>en;cs;de;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant</XlfLanguages>
 
-    <UpdateXlfOnBuild>true</UpdateXlfOnBuild>
     <ErrorOnOutOfDateXlf>true</ErrorOnOutOfDateXlf>
 
     <!-- Workaround that can be removed when we update machines to 15.6.
