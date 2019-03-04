@@ -31,6 +31,8 @@ Write-Host "Existing MSBuild assemblies backed up to $BackupFolder"
 $filesToCopyToBin = @(
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\MSBuild.exe"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Build.dll"
+    "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Build.Conversion.Core.dll"
+    "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Build.Engine.dll"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Build.Framework.dll"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Build.Tasks.Core.dll"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Build.Utilities.Core.dll"
