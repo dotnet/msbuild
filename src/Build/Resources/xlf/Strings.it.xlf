@@ -82,6 +82,11 @@
         <target state="translated">MSB4255: i file della cache dei risultati di input seguenti non esistono: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSdkResolverDocumentNode">
+        <source>MSB4259: Unable to find node {0} in the SDK Resolver XML document</source>
+        <target state="new">MSB4259: Unable to find node {0} in the SDK Resolver XML document</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Il metaprogetto "{0}" è stato generato.</target>
