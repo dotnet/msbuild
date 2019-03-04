@@ -3,7 +3,7 @@
           BeforeTargets="Build">
 
     <WriteLinesToFile File="$(OutputPath)/.toolsetversion"
-                      Lines="$(CommitHash);$(Version);$(Rid)"
+                      Lines="$(GitCommitHash);$(Version);$(Rid)"
                       Overwrite="true" />
   </Target>
 
