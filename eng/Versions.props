@@ -12,7 +12,7 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <DotNetCoreSdkLKGVersion>3.0.100-preview3-010272</DotNetCoreSdkLKGVersion>
+    <DotNetCoreSdkLKGVersion>3.0.100-preview4-010615</DotNetCoreSdkLKGVersion>
     <MicrosoftAspNetCoreAllPackageVersion>2.2.1</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
     <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.2.0</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
