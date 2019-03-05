@@ -9,6 +9,7 @@
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>$(PackageId)</ToolCommandName>
+    <CanRunTestAsTool>true</CanRunTestAsTool>
 
     <!-- Put packages for tests in subfolder so we don't try to sign them -->
     <PackageOutputPath>$(PackageOutputPath)tests\</PackageOutputPath>
@@ -25,6 +26,48 @@
           LinkBase="Assets" Visible="false" />
     
   </ItemGroup>
+
+  <Target Name="LayoutSdk">
+    <MSBuild Projects="$(RepoRoot)\src\LayoutSdk\LayoutSdk.proj"
+             Targets="LayoutSdk"/>
+  </Target>
+
+  <Target Name="TestAsTool" DependsOnTargets="Pack;LayoutSdk;_InnerGetTestsToRun">
+    <PropertyGroup>
+      <TestLocalToolFolder>$(ArtifactsTmpDir)$(ToolCommandName)\</TestLocalToolFolder>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(TestLocalToolFolder)" />
+    <MakeDir Directories="$(TestLocalToolFolder)" />
+
+    <MakeDir Directories="$(ArtifactsTestResultsDir)" />
+
+    <!-- Remove tool package from NuGet cache, so that local changes will be reflected if the package version
+         hasn't changed. -->
+    <RemoveDir Directories="$(NuGetPackageRoot)$(ToolCommandName)\$(PackageVersion)" />
+
+    <Exec Command="dotnet new tool-manifest"
+      WorkingDirectory="$(TestLocalToolFolder)"/>
+    
+    <Exec Command="dotnet tool install --local $(ToolCommandName) --version $(PackageVersion) --add-source $(ArtifactsShippingPackagesDir)"
+      WorkingDirectory="$(TestLocalToolFolder)"/>
+
+    <PropertyGroup>
+      <ResultsXmlPath>@(TestToRun->'%(ResultsXmlPath)')</ResultsXmlPath>
+      <ResultsHtmlPath>@(TestToRun->'%(ResultsHtmlPath)')</ResultsHtmlPath>
+      <ResultsStdOutPath>@(TestToRun->'%(ResultsStdOutPath)')</ResultsStdOutPath>
+
+      <TestArgs>-noautoreporters -noRepoInference</TestArgs>
+      <TestArgs>$(TestArgs) -dotnetPath $(SdkLayoutDirectory)\dotnet</TestArgs>
+      <TestArgs>$(TestArgs) -xml "$(ResultsXmlPath)"</TestArgs>
+      <TestArgs>$(TestArgs) -html "$(ResultsHtmlPath)" $(TestRunnerAdditionalArguments)</TestArgs>
+      <TestArgs>$(TestArgs) &gt; $(ResultsStdOutPath)</TestArgs>
+    </PropertyGroup>
+
+    <Exec Command="dotnet tool run $(ToolCommandName) $(TestArgs)"
+          WorkingDirectory="$(TestLocalToolFolder)"
+          IgnoreStandardErrorWarningFormat="true" />
+  </Target>
 
   <Import Project="..\..\Directory.Build.targets" />
 

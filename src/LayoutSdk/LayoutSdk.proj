@@ -1,0 +1,22 @@
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <Target Name="LayoutSdk">
+    <Exec Command="$(_DotNetRoot)/dotnet --version" ConsoleToMsBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="Stage0SdkVersion"/>
+    </Exec>
+
+    <ItemGroup>
+      <Stage0FilestToCopy Include="$(_DotNetRoot)/**/*.*"
+                          Exclude="$(_DotNetRoot)/sdk/$(Stage0SdkVersion)/Sdks/Microsoft.NET.Sdk/**/*.*)"/>
+      <LayoutFilesToCopy Include="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk/**/*.*" />
+    </ItemGroup>
+
+    <RemoveDir Directories="SdkLayoutDirectory" />
+
+    <Copy SourceFiles="@(Stage0FilestToCopy)"
+          DestinationFiles="@(Stage0FilestToCopy->'$(SdkLayoutDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(LayoutFilesToCopy)"
+          DestinationFiles="@(LayoutFilesToCopy->'$(SdkLayoutDirectory)\sdk\$(Stage0SdkVersion)\Sdks\Microsoft.NET.Sdk\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+</Project>

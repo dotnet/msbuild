@@ -55,6 +55,18 @@ phases:
             _BuildConfig: Release
             _PublishType: none
             _SignType: test
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_NT_TestAsTools
+      queue:
+        name: dotnet-external-temp
+        parallel: 2
+        timeoutInMinutes: 120
+        matrix:
+          Build_Debug:
+            _BuildConfig: Debug
+            _PublishType: none
+            _SignType: test
 
   - template: /eng/build.yml
     parameters:
