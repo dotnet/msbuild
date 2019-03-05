@@ -27,21 +27,30 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <summary>
         /// Creates a new process reaper.
         /// </summary>
-        /// <param name="process">The target process to reap if the current process terminates. The process must already be started.</param>
+        /// <param name="process">The target process to reap if the current process terminates. The process should not yet be started.</param>
         public ProcessReaper(Process process)
         {
             _process = process;
 
+            // The tests need the event handlers registered prior to spawning the child to prevent a race
+            // where the child writes output the test expects before the intermediate dotnet process
+            // has registered the event handlers to handle the signals the tests will generate.
+            Console.CancelKeyPress += HandleCancelKeyPress;
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
+            {
+                AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
+            }
+        }
+
+        /// <summary>
+        /// Call to notify the reaper that the process has started.
+        /// </summary>
+        public void NotifyProcessStarted()
+        {
             if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
                 _job = AssignProcessToJobObject(_process.Handle);
             }
-            else
-            {
-                AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
-            }
-
-            Console.CancelKeyPress += HandleCancelKeyPress;
         }
 
         public void Dispose()
@@ -97,7 +106,18 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private void HandleProcessExit(object sender, EventArgs args)
         {
-            if (!_process.WaitForExit(0) && NativeMethods.Posix.kill(_process.Id, NativeMethods.Posix.SIGTERM) != 0)
+            int processId;
+            try
+            {
+                processId = _process.Id;
+            }
+            catch (InvalidOperationException)
+            {
+                // The process hasn't started yet; nothing to signal
+                return;
+            }
+
+            if (!_process.WaitForExit(0) && NativeMethods.Posix.kill(processId, NativeMethods.Posix.SIGTERM) != 0)
             {
                 // Couldn't send the signal, don't wait
                 return;
