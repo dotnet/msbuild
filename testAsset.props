@@ -9,9 +9,6 @@
 
     <NoPackageAnalysis>true</NoPackageAnalysis>
 
-    <!-- Needed while dotnet/sdk version used does not support 3.0 yet -->
-    <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
-
     <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
     <EnableSourceLink>false</EnableSourceLink>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
