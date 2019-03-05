@@ -33,14 +33,14 @@
     <MSBuild
       BuildInParallel="False"
       Projects="%(TestPackageProject.ProjectPath)"
-      Properties="RestoreAdditionalProjectSources=$(TestPackagesDir);ImportDirectoryBuildTargets=false"
+      Properties="ImportDirectoryBuildTargets=false"
       Targets="Restore"
       RemoveProperties="TargetFramework" />
 
     <MSBuild
       BuildInParallel="False"
       Projects="%(TestPackageProject.ProjectPath)"
-      Properties="PackageOutputPath=$(TestPackagesDir);%(TestPackageProject.MsbuildArgs);RestoreAdditionalProjectSources=$(TestOutputDir)/packages;Version=%(TestPackageProject.Version)"
+      Properties="PackageOutputPath=$(TestPackagesDir);%(TestPackageProject.MsbuildArgs);Version=%(TestPackageProject.Version)"
       Targets="Pack"
       RemoveProperties="TargetFramework" />
   </Target>
