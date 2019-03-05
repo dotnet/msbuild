@@ -10,7 +10,7 @@ using Xunit;
 using FluentAssertions;
 using System.Linq;
 
-namespace Microsoft.DotNet.Restore.Tests
+namespace Microsoft.DotNet.Restore.Test
 {
     public class GivenThatIWantToRestoreApp : TestBase
     {
@@ -24,16 +24,17 @@ namespace Microsoft.DotNet.Restore.Tests
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            string newArgs = $"console -o \"{rootPath}\" --no-restore";
-            new NewCommandShim()
-                .WithWorkingDirectory(rootPath)
-                .Execute(newArgs)
-                .Should()
-                .Pass();
+            var sln = "TestAppWithSlnAndSolutionFolders";
+            var projectDirectory = TestAssets
+                .Get(sln)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
 
-            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\"";
+            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{fullPath}\"";
             new RestoreCommand()
-                 .WithWorkingDirectory(rootPath)
+                 .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput(args)
                  .Should()
                  .Pass()
