@@ -47,10 +47,11 @@ namespace Microsoft.DotNet.Cli.Utils
 #endif
             using (PerfTrace.Current.CaptureTiming($"{Path.GetFileNameWithoutExtension(_process.StartInfo.FileName)} {_process.StartInfo.Arguments}"))
             {
-                _process.Start();
-
-                using (new ProcessReaper(_process))
+                using (var reaper = new ProcessReaper(_process))
                 {
+                    _process.Start();
+                    reaper.NotifyProcessStarted();
+
                     Reporter.Verbose.WriteLine(string.Format(
                         LocalizableStrings.ProcessId,
                         _process.Id));
