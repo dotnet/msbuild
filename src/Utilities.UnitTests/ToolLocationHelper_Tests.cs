@@ -1404,7 +1404,6 @@ namespace Microsoft.Build.UnitTests
         /// do not have anything to chain with.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ChainReferenceAssembliesRedistExistsNoRedistList()
         {
             string path = ToolLocationHelper.ChainReferenceAssemblyPath(@"PathDoesNotExistSoICannotChain");
@@ -1684,6 +1683,36 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+
+        [Fact]
+        public void ShouldCorrectlyHandleRedirectionWithTargetFrameworkDirectory()
+        {
+            string redistString41 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                                    "<FileList Name=\".NET Framework 4.1\" TargetFrameworkDirectory=\"..\\..\\4.1-api\">" +
+                                    "</FileList>";
+
+            string tempDirectory = Path.Combine(Path.GetTempPath(), "ShouldCorrectlyHandleMonoPathRedirection");
+
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
+            string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
+            string tempDirectoryPath = Path.Combine(tempDirectory, "v4.1");
+            string redirectedPath = Path.Combine(tempDirectory, "4.1-api");
+            try
+            {
+                Directory.CreateDirectory(redist41Directory);
+                Directory.CreateDirectory(redirectedPath);
+                File.WriteAllText(redist41, redistString41);
+                var path = ToolLocationHelper.ChainReferenceAssemblyPath(tempDirectoryPath);
+                path.ShouldBe(redirectedPath);
+            }
+            finally
+            {
+                if (Directory.Exists(tempDirectory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
+                }
+            }
+        }
         #endregion
 
         #region GetReferenceAssemblyPathWithRootPath
@@ -1938,6 +1967,45 @@ namespace Microsoft.Build.UnitTests
                 ToolLocationHelper.GetPathToReferenceAssemblies(string.Empty, frameworkName);
             }
            );
+        }
+        /// <summary>
+        /// Check behaviour when ref asm folder has mono like layout
+        /// </summary>
+        [Fact]
+        public void GetPathToReferenceAssembliesShouldCorrectlyWorkWithTargetFrameworkDirectory()
+        {
+            var redistString41 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                                    "<FileList Name=\".NET Framework 4.1\" TargetFrameworkDirectory=\"..\\..\\4.1-api\">" +
+                                    "</FileList>";
+
+            var tempDirectory = Path.Combine(Path.GetTempPath(), "GetPathToReferenceAssembliesShouldCorrectlyWorkWithTargetFrameworkDirectory");
+            var fm41Dir = Path.Combine(tempDirectory, ".NET Framework", "v4.1");
+            var redist41Directory = Path.Combine(fm41Dir, "RedistList") + Path.DirectorySeparatorChar;
+            var redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
+            var redist41ApiDirectory = Path.Combine(tempDirectory, ".NET Framework", "4.1-api");
+            var facadesDirectory = Path.Combine(redist41ApiDirectory, "Facades");
+            try
+            {
+                Directory.CreateDirectory(redist41Directory);
+                Directory.CreateDirectory(redist41ApiDirectory);
+                Directory.CreateDirectory(facadesDirectory);
+                File.WriteAllText(redist41, redistString41);
+                var frameworkName = new FrameworkNameVersioning(".NET Framework", new Version("4.1"));
+                var refAsmPathList = ToolLocationHelper.GetPathToReferenceAssemblies(tempDirectory, frameworkName);
+                refAsmPathList.Count.ShouldBe(3);
+                refAsmPathList.ShouldContain(fm41Dir + Path.DirectorySeparatorChar);
+                refAsmPathList.ShouldContain(redist41ApiDirectory + Path.DirectorySeparatorChar);
+                refAsmPathList.ShouldContain(facadesDirectory + Path.DirectorySeparatorChar);
+            }
+            finally
+            {
+                if (Directory.Exists(tempDirectory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
+                }
+            }
+            
+            
         }
         #endregion
 
