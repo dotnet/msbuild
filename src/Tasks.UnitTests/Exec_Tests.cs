@@ -5,13 +5,14 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Microsoft.Build.UnitTests;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -20,9 +21,16 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     sealed public class Exec_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public Exec_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         private Exec PrepareExec(string command)
         {
-            IBuildEngine2 mockEngine = new MockEngine(true);
+            IBuildEngine2 mockEngine = new MockEngine(_output);
             Exec exec = new Exec();
             exec.BuildEngine = mockEngine;
             exec.Command = command;
@@ -31,7 +39,7 @@ namespace Microsoft.Build.UnitTests
 
         private ExecWrapper PrepareExecWrapper(string command)
         {
-            IBuildEngine2 mockEngine = new MockEngine(true);
+            IBuildEngine2 mockEngine = new MockEngine(_output);
             ExecWrapper exec = new ExecWrapper();
             exec.BuildEngine = mockEngine;
             exec.Command = command;
