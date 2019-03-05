@@ -9,6 +9,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Execution
@@ -87,7 +88,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
 
-            // We can only set the host object to a non-null value if the affinity for the project is not out of proc, or if it is, it is only implicitly 
+            // We can only set the host object to a non-null value if the affinity for the project is not out of proc, or if it is, it is only implicitly
             // out of proc, in which case it will become in-proc after this call completes.  See GetNodeAffinity.
             bool isExplicit;
             bool hasExplicitOutOfProcAffinity = (GetNodeAffinity(projectFile, out isExplicit) == NodeAffinity.OutOfProc) && (isExplicit == true);
@@ -246,7 +247,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // Attempts to find a specific affinity failed, so just go with Any. 
+            // Attempts to find a specific affinity failed, so just go with Any.
             return NodeAffinity.Any;
         }
 
@@ -279,30 +280,37 @@ namespace Microsoft.Build.Execution
 
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                var count = 0;
-                foreach (var pair in _hostObjectMap)
+                if (_hostObjectMap == null)
                 {
-                    foreach (var hostObjectMappair in pair.Value._hostObjects)
+                    translator.Writer.Write(0);
+                }
+                else
+                {
+                    var count = 0;
+                    foreach (var pair in _hostObjectMap)
                     {
-                        if (hostObjectMappair.Value.IsMoniker)
+                        foreach (var hostObjectMappair in pair.Value._hostObjects)
                         {
-                            count++;
+                            if (hostObjectMappair.Value.IsMoniker)
+                            {
+                                count++;
+                            }
                         }
                     }
-                }
 
-                translator.Writer.Write(count);
+                    translator.Writer.Write(count);
 
-                foreach (var pair in _hostObjectMap)
-                {
-                    foreach (var hostObjectMappair in pair.Value._hostObjects)
+                    foreach (var pair in _hostObjectMap)
                     {
-                        if (hostObjectMappair.Value.IsMoniker)
+                        foreach (var hostObjectMappair in pair.Value._hostObjects)
                         {
-                            translator.Writer.Write(pair.Key);
-                            translator.Writer.Write(hostObjectMappair.Key._targetName);
-                            translator.Writer.Write(hostObjectMappair.Key._taskName);
-                            translator.Writer.Write(hostObjectMappair.Value.MonikerName);
+                            if (hostObjectMappair.Value.IsMoniker)
+                            {
+                                translator.Writer.Write(pair.Key);
+                                translator.Writer.Write(hostObjectMappair.Key._targetName);
+                                translator.Writer.Write(hostObjectMappair.Key._taskName);
+                                translator.Writer.Write(hostObjectMappair.Value.MonikerName);
+                            }
                         }
                     }
                 }
@@ -354,7 +362,7 @@ namespace Microsoft.Build.Execution
             {
                 get
                 {
-                    return _hostObjects.Count > 0;
+                    return _hostObjects.Any(h => h.Value.IsTaskHost);
                 }
             }
 
@@ -396,7 +404,7 @@ namespace Microsoft.Build.Execution
                 {
                     RunningObjectTable rot = new RunningObjectTable();
                     object objectFromRunningObjectTable = rot.GetObject(hostObject.MonikerName);
-                    return (ITaskHost) objectFromRunningObjectTable;
+                    return (ITaskHost)objectFromRunningObjectTable;
                 }
                 else
                 {
