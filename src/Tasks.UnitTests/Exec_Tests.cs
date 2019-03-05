@@ -13,6 +13,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -848,6 +850,57 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(Exec.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters));
             Assert.True(Exec.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters));
+        }
+
+        [Fact]
+        public void EndToEndMultilineExec()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var testProject = env.CreateTestProjectWithFiles(@"<Project>
+ <Target Name=""MultilineExec"">
+  <Exec Command=""echo line 1
+echo line 2
+echo line 3"" />
+   </Target>
+</Project>");
+
+                using (var buildManager = new BuildManager())
+                {
+                    MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
+                    var parameters = new BuildParameters()
+                    {
+                        Loggers = new[] { logger },
+                    };
+
+                    var collection = new ProjectCollection(
+                        new Dictionary<string, string>(),
+                        new[] { logger },
+                        remoteLoggers: null,
+                        ToolsetDefinitionLocations.Default,
+                        maxNodeCount: 1,
+                        onlyLogCriticalEvents: false,
+                        loadProjectsReadOnly: true);
+
+                    var project = collection.LoadProject(testProject.ProjectFile).CreateProjectInstance();
+
+                    var request = new BuildRequestData(
+                        project,
+                        targetsToBuild: new[] { "MultilineExec" },
+                        hostServices: null);
+
+                    var result = buildManager.Build(parameters, request);
+
+                    logger.AssertLogContains("line 2");
+                    logger.AssertLogContains("line 3");
+
+                    // To be correct, these need to be on separate lines, not
+                    // all together on one.
+                    logger.AssertLogDoesntContain("1 echo line");
+
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                }
+            }
         }
     }
 
