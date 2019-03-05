@@ -4,10 +4,10 @@
       "name": "Microsoft.Build.vsix",
       "tests": [
         {
-          "container": "MSBuild",
+          "container": "VSPE",
           "testCases": [
-            "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
-            "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
+            "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+            "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
           ]
         }
       ]
