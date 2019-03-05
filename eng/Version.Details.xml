@@ -9,9 +9,9 @@
       <Uri>https://github.com/dotnet/sdk</Uri>
       <Sha>87f00dbd00e72ca5e3e42b2e1f7b553c2e2f4f32</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.0.447">
+    <Dependency Name="Microsoft.Build" Version="16.0.448">
       <Uri>https://github.com/microsoft/msbuild</Uri>
-      <Sha>b7a500dc876851f9c72187fd712cbdfce5ffa26c</Sha>
+      <Sha>86ff63b5d61ef4b642bbe7b92690ef1419576b9c</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="10.4.0-rtm-190131-04">
       <Uri>https://github.com/microsoft/visualfsharp</Uri>
