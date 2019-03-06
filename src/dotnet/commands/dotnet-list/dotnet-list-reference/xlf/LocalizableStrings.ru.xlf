@@ -12,13 +12,6 @@
         <target state="translated">Эта команда перечисляет ссылки из одного проекта на другой</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">В проекте {1} нет ссылок {0}.
-{0} — тип запрашиваемого элемента (проект, пакет, p2p), а {1} — обрабатываемый объект (файл проекта или решения). </target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

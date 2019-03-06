@@ -12,13 +12,6 @@
         <target state="translated">プロジェクト間参照を一覧表示するコマンド</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">プロジェクト {1} 内に {0} 参照がありません。
-{0} は要求中のアイテムの種類 (プロジェクト、パッケージ、p2p) であり、{1} は操作対象のオブジェクト (プロジェクト ファイルまたはソリューション ファイル) です。 </target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>
