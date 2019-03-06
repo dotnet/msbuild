@@ -399,17 +399,20 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal ITaskHost GetAnyMatchingHostObject(string targetName, string taskName)
             {
-                _hostObjects.TryGetValue(new TargetTaskKey(targetName, taskName), out MonikerNameOrITaskHost hostObject);
-                if (hostObject.IsMoniker)
+                if (_hostObjects.TryGetValue(new TargetTaskKey(targetName, taskName), out MonikerNameOrITaskHost hostObject))
                 {
-                    RunningObjectTable rot = new RunningObjectTable();
-                    object objectFromRunningObjectTable = rot.GetObject(hostObject.MonikerName);
-                    return (ITaskHost)objectFromRunningObjectTable;
+                    if (hostObject.IsMoniker)
+                    {
+                        RunningObjectTable rot = new RunningObjectTable();
+                        object objectFromRunningObjectTable = rot.GetObject(hostObject.MonikerName);
+                        return (ITaskHost)objectFromRunningObjectTable;
+                    }
+                    else
+                    {
+                        return hostObject.TaskHost;
+                    }
                 }
-                else
-                {
-                    return hostObject.TaskHost;
-                }
+                return null;
             }
 
             /// <summary>
