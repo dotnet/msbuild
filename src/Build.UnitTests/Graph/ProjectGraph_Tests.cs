@@ -29,9 +29,16 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                                                                         <InnerBuildProperty>{InnerBuildProperty}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>InnerBuildProperties</InnerBuildPropertyValues>
                                                                         <InnerBuildProperties>a;b</InnerBuildProperties>
-                                                                     </PropertyGroup>
+                                                                     </PropertyGroup>";
+        private static readonly string ProjectReferenceTargetsWithCrosstargeting = @"<ItemGroup>
+                                                                                        <!-- Item order is important to ensure outer build targets are put in front of inner build ones -->
+                                                                                        <ProjectReferenceTargets Include='A' Targets='AHelperInner;A' />
+                                                                                        <ProjectReferenceTargets Include='A' Targets='AHelperOuter' OuterBuild='true' />
+                                                                                     </ItemGroup>";
+        private static string[] NonOuterBuildTargets = {"AHelperOuter", "AHelperInner", "A"};
+        private static string[] OuterBuildTargets = {"AHelperOuter"};
 
-";
+        private static readonly string OuterBuildSpecificationWithProjectReferenceTargets = OuterBuildSpecification + ProjectReferenceTargetsWithCrosstargeting;
 
         public ProjectGraphTests(ITestOutputHelper outputHelper)
         {
@@ -645,6 +652,208 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "A" });
                 targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBe(new[] { "B" });
                 targetLists[GetFirstNodeWithProjectNumber(projectGraph, 3)].ShouldBe(new[] { "C" });
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsUsesAllTargetsForNonCrosstargetingNodes()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var root1 = CreateProjectFile(env, 1, new[] {2}, null, null, ProjectReferenceTargetsWithCrosstargeting).Path;
+                CreateProjectFile(env, 2);
+                
+                var projectGraph = new ProjectGraph(root1);
+
+                var dot = projectGraph.ToDot();
+
+                projectGraph.ProjectNodes.Count.ShouldBe(2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string>{"A"});
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "A" });
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBe(NonOuterBuildTargets);
+            }
+        }
+
+        [Fact]
+        public void GetTargetsListInnerBuildToInnerBuild()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                string outerBuildSpec = OuterBuildSpecificationWithProjectReferenceTargets +
+                        $@"<PropertyGroup>
+                            <{InnerBuildProperty}>a</{InnerBuildProperty}>
+                          </PropertyGroup>";
+
+                var root1 =
+                    CreateProjectFile(
+                        env,
+                        1,
+                        new[] {2},
+                        null,
+                        null,
+                        outerBuildSpec)
+                        .Path;
+                CreateProjectFile(
+                    env,
+                    2,
+                    null,
+                    null,
+                    null,
+                    outerBuildSpec);
+                
+                
+                var projectGraph = new ProjectGraph(root1);
+
+                var dot = projectGraph.ToDot();
+
+                projectGraph.ProjectNodes.Count.ShouldBe(2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string>{"A"});
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "A" });
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBe(NonOuterBuildTargets);
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsFiltersTargetsForOuterAndInnerBuilds()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var root1 = CreateProjectFile(env, 1, new[] {2}, null, null, ProjectReferenceTargetsWithCrosstargeting).Path;
+                CreateProjectFile(env, 2, null, null, null, OuterBuildSpecificationWithProjectReferenceTargets);
+                
+                var projectGraph = new ProjectGraph(root1);
+
+                var dot = projectGraph.ToDot();
+
+                projectGraph.ProjectNodes.Count.ShouldBe(4);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string>{"A"});
+
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                var root = GetFirstNodeWithProjectNumber(projectGraph, 1);
+
+                var outerBuild = GetNodesWithProjectNumber(projectGraph, 2).First(IsOuterBuild);
+                var innerBuilds = GetNodesWithProjectNumber(projectGraph, 2).Where(IsInnerBuild).ToArray();
+
+                targetLists[root].ShouldBe(new[] { "A" });
+                targetLists[outerBuild].ShouldBe(OuterBuildTargets);
+
+                foreach (var innerBuild in innerBuilds)
+                {
+                    targetLists[innerBuild].ShouldBe(NonOuterBuildTargets);
+                }
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsForComplexCrosstargetingGraph()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var root1 = CreateProjectFile(
+                    env,
+                    1,
+                    null,
+                    null,
+                    null,
+                    OuterBuildSpecificationWithProjectReferenceTargets +
+                    $@"<ItemGroup>
+                            <ProjectReference Include=`3.proj` Condition=`'$({InnerBuildProperty})'=='a'`/>
+
+                            <ProjectReference Include=`4.proj` Condition=`'$({InnerBuildProperty})'=='b'`/>
+                            <ProjectReference Include=`5.proj` Condition=`'$({InnerBuildProperty})'=='b'`/>
+                            <ProjectReference Include=`6.proj` Condition=`'$({InnerBuildProperty})'=='b'` Properties=`{InnerBuildProperty}=a`/>
+                       </ItemGroup>".Cleanup())
+                    .Path;
+
+                var root2 = CreateProjectFile(
+                    env,
+                    2,
+                    null,
+                    null,
+                    null,
+                    ProjectReferenceTargetsWithCrosstargeting +
+                    $@"<ItemGroup>
+                            <ProjectReference Include=`1.proj` Properties=`{InnerBuildProperty}=b`/>
+                            <ProjectReference Include=`4.proj`/>
+                            <ProjectReference Include=`5.proj`/>
+                       </ItemGroup>".Cleanup())
+                    .Path;
+
+                CreateProjectFile(
+                    env,
+                    3,
+                    null,
+                    null,
+                    null,
+                    OuterBuildSpecificationWithProjectReferenceTargets);
+
+                CreateProjectFile(
+                    env,
+                    4,
+                    new []{6},
+                    null,
+                    null,
+                    ProjectReferenceTargetsWithCrosstargeting);
+
+                CreateProjectFile(
+                    env,
+                    5,
+                    null,
+                    null,
+                    null,
+                    OuterBuildSpecificationWithProjectReferenceTargets +
+                    $@"
+                       <PropertyGroup>
+                            <{InnerBuildProperty}>a</{InnerBuildProperty}>
+                       </PropertyGroup>
+
+                       <ItemGroup>
+                            <ProjectReference Include=`3.proj` Properties=`{InnerBuildProperty}=a`/>
+                            <ProjectReference Include=`6.proj`/>
+                       </ItemGroup>".Cleanup());
+
+                CreateProjectFile(
+                    env,
+                    6,
+                    null,
+                    null,
+                    null,
+                    OuterBuildSpecificationWithProjectReferenceTargets);
+                
+                var projectGraph = new ProjectGraph(new[] {root1, root2});
+
+                var dot = projectGraph.ToDot();
+
+                projectGraph.ProjectNodes.Count.ShouldBe(12);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string>{"A"});
+
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+
+                AssertCrossTargetingNode(1, projectGraph, targetLists, new []{"A"}, NonOuterBuildTargets);
+                AssertCrossTargetingNode(3, projectGraph, targetLists, OuterBuildTargets, NonOuterBuildTargets);
+                AssertCrossTargetingNode(6, projectGraph, targetLists, OuterBuildTargets, NonOuterBuildTargets);
+
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBe(new []{"A"});
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 4)].ShouldBe(NonOuterBuildTargets);
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 5)].ShouldBe(NonOuterBuildTargets);
+            }
+
+            void AssertCrossTargetingNode(int projectNumber, ProjectGraph projectGraph, IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists, string[] outerBuildTargets, string[] nonOuterBuildTargets)
+            {
+                targetLists[GetNodesWithProjectNumber(projectGraph, projectNumber).First(IsOuterBuild)].ShouldBe(outerBuildTargets);
+
+                foreach (var innerBuild in GetNodesWithProjectNumber(projectGraph, projectNumber).Where(IsInnerBuild))
+                {
+                    targetLists[innerBuild].ShouldBe(nonOuterBuildTargets);
+                }
             }
         }
 

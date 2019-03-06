@@ -187,7 +187,7 @@ namespace Microsoft.Build.Experimental.Graph
 
             projectInstanceFactory = projectInstanceFactory ?? DefaultProjectInstanceFactory;
 
-            var sdkInfo = ProjectInterpretation.Instance;
+            _projectInterpretation = ProjectInterpretation.Instance;
 
             var entryPointConfigurationMetadata = new List<ConfigurationMetadata>();
 
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Experimental.Graph
                 entryPointConfigurationMetadata.Add(configurationMetadata);
             }
 
-            var (entryPointNodes, rootNodes, allNodes) = LoadGraph(entryPointConfigurationMetadata, projectCollection, projectInstanceFactory, sdkInfo);
+            var (entryPointNodes, rootNodes, allNodes) = LoadGraph(entryPointConfigurationMetadata, projectCollection, projectInstanceFactory, _projectInterpretation);
 
             EntryPointNodes = entryPointNodes;
             GraphRoots = rootNodes;
@@ -418,6 +418,7 @@ namespace Microsoft.Build.Experimental.Graph
         }
 
         private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
+        private ProjectInterpretation _projectInterpretation;
 
         private static IReadOnlyCollection<ProjectGraphNode> TopologicalSort(IReadOnlyCollection<ProjectGraphNode> graphRoots, IReadOnlyCollection<ProjectGraphNode> graphNodes)
         {
@@ -506,14 +507,17 @@ namespace Microsoft.Build.Experimental.Graph
                 }
 
                 // Based on the entry points of this project, determine which targets to propagate down to project references.
-                var targetsToPropagate = DetermineTargetsToPropagate(node, requestedTargets);
+                var targetsToPropagate = ProjectInterpretation.TargetsToPropagate.FromProjectAndEntryTargets(node.ProjectInstance, requestedTargets);
 
                 // Queue the project references for visitation, if the edge hasn't already been traversed.
                 foreach (var projectReference in node.ProjectReferences)
                 {
+                    var applicableTargets = targetsToPropagate.GetApplicableTargets(projectReference.ProjectInstance);
+
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
                         projectReference,
-                        ExpandDefaultTargets(targetsToPropagate, projectReference.ProjectInstance.DefaultTargets));
+                        ExpandDefaultTargets(applicableTargets, projectReference.ProjectInstance.DefaultTargets));
+
                     if (encounteredEdges.Add(projectReferenceEdge))
                     {
                         edgesToVisit.Enqueue(projectReferenceEdge);
@@ -654,7 +658,7 @@ namespace Microsoft.Build.Experimental.Graph
             ProjectCollection projectCollection,
             ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress,
             ProjectInstanceFactoryFunc projectInstanceFactory,
-            ProjectInterpretation sdkInfo,
+            ProjectInterpretation projectInterpretation,
             ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allParsedProjects,
             out List<Exception> exceptions)
         {
@@ -671,7 +675,7 @@ namespace Microsoft.Build.Experimental.Graph
                     {
                         var parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory, allParsedProjects);
 
-                        foreach (var referenceConfig in sdkInfo.GetReferences(parsedProject.ProjectInstance))
+                        foreach (var referenceConfig in projectInterpretation.GetReferences(parsedProject.ProjectInstance))
                         {
                              /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
                              meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
@@ -748,25 +752,6 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             return errorMessage.ToString();
-        }
-
-        private static ImmutableList<string> DetermineTargetsToPropagate(ProjectGraphNode node, ImmutableList<string> entryTargets)
-        {
-            var targetsToPropagate = ImmutableList<string>.Empty;
-            var projectReferenceTargets = node.ProjectInstance.GetItems(ItemTypeNames.ProjectReferenceTargets);
-            foreach (var entryTarget in entryTargets)
-            {
-                foreach (var projectReferenceTarget in projectReferenceTargets)
-                {
-                    if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
-                    {
-                        var targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
-                        targetsToPropagate = targetsToPropagate.AddRange(ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue));
-                    }
-                }
-            }
-
-            return targetsToPropagate;
         }
 
         private static PropertyDictionary<ProjectPropertyInstance> CreatePropertyDictionary(IDictionary<string, string> properties)

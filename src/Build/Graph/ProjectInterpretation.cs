@@ -24,6 +24,8 @@ namespace Microsoft.Build.Experimental.Graph
         private const string SetPlatformMetadataName = "SetPlatform";
         private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
         private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
+        private const string ProjectReferenceTargetIsOuterBuildMetadataName = "OuterBuild";
+
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
         public static ProjectInterpretation Instance = new ProjectInterpretation();
@@ -39,12 +41,6 @@ namespace Microsoft.Build.Experimental.Graph
             OuterBuild, InnerBuild, NonCrossTargeting
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="requesterConfig"></param>
-        /// <param name="requesterInstance"></param>
-        /// <returns></returns>
         public IEnumerable<ConfigurationMetadata> GetReferences(ProjectInstance requesterInstance)
         {
             IEnumerable<ProjectItemInstance> references;
@@ -69,10 +65,10 @@ namespace Microsoft.Build.Experimental.Graph
 
             foreach (var projectReference in references)
             {
-                if (!string.IsNullOrEmpty(projectReference.GetMetadataValue(ToolsVersionMetadataName)))
+                if (!String.IsNullOrEmpty(projectReference.GetMetadataValue(ToolsVersionMetadataName)))
                 {
                     throw new InvalidOperationException(
-                        string.Format(
+                        String.Format(
                             CultureInfo.InvariantCulture,
                             ResourceUtilities.GetResourceString(
                                 "ProjectGraphDoesNotSupportProjectReferenceWithToolset"),
@@ -107,8 +103,8 @@ namespace Microsoft.Build.Experimental.Graph
 
         internal static ProjectType GetProjectType(ProjectInstance project)
         {
-            var isOuterBuild = string.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project)) && !string.IsNullOrWhiteSpace(GetInnerBuildPropertyValues(project));
-            var isInnerBuild = !string.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project));
+            var isOuterBuild = String.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project)) && !String.IsNullOrWhiteSpace(GetInnerBuildPropertyValues(project));
+            var isInnerBuild = !String.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project));
 
             ErrorUtilities.VerifyThrow(!(isOuterBuild && isInnerBuild), $"A project cannot be an outer and inner build at the same time: ${project.FullPath}");
 
@@ -145,8 +141,8 @@ namespace Microsoft.Build.Experimental.Graph
             var globalPropertyName = GetInnerBuildPropertyName(outerBuild);
             var globalPropertyValues = GetInnerBuildPropertyValues(outerBuild);
 
-            ErrorUtilities.VerifyThrow(!string.IsNullOrWhiteSpace(globalPropertyName), "Must have an inner build property");
-            ErrorUtilities.VerifyThrow(!string.IsNullOrWhiteSpace(globalPropertyValues), "Must have values for the inner build property");
+            ErrorUtilities.VerifyThrow(!String.IsNullOrWhiteSpace(globalPropertyName), "Must have an inner build property");
+            ErrorUtilities.VerifyThrow(!String.IsNullOrWhiteSpace(globalPropertyValues), "Must have values for the inner build property");
 
             foreach (var globalPropertyValue in ExpressionShredder.SplitSemiColonSeparatedList(globalPropertyValues))
             {
@@ -190,7 +186,7 @@ namespace Microsoft.Build.Experimental.Graph
                 var setPlatformString = projectReference.GetMetadataValue(SetPlatformMetadataName);
                 var setTargetFrameworkString = projectReference.GetMetadataValue(SetTargetFrameworkMetadataName);
 
-                if (!string.IsNullOrEmpty(setConfigurationString) || !string.IsNullOrEmpty(setPlatformString) || !string.IsNullOrEmpty(setTargetFrameworkString))
+                if (!String.IsNullOrEmpty(setConfigurationString) || !String.IsNullOrEmpty(setPlatformString) || !String.IsNullOrEmpty(setTargetFrameworkString))
                 {
                     newProperties = SplitPropertyNameValuePairs(
                         ItemMetadataNames.PropertiesMetadataName,
@@ -235,12 +231,12 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         /// <remarks>
         ///     The behavior of this method matches the hardcoded behaviour of the msbuild task
-        ///     and the <paramref name="globalPropertyModifier"/> parameter can contain other mutations done at build time in targets / tasks
+        ///     and the <paramref name="globalPropertyModifiers"/> parameter can contain other mutations done at build time in targets / tasks
         /// </remarks>
         private static PropertyDictionary<ProjectPropertyInstance> GetGlobalPropertiesForItem(
             ProjectItemInstance projectReference,
             PropertyDictionary<ProjectPropertyInstance> requesterGlobalProperties,
-            IEnumerable<GlobalPropertiesModifier> globalPropertyModifier = null)
+            IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers = null)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectReference, nameof(projectReference));
             ErrorUtilities.VerifyThrowArgumentNull(requesterGlobalProperties, nameof(requesterGlobalProperties));
@@ -251,7 +247,7 @@ namespace Microsoft.Build.Experimental.Graph
 
             var defaultParts = new GlobalPropertyPartsForMSBuildTask(properties.ToImmutableDictionary(), additionalProperties.ToImmutableDictionary(), undefineProperties.ToImmutableList());
 
-            var globalPropertyParts = globalPropertyModifier?.Aggregate(defaultParts, (currentProperties, modifier) => modifier(currentProperties, projectReference)) ?? defaultParts;
+            var globalPropertyParts = globalPropertyModifiers?.Aggregate(defaultParts, (currentProperties, modifier) => modifier(currentProperties, projectReference)) ?? defaultParts;
 
             if (globalPropertyParts.AllEmpty())
             {
@@ -281,7 +277,7 @@ namespace Microsoft.Build.Experimental.Graph
 
         private static IReadOnlyDictionary<string, string> SplitPropertyNameValuePairs(string syntaxName, string propertyNameAndValuesString)
         {
-            if (string.IsNullOrEmpty(propertyNameAndValuesString))
+            if (String.IsNullOrEmpty(propertyNameAndValuesString))
             {
                 return ImmutableDictionary<string, string>.Empty;
             }
@@ -297,7 +293,7 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             throw new InvalidProjectFileException(
-                string.Format(
+                String.Format(
                     CultureInfo.InvariantCulture,
                     ResourceUtilities.GetResourceString("General.InvalidPropertyError"),
                     syntaxName,
@@ -306,7 +302,7 @@ namespace Microsoft.Build.Experimental.Graph
 
         private static IReadOnlyCollection<string> SplitPropertyNames(string propertyNamesString)
         {
-            if (string.IsNullOrEmpty(propertyNamesString))
+            if (String.IsNullOrEmpty(propertyNamesString))
             {
                 return ImmutableArray<string>.Empty;
             }
@@ -321,6 +317,70 @@ namespace Microsoft.Build.Experimental.Graph
             foreach (var propertyName in propertyNamesToRemove)
             {
                 properties.Remove(propertyName);
+            }
+        }
+
+        public readonly struct TargetsToPropagate
+        {
+            private readonly ImmutableList<string> _outerBuildTargets;
+            private readonly ImmutableList<string> _allTargets;
+
+            private TargetsToPropagate(ImmutableList<string> outerBuildTargets, ImmutableList<string> nonOuterBuildTargets)
+            {
+                _outerBuildTargets = outerBuildTargets;
+
+                // Since non outer builds act both as outer and inner builds, they need to implement both sets of targets
+                // Outer build targets go first because at build time outer builds are built before inner builds
+                _allTargets = outerBuildTargets.AddRange(nonOuterBuildTargets);
+            }
+
+            public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, ImmutableList<string> entryTargets)
+            {
+                var targetsForOuterBuild = new List<string>();
+                var targetsForInnerBuild = new List<string>();
+
+                var projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
+
+                foreach (var entryTarget in entryTargets)
+                {
+                    foreach (var projectReferenceTarget in projectReferenceTargets)
+                    {
+                        if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+
+                            var targetsAreForOuterBuild = projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName).Equals("true", StringComparison.OrdinalIgnoreCase);
+
+                            var targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue).ToArray();
+
+                            if (targetsAreForOuterBuild)
+                            {
+                                targetsForOuterBuild.AddRange(targets);
+                            }
+                            else
+                            {
+                                targetsForInnerBuild.AddRange(targets);
+                            }
+                        }
+                    }
+                }
+
+                return new TargetsToPropagate(targetsForOuterBuild.ToImmutableList(), targetsForInnerBuild.ToImmutableList());
+            }
+
+            public ImmutableList<string> GetApplicableTargets(ProjectInstance project)
+            {
+                switch (GetProjectType(project))
+                {
+                    case ProjectType.InnerBuild:
+                        return _allTargets;
+                    case ProjectType.OuterBuild:
+                        return _outerBuildTargets;
+                    case ProjectType.NonCrossTargeting:
+                        return _allTargets;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
     }
