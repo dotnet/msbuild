@@ -172,23 +172,6 @@ namespace Microsoft.DotNet.TestFramework
             return this;
         }
 
-        public TestAssetInstance UseCurrentRuntimeFrameworkVersion()
-        {
-            return WithProjectChanges(project =>
-            {
-                var ns = project.Root.Name.Namespace;
-
-                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").LastOrDefault();
-                if (propertyGroup == null)
-                {
-                    propertyGroup = new XElement(ns + "PropertyGroup");
-                    project.Root.Add(propertyGroup);
-                }
-
-                propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", CurrentRuntimeFrameworkVersion));
-            });
-        }
-
         private static string RebasePath(string path, string oldBaseDirectory, string newBaseDirectory)
         {
             path = Path.IsPathRooted(path) ? PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(oldBaseDirectory), path) : path;

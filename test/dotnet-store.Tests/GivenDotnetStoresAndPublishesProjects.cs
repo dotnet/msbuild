@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         private static string _frameworkVersion = TestAssetInstance.CurrentRuntimeFrameworkVersion;
         private static string _arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
         public void ItPublishesARunnablePortableApp()
         {
             var testAppName = "NewtonSoftDependentProject";
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         //  Windows only for now due to https://github.com/dotnet/cli/issues/7501
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
         public void ItPublishesAnAppWithMultipleProfiles()
         {
             var testAppName = "MultiDependentProject";

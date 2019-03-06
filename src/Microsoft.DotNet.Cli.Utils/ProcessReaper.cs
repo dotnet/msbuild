@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Win32.SafeHandles;
 
@@ -38,6 +39,7 @@ namespace Microsoft.DotNet.Cli.Utils
             Console.CancelKeyPress += HandleCancelKeyPress;
             if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
             {
+                _shutdownMutex = new Mutex();
                 AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
             }
         }
@@ -70,6 +72,17 @@ namespace Microsoft.DotNet.Cli.Utils
             else
             {
                 AppDomain.CurrentDomain.ProcessExit -= HandleProcessExit;
+
+                // If there's been a shutdown via the process exit handler,
+                // this will block the current thread so we don't race with the CLR shutdown
+                // from the signal handler.
+                if (_shutdownMutex != null)
+                {
+                    _shutdownMutex.WaitOne();
+                    _shutdownMutex.ReleaseMutex();
+                    _shutdownMutex.Dispose();
+                    _shutdownMutex = null;
+                }
             }
 
             Console.CancelKeyPress -= HandleCancelKeyPress;
@@ -116,6 +129,11 @@ namespace Microsoft.DotNet.Cli.Utils
                 // The process hasn't started yet; nothing to signal
                 return;
             }
+
+            // Take ownership of the shutdown mutex; this will ensure that the other
+            // thread also waiting on the process to exit won't complete CLR shutdown before
+            // this one does.
+            _shutdownMutex.WaitOne();
 
             if (!_process.WaitForExit(0) && NativeMethods.Posix.kill(processId, NativeMethods.Posix.SIGTERM) != 0)
             {
@@ -165,5 +183,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private Process _process;
         private SafeWaitHandle _job;
+        private Mutex _shutdownMutex;
     }
 }
