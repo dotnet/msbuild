@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         private static string _frameworkVersion = TestAssetInstance.CurrentRuntimeFrameworkVersion;
         private static string _arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
         public void ItPublishesARunnablePortableApp()
         {
             var testAppName = "NewtonSoftDependentProject";
