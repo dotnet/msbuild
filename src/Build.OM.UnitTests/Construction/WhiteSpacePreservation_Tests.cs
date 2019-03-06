@@ -448,8 +448,8 @@ multi-line comment here
             // Each OS uses its own line endings. Using WSL on Windows leads to LF on Windows which messes up the tests. This happens due to git LF <-> CRLF conversions.
             if (NativeMethodsShared.IsWindows)
             {
-                projectContents = Regex.Replace(projectContents, @"[^\r]\n", "\r\n", RegexOptions.Multiline);
-                updatedProject = Regex.Replace(updatedProject, @"[^\r]\n", "\r\n", RegexOptions.Multiline);
+                projectContents = Regex.Replace(projectContents, @"(?<!\r)\n", "\r\n", RegexOptions.Multiline);
+                updatedProject = Regex.Replace(updatedProject, @"(?<!\r)\n", "\r\n", RegexOptions.Multiline);
             }
             else
             {

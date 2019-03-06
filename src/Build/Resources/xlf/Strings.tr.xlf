@@ -37,10 +37,10 @@
     - the reference was not included in the provided input caches
     - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
     </source>
-        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was not explicitly specified as a ProjectReference item in "{0}"
-    - the reference was not included in the provided input caches
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+        <target state="translated">MSB4252: "{0}" projesinde "{1}" ({2} hedef) başvurusu var, ancak başvurunun derleme sonucu altyapı önbelleğinde değil. Yalıtılmış derlemelerde bunun anlamı aşağıdakilerden biri olabilir:
+    - "{0}" içinde başvuru açıkça bir ProjectReference öğesi olarak belirtilmemiş
+    - Başvuru, sağlanan giriş önbelleklerine eklenmemiş
+    - Başvuru, "{0}" içindeki ProjectReferenceTargets öğesinde belirtilmeyen bir hedefle çağrılmış
     </target>
         <note>
       {StrBegin="MSB4252:"}
@@ -64,22 +64,22 @@
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
-        <target state="new">MSB4257: The specified output result cache file is empty.</target>
+        <target state="translated">MSB4257: Belirtilen çıkış sonucu önbellek dosyası boş.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
-        <target state="new">MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</target>
+        <target state="translated">MSB4256: "{0}" yolundan giriş sonucu önbellek dosyaları okunurken bir hatayla karşılaşıldı: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorWritingCacheFile">
         <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
-        <target state="new">MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</target>
+        <target state="translated">MSB4258: Çıkış sonucu önbellek dosyası "{0}" yoluna yazılırken bir hatayla karşılaşıldı: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
-        <target state="new">MSB4255: The following input result cache files do not exist: "{0}"</target>
+        <target state="translated">MSB4255: Şu giriş sonucu önbellek dosyaları mevcut değil: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
@@ -118,7 +118,7 @@
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
-        <target state="new">Using input build results caches: {0}</target>
+        <target state="translated">Giriş derleme sonuçları önbellekleri kullanılıyor: {0}</target>
         <note>
       LOCALIZATION: {0} is a list of semicolon separated file paths
     </note>
@@ -661,8 +661,8 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
-        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). </source>
-        <target state="translated">MSB4186: Geçersiz statik yöntem çağırma sözdizimi: "{0}". {1} Statik yöntem çağırma şu biçimde olmalıdır: $([FullTypeName]::Method()), örn. $([System.IO.Path]::Combine(`a`, `b`)). </target>
+        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
+        <target state="translated">MSB4186: Geçersiz statik yöntem çağırma söz dizimi: "{0}". {1} Statik yöntem çağırma şu biçimde olmalıdır: $([FullTypeName]::Method()), örn. $([System.IO.Path]::Combine(`a`, `b`)). Tüm parametrelerin tanımlı, doğru türde ve doğru sıra ile belirtilmiş olup olmadığını denetleyin.</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -1632,7 +1632,7 @@
       </trans-unit>
       <trans-unit id="WritingToOutputCache">
         <source>Writing build results caches to: {0}</source>
-        <target state="new">Writing build results caches to: {0}</target>
+        <target state="translated">Derleme sonuçları önbellekleri şuraya yazılıyor: {0}</target>
         <note>
       LOCALIZATION: {0} is a file path
     </note>

@@ -32,6 +32,8 @@
 
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
 
+    <XunitOptions>$(XunitOptions) -notrait category=failing</XunitOptions>
+
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
     
     <PackageOutputPath Condition="'$(IsVisualStudioInsertionPackage)' == 'true'">$(DevDivPackagesDir)</PackageOutputPath>
@@ -154,10 +156,5 @@
 
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
-
-  <PropertyGroup>
-    <!-- Use IBC optimization data if available. Depends on a property defined in the CentralPackageVersions import -->
-    <IbcOptimizationDataDir>$(NuGetPackageRoot)\RoslynDependencies.OptimizationData\$(RoslynDependenciesOptimizationDataVersion)\content\OptimizationData\</IbcOptimizationDataDir>
-  </PropertyGroup>
 
 </Project>

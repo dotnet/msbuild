@@ -6,16 +6,14 @@
       <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup>
-      <ShouldUseIBCOptimization Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and !( '$(BUILD_REASON)' == 'PullRequest' or '$(BUILD_REASON)' == 'IndividualCI' )">true</ShouldUseIBCOptimization>
-  </PropertyGroup>
-
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(ShouldUseIBCOptimization)' == 'true'" />
 
   <!-- Override project defaults provided by Repo toolset -->
   <PropertyGroup>
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
+
+    <ProduceReferenceAssembly Condition="'$(IsTestProject)' != 'true'">true</ProduceReferenceAssembly>
 
     <!-- Set up BeforeCommon.targets -->
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Directory.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
@@ -60,7 +58,7 @@
     <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -excludeAttributesList:&quot;$(RepoRoot)ref\ExcludeAttributeList.txt&quot;</GenAPIAdditionalParameters>
     <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -headerFile:&quot;$(RepoRoot)ref\LicenseHeader.txt&quot;</GenAPIAdditionalParameters>
 
-    <PackageLicenseUrl>http://go.microsoft.com/fwlink/?LinkId=329770</PackageLicenseUrl>
+    <PackageLicenseUrl Condition="'$(PackageLicenseExpression)' == ''">http://go.microsoft.com/fwlink/?LinkId=329770</PackageLicenseUrl>
     <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
     <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
 

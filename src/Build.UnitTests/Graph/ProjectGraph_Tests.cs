@@ -13,7 +13,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
-namespace Microsoft.Build.Graph.UnitTests
+namespace Microsoft.Build.Experimental.Graph.UnitTests
 {
     public class ProjectGraphTests
     {
@@ -682,8 +682,7 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 yield return new object[]
                 {
-                    new Dictionary<int, int[]>(),
-                    new int[0]
+                    new Dictionary<int, int[]>()
                 };
 
                 yield return new object[]
@@ -691,8 +690,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     new Dictionary<int, int[]>
                     {
                         {1, null}
-                    },
-                    new []{1}
+                    }
                 };
 
                 yield return new object[]
@@ -701,17 +699,15 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, null},
                         {2, null}
-                    },
-                    new []{2, 1}
+                    }
                 };
 
                 yield return new object[]
                 {
                     new Dictionary<int, int[]>
                     {
-                        {1, new []{2}},
-                    },
-                    new []{2, 1}
+                        {1, new []{2}}
+                    }
                 };
 
                 yield return new object[]
@@ -720,8 +716,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2}},
                         {2, null}
-                    },
-                    new []{2, 1}
+                    }
                 };
 
                 yield return new object[]
@@ -730,17 +725,24 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2}},
                         {2, new []{3}}
-                    },
-                    new []{3, 2, 1}
+                    }
                 };
 
                 yield return new object[]
                 {
                     new Dictionary<int, int[]>
                     {
-                        {1, new []{2, 3}},
-                    },
-                    new []{3, 2, 1}
+                        {1, new []{2, 3}}
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{3, 2}},
+                        {2, new []{3}}
+                    }
                 };
 
                 yield return new object[]
@@ -749,20 +751,18 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2, 3}},
                         {2, new []{4}},
-                        {3, new []{4}},
-                    },
-                    new []{4, 3, 2, 1}
+                        {3, new []{4}}
+                    }
                 };
 
                 yield return new object[]
                 {
                     new Dictionary<int, int[]>
                     {
-                        {1, new []{2, 3, 4}},
+                        {1, new []{4, 3, 2}},
                         {2, new []{4}},
-                        {3, new []{4}},
-                    },
-                    new []{4, 3, 2, 1}
+                        {3, new []{4}}
+                    }
                 };
 
                 yield return new object[]
@@ -770,9 +770,8 @@ namespace Microsoft.Build.Graph.UnitTests
                     new Dictionary<int, int[]>
                     {
                         {1, new []{2}},
-                        {3, new []{4}},
-                    },
-                    new []{4, 2, 3, 1}
+                        {3, new []{4}}
+                    }
                 };
 
                 yield return new object[]
@@ -780,38 +779,66 @@ namespace Microsoft.Build.Graph.UnitTests
                     new Dictionary<int, int[]>
                     {
                         {1, new []{2, 4}},
-                        {3, new []{4}},
-                    },
-                    new []{4, 2, 3, 1}
+                        {3, new []{4}}
+                    }
                 };
 
                 yield return new object[]
                 {
                     new Dictionary<int, int[]>
                     {
-                        {1, new []{4, 5}},
+                        {1, new []{2, 4}},
+                        {2, new []{3}},
+                        {3, new []{4}},
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{3, 2}},
+                        {2, new []{3}},
+                        {3, new []{5, 4}},
+                        {4, new []{5}},
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{5, 4}},
                         {2, new []{5}},
-                        {3, new []{5, 6}},
+                        {3, new []{6, 5}},
                         {4, new []{7}},
                         {5, new []{7, 8}},
-                        {6, new []{7, 9}},
-                    },
-                    new []{9, 8, 7, 6, 5, 4, 3, 2, 1}
+                        {6, new []{7, 9}}
+                    }
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(TopologicalSortShouldTopologicallySortData))]
-        public void TopologicalSortShouldTopologicallySort(Dictionary<int, int[]> edges, int[] expectedTopoSort)
+        public void TopologicalSortShouldTopologicallySort(Dictionary<int, int[]> edges)
         {
             using (var env = TestEnvironment.Create())
             {
                 var projectGraph = Helpers.CreateProjectGraph(env, edges);
 
-                projectGraph.ProjectNodesTopologicallySorted.Select(n => Path.GetFileNameWithoutExtension(n.ProjectInstance.FullPath))
-                    .ToArray()
-                    .ShouldBe(expectedTopoSort.Select(n => n.ToString()));
+                var toposort = projectGraph.ProjectNodesTopologicallySorted.ToArray();
+
+                toposort.Length.ShouldBe(projectGraph.ProjectNodes.Count);
+
+                for (var i = 0; i < toposort.Length; i++)
+                {
+                    for (var j = 0; j < i; j++)
+                    {
+                        // toposort is reversed
+                        toposort[i].ReferencingProjects.ShouldNotContain(toposort[j], $"Dependency of node at index {j} found at index {i}");
+                    }
+                }
             }
         }
 

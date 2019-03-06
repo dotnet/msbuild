@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <ThirdPartyNotice Condition=" '$(ThirdPartyNotice)' == '' ">$(RepoRoot)THIRDPARTYNOTICES.txt</ThirdPartyNotice>
+    <AssemblyTitle>$(TargetFileName)</AssemblyTitle>
+    <Description Condition="'$(Description)' == ''">$(TargetFileName)</Description>
   </PropertyGroup>
 
   <ItemGroup>

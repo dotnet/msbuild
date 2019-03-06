@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.ValidateParametersFailed">
         <source>MSB6011: Invalid parameters passed to the {0} task.</source>
-        <target state="new">MSB6011: Invalid parameters passed to the {0} task.</target>
+        <target state="translated">MSB6011: {0} görevine geçersiz parametreler geçirildi.</target>
         <note>{StrBegin="MSB6011: "}</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="Tracking_MissingInputs">
         <source>Missing input files detected, minimal rebuild will be disabled.</source>
-        <target state="translated">Eksik girdi dosyaları algılandı, en az yeniden oluşturma devre dışı bırakılacak.</target>
+        <target state="translated">Eksik giriş dosyaları algılandı, en az yeniden oluşturma devre dışı bırakılacak.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_MissingOutputs">

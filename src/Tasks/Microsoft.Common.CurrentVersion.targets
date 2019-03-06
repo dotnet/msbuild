@@ -3429,7 +3429,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CoreCompileCache Include="$(DefineConstants)" />
     </ItemGroup>
 
-    <Hash ItemsToHash="@(CoreCompileCache)">
+    <Hash 
+      ItemsToHash="@(CoreCompileCache)" 
+      IgnoreCase="$([MSBuild]::ValueOrDefault(`$(CoreCompileCacheIgnoreCase)`, `true`))">
       <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
     </Hash>
 
@@ -6004,6 +6006,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </ReferenceCopyLocalPathsOutputGroupOutput>
     </ItemGroup>
 
+  </Target>
+
+  <!--
+    ============================================================
+         DesignerRuntimeImplementationProjectOutputGroup
+
+    Exposes build items to be used by designer. The default is empty, but
+    SDKs can override it as appropriate. The empty stub is required so that
+    the project system can always rely on calling it even if it is not
+    overridden.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+      $(DesignerRuntimeImplementationProjectOutputGroupDependsOn);
+      $(CommonOutputGroupsDependsOn)
+    </DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+  </PropertyGroup>
+
+  <Target
+      Name="DesignerRuntimeImplementationProjectOutputGroup"
+      DependsOnTargets="$(DesignerRuntimeImplementationProjectOutputGroupDependsOn)"
+      Returns="@(DesignerRuntimeImplementationProjectOutputGroupOutput)">
   </Target>
 
   <PropertyGroup>

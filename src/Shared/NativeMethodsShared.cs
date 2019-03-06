@@ -19,6 +19,12 @@ using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Microsoft.Build.Utilities;
 
+#if MICROSOFT_BUILD_TASKS
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+#else
+using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
+#endif
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -838,11 +844,16 @@ namespace Microsoft.Build.Shared
                 return success;
             }
 
-            DateTime lastWriteTime = Directory.GetLastWriteTimeUtc(fullPath);
-            bool directoryExists = lastWriteTime != MinFileDate;
-
-            fileModifiedTimeUtc = directoryExists ? lastWriteTime : DateTime.MinValue;
-            return directoryExists;
+            if (Directory.Exists(fullPath))
+            {
+                fileModifiedTimeUtc = Directory.GetLastWriteTimeUtc(fullPath);
+                return true;
+            }
+            else
+            {
+                fileModifiedTimeUtc = DateTime.MinValue;
+                return false;
+            }
         }
 
         /// <summary>
@@ -967,7 +978,7 @@ namespace Microsoft.Build.Shared
 
                 success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
 
-                if (success)
+                if (success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
                     long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
                     fileModifiedTime = DateTime.FromFileTimeUtc(dt);
@@ -978,16 +989,15 @@ namespace Microsoft.Build.Shared
                         fileModifiedTime = GetContentLastWriteFileUtcTime(fullPath);
                     }
                 }
+
+                return fileModifiedTime;
             }
             else
             {
-                DateTime lastWriteTime = File.GetLastWriteTimeUtc(fullPath);
-                bool fileExists = lastWriteTime != MinFileDate;
-
-                fileModifiedTime = fileExists ? lastWriteTime : DateTime.MinValue;
+                return File.Exists(fullPath)
+                        ? File.GetLastWriteTimeUtc(fullPath)
+                        : DateTime.MinValue;
             }
-
-            return fileModifiedTime;
         }
 
         /// <summary>
@@ -1173,7 +1183,7 @@ namespace Microsoft.Build.Shared
                     // One of the fields is the process name. It may contain any characters, but since it's
                     // in parenthesis, we can finds its end by looking for the last parenthesis. After that,
                     // there comes a space, then the second fields separated by a space is the parent id.
-                    string[] statFields = line.Substring(line.LastIndexOf(')')).Split(new[] { ' ' }, 4);
+                    string[] statFields = line.Substring(line.LastIndexOf(')')).Split(MSBuildConstants.SpaceChar, 4);
                     if (statFields.Length >= 3)
                     {
                         ParentID = Int32.Parse(statFields[2]);

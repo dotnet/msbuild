@@ -48,7 +48,7 @@ TMPDIR=$1
 if [ ! -d $TMPDIR ]; then
 	TMPDIR=./tizen_tmp
 	Debug "Create temporary directory : $TMPDIR"
-	mkdir -p $TMPDIR
+	mkdir -p $TMPDIR 
 fi
 
 TIZEN_URL=http://download.tizen.org/releases/milestone/tizen
@@ -113,9 +113,9 @@ fetch_tizen_pkgs_init()
 
 	Debug "fetch $PRIMARY_URL to $TMP_PRIMARYGZ"
 
-	gunzip $TMP_PRIMARYGZ
+	gunzip $TMP_PRIMARYGZ 
 
-	Debug "unzip $TMP_PRIMARYGZ to $TMP_PRIMARY"
+	Debug "unzip $TMP_PRIMARYGZ to $TMP_PRIMARY" 
 }
 
 fetch_tizen_pkgs()
@@ -168,3 +168,4 @@ Inform "Initialize standard unified"
 fetch_tizen_pkgs_init standard unified
 Inform "fetch corefx packages"
 fetch_tizen_pkgs armv7l gssdp gssdp-devel
+

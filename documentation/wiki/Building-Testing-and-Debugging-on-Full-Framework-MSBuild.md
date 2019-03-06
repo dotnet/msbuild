@@ -11,20 +11,20 @@ All command lines should be executed from a Visual Studio developer command prom
 ## Getting the code
 
 1. Clone the repo: `git clone https://github.com/Microsoft/msbuild.git`
-2. Build on the command line: `build.cmd`
-3. Open the solution file in Visual Studio (`MSBuild.dev.sln`).
+2. Build on the command line: `.\build.cmd`
+3. Open the solution file in Visual Studio (`MSBuild.Dev.sln`).
 
 ## Running Unit Tests
 
 To run the unit tests from Visual Studio:
 
-1. Open the MSBuild solution file (`MSBuild.dev.sln`) in Visual Studio.
+1. Open the MSBuild solution file (`MSBuild.Dev.sln`) in Visual Studio.
 2. Open the Test menu -> Windows -> Test Explorer.
 3. Click Run All.
 
-To build MSBuild and run all unit tests from the command line, use `build.cmd -test`.
+To build MSBuild and run all unit tests from the command line, use `.\build.cmd -test`.
 
-To mimic our CI job use `build\cibuild.cmd`. Be aware that this command deletes your nuget cache. You can temporarily edit the script `build\build.ps1` to prevent it from deleting the cache.
+To mimic our CI job use `eng\CIBuild.cmd`. Be aware that this command may delete your local NuGet cache.
 
 The CI does two builds. In the second build, it uses the binaries from the first build to build the repository again.
 
@@ -41,6 +41,9 @@ Please see [Contributing Code](https://github.com/Microsoft/msbuild/blob/master/
 
 ### Using the repository binaries to perform builds
 
-To build projects using the MSBuild binaries from the repository, you first need to do a build (command: `build.cmd`) which produces a bootstrap directory mimicing a Visual Studio installation.
+To build projects using the MSBuild binaries from the repository, you first need to do a build which produces
+a "bootstrap" directory. The "bootstrap" directory mimics a Visual Studio installation by aquiring additional
+dependencies (Roslyn compilers, NuGet, etc.) from packages or from your local machine (e.g. props/targets
+from Visual Studio). To produce a bootstrap build, run `.\build.cmd /p:CreateBootstrap=true` from the root of your enlistment.
 
-Now, just point `artifacts\Debug\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe` at a project file.
+Now, just point `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe` at a project file.

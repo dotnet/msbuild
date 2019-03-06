@@ -25,11 +25,4 @@ using System.Runtime.InteropServices;
 #endif
 
 [assembly: ComVisible(false)]
-
 [assembly: CLSCompliant(true)]
-
-[assembly: AssemblyTitle("MSBuild.exe")]
-[assembly: AssemblyDescription("MSBuild.exe")]
-[assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("Microsoft® Build Tools®")]
-[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]

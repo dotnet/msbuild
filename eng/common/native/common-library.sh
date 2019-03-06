@@ -146,7 +146,7 @@ function NewScriptShim {
       rm -rf $shimpath
     fi
   fi
-
+  
   if [[ ! -f $tool_file_path ]]; then
     echo "Specified tool file path:'$tool_file_path' does not exist" >&2
     return 1
@@ -165,3 +165,4 @@ function NewScriptShim {
 
   return $?
 }
+

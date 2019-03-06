@@ -215,7 +215,7 @@ namespace Microsoft.Build.Tasks
             if (!String.IsNullOrEmpty(RemoveProperties))
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties");
-                undefinePropertiesArray = RemoveProperties.Split(';');
+                undefinePropertiesArray = RemoveProperties.Split(MSBuildConstants.SemicolonChar);
                 foreach (string property in undefinePropertiesArray)
                 {
                     Log.LogMessageFromText($"  {property}", MessageImportance.Low);
@@ -504,7 +504,7 @@ namespace Microsoft.Build.Tasks
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(';'),
+                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
                               out Dictionary<string, string> preProjectPropertiesTable)
                            )
                         {
@@ -523,7 +523,7 @@ namespace Microsoft.Build.Tasks
                     string projectUndefineProperties = projects[i].GetMetadata("UndefineProperties");
                     if (!String.IsNullOrEmpty(projectUndefineProperties))
                     {
-                        string[] propertiesToUndefine = projectUndefineProperties.Split(';');
+                        string[] propertiesToUndefine = projectUndefineProperties.Split(MSBuildConstants.SemicolonChar);
                         if (undefinePropertiesPerProject[i] == null)
                         {
                             undefinePropertiesPerProject[i] = new List<string>(propertiesToUndefine.Length);
@@ -545,7 +545,7 @@ namespace Microsoft.Build.Tasks
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(';'),
+                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(MSBuildConstants.SemicolonChar),
                               out Dictionary<string, string> additionalProjectPropertiesTable)
                            )
                         {

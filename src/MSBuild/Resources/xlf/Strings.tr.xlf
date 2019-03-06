@@ -34,7 +34,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified.</target>
+        <target state="translated">MSBUILD : hata MSB1058: Yalnızca bir çıkış sonuçları önbelleği belirtilebilir.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -550,11 +550,11 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;önbellekDosyası&gt;...
+                     MSBuild’in derleme sonuçlarını okuyacağı giriş önbellek dosyalarının
+                     noktalı virgülle ayrılmış listesi.
+                     Bu ayarlandığında yalıtılmış derlemeler (-isolate) de açılır.
+                     (kısa biçim: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -568,11 +568,11 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:[önbellekDosyası]
+                     MSBuild’in derleme sonunda derleme sonucu önbelleklerinin
+                     içeriğini yazacağı çıkış önbellek dosyası.
+                     Bu açıldığında yalıtılmış derlemeler (-isolate) de açılır.
+                     (kısa biçim: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -853,7 +853,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <target state="translated">  -preprocess[:file]
                      Bir derleme sırasında içeri aktarılacak tüm dosyaları
                      satır içinde kullanarak ve sınırlarını belirleyerek
-                     tek bir toplanmış proje dosyası oluşturur. Bu, hangi
+                    tek bir kümelenmiş proje dosyası oluşturur. Bu, hangi
                      dosyaların nereden içeri aktarılacağını ve derlemeye
                      nasıl katkıda bulunacağını belirlemede yararlı
                      olabilir. Çıkış, varsayılan olarak

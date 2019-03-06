@@ -31,10 +31,12 @@
     <ContentTargetFolders>contentFiles</ContentTargetFolders>
     <BuildOutputTargetFolder>contentFiles\any\</BuildOutputTargetFolder>
     <PackageId>Microsoft.Build.Runtime</PackageId>
-    <Description>This package delivers a complete executable copy of MSBuild. Reference this package only if your application needs to load projects or execute in-process builds without requiring installation of MSBuild. Successfully evaluating projects using this package requires aggregating additional components (like the compilers) into an application directory.</Description>
+    <PackageDescription>This package delivers a complete executable copy of MSBuild. Reference this package only if your application needs to load projects or execute in-process builds without requiring installation of MSBuild. Successfully evaluating projects using this package requires aggregating additional components (like the compilers) into an application directory.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AddAppConfigToBuildOutputs>false</AddAppConfigToBuildOutputs>
+
+    <DebugType Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">full</DebugType><!-- Work around arcade stomping on symbols for same-program-different-arches. -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
@@ -243,6 +245,26 @@
 
       <ContentWithTargetPath Include="$(ProjectRuntimeConfigFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectRuntimeConfigFileName)" />
       <ContentWithTargetPath Include="$(ProjectRuntimeConfigDevFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$([System.IO.Path]::GetFileName('$(ProjectRuntimeConfigDevFilePath)'))" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Redistribute core assemblies so that RoslynCodeTaskFactory can reference
+       them when creating assemblies at build time.
+
+       Don't add these to the Content list before RAR, because that might result
+       in resolving references using them instead of the correct build-time references.
+       Instead, add them just afterward, before assigning target paths/copying to
+       the bin folder. -->
+  <Target Name="AddRefAssemblies"
+          DependsOnTargets="ResolveAssemblyReferences"
+          BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\netstandard.dll"
+               Link="ref\netstandard.dll"
+               CopyToOutputDirectory="PreserveNewest" />
+      <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\mscorlib.dll"
+               Link="ref\mscorlib.dll"
+               CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
   </Target>
 

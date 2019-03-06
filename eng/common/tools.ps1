@@ -29,7 +29,7 @@
 # Specifies which msbuild engine to use for build: 'vs', 'dotnet' or unspecified (determined based on presence of tools.vs in global.json).
 [string]$msbuildEngine = if (Test-Path variable:msbuildEngine) { $msbuildEngine } else { $null }
 
-# True to attempt using .NET Core already that meets requirements specified in global.json
+# True to attempt using .NET Core already that meets requirements specified in global.json 
 # installed on the machine instead of downloading one.
 [bool]$useInstalledDotNetCli = if (Test-Path variable:useInstalledDotNetCli) { $useInstalledDotNetCli } else { $true }
 
@@ -70,7 +70,7 @@ function Exec-Process([string]$command, [string]$commandArgs) {
 
   $finished = $false
   try {
-    while (-not $process.WaitForExit(100)) {
+    while (-not $process.WaitForExit(100)) { 
       # Non-blocking loop done to allow ctr-c interrupts
     }
 
@@ -87,7 +87,7 @@ function Exec-Process([string]$command, [string]$commandArgs) {
 }
 
 function InitializeDotNetCli([bool]$install) {
-  if (Test-Path global:_DotNetInstallDir) {
+  if (Test-Path variable:global:_DotNetInstallDir) {
     return $global:_DotNetInstallDir
   }
 
@@ -136,6 +136,18 @@ function InitializeDotNetCli([bool]$install) {
     $env:DOTNET_INSTALL_DIR = $dotnetRoot
   }
 
+  # Add dotnet to PATH. This prevents any bare invocation of dotnet in custom
+  # build steps from using anything other than what we've downloaded.
+  # It also ensures that VS msbuild will use the downloaded sdk targets.
+  $env:PATH = "$dotnetRoot;$env:PATH"
+
+  if ($ci) {
+    # Make Sure that our bootstrapped dotnet cli is avaliable in future steps of the Azure Pipelines build
+    Write-Host "##vso[task.prependpath]$dotnetRoot"
+    Write-Host "##vso[task.setvariable variable=DOTNET_MULTILEVEL_LOOKUP]0"
+    Write-Host "##vso[task.setvariable variable=DOTNET_SKIP_FIRST_TIME_EXPERIENCE]1"
+  }
+
   return $global:_DotNetInstallDir = $dotnetRoot
 }
 
@@ -149,9 +161,10 @@ function GetDotNetInstallScript([string] $dotnetRoot) {
   return $installScript
 }
 
-function InstallDotNetSdk([string] $dotnetRoot, [string] $version) {
+function InstallDotNetSdk([string] $dotnetRoot, [string] $version, [string] $architecture = "") {
   $installScript = GetDotNetInstallScript $dotnetRoot
-  & $installScript -Version $version -InstallDir $dotnetRoot
+  $archArg = if ($architecture) { $architecture } else { "<auto>" }
+  & $installScript -Version $version -InstallDir $dotnetRoot -Architecture $archArg
   if ($lastExitCode -ne 0) {
     Write-Host "Failed to install dotnet cli (exit code '$lastExitCode')." -ForegroundColor Red
     ExitWithExitCode $lastExitCode
@@ -159,7 +172,7 @@ function InstallDotNetSdk([string] $dotnetRoot, [string] $version) {
 }
 
 #
-# Locates Visual Studio MSBuild installation.
+# Locates Visual Studio MSBuild installation. 
 # The preference order for MSBuild to use is as follows:
 #
 #   1. MSBuild from an active VS command prompt
@@ -169,13 +182,14 @@ function InstallDotNetSdk([string] $dotnetRoot, [string] $version) {
 # Returns full path to msbuild.exe.
 # Throws on failure.
 #
-function InitializeVisualStudioMSBuild([bool]$install) {
-  if (Test-Path global:_MSBuildExe) {
+function InitializeVisualStudioMSBuild([bool]$install, [object]$vsRequirements = $null) {
+  if (Test-Path variable:global:_MSBuildExe) {
     return $global:_MSBuildExe
   }
 
-  $vsMinVersionStr = if (!$GlobalJson.tools.vs.version) { $GlobalJson.tools.vs.version } else { "15.9" }
-  $vsMinVersion = [Version]::new($vsMinVersionStr)
+  if (!$vsRequirements) { $vsRequirements = $GlobalJson.tools.vs }
+  $vsMinVersionStr = if ($vsRequirements.version) { $vsRequirements.version } else { "15.9" }
+  $vsMinVersion = [Version]::new($vsMinVersionStr) 
 
   # Try msbuild command available in the environment.
   if ($env:VSINSTALLDIR -ne $null) {
@@ -191,13 +205,13 @@ function InitializeVisualStudioMSBuild([bool]$install) {
   }
 
   # Locate Visual Studio installation or download x-copy msbuild.
-  $vsInfo = LocateVisualStudio
+  $vsInfo = LocateVisualStudio $vsRequirements
   if ($vsInfo -ne $null) {
     $vsInstallDir = $vsInfo.installationPath
     $vsMajorVersion = $vsInfo.installationVersion.Split('.')[0]
 
     InitializeVisualStudioEnvironmentVariables $vsInstallDir $vsMajorVersion
-  } elseif ($install) {
+  } else {
 
     if (Get-Member -InputObject $GlobalJson.tools -Name "xcopy-msbuild") {
       $xcopyMSBuildVersion = $GlobalJson.tools.'xcopy-msbuild'
@@ -207,9 +221,10 @@ function InitializeVisualStudioMSBuild([bool]$install) {
       $xcopyMSBuildVersion = "$vsMajorVersion.$($vsMinVersion.Minor).0-alpha"
     }
 
-    $vsInstallDir = InstallXCopyMSBuild $xcopyMSBuildVersion
-  } else {
-    throw "Unable to find Visual Studio that has required version and components installed"
+    $vsInstallDir = InitializeXCopyMSBuild $xcopyMSBuildVersion $install
+    if ($vsInstallDir -eq $null) {
+      throw "Unable to find Visual Studio that has required version and components installed"
+    }
   }
 
   $msbuildVersionDir = if ([int]$vsMajorVersion -lt 16) { "$vsMajorVersion.0" } else { "Current" }
@@ -219,7 +234,7 @@ function InitializeVisualStudioMSBuild([bool]$install) {
 function InitializeVisualStudioEnvironmentVariables([string] $vsInstallDir, [string] $vsMajorVersion) {
   $env:VSINSTALLDIR = $vsInstallDir
   Set-Item "env:VS$($vsMajorVersion)0COMNTOOLS" (Join-Path $vsInstallDir "Common7\Tools\")
-
+  
   $vsSdkInstallDir = Join-Path $vsInstallDir "VSSDK\"
   if (Test-Path $vsSdkInstallDir) {
     Set-Item "env:VSSDK$($vsMajorVersion)0Install" $vsSdkInstallDir
@@ -227,12 +242,20 @@ function InitializeVisualStudioEnvironmentVariables([string] $vsInstallDir, [str
   }
 }
 
-function InstallXCopyMSBuild([string] $packageVersion) {
+function InstallXCopyMSBuild([string]$packageVersion) {
+  return InitializeXCopyMSBuild $packageVersion -install $true
+}
+
+function InitializeXCopyMSBuild([string]$packageVersion, [bool]$install) {
   $packageName = "RoslynTools.MSBuild"
   $packageDir = Join-Path $ToolsDir "msbuild\$packageVersion"
   $packagePath = Join-Path $packageDir "$packageName.$packageVersion.nupkg"
 
   if (!(Test-Path $packageDir)) {
+    if (!$install) {
+      return $null
+    }
+
     Create-Directory $packageDir
     Write-Host "Downloading $packageName $packageVersion"
     Invoke-WebRequest "https://dotnet.myget.org/F/roslyn-tools/api/v2/package/$packageName/$packageVersion/" -OutFile $packagePath
@@ -246,16 +269,16 @@ function InstallXCopyMSBuild([string] $packageVersion) {
 # Locates Visual Studio instance that meets the minimal requirements specified by tools.vs object in global.json.
 #
 # The following properties of tools.vs are recognized:
-#   "version": "{major}.{minor}"
+#   "version": "{major}.{minor}"    
 #       Two part minimal VS version, e.g. "15.9", "16.0", etc.
-#   "components": ["componentId1", "componentId2", ...]
+#   "components": ["componentId1", "componentId2", ...] 
 #       Array of ids of workload components that must be available in the VS instance.
 #       See e.g. https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-enterprise?view=vs-2017
 #
-# Returns JSON describing the located VS instance (same format as returned by vswhere),
+# Returns JSON describing the located VS instance (same format as returned by vswhere), 
 # or $null if no instance meeting the requirements is found on the machine.
 #
-function LocateVisualStudio {
+function LocateVisualStudio([object]$vsRequirements = $null){
   if (Get-Member -InputObject $GlobalJson.tools -Name "vswhere") {
     $vswhereVersion = $GlobalJson.tools.vswhere
   } else {
@@ -271,19 +294,19 @@ function LocateVisualStudio {
     Invoke-WebRequest "https://github.com/Microsoft/vswhere/releases/download/$vswhereVersion/vswhere.exe" -OutFile $vswhereExe
   }
 
-  $vs = $GlobalJson.tools.vs
+  if (!$vsRequirements) { $vsRequirements = $GlobalJson.tools.vs }
   $args = @("-latest", "-prerelease", "-format", "json", "-requires", "Microsoft.Component.MSBuild")
-
-  if (Get-Member -InputObject $vs -Name "version") {
+  
+  if (Get-Member -InputObject $vsRequirements -Name "version") {
     $args += "-version"
-    $args += $vs.version
+    $args += $vsRequirements.version
   }
 
-  if (Get-Member -InputObject $vs -Name "components") {
-    foreach ($component in $vs.components) {
+  if (Get-Member -InputObject $vsRequirements -Name "components") {
+    foreach ($component in $vsRequirements.components) {
       $args += "-requires"
       $args += $component
-    }
+    }    
   }
 
   $vsInfo =& $vsWhereExe $args | ConvertFrom-Json
@@ -340,7 +363,7 @@ function GetDefaultMSBuildEngine() {
   if (Get-Member -InputObject $GlobalJson.tools -Name "vs") {
     return "vs"
   }
-
+  
   if (Get-Member -InputObject $GlobalJson.tools -Name "dotnet") {
     return "dotnet"
   }
@@ -363,8 +386,13 @@ function GetNuGetPackageCachePath() {
   return $env:NUGET_PACKAGES
 }
 
+# Returns a full path to an Arcade SDK task project file.
+function GetSdkTaskProject([string]$taskName) {
+  return Join-Path (Split-Path (InitializeToolset) -Parent) "SdkTasks\$taskName.proj"
+}
+
 function InitializeToolset() {
-  if (Test-Path global:_ToolsetBuildProj) {
+  if (Test-Path variable:global:_ToolsetBuildProj) {
     return $global:_ToolsetBuildProj
   }
 
@@ -381,7 +409,7 @@ function InitializeToolset() {
   }
 
   if (-not $restore) {
-    Write-Host  "Toolset version $toolsetVersion has not been restored."
+    Write-Host "Toolset version $toolsetVersion has not been restored." -ForegroundColor Red
     ExitWithExitCode 1
   }
 
@@ -389,15 +417,15 @@ function InitializeToolset() {
 
   $proj = Join-Path $ToolsetDir "restore.proj"
   $bl = if ($binaryLog) { "/bl:" + (Join-Path $LogDir "ToolsetRestore.binlog") } else { "" }
-
+  
   '<Project Sdk="Microsoft.DotNet.Arcade.Sdk"/>' | Set-Content $proj
   MSBuild $proj $bl /t:__WriteToolsetLocation /noconsolelogger /p:__ToolsetLocationOutputFile=$toolsetLocationFile
-
+  
   $path = Get-Content $toolsetLocationFile -TotalCount 1
   if (!(Test-Path $path)) {
     throw "Invalid toolset path: $path"
   }
-
+  
   return $global:_ToolsetBuildProj = $path
 }
 
@@ -435,8 +463,8 @@ function MSBuild() {
 
   $cmdArgs = "$($buildTool.Command) /m /nologo /clp:Summary /v:$verbosity /nr:$nodeReuse"
 
-  if ($warnAsError) {
-    $cmdArgs += " /warnaserror /p:TreatWarningsAsErrors=true"
+  if ($warnAsError) { 
+    $cmdArgs += " /warnaserror /p:TreatWarningsAsErrors=true" 
   }
 
   foreach ($arg in $args) {
@@ -444,29 +472,29 @@ function MSBuild() {
       $cmdArgs += " `"$arg`""
     }
   }
-
+  
   $exitCode = Exec-Process $buildTool.Path $cmdArgs
 
   if ($exitCode -ne 0) {
     Write-Host "Build failed." -ForegroundColor Red
 
     $buildLog = GetMSBuildBinaryLogCommandLineArgument $args
-    if ($buildLog -ne $null) {
-      Write-Host "See log: $buildLog" -ForegroundColor DarkGray
+    if ($buildLog -ne $null) {      
+      Write-Host "See log: $buildLog" -ForegroundColor DarkGray 
     }
 
     ExitWithExitCode $exitCode
   }
 }
 
-function GetMSBuildBinaryLogCommandLineArgument($arguments) {
+function GetMSBuildBinaryLogCommandLineArgument($arguments) {  
   foreach ($argument in $arguments) {
     if ($argument -ne $null) {
       $arg = $argument.Trim()
       if ($arg.StartsWith("/bl:", "OrdinalIgnoreCase")) {
         return $arg.Substring("/bl:".Length)
-      }
-
+      } 
+        
       if ($arg.StartsWith("/binaryLogger:", "OrdinalIgnoreCase")) {
         return $arg.Substring("/binaryLogger:".Length)
       }
