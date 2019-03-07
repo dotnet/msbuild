@@ -11,5 +11,10 @@ namespace Microsoft.DotNet.ToolManifest
         public ToolManifestCannotBeFoundException(string message) : base(new[] { message }, null, false)
         {
         }
+
+        public ToolManifestCannotBeFoundException(string message, string optionalMessage)
+            : base(new[] { message }, new[] { optionalMessage }, false)
+        {
+        }
     }
 }

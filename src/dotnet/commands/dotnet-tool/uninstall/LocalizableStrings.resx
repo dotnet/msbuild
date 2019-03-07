@@ -171,4 +171,7 @@
   <data name="UninstallLocalToolSucceeded" xml:space="preserve">
     <value>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</value>
   </data>
+  <data name="NoManifestGuide" xml:space="preserve">
+    <value>If you intended to uninstall a global tool, add `--global` to the command.</value>
+  </data>
 </root>

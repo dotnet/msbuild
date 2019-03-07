@@ -157,7 +157,13 @@ namespace Microsoft.DotNet.Tests.Commands
 
             Action a = () => toolManifest.Find(new FilePath(Path.Combine(_testDirectoryRoot, "non-exists")));
             a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""))
+                .And.Contain(
+                    Path.Combine(_testDirectoryRoot, "non-exists"),
+                    "the specificied manifest file name is in the 'searched list'");
         }
 
         [Fact]
@@ -171,7 +177,10 @@ namespace Microsoft.DotNet.Tests.Commands
 
             Action a = () => toolManifest.Find();
             a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                 .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]
@@ -537,7 +546,10 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolManifest.FindFirst();
 
             a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]

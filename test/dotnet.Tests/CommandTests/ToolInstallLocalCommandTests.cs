@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolInstallLocalCommand.Execute();
             a.ShouldThrow<GracefulException>()
                 .And.Message.Should()
-                .Contain(string.Format(ToolManifest.LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
         }
 
         [Fact]
@@ -136,6 +136,13 @@ namespace Microsoft.DotNet.Tests.Commands
             a.ShouldThrow<GracefulException>()
                 .And.Message.Should()
                 .Contain(LocalizableStrings.NoManifestGuide);
+
+            a.ShouldThrow<GracefulException>()
+                .And.Message.Should()
+                .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<GracefulException>()
+                .And.VerboseMessage.Should().Contain(string.Format(ToolManifest.LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]

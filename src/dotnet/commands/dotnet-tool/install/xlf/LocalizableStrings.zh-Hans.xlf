@@ -42,8 +42,9 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
-        <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
-        <target state="translated">如果要安装全局工具，请添加 "-g"。如果要使用工具清单，则必须先使用 "dotnet new tool-manifest" 创建该清单。</target>
+        <source>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
+        <target state="needs-review-translation">如果要安装全局工具，请添加 "-g"。如果要使用工具清单，则必须先使用 "dotnet new tool-manifest" 创建该清单。</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">

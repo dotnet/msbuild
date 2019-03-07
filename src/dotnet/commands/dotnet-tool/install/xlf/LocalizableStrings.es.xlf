@@ -42,8 +42,9 @@ La herramienta "{1}" (versión "{2}") se instaló correctamente. La entrada se h
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
-        <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
-        <target state="translated">Si desea instalar una herramienta global, agregue "-g". Si desea utilizar un manifiesto de herramientas, primero debe crearlo con "dotnet new tool-manifest".</target>
+        <source>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
+        <target state="needs-review-translation">Si desea instalar una herramienta global, agregue "-g". Si desea utilizar un manifiesto de herramientas, primero debe crearlo con "dotnet new tool-manifest".</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">

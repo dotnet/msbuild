@@ -224,6 +224,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
     <value>The local option(--local) does not support the framework option (--framework).</value>
   </data>
   <data name="NoManifestGuide" xml:space="preserve">
-    <value>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</value>
+    <value>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</value>
   </data>
 </root>

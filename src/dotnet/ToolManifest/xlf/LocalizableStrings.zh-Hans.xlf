@@ -2,9 +2,23 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="CannotFindAManifestFile">
+        <source>Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</source>
+        <target state="new">Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotFindPackageIdInManifest">
         <source>Cannot find a package with the package id {0} in the manifest file.</source>
         <target state="translated">未在清单文件中找到包 ID 为 {0} 的包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListOfSearched">
+        <source>The list of searched paths:
+{0}</source>
+        <target state="new">The list of searched paths:
+{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
@@ -32,12 +46,6 @@
 {1}</source>
         <target state="translated">清单文件无效。路径 {0}:
 {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CannotFindAnyManifestsFileSearched">
-        <source>Cannot find any manifests file. Searched:
-{0}</source>
-        <target state="translated">找不到任何清单文件。已搜索: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InPackage">

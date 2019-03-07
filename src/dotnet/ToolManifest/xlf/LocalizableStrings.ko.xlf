@@ -2,9 +2,23 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="CannotFindAManifestFile">
+        <source>Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</source>
+        <target state="new">Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotFindPackageIdInManifest">
         <source>Cannot find a package with the package id {0} in the manifest file.</source>
         <target state="translated">매니페스트 파일에서 패키지 ID가 {0}인 패키지를 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListOfSearched">
+        <source>The list of searched paths:
+{0}</source>
+        <target state="new">The list of searched paths:
+{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
@@ -32,13 +46,6 @@
 {1}</source>
         <target state="translated">매니페스트 파일이 잘못되었습니다. 경로 {0}:
 {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CannotFindAnyManifestsFileSearched">
-        <source>Cannot find any manifests file. Searched:
-{0}</source>
-        <target state="translated">매니페스트 파일을 찾을 수 없습니다. 검색함:
-{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InPackage">

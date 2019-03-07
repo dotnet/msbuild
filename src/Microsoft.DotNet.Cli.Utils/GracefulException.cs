@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Utils
             IsUserError = isUserError;
             if (verboseMessages != null)
             {
-                VerboseMessage = string.Join(Environment.NewLine, VerboseMessage);
+                VerboseMessage = string.Join(Environment.NewLine, verboseMessages);
             }
 
             Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, true);

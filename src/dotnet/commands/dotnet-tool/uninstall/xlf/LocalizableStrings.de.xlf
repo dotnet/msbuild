@@ -17,6 +17,11 @@
         <target state="translated">Pfad</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoManifestGuide">
+        <source>If you intended to uninstall a global tool, add `--global` to the command.</source>
+        <target state="new">If you intended to uninstall a global tool, add `--global` to the command.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
         <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
         <target state="translated">Das Angeben des Toolmanifests (--tool-manifest) ist nur mit der lokalen Option (--local oder Standardeinstellung) gültig.</target>

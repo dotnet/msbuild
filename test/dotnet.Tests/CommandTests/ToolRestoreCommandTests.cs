@@ -335,7 +335,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             _reporter.Lines.Should()
                 .Contain(l =>
-                    l.Contains(string.Format(ToolManifest.LocalizableStrings.CannotFindAnyManifestsFileSearched, "")));
+                    l.Contains(ToolManifest.LocalizableStrings.CannotFindAManifestFile));
         }
 
         [Fact]
