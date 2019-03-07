@@ -14,23 +14,24 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
     public class GivenDotnetListReference : TestBase
     {
-        private const string HelpText = @"Usage: dotnet list <PROJECT> reference [options]
+        private const string HelpText = @"Usage: dotnet list <PROJECT | SOLUTION> reference [options]
 
 Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT | SOLUTION>   The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
   -h, --help   Show command line help.";
 
-        private const string ListCommandHelpText = @"Usage: dotnet list [options] <PROJECT> [command]
+        private const string ListCommandHelpText = @"Usage: dotnet list [options] <PROJECT | SOLUTION> [command]
 
 Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT | SOLUTION>   The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
   -h, --help   Show command line help.
 
 Commands:
+  package     List all package references of the project or solution.
   reference   List all project-to-project references of the project.";
 
         const string FrameworkNet451Arg = "-f net451";

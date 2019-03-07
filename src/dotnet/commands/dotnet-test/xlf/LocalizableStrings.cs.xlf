@@ -62,14 +62,14 @@
       <trans-unit id="CmdLoggerDescription">
         <source>The logger to use for test results.
                                         Examples:
-                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">Protokolovací nástroj, který se použije pro výsledky testů.
+        <target state="translated">Protokolovací nástroj, který se má použít pro výsledky testů.
                                         Příklady:
-                                        Protokol ve formátu trx, který používá jedinečný název souboru: --logger trx
-                                        Protokol ve formátu trx, který používá zadaný název souboru: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Další informace o argumentech protokolovacího nástroje: https://aka.ms/vstest-report.</target>
+                                        Protokolování ve formátu trx s využitím jedinečného názvu souboru: --logger trx
+                                        Protokolování ve formátu trx s využitím zadaného názvu souboru: --logger "trx;LogFileName=&lt;VýsledkyTestů.trx&gt;"
+                                        Další informace o argumentech pro protokolovací nástroje najdete na https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -158,6 +158,11 @@ Výstupem je soubor Sequence.xml v aktuálním adresáři, do kterého se zaznam
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
         <target state="translated">Konfigurace, která se má použít pro spuštění testů. Výchozí možností pro většinu projektů je Debug.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="translated">Cílový modul runtime pro testování.</target>
         <note />
       </trans-unit>
     </body>

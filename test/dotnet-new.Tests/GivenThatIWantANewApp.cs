@@ -73,58 +73,5 @@ namespace Microsoft.DotNet.New.Tests
                 .Execute($"--configfile {configFile} --packages {packagesDirectory}")
                 .Should().Pass();
         }
-
-        [Theory]
-        // [InlineData("console", "microsoft.netcore.app")] re-enable when this issue is resolved: "https://github.com/dotnet/cli/issues/9420"
-        [InlineData("classlib", "netstandard.library")]
-        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
-        {
-            var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
-            var packagesDirectory = Path.Combine(rootPath, "packages");
-            var projectName = "Project";
-            var expectedVersion = GetFrameworkPackageVersion();
-
-            var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
-
-            new NewCommand()
-                .WithWorkingDirectory(rootPath)
-                .Execute($"{type} --name {projectName} -o . --debug:ephemeral-hive --no-restore")
-                .Should().Pass();
-
-            new RestoreCommand()
-                .WithWorkingDirectory(rootPath)
-                .Execute($"--configfile {repoRootNuGetConfig} --packages {packagesDirectory}")
-                .Should().Pass();
-
-            new DirectoryInfo(Path.Combine(packagesDirectory, packageName))
-                .Should().Exist()
-                .And.HaveDirectory(expectedVersion);
-
-            string GetFrameworkPackageVersion()
-            {
-                var dotnetDir = new FileInfo(DotnetUnderTest.FullName).Directory;
-                var sharedFxDir = dotnetDir
-                    .GetDirectory("shared", "Microsoft.NETCore.App")
-                    .EnumerateDirectories()
-                    .Single(d => d.Name.StartsWith("2.1"));
-
-                if (packageName == "microsoft.netcore.app")
-                {
-                    return sharedFxDir.Name;
-                }
-
-                var depsFile = Path.Combine(sharedFxDir.FullName, "Microsoft.NETCore.App.deps.json");
-                using (var stream = File.OpenRead(depsFile))
-                using (var reader = new DependencyContextJsonReader())
-                {
-                    var context = reader.Read(stream);
-                    var dependency = context
-                        .RuntimeLibraries
-                        .Single(library => string.Equals(library.Name, packageName, StringComparison.OrdinalIgnoreCase));
-
-                    return dependency.Version;
-                }
-            }
-        }
     }
 }
