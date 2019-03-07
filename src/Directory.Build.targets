@@ -32,7 +32,7 @@
 
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
 
-    <XunitOptions>$(XunitOptions) -notrait category=failing</XunitOptions>
+    <XunitOptions>$(XunitOptions) -notrait category=failing -diagnostics</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
     
