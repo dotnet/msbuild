@@ -196,5 +196,31 @@ Commands:
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
         }
+
+        [Fact]
+        public void WhenProjectsPresentInTheReadonlySolutionItListsThem()
+        {
+            var expectedOutput = $@"{CommandLocalizableStrings.ProjectsHeader}
+{new string('-', CommandLocalizableStrings.ProjectsHeader.Length)}
+{Path.Combine("App", "App.csproj")}
+{Path.Combine("Lib", "Lib.csproj")}";
+
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndExistingCsprojReferences")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var slnFileName = Path.Combine(projectDirectory, "App.sln");
+            var attributes = File.GetAttributes(slnFileName);
+            File.SetAttributes(slnFileName, attributes | FileAttributes.ReadOnly);
+            
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput("sln list");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
+        }
     }
 }
