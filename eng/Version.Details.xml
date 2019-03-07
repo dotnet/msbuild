@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <ProductDependencies></ProductDependencies>
+  <ProductDependencies>
+     <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="3.0.0-preview4-19154-11">
+      <Uri>https://github.com/aspnet/AspNetCore</Uri>
+      <Sha>0000</Sha>
+    </Dependency>
+     <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="3.0.0-preview4-19154-11">
+      <Uri>https://github.com/aspnet/AspNetCore</Uri>
+      <Sha>0000</Sha>
+    </Dependency>
+  </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19154.14">
       <Uri>https://github.com/dotnet/arcade</Uri>

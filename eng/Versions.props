@@ -13,9 +13,25 @@
     <RestoreSources>
       $(RestoreSources);
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
+      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
       https://dotnet.myget.org/F/msbuild/api/v3/index.json;
       https://www.myget.org/F/nugetbuild/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-web/api/v3/index.json
     </RestoreSources>
+  </PropertyGroup>
+
+  <!--
+
+    These versions should ONLY be updated by automation.
+
+    DO NOT UPDATE THESE MANUALLY. Use the `darc` command line tool to update this file so it stays in sync with
+    Version.Details.xml.
+
+    See https://github.com/dotnet/arcade/blob/master/Documentation/Darc.md for instructions on using darc.
+
+  -->
+  <PropertyGroup Label="Automated">
+    <MicrosoftAspNetCoreMvcAnalyzers>3.0.0-preview4-19154-11</MicrosoftAspNetCoreMvcAnalyzers>
+    <MicrosoftAspNetCoreMvcApiAnalyzers>3.0.0-preview4-19154-11</MicrosoftAspNetCoreMvcApiAnalyzers>
   </PropertyGroup>
 </Project>
