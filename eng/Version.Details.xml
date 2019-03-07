@@ -37,9 +37,9 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha></Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview3.19114.6">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview3.19157.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>8e7f5f9da867d9a809f11b2aab7540ee3999252a</Sha>
+      <Sha>760c101a3d3b194f125e9fdcaa23dc28e6827ee2</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
