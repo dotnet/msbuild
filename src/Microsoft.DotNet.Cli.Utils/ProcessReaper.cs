@@ -51,7 +51,16 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
-                _job = AssignProcessToJobObject(_process.Handle);
+                // Limit the use of job objects to versions of Windows that support nested jobs (i.e. Windows 8/2012 or later).
+                // Ideally, we would check for some new API export or OS feature instead of the OS version,
+                // but nested jobs are transparently implemented with respect to the Job Objects API.
+                // Note: Windows 8.1 and later may report as Windows 8 (see https://docs.microsoft.com/en-us/windows/desktop/sysinfo/operating-system-version).
+                //       However, for the purpose of this check that is still sufficient.
+                if (Environment.OSVersion.Version.Major > 6 ||
+                   (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor >= 2))
+                {
+                    _job = AssignProcessToJobObject(_process.Handle);
+                }
             }
         }
 
