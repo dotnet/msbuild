@@ -3401,6 +3401,19 @@ namespace Microsoft.Build.Evaluation
                             returnVal = text.LastIndexOf(arg0);
                             return true;
                         }
+                        else if(TryGetArgs(args, out arg0, out int startIndex))
+                        {
+                            returnVal = text.LastIndexOf(arg0, startIndex);
+                            return true;
+                        }
+                        else if(TryGetArgs(args, out arg0, out string arg1))
+                        {
+                            if(Enum.TryParse<StringComparison>(arg1, out StringComparison comparison))
+                            {
+                                returnVal = text.LastIndexOf(arg0, comparison);
+                                return true;
+                            }
+                        }
                     }
                     else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
                     {
@@ -3603,7 +3616,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetPathOfFileAbove), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out string arg0, out var arg1))
+                            if (TryGetArgs(args, out string arg0, out string arg1))
                             {
                                 returnVal = IntrinsicFunctions.GetPathOfFileAbove(arg0, arg1, _fileSystem);
                                 return true;
@@ -3611,7 +3624,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Add), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
+                            if (TryGetArgs(args, out double arg0, out double arg1))
                             {
                                 returnVal = arg0 + arg1;
                                 return true;
@@ -3619,7 +3632,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Subtract), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
+                            if (TryGetArgs(args, out double arg0, out double arg1))
                             {
                                 returnVal = arg0 - arg1;
                                 return true;
@@ -3627,7 +3640,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Multiply), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
+                            if (TryGetArgs(args, out double arg0, out double arg1))
                             {
                                 returnVal = arg0 * arg1;
                                 return true;
@@ -3635,7 +3648,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Divide), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
+                            if (TryGetArgs(args, out double arg0, out double arg1))
                             {
                                 returnVal = arg0 / arg1;
                                 return true;
@@ -3949,6 +3962,28 @@ namespace Microsoft.Build.Evaluation
                 if (value0 != null &&
                     arg1 != null &&
                     int.TryParse(value0, out arg0))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryGetArgs(object[] args, out string arg0, out int arg1)
+            {
+                arg0 = null;
+                arg1 = 0;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                var value1 = args[1] as string;
+                arg0 = args[1] as string;
+                if (value1 != null &&
+                    arg0 != null &&
+                    int.TryParse(value1, out arg1))
                 {
                     return true;
                 }
