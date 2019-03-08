@@ -502,7 +502,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [Fact]
+        [Fact(Skip="https://github.com/Microsoft/msbuild/issues/4205")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadGlobalroot()
         {
