@@ -19,7 +19,6 @@
       https://dotnet.myget.org/F/dotnet-web/api/v3/index.json
     </RestoreSources>
   </PropertyGroup>
-
   <!--
 
     These versions should ONLY be updated by automation.
