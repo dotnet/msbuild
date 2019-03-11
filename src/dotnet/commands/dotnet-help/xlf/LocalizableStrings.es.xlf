@@ -219,12 +219,12 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">Ruta de acceso al archivo &lt;aplicación&gt;.deps.json.</target>
+        <target state="translated">Ruta al archivo &lt;application&gt;.deps.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">Ruta de acceso al archivo &lt;aplicación&gt;.runtimeconfig.json.</target>
+        <target state="translated">Ruta al archivo &lt;application&gt;.runtimeconfig.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
@@ -295,6 +295,11 @@
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET Core application.</source>
         <target state="translated">Ejecute una aplicación de .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FsiDefinition">
+        <source>Start F# Interactive / execute F# scripts.</source>
+        <target state="translated">Inicie F# Interactive/ejecute scripts de F#.</target>
         <note />
       </trans-unit>
     </body>
