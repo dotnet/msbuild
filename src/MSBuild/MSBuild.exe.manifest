@@ -32,7 +32,6 @@
     </security>
   </trustInfo>
 
-  <!-- TODO wul no checkin version need to be generated -->
   <file name="Microsoft.Build.Framework.tlb">
         <typelib
             tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}"
