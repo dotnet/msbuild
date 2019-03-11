@@ -3705,6 +3705,12 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionVersionPath()
+        {
+            TestPropertyFunction(@"$([System.Version]::Parse('$(X)').ToString(1))", "X", "4.0", "4");
+        }
+
+        [Fact]
         public void PropertyFunctionStringArrayIndexerGetter()
         {
             TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");

@@ -3401,12 +3401,12 @@ namespace Microsoft.Build.Evaluation
                             returnVal = text.LastIndexOf(arg0);
                             return true;
                         }
-                        else if(TryGetArgs(args, out arg0, out int startIndex))
+                        else if (TryGetArgs(args, out arg0, out int startIndex))
                         {
                             returnVal = text.LastIndexOf(arg0, startIndex);
                             return true;
                         }
-                        else if(TryGetArgs(args, out arg0, out string arg1))
+                        else if (TryGetArgs(args, out arg0, out string arg1))
                         {
                             string comparisonType = arg1;
 
@@ -3755,6 +3755,17 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArg(args, out string arg0))
                             {
                                 returnVal = Path.GetDirectoryName(arg0);
+                                return true;
+                            }
+                        }
+                    }
+                    else if (_receiverType == typeof(Version))
+                    {
+                        if (string.Equals(_methodMethodName, nameof(Version.Parse), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Version.Parse(arg0);
                                 return true;
                             }
                         }
