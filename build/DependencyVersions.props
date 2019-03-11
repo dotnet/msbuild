@@ -31,7 +31,7 @@
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta4</MicrosoftDotNetCommonItemTemplatesPackageVersion>
     <MicrosoftDotNetCommonProjectTemplates22PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates22PackageVersion>
-    <MicrosoftDotNetTestProjectTemplates22PackageVersion>1.0.2-beta4.19106.1</MicrosoftDotNetTestProjectTemplates22PackageVersion>
+    <MicrosoftDotNetTestProjectTemplates22PackageVersion>1.0.2-beta4.19155.2</MicrosoftDotNetTestProjectTemplates22PackageVersion>
     <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta4</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
