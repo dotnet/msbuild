@@ -3886,5 +3886,47 @@ $(
                 squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { rootSquiggle.Path, betaSquiggle.Path }, Case.Insensitive);
             }
         }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_GetDirectoriesOfAllFilesAbove()
+        {
+            // Directory structure:
+            // <temp>\
+            //    alpha\
+            //        One.cs
+            //        beta\
+            //            Two.cs
+            //            Three.cs
+            //        gamma\
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var alpha = root.CreateDirectory("alpha");
+                var projectFile = env.CreateFile(alpha, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <Compile Include=""One.cs"" />
+    <Compile Include=""beta\Two.cs"" />
+    <Compile Include=""beta\Three.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <MyDirectories Include=""@(Compile->GetPathsOfAllDirectoriesAbove())"" />
+  </ItemGroup>
+</Project>");
+
+                var beta = alpha.CreateDirectory("beta");
+                var gamma = alpha.CreateDirectory("gamma");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> myDirectories = projectInstance.GetItems("MyDirectories");
+
+                var includes = myDirectories.Select(i => i.EvaluatedInclude);
+                includes.ShouldContain(root.Path);
+                includes.ShouldContain(alpha.Path);
+                includes.ShouldContain(beta.Path);
+                includes.ShouldNotContain(gamma.Path);
+            }
+        }
     }
 }
