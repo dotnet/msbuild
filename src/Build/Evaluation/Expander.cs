@@ -3408,7 +3408,14 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if(TryGetArgs(args, out arg0, out string arg1))
                         {
-                            if(Enum.TryParse<StringComparison>(arg1, out StringComparison comparison))
+                            string comparisonType = arg1;
+
+                            //Verify the enum is not in full format, eg. "System.StringComparison.OrdinalIgnoreCase"
+                            if (comparisonType.Contains("."))
+                            {
+                                comparisonType = arg1.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
+                            }
+                            if (Enum.TryParse<StringComparison>(comparisonType, out StringComparison comparison))
                             {
                                 returnVal = text.LastIndexOf(arg0, comparison);
                                 return true;
