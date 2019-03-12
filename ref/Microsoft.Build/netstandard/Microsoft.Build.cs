@@ -1052,15 +1052,6 @@ namespace Microsoft.Build.Execution
         public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName) { }
         public void SetNodeAffinity(string projectFile, Microsoft.Build.Execution.NodeAffinity nodeAffinity) { }
         public void UnregisterProject(string projectFullPath) { }
-        public partial class MonikerNameOrITaskHost
-        {
-            public MonikerNameOrITaskHost(Microsoft.Build.Framework.ITaskHost taskHost) { }
-            public MonikerNameOrITaskHost(string monikerName) { }
-            public bool IsMoniker { get { throw null; } }
-            public bool IsTaskHost { get { throw null; } }
-            public string MonikerName { get { throw null; } }
-            public Microsoft.Build.Framework.ITaskHost TaskHost { get { throw null; } }
-        }
     }
     public partial interface ITargetResult
     {

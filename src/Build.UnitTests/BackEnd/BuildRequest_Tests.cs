@@ -2,18 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-
+using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
-
-
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    public class BuildRequest_Tests
+    public partial class BuildRequest_Tests
     {
         private int _nodeRequestId;
 
@@ -138,47 +136,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        private interface ITestRemoteHostObject
-        {
-            int GetState();
-        }
-
-        private class TestRemoteHostObject : ITaskHost, ITestRemoteHostObject
-        {
-            private int _state;
-
-            public TestRemoteHostObject(int state)
-            {
-                _state = state;
-            }
-
-            public int GetState()
-            {
-                return _state;
-            }
-        }
-
         // TODO add test for HasInProcessHostObject
 
         // TODO test case of overwrite
 
         // TODO test case of null _hostObjectMap
 
-        // TODO wul fix test
+        // TODO test for not affilgy 
+
         [Fact]
-        public void TestTranslationHostObjects()
+        public void TestTranslationRemoteHostObjects()
         {
+            var stateInHostObject = 3;
+
             var hostServices = new HostServices();
-            var rot = new RunningObjectTable();
-            var moniker = nameof(TestTranslationHostObjects) + Guid.NewGuid();
-            var remoteHost = new TestRemoteHostObject(3);
+            var rot = new MockRunningObjectTable();
+            hostServices.SetTestRunningObjectTable(rot);
+            var moniker = nameof(TestTranslationRemoteHostObjects) + Guid.NewGuid();
+            var remoteHost = new MockRemoteHostObject(stateInHostObject);
             using (var result = rot.Register(moniker, remoteHost))
             {
                 hostServices.RegisterHostObject(
                     "WithOutOfProc.targets",
                     "DisplayMessages",
                     "ATask",
-                    "theidforRunningObjectTable");
+                    moniker);
 
                 BuildRequest request = new BuildRequest(
                     submissionId: 1,
@@ -188,21 +170,63 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     hostServices: hostServices,
                     BuildEventContext.Invalid,
                     parentRequest: null);
-                Assert.Equal(NodePacketType.BuildRequest, request.Type);
 
                 ((ITranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
                 INodePacket packet = BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
                 BuildRequest deserializedRequest = packet as BuildRequest;
+                deserializedRequest.HostServices.SetTestRunningObjectTable(rot);
+                var hostObject = deserializedRequest.HostServices.GetHostObject(
+                    "WithOutOfProc.targets",
+                    "DisplayMessages",
+                    "ATask") as ITestRemoteHostObject;
 
-                Assert.True(request.HostServices.HasInProcessHostObject("WithOutOfProc.targets"));
-                Assert.True(deserializedRequest.HostServices.HasInProcessHostObject("WithOutOfProc.targets"));
+                Assert.Equal(stateInHostObject, hostObject.GetState());
             }
         }
 
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
         {
             return new BuildRequest(1 /* submissionId */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null);
+        }
+
+        private interface ITestRemoteHostObject
+        {
+            int GetState();
+        }
+
+        private class MockRunningObjectTable : IRunningObjectTableWrapper
+        {
+            private readonly Dictionary<string, object> _dictionary = new Dictionary<string, object>();
+            public void Dispose()
+            {
+            }
+
+            public object GetObject(string itemName)
+            {
+                if (_dictionary.TryGetValue(itemName, out var obj))
+                {
+                    return obj;
+                }
+                else
+                {
+                    throw new System.Runtime.InteropServices.COMException(
+                        "Operation unavailable(Exception from HRESULT: 0x800401E3(MK_E_UNAVAILABLE))");
+                }
+            }
+
+            public IDisposable Register(string itemName, object obj)
+            {
+                _dictionary.Add(itemName, obj);
+                return new MockRegisterHandle();
+            }
+
+            private class MockRegisterHandle : IDisposable
+            {
+                public void Dispose()
+                {
+                }
+            }
         }
     }
 }

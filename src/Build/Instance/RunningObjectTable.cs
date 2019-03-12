@@ -11,7 +11,7 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// See https://docs.microsoft.com/en-us/windows/desktop/api/objidl/nn-objidl-irunningobjecttable.
     /// </remarks>
-    internal class RunningObjectTable : IDisposable
+    internal class RunningObjectTable : IDisposable, IRunningObjectTableWrapper
     {
         private readonly IRunningObjectTable rot;
         private bool isDisposed = false;
@@ -33,19 +33,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Attempts to register an item in the ROT.
-        /// </summary>
-        public IDisposable Register(string itemName, object obj)
-        {
-            IMoniker moniker = CreateMoniker(itemName);
-
-            const int ROTFLAGS_REGISTRATIONKEEPSALIVE = 1;
-            int regCookie = this.rot.Register(ROTFLAGS_REGISTRATIONKEEPSALIVE, obj, moniker);
-
-            return new RevokeRegistration(this, regCookie);
-        }
-
-        /// <summary>
         /// Attempts to retrieve an item from the ROT.
         /// </summary>
         public object GetObject(string itemName)
@@ -60,32 +47,10 @@ namespace Microsoft.Build.Execution
             return obj;
         }
 
-        private void Revoke(int regCookie)
-        {
-            this.rot.Revoke(regCookie);
-        }
-
         private IMoniker CreateMoniker(string itemName)
         {
             Ole32.CreateItemMoniker("!", itemName, out IMoniker mk);
             return mk;
-        }
-
-        private class RevokeRegistration : IDisposable
-        {
-            private readonly RunningObjectTable rot;
-            private readonly int regCookie;
-
-            public RevokeRegistration(RunningObjectTable rot, int regCookie)
-            {
-                this.rot = rot;
-                this.regCookie = regCookie;
-            }
-
-            public void Dispose()
-            {
-                this.rot.Revoke(this.regCookie);
-            }
         }
 
         private static class Ole32

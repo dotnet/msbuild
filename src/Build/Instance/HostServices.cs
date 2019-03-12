@@ -56,6 +56,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private Dictionary<string, NodeAffinity> _projectAffinities;
 
+        private IRunningObjectTableWrapper _runningObjectTable = new RunningObjectTable();
+
         /// <summary>
         /// Gets any host object applicable to this task name
         /// where the task appears within a target and project with the specified names.
@@ -73,9 +75,26 @@ namespace Microsoft.Build.Execution
                 return null;
             }
 
-            ITaskHost hostObject = hostObjects.GetAnyMatchingHostObject(targetName, taskName);
+            var monikerNameOrITaskHost =
+                hostObjects.GetAnyMatchingMonikerNameOrITaskHost(targetName, taskName);
 
-            return hostObject;
+            if (monikerNameOrITaskHost == null)
+            {
+                return null;
+            }
+            else
+            {
+                if (monikerNameOrITaskHost.IsMoniker)
+                {
+                    object objectFromRunningObjectTable =
+                        _runningObjectTable.GetObject(monikerNameOrITaskHost.MonikerName);
+                    return (ITaskHost)objectFromRunningObjectTable;
+                }
+                else
+                {
+                    return monikerNameOrITaskHost.TaskHost;
+                }
+            }
         }
 
         /// <summary>
@@ -328,7 +347,16 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        public class MonikerNameOrITaskHost
+        /// <summary>
+        /// Test only
+        /// </summary>
+        /// <param name="runningObjectTable"></param>
+        internal void SetTestRunningObjectTable(IRunningObjectTableWrapper runningObjectTable)
+        {
+            _runningObjectTable = runningObjectTable;
+        }
+
+        internal class MonikerNameOrITaskHost
         {
             public ITaskHost TaskHost { get; }
             public string MonikerName { get; }
@@ -410,21 +438,13 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Gets any host object for this project file matching the task and target names specified.
             /// </summary>
-            internal ITaskHost GetAnyMatchingHostObject(string targetName, string taskName)
+            internal MonikerNameOrITaskHost GetAnyMatchingMonikerNameOrITaskHost(string targetName, string taskName)
             {
                 if (_hostObjects.TryGetValue(new TargetTaskKey(targetName, taskName), out MonikerNameOrITaskHost hostObject))
                 {
-                    if (hostObject.IsMoniker)
-                    {
-                        RunningObjectTable rot = new RunningObjectTable();
-                        object objectFromRunningObjectTable = rot.GetObject(hostObject.MonikerName);
-                        return (ITaskHost)objectFromRunningObjectTable;
-                    }
-                    else
-                    {
-                        return hostObject.TaskHost;
-                    }
+                    return hostObject;
                 }
+
                 return null;
             }
 
