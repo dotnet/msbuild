@@ -9,10 +9,10 @@
     - [Public API](#public-api)
   - [Isolated builds](#isolated-builds)
     - [Isolated graph builds](#isolated-graph-builds)
-    - [Single project isolated builds](#single-project-builds)
-  - [Distribution](#distribution)
-    - [Serialization](#serialization)
-    - [Deserialization](#deserialization)
+    - [Single project isolated builds](#single-project-isolated-builds)
+    - [Single project isolated builds: implementation details](#single-project-isolated-builds-implementation-details)
+      - [Apis](#apis)
+      - [Command line](#command-line)
   - [I/O Tracking](#io-tracking)
     - [Detours](#detours)
     - [Isolation requirement](#isolation-requirement)
@@ -217,10 +217,6 @@ If a project uses the MSBuild task, the build result must be in MSBuild's build 
 
 Because referenced projects and their entry targets are guaranteed to be in the cache, they will not build again. Therefore we do not need to set `/p:BuildProjectReferences=false` or any other gesture that tells SDKs to not do recursive operations.
 
-**Open Issue:** With this approach initial targets will also get included due to how the `RequestBuilder` composes entry targets and how `TargetBuilder` reports build results. Is this an issue? Is it just a perf optimization to take them out from the cache? It seems like target mapping incompleteness at the very least, since if the project changes its initial targets, the cache hit from the referencing project would suddenly be a miss.
-
-**Open Issue:** How do we differentiate between targets called on the outer build project and targets called on the inner build projects? For multitargeting builds, a project will actually reach into the inner build, but the graph expresses a dependency on the outer build.
-
 ### Isolated graph builds
 When building a graph in isolated mode, the graph is used to traverse and build the projects in the right order, but each individual project is built in isolation. The build result cache will just be in memory exactly as it is today, but on cache miss it will error. This enforces that both the graph and target mappings are complete and correct.
 
@@ -237,16 +233,43 @@ There is also the possibility for these higher-order build engines and even Visu
 
 These incremental builds can even be extended to multiple projects by keeping a project graph in memory as well as the last build result for each node and whether that build result is valid. The higher-order build engine can then itself traverse the graph and do single project isolated builds for projects which are not currently up to date.
 
-## Distribution
-To support distribution for isolated builds (eg. for the MS internal build engine), we need a solution for a project and a dependency building on different machines. To facilitate this, we need to serialize the build result cache to disk on the source machine which built the project reference, and deserialize it on the destination machine which is about to build the project referencing the project reference.
+### Single project isolated builds: implementation details
 
-In fact, this same mechanism can be used for non-distributed builds as well, for example for incremental builds. The caller would still need to ensure that the build result cache was valid (ie. the project reference project was not changed since the build result cache for it was produced), but the benefit would be that only the current project being built would need to be evaluated and only targets on that project would need to execute.
+<!-- workflow -->
+Single project builds can be achieved by providing MSBuild with input and output cache files.
 
-### Serialization
-**WIP**
+The input cache files contain the cached results of all of the current project's references. This way, when the current project executes, it will naturally build its references via [MSBuild task](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) calls. The engine, instead of executing these tasks, will serve them from the provided input caches. 
 
-### Deserialization
-**WIP**
+The output cache file tells MSBuild where it should serialize the results of the current project. This output cache would become an input cache for all other projects that depend on the current project.
+The output cache file can be ommited in which case the build would just reuse prior results but not write out any new results. This could be useful when one wants to replay a build from previous caches.
+
+The presence of either input or output caches turns on the isolated build constraints. The engine will fail the build on:
+- MSBuild task calls on projects files which were not defined in the `ProjectReference` item at evaluation time.
+- MSBuild task calls which cannot be served from the cache
+
+<!-- cache structure -->
+These cache files contain the serialized state of MSBuild's [ConfigCache](https://github.com/Microsoft/msbuild/blob/master/src/Build/BackEnd/Components/Caching/ConfigCache.cs) and [ResultsCache](https://github.com/Microsoft/msbuild/blob/master/src/Build/BackEnd/Components/Caching/ResultsCache.cs). These two caches have been traditionally used by the engine to cache build results.
+
+Cache structure: `(project path, global properties) -> results`
+
+<!-- cache lifetime -->
+The caches are applicable for the entire duration of the MSBuild.exe process. The input and output caches have the same lifetime as the `ConfigCache` and the `ResultsCache`. The `ConfigCache` and the `ResultsCache` are owned by the [BuildManager](https://github.com/Microsoft/msbuild/blob/master/src/Build/BackEnd/BuildManager/BuildManager.cs), and their lifetimes are one `BuildManager.BeginBuild` / `BuildManager.EndBuild` session. Since MSBuild.exe uses one BuildManager with one BeginBuild / EndBuild session, the cache lifetime is the same as the entire process lifetime.
+
+<!-- constraints -->
+The following are some constraints enforced by the engine. They're just for 
+
+Input cache files constraints:
+- A ConfigCache / ResultsCache mapping must be unique between all input caches (multiple input caches cannot provide information for the same cache entry)
+- For each input cache, ConfiguCache.Entries.Size == ResultsCache.Entries.Size
+- For each input cache, there is exactly one mapping from ConfigCache to ResultsCache
+
+Output cache file constraints:
+- the output cache file contains results only for additional work performed in the current BeginBuild / EndBuild session. Entries from input caches are not transferred to the output cache.
+
+#### Apis
+Caches are provided via [BuildParameters](https://github.com/Microsoft/msbuild/blob/2d4dc592a638b809944af10ad1e48e7169e40808/src/Build/BackEnd/BuildManager/BuildParameters.cs#L746-L764). They are applied in `BuildManager.BeginBuild`
+#### Command line 
+Caches are provided to MSBuild.exe via the multi value `/inputCacheFiles` and the single value `/outputCacheFile`.
 
 ## I/O Tracking
 To help facilitate caching of build outputs by a higher-order build engine, MSBuild needs to track all I/O that happens as part of a build.
