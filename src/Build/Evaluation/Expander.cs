@@ -3913,6 +3913,17 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+                    else if (_receiverType == typeof(System.Guid))
+                    {
+                        if (string.Equals(_methodMethodName, nameof(Guid.NewGuid), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = Guid.NewGuid();
+                                return true;
+                            }
+                        }
+                    }
                 }
 
                 if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
