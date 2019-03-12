@@ -3328,6 +3328,7 @@ namespace Microsoft.Build.Evaluation
             private bool TryExecuteWellKnownFunction(out object returnVal, object objectInstance, object[] args)
             {
                 returnVal = null;
+
                 if (objectInstance is string text)
                 {
                     if (string.Equals(_methodMethodName, nameof(string.StartsWith), StringComparison.OrdinalIgnoreCase))

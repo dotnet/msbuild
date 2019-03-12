@@ -3692,6 +3692,8 @@ $(
         public void PropertyFunctionStringLastIndexOf()
         {
             TestPropertyFunction("$(prop.LastIndexOf('y'))", "prop", "x-x-y-y-y-z", "8");
+
+            TestPropertyFunction("$(prop.LastIndexOf('y', 7))", "prop", "x-x-y-y-y-z", "6");
         }
 
         [Fact]
