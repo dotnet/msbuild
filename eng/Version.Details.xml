@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="3.0.0-preview4-19158-05">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="3.0.0-preview4-19161-07">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>1ac6f3d4fd0a5c396e9be46908a7a39a4f6501fb</Sha>
+      <Sha>77948feebaab1b8ab67a08b0dea023f4199439be</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="3.0.0-preview4-19158-05">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="3.0.0-preview4-19161-07">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>1ac6f3d4fd0a5c396e9be46908a7a39a4f6501fb</Sha>
+      <Sha>77948feebaab1b8ab67a08b0dea023f4199439be</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
