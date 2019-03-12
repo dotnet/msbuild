@@ -1,153 +1,105 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace Microsoft.Build.Execution
 {
+
     /// <summary>
-    /// Handy wrapper for the COM Running Object Table. The scope
-    /// for this table is session-wide.
+    /// Wrapper for the COM Running Object Table.
     /// </summary>
+    /// <remarks>
+    /// See https://docs.microsoft.com/en-us/windows/desktop/api/objidl/nn-objidl-irunningobjecttable.
+    /// </remarks>
     internal class RunningObjectTable : IDisposable
     {
-        private IRunningObjectTable _rot;
-
-        public IRunningObjectTable GetRot() => _rot;
+        private readonly IRunningObjectTable rot;
+        private bool isDisposed = false;
 
         public RunningObjectTable()
         {
-            int result = Ole32.GetRunningObjectTable(0, out _rot);
-            if (result != 0)
-            {
-                throw new Win32Exception(result);
-            }
-        }
-
-        ~RunningObjectTable()
-        {
-            Dispose(false);
+            Ole32.GetRunningObjectTable(0, out this.rot);
         }
 
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            Marshal.ReleaseComObject(this.rot);
+            this.isDisposed = true;
         }
 
         /// <summary>
-        /// Releases the Running Object Table instance.
+        /// Attempts to register an item in the ROT.
         /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_rot != null)
-                {
-                    Marshal.ReleaseComObject(_rot);
-                }
-                _rot = null;
-            }
-        }
-
         public IDisposable Register(string itemName, object obj)
         {
-            IMoniker mk = CreateMoniker(itemName);
+            IMoniker moniker = CreateMoniker(itemName);
 
-            int registration = _rot.Register(1, obj, mk);
+            const int ROTFLAGS_REGISTRATIONKEEPSALIVE = 1;
+            int regCookie = this.rot.Register(ROTFLAGS_REGISTRATIONKEEPSALIVE, obj, moniker);
 
-            return new RegistrationHandle(this, registration);
-        }
-
-        public static IMoniker CreateMoniker(string itemName)
-        {
-            IMoniker mk;
-            int result = Ole32.CreateItemMoniker("!", itemName, out mk);
-            if (result != 0)
-            {
-                throw new Win32Exception(result);
-            }
-            return mk;
+            return new RevokeRegistration(this, regCookie);
         }
 
         /// <summary>
-        /// Attempts to retrieve an item from the ROT; returns null if not found.
+        /// Attempts to retrieve an item from the ROT.
         /// </summary>
         public object GetObject(string itemName)
         {
             IMoniker mk = CreateMoniker(itemName);
-            object obj;
-            try
+            int hr = this.rot.GetObject(mk, out object obj);
+            if (hr != 0)
             {
-                int result = _rot.GetObject(mk, out obj);
-                if (result != 0)
-                {
-                    throw new Win32Exception(result);
-                }
-                return obj;
+                Marshal.ThrowExceptionForHR(hr);
             }
-            catch (COMException ce)
-            {
-                // MK_E_UNAVAILABLE: The moniker is not in the ROT
-                if (ce.ErrorCode == unchecked((int)0x800401e3))
-                {
-                    return null;
-                }
-                throw;
-            }
+
+            return obj;
         }
 
-        private void Revoke(int registration)
+        private void Revoke(int regCookie)
         {
-            _rot.Revoke(registration);
+            this.rot.Revoke(regCookie);
         }
 
-        private class RegistrationHandle : IDisposable
+        private IMoniker CreateMoniker(string itemName)
         {
-            private RunningObjectTable _rot;
-            private int _registration;
+            Ole32.CreateItemMoniker("!", itemName, out IMoniker mk);
+            return mk;
+        }
 
-            public RegistrationHandle(RunningObjectTable rot, int registration)
-            {
-                _rot = rot;
-                _registration = registration;
-            }
+        private class RevokeRegistration : IDisposable
+        {
+            private readonly RunningObjectTable rot;
+            private readonly int regCookie;
 
-            ~RegistrationHandle()
+            public RevokeRegistration(RunningObjectTable rot, int regCookie)
             {
-                // Can't use normal Dispose() because the _rot may already
-                // have been garbage collected by this point
-                IRunningObjectTable rot;
-                int result = Ole32.GetRunningObjectTable(0, out rot);
-                if (result == 0)
-                {
-                    rot.Revoke(_registration);
-                    Marshal.ReleaseComObject(rot);
-                }
+                this.rot = rot;
+                this.regCookie = regCookie;
             }
 
             public void Dispose()
             {
-                GC.SuppressFinalize(this);
-                _rot.Revoke(_registration);
+                this.rot.Revoke(this.regCookie);
             }
         }
-    }
 
-    internal class Ole32
-    {
-        [DllImport("Ole32.dll")]
-        public static extern int CreateItemMoniker(
-            [MarshalAs(UnmanagedType.LPWStr)] string lpszDelim,
-            [MarshalAs(UnmanagedType.LPWStr)] string lpszItem,
-            out IMoniker ppmk
-            );
+        private static class Ole32
+        {
+            [DllImport(nameof(Ole32))]
+            public static extern void CreateItemMoniker(
+                [MarshalAs(UnmanagedType.LPWStr)] string lpszDelim,
+                [MarshalAs(UnmanagedType.LPWStr)] string lpszItem,
+                out IMoniker ppmk);
 
-        [DllImport("Ole32.dll")]
-        public static extern int GetRunningObjectTable(
-            int reserved,
-            out IRunningObjectTable pprot
-            );
+            [DllImport(nameof(Ole32))]
+            public static extern void GetRunningObjectTable(
+                int reserved,
+                out IRunningObjectTable pprot);
+        }
     }
 }
