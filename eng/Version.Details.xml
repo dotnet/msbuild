@@ -25,17 +25,19 @@
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
       <Sha>66486575487ac106537473e56baa4824d2301ac5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview3-27512-27">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview3-27512-34">
       <Uri>https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</Uri>
-      <Sha>099b837590576f319a5f03b99ff2c534ad9ad2b8</Sha>
+      <Sha>a0570cdaf48e95b8d53c2a12f3e2ddba7d3df94e</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.0.0-preview1.5663">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="15.9.0">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview3.19157.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
