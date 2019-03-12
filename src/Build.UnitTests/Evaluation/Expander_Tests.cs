@@ -3928,5 +3928,107 @@ $(
                 includes.ShouldNotContain(gamma.Path);
             }
         }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Combine()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <MyDirectory Include=""Alpha;Beta;Alpha\Gamma"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Squiggle Include=""@(MyDirectory->Combine('.squiggle'))"" />
+  </ItemGroup>
+</Project>");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggles = projectInstance.GetItems("Squiggle");
+
+                squiggles.Select(i => i.EvaluatedInclude).ShouldBe(new[] { @"Alpha\.squiggle", @"Beta\.squiggle", @"Alpha\Gamma\.squiggle" });
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Exists_Files()
+        {
+            // Directory structure:
+            // <temp>\
+            //    .proj
+            //    alpha\
+            //        One.cs   // exists
+            //        Two.cs   // does not exist
+            //        Three.cs // exists
+            //        Four.cs  // does not exist
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <PotentialCompile Include=""alpha\One.cs"" />
+    <PotentialCompile Include=""alpha\Two.cs"" />
+    <PotentialCompile Include=""alpha\Three.cs"" />
+    <PotentialCompile Include=""alpha\Four.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include=""@(PotentialCompile->Exists())"" />
+  </ItemGroup>
+</Project>");
+
+                var alpha = root.CreateDirectory("alpha");
+                var one = alpha.CreateFile("One.cs");
+                var three = alpha.CreateFile("Three.cs");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Compile");
+
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { @"alpha\One.cs", @"alpha\Three.cs" }, Case.Insensitive);
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Exists_Directories()
+        {
+            // Directory structure:
+            // <temp>\
+            //    .proj
+            //    alpha\
+            //        beta\    // exists
+            //        gamma\   // does not exist
+            //        delta\   // exists
+            //        epsilon\ // does not exist
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <PotentialDirectory Include=""alpha\beta"" />
+    <PotentialDirectory Include=""alpha\gamma"" />
+    <PotentialDirectory Include=""alpha\delta"" />
+    <PotentialDirectory Include=""alpha\epsilon"" />
+  </ItemGroup>
+  <ItemGroup>
+    <MyDirectory Include=""@(PotentialDirectory->Exists())"" />
+  </ItemGroup>
+</Project>");
+
+                var alpha = root.CreateDirectory("alpha");
+                var beta = alpha.CreateDirectory("beta");
+                var delta = alpha.CreateDirectory("delta");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("MyDirectory");
+
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { @"alpha\beta", @"alpha\delta" }, Case.Insensitive);
+            }
+        }
     }
 }
