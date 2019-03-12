@@ -2242,7 +2242,6 @@ namespace Microsoft.Build.Evaluation
 
                         if (File.Exists(rootedPath) || Directory.Exists(rootedPath))
                         {
-                            //string escapedRootedPath = EscapingUtilities.Escape(rootedPath);
                             yield return item;
                         }
                     }
