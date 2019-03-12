@@ -3843,11 +3843,12 @@ $(
         }
 
         [Fact]
-        public void ExpandItemVectorFunctions_GetDirectoriesOfAllFilesAbove()
+        public void ExpandItemVectorFunctions_GetPathsOfAllDirectoriesAbove()
         {
             // Directory structure:
             // <temp>\
             //    alpha\
+            //        .proj
             //        One.cs
             //        beta\
             //            Two.cs
