@@ -661,14 +661,16 @@ Copyright (c) .NET Foundation. All rights reserved.
                            _DefaultMicrosoftNETPlatformLibrary
 
   .NET Core apps can have shared frameworks that are pre-installed on the target machine, thus the app is "portable"
-  to any machine that already has the shared framework installed. In order to enable this, a "platform" library
-  has to be declared. The platform library and its dependencies will be excluded from the runtime assemblies.
+  to any machine that already has the shared framework installed. For .NET Core 1.x and 2.x, a "platform" library
+  is declared. The platform library and its dependencies will be excluded from the publish output.
+  
+  For .NET Core 3 and up, targeting packs and runtime packs are used for shared framework assets instead of PackageReference
   ============================================================
   -->
   <Target Name="_DefaultMicrosoftNETPlatformLibrary">
 
     <PropertyGroup Condition="'$(MicrosoftNETPlatformLibrary)' == ''">
-      <MicrosoftNETPlatformLibrary Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">Microsoft.NETCore.App</MicrosoftNETPlatformLibrary>
+      <MicrosoftNETPlatformLibrary Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'">Microsoft.NETCore.App</MicrosoftNETPlatformLibrary>
     </PropertyGroup>
 
   </Target>
