@@ -3683,13 +3683,13 @@ $(
         }
 
         [Fact]
-        public void PropertyFunctionIndexOfAny()
+        public void PropertyFunctionStringIndexOfAny()
         {
             TestPropertyFunction("$(prop.IndexOfAny('y'))", "prop", "x-y-z", "2");
         }
 
         [Fact]
-        public void PropertyFunctionLastIndexOf()
+        public void PropertyFunctionStringLastIndexOf()
         {
             TestPropertyFunction("$(prop.LastIndexOf('y'))", "prop", "x-x-y-y-y-z", "8");
         }
@@ -3705,7 +3705,7 @@ $(
         }
 
         [Fact]
-        public void PropertyFunctionVersionPath()
+        public void PropertyFunctionVersionParse()
         {
             TestPropertyFunction(@"$([System.Version]::Parse('$(X)').ToString(1))", "X", "4.0", "4");
         }

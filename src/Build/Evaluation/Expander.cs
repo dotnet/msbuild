@@ -3410,7 +3410,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             string comparisonType = arg1;
 
-                            //Verify the enum is not in full format, eg. "System.StringComparison.OrdinalIgnoreCase"
+                            // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
                             if (comparisonType.Contains("."))
                             {
                                 comparisonType = arg1.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
@@ -3998,7 +3998,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 var value1 = args[1] as string;
-                arg0 = args[1] as string;
+                arg0 = args[0] as string;
                 if (value1 != null &&
                     arg0 != null &&
                     int.TryParse(value1, out arg1))
