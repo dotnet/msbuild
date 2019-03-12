@@ -3905,7 +3905,15 @@ $(
                 ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
                 ICollection<ProjectItemInstance> squiggles = projectInstance.GetItems("Squiggle");
 
-                squiggles.Select(i => i.EvaluatedInclude).ShouldBe(new[] { @"Alpha\.squiggle", @"Beta\.squiggle", @"Alpha\Gamma\.squiggle" });
+                var expectedAlphaSquigglePath = Path.Combine("Alpha", ".squiggle");
+                var expectedBetaSquigglePath = Path.Combine("Beta", ".squiggle");
+                var expectedAlphaGammaSquigglePath = Path.Combine("Alpha", "Gamma", ".squiggle");
+                squiggles.Select(i => i.EvaluatedInclude).ShouldBe(new[]
+                {
+                    expectedAlphaSquigglePath,
+                    expectedBetaSquigglePath,
+                    expectedAlphaGammaSquigglePath
+                }, Case.Insensitive);
             }
         }
 
@@ -3944,7 +3952,9 @@ $(
                 ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
                 ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Compile");
 
-                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { @"alpha\One.cs", @"alpha\Three.cs" }, Case.Insensitive);
+                var alphaOnePath = Path.Combine("alpha", "One.cs");
+                var alphaThreePath = Path.Combine("alpha", "Three.cs");
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { alphaOnePath, alphaThreePath }, Case.Insensitive);
             }
         }
 
@@ -3983,7 +3993,9 @@ $(
                 ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
                 ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("MyDirectory");
 
-                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { @"alpha\beta", @"alpha\delta" }, Case.Insensitive);
+                var alphaBetaPath = Path.Combine("alpha", "beta");
+                var alphaDeltaPath = Path.Combine("alpha", "delta");
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { alphaBetaPath, alphaDeltaPath }, Case.Insensitive);
             }
         }
     }
