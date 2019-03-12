@@ -373,7 +373,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
 
-            Assert.False(hostServices.HasHostObject(project.FullPath));
+            Assert.False(hostServices.HasInProcessHostObject(project.FullPath));
         }
 
         /// <summary>
@@ -393,11 +393,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectCollection.GlobalProjectCollection.UnloadProject(project1);
 
-            Assert.True(hostServices.HasHostObject(project2.FullPath));
+            Assert.True(hostServices.HasInProcessHostObject(project2.FullPath));
 
             ProjectCollection.GlobalProjectCollection.UnloadProject(project2);
 
-            Assert.False(hostServices.HasHostObject(project2.FullPath));
+            Assert.False(hostServices.HasInProcessHostObject(project2.FullPath));
         }
 
         /// <summary>

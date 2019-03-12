@@ -158,6 +158,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        // TODO add test for HasInProcessHostObject
+
+        // TODO test case of overwrite
+
+        // TODO test case of null _hostObjectMap
+
+        // TODO wul fix test
         [Fact]
         public void TestTranslationHostObjects()
         {
@@ -188,8 +195,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequest deserializedRequest = packet as BuildRequest;
 
-                Assert.True(request.HostServices.HasHostObject("WithOutOfProc.targets"));
-                Assert.True(deserializedRequest.HostServices.HasHostObject("WithOutOfProc.targets"));
+                Assert.True(request.HostServices.HasInProcessHostObject("WithOutOfProc.targets"));
+                Assert.True(deserializedRequest.HostServices.HasInProcessHostObject("WithOutOfProc.targets"));
             }
         }
 

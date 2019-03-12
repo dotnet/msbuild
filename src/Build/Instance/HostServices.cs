@@ -168,7 +168,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                if (HasHostObject(projectFile))
+                if (HasInProcessHostObject(projectFile))
                 {
                     ErrorUtilities.VerifyThrowInvalidOperation(nodeAffinity == NodeAffinity.InProc, "InvalidAffinityForProjectWithHostObject");
                 }
@@ -199,7 +199,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns true if there is any host object registered for this project file.
         /// </summary>
-        internal bool HasHostObject(string projectFile)
+        internal bool HasInProcessHostObject(string projectFile)
         {
             if (_hostObjectMap == null)
             {
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Execution
                 return false;
             }
 
-            return hostObjects.HasRegisteredHostObjects;
+            return hostObjects.HasRegisteredInProcessHostObjects;
         }
 
         /// <summary>
@@ -224,7 +224,7 @@ namespace Microsoft.Build.Execution
             isExplicit = false;
 
             // Projects with a registered host object must build in-proc
-            if (HasHostObject(projectFile))
+            if (HasInProcessHostObject(projectFile))
             {
                 return NodeAffinity.InProc;
             }
@@ -367,9 +367,9 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Accessor which indicates if there are any registered host objects.
+            /// Accessor which indicates if there are any registered in process host objects.
             /// </summary>
-            internal bool HasRegisteredHostObjects
+            internal bool HasRegisteredInProcessHostObjects
             {
                 get
                 {
