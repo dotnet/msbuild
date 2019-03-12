@@ -1194,19 +1194,6 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
 
-                // Exclude any runtime frameworks
-                if (_task.RuntimeFrameworks != null)
-                {
-                    foreach (var framework in _task.RuntimeFrameworks)
-                    {
-                        var frameworkLibrary = _runtimeTarget.GetLibrary(framework.ItemSpec);
-                        if (frameworkLibrary != null)
-                        {
-                            packageExclusions.UnionWith(_runtimeTarget.GetPlatformExclusionList(frameworkLibrary, libraryLookup));
-                        }
-                    }
-                }
-
                 return packageExclusions;
             }
 
