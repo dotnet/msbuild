@@ -1100,6 +1100,18 @@
     <value>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</value>
     <comment>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</comment>
   </data>
+  <data name="GenerateResource.ExtractingFromBinaryResourcesNotSupported">
+    <value>MSB3822: Reading resources from binary .resources files is not supported when running MSBuild on .NET Core.</value>
+    <comment>{StrBegin="MSB3822: "} do not translate ".resources" which is a file extension.</comment>
+  </data>
+  <data name="GenerateResource.ExtractingFromAssemblyNotSupported">
+    <value>MSB3823: Reading resources from a .NET assembly is not supported when running MSBuild on .NET Core.</value>
+    <comment>{StrBegin="MSB3823: "}</comment>
+  </data>
+  <data name="GenerateResource.WritingToResxNotSupported">
+    <value>MSB3824: Writing resources to a .resx file is not supported when running MSBuild on .NET Core.</value>
+    <comment>{StrBegin="MSB3824: "}</comment>
+  </data>
 
 
 

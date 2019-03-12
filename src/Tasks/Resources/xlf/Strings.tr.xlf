@@ -969,6 +969,16 @@
         <target state="translated">MSB3190: ClickOnce, '{0}' istek yürütme düzeyini desteklemiyor.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.ExtractingFromAssemblyNotSupported">
+        <source>MSB3823: Reading resources from a .NET assembly is not supported when running MSBuild on .NET Core.</source>
+        <target state="new">MSB3823: Reading resources from a .NET assembly is not supported when running MSBuild on .NET Core.</target>
+        <note>{StrBegin="MSB3823: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.ExtractingFromBinaryResourcesNotSupported">
+        <source>MSB3822: Reading resources from binary .resources files is not supported when running MSBuild on .NET Core.</source>
+        <target state="new">MSB3822: Reading resources from binary .resources files is not supported when running MSBuild on .NET Core.</target>
+        <note>{StrBegin="MSB3822: "} do not translate ".resources" which is a file extension.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: {0} dosyası İnternet’te veya Kısıtlı bölgede olduğu ya da dosyada web işaretine sahip olduğu için işlenemedi. Bu dosyaları işlemek istiyorsanız web işaretlerini kaldırın.</target>
@@ -1240,6 +1250,11 @@
         <source>MSB3820: The path needed to store build-related temporary files is too long.  Try your project in a shorter directory, or rename some of your resources.  The full path was "{0}".</source>
         <target state="translated">MSB3820: Derlemeyle ilgili geçici dosyaları depolamak için gereken yol çok uzun.  Projenizi daha kısa bir dizinde deneyin veya kaynaklarınızın bazılarını yeniden adlandırın.  Tam yol "{0}" şeklindeydi.</target>
         <note>{StrBegin="MSB3820: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.WritingToResxNotSupported">
+        <source>MSB3824: Writing resources to a .resx file is not supported when running MSBuild on .NET Core.</source>
+        <target state="new">MSB3824: Writing resources to a .resx file is not supported when running MSBuild on .NET Core.</target>
+        <note>{StrBegin="MSB3824: "}</note>
       </trans-unit>
       <trans-unit id="GetAssemblyIdentity.CouldNotGetAssemblyName">
         <source>MSB3441: Cannot get assembly name for "{0}". {1}</source>

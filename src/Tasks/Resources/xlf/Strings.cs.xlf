@@ -969,6 +969,16 @@
         <target state="translated">MSB3190: Funkce ClickOnce nepodporuje požadovanou úroveň provedení {0}.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.ExtractingFromAssemblyNotSupported">
+        <source>MSB3823: Reading resources from a .NET assembly is not supported when running MSBuild on .NET Core.</source>
+        <target state="new">MSB3823: Reading resources from a .NET assembly is not supported when running MSBuild on .NET Core.</target>
+        <note>{StrBegin="MSB3823: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.ExtractingFromBinaryResourcesNotSupported">
+        <source>MSB3822: Reading resources from binary .resources files is not supported when running MSBuild on .NET Core.</source>
+        <target state="new">MSB3822: Reading resources from binary .resources files is not supported when running MSBuild on .NET Core.</target>
+        <note>{StrBegin="MSB3822: "} do not translate ".resources" which is a file extension.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: Nešlo zpracovat soubor {0}, protože je v zóně Internet nebo Omezené nebo má na souboru značku webu. Pokud chcete tyto soubory zpracovat, odeberte značku webu.</target>
@@ -1240,6 +1250,11 @@
         <source>MSB3820: The path needed to store build-related temporary files is too long.  Try your project in a shorter directory, or rename some of your resources.  The full path was "{0}".</source>
         <target state="translated">MSB3820: Cesta potřebná pro uložení dočasných souborů souvisejících s procesem sestavení je příliš dlouhá.  Zkuste svůj projekt použít v adresáři s kratším názvem nebo změňte název některých svých prostředků.  Úplná cesta byla {0}.</target>
         <note>{StrBegin="MSB3820: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.WritingToResxNotSupported">
+        <source>MSB3824: Writing resources to a .resx file is not supported when running MSBuild on .NET Core.</source>
+        <target state="new">MSB3824: Writing resources to a .resx file is not supported when running MSBuild on .NET Core.</target>
+        <note>{StrBegin="MSB3824: "}</note>
       </trans-unit>
       <trans-unit id="GetAssemblyIdentity.CouldNotGetAssemblyName">
         <source>MSB3441: Cannot get assembly name for "{0}". {1}</source>

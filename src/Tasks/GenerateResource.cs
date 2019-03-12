@@ -3026,7 +3026,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM
                 ReadAssemblyResources(filename, outFileOrDir);
 #else
-                _logger.LogError("Reading resources from Assembly not supported on .NET Core MSBuild");
+                _logger.LogErrorWithCodeFromResources("GenerateResource.ExtractingFromAssemblyNotSupported");
 #endif
             }
             else
@@ -3064,7 +3064,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESX_RESOURCE_READER
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
 #else
-                        _logger.LogError("Reading resources from binary .resources files not supported on .NET Core MSBuild");
+                        _logger.LogErrorWithCodeFromResources("GenerateResource.ExtractingFromBinaryResourcesNotSupported");
 #endif
                         break;
 
@@ -3314,7 +3314,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESX_RESOURCE_READER
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
 #else
-                    _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.WritingToResxNotSupported");
 #endif
                     break;
 
