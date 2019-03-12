@@ -95,17 +95,22 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowInvalidOperation(!hasExplicitOutOfProcAffinity || hostObject == null, "InvalidHostObjectOnOutOfProcProject");
             _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 
-            HostObjects hostObjects;
-            if (!_hostObjectMap.TryGetValue(projectFile, out hostObjects))
-            {
-                hostObjects = new HostObjects();
-                _hostObjectMap[projectFile] = hostObjects;
-            }
+            HostObjects hostObjects = GetHostObjectsFromMapByKeyOrCreateNew(projectFile);
 
             hostObjects.RegisterHostObject(targetName, taskName, hostObject);
         }
 
-        // TODO wul no checkin doc
+        /// <summary>
+        /// Register a remote host object for a particular task/target pair.
+        /// The remote host object require registered in Running Object Table(ROT) already.
+        /// Overwrites any existing host object.
+        ///
+        /// It's caller's responsibly:
+        /// To maintain the live cycle of the host object.
+        /// Register and unregister from ROT.
+        /// Ensure the host object has appropriate COM interface that can be used in task.
+        /// </summary>
+        /// <param name="monikerName">the Moniker used to register host object in ROT</param>
         public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
@@ -115,13 +120,7 @@ namespace Microsoft.Build.Execution
 
             _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 
-            // TODO wul no checkin dedup
-            HostObjects hostObjects;
-            if (!_hostObjectMap.TryGetValue(projectFile, out hostObjects))
-            {
-                hostObjects = new HostObjects();
-                _hostObjectMap[projectFile] = hostObjects;
-            }
+            HostObjects hostObjects = GetHostObjectsFromMapByKeyOrCreateNew(projectFile);
 
             hostObjects.RegisterHostObject(targetName, taskName, monikerName);
         }
@@ -249,6 +248,18 @@ namespace Microsoft.Build.Execution
 
             // Attempts to find a specific affinity failed, so just go with Any.
             return NodeAffinity.Any;
+        }
+
+        private HostObjects GetHostObjectsFromMapByKeyOrCreateNew(string projectFile)
+        {
+            HostObjects hostObjects;
+            if (!_hostObjectMap.TryGetValue(projectFile, out hostObjects))
+            {
+                hostObjects = new HostObjects();
+                _hostObjectMap[projectFile] = hostObjects;
+            }
+
+            return hostObjects;
         }
 
         void ITranslatable.Translate(ITranslator translator)
