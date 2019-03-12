@@ -392,7 +392,9 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // TODO wul no checkin doc
+            /// <summary>
+            /// Registers a host object for this project file
+            /// </summary>
             internal void RegisterHostObject(string targetName, string taskName, string monikerName)
             {
                 if (monikerName == null)
