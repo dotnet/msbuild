@@ -3707,6 +3707,18 @@ $(
         {
             TestPropertyFunction(@"$([System.Version]::Parse('$(X)').ToString(1))", "X", "4.0", "4");
         }
+
+        [Fact]
+        public void PropertyFunctionGuidNewGuid()
+        {
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
+
+            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Guid]::NewGuid())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.True(Guid.TryParse(result, out Guid guid));
+        }
+
+        [Fact]
         public void PropertyFunctionIntrinsicFunctionGetCurrentToolsDirectory()
         {
             TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetCurrentToolsDirectory())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetCurrentToolsDirectory()));
