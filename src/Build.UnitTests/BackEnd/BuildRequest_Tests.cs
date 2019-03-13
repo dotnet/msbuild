@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    public partial class BuildRequest_Tests
+    public class BuildRequest_Tests
     {
         private int _nodeRequestId;
 
