@@ -4,7 +4,6 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace Microsoft.Build.Execution
 {
-
     /// <summary>
     /// Wrapper for the COM Running Object Table.
     /// </summary>
