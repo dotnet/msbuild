@@ -31,11 +31,13 @@
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.0.0-preview1.5663">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="15.9.0">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview4.19159.1">
       <Uri>https://github.com/aspnet/websdk</Uri>
