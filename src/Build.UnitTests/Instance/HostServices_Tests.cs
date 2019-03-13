@@ -9,7 +9,7 @@ using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-
+using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
@@ -238,6 +238,18 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             }
            );
         }
+
+        /// <summary>
+        /// Test which ensures that setting an Any affinity for a project with a remote host object does not throws.
+        /// </summary>
+        [Fact]
+        public void TestNoContradictoryRemoteHostObjectAffinity()
+        {
+            HostServices hostServices = new HostServices();
+            hostServices.RegisterHostObject("project", "target", "task", "moniker");
+            hostServices.SetNodeAffinity("project", NodeAffinity.Any);
+        }
+
         /// <summary>
         /// Test which ensures that setting the InProc affinity for a project with a host object is allowed.
         /// </summary>
@@ -282,6 +294,18 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
+        /// Test which ensures the remote host object cannot affect a project which has the Any affinity specifically set.
+        /// </summary>
+        [Fact]
+        public void TestReigsterRemoteHostObjectNoAffect_Any2()
+        {
+            HostServices hostServices = new HostServices();
+            hostServices.SetNodeAffinity("project", NodeAffinity.Any);
+            hostServices.RegisterHostObject("project", "target", "task", "moniker");
+            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+        }
+
+        /// <summary>
         /// Test which ensures the host object can be set for a project which has an out-of-proc affinity only because that affinity
         /// is implied by being set generally for all project, not for that specific project.
         /// </summary>
@@ -304,6 +328,20 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TestHostObject hostObject = new TestHostObject();
             hostServices.SetNodeAffinity("project", NodeAffinity.InProc);
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
+        }
+
+        /// <summary>
+        /// Test which ensures the affinity for a project can be changed once the in process host object is registered
+        /// </summary>
+        [Fact]
+        public void TestAffinityChangeAfterRegisterInprocessHostObject()
+        {
+            HostServices hostServices = new HostServices();
+            hostServices.RegisterHostObject("project", "target", "task", "moniker");
+            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+            TestHostObject hostObject = new TestHostObject();
+            hostServices.RegisterHostObject("project", "target", "task", hostObject);
+            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
         }
 
         /// <summary>
@@ -398,6 +436,35 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectCollection.GlobalProjectCollection.UnloadProject(project2);
 
             Assert.False(hostServices.HasInProcessHostObject(project2.FullPath));
+        }
+
+        /// <summary>
+        /// Tests that register overrides existing reigsted remote host object.
+        /// </summary>
+        [Fact]
+        public void TestRegisterOverrideExistingRegisted()
+        {
+            var hostServices = new HostServices();
+            var rot = new MockRunningObjectTable();
+            hostServices.SetTestRunningObjectTable(rot);
+
+            var moniker = Guid.NewGuid().ToString();
+            var remoteHost = new MockRemoteHostObject(1);
+            rot.Register(moniker, remoteHost);
+            var newMoniker = Guid.NewGuid().ToString();
+            var newRemoteHost = new MockRemoteHostObject(2);
+            rot.Register(newMoniker, newRemoteHost);
+            hostServices.RegisterHostObject(
+                    "WithOutOfProc.targets",
+                    "DisplayMessages",
+                    "ATask",
+                    remoteHost);
+
+            hostServices.RegisterHostObject("project", "test", "Message", moniker);
+            hostServices.RegisterHostObject("project", "test", "Message", newMoniker);
+            var resultObject = (ITestRemoteHostObject)hostServices.GetHostObject("project", "test", "Message");
+
+            Assert.Equal(2, resultObject.GetState());
         }
 
         /// <summary>

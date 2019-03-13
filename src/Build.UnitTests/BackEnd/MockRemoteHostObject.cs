@@ -5,21 +5,23 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    public partial class BuildRequest_Tests
+    internal class MockRemoteHostObject : ITaskHost, ITestRemoteHostObject
     {
-        internal class MockRemoteHostObject : ITaskHost, ITestRemoteHostObject
+        private int _state;
+
+        public MockRemoteHostObject(int state)
         {
-            private int _state;
-
-            public MockRemoteHostObject(int state)
-            {
-                _state = state;
-            }
-
-            public int GetState()
-            {
-                return _state;
-            }
+            _state = state;
         }
+
+        public int GetState()
+        {
+            return _state;
+        }
+    }
+
+    internal interface ITestRemoteHostObject
+    {
+        int GetState();
     }
 }

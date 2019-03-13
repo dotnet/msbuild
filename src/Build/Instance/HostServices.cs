@@ -216,7 +216,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Returns true if there is any host object registered for this project file.
+        /// Returns true if there is any in process host object registered for this project file.
         /// </summary>
         internal bool HasInProcessHostObject(string projectFile)
         {

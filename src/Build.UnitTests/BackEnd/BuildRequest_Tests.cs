@@ -136,14 +136,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        // TODO add test for HasInProcessHostObject
-
-        // TODO test case of overwrite
-
-        // TODO test case of null _hostObjectMap
-
-        // TODO test for not affilgy 
-
         [Fact]
         public void TestTranslationRemoteHostObjects()
         {
@@ -185,48 +177,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        [Fact]
+        public void TestTranslationHostObjectsWhenEmpty()
+        {
+            var hostServices = new HostServices();
+            BuildRequest request = new BuildRequest(
+                submissionId: 1,
+                _nodeRequestId++,
+                1,
+                new string[] { "alpha", "omega" },
+                hostServices: hostServices,
+                BuildEventContext.Invalid,
+                parentRequest: null);
+
+            ((ITranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
+            BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+        }
+
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
         {
             return new BuildRequest(1 /* submissionId */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null);
-        }
-
-        private interface ITestRemoteHostObject
-        {
-            int GetState();
-        }
-
-        private class MockRunningObjectTable : IRunningObjectTableWrapper
-        {
-            private readonly Dictionary<string, object> _dictionary = new Dictionary<string, object>();
-            public void Dispose()
-            {
-            }
-
-            public object GetObject(string itemName)
-            {
-                if (_dictionary.TryGetValue(itemName, out var obj))
-                {
-                    return obj;
-                }
-                else
-                {
-                    throw new System.Runtime.InteropServices.COMException(
-                        "Operation unavailable(Exception from HRESULT: 0x800401E3(MK_E_UNAVAILABLE))");
-                }
-            }
-
-            public IDisposable Register(string itemName, object obj)
-            {
-                _dictionary.Add(itemName, obj);
-                return new MockRegisterHandle();
-            }
-
-            private class MockRegisterHandle : IDisposable
-            {
-                public void Dispose()
-                {
-                }
-            }
         }
     }
 }
