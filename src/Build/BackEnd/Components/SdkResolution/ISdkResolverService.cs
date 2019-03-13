@@ -38,7 +38,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element which referenced the SDK.</param>
         /// <param name="solutionPath">The full path to the solution file, if any, that is resolving the SDK.</param>
         /// <param name="projectPath">The full path to the project file that is resolving the SDK.</param>
+        /// <param name="interactive">Indicates whether or not the resolver is allowed to be interactive.</param>
         /// <returns>An <see cref="SdkResult"/> containing information about the resolved SDK. If no resolver was able to resolve it, then <see cref="Framework.SdkResult.Success"/> == false. </returns>
-        SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath);
+        SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive);
     }
 }

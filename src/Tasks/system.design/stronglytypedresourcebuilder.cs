@@ -244,7 +244,7 @@ namespace Microsoft.Build.Tasks
             {
                 String propertyName = entry.Key;
                 // The resourceName will be the original value, before fixups, if any.
-                if (reverseFixupTable.TryGetValue(propertyName, out string resourceName))
+                if (!reverseFixupTable.TryGetValue(propertyName, out string resourceName))
                 {
                     resourceName = propertyName;
                 }

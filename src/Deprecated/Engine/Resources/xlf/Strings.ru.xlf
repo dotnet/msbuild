@@ -699,7 +699,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Тег &lt;{0}&gt; уже не поддерживается как дочерний элемент &lt;Project&gt;. Включите этот тег в цель и добавьте имя цели в атрибут InitialTargets элемента &lt;Project&gt;.</target>
+        <target state="translated">Тег &lt;{0}&gt; уже не поддерживается как дочерний элемент &lt;Project&gt;. Включите этот тег в целевой объект и добавьте имя целевого объекта в атрибут InitialTargets элемента &lt;Project&gt;.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">&lt;{0}&gt; Тег не поддерживается как дочерний элемент &lt; проект &gt;. Поместите этот тег в цель и добавьте имя целевого объекта атрибута «InitialTargets» элемента &lt; проект &gt;.</target>
@@ -993,9 +993,9 @@
       <trans-unit id="InvalidMessageImportance">
         <source>MSB4071: The value Importance="{0}" in the &lt;Message&gt; element is invalid. Valid values are: High, Normal and Low.</source>
         <target state="translated">MSB4071: недопустимое значение Importance="{0}" в элементе &lt;Message&gt;. Допустимые значения: High, Normal и Low.</target>
-        <note>{StrBegin="MSB4071: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.  
+        <note>{StrBegin="MSB4071: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
     The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
-    LOCALIZATION: "Importance" should not be localized.  
+    LOCALIZATION: "Importance" should not be localized.
                   "Message" should not be localized.
                   High should not be localized.
                   Normal should not be localized.

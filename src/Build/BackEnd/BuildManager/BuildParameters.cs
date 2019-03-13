@@ -24,7 +24,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// This class represents all of the settings which must be specified to start a build.
     /// </summary>
-    public class BuildParameters : INodePacketTranslatable
+    public class BuildParameters : ITranslatable
     {
         /// <summary>
         /// The default thread stack size for threads owned by MSBuild.
@@ -207,6 +207,14 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectLoadSettings _projectLoadSettings = ProjectLoadSettings.Default;
 
+        private bool _interactive;
+
+        private bool _isolateProjects;
+
+        private string[] _inputResultsCacheFiles;
+
+        private string _outputResultsCacheFile;
+
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
@@ -236,9 +244,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Private constructor for translation
         /// </summary>
-        private BuildParameters(INodePacketTranslator translator)
+        private BuildParameters(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -283,6 +291,10 @@ namespace Microsoft.Build.Execution
             WarningsAsErrors = other.WarningsAsErrors == null ? null : new HashSet<string>(other.WarningsAsErrors, StringComparer.OrdinalIgnoreCase);
             WarningsAsMessages = other.WarningsAsMessages == null ? null : new HashSet<string>(other.WarningsAsMessages, StringComparer.OrdinalIgnoreCase);
             _projectLoadSettings = other._projectLoadSettings;
+            _interactive = other._interactive;
+            _isolateProjects = other._isolateProjects;
+            _inputResultsCacheFiles = other._inputResultsCacheFiles;
+            _outputResultsCacheFile = other._outputResultsCacheFile;
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -713,6 +725,43 @@ namespace Microsoft.Build.Execution
             set => _projectLoadSettings = value;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating if the build is allowed to interact with the user.
+        /// </summary>
+        public bool Interactive
+        {
+            get => _interactive;
+            set => _interactive = value;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether projects should build in isolation.
+        /// </summary>
+        public bool IsolateProjects
+        {
+            get => _isolateProjects;
+            set => _isolateProjects = value;
+        }
+
+        /// <summary>
+        /// Input cache files that MSBuild will use to read build results from.
+        /// Setting this also turns on isolated builds.
+        /// </summary>
+        public string[] InputResultsCacheFiles
+        {
+            get => _inputResultsCacheFiles;
+            set => _inputResultsCacheFiles = value;
+        }
+
+        /// <summary>
+        /// Output cache file where MSBuild will write the contents of its build result caches during EndBuild.
+        /// Setting this also turns on isolated builds.
+        /// </summary>
+        public string OutputResultsCacheFile
+        {
+            get => _outputResultsCacheFile;
+            set => _outputResultsCacheFile = value;
+        }
 
         /// <summary>
         /// Retrieves a toolset.
@@ -732,10 +781,16 @@ namespace Microsoft.Build.Execution
             return new BuildParameters(this);
         }
 
+        internal bool UsesCachedResults() => UsesInputCaches() || UsesOutputCache();
+
+        internal bool UsesOutputCache() => OutputResultsCacheFile != null;
+
+        internal bool UsesInputCaches() => InputResultsCacheFiles != null;
+
         /// <summary>
         /// Implementation of the serialization mechanism.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _buildId);
             /* No build thread priority during translation.  We specifically use the default (which is ThreadPriority.Normal) */
@@ -762,10 +817,13 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _logTaskInputs);
             translator.Translate(ref _logInitialPropertiesAndItems);
             translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
+            translator.Translate(ref _interactive);
+            translator.Translate(ref _isolateProjects);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.
             // LegacyThreadingSemantics is not transmitted.
+            // InputResultsCacheFiles and OutputResultsCacheFile are not transmitted, as they are only used by the BuildManager
         }
 
 #region INodePacketTranslatable Members
@@ -773,7 +831,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The class factory for deserialization.
         /// </summary>
-        internal static BuildParameters FactoryForDeserialization(INodePacketTranslator translator)
+        internal static BuildParameters FactoryForDeserialization(ITranslator translator)
         {
             return new BuildParameters(translator);
         }

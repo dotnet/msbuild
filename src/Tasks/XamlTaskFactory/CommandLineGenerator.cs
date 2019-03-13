@@ -535,7 +535,7 @@ namespace Microsoft.Build.Tasks.Xaml
                     {
                         if (arg.Item2)
                         {
-                            throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.MissingRequiredArgument", parentSwitch, arg.Item1));
+                            throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.MissingRequiredArgument", parentSwitch, arg.Item1));
                         }
                     }
                 }

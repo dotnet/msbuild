@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks
                             //
                             // Also, when not under debugger (!) it will give error == 3 for path too long. Make that consistently throw instead.
                             if ((error == 2 /* ERROR_FILE_NOT_FOUND */|| error == 3 /* ERROR_PATH_NOT_FOUND */)
-                                && _filename.Length <= NativeMethodsShared.MAX_PATH)
+                                && _filename.Length <= NativeMethodsShared.MaxPath)
                             {
                                 Exists = false;
                                 return;
@@ -139,30 +139,30 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        // Check if we have a directory
-                        IsDirectory = FileSystems.Default.DirectoryExists(_filename);
-                        Exists = IsDirectory;
+                        var fileInfo = new FileInfo(_filename);
 
-                        // If not exists, see if this is a file
-                        if (!Exists)
-                        {
-                            Exists = FileSystems.Default.FileExists(_filename);
-                        }
-
-                        if (IsDirectory)
-                        {
-                            // Use DirectoryInfo to get the last write date
-                            var directoryInfo = new DirectoryInfo(_filename);
-                            IsReadOnly = false;
-                            LastWriteTimeUtc = directoryInfo.LastWriteTimeUtc;
-                        }
-                        else if (Exists)
+                        if (fileInfo.Exists)
                         {
                             // Use FileInfo to get readonly and last write date
-                            var fileInfo = new FileInfo(_filename);
+                            Exists = true;
                             IsReadOnly = fileInfo.IsReadOnly;
                             LastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
                             Length = fileInfo.Length;
+
+                        }
+                        else
+                        {
+                            var directoryInfo = new DirectoryInfo(_filename);
+
+                            if (directoryInfo.Exists)
+                            {
+                                // Use DirectoryInfo to get the last write date
+                                Exists = true;
+                                IsDirectory = true;
+                                IsReadOnly = false;
+                                LastWriteTimeUtc = directoryInfo.LastWriteTimeUtc;
+                            }
+
                         }
                     }
                 }

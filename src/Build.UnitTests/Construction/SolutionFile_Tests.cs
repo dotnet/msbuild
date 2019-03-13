@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.Construction
                  proj
             );
             Assert.Equal(SolutionProjectType.Unknown, proj.ProjectType);
-            Assert.True(proj.ProjectName.StartsWith("EmptyProjectName"));
+            Assert.StartsWith("EmptyProjectName", proj.ProjectName);
             Assert.Equal("src\\.proj", proj.RelativePath);
             Assert.Equal("Unique name-GUID", proj.ProjectGuid);
         }
@@ -171,8 +171,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 //Project should get added to the solution
-                Assert.Equal(solution.ProjectsInOrder[0].RelativePath, @"someproj.etp");
-                Assert.Equal(solution.ProjectsInOrder[1].RelativePath, @"ClassLibrary2.csproj");
+                Assert.Equal(@"someproj.etp", solution.ProjectsInOrder[0].RelativePath);
+                Assert.Equal(@"ClassLibrary2.csproj", solution.ProjectsInOrder[1].RelativePath);
             }
             // Delete the files created during the test
             finally
@@ -363,9 +363,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
                 //Project should get added to the solution
-                Assert.Equal(solution.ProjectsInOrder[0].RelativePath, @"someproj.etp");
-                Assert.Equal(solution.ProjectsInOrder[1].RelativePath, @"someproj2.etp");
-                Assert.Equal(solution.ProjectsInOrder[2].RelativePath, @"ClassLibrary1.csproj");
+                Assert.Equal(@"someproj.etp", solution.ProjectsInOrder[0].RelativePath);
+                Assert.Equal(@"someproj2.etp", solution.ProjectsInOrder[1].RelativePath);
+                Assert.Equal(@"ClassLibrary1.csproj", solution.ProjectsInOrder[2].RelativePath);
             }
             // Delete the files created during the test
             finally
@@ -389,8 +389,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solutionPriorToDev12 = ParseSolutionHelper(solutionFileContentsPriorToDev12);
 
-            Assert.Equal(solutionPriorToDev12.Version, 11);
-            Assert.Equal(solutionPriorToDev12.VisualStudioVersion, 10);
+            Assert.Equal(11, solutionPriorToDev12.Version);
+            Assert.Equal(10, solutionPriorToDev12.VisualStudioVersion);
 
             // Create the SolutionFile object
             string solutionFileContentsDev12 =
@@ -405,8 +405,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solutionDev12 = ParseSolutionHelper(solutionFileContentsDev12);
 
-            Assert.Equal(solutionDev12.Version, 11);
-            Assert.Equal(solutionDev12.VisualStudioVersion, 12);
+            Assert.Equal(11, solutionDev12.Version);
+            Assert.Equal(12, solutionDev12.VisualStudioVersion);
 
             // Test parsing of corrupted VisualStudioVersion lines
 
@@ -422,8 +422,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
 
             SolutionFile solutionDev12Corrupted1 = ParseSolutionHelper(solutionFileContentsDev12Corrupted1);
-            Assert.Equal(solutionDev12Corrupted1.Version, 11);
-            Assert.Equal(solutionDev12Corrupted1.VisualStudioVersion, 10);
+            Assert.Equal(11, solutionDev12Corrupted1.Version);
+            Assert.Equal(10, solutionDev12Corrupted1.VisualStudioVersion);
 
             // Remove version number and VSPRO_PLATFORM tag
             string solutionFileContentsDev12Corrupted2 =
@@ -437,8 +437,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
 
             SolutionFile solutionDev12Corrupted2 = ParseSolutionHelper(solutionFileContentsDev12Corrupted2);
-            Assert.Equal(solutionDev12Corrupted2.Version, 11);
-            Assert.Equal(solutionDev12Corrupted2.VisualStudioVersion, 10);
+            Assert.Equal(11, solutionDev12Corrupted2.Version);
+            Assert.Equal(10, solutionDev12Corrupted2.VisualStudioVersion);
 
             // Switch positions between VSPRO_PLATFORM tag and version number
             string solutionFileContentsDev12Corrupted3 =
@@ -452,8 +452,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
 
             SolutionFile solutionDev12Corrupted3 = ParseSolutionHelper(solutionFileContentsDev12Corrupted3);
-            Assert.Equal(solutionDev12Corrupted3.Version, 11);
-            Assert.Equal(solutionDev12Corrupted3.VisualStudioVersion, 10);
+            Assert.Equal(11, solutionDev12Corrupted3.Version);
+            Assert.Equal(10, solutionDev12Corrupted3.VisualStudioVersion);
 
             // Add a number of spaces before version number and glue it together with VSPRO_PLATFORM
             string solutionFileContentsDev12Corrupted4 =
@@ -467,8 +467,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
 
             SolutionFile solutionDev12Corrupted4 = ParseSolutionHelper(solutionFileContentsDev12Corrupted4);
-            Assert.Equal(solutionDev12Corrupted4.Version, 11);
-            Assert.Equal(solutionDev12Corrupted4.VisualStudioVersion, 10);
+            Assert.Equal(11, solutionDev12Corrupted4.Version);
+            Assert.Equal(10, solutionDev12Corrupted4.VisualStudioVersion);
 
             // Corrupted version number
             string solutionFileContentsDev12Corrupted5 =
@@ -482,8 +482,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
 
             SolutionFile solutionDev12Corrupted5 = ParseSolutionHelper(solutionFileContentsDev12Corrupted5);
-            Assert.Equal(solutionDev12Corrupted5.Version, 11);
-            Assert.Equal(solutionDev12Corrupted5.VisualStudioVersion, 10);
+            Assert.Equal(11, solutionDev12Corrupted5.Version);
+            Assert.Equal(10, solutionDev12Corrupted5.VisualStudioVersion);
 
             // Add a number of spaces before version number
             string solutionFileContentsDev12Corrupted6 =
@@ -497,8 +497,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
 
             SolutionFile solutionDev12Corrupted6 = ParseSolutionHelper(solutionFileContentsDev12Corrupted6);
-            Assert.Equal(solutionDev12Corrupted6.Version, 11);
-            Assert.Equal(solutionDev12Corrupted6.VisualStudioVersion, 12);
+            Assert.Equal(11, solutionDev12Corrupted6.Version);
+            Assert.Equal(12, solutionDev12Corrupted6.VisualStudioVersion);
         }
 
         /// <summary>
@@ -578,11 +578,12 @@ namespace Microsoft.Build.UnitTests.Construction
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
                 //Project should get added to the solution
-                Assert.Equal(solution.ProjectsInOrder[0].RelativePath, @"someproj.etp");
-                Assert.Equal(solution.ProjectsInOrder[1].RelativePath, @"someproj2.etp");
-                Assert.Equal(solution.ProjectsInOrder[2].RelativePath, @"ETPProjUpgradeTest\someproj3.etp");
-                Assert.Equal(solution.ProjectsInOrder[3].RelativePath,
-                    Path.Combine("ETPProjUpgradeTest", "..", "SomeFolder", "ClassLibrary1.csproj"));
+                Assert.Equal(@"someproj.etp", solution.ProjectsInOrder[0].RelativePath);
+                Assert.Equal(@"someproj2.etp", solution.ProjectsInOrder[1].RelativePath);
+                Assert.Equal(@"ETPProjUpgradeTest\someproj3.etp", solution.ProjectsInOrder[2].RelativePath);
+                Assert.Equal(
+                    Path.Combine("ETPProjUpgradeTest", "..", "SomeFolder", "ClassLibrary1.csproj"),
+                    solution.ProjectsInOrder[3].RelativePath);
             }
             // Delete the files created during the test
             finally
@@ -636,13 +637,13 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 string errCode, ignoredKeyword;
-                ResourceUtilities.FormatResourceString(out errCode, out ignoredKeyword, "Shared.InvalidProjectFile",
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out ignoredKeyword, "Shared.InvalidProjectFile",
                    "someproj.etp", String.Empty);
                 foreach (string warningString in solution.SolutionParserWarnings)
                 {
                     Console.WriteLine(warningString.ToString());
                 }
-                Assert.True(solution.SolutionParserErrorCodes[0].ToString().Contains(errCode));
+                Assert.Contains(errCode, solution.SolutionParserErrorCodes[0].ToString());
             }
             // Delete the files created during the test
             finally
@@ -671,9 +672,9 @@ namespace Microsoft.Build.UnitTests.Construction
             File.Delete(proj1Path);
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             string errCode, ignoredKeyword;
-            ResourceUtilities.FormatResourceString(out errCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
                   "someproj.etp", String.Empty);
-            Assert.True(solution.SolutionParserErrorCodes[0].ToString().Contains(errCode));
+            Assert.Contains(errCode, solution.SolutionParserErrorCodes[0].ToString());
         }
 
         /// <summary>
@@ -708,7 +709,7 @@ namespace Microsoft.Build.UnitTests.Construction
             using (var env = TestEnvironment.Create())
             {
                 var solutionFolder = env.CreateFolder(Path.Combine(FileUtilities.GetTemporaryDirectory(), "sln"));
-                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.Path, "RelativePath"));
+                env.CreateFolder(Path.Combine(solutionFolder.Path, "RelativePath"));
 
                 SolutionFile p = new SolutionFile();
                 p.FullPath = Path.Combine(solutionFolder.Path, "RelativePath", "project file");
@@ -762,7 +763,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -780,7 +781,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -798,8 +799,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-            Assert.Equal(1, solution.SolutionParserComments.Count); // "Expected the solution parser to contain one comment"
-            Assert.True(String.Equals((string)solution.SolutionParserComments[0], ResourceUtilities.FormatResourceString("UnrecognizedSolutionComment", "999"), StringComparison.OrdinalIgnoreCase));
+            Assert.Single(solution.SolutionParserComments); // "Expected the solution parser to contain one comment"
+            Assert.Equal(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedSolutionComment", "999"), (string)solution.SolutionParserComments[0]);
         }
 
         [Fact]
@@ -862,7 +863,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
             try
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
             catch (Exception ex)
             {
@@ -919,24 +920,24 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("ConsoleApplication1", solution.ProjectsInOrder[0].ProjectName);
             Assert.Equal(@"ConsoleApplication1\ConsoleApplication1.vbproj", solution.ProjectsInOrder[0].RelativePath);
             Assert.Equal("{AB3413A6-D689-486D-B7F0-A095371B3F13}", solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[0].Dependencies.Count);
-            Assert.Equal(null, solution.ProjectsInOrder[0].ParentProjectGuid);
+            Assert.Empty(solution.ProjectsInOrder[0].Dependencies);
+            Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
             Assert.Equal("ConsoleApplication1", solution.ProjectsInOrder[0].GetUniqueProjectName());
 
             Assert.Equal(SolutionProjectType.KnownToBeMSBuildFormat, solution.ProjectsInOrder[1].ProjectType);
             Assert.Equal("vbClassLibrary", solution.ProjectsInOrder[1].ProjectName);
             Assert.Equal(@"vbClassLibrary\vbClassLibrary.vbproj", solution.ProjectsInOrder[1].RelativePath);
             Assert.Equal("{BA333A76-4511-47B8-8DF4-CA51C303AD0B}", solution.ProjectsInOrder[1].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[1].Dependencies.Count);
-            Assert.Equal(null, solution.ProjectsInOrder[1].ParentProjectGuid);
+            Assert.Empty(solution.ProjectsInOrder[1].Dependencies);
+            Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
             Assert.Equal("vbClassLibrary", solution.ProjectsInOrder[1].GetUniqueProjectName());
 
             Assert.Equal(SolutionProjectType.KnownToBeMSBuildFormat, solution.ProjectsInOrder[2].ProjectType);
             Assert.Equal("ClassLibrary1", solution.ProjectsInOrder[2].ProjectName);
             Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[2].RelativePath);
             Assert.Equal("{DEBCE986-61B9-435E-8018-44B9EF751655}", solution.ProjectsInOrder[2].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[2].Dependencies.Count);
-            Assert.Equal(null, solution.ProjectsInOrder[2].ParentProjectGuid);
+            Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
+            Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
             Assert.Equal("ClassLibrary1", solution.ProjectsInOrder[2].GetUniqueProjectName());
         }
 
@@ -997,31 +998,31 @@ namespace Microsoft.Build.UnitTests.Construction
 
             Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[0].RelativePath);
             Assert.Equal("{34E0D07D-CF8F-459D-9449-C4188D8C5564}", solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[0].Dependencies.Count);
-            Assert.Equal(null, solution.ProjectsInOrder[0].ParentProjectGuid);
+            Assert.Empty(solution.ProjectsInOrder[0].Dependencies);
+            Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
             Assert.Equal("ClassLibrary1", solution.ProjectsInOrder[0].GetUniqueProjectName());
 
             Assert.Equal(SolutionProjectType.SolutionFolder, solution.ProjectsInOrder[1].ProjectType);
             Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[1].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[1].Dependencies.Count);
-            Assert.Equal(null, solution.ProjectsInOrder[1].ParentProjectGuid);
+            Assert.Empty(solution.ProjectsInOrder[1].Dependencies);
+            Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
             Assert.Equal("MySlnFolder", solution.ProjectsInOrder[1].GetUniqueProjectName());
 
             Assert.Equal(@"MyPhysicalFolder\ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[2].RelativePath);
             Assert.Equal("{A5EE8128-B08E-4533-86C5-E46714981680}", solution.ProjectsInOrder[2].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[2].Dependencies.Count);
+            Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
             Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[2].ParentProjectGuid);
             Assert.Equal(@"MySlnFolder\ClassLibrary1", solution.ProjectsInOrder[2].GetUniqueProjectName());
 
             Assert.Equal(SolutionProjectType.SolutionFolder, solution.ProjectsInOrder[3].ProjectType);
             Assert.Equal("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", solution.ProjectsInOrder[3].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[3].Dependencies.Count);
+            Assert.Empty(solution.ProjectsInOrder[3].Dependencies);
             Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[3].ParentProjectGuid);
             Assert.Equal(@"MySlnFolder\MySubSlnFolder", solution.ProjectsInOrder[3].GetUniqueProjectName());
 
             Assert.Equal(@"ClassLibrary2\ClassLibrary2.csproj", solution.ProjectsInOrder[4].RelativePath);
             Assert.Equal("{6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}", solution.ProjectsInOrder[4].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[4].Dependencies.Count);
+            Assert.Empty(solution.ProjectsInOrder[4].Dependencies);
             Assert.Equal("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", solution.ProjectsInOrder[4].ParentProjectGuid);
             Assert.Equal(@"MySlnFolder\MySubSlnFolder\ClassLibrary2", solution.ProjectsInOrder[4].GetUniqueProjectName());
         }
@@ -1138,12 +1139,12 @@ namespace Microsoft.Build.UnitTests.Construction
 
             try
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
             catch (InvalidProjectFileException e)
             {
                 Assert.Equal("MSB5023", e.ErrorCode);
-                Assert.True(e.Message.Contains("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}"));
+                Assert.Contains("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", e.Message);
                 return;
             }
 
@@ -1357,9 +1358,9 @@ EndGlobal
 
             Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[0].RelativePath);
             Assert.Equal("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}", solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.Equal(1, solution.ProjectsInOrder[0].Dependencies.Count);
+            Assert.Single(solution.ProjectsInOrder[0].Dependencies);
             Assert.Equal("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", (string)solution.ProjectsInOrder[0].Dependencies[0]);
-            Assert.Equal(null, solution.ProjectsInOrder[0].ParentProjectGuid);
+            Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
             Assert.Equal("ClassLibrary1", solution.ProjectsInOrder[0].GetUniqueProjectName());
 
             Assert.Equal(@"ClassLibrary2\ClassLibrary2.csproj", solution.ProjectsInOrder[1].RelativePath);
@@ -1367,13 +1368,13 @@ EndGlobal
             Assert.Equal(2, solution.ProjectsInOrder[1].Dependencies.Count);
             Assert.Equal("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", (string)solution.ProjectsInOrder[1].Dependencies[0]);
             Assert.Equal("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}", (string)solution.ProjectsInOrder[1].Dependencies[1]);
-            Assert.Equal(null, solution.ProjectsInOrder[1].ParentProjectGuid);
+            Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
             Assert.Equal("ClassLibrary2", solution.ProjectsInOrder[1].GetUniqueProjectName());
 
             Assert.Equal(@"ClassLibrary3\ClassLibrary3.csproj", solution.ProjectsInOrder[2].RelativePath);
             Assert.Equal("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", solution.ProjectsInOrder[2].ProjectGuid);
-            Assert.Equal(0, solution.ProjectsInOrder[2].Dependencies.Count);
-            Assert.Equal(null, solution.ProjectsInOrder[2].ParentProjectGuid);
+            Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
+            Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
             Assert.Equal("ClassLibrary3", solution.ProjectsInOrder[2].GetUniqueProjectName());
         }
 
@@ -1428,14 +1429,14 @@ EndGlobal
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents.Replace('`', '"'));
 
-            Assert.Equal(1, solution.ProjectsInOrder.Count);
+            Assert.Single(solution.ProjectsInOrder);
 
             Assert.Equal(SolutionProjectType.WebProject, solution.ProjectsInOrder[0].ProjectType);
             Assert.Equal(@"C:\WebSites\WebApplication3\", solution.ProjectsInOrder[0].ProjectName);
             Assert.Equal(@"C:\WebSites\WebApplication3\", solution.ProjectsInOrder[0].RelativePath);
             Assert.Equal("{464FD0B9-E335-4677-BE1E-6B2F982F4D86}", solution.ProjectsInOrder[0].ProjectGuid);
             Assert.Equal(2, solution.ProjectsInOrder[0].Dependencies.Count);
-            Assert.Equal(null, solution.ProjectsInOrder[0].ParentProjectGuid);
+            Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
             Assert.Equal(@"C:\WebSites\WebApplication3\", solution.ProjectsInOrder[0].GetUniqueProjectName());
 
             Hashtable aspNetCompilerParameters = solution.ProjectsInOrder[0].AspNetConfigurations;
@@ -1588,12 +1589,12 @@ EndGlobal
                 configurationNames.Add(configuration.FullName);
             }
 
-            Assert.True(configurationNames.Contains("Debug|Any CPU"));
-            Assert.True(configurationNames.Contains("Debug|Mixed Platforms"));
-            Assert.True(configurationNames.Contains("Debug|Win32"));
-            Assert.True(configurationNames.Contains("Release|Any CPU"));
-            Assert.True(configurationNames.Contains("Release|Mixed Platforms"));
-            Assert.True(configurationNames.Contains("Release|Win32"));
+            Assert.Contains("Debug|Any CPU", configurationNames);
+            Assert.Contains("Debug|Mixed Platforms", configurationNames);
+            Assert.Contains("Debug|Win32", configurationNames);
+            Assert.Contains("Release|Any CPU", configurationNames);
+            Assert.Contains("Release|Mixed Platforms", configurationNames);
+            Assert.Contains("Release|Win32", configurationNames);
 
             Assert.Equal("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
             Assert.Equal("Mixed Platforms", solution.GetDefaultPlatformName()); // "Default solution platform"
@@ -1648,12 +1649,12 @@ EndGlobal
                 configurationNames.Add(configuration.FullName);
             }
 
-            Assert.True(configurationNames.Contains("Debug|Any CPU"));
-            Assert.True(configurationNames.Contains("Debug|ARM"));
-            Assert.True(configurationNames.Contains("Debug|x86"));
-            Assert.True(configurationNames.Contains("Release|Any CPU"));
-            Assert.True(configurationNames.Contains("Release|ARM"));
-            Assert.True(configurationNames.Contains("Release|x86"));
+            Assert.Contains("Debug|Any CPU", configurationNames);
+            Assert.Contains("Debug|ARM", configurationNames);
+            Assert.Contains("Debug|x86", configurationNames);
+            Assert.Contains("Release|Any CPU", configurationNames);
+            Assert.Contains("Release|ARM", configurationNames);
+            Assert.Contains("Release|x86", configurationNames);
 
             Assert.Equal("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
             Assert.Equal("Any CPU", solution.GetDefaultPlatformName()); // "Default solution platform"
@@ -1682,7 +1683,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -1709,7 +1710,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -1736,7 +1737,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -1800,42 +1801,42 @@ EndGlobal
             Assert.Equal(6, csProject.ProjectConfigurations.Count);
 
             Assert.Equal("Debug|AnyCPU", csProject.ProjectConfigurations["Debug|Any CPU"].FullName);
-            Assert.Equal(true, csProject.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
+            Assert.True(csProject.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
 
             Assert.Equal("Release|AnyCPU", csProject.ProjectConfigurations["Debug|Mixed Platforms"].FullName);
-            Assert.Equal(true, csProject.ProjectConfigurations["Debug|Mixed Platforms"].IncludeInBuild);
+            Assert.True(csProject.ProjectConfigurations["Debug|Mixed Platforms"].IncludeInBuild);
 
             Assert.Equal("Debug|AnyCPU", csProject.ProjectConfigurations["Debug|Win32"].FullName);
-            Assert.Equal(false, csProject.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
+            Assert.False(csProject.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
 
             Assert.Equal("Release|AnyCPU", csProject.ProjectConfigurations["Release|Any CPU"].FullName);
-            Assert.Equal(true, csProject.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
+            Assert.True(csProject.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
 
             Assert.Equal("Release|AnyCPU", csProject.ProjectConfigurations["Release|Mixed Platforms"].FullName);
-            Assert.Equal(true, csProject.ProjectConfigurations["Release|Mixed Platforms"].IncludeInBuild);
+            Assert.True(csProject.ProjectConfigurations["Release|Mixed Platforms"].IncludeInBuild);
 
             Assert.Equal("Release|AnyCPU", csProject.ProjectConfigurations["Release|Win32"].FullName);
-            Assert.Equal(false, csProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
+            Assert.False(csProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
 
             Assert.Equal(6, vcProject.ProjectConfigurations.Count);
 
             Assert.Equal("Debug|Win32", vcProject.ProjectConfigurations["Debug|Any CPU"].FullName);
-            Assert.Equal(false, vcProject.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
+            Assert.False(vcProject.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
 
             Assert.Equal("Debug|Win32", vcProject.ProjectConfigurations["Debug|Mixed Platforms"].FullName);
-            Assert.Equal(true, vcProject.ProjectConfigurations["Debug|Mixed Platforms"].IncludeInBuild);
+            Assert.True(vcProject.ProjectConfigurations["Debug|Mixed Platforms"].IncludeInBuild);
 
             Assert.Equal("Debug|Win32", vcProject.ProjectConfigurations["Debug|Win32"].FullName);
-            Assert.Equal(true, vcProject.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
+            Assert.True(vcProject.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
 
             Assert.Equal("Release|Win32", vcProject.ProjectConfigurations["Release|Any CPU"].FullName);
-            Assert.Equal(false, vcProject.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
+            Assert.False(vcProject.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
 
             Assert.Equal("Release|Win32", vcProject.ProjectConfigurations["Release|Mixed Platforms"].FullName);
-            Assert.Equal(true, vcProject.ProjectConfigurations["Release|Mixed Platforms"].IncludeInBuild);
+            Assert.True(vcProject.ProjectConfigurations["Release|Mixed Platforms"].IncludeInBuild);
 
             Assert.Equal("Release|Win32", vcProject.ProjectConfigurations["Release|Win32"].FullName);
-            Assert.Equal(true, vcProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
+            Assert.True(vcProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
         }
 
         /// <summary>
@@ -1883,17 +1884,17 @@ EndGlobal
             ProjectInSolution exeProject = (ProjectInSolution)solution.ProjectsByGuid["{25FD9E7C-F37E-48E0-9A7C-607FE4AACCC0}"];
             ProjectInSolution missingWebProject = (ProjectInSolution)solution.ProjectsByGuid["{E8E75132-67E4-4D6F-9CAE-8DA4C883F419}"];
 
-            Assert.Equal(1, webProject.ProjectConfigurations.Count);
+            Assert.Single(webProject.ProjectConfigurations);
 
             Assert.Equal("Debug|.NET", webProject.ProjectConfigurations["Debug|.NET"].FullName);
-            Assert.Equal(true, webProject.ProjectConfigurations["Debug|.NET"].IncludeInBuild);
+            Assert.True(webProject.ProjectConfigurations["Debug|.NET"].IncludeInBuild);
 
-            Assert.Equal(1, exeProject.ProjectConfigurations.Count);
+            Assert.Single(exeProject.ProjectConfigurations);
 
             Assert.Equal("Debug", exeProject.ProjectConfigurations["Debug|.NET"].FullName);
-            Assert.Equal(false, exeProject.ProjectConfigurations["Debug|.NET"].IncludeInBuild);
+            Assert.False(exeProject.ProjectConfigurations["Debug|.NET"].IncludeInBuild);
 
-            Assert.Equal(0, missingWebProject.ProjectConfigurations.Count);
+            Assert.Empty(missingWebProject.ProjectConfigurations);
 
             Assert.Equal("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
             Assert.Equal(".NET", solution.GetDefaultPlatformName()); // "Default solution platform"

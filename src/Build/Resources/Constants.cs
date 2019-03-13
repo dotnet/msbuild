@@ -54,6 +54,7 @@ namespace Microsoft.Build.Internal
         internal const string version = "MSBuildVersion";
         internal const string osName = "OS";
         internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";
+        internal const string interactive = "MSBuildInteractive";
 
         /// <summary>
         /// Lookup for reserved property names. Intentionally do not include MSBuildExtensionsPath* or MSBuildUserExtensionsPath in this list.  We need tasks to be able to override those.
@@ -84,7 +85,8 @@ namespace Microsoft.Build.Internal
             lastTaskResult,
             programFiles32,
             assemblyVersion,
-            version
+            version,
+            interactive
         };
 
         /// <summary>
@@ -146,14 +148,7 @@ namespace Microsoft.Build.Internal
         {
             get
             {
-#if STANDALONEBUILD
-                return MSBuildConstants.CurrentToolsVersion;
-#else
-                Version version = new Version(ThisAssembly.Version);
-
-                // "4.0.0.0" --> "4.0"
-                return version.Major + "." + version.Minor;
-#endif
+                return MSBuildConstants.CurrentProductVersion;
             }
         }
 
@@ -182,6 +177,8 @@ namespace Microsoft.Build.Internal
 
         // Name of the environment variable that always points to 32-bit program files.
         internal const string programFilesx86 = "ProgramFiles(x86)";
+
+        internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
     }
 
     /// <summary>

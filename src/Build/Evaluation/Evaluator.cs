@@ -66,28 +66,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Character used to split InitialTargets and DefaultTargets lists
         /// </summary>
-        private static readonly char[] s_splitter = new char[] { ';' };
-
-        /// <summary>
-        /// Locals types names. We only have these because 'Built In' has a space,
-        /// else we would use LocalsTypes enum names.
-        /// Note: This should match LocalsTypes enum.
-        /// </summary>
-        private static readonly string[] s_localsTypesNames = new string[]
-        {
-                "Project",
-                "Built In",
-                "Environment",
-                "Toolset",
-                "SubToolset",
-                "Global",
-                "EvaluateExpression",
-                "EvaluateCondition",
-                "ToolsVersion",
-                "Properties",
-                "ItemDefinitions",
-                "Items"
-        };
+        private static readonly char[] s_splitter = MSBuildConstants.SemicolonChar;
 
         /// <summary>
         /// Expander for evaluating conditions
@@ -200,6 +179,13 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
+        /// Keeps track of the project that is last modified of the project and all imports.
+        /// </summary>
+        private ProjectRootElement _lastModifiedProject;
+
+        private readonly bool _interactive;
+
+        /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
         private Evaluator(
@@ -214,7 +200,8 @@ namespace Microsoft.Build.Evaluation
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext,
-            bool profileEvaluation)
+            bool profileEvaluation,
+            bool interactive)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
@@ -245,6 +232,16 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+
+            // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
+            // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
+            _interactive = interactive || String.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("NuGetInteractive")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
+
+            // The last modified project is the project itself unless its an in-memory project
+            if (projectRootElement.FullPath != null)
+            {
+                _lastModifiedProject = projectRootElement;
+            }
         }
 
         /// <summary>
@@ -258,73 +255,6 @@ namespace Microsoft.Build.Evaluation
         /// ability, without having a language service.
         /// </summary>
         internal delegate bool EvaluateConditionalExpression(string unexpandedExpression);
-
-        /// <summary>
-        /// Enumeration for locals types
-        /// Note: This should match LocalsTypesNames
-        /// </summary>
-        private enum LocalsTypes : int
-        {
-            /// <summary>
-            /// Project,
-            /// </summary>
-            Project,
-
-            /// <summary>
-            /// BuiltIn,
-            /// </summary>
-            BuiltIn,
-
-            /// <summary>
-            /// Environment,
-            /// </summary>
-            Environment,
-
-            /// <summary>
-            /// Toolset,
-            /// </summary>
-            Toolset,
-
-            /// <summary>
-            /// SubToolset,
-            /// </summary>
-            SubToolset,
-
-            /// <summary>
-            /// Global,
-            /// </summary>
-            Global,
-
-            /// <summary>
-            /// EvaluateExpression,
-            /// </summary>
-            EvaluateExpression,
-
-            /// <summary>
-            /// EvaluateCondition,
-            /// </summary>
-            EvaluateCondition,
-
-            /// <summary>
-            /// ToolsVersion,
-            /// </summary>
-            ToolsVersion,
-
-            /// <summary>
-            /// Properties,
-            /// </summary>
-            Properties,
-
-            /// <summary>
-            /// ItemDefinitions,
-            /// </summary>
-            ItemDefinitions,
-
-            /// <summary>
-            /// Items
-            /// </summary>
-            Items
-        }
 
         /// <summary>
         /// Evaluates the project data passed in.
@@ -347,7 +277,8 @@ namespace Microsoft.Build.Evaluation
             BuildEventContext buildEventContext,
             ISdkResolverService sdkResolverService,
             int submissionId,
-            EvaluationContext evaluationContext = null)
+            EvaluationContext evaluationContext = null,
+            bool interactive = false)
         {
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
@@ -373,7 +304,8 @@ namespace Microsoft.Build.Evaluation
                     sdkResolverService,
                     submissionId,
                     evaluationContext,
-                    profileEvaluation);
+                    profileEvaluation,
+                    interactive);
 
                 evaluator.Evaluate(loggingService, buildEventContext);
 #if MSBUILDENABLEVSPROFILING 
@@ -692,6 +624,11 @@ namespace Microsoft.Build.Evaluation
                     environmentProperties = AddEnvironmentProperties();
                     toolsetProperties = AddToolsetProperties();
                     globalProperties = AddGlobalProperties();
+
+                    if (_interactive)
+                    {
+                        SetBuiltInProperty(ReservedPropertyNames.interactive, "true");
+                    }
                 }
 
 #if (!STANDALONEBUILD)
@@ -716,6 +653,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     PerformDepthFirstPass(_projectRootElement);
                 }
+
+                SetAllProjectsProperty();
 
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
@@ -1421,6 +1360,7 @@ namespace Microsoft.Build.Evaluation
                         !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name)
                     )
                 {
+                    _evaluationLoggingContext.LogComment(MessageImportance.Low, "OM_GlobalProperty", propertyElement.Name);
                     return;
                 }
 
@@ -2132,7 +2072,7 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive);
 
                 if (!sdkResult.Success)
                 {
@@ -2351,6 +2291,11 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             imports.Add(importedProjectElement);
+
+                            if (_lastModifiedProject == null || importedProjectElement.LastWriteTimeWhenRead > _lastModifiedProject.LastWriteTimeWhenRead)
+                            {
+                                _lastModifiedProject = importedProjectElement;
+                            }
 
                             if (_logProjectImportedEvents)
                             {
@@ -2724,6 +2669,27 @@ namespace Microsoft.Build.Evaluation
             sb.Append($"\"{strings[strings.Count - 1]}\"");
 
             return sb.ToString();
+        }
+
+        private void SetAllProjectsProperty()
+        {
+            if (_lastModifiedProject != null)
+            {
+                P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
+
+                P newValue = _data.SetProperty(
+                    Constants.MSBuildAllProjectsPropertyName,
+                    oldValue == null
+                        ? _lastModifiedProject.FullPath
+                        : $"{_lastModifiedProject.FullPath};{oldValue.EvaluatedValue}",
+                    isGlobalProperty: false,
+                    mayBeReserved: false);
+
+                if (oldValue != null)
+                {
+                    LogPropertyReassignment(oldValue, newValue, String.Empty);
+                }
+            }
         }
     }
 

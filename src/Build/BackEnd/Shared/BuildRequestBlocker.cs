@@ -71,7 +71,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
-        internal BuildRequestBlocker(INodePacketTranslator translator)
+        internal BuildRequestBlocker(ITranslator translator)
         {
             Translate(translator);
         }
@@ -223,7 +223,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Serialization method.
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref _blockedGlobalRequestId);
             translator.Translate(ref _targetsInProgress);
@@ -239,7 +239,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslator translator)
         {
             return new BuildRequestBlocker(translator);
         }

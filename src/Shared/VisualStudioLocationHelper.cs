@@ -16,7 +16,9 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class VisualStudioLocationHelper
     {
+#if FEATURE_VISUALSTUDIOSETUP
         private const int REGDB_E_CLASSNOTREG = unchecked((int) 0x80040154);
+#endif // FEATURE_VISUALSTUDIOSETUP
 
         /// <summary>
         /// Query the Visual Studio setup API to get instances of Visual Studio installed

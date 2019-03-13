@@ -703,6 +703,7 @@ namespace Microsoft.Build.Tasks
         public Hash() { }
         [Microsoft.Build.Framework.OutputAttribute]
         public string HashResult { get { throw null; } set { } }
+        public bool IgnoreCase { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] ItemsToHash { get { throw null; } set { } }
         public override bool Execute() { throw null; }

@@ -1,17 +1,10 @@
 all-mono:
-	./build.sh -hostType mono -configuration Release -skipTests
+	./eng/cibuild_bootstrapped_msbuild.sh --host_type mono --configuration Release --binaryLog --skip_tests
 
 test-mono:
-	./build.sh -hostType mono -configuration Release
-
-all-coreclr:
-	./build.sh -hostType core -skipTests
-
-test-coreclr:
-	./build.sh -hostType core
+	./eng/cibuild_bootstrapped_msbuild.sh --host_type mono --configuration Release --binaryLog
 
 clean-%: clean
 
 clean:
-	rm -Rf artifacts
-	rm -Rf build/obj
+	rm -Rf artifacts .packages

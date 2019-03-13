@@ -1,141 +1,187 @@
-queue:
-  name: VSEng-MicroBuildVS2017
-  timeoutInMinutes: 360
-trigger: none
+trigger:
+- master
+- vs*
+
 variables:
-  BuildConfiguration: 'Release'
-  TeamName: MSBuild
-steps:
-- task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
-  displayName: Install Signing Plugin
-  inputs:
-    signType: '$(SignType)'
+  SignType: real
+  SkipApplyOptimizationData: false
 
-- task: ms-vseng.MicroBuildTasks.a9799c06-320f-4175-8756-31cd731bd5f3.MicroBuildIBCMergePlugin@0
-  displayName: Install IBCMerge Plugin
+jobs:
+- job: Windows_NT
+  pool: 
+    name: VSEng-MicroBuildVS2017
+    demands:
+    - agent.os -equals Windows_NT
 
-- task: CmdLine@1
-  displayName: save build number
-  inputs:
-    filename: echo
-    arguments: '##vso[task.setvariable variable=BUILD_BUILDNUMBER_SAVED]%BUILD_BUILDNUMBER%'
-  condition: always()
+  timeoutInMinutes: 180
 
-- task: CmdLine@1
-  displayName: Print Vars
-  inputs:
-    filename: set
-  condition: always()
+  variables:
+  - group: DotNet-Blob-Feed
+  - group: DotNet-Symbol-Publish
+  - group: Publish-Build-Assets
+  - name: TeamName
+    value: MSBuild
+  - name: VisualStudio.MajorVersion
+    value: 16
+  - name: VisualStudio.ChannelName
+    value: 'int.d16.0stg'
+  - name: VisualStudio.DropName
+    value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
-- task: CmdLine@1
-  displayName: Bogus build to have nerdbank.GitVersioning set the version for the swix plugin
-  inputs:
-    filename: '$(comspec)'
-    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & msbuild /restore $(Build.Repository.LocalPath)\build\SetMicrobuildVersion\SetMicrobuildVersion.csproj"'
+  steps:
+  - task: NuGetToolInstaller@0
+    inputs:
+      versionSpec: '4.9.2'
 
-- task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
-  displayName: Install Swix Plugin
-  inputs:
-    dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
+  - task: NuGetCommand@2
+    displayName: Restore internal tools
+    inputs:
+      command: restore
+      feedsToUse: config
+      restoreSolution: 'eng\common\internal\Tools.csproj'
+      nugetConfigPath: 'NuGet.config'
+      restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
-- task: CmdLine@1
-  displayName: restore build number
-  inputs:
-    filename: echo
-    arguments: '##vso[build.updatebuildnumber]%BUILD_BUILDNUMBER_SAVED%'
-  condition: always()
+  - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
+    inputs:
+      signType: $(SignType)
+      zipSources: false
+    condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
 
-- task: CmdLine@1
-  displayName: Print Vars
-  inputs:
-    filename: set
-  condition: always()
+  - task: ms-vseng.MicroBuildTasks.965C8DC6-1483-45C9-B384-5AC75DA1F1A4.MicroBuildOptProfPlugin@1
+    inputs:
+      skipRunOptimize: true
+    displayName: 'Install OptProf Plugin'
 
-- task: CmdLine@1
-  displayName: Run build.cmd
-  inputs:
-    filename: '$(comspec)'
-    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & $(Build.Repository.LocalPath)\build.cmd -pack -sign -configuration Release -properties /p:SignType=$(SignType)"'
+  # Required by MicroBuildBuildVSBootstrapper
+  - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+    inputs:
+      dropName: $(VisualStudio.DropName)
+      feedSource: 'https://devdiv-test.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json'
 
-- task: CmdLine@1
-  displayName: Print bin contents
-  inputs:
-    filename: dir
-    arguments: '/s /b artifacts\>artifacts\$(BuildConfiguration)\log\BinFileListing.log'
-  condition: always()
+  - script: eng/CIBuild.cmd
+              -configuration $(BuildConfiguration)
+              -officialBuildId $(Build.BuildNumber)
+              -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
+              /p:RepositoryName=$(Build.Repository.Name)
+              /p:VisualStudioIbcSourceBranchName=$(Build.SourceBranchName)
+              /p:VisualStudioDropAccessToken=$(System.AccessToken)
+              /p:VisualStudioDropName=$(VisualStudio.DropName)
+              /p:DotNetSignType=$(SignType)
+              /p:DotNetPublishToBlobFeed=true
+              /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+              /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+              /p:PublishToSymbolServer=true
+              /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+              /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+              /p:TeamName=MSBuild
+    displayName: Build
+    condition: succeeded()
 
-- task: CmdLine@1
-  displayName: Set build version to meaningful one again
-  inputs:
-    filename: '$(comspec)'
-    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & msbuild /restore $(Build.Repository.LocalPath)\build\SetMicrobuildVersion\SetMicrobuildVersion.csproj"'
+  # Publish OptProf configuration files
+  - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
+    inputs:
+      dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
+      buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+      sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
+      toLowerCase: false
+      usePat: false
+    displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
+    condition: succeeded()
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: logs'
-  inputs:
-    PathtoPublish: 'artifacts\$(BuildConfiguration)\log'
-    ArtifactName: logs
-  condition: succeededOrFailed()
+  # Build VS bootstrapper
+  # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+  - task: ms-vseng.MicroBuildTasks.0e9d0d4d-71ec-4e4e-ae40-db9896f1ae74.MicroBuildBuildVSBootstrapper@2
+    inputs:
+      vsMajorVersion: $(VisualStudio.MajorVersion)
+      channelName: $(VisualStudio.ChannelName)
+      manifests: $(VisualStudio.SetupManifestList)
+      outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+    displayName: 'OptProf - Build VS bootstrapper'
+    condition: succeeded()
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: packages'
-  inputs:
-    PathtoPublish: 'artifacts\$(BuildConfiguration)\packages'
-    ArtifactName: packages
-  condition: succeededOrFailed()
+  # Publish run settings
+  - task: PowerShell@2
+    inputs:
+      filePath: eng\common\sdk-task.ps1
+      arguments: -configuration $(BuildConfiguration)
+                 -task VisualStudio.BuildIbcTrainingSettings
+                 /p:VisualStudioDropName=$(VisualStudio.DropName)
+                 /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+    displayName: 'OptProf - Build IBC training settings'
+    condition: succeeded()
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: vsix'
-  inputs:
-    PathtoPublish: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
-    ArtifactName: vsix
-  condition: succeededOrFailed()
+  # Publish bootstrapper info
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+      ArtifactName: MicroBuildOutputs
+      ArtifactType: Container
+    displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
+    condition: succeeded()
 
-- task: CopyFiles@2
-  displayName: Collect Symbols
-  inputs:
-    Contents: 'artifacts\$(BuildConfiguration)\bin\**\*.pdb'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/symbols'
-    CleanTargetFolder: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
+      ArtifactName: logs
+    condition: succeededOrFailed()
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: symbols'
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)/symbols'
-    ArtifactName: symbols
-  condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: bin'
+    inputs:
+      PathtoPublish: 'artifacts\bin'
+      ArtifactName: bin
+    condition: succeededOrFailed()
 
-- task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
-  displayName: Reinstall Swix Plugin (to pick up new build number)
-  inputs:
-    dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
-  enabled: false
+  # Publishes setup VSIXes to a drop.
+  # Note: The insertion tool looks for the display name of this task in the logs.
+  - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+    displayName: Upload VSTS Drop
+    inputs:
+      DropName: $(VisualStudio.DropName)
+      DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+    condition: succeeded()
 
-- task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
-  displayName: Upload VSTS Drop
-  inputs:
-    DropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
+  # Publish an artifact that the RoslynInsertionTool is able to find by its name.
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: VSSetup'
+    inputs:
+      PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)'
+      ArtifactName: VSSetup
+    condition: succeeded()
 
-- task: PublishSymbols@1
-  displayName: Index Sources
-  inputs:
-    SearchPattern: '**/*.pdb'
-    SymbolsFolder: '$(Build.ArtifactStagingDirectory)\symbols'
+  # Archive NuGet packages to DevOps.
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: packages'
+    inputs:
+      PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
+      ArtifactName: Packages
+    condition: succeeded()
 
-- task: ms-vscs-artifact.build-tasks.artifactSymbolTask-1.artifactSymbolTask@0
-  displayName: Publish Symbols to Artifact Services
-  inputs:
-    symbolServiceURI: 'https://microsoft.artifacts.visualstudio.com/DefaultCollection'
-    sourcePath: '$(Build.ArtifactStagingDirectory)\symbols'
-    usePat: false
+  # Publish Asset Manifests for Build Asset Registry job
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Asset Manifests
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
+      ArtifactName: AssetManifests
+    condition: succeeded()
 
-- task: PowerShell@1
-  displayName: Microbuild health checks
-  inputs:
-    scriptName: 'build/MicrobuildTest.ps1'
-  enabled: false
-  continueOnError: true
+  # Tag the build at the very end when we know it's been successful.
+  - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
+    displayName: Tag build as ready for optimization training
+    inputs:
+      tags: 'ready-for-training'
+    condition: succeeded()
 
-- task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
-  displayName: Execute cleanup tasks
+  - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
+    displayName: Execute cleanup tasks
+    condition: succeededOrFailed()
 
+- template: /eng/common/templates/job/publish-build-assets.yml
+  parameters:
+    enablePublishBuildArtifacts: true
+    dependsOn:
+      - Windows_NT
+    pool:
+      vmImage: vs2017-win2016

@@ -20,7 +20,7 @@ namespace Microsoft.Build.Logging
     /// can be used to instantiate the logger and can be serialized to be passed between different
     /// processes.
     /// </summary>
-    public class LoggerDescription : INodePacketTranslatable
+    public class LoggerDescription : ITranslatable
     {
         #region Constructor
 
@@ -207,7 +207,7 @@ namespace Microsoft.Build.Logging
             catch (InvalidCastException e)
             {
                 // The logger when trying to load has hit an invalid case, this is usually due to the framework assembly being a different version
-                string message = ResourceUtilities.FormatResourceString("LoggerInstantiationFailureErrorInvalidCast", _loggerClassName, _loggerAssembly.AssemblyLocation, e.Message);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerInstantiationFailureErrorInvalidCast", _loggerClassName, _loggerAssembly.AssemblyLocation, e.Message);
                 throw new LoggerException(message, e.InnerException);
             }
             catch (TargetInvocationException e)
@@ -344,7 +344,7 @@ namespace Microsoft.Build.Logging
 
         #region INodePacketTranslatable Members
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _loggerClassName);
             translator.Translate(ref _loggerSwitchParameters);
@@ -353,10 +353,10 @@ namespace Microsoft.Build.Logging
             translator.Translate(ref _loggerId);
         }
 
-        static internal LoggerDescription FactoryForTranslation(INodePacketTranslator translator)
+        static internal LoggerDescription FactoryForTranslation(ITranslator translator)
         {
             LoggerDescription description = new LoggerDescription();
-            ((INodePacketTranslatable)description).Translate(translator);
+            ((ITranslatable)description).Translate(translator);
             return description;
         }
 

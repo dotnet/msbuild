@@ -40,7 +40,7 @@ namespace Microsoft.Build.Evaluation
         /// Character used to separate search paths specified for MSBuildExtensionsPath* in
         /// the config file
         /// </summary>
-        private char _separatorForExtensionsPathSearchPaths = ';';
+        private static readonly char[] s_separatorForExtensionsPathSearchPaths = MSBuildConstants.SemicolonChar;
 
         /// <summary>
         /// Cached values of tools version -> project import search paths table
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Evaluation
 
                 //FIXME: handle ; in path on Unix
                 var paths = property.Value
-                    .Split(new[] {_separatorForExtensionsPathSearchPaths}, StringSplitOptions.RemoveEmptyEntries)
+                    .Split(s_separatorForExtensionsPathSearchPaths, StringSplitOptions.RemoveEmptyEntries)
                     .Distinct()
                     .Where(path => !string.IsNullOrEmpty(path));
 

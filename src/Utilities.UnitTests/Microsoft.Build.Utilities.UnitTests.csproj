@@ -1,4 +1,4 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
@@ -10,9 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
-    <PackageReference Include="System.IO.FileSystem.Primitives " Version="4.3.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftCodeAnalysisBuildTasksVersion)" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="System.IO.FileSystem.Primitives" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
 
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
@@ -26,6 +26,7 @@
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs" />
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />

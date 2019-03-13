@@ -19,9 +19,9 @@
     </note>
       </trans-unit>
       <trans-unit id="CannotAutoDisableAutoResponseFile">
-        <source>MSBUILD : error MSB1027: The /noautoresponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
-        <target state="translated">MSBUILD : error MSB1027: MSBuild.rsp 자동 지시 파일과 자동 지시 파일에서 참조하는 모든 지시 파일에는 /noautoresponse 스위치를 지정할 수 없습니다.</target>
-        <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "/noautoresponse" and "MSBuild.rsp" should not be localized.</note>
+        <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
+        <target state="translated">MSBUILD : error MSB1027: MSBuild.rsp 자동 지시 파일과 자동 지시 파일에서 참조하는 모든 지시 파일에는 -noAutoResponse 스위치를 지정할 수 없습니다.</target>
+        <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="CopyrightMessage">
         <source>Microsoft (R) Build Engine version {0} for {1}
@@ -31,6 +31,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 Copyright (C) Microsoft Corporation. All rights reserved.
 </target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
+      </trans-unit>
+      <trans-unit id="DuplicateOutputResultsCache">
+        <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
+        <target state="translated">MSBUILD : 오류 MSB1058: 출력 결과 캐시는 하나만 지정할 수 있습니다.</target>
+        <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
         <source>MSBUILD : error MSB1008: Only one project can be specified.</source>
@@ -56,7 +61,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
@@ -80,63 +85,148 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_34_InteractiveSwitch">
+        <source>  -interactive[:True|False]
+                     Indicates that actions in the build are allowed to
+                     interact with the user.  Do not use this argument
+                     in an automated scenario where interactivity is
+                     not expected.
+                     Specifying -interactive is the same as specifying
+                     -interactive:true.  Use the parameter to override a
+                     value that comes from a response file.
+    </source>
+        <target state="translated">  -interactive[:True|False]
+                     빌드의 작업이 사용자와 상호 작용할 수 
+                     있음을 나타냅니다. 상호 작용이 필요하지 
+                     않은 자동화된 시나리오에서는 이 인수를 
+                     사용하지 마세요.
+                     -interactive를 지정하는 것은 -interactive:true를
+                     지정하는 것과 같습니다. 매개 변수를 
+                     사용하여 지시 파일에서 가져오는 값을 재정의합니다.
+    </target>
+        <note>
+      LOCALIZATION: "-interactive" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_35_IsolateProjectsSwitch">
+        <source>  -isolateProjects[:True|False]
+                     Causes MSBuild to build each project in isolation.
+
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
+    </source>
+        <target state="translated">  -isolateProjects[:True|False]
+                     MSBuild가 격리 모드에서 각 프로젝트를 빌드하도록 합니다.
+
+                     이 모드는 프로젝트 그래프가 평가 시간에 정적으로 
+                     검색 가능해야 하므로 더 제한적인 MSBuild 모드이나, 
+                     대규모 프로젝트를 빌드할 경우 예약을 개선하고 
+                     메모리 오버헤드를 줄일 수 있습니다.
+                     (약식: -isolate)
+
+                     이 플래그는 실험적이며 예상대로 작동하지 않을 수 있습니다.
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-isolateProjects" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.</note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_36_GraphBuildSwitch">
+        <source>  -graphBuild[:True|False]
+                     Causes MSBuild to construct and build a project graph.
+
+                     Constructing a graph involves identifying project
+                     references to form dependencies. Building that graph
+                     involves attempting to build project references prior
+                     to the projects that reference them, differing from
+                     traditional MSBuild scheduling.
+                     (Short form: -graph)
+
+                     This flag is experimental and may not work as intended.
+    </source>
+        <target state="translated">  -graphBuild[:True|False]
+                     MSBuild가 프로젝트 그래프를 생성 및 빌드하도록 합니다.
+
+                     그래프 생성에는 종속성을 형성하기 위한 프로젝트 
+                     참조 식별이 관련됩니다. 해당 그래프 빌드에는 프로젝트 
+                     참조를 참조하는 프로젝트 전에 프로젝트 참조를 
+                     빌드하는 시도가 관련되며, 이는 기존 MSBuild
+                     예약과 다릅니다.
+                     (약식: -graph)
+
+                     이 플래그는 실험적이며 예상대로 작동하지 않을 수 있습니다.
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-graphBuild" and "-graph" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
-        <source>Switches:
+        <source>Switches:            Note that you can specify switches using both
+                     "-switch" and "/switch".
 </source>
-        <target state="translated">스위치:
+        <target state="translated">스위치:            스위치를 지정하는 데 "-switch" 및 "/switch"를
+                     둘 다 사용할 수 있습니다.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_4_HelpSwitch">
-        <source>  /help              Display this usage message. (Short form: /? or /h)
+        <source>  -help              Display this usage message. (Short form: -? or -h)
 </source>
-        <target state="translated">  /help              사용법 메시지를 표시합니다. (약식: /? 또는 /h)
+        <target state="translated">  -help              사용법 메시지를 표시합니다. (약식: -? 또는 -h)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
-        <source>  /nologo            Do not display the startup banner and copyright message.
+        <source>  -noLogo            Do not display the startup banner and copyright message.
 </source>
-        <target state="translated">  /nologo            시작 배너 및 저작권 메시지를 표시하지 않습니다.
+        <target state="translated">  -noLogo            시작 배너 및 저작권 메시지를 표시하지 않습니다.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_6_VersionSwitch">
-        <source>  /version           Display version information only. (Short form: /ver)
+        <source>  -version           Display version information only. (Short form: -ver)
 </source>
-        <target state="translated">  /version           버전 정보만 표시합니다. (약식: /ver)
+        <target state="translated">  -version           버전 정보만 표시합니다. (약식: -ver)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
@@ -164,75 +254,75 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_8_NoAutoResponseSwitch">
-        <source>  /noautoresponse    Do not auto-include any MSBuild.rsp files. (Short form:
-                     /noautorsp)
+        <source>  -noAutoResponse    Do not auto-include any MSBuild.rsp files. (Short form:
+                     -noAutoRsp)
 </source>
-        <target state="translated">  /noautoresponse    MSBuild.rsp 파일을 자동으로 포함하지 않습니다. (약식:
-                     /noautorsp).
+        <target state="translated">  -noAutoResponse    MSBuild.rsp 파일을 자동으로 포함하지 않습니다. (약식:
+                     -noAutoRsp).
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_9_TargetSwitch">
-        <source>  /target:&lt;targets&gt;  Build these targets in this project. Use a semicolon or a
+        <source>  -target:&lt;targets&gt;  Build these targets in this project. Use a semicolon or a
                      comma to separate multiple targets, or specify each
-                     target separately. (Short form: /t)
+                     target separately. (Short form: -t)
                      Example:
-                       /target:Resources;Compile
+                       -target:Resources;Compile
 </source>
-        <target state="translated">  /target:&lt;targets&gt;  지정한 대상을 이 프로젝트에 빌드합니다. 세미콜론 또는
+        <target state="translated">  -target:&lt;targets&gt;  지정한 대상을 이 프로젝트에 빌드합니다. 세미콜론 또는
                      쉼표를 사용하여 여러 대상을 구분하거나 각 대상을 따로
-                     지정하세요. (약식: /t)
+                     지정하세요. (약식: -t)
                      예:
-                       /target:Resources;Compile
+                       -target:Resources;Compile
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_10_PropertySwitch">
-        <source>  /property:&lt;n&gt;=&lt;v&gt;  Set or override these project-level properties. &lt;n&gt; is
+        <source>  -property:&lt;n&gt;=&lt;v&gt;  Set or override these project-level properties. &lt;n&gt; is
                      the property name, and &lt;v&gt; is the property value. Use a
                      semicolon or a comma to separate multiple properties, or
-                     specify each property separately. (Short form: /p)
+                     specify each property separately. (Short form: -p)
                      Example:
-                       /property:WarningLevel=2;OutDir=bin\Debug\
+                       -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  /property:&lt;n&gt;=&lt;v&gt;  지정한 프로젝트 수준 속성을 설정하거나 재정의합니다. 여기서 &lt;n&gt;은
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  지정한 프로젝트 수준 속성을 설정하거나 재정의합니다. 여기서 &lt;n&gt;은
                      속성 이름이고 &lt;v&gt;는 속성 값입니다. 세미콜론
                      또는 쉼표를 사용하여 여러 속성을 구분하거나
-                     각 속성을 따로 지정하세요. (약식: /p)
+                     각 속성을 따로 지정하세요. (약식: -p)
                      예:
-                       /property:WarningLevel=2;OutDir=bin\Debug\
+                       -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_11_LoggerSwitch">
-        <source>  /logger:&lt;logger&gt;   Use this logger to log events from MSBuild. To specify
+        <source>  -logger:&lt;logger&gt;   Use this logger to log events from MSBuild. To specify
                      multiple loggers, specify each logger separately.
                      The &lt;logger&gt; syntax is:
                        [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
@@ -241,12 +331,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      The &lt;logger assembly&gt; syntax is:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      The &lt;logger parameters&gt; are optional, and are passed
-                     to the logger exactly as you typed them. (Short form: /l)
+                     to the logger exactly as you typed them. (Short form: -l)
                      Examples:
-                       /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  /logger:&lt;logger&gt;   이 로거를 사용하여 MSBuild에서 이벤트를 로깅합니다. 여러
+        <target state="translated">  -logger:&lt;logger&gt;   이 로거를 사용하여 MSBuild에서 이벤트를 로깅합니다. 여러
                      로거를 지정하려면 각 로거를 따로 지정하세요.
                      &lt;logger&gt; 구문:
                        [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
@@ -255,45 +345,45 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      &lt;logger assembly&gt; 구문:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      &lt;logger parameters&gt;는 선택적 요소이며, 입력한 그대로
-                     로거로 전달됩니다. (약식: /l)
+                     로거로 전달됩니다. (약식: -l)
                      예:
-                       /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_12_VerbositySwitch">
-        <source>  /verbosity:&lt;level&gt; Display this amount of information in the event log.
+        <source>  -verbosity:&lt;level&gt; Display this amount of information in the event log.
                      The available verbosity levels are: q[uiet], m[inimal],
-                     n[ormal], d[etailed], and diag[nostic]. (Short form: /v)
+                     n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
                      Example:
-                       /verbosity:quiet
+                       -verbosity:quiet
 </source>
-        <target state="translated">  /verbosity:&lt;level&gt; 지정한 양의 정보를 이벤트 로그에 표시합니다.
+        <target state="translated">  -verbosity:&lt;level&gt; 지정한 양의 정보를 이벤트 로그에 표시합니다.
                      사용할 수 있는 세부 정보 표시 수준은 q[uiet], m[inimal],
-                     n[ormal], d[etailed] 및 diag[nostic]입니다. (약식: /v)
+                     n[ormal], d[etailed] 및 diag[nostic]입니다. (약식: -v)
                      예:
-                       /verbosity:quiet
+                       -verbosity:quiet
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_13_ConsoleLoggerParametersSwitch">
-        <source>  /consoleloggerparameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: /clp)
+        <source>  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parameters to console logger. (Short form: -clp)
                      The available parameters are:
                         PerformanceSummary--Show time spent in tasks, targets
                             and projects.
@@ -321,14 +411,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the /verbosity setting for this
+                        Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
-                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  /consoleloggerparameters:&lt;parameters&gt;
-                     콘솔 로거에 대한 매개 변수입니다. (약식: /clp)
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+                     콘솔 로거에 대한 매개 변수입니다. (약식: -clp)
                      사용할 수 있는 매개 변수:
                         PerformanceSummary--작업, 대상 및 프로젝트에 소요된
                             시간을 표시합니다.
@@ -356,115 +446,151 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             사용합니다. 이 로깅 스타일은 기본적으로 설정됩니다.
                         ForceConsoleColor--콘솔에서 지원하지 않아도
                             ANSI 콘솔 색을 사용합니다.
-                        Verbosity--이 로거에 대한 /verbosity 설정을
+                        Verbosity--이 로거에 대한 -verbosity 설정을
                             재정의합니다.
                      예:
-                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_14_NoConsoleLoggerSwitch">
-        <source>  /noconsolelogger   Disable the default console logger and do not log events
-                     to the console. (Short form: /noconlog)
+        <source>  -noConsoleLogger   Disable the default console logger and do not log events
+                     to the console. (Short form: -noConLog)
 </source>
-        <target state="translated">  /noconsolelogger   기본 콘솔 로거를 사용하지 않고 콘솔에 이벤트를
-                     로깅하지 않습니다. (약식: /noconlog)
+        <target state="translated">  -noConsoleLogger   기본 콘솔 로거를 사용하지 않고 콘솔에 이벤트를
+                     로깅하지 않습니다. (약식: -noConLog)
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_15_ValidateSwitch">
-        <source>  /validate          Validate the project against the default schema. (Short
-                     form: /val)
+        <source>  -validate          Validate the project against the default schema. (Short
+                     form: -val)
 
-  /validate:&lt;schema&gt; Validate the project against the specified schema. (Short
-                     form: /val)
+  -validate:&lt;schema&gt; Validate the project against the specified schema. (Short
+                     form: -val)
                      Example:
-                       /validate:MyExtendedBuildSchema.xsd
+                       -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  /validate          기본 스키마에 대해 프로젝트의 유효성을 검사합니다. (약식:
-                     /val)
+        <target state="translated">  -validate          기본 스키마에 대해 프로젝트의 유효성을 검사합니다. (약식:
+                     -val)
 
-  /validate:&lt;schema&gt; 지정한 스키마에 대해 프로젝트의 유효성을 검사합니다. (약식:
-                     /val)
+  -validate:&lt;schema&gt; 지정한 스키마에 대해 프로젝트의 유효성을 검사합니다. (약식:
+                     -val)
                      예:
-                       /validate:MyExtendedBuildSchema.xsd
+                       -validate:MyExtendedBuildSchema.xsd
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_17_MaximumCPUSwitch">
-        <source>  /maxcpucount[:n]   Specifies the maximum number of concurrent processes to
+        <source>  -maxCpuCount[:n]   Specifies the maximum number of concurrent processes to
                      build with. If the switch is not used, the default
                      value used is 1. If the switch is used without a value
                      MSBuild will use up to the number of processors on the
-                     computer. (Short form: /m[:n])
+                     computer. (Short form: -m[:n])
       </source>
-        <target state="translated">  /maxcpucount[:n]   빌드에 사용할 최대 동시 프로세스 수를
+        <target state="translated">  -maxCpuCount[:n]   빌드에 사용할 최대 동시 프로세스 수를
                      지정합니다. 스위치가 사용되지 않으면 기본값
-                     1이 사용됩니다. 값 없이 스위치가 사용되면
+                     1이 사용됩니다. 값없이 스위치가 사용되면
                      MSBuild에서 컴퓨터에 있는 프로세서 수 이하로
-                     사용됩니다. (약식: /m[:n])
+                     사용됩니다. (약식: -m[:n])
       </target>
         <note>
-          LOCALIZATION: "maxcpucount" should not be localized.
+          LOCALIZATION: "maxCpuCount" should not be localized.
           LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
       </note>
       </trans-unit>
       <trans-unit id="HelpMessage_16_Examples">
         <source>Examples:
 
-        MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean
-                             /p:Configuration=Debug;TargetFrameworkVersion=v3.5
+        MSBuild MyApp.sln -t:Rebuild -p:Configuration=Release
+        MSBuild MyApp.csproj -t:Clean
+                             -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
         <target state="translated">예:
 
-        MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean
-                             /p:Configuration=Debug;TargetFrameworkVersion=v3.5
+        MSBuild MyApp.sln -t:Rebuild -p:Configuration=Release
+        MSBuild MyApp.csproj -t:Clean
+                             -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_InputCachesFiles">
+        <source>  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from.
+                     Setting this also turns on isolated builds (-isolate).
+                     (short form: -irc)
+   </source>
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     MSBuild에서 빌드 결과를 읽을
+                     세미콜론으로 구분된 입력 캐시 파일 목록입니다.
+                     설정하면 격리된 빌드에서도 설정됩니다(-isolate).
+                     (short form: -irc)
+   </target>
+        <note>
+      LOCALIZATION: The following should not be localized: MSBuild, -isolate
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_OutputCacheFile">
+        <source>  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     Setting this also turns on isolated builds (-isolate).
+                     (short form: -orc)
+   </source>
+        <target state="translated">  -outputResultsCache:[cacheFile]
+                     MSBuild에서 빌드 마지막에 빌드 결과 캐시의
+                     콘텐츠를 쓰는 출력 캐시 파일입니다.
+                     설정하면 격리된 빌드에서도 설정됩니다(-isolate).
+                     (short form: -orc)
+   </target>
+        <note>
+      LOCALIZATION: The following should not be localized: MSBuild, -isolate
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="HelpPrompt">
-        <source>For switch syntax, type "MSBuild /help"</source>
-        <target state="translated">스위치 구문을 보려면 "MSBuild /help"를 입력하십시오.</target>
+        <source>For switch syntax, type "MSBuild -help"</source>
+        <target state="translated">스위치 구문을 보려면 "MSBuild -help"를 입력하세요.</target>
         <note>UE: this message is shown when the user makes a syntax error on the command-line for a switch.
-    LOCALIZATION: "MSBuild /help" should not be localized.</note>
+    LOCALIZATION: "MSBuild -help" should not be localized.</note>
       </trans-unit>
       <trans-unit id="HelpMessage_18_DistributedLoggerSwitch">
-        <source>  /distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+        <source>  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
                      Use this logger to log events from MSBuild, attaching a
                      different logger instance to each node. To specify
                      multiple loggers, specify each logger separately.
-                     (Short form /dl)
+                     (Short form -dl)
                      The &lt;logger&gt; syntax is:
                        [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
                      The &lt;logger class&gt; syntax is:
@@ -472,16 +598,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      The &lt;logger assembly&gt; syntax is:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      The &lt;logger parameters&gt; are optional, and are passed
-                     to the logger exactly as you typed them. (Short form: /l)
+                     to the logger exactly as you typed them. (Short form: -l)
                      Examples:
-                       /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  /distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
                      이 로거를 사용하여 MSBuild에서 이벤트를 로깅하고 각 노드에
                      서로 다른 로거 인스턴스를 추가합니다. 여러
                      로거를 지정하려면 각 로거를 따로 지정하세요.
-                     (약식: /dl)
+                     (약식: -dl)
                      &lt;logger&gt; 구문:
                        [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
                      &lt;logger class&gt; 구문:
@@ -489,121 +615,121 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      &lt;logger assembly&gt; 구문:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      &lt;logger parameters&gt;는 선택적 요소이며, 입력한 그대로
-                     로거로 전달됩니다. (약식: /l)
+                     로거로 전달됩니다. (약식: -l)
                      예:
-                       /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_19_IgnoreProjectExtensionsSwitch">
-        <source>  /ignoreprojectextensions:&lt;extensions&gt;
+        <source>  -ignoreProjectExtensions:&lt;extensions&gt;
                      List of extensions to ignore when determining which
                      project file to build. Use a semicolon or a comma
                      to separate multiple extensions.
-                     (Short form: /ignore)
+                     (Short form: -ignore)
                      Example:
-                       /ignoreprojectextensions:.sln
+                       -ignoreProjectExtensions:.sln
     </source>
-        <target state="translated">  /ignoreprojectextensions:&lt;extensions&gt;
+        <target state="translated">  -ignoreProjectExtensions:&lt;extensions&gt;
                      빌드할 프로젝트 파일을 결정할 때 무시할
                      확장명의 목록입니다. 세미콜론 또는 쉼표를 사용하여
                      여러 확장명을 구분하세요.
-                     (약식: /ignore)
+                     (약식: -ignore)
                      예:
-                       /ignoreprojectextensions:.sln
+                       -ignoreProjectExtensions:.sln
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_23_ToolsVersionSwitch">
-        <source>  /toolsversion:&lt;version&gt;
+        <source>  -toolsVersion:&lt;version&gt;
                      The version of the MSBuild Toolset (tasks, targets, etc.)
                      to use during build. This version will override the
                      versions specified by individual projects. (Short form:
-                     /tv)
+                     -tv)
                      Example:
-                       /toolsversion:3.5
+                       -toolsVersion:3.5
    </source>
-        <target state="translated">  /toolsversion:&lt;version&gt;
+        <target state="translated">  -toolsVersion:&lt;version&gt;
                      빌드 중 사용할 MSBuild 도구 집합(작업, 대상 등)의
                      버전입니다. 이 버전은 개별 프로젝트에서 
                      지정한 버전을 재정의합니다. (약식: 
-                     /tv)
+                     -tv)
                      예:
-                       /toolsversion:3.5
+                       -toolsVersion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_20_FileLoggerSwitch">
-        <source>  /fileLogger[n]     Logs the build output to a file. By default
+        <source>  -fileLogger[n]     Logs the build output to a file. By default
                      the file is in the current directory and named
                      "msbuild[n].log". Events from all nodes are combined into
                      a single log. The location of the file and other
                      parameters for the fileLogger can be specified through
-                     the addition of the "/fileLoggerParameters[n]" switch.
+                     the addition of the "-fileLoggerParameters[n]" switch.
                      "n" if present can be a digit from 1-9, allowing up to
-                     10 file loggers to be attached. (Short form: /fl[n])
+                     10 file loggers to be attached. (Short form: -fl[n])
     </source>
-        <target state="translated">  /fileLogger[n]     빌드 출력을 파일에 로깅합니다. 기본적으로
+        <target state="translated">  -fileLogger[n]     빌드 출력을 파일에 로깅합니다. 기본적으로
                      파일은 현재 디렉터리에 있고
                      "msbuild[n].log"로 이름이 지정되어 있습니다. 모든 노드의 이벤트는 단일 로그로
                      결합됩니다. 파일의 위치 및 fileLogger의
-                     다른 매개 변수는 "/fileLoggerParameters[n]" 스위치를 
+                     다른 매개 변수는 "-fileLoggerParameters[n]" 스위치를 
                      추가하여 지정할 수 있습니다.
                      "n"은 1-9 사이의 숫자일 수 있으며 최대 10개의 
-                     파일 로거가 추가될 수 있습니다. (약식: /fl[n])
+                     파일 로거가 추가될 수 있습니다. (약식: -fl[n])
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_21_DistributedFileLoggerSwitch">
-        <source>  /distributedFileLogger
+        <source>  -distributedFileLogger
                      Logs the build output to multiple log files, one log file
                      per MSBuild node. The initial location for these files is
                      the current directory. By default the files are called
                      "MSBuild&lt;nodeid&gt;.log". The location of the files and
                      other parameters for the fileLogger can be specified
-                     with the addition of the "/fileLoggerParameters" switch.
+                     with the addition of the "-fileLoggerParameters" switch.
 
                      If a log file name is set through the fileLoggerParameters
                      switch the distributed logger will use the fileName as a
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  /distributedFileLogger
+        <target state="translated">  -distributedFileLogger
                      빌드 출력을 여러 개의 로그 파일에
                      로깅합니다(MSBuild 노드당 로그 파일 하나). 이 파일의 초기 위치는
                      현재 디렉터리입니다. 기본적으로 이 파일의 이름은
                      "MSBuild&lt;nodeid&gt;.log"입니다. 파일의 위치 및
                      fileLogger의 다른 매개 변수는
-                     "/fileLoggerParameters" 스위치를 추가하여 지정할 수 있습니다.
+                     "-fileLoggerParameters" 스위치를 추가하여 지정할 수 있습니다.
 
                      fileLoggerParameters 스위치를 통해 로그 파일 이름이 설정되면
                      분산 로거는 fileName을 템플릿으로 사용하고 이 fileName에
@@ -614,20 +740,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_22_FileLoggerParametersSwitch">
-        <source>  /fileloggerparameters[n]:&lt;parameters&gt;
+        <source>  -fileLoggerParameters[n]:&lt;parameters&gt;
                      Provides any extra parameters for file loggers.
                      The presence of this switch implies the
-                     corresponding /filelogger[n] switch.
+                     corresponding -fileLogger[n] switch.
                      "n" if present can be a digit from 1-9.
-                     /fileloggerparameters is also used by any distributed
-                     file logger, see description of /distributedFileLogger.
-                     (Short form: /flp[n])
+                     -fileLoggerParameters is also used by any distributed
+                     file logger, see description of -distributedFileLogger.
+                     (Short form: -flp[n])
                      The same parameters listed for the console logger are
                      available. Some additional available parameters are:
                         LogFile--path to the log file into which the
@@ -642,21 +768,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             for example, UTF-8, Unicode, or ASCII
                      Default verbosity is Detailed.
                      Examples:
-                       /fileLoggerParameters:LogFile=MyLog.log;Append;
+                       -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       /flp1:warningsonly;logfile=msbuild.wrn
-                       /flp2:errorsonly;logfile=msbuild.err
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  /fileloggerparameters[n]:&lt;parameters&gt;
+        <target state="translated">  -fileLoggerParameters[n]:&lt;parameters&gt;
                      파일 로거에 대한 추가 매개 변수를 제공합니다.
                      이 스위치가 있으면 
-                     해당 /filelogger[n] 스위치도 있습니다.
+                     해당 -fileLogger[n] 스위치도 있습니다.
                      "n"은 1-9 사이의 숫자일 수 있습니다.
-                     /fileloggerparameters는 모든 분산 파일 로거에도 사용할 수 있습니다.
-                     /distributedFileLogger의 설명을 참조하세요.
-                     (약식: /flp[n])
+                     -fileLoggerParameters는 모든 분산 파일 로거에도 사용할 수 있습니다.
+                     -distributedFileLogger의 설명을 참조하세요.
+                     (약식: -flp[n])
                      콘솔 로거에 대해 나열된 것과 동일한 매개 변수를 사용할
                      수 있습니다. 사용할 수 있는 추가 매개 변수:
                         LogFile--빌드 로그를 기록할 로그 파일의
@@ -671,47 +797,47 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             파일 인코딩을 지정합니다.
                      기본 세부 정보 표시는 Detailed입니다.
                      예:
-                       /fileLoggerParameters:LogFile=MyLog.log;Append;
+                       -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       /flp1:warningsonly;logfile=msbuild.wrn
-                       /flp2:errorsonly;logfile=msbuild.err
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
       2) the string "proj" that describes the extension we look for
-      3) all switch names and their short forms e.g. /property, or /p
+      3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_24_NodeReuse">
-        <source>  /nodeReuse:&lt;parameters&gt;
+        <source>  -nodeReuse:&lt;parameters&gt;
                      Enables or Disables the reuse of MSBuild nodes.
                      The parameters are:
                      True --Nodes will remain after the build completes
                             and will be reused by subsequent builds (default)
                      False--Nodes will not remain after the build completes
-                     (Short form: /nr)
+                     (Short form: -nr)
                      Example:
-                       /nr:true
+                       -nr:true
     </source>
-        <target state="translated">  /nodeReuse:&lt;parameters&gt;
+        <target state="translated">  -nodeReuse:&lt;parameters&gt;
                      MSBuild 노드를 다시 사용하도록 설정하거나 해제합니다.
                      매개 변수:
                      True --빌드가 완료된 후 노드가 남아 있으며
                             이 노드는 이후 빌드에 다시 사용됩니다(기본값).
                      False--빌드가 완료된 후 노드가 남아 있지 않습니다.
-                     (약식: /nr)
+                     (약식: -nr)
                      예:
-                       /nr:true
+                       -nr:true
     </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_25_PreprocessSwitch">
-        <source>  /preprocess[:file]
+        <source>  -preprocess[:file]
                      Creates a single, aggregated project file by
                      inlining all the files that would be imported during a
                      build, with their boundaries marked. This can be
@@ -720,11 +846,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      the build. By default the output is written to
                      the console window. If the path to an output file
                      is provided that will be used instead.
-                     (Short form: /pp)
+                     (Short form: -pp)
                      Example:
-                       /pp:out.txt
+                       -pp:out.txt
     </source>
-        <target state="translated">  /preprocess[:file]
+        <target state="translated">  -preprocess[:file]
                      빌드 중에 가져온 모든 파일에
                      해당 경계를 표시하여 인라인 처리하면 집계된
                      단일 프로젝트 파일을 만들 수 있습니다. 이렇게 하면
@@ -733,34 +859,64 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      도움이 됩니다. 기본적으로 출력은
                      콘솔 창에 기록됩니다. 출력 파일에 대한 경로가
                      제공되면 해당 경로가 대신 사용됩니다.
-                     (약식: /pp)
+                     (약식: -pp)
                      예:
-                       /pp:out.txt
+                       -pp:out.txt
     </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
-        <source>  /detailedsummary
+        <source>  -detailedSummary
                      Shows detailed information at the end of the build
                      about the configurations built and how they were
                      scheduled to nodes.
-                     (Short form: /ds)
+                     (Short form: -ds)
     </source>
-        <target state="translated">  /detailedsummary
+        <target state="translated">  -detailedSummary
                      빌드 마지막에 구성 상태 및
                      노드에 대한 해당 구성의 예약 상태와 관련한
                      자세한 정보를 표시합니다.
-                     (약식: /ds)
+                     (약식: -ds)
     </target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
-        <target state="translated">MSBUILD : Configuration error MSB1043: 응용 프로그램을 시작할 수 없습니다. {0}</target>
+        <target state="translated">MSBUILD : Configuration error MSB1043: 애플리케이션을 시작할 수 없습니다. {0}</target>
         <note>
       {StrBegin="MSBUILD : Configuration error MSB1043: "}
       UE: This error is shown when the msbuild.exe.config file had invalid content.
       LOCALIZATION: The prefix "MSBUILD : Configuration error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidGraphBuildValue">
+        <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1057: 그래프 빌드 값이 유효하지 않습니다. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1057: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -graphBuild parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidInteractiveValue">
+        <source>MSBUILD : error MSB1055: Interactive value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1055: 대화형 값이 유효하지 않습니다. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1055: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the interactive parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidIsolateProjectsValue">
+        <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1056: 프로젝트 격리 값이 유효하지 않습니다. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1056: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="InvalidLoggerError">
@@ -768,9 +924,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">MSBUILD : error MSB1019: 로거 스위치의 형식이 잘못되었습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1019: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user does any of the following:
-      msbuild.exe /logger:;"logger parameters"                    (missing logger class and assembly)
-      msbuild.exe /logger:loggerclass,                            (missing logger assembly)
-      msbuild.exe /logger:loggerclass,;"logger parameters"        (missing logger assembly)
+      msbuild.exe -logger:;"logger parameters"                    (missing logger class and assembly)
+      msbuild.exe -logger:loggerclass,                            (missing logger assembly)
+      msbuild.exe -logger:loggerclass,;"logger parameters"        (missing logger assembly)
       The correct way to specify a logger is to give both the logger class and logger assembly, or just the logger assembly (logger
       parameters are optional).
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
@@ -781,7 +937,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>
       {StrBegin="MSBUILD : error MSB1030: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an invalid CPU value. For example, /m:foo instead of /m:2.
+      This error is shown when a user specifies an invalid CPU value. For example, -m:foo instead of -m:2.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -790,7 +946,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">MSBUILD : error MSB1032: 최대 CPU 수가 잘못되었습니다. 값은 0보다 크고 1024 이하인 정수여야 합니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1032: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a CPU value that is zero or less. For example, /m:0 instead of /m:2.
+      This error is shown when a user specifies a CPU value that is zero or less. For example, -m:0 instead of -m:2.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -800,7 +956,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>
       {StrBegin="MSBUILD : error MSB1033: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a CPU value that is zero or less. For example, /nodemode:foo instead of /nodemode:2.
+      This error is shown when a user specifies a CPU value that is zero or less. For example, -nodeMode:foo instead of -nodeMode:2.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -809,7 +965,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">MSBUILD : error MSB1034: 노드 번호가 잘못되었습니다. 값은 0보다 큰 정수여야 합니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1034: "}
         UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-        This error is shown when a user specifies a CPU value that is zero or less. For example, /nodemode:0 instead of /nodemode:2.
+        This error is shown when a user specifies a CPU value that is zero or less. For example, -nodeMode:0 instead of -nodeMode:2.
         LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
       </note>
       </trans-unit>
@@ -819,9 +975,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>
       {StrBegin="MSBUILD : error MSB1006: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown if the user does any of the following:
-      msbuild.exe /property:foo              (missing property value)
-      msbuild.exe /property:=4               (missing property name)
-      The user must pass in an actual property name and value following the switch, as in "msbuild.exe /property:Configuration=Debug".
+      msbuild.exe -property:foo              (missing property value)
+      msbuild.exe -property:=4               (missing property name)
+      The user must pass in an actual property name and value following the switch, as in "msbuild.exe -property:Configuration=Debug".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -838,7 +994,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       UE: This is attached to error messages caused by an invalid switch. This message indicates what the invalid arg was.
       For example, if an unknown switch is passed to MSBuild.exe, the error message will look like this:
       MSBUILD : error MSB1001: Unknown switch.
-      Switch: /bogus
+      Switch: -bogus
       LOCALIZATION: {0} contains the invalid switch text.
     </note>
       </trans-unit>
@@ -848,7 +1004,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>
       {StrBegin="MSBUILD : error MSB1040: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an unknown toolversion, eg /toolsversion:99
+      This error is shown when a user specifies an unknown toolversion, eg -toolsVersion:99
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -857,7 +1013,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">MSBUILD : error MSB1018: 자세한 정도가 잘못되었습니다.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1018: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an unknown verbosity level e.g. "msbuild /verbosity:foo". The only valid verbosities
+      This error is shown when a user specifies an unknown verbosity level e.g. "msbuild -verbosity:foo". The only valid verbosities
       (and their short forms) are: q[uiet], m[inimal], n[ormal], d[etailed], diag[nostic].
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -866,7 +1022,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1028: The logger failed unexpectedly.</source>
         <target state="translated">MSBUILD : error MSB1028: 로거에서 예기치 않은 오류가 발생했습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1028: "}
-      UE: This error is shown when a logger specified with the /logger switch throws an exception while being
+      UE: This error is shown when a logger specified with the -logger switch throws an exception while being
       initialized. This message is followed by the exception text including the stack trace.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
@@ -893,8 +1049,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="translated">MSBUILD : error MSB1007: 로거를 지정하십시오.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1007: "}UE: This happens if the user does something like "msbuild.exe /logger". The user must pass in an actual logger class
-      following the switch, as in "msbuild.exe /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral".
+      {StrBegin="MSBUILD : error MSB1007: "}UE: This happens if the user does something like "msbuild.exe -logger". The user must pass in an actual logger class
+      following the switch, as in "msbuild.exe -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -902,7 +1058,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1031: Specify the maximum number of CPUs.</source>
         <target state="translated">MSBUILD : error MSB1031: 최대 CPU 수를 지정하십시오.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1031: "}UE: This happens if the user does something like "msbuild.exe /m". The user must pass in an actual number like /m:4.
+      {StrBegin="MSBUILD : error MSB1031: "}UE: This happens if the user does something like "msbuild.exe -m". The user must pass in an actual number like -m:4.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -919,8 +1075,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1005: Specify a property and its value.</source>
         <target state="translated">MSBUILD : error MSB1005: 속성과 해당 속성 값을 지정하십시오.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1005: "}UE: This happens if the user does something like "msbuild.exe /property". The user must pass in an actual property
-      name and value following the switch, as in "msbuild.exe /property:Configuration=Debug".
+      {StrBegin="MSBUILD : error MSB1005: "}UE: This happens if the user does something like "msbuild.exe -property". The user must pass in an actual property
+      name and value following the switch, as in "msbuild.exe -property:Configuration=Debug".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -937,8 +1093,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1004: Specify the name of the target.</source>
         <target state="translated">MSBUILD : error MSB1004: 대상의 이름을 지정하십시오.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1004: "}UE: This happens if the user does something like "msbuild.exe /target". The user must pass in an actual target name
-      following the switch, as in "msbuild.exe /target:blah".
+      {StrBegin="MSBUILD : error MSB1004: "}UE: This happens if the user does something like "msbuild.exe -target". The user must pass in an actual target name
+      following the switch, as in "msbuild.exe -target:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -947,8 +1103,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">MSBUILD : error MSB1039: 도구 집합의 버전을 지정하십시오.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1039: "}
-      UE: This happens if the user does something like "msbuild.exe /ToolsVersion". The user must pass in an actual toolsversion
-      name following the switch, as in "msbuild.exe /ToolsVersion:3.5".
+      UE: This happens if the user does something like "msbuild.exe -toolsVersion". The user must pass in an actual toolsversion
+      name following the switch, as in "msbuild.exe -toolsVersion:3.5".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -956,8 +1112,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1016: Specify the verbosity level.</source>
         <target state="translated">MSBUILD : error MSB1016: 자세한 정도를 지정하십시오.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1016: "}UE: This happens if the user does something like "msbuild.exe /verbosity". The user must pass in a verbosity level
-      after the switch e.g. "msbuild.exe /verbosity:detailed".
+      {StrBegin="MSBUILD : error MSB1016: "}UE: This happens if the user does something like "msbuild.exe -verbosity". The user must pass in a verbosity level
+      after the switch e.g. "msbuild.exe -verbosity:detailed".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -965,13 +1121,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1024: Only one schema can be specified for validation of the project.</source>
         <target state="translated">MSBUILD : error MSB1024: 프로젝트의 유효성을 검사하는 데 사용할 스키마를 하나만 지정할 수 있습니다.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild /validate:foo.xsd /validate:bar.xsd. We only allow one schema to be specified.
+      {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="PickedUpSwitchesFromAutoResponse">
-        <source>Some command line switches were read from the auto-response file "{0}". To disable this file, use the "/noautoresponse" switch.</source>
-        <target state="translated">자동 지시 파일 "{0}"에서 일부 명령줄 스위치를 읽어왔습니다. 이 파일을 사용하지 않도록 설정하려면 "/noautoresponse" 스위치를 사용하세요.</target>
+        <source>Some command line switches were read from the auto-response file "{0}". To disable this file, use the "-noAutoResponse" switch.</source>
+        <target state="translated">자동 지시 파일 "{0}"에서 일부 명령줄 스위치를 읽어왔습니다. 이 파일을 사용하지 않도록 설정하려면 "-noAutoResponse" 스위치를 사용하세요.</target>
         <note>
       UE: This message appears in high verbosity modes when we used some
       switches from the auto-response file msbuild.rsp: otherwise the user may be unaware
@@ -985,8 +1141,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="PossiblyOmittedMaxCPUSwitch">
-        <source>Building the projects in this solution one at a time. To enable parallel build, please add the "/m" switch.</source>
-        <target state="translated">이 솔루션의 프로젝트를 한 번에 하나씩 빌드합니다. 병렬 빌드를 사용하려면 "/m" 스위치를 추가하세요.</target>
+        <source>Building the projects in this solution one at a time. To enable parallel build, please add the "-m" switch.</source>
+        <target state="translated">이 솔루션의 프로젝트를 한 번에 하나씩 빌드합니다. 병렬 빌드를 사용하려면 "-m" 스위치를 추가하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectSchemaErrorHalt">
@@ -1026,14 +1182,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="SchemaValidationError">
         <source>MSBUILD : MSB1044: Project is not valid. {0}</source>
         <target state="translated">MSBUILD : MSB1044: 프로젝트가 잘못되었습니다. {0}</target>
-        <note>{StrBegin="MSBUILD : MSB1044: "}UE: This error is shown when the user asks his project to be validated against a schema (/val switch for
+        <note>{StrBegin="MSBUILD : MSB1044: "}UE: This error is shown when the user asks his project to be validated against a schema (-val switch for
     MSBuild.exe), and the project has errors. "{0}" contains a message explaining the problem.
     LOCALIZATION: "{0}" is a message from the System.XML schema validator and is already localized.</note>
       </trans-unit>
       <trans-unit id="SchemaNotFoundError">
         <source>MSBUILD : error MSB1026: Schema file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1026: 스키마 파일이 없습니다.</target>
-        <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is shown when the user specifies a schema file using the /validate:&lt;schema&gt; switch, and the file
+        <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is shown when the user specifies a schema file using the -validate:&lt;schema&gt; switch, and the file
     does not exist on disk. This message does not need in-line parameters because the exception takes care of displaying the
     invalid arg.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
@@ -1048,7 +1204,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
         <target state="translated">MSBUILD : error MSB1002: 이 스위치에는 매개 변수를 지정할 수 없습니다.</target>
-        <note>{StrBegin="MSBUILD : error MSB1002: "}UE: For example, if somebody types "msbuild.exe /nologo:1", they would get this error because the /nologo switch
+        <note>{StrBegin="MSBUILD : error MSB1002: "}UE: For example, if somebody types "msbuild.exe -noLogo:1", they would get this error because the -noLogo switch
     should not be followed by any parameters ... it stands alone.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
@@ -1072,39 +1228,39 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1035: Specify the project extensions to ignore.</source>
         <target state="translated">MSBUILD : error MSB1035: 무시할 프로젝트 확장명을 지정하십시오.</target>
         <note>{StrBegin="MSBUILD : error MSB1035: "}
-      UE: This happens if the user does something like "msbuild.exe /IgnoreProjectextensions". The user must pass in one or more
-      project extensions to ignore e.g. "msbuild.exe /IgnoreProjectExtensions:.sln".
+      UE: This happens if the user does something like "msbuild.exe -ignoreProjectExtensions". The user must pass in one or more
+      project extensions to ignore e.g. "msbuild.exe -ignoreProjectExtensions:.sln".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="InvalidExtensionToIgnore">
-        <source>MSBUILD : error MSB1036: There is an invalid extension in the /ignoreprojectextensions list. Extensions must start with a period ".", have one or more characters after the period and not contain any invalid path characters or wildcards.</source>
-        <target state="translated">MSBUILD : error MSB1036: /ignoreprojectextensions 목록에 잘못된 확장명이 있습니다. 확장명은 마침표(".")로 시작되고 마침표 뒤에 하나 이상의 문자가 있어야 하며 잘못된 경로 문자 또는 와일드카드를 포함해서는 안 됩니다.</target>
+        <source>MSBUILD : error MSB1036: There is an invalid extension in the -ignoreProjectExtensions list. Extensions must start with a period ".", have one or more characters after the period and not contain any invalid path characters or wildcards.</source>
+        <target state="translated">MSBUILD : error MSB1036: -ignoreProjectExtensions 목록에 잘못된 확장명이 있습니다. 확장명은 마침표(".")로 시작되고 마침표 뒤에 하나 이상의 문자가 있어야 하며 잘못된 경로 문자 또는 와일드카드를 포함해서는 안 됩니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1036: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MissingConsoleLoggerParameterError">
-        <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the /consoleLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1037: /consoleLoggerParameters 스위치를 사용하는 경우 콘솔 로거의 매개 변수를 하나 이상 지정하십시오.</target>
+        <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch</source>
+        <target state="translated">MSBUILD : error MSB1037: -consoleLoggerParameters 스위치를 사용하는 경우 콘솔 로거의 매개 변수를 하나 이상 지정하세요.</target>
         <note>{StrBegin="MSBUILD : error MSB1037: "}
-      UE: This happens if the user does something like "msbuild.exe /consoleLoggerParameters:". The user must pass in one or more parameters
-      after the switch e.g. "msbuild.exe /consoleLoggerParameters:ErrorSummary".
+      UE: This happens if the user does something like "msbuild.exe -consoleLoggerParameters:". The user must pass in one or more parameters
+      after the switch e.g. "msbuild.exe -consoleLoggerParameters:ErrorSummary".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="MissingFileLoggerParameterError">
-        <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the /fileLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1038: /fileLoggerParameters 스위치를 사용하는 경우 파일 로거에 대한 매개 변수를 하나 이상 지정하십시오.</target>
+        <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch</source>
+        <target state="translated">MSBUILD : error MSB1038: -fileLoggerParameters 스위치를 사용하는 경우 파일 로거에 대한 매개 변수를 하나 이상 지정하세요.</target>
         <note>{StrBegin="MSBUILD : error MSB1038: "}
-      UE: This happens if the user does something like "msbuild.exe /fileLoggerParameters:". The user must pass in one or more parameters
-      after the switch e.g. "msbuild.exe /fileLoggerParameters:logfile=c:\temp\logfile".
+      UE: This happens if the user does something like "msbuild.exe -fileLoggerParameters:". The user must pass in one or more parameters
+      after the switch e.g. "msbuild.exe -fileLoggerParameters:logfile=c:\temp\logfile".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="MissingNodeReuseParameterError">
-        <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the /nodereuse switch</source>
-        <target state="translated">MSBUILD : error MSB1041: /nodereuse 스위치를 사용하는 경우 노드 다시 사용에 대한 매개 변수를 하나 이상 지정하십시오.</target>
+        <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch</source>
+        <target state="translated">MSBUILD : error MSB1041: -nodeReuse 스위치를 사용하는 경우 노드 다시 사용에 대한 매개 변수를 하나 이상 지정하세요.</target>
         <note>{StrBegin="MSBUILD : error MSB1041: "}
-      UE: This happens if the user does something like "msbuild.exe /nodereuse:" without a true or false
+      UE: This happens if the user does something like "msbuild.exe -nodeReuse:" without a true or false
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
      </note>
       </trans-unit>
@@ -1140,7 +1296,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">MSBUILD : error MSB1020: 로거를 찾을 수 없습니다. 다음을 확인하세요. 1) 지정한 로거 이름이 로거 클래스 이름과 같은지 확인합니다. 2.) 로거 클래스가 "public"이고 Microsoft.Build.Framework.ILogger 인터페이스를 구현하는지 확인합니다. 3.) 로거 어셈블리의 경로가 올바른지 또는 지정한 어셈블리 이름만 사용하여 로거를 로드할 수 있는지 확인합니다.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an logger that does not exist e.g. "msbuild /logger:FooLoggerClass,FooAssembly". The
+      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
       logger class must exist in the given assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -1181,58 +1337,58 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_28_WarnAsErrorSwitch">
-        <source>  /warnaserror[:code[;code2]]
+        <source>  -warnAsError[:code[;code2]]
                      List of warning codes to treats as errors.  Use a semicolon
                      or a comma to separate multiple warning codes. To treat all
                      warnings as errors use the switch with no values.
-                     (Short form: /err[:c;[c2]])
+                     (Short form: -err[:c;[c2]])
 
                      Example:
-                       /warnaserror:MSB4130
+                       -warnAsError:MSB4130
 
                      When a warning is treated as an error the target will
                      continue to execute as if it was a warning but the overall
                      build will fail.
     </source>
-        <target state="translated">  /warnaserror[:code[;code2]]
+        <target state="translated">  -warnAsError[:code[;code2]]
                      오류로 처리할 경고 코드 목록입니다. 여러 경고 코드를
                      구분하려면 세미콜론이나 쉼표를 사용하세요. 모든 경고를
                      오류로 처리하려면 값없이 스위치를 사용하세요.
-                     (약식: /err[:c;[c2]])
+                     (약식: -err[:c;[c2]])
 
                      예:
-                       /warnaserror:MSB4130
+                       -warnAsError:MSB4130
 
                      경고를 오류로 처리하는 경우 대상이
                      계속해서 경고인 것처럼 실행되지만 전체
                      빌드는 실패합니다.
     </target>
         <note>
-      LOCALIZATION: "/warnaserror" and "/err" should not be localized.
+      LOCALIZATION: "-warnAsError" and "-err" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_29_WarnAsMessageSwitch">
-        <source>  /warnasmessage[:code[;code2]]
+        <source>  -warnAsMessage[:code[;code2]]
                      List of warning codes to treats as low importance
                      messages.  Use a semicolon or a comma to separate
                      multiple warning codes.
-                     (Short form: /nowarn[:c;[c2]])
+                     (Short form: -noWarn[:c;[c2]])
 
                      Example:
-                       /warnasmessage:MSB3026
+                       -warnAsMessage:MSB3026
     </source>
-        <target state="translated">  /warnasmessage[:code[;code2]]
+        <target state="translated">  -warnAsMessage[:code[;code2]]
                      중요도가 낮은 메시지로 처리할 경고 코드
                      목록입니다. 여러 경고 코드를 구분하려면 세미콜론이나
                      쉼표를 사용하세요.
-                     (약식: /nowarn[:c;[c2]])
+                     (약식: -noWarn[:c;[c2]])
 
                      예:
-                       /warnasmessage:MSB3026
+                       -warnAsMessage:MSB3026
     </target>
         <note>
-      LOCALIZATION: "/warnasmessage" and "/nowarn" should not be localized.
+      LOCALIZATION: "-warnAsMessage" and "-noWarn" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1242,16 +1398,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
-        <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the /warnasmessage switch.</source>
-        <target state="translated">MSBUILD : error MSB1051: /warnasmessage 스위치를 사용하는 경우 중요도가 낮은 메시지로 처리할 경고 코드를 하나 이상 지정하세요.</target>
+        <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
+        <target state="translated">MSBUILD : error MSB1051: -warnAsMessage 스위치를 사용하는 경우 중요도가 낮은 메시지로 처리할 경고 코드를 하나 이상 지정하세요.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
-      UE: This happens if the user does something like "msbuild.exe /warnasmessage:" without any codes.
+      UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_30_BinaryLoggerSwitch">
-        <source>  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <source>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializes all build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
@@ -1259,7 +1415,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      text logs and used by other analysis tools. A binary log
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
-                     (Short form: /bl)
+                     (Short form: -bl)
 
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
@@ -1287,14 +1443,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      Examples:
-                       /bl
-                       /bl:output.binlog
-                       /bl:output.binlog;ProjectImports=None
-                       /bl:output.binlog;ProjectImports=ZipFile
-                       /bl:..\..\custom.binlog
-                       /binaryLogger
+                       -bl
+                       -bl:output.binlog
+                       -bl:output.binlog;ProjectImports=None
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
     </source>
-        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      모든 빌드 이벤트를 압축된 이진 파일로 직렬화합니다.
                      기본적으로 이 파일은 현재 디렉터리에 있으며 이름은
                      "msbuild.binlog"입니다. 이진 로그는 빌드 프로세스를
@@ -1303,7 +1459,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      사용될 수 있습니다. 이진 로그는 일반적으로 가장
                      상세한 텍스트 진단 수준 로그보다 10~20배 작지만,
                      더 자세한 정보를 포함하고 있습니다.
-                     (약식: /bl)
+                     (약식: -bl)
 
                      이진 로거는 기본적으로 빌드 중에 가져온 모든 프로젝트와
                      발생한 대상 파일을 비롯한 프로젝트 파일의 소스 텍스트를
@@ -1323,51 +1479,53 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      수집하지 않습니다.
 
                      .binlog 파일을 프로젝트/솔루션 대신 인수로 msbuild.exe에
-                     전달하여 "재생"할 수 있습니다.다른 로거는 원본 빌드가
+                     전달하여 "재생"할 수 있습니다. 다른 로거는 원본 빌드가
 		     발생하고 있는 것처럼 로그 파일에 포함된 정보를 받게 됩니다.
                      이진 로그 및 해당 사용법에 대한 자세한 내용은
                      다음 위치에서 확인할 수 있습니다.
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      예:
-                       /bl
-                       /bl:output.binlog
-                       /bl:output.binlog;ProjectImports=None
-                       /bl:output.binlog;ProjectImports=ZipFile
-                       /bl:..\..\custom.binlog
-                       /binaryLogger
+                       -bl
+                       -bl:output.binlog
+                       -bl:output.binlog;ProjectImports=None
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"
       2) the string "binlog" that describes the file extension
-      3) all switch names and their short forms e.g. /bl and /binaryLogger
+      3) all switch names and their short forms e.g. -bl and -binaryLogger
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_31_RestoreSwitch">
-        <source>  /restore[:True|False]
+        <source>  -restore[:True|False]
                      Runs a target named Restore prior to building
                      other targets and ensures the build for these
                      targets uses the latest restored build logic.
                      This is useful when your project tree requires
                      packages to be restored before it can be built.
-                     Specifying /restore is the same as specifying
-                     /restore:True. Use the parameter to override
+                     Specifying -restore is the same as specifying
+                     -restore:True. Use the parameter to override
                      a value that comes from a response file.
-                     (Short form: /r)
+                     (Short form: -r)
     </source>
-        <target state="needs-review-translation">  /restore[:True|False]
+        <target state="translated">  -restore[:True|False]
                      다른 대상을 빌드하기 전에 Restore라는 대상을
-                     실행합니다. 프로젝트 트리에서 패키지를
-                     빌드하려면 먼저 복원해야 하는 경우에
-                     유용합니다. /restore를 지정하는 것은
-                     /restore:True를 지정하는 것과 동일합니다. 이 매개 변수를 사용하여
+                     실행하고 이러한 대상의 빌드에 최신 복원된 
+                     빌드 논리가 사용되는지 확인합니다. 
+                     프로젝트 트리를 빌드하기 전에 
+                     프로젝트 트리에서 패키지를 복원해야 하는 
+                     경우에 유용합니다. -restore를 지정하는 것은
+                     -restore:True를 지정하는 것과 동일합니다. 이 매개 변수를 사용하여
                      지시 파일에서 가져오는 값을 재정의할 수 있습니다.
-                     (약식: /r)
+                     (약식: -r)
     </target>
         <note>
-      LOCALIZATION: "/restore" and "/r" should not be localized.
+      LOCALIZATION: "-restore" and "-r" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1390,13 +1548,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  -profileEvaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;file&gt;    
+        <target state="translated">  -profileEvaluation:&lt;file&gt;
                      MSBuild 실행을 프로파일링하고 결과를 
                      지정된 파일에 씁니다. 지정된 파일의 확장명이
                      '.md'이면 결과가 markdown 형식으로
@@ -1405,30 +1563,30 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_33_RestorePropertySwitch">
-        <source>  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+        <source>  -restoreProperty:&lt;n&gt;=&lt;v&gt;
                      Set or override these project-level properties only
                      during restore and do not use properties specified
-                     with the /property argument. &lt;n&gt; is the property
+                     with the -property argument. &lt;n&gt; is the property
                      name, and &lt;v&gt; is the property value. Use a
                      semicolon or a comma to separate multiple properties,
                      or specify each property separately.
-                     (Short form: /rp)
+                     (Short form: -rp)
                      Example:
-                       /restoreProperty:IsRestore=true;MyProperty=value
+                       -restoreProperty:IsRestore=true;MyProperty=value
     </source>
-        <target state="translated">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+        <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
                      복원 중에만 이러한 프로젝트 수준 속성을
-                     설정하거나 재정의하고 /property 인수로 지정된 속성을
+                     설정하거나 재정의하고 -property 인수로 지정된 속성을
                      사용하지 않습니다. 여기서, &lt;n&gt;은 속성 이름이고
                      &lt;v&gt;는 속성 값입니다. 세미콜론
                      또는 쉼표를 사용하여 여러 속성을 구분하거나
                      각 속성을 따로 지정하세요.
-                     (약식: /rp)
+                     (약식: -rp)
                      예:
-                       /restoreProperty:IsRestore=true;MyProperty=value
+                       -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
-      LOCALIZATION: "/restoreProperty" and "/rp" should not be localized.
+      LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>

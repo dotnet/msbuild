@@ -281,11 +281,30 @@ namespace Microsoft.Build.Evaluation
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents)
+            : this(globalProperties, loggers, null, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly: false)
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a project collection with specified global properties and loggers and using the
+        /// specified toolset locations, node count, and setting of onlyLogCriticalEvents.
+        /// Global properties and loggers may be null.
+        /// Throws InvalidProjectFileException if any of the global properties are reserved.
+        /// May throw InvalidToolsetDefinitionException.
+        /// </summary>
+        /// <param name="globalProperties">The default global properties to use. May be null.</param>
+        /// <param name="loggers">The loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="remoteLoggers">Any remote loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
+        /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
+        /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
+        /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
         {
             _loadedProjects = new LoadedProjectCollection();
             _toolsetDefinitionLocations = toolsetDefinitionLocations;
             MaxNodeCount = maxNodeCount;
-            ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */);
+            ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */, loadProjectsReadOnly);
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
@@ -2331,7 +2350,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     _loadedProjects.TryGetValue(fullPath, out List<Project> candidates);
 
-                    return candidates ?? (IList<Project>)Enumerable.Empty<Project>();
+                    return candidates ?? (IList<Project>)Array.Empty<Project>();
                 }
             }
 

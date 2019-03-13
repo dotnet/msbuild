@@ -979,7 +979,6 @@ namespace Microsoft.Build.Evaluation
                 // The sourceIndex is the zero-based index into the expression,
                 // where we've essentially read up to and copied into the target string.
                 int sourceIndex = 0;
-                int expressionLength = expression.Length;
 
                 // Search for "$(" in the expression.  Loop until we don't find it 
                 // any more.
@@ -2439,11 +2438,7 @@ namespace Microsoft.Build.Evaluation
                             item.Key,
                             functionName,
                             arguments,
-#if FEATURE_TYPE_INVOKEMEMBER
                             BindingFlags.Public | BindingFlags.InvokeMethod,
-#else
-                            BindingFlags.Public, InvokeType.InvokeMethod,
-#endif
                             string.Empty,
                             expander.UsedUninitializedProperties,
                             expander._fileSystem);
@@ -2809,14 +2804,6 @@ namespace Microsoft.Build.Evaluation
              *************************************************************************************************************************/
         }
 
-#if !FEATURE_TYPE_INVOKEMEMBER
-        internal enum InvokeType
-        {
-            InvokeMethod,
-            GetPropertyOrField
-        }
-#endif
-
         private struct FunctionBuilder<T>
             where T : class, IProperty
         {
@@ -2850,10 +2837,6 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public BindingFlags BindingFlags { get; set; }
 
-#if !FEATURE_TYPE_INVOKEMEMBER
-            public InvokeType InvokeType { get; set; }
-#endif
-
             /// <summary>
             /// The remainder of the body once the function and arguments have been extracted
             /// </summary>
@@ -2875,9 +2858,6 @@ namespace Microsoft.Build.Evaluation
                     Name,
                     Arguments,
                     BindingFlags,
-#if !FEATURE_TYPE_INVOKEMEMBER
-                    InvokeType,
-#endif
                     Remainder,
                     UsedUninitializedProperties,
                     FileSystem
@@ -2923,10 +2903,6 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private BindingFlags _bindingFlags;
 
-#if !FEATURE_TYPE_INVOKEMEMBER
-            private InvokeType _invokeType;
-#endif
-
             /// <summary>
             /// The remainder of the body once the function and arguments have been extracted
             /// </summary>
@@ -2949,9 +2925,6 @@ namespace Microsoft.Build.Evaluation
                 string methodName,
                 string[] arguments,
                 BindingFlags bindingFlags,
-#if !FEATURE_TYPE_INVOKEMEMBER
-                InvokeType invokeType,
-#endif
                 string remainder,
                 UsedUninitializedProperties usedUninitializedProperties,
                 IFileSystem fileSystem)
@@ -2970,9 +2943,6 @@ namespace Microsoft.Build.Evaluation
                 _expression = expression;
                 _receiverType = receiverType;
                 _bindingFlags = bindingFlags;
-#if !FEATURE_TYPE_INVOKEMEMBER
-                _invokeType = invokeType;
-#endif
                 _remainder = remainder;
                 _usedUninitializedProperties = usedUninitializedProperties;
                 _fileSystem = fileSystem;
@@ -3113,33 +3083,6 @@ namespace Microsoft.Build.Evaluation
 
                 return functionBuilder.Build();
             }
-
-#if !FEATURE_TYPE_INVOKEMEMBER
-            private MemberInfo BindFieldOrProperty()
-            {
-                StringComparison nameComparison =
-                    ((_bindingFlags & BindingFlags.IgnoreCase) == BindingFlags.IgnoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-
-                var matchingMembers = _receiverType.GetFields(_bindingFlags)
-                    .Cast<MemberInfo>()
-                    .Concat(_receiverType.GetProperties(_bindingFlags))
-                    .Where(member => member.Name.Equals(_methodMethodName, nameComparison))
-                    .ToArray();
-
-                if (matchingMembers.Length == 0)
-                {
-                    throw new MissingMemberException(_methodMethodName);
-                }
-                else if (matchingMembers.Length == 1)
-                {
-                    return matchingMembers[0];
-                }
-                else
-                {
-                    throw new AmbiguousMatchException(_methodMethodName);
-                }                
-            }
-#endif
 
             /// <summary>
             /// Execute the function on the given instance
@@ -3282,41 +3225,14 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-#if FEATURE_TYPE_INVOKEMEMBER
                                 // First use InvokeMember using the standard binder - this will match and coerce as needed
                                 functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
-#else
-                                if (_invokeType == InvokeType.InvokeMethod)
-                                {
-                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, objectInstance, args, null, CultureInfo.InvariantCulture, null);
-                                }
-                                else if (_invokeType == InvokeType.GetPropertyOrField)
-                                {
-                                    MemberInfo memberInfo = BindFieldOrProperty();
-                                    if (memberInfo is FieldInfo)
-                                    {
-                                        functionResult = ((FieldInfo)memberInfo).GetValue(objectInstance);
-                                    }
-                                    else
-                                    {
-                                        functionResult = ((PropertyInfo)memberInfo).GetValue(objectInstance);
-                                    }
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException(_invokeType.ToString());
-                                }
-#endif
                             }
                             catch (MissingMethodException ex) // Don't catch and retry on any other exception
                             {
                                 // If we're invoking a method, then there are deeper attempts that
                                 // can be made to invoke the method
-#if FEATURE_TYPE_INVOKEMEMBER
                                 if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
-#else
-                                if (_invokeType == InvokeType.InvokeMethod)
-#endif
                                 {
                                     // The standard binder failed, so do our best to coerce types into the arguments for the function
                                     // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true. 
@@ -4240,12 +4156,7 @@ namespace Microsoft.Build.Evaluation
 
                 functionBuilder.Name = functionName;
                 functionBuilder.Arguments = functionArguments;
-#if FEATURE_TYPE_INVOKEMEMBER
                 functionBuilder.BindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.InvokeMethod;
-#else
-                functionBuilder.BindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
-                functionBuilder.InvokeType = InvokeType.InvokeMethod;
-#endif
                 functionBuilder.Remainder = remainder;
             }
 
@@ -4266,9 +4177,6 @@ namespace Microsoft.Build.Evaluation
 
                 // The binding flags that we will use for this function's execution
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
-#if !FEATURE_TYPE_INVOKEMEMBER
-                InvokeType defaultInvokeType;
-#endif
 
                 // There are arguments that need to be passed to the function
                 if (argumentStartIndex > -1 && !expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Contains("."))
@@ -4290,11 +4198,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // We have been asked for a method invocation
-#if FEATURE_TYPE_INVOKEMEMBER
                     defaultBindingFlags |= BindingFlags.InvokeMethod;
-#else
-                    defaultInvokeType = InvokeType.InvokeMethod;
-#endif
 
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
@@ -4346,11 +4250,7 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.VerifyThrowInvalidProject(netPropertyName.Length > 0, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
                     // We have been asked for a property or a field
-#if FEATURE_TYPE_INVOKEMEMBER
                     defaultBindingFlags |= (BindingFlags.GetProperty | BindingFlags.GetField);
-#else
-                    defaultInvokeType = InvokeType.GetPropertyOrField;
-#endif
 
                     functionName = netPropertyName;
                 }
@@ -4362,9 +4262,6 @@ namespace Microsoft.Build.Evaluation
                     functionBuilder.Arguments = functionArguments;
                     functionBuilder.BindingFlags = defaultBindingFlags;
                     functionBuilder.Remainder = remainder;
-#if !FEATURE_TYPE_INVOKEMEMBER
-                    functionBuilder.InvokeType = defaultInvokeType;
-#endif
                 }
                 else
                 {
@@ -4485,11 +4382,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         typeName = "MSBuild";
                     }
-#if FEATURE_TYPE_INVOKEMEMBER
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
-#else
-                    if (_invokeType == InvokeType.InvokeMethod)
-#endif
                     {
                         return "[" + typeName + "]::" + name + "(" + parameters + ")";
                     }
@@ -4502,11 +4395,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     string propertyValue = "\"" + objectInstance as string + "\"";
 
-#if FEATURE_TYPE_INVOKEMEMBER
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
-#else
-                    if (_invokeType == InvokeType.InvokeMethod)
-#endif
                     {
                         return propertyValue + "." + name + "(" + parameters + ")";
                     }
@@ -4537,21 +4426,6 @@ namespace Microsoft.Build.Evaluation
                 return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
             }
 
-#if !FEATURE_TYPE_INVOKEMEMBER
-            private static bool ParametersBindToNStringArguments(ParameterInfo[] parameters, int n)
-            {
-                if (parameters.Length != n)
-                {
-                    return false;
-                }
-                if (parameters.Any(p => !p.ParameterType.IsAssignableFrom(typeof(string))))
-                {
-                    return false;
-                }
-                return true;
-            }
-#endif
-
             /// <summary>
             /// Construct and instance of objectType based on the constructor or method arguments provided.
             /// Arguments must never be null.
@@ -4571,13 +4445,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (isConstructor)
                 {
-#if FEATURE_TYPE_INVOKEMEMBER
                     memberInfo = _receiverType.GetConstructor(bindingFlags, null, types, null);
-#else
-                    memberInfo = _receiverType.GetConstructors(bindingFlags)
-                        .Where(c => ParametersBindToNStringArguments(c.GetParameters(), args.Length))
-                        .FirstOrDefault();
-#endif
                 }
                 else
                 {

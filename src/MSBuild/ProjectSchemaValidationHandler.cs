@@ -57,7 +57,7 @@ namespace Microsoft.Build.CommandLine
                 // If we've gotten to this point, there is no schema to validate against -- just exit. 
                 InitializationException.Throw
                     (
-                    ResourceUtilities.FormatResourceString("SchemaNotFoundErrorWithFile", schemaFile),
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SchemaNotFoundErrorWithFile", schemaFile),
                     null /* No associated command line switch */
                     );
             }
@@ -247,7 +247,7 @@ namespace Microsoft.Build.CommandLine
         {
             string errorCode;
             string helpKeyword;
-            string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, resourceName, args);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, args);
 
             return EventArgsFormatting.FormatEventMessage
                 (

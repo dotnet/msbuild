@@ -136,7 +136,7 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            throw new BuildAbortedException(ResourceUtilities.FormatResourceString("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
+            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
         }
 
         /// <summary>

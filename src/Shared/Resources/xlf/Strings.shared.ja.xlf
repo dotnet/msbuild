@@ -62,7 +62,7 @@
       </trans-unit>
       <trans-unit id="Shared.PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
-        <target state="new">Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</target>
+        <target state="translated">パス: {0} は OS のパスの上限を越えています。完全修飾のファイル名は {1} 文字以下にする必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">

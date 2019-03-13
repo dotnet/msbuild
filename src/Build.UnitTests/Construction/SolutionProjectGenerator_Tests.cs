@@ -89,10 +89,10 @@ namespace Microsoft.Build.UnitTests.Construction
 
             string code = null;
             string keyword = null;
-            string text = ResourceUtilities.FormatResourceString(out code, out keyword, "SolutionParseUnknownProjectType", "proj1.csproj");
+            string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionParseUnknownProjectType", "proj1.csproj");
 
             // check the error event
-            Assert.Equal(1, logger.Warnings.Count);
+            Assert.Single(logger.Warnings);
             BuildWarningEventArgs warning = logger.Warnings[0];
 
             Assert.Equal(text, warning.Message);
@@ -101,10 +101,10 @@ namespace Microsoft.Build.UnitTests.Construction
 
             code = null;
             keyword = null;
-            text = ResourceUtilities.FormatResourceString(out code, out keyword, "SolutionInvalidSolutionConfiguration");
+            text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionInvalidSolutionConfiguration");
 
             // check the warning event
-            Assert.Equal(1, logger.Errors.Count);
+            Assert.Single(logger.Errors);
             BuildErrorEventArgs error = logger.Errors[0];
 
             Assert.Equal(text, error.Message);
@@ -113,10 +113,10 @@ namespace Microsoft.Build.UnitTests.Construction
 
             code = null;
             keyword = null;
-            text = ResourceUtilities.FormatResourceString(out code, out keyword, "SolutionVenusProjectNoClean");
+            text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionVenusProjectNoClean");
 
             // check the message event
-            Assert.True(logger.FullLog.Contains(text)); // "Log should contain the regular message"
+            Assert.Contains(text, logger.FullLog); // "Log should contain the regular message"
         }
 
         /// <summary>
@@ -794,7 +794,7 @@ EndGlobal
             var instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             var projectBravoMetaProject = instances[1];
-            Assert.False(projectBravoMetaProject.Targets.Any(kvp => kvp.Value.Outputs.Equals("@()"))); // "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case."
+            Assert.DoesNotContain(projectBravoMetaProject.Targets, kvp => kvp.Value.Outputs.Equals("@()")); // "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case."
             // saves the in-memory metaproj to disk
             projectBravoMetaProject.ToProjectRootElement().Save(projectBravoMetaProject.FullPath);
             var automaticProjectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("automatic.msbuild", automaticProjectFileContents);
@@ -853,16 +853,16 @@ EndGlobal
             string solutionConfigurationContents = msbuildProject.GetPropertyValue("CurrentSolutionConfigurationContents");
             string tempProjectPath = Path.Combine(Path.GetTempPath(), "ClassLibrary1\\ClassLibrary1.csproj");
 
-            Assert.True(solutionConfigurationContents.Contains("{6185CC21-BE89-448A-B3C0-D1C27112E595}"));
+            Assert.Contains("{6185CC21-BE89-448A-B3C0-D1C27112E595}", solutionConfigurationContents);
             tempProjectPath = Path.GetFullPath(tempProjectPath);
             Assert.True(solutionConfigurationContents.IndexOf(tempProjectPath, StringComparison.OrdinalIgnoreCase) > 0);
-            Assert.True(solutionConfigurationContents.Contains("CSConfig1|AnyCPU"));
+            Assert.Contains("CSConfig1|AnyCPU", solutionConfigurationContents);
 
             tempProjectPath = Path.Combine(Path.GetTempPath(), "MainApp\\MainApp.vcxproj");
             tempProjectPath = Path.GetFullPath(tempProjectPath);
-            Assert.True(solutionConfigurationContents.Contains("{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}"));
+            Assert.Contains("{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}", solutionConfigurationContents);
             Assert.True(solutionConfigurationContents.IndexOf(tempProjectPath, StringComparison.OrdinalIgnoreCase) > 0);
-            Assert.True(solutionConfigurationContents.Contains("VCConfig1|Win32"));
+            Assert.Contains("VCConfig1|Win32", solutionConfigurationContents);
 
             // Only the C# project should be present for solution configuration "Release|Any CPU", since the VC project
             // is missing
@@ -872,10 +872,10 @@ EndGlobal
 
             solutionConfigurationContents = msbuildProject.GetPropertyValue("CurrentSolutionConfigurationContents");
 
-            Assert.True(solutionConfigurationContents.Contains("{6185CC21-BE89-448A-B3C0-D1C27112E595}"));
-            Assert.True(solutionConfigurationContents.Contains("CSConfig2|AnyCPU"));
+            Assert.Contains("{6185CC21-BE89-448A-B3C0-D1C27112E595}", solutionConfigurationContents);
+            Assert.Contains("CSConfig2|AnyCPU", solutionConfigurationContents);
 
-            Assert.False(solutionConfigurationContents.Contains("{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}"));
+            Assert.DoesNotContain("{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}", solutionConfigurationContents);
         }
 
         /// <summary>
@@ -919,7 +919,7 @@ EndGlobal
             msbuildProject.ReevaluateIfNecessary();
 
             string solutionConfigurationContents = msbuildProject.GetPropertyValue("CurrentSolutionConfigurationContents");
-            Assert.True(solutionConfigurationContents.Contains(@"BuildProjectInSolution=""" + bool.TrueString + @""""));
+            Assert.Contains(@"BuildProjectInSolution=""" + bool.TrueString + @"""", solutionConfigurationContents);
         }
 
         /// <summary>
@@ -962,7 +962,7 @@ EndGlobal
             msbuildProject.ReevaluateIfNecessary();
 
             string solutionConfigurationContents = msbuildProject.GetPropertyValue("CurrentSolutionConfigurationContents");
-            Assert.True(solutionConfigurationContents.Contains(@"BuildProjectInSolution=""" + bool.FalseString + @""""));
+            Assert.Contains(@"BuildProjectInSolution=""" + bool.FalseString + @"""", solutionConfigurationContents);
         }
 
         /// <summary>
@@ -1024,13 +1024,13 @@ EndGlobal
                 {
                     Assert.Equal("Debug", item.GetMetadata("Configuration"));
                     Assert.Equal("Mixed Platforms", item.GetMetadata("Platform"));
-                    Assert.True(item.GetMetadata("Content").Contains("<SolutionConfiguration>"));
+                    Assert.Contains("<SolutionConfiguration>", item.GetMetadata("Content"));
                 }
                 else if (item.ItemSpec == "Release|Any CPU")
                 {
                     Assert.Equal("Release", item.GetMetadata("Configuration"));
                     Assert.Equal("Any CPU", item.GetMetadata("Platform"));
-                    Assert.True(item.GetMetadata("Content").Contains("<SolutionConfiguration>"));
+                    Assert.Contains("<SolutionConfiguration>", item.GetMetadata("Content"));
                 }
                 else
                 {
@@ -1098,7 +1098,7 @@ EndGlobal
                                 // ToolsVersion parameter set
                                 string toolsVersionParameter = childNode.GetParameter("ToolsVersion");
 
-                                Assert.Equal(0, String.Compare(toolsVersionParameter, instances[0].GetPropertyValue("ProjectToolsVersion"), StringComparison.OrdinalIgnoreCase));
+                                Assert.Equal(toolsVersionParameter, instances[0].GetPropertyValue("ProjectToolsVersion"));
                             }
                         }
                     }
@@ -1258,10 +1258,10 @@ EndGlobal
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-            Assert.Equal(1, instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0).Count());
-            Assert.Equal(1, instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase) == 0).Count());
-            Assert.Equal(1, instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0).Count());
-            Assert.Equal(1, instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase) == 0).Count());
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase) == 0));
 
             ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
             ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
@@ -1269,7 +1269,7 @@ EndGlobal
             ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
 
             // Check that the appropriate target is being passed to the child projects
-            Assert.Equal(null, buildTarget.Tasks.Where
+            Assert.Null(buildTarget.Tasks.Where
                 (
                 task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
                 ).First().GetParameter("Targets"));
@@ -1408,8 +1408,8 @@ EndGlobal
             Assert.Equal("Release", msbuildProject.GetPropertyValue("AspNetConfiguration"));
 
             // Check that the two standard Asp.net configurations are represented on the targets
-            Assert.True(msbuildProject.Targets["Build"].Condition.Contains("'$(Configuration)' == 'Release'"));
-            Assert.True(msbuildProject.Targets["Build"].Condition.Contains("'$(Configuration)' == 'Debug'"));
+            Assert.Contains("'$(Configuration)' == 'Release'", msbuildProject.Targets["Build"].Condition);
+            Assert.Contains("'$(Configuration)' == 'Debug'", msbuildProject.Targets["Build"].Condition);
         }
 
         /// <summary>
@@ -1472,7 +1472,7 @@ EndGlobal
                 Assert.Equal("2.0", msbuildProject.ToolsVersion);
 
                 bool success = msbuildProject.Build("GetFrameworkPathAndRedistList", null);
-                Assert.Equal(true, success);
+                Assert.True(success);
                 AssertProjectContainsItem(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", FrameworkLocationHelper.PathToDotNetFrameworkV20);
                 AssertProjectItemNameCount(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", 1);
             }
@@ -1526,7 +1526,7 @@ EndGlobal
             msbuildProject.SetProperty("TargetFrameworkVersion", "v4.0");
             // ProjectInstance projectToBuild = msbuildProject.CreateProjectInstance();
             bool success = msbuildProject.Build("GetFrameworkPathAndRedistList", null);
-            Assert.Equal(true, success);
+            Assert.True(success);
 
             int expectedCount = 0;
 
@@ -1587,7 +1587,7 @@ EndGlobal
             Assert.Equal("Release|Win32", SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
 
             globalProperties["Configuration"] = "Nonexistent";
-            Assert.Equal(null, SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
+            Assert.Null(SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
         }
 
 
@@ -1625,15 +1625,15 @@ EndGlobal
             solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
             // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
-            Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
+            Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-            Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
+            Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
             // Ensure that the value has been correctly stored in the ProjectReference item list
             // Since there is only one project in the solution, there will be only one project reference
-            Assert.True(instances[0].GetItems("ProjectReference").ElementAt(0).EvaluatedInclude.Contains("%abtest"));
+            Assert.Contains("%abtest", instances[0].GetItems("ProjectReference").ElementAt(0).EvaluatedInclude);
         }
 
         /// <summary>
@@ -1680,12 +1680,12 @@ EndGlobal
                 solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
                 // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
-                Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
+                Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
                 // Instantiating the
-                Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
+                Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
             }
             finally
             {
@@ -1766,10 +1766,10 @@ EndGlobal
                 ProjectInstance msbuildProject = instances[0];
 
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
-                Assert.Equal(true, msbuildProject.Build(new ILogger[] { logger }));
+                Assert.True(msbuildProject.Build(new ILogger[] { logger }));
 
                 // We should get the invalid solution configuration warning
-                Assert.Equal(1, logger.Warnings.Count);
+                Assert.Single(logger.Warnings);
                 BuildWarningEventArgs warning = logger.Warnings[0];
 
                 // Don't look at warning.Code here -- it may be null if PseudoLoc has messed
@@ -1778,7 +1778,7 @@ EndGlobal
                 logger.AssertLogContains("MSB4126");
 
                 // No errors expected
-                Assert.Equal(0, logger.Errors.Count);
+                Assert.Empty(logger.Errors);
             }
             finally
             {
@@ -2041,7 +2041,7 @@ EndGlobal
 
 #if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");
-                string message = ResourceUtilities.FormatResourceString("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
                 logger.AssertLogContains(message);
 #endif
             }
@@ -2077,26 +2077,26 @@ EndGlobal
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
 
-            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase) == 0));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Two", "Three", "Four" });
 
-            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase) == 0));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Build" });
 
-            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Five", "Rebuild" });
 
-            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
 
-            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase) == 0));
         }
 
         /// <summary>
@@ -2146,7 +2146,7 @@ EndGlobal
             {
                 instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), builtInTargetName == null ? null : new [] { builtInTargetName });
 
-                Assert.Equal(1, instances.Length);
+                Assert.Single(instances);
 
                 Assert.Equal(12, instances[0].Targets.Select(kvp => kvp.Value).Where(t => t.FullPath.Contains(".sln.metaproj")).Count());
             }
@@ -2154,7 +2154,7 @@ EndGlobal
 
             instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Foo" });
 
-            Assert.Equal(1, instances.Length);
+            Assert.Single(instances);
 
             Assert.Equal(14, instances[0].Targets.Select(kvp => kvp.Value).Where(t => t.FullPath.Contains(".sln.metaproj")).Count());
         }
@@ -2203,7 +2203,7 @@ EndGlobal
 
                 Assert.True(projectInstance.Targets.ContainsKey("MyTarget"));
 
-                Assert.Equal(1, projectInstance.Targets["MyTarget"].Children.Count);
+                Assert.Single(projectInstance.Targets["MyTarget"].Children);
 
                 ProjectTaskInstance task = Assert.IsType<ProjectTaskInstance>(projectInstance.Targets["MyTarget"].Children[0]);
 

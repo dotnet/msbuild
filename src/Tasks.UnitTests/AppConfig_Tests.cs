@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.True(s.Contains("Dependent Assembly: Simple, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.0.0 oldVersionHigh=1.0.0.0 newVersion=2.0.0.0"));
+            Assert.Contains("Dependent Assembly: Simple, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.0.0 oldVersionHigh=1.0.0.0 newVersion=2.0.0.0", s);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.True(s.Contains("Dependent Assembly: Simple, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.0.0 oldVersionHigh=2.0.0.0 newVersion=2.0.0.0"));
+            Assert.Contains("Dependent Assembly: Simple, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.0.0 oldVersionHigh=2.0.0.0 newVersion=2.0.0.0", s);
         }
 
         /// <summary>
@@ -109,9 +109,9 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.True(s.Contains("Dependent Assembly: Microsoft.VSDesigner, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=7.0.3300.0 oldVersionHigh=7.0.3300.0 newVersion=8.0.1000.0"));
-            Assert.True(s.Contains("Dependent Assembly: Microsoft.VisualStudio.Designer.Interfaces, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.3300.0 oldVersionHigh=1.0.3300.0 newVersion=1.2.3400.0"));
-            Assert.True(s.Contains("Dependent Assembly: Microsoft.VisualStudio, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.3300.0 oldVersionHigh=1.0.3300.0 newVersion=1.2.3400.0"));
+            Assert.Contains("Dependent Assembly: Microsoft.VSDesigner, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=7.0.3300.0 oldVersionHigh=7.0.3300.0 newVersion=8.0.1000.0", s);
+            Assert.Contains("Dependent Assembly: Microsoft.VisualStudio.Designer.Interfaces, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.3300.0 oldVersionHigh=1.0.3300.0 newVersion=1.2.3400.0", s);
+            Assert.Contains("Dependent Assembly: Microsoft.VisualStudio, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.3300.0 oldVersionHigh=1.0.3300.0 newVersion=1.2.3400.0", s);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.True(s.Contains("Dependent Assembly: Microsoft.VSDesigner, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=7.1.3300.0 oldVersionHigh=7.1.3300.0 newVersion=7.2.3300.0"));
+            Assert.Contains("Dependent Assembly: Microsoft.VSDesigner, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=7.1.3300.0 oldVersionHigh=7.1.3300.0 newVersion=7.2.3300.0", s);
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.True(s.Contains("Dependent Assembly"));
+            Assert.Contains("Dependent Assembly", s);
         }
 
 

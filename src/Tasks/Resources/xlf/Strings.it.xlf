@@ -2283,6 +2283,11 @@
         <target state="translated">MSB3353: chiave pubblica necessaria per la firma ritardata non specificata.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
+        <target state="translated">MSB4803: l'attività "{0}" non è supportata nella versione .NET Core di MSBuild. Usare la versione .NET Framework di MSBuild. Per altri dettagli, vedere https://aka.ms/msbuild/MSB4803.</target>
+        <note>{StrBegin="MSB4803: "}</note>
+      </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>
         <target state="translated">MSB3661: valore '{0}' non valido passato alla proprietà Transform.</target>

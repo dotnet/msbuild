@@ -228,7 +228,7 @@ namespace Microsoft.Build.Internal
             else
             {
                 List<Regex> regexes = new List<Regex>();
-                foreach (string regex in wildCards.Split(';'))
+                foreach (string regex in wildCards.Split(MSBuildConstants.SemicolonChar))
                 {
                     Regex item = new Regex(regex, RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
                     // trigger a match first?

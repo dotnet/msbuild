@@ -1,0 +1,59 @@
+<Project>
+
+  <PropertyGroup>
+      <MicrosoftNETCoreCompilersVersion>2.10.0</MicrosoftNETCoreCompilersVersion>
+      <NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-rtm.5362</NuGetPackageVersion>
+      <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
+      <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
+      <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Update="LargeAddressAware" Version="1.0.3" />
+    <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
+    <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="3.0.0-beta1-61516-01" />
+    <PackageReference Update="Microsoft.DotNet.BuildTools.GenAPI" Version="2.1.0-prerelease-02404-02" />
+    <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
+    <PackageReference Update="Microsoft.Net.Compilers" Version="$(MicrosoftNetCompilersVersion)" />
+    <PackageReference Update="Microsoft.NETCore.Compilers" Version="$(MicrosoftNetCoreCompilersVersion)" />
+    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
+    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
+    <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
+    <PackageReference Update="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
+    <PackageReference Update="PdbGit" Version="3.0.41" />
+    <PackageReference Update="Shouldly" Version="3.0.0" />
+    <PackageReference Update="SourceLink.Create.CommandLine" Version="2.1.2" />
+    <PackageReference Update="System.CodeDom" Version="4.4.0" />
+    <PackageReference Update="System.Collections.Concurrent" Version="4.3.0" />
+    <PackageReference Update="System.Collections.Immutable" Version="1.5.0" />
+    <PackageReference Update="System.Diagnostics.TraceSource" Version="4.0.0" />
+    <PackageReference Update="System.IO.Compression" Version="4.3.0" />
+    <PackageReference Update="System.IO.FileSystem.Primitives" Version="4.3.0" />
+    <PackageReference Update="System.Linq.Parallel" Version="4.0.1" />
+    <PackageReference Update="System.Net.Http" Version="4.3.0" />
+    <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
+    <PackageReference Update="System.Reflection.TypeExtensions" Version="4.1.0" />
+    <PackageReference Update="System.Resources.Writer" Version="4.0.0" />
+    <PackageReference Update="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageReference Update="System.Runtime.Loader" Version="4.0.0" />
+    <PackageReference Update="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Update="System.Security.Principal.Windows" Version="4.3.0" />
+    <PackageReference Update="System.Text.Encoding.CodePages" Version="4.0.1" />
+
+    <PackageReference Update="System.Threading.Tasks.Dataflow" Version="4.5.24.0" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <PackageReference Update="System.Threading.Tasks.Dataflow" Version="4.6.0" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'"/>
+
+    <PackageReference Update="System.Threading.Thread" Version="4.0.0" />
+    <PackageReference Update="System.Xml.XPath" Version="4.3.0" />
+    <PackageReference Update="xunit.assert" Version="$(XUnitVersion)" />
+    <PackageReference Update="xunit.console" Version="$(XUnitVersion)" />
+    <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="2.2.33" Condition="'$(DisableNerdbankVersioning)' != 'true'" PrivateAssets="All" />
+    <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-004" PrivateAssets="All"/>
+    <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+  </ItemGroup>
+
+</Project>

@@ -12,7 +12,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This interface represents an object which holds build results.
     /// </summary>
-    internal interface IResultsCache : IBuildComponent
+    internal interface IResultsCache : IBuildComponent, ITranslatable, IEnumerable<BuildResult>
     {
         /// <summary>
         /// Adds a result to the cache

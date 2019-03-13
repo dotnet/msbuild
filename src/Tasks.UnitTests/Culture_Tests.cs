@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
         public void NonCultureFile()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.resx", null);
-            Assert.Equal(null, info.culture);
+            Assert.Null(info.culture);
             Assert.Equal("MyResource.resx", info.cultureNeutralFilename);
         }
 
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
         public void BogusEmbeddedCulture()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.notalocale.resx", null);
-            Assert.Equal(null, info.culture);
+            Assert.Null(info.culture);
             Assert.Equal("MyResource.notalocale.resx", info.cultureNeutralFilename);
         }
     }

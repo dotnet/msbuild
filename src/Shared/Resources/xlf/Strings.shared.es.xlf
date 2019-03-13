@@ -62,7 +62,7 @@
       </trans-unit>
       <trans-unit id="Shared.PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
-        <target state="new">Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</target>
+        <target state="translated">La ruta de acceso {0} supera el límite máximo para la ruta de acceso del sistema operativo. El nombre de archivo completo debe ser inferior a {1} caracteres.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">

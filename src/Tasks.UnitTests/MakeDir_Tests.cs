@@ -38,13 +38,11 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.True(success);
-                Assert.Equal(1, t.DirectoriesCreated.Length);
+                Assert.Single(t.DirectoriesCreated);
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
-                Assert.True(
-                    engine.Log.Contains
-                    (
-                        String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir)
-                    )
+                Assert.Contains(
+                    String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
+                    engine.Log
                 );
                 Assert.Equal("en-GB", t.DirectoriesCreated[0].GetMetadata("Locale"));
 
@@ -106,12 +104,10 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
-                Assert.True
+                Assert.Contains
                 (
-                    engine.Log.Contains
-                    (
-                        String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir)
-                    )
+                    String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
+                    engine.Log
                 );
             }
             finally
@@ -149,13 +145,11 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.True(success);
-                Assert.Equal(1, t.DirectoriesCreated.Length);
+                Assert.Single(t.DirectoriesCreated);
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
-                Assert.True(
-                    engine.Log.Contains
-                    (
-                        String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir)
-                    )
+                Assert.Contains(
+                    String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
+                    engine.Log
                 );
 
                 engine.Log = "";
@@ -163,12 +157,11 @@ namespace Microsoft.Build.UnitTests
 
                 Assert.True(success);
                 // should still return directory even though it didn't need to be created
-                Assert.Equal(1, t.DirectoriesCreated.Length);
+                Assert.Single(t.DirectoriesCreated);
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
-                Assert.False(engine.Log.Contains
-                    (
-                        String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir)
-                    ));
+                Assert.DoesNotContain(
+                    String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
+                    engine.Log);
             }
             finally
             {
@@ -204,9 +197,9 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.False(success);
-                Assert.Equal(0, t.DirectoriesCreated.Length);
-                Assert.True(engine.Log.Contains("MSB3191"));
-                Assert.True(engine.Log.Contains(file));
+                Assert.Empty(t.DirectoriesCreated);
+                Assert.Contains("MSB3191", engine.Log);
+                Assert.Contains(file, engine.Log);
             }
             finally
             {

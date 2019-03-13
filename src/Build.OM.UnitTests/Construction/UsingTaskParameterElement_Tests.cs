@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.ParameterType = "newType";
             Assert.Equal("newType", parameter.ParameterType);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.Output = "output";
             Assert.Equal("output", parameter.Output);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.Required = "required";
             Assert.Equal("required", parameter.Required);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.ParameterType = String.Empty;
             Assert.Equal(typeof(String).FullName, parameter.ParameterType);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.Output = String.Empty;
             Assert.Equal(bool.FalseString, parameter.Output);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.Required = String.Empty;
             Assert.Equal(bool.FalseString, parameter.Required);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.ParameterType = null;
             Assert.Equal(typeof(String).FullName, parameter.ParameterType);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.Output = null;
             Assert.Equal(bool.FalseString, parameter.Output);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             parameter.Required = null;
             Assert.Equal(bool.FalseString, parameter.Required);
-            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.True(parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>

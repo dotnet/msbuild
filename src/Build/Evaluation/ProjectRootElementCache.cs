@@ -58,6 +58,8 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal class ProjectRootElementCache
     {
+        public bool LoadProjectsReadOnly { get; }
+
         /// <summary>
         /// The maximum number of entries to keep strong references to.
         /// This has to be strong enough to make sure that key .targets files aren't pushed
@@ -124,13 +126,14 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Creates an empty cache.
         /// </summary>
-        internal ProjectRootElementCache(bool autoReloadFromDisk)
+        internal ProjectRootElementCache(bool autoReloadFromDisk, bool loadProjectsReadOnly = false)
         {
             DebugTraceCache("Constructing with autoreload from disk: ", autoReloadFromDisk);
 
             _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
             _strongCache = new LinkedList<ProjectRootElement>();
             _autoReloadFromDisk = autoReloadFromDisk;
+            LoadProjectsReadOnly = loadProjectsReadOnly;
         }
 
         /// <summary>
@@ -234,7 +237,7 @@ namespace Microsoft.Build.Evaluation
                             XmlDocument document = new XmlDocument();
                             document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
 
-                            using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath))
+                            using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath, projectRootElement.ProjectRootElementCache.LoadProjectsReadOnly))
                             {
                                 document.Load(xtr.Reader);
                             }

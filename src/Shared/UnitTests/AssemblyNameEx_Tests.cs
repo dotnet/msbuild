@@ -202,7 +202,6 @@ namespace Microsoft.Build.UnitTests
         public void ExerciseMiscMethods()
         {
             AssemblyNameExtension a1 = s_producers[0](s_assemblyStrings[0]);
-            Assert.NotNull(a1.GetHashCode());
 
             Version newVersion = new Version(1, 2);
             a1.ReplaceVersion(newVersion);
@@ -224,7 +223,7 @@ namespace Microsoft.Build.UnitTests
         /// General equals comparison validator.
         /// </summary>
         [Fact]
-        public void Equals()
+        public void AreEquals()
         {
             // For each pair of assembly strings...
             foreach (string assemblyString1 in s_assemblyStrings)
@@ -361,31 +360,31 @@ namespace Microsoft.Build.UnitTests
         public void CreateAssemblyNameWithNameAndVersionCulturePublicKey()
         {
             AssemblyNameExtension extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("A", extension.Name);
             Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
             Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
-            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
 
             extension = new AssemblyNameExtension("A, Version=2.0.0.0, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("A", extension.Name);
             Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
             Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
-            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
 
             extension = new AssemblyNameExtension("A, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("A", extension.Name);
             Assert.True(Object.ReferenceEquals(extension.Version, null));
             Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
-            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
 
             extension = new AssemblyNameExtension("A, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("A", extension.Name);
             Assert.True(Object.ReferenceEquals(extension.Version, null));
             Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
-            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
 
             extension = new AssemblyNameExtension("A");
-            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("A", extension.Name);
             Assert.True(Object.ReferenceEquals(extension.Version, null));
             Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
         }
@@ -397,18 +396,18 @@ namespace Microsoft.Build.UnitTests
         public void CreateAssemblyNameWithNameAndProcessorArchitecture()
         {
             AssemblyNameExtension extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, ProcessorArchitecture=MSIL");
-            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("A", extension.Name);
             Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
             Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
-            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
-            Assert.True(extension.FullName.Contains("MSIL"));
+            Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
+            Assert.Contains("MSIL", extension.FullName);
             Assert.True(extension.HasProcessorArchitectureInFusionName);
 
             extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("A", extension.Name);
             Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
             Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
-            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
             Assert.False(extension.HasProcessorArchitectureInFusionName);
         }
 

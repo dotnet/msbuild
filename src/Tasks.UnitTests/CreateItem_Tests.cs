@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.Include.Length);
+            Assert.Empty(t.Include);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(1, t.Include.Length);
+            Assert.Single(t.Include);
             Assert.Equal("MyFile.txt", t.Include[0].ItemSpec);
         }
 
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(1, t.Include.Length);
+            Assert.Single(t.Include);
             Assert.Equal(t.Include[0].ItemSpec, t.Include[0].ItemSpec);
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.Include.Length);
+            Assert.Empty(t.Include);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.Include.Length);
+            Assert.Empty(t.Include);
         }
 
 
@@ -115,7 +115,7 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.True(success);
-            Assert.Equal(0, t.Include.Length);
+            Assert.Empty(t.Include);
         }
 
         /// <summary>

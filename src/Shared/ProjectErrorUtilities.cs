@@ -407,7 +407,7 @@ namespace Microsoft.Build.Shared
 
             string errorCode;
             string helpKeyword;
-            string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, resourceName, args);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, args);
 
             throw new InvalidProjectFileException(elementLocation.File, elementLocation.Line, elementLocation.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
         }

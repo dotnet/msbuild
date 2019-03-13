@@ -1,6 +1,7 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
+  <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
@@ -10,10 +11,11 @@
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
-    <CreateTlb>true</CreateTlb>
+    <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
   </PropertyGroup>
 
   <ItemGroup>
@@ -74,9 +76,6 @@
       <Link>FileDelegates.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\HybridDictionary.cs">
-      <Link>HybridDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\NativeMethodsShared.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -107,6 +106,9 @@
     <Compile Include="..\Shared\StringBuilderCache.cs">
       <Link>StringBuilderCache.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs">
+      <Link>ReuseableStringBuilder.cs</Link>
     </Compile>
     <Compile Include="..\Shared\StrongNameHelpers.cs">
       <Link>StrongNameHelpers.cs</Link>
@@ -332,6 +334,7 @@
     <Compile Include="CommandLineBuilderExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ResolveComReference.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
     <Compile Include="FileIO\GetFileHash.cs" />
@@ -611,7 +614,6 @@
     </Compile>
     <Compile Include="ResGen.cs" />
     <Compile Include="ResGenDependencies.cs" />
-    <Compile Include="ResolveComReference.cs" />
     <Compile Include="ResolveComReferenceCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -756,7 +758,7 @@
          path for some tests.  So include it twice. -->
     <Content Include="Microsoft.Common.props" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>15.0\Microsoft.Common.props</Link>
+      <Link>Current\Microsoft.Common.props</Link>
     </Content>
     <Content Include="Microsoft.Common.tasks">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -777,6 +779,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.VisualStudioVersion.v15.Common.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Microsoft.VisualStudioVersion.v16.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <!-- Resource Files -->
@@ -963,34 +968,44 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+    <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.5.24.0" />
 
-    <!-- Reference compilers package without using assets, so we can copy them to the output directory under the Roslyn folder -->
-    <PackageReference Include="Microsoft.Net.Compilers" Version="$(MicrosoftNetCompilersVersion)" ExcludeAssets="All" />
+  <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
+  <ItemGroup>
+    <!-- reference both when repotoolset is not adding compiler references -->
+    <PackageReference Include="Microsoft.Net.Compilers" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
+    <PackageReference Include="Microsoft.NETCore.Compilers" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
+
+    <!-- reference the missing package when repotoolset is adding compiler references based on MSBuildRuntimeType https://github.com/dotnet/roslyn-tools/blob/master/src/RepoToolset/tools/Compiler.props -->
+    <PackageReference Include="Microsoft.Net.Compilers" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'true' and '$(MSBuildRuntimeType)' == 'Core'" />
+    <PackageReference Include="Microsoft.NETCore.Compilers" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'true' and '$(MSBuildRuntimeType)' != 'Core'" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" />
+
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-    <PackageReference Include="System.CodeDom" Version="4.4.0" />
-    <PackageReference Include="System.Linq.Parallel" Version="4.0.1" />
-    <PackageReference Include="System.Net.Http" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
-    <PackageReference Include="System.Resources.Writer" Version="4.0.0" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.6.0" />
+    <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Linq.Parallel" />
+    <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="System.Reflection.TypeExtensions" />
+    <PackageReference Include="System.Resources.Writer" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
     <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
-    <PackageReference Include="Microsoft.Win32.Registry" Version="$(MicrosoftWin32RegistryVersion)" />
+    <PackageReference Include="Microsoft.Win32.Registry" />
 
-    <!-- Reference compilers package without using assets, so we can copy them to the output directory under the Roslyn folder -->
-    <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(MicrosoftNetCoreCompilersVersion)" ExcludeAssets="All" />
     <Content Include="$(NuGetPackageRoot)microsoft.netcore.compilers\$(MicrosoftNetCoreCompilersVersion)\tools\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+    <PackageReference Include="System.Reflection.Metadata" />
   </ItemGroup>
   <ItemGroup>
     <!--
@@ -1000,9 +1015,4 @@
     -->
     <Content Update="@(Content)" Pack="false" />
   </ItemGroup>
-
-  <Target Name="CopyMscorlib" AfterTargets="Build" Condition="'$(MonoBuild)' != 'true'">
-    <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\netstandard.dll" DestinationFolder="$(ArtifactsBinDir)/MSBuild/$(TargetFramework)/ref" />
-    <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\mscorlib.dll" DestinationFolder="$(ArtifactsBinDir)/MSBuild/$(TargetFramework)/ref" />
-  </Target>
 </Project>

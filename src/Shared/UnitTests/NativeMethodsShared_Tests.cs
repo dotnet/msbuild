@@ -84,6 +84,34 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that when NativeMethodsShared.GetLastWriteFileUtcTime() is called on a
+        /// *directory*, DateTime.MinValue is returned.
+        /// </summary>
+        [Fact]
+        public void GetLastWriteFileUtcTimeReturnsMinValueForDirectory()
+        {
+            string directory = FileUtilities.GetTemporaryDirectory(createDirectory: true);
+
+            DateTime directoryTime = NativeMethodsShared.GetLastWriteFileUtcTime(directory);
+            Assert.Equal(DateTime.MinValue, directoryTime);
+        }
+
+        /// <summary>
+        /// Verifies that when NativeMethodsShared.GetLastWriteDirectoryUtcTime() is called on a
+        /// *file*, it returns DateTime.MinValue
+        /// </summary>
+        [Fact]
+        public void GetLastWriteDirectoryUtcTimeReturnsMinValueForFile()
+        {
+            string file = FileUtilities.GetTemporaryFile();
+
+            DateTime directoryTime;
+            Assert.False(NativeMethodsShared.GetLastWriteDirectoryUtcTime(file, out directoryTime));
+            Assert.Equal(DateTime.MinValue, directoryTime);
+        }
+
+
+        /// <summary>
         /// Verifies that NativeMethodsShared.SetCurrentDirectory(), when called on a nonexistent
         /// directory, will not set the current directory to that location. 
         /// </summary>

@@ -21,6 +21,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Experimental.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -94,9 +95,9 @@ namespace Microsoft.Build.CommandLine
         private static Object s_buildLock = new Object();
 
         /// <summary>
-        /// The currently active build, if any.
+        /// Whether a build has started.
         /// </summary>
-        private static BuildSubmission s_activeBuild;
+        private static bool s_hasBuildStarted;
 
         /// <summary>
         /// Event signalled when the build is complete.
@@ -112,6 +113,8 @@ namespace Microsoft.Build.CommandLine
         /// Cancel when handling Ctrl-C
         /// </summary>
         private static CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
+
+        private static readonly char[] s_commaSemicolon = { ',', ';' };
 
         /// <summary>
         /// Static constructor
@@ -185,7 +188,7 @@ namespace Microsoft.Build.CommandLine
             }
             while (exception != null);
 
-            Console.WriteLine(ResourceUtilities.FormatResourceString("InvalidConfigurationFile", builder.ToString()));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidConfigurationFile", builder.ToString()));
 
             s_initialized = false;
         }
@@ -228,6 +231,7 @@ namespace Microsoft.Build.CommandLine
             return exitCode;
         }
 
+#if !FEATURE_GET_COMMANDLINE
         /// <summary>
         /// Insert the command executable path as the first element of the args array.
         /// </summary>
@@ -242,6 +246,7 @@ namespace Microsoft.Build.CommandLine
 
             return newArgArray;
         }
+#endif // !FEATURE_GET_COMMANDLINE
 
         /// <summary>
         /// Append output file with elapsedTime
@@ -555,6 +560,11 @@ namespace Microsoft.Build.CommandLine
                 bool enableRestore = Traits.Instance.EnableRestoreFirst;
                 ProfilerLogger profilerLogger = null;
                 bool enableProfiler = false;
+                bool interactive = false;
+                bool isolateProjects = false;
+                bool graphBuild = false;
+                string[] inputResultsCaches = null;
+                string outputResultsCache = null;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -581,9 +591,14 @@ namespace Microsoft.Build.CommandLine
                         ref warningsAsErrors,
                         ref warningsAsMessages,
                         ref enableRestore,
+                        ref interactive,
                         ref profilerLogger,
                         ref enableProfiler,
                         ref restoreProperties,
+                        ref isolateProjects,
+                        ref graphBuild,
+                        ref inputResultsCaches,
+                        ref outputResultsCache,
                         recursing: false
                         ))
                 {
@@ -617,11 +632,33 @@ namespace Microsoft.Build.CommandLine
 #endif
                         {
                             // if everything checks out, and sufficient information is available to start building
-                            if (!BuildProject(projectFile, targets, toolsVersion, globalProperties, restoreProperties, loggers, verbosity, distributedLoggerRecords.ToArray(),
+                            if (
+                                !BuildProject(
+                                    projectFile,
+                                    targets,
+                                    toolsVersion,
+                                    globalProperties,
+                                    restoreProperties,
+                                    loggers,
+                                    verbosity,
+                                    distributedLoggerRecords.ToArray(),
 #if FEATURE_XML_SCHEMA_VALIDATION
-                            needToValidateProject, schemaFile,
+                                    needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler))
+                                    cpuCount,
+                                    enableNodeReuse,
+                                    preprocessWriter,
+                                    detailedSummary,
+                                    warningsAsErrors,
+                                    warningsAsMessages,
+                                    enableRestore,
+                                    profilerLogger,
+                                    enableProfiler,
+                                    interactive,
+                                    isolateProjects,
+                                    graphBuild,
+                                    inputResultsCaches,
+                                    outputResultsCache))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -672,7 +709,7 @@ namespace Microsoft.Build.CommandLine
             catch (InvalidToolsetDefinitionException e)
             {
                 // Brief prefix to indicate that it's a configuration failure, and provide the "error" indication
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ConfigurationFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConfigurationFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
 
                 exitType = ExitType.InitializationError;
             }
@@ -690,13 +727,13 @@ namespace Microsoft.Build.CommandLine
                 if (null != e.ErrorCode)
                 {
                     // Brief prefix to indicate that it's a logger failure, and provide the "error" indication
-                    Console.WriteLine(ResourceUtilities.FormatResourceString("LoggerFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
+                    Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
                 }
                 else
                 {
                     // Brief prefix to indicate that it's a logger failure, adding a generic error code to make sure
                     // there's something for the user to look up in the documentation
-                    Console.WriteLine(ResourceUtilities.FormatResourceString("LoggerFailurePrefixWithErrorCode", e.Message));
+                    Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerFailurePrefixWithErrorCode", e.Message));
                 }
 
                 if (null != e.InnerException)
@@ -847,13 +884,13 @@ namespace Microsoft.Build.CommandLine
                 // If the build has already started (or already finished), we will cancel it
                 // If the build has not yet started, it will cancel itself, because
                 // we set alreadyCalled=1
-                BuildSubmission result = null;
+                bool hasBuildStarted = false;
                 lock (s_buildLock)
                 {
-                    result = s_activeBuild;
+                    hasBuildStarted = s_hasBuildStarted;
                 }
 
-                if (result != null)
+                if (hasBuildStarted)
                 {
                     BuildManager.DefaultBuildManager.CancelAllSubmissions();
                     s_buildComplete.WaitOne();
@@ -920,13 +957,17 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningsAsMessages,
             bool enableRestore,
             ProfilerLogger profilerLogger,
-            bool enableProfiler
+            bool enableProfiler,
+            bool interactive,
+            bool isolateProjects,
+            bool graphBuild,
+            string[] inputResultsCaches,
+            string outputResultsCache
         )
         {
-            if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(Path.GetExtension(projectFile), ".dsp", StringComparison.OrdinalIgnoreCase))
+            if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
-                InitializationException.Throw(ResourceUtilities.FormatResourceString("ProjectUpgradeNeededToVcxProj", projectFile), null);
+                InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
             bool success = false;
@@ -1007,6 +1048,8 @@ namespace Microsoft.Build.CommandLine
 
                 ToolsetDefinitionLocations toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
 
+                bool preprocessOnly = preprocessWriter != null && !FileUtilities.IsSolutionFilename(projectFile);
+
                 projectCollection = new ProjectCollection
                 (
                     globalProperties,
@@ -1014,7 +1057,8 @@ namespace Microsoft.Build.CommandLine
                     null,
                     toolsetDefinitionLocations,
                     cpuCount,
-                    onlyLogCriticalEvents
+                    onlyLogCriticalEvents,
+                    loadProjectsReadOnly: !preprocessOnly
                 );
 
 #if MONO
@@ -1051,7 +1095,7 @@ namespace Microsoft.Build.CommandLine
                 }
 #endif
 
-                if (preprocessWriter != null && !FileUtilities.IsSolutionFilename(projectFile))
+                if (preprocessOnly)
                 {
                     Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
@@ -1062,8 +1106,6 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    BuildRequestData request = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
-
                     BuildParameters parameters = new BuildParameters(projectCollection);
 
                     // By default we log synchronously to the console for compatibility with previous versions,
@@ -1087,6 +1129,10 @@ namespace Microsoft.Build.CommandLine
                     parameters.LogTaskInputs = logTaskInputs;
                     parameters.WarningsAsErrors = warningsAsErrors;
                     parameters.WarningsAsMessages = warningsAsMessages;
+                    parameters.Interactive = interactive;
+                    parameters.IsolateProjects = isolateProjects;
+                    parameters.InputResultsCacheFiles = inputResultsCaches;
+                    parameters.OutputResultsCacheFile = outputResultsCache;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -1119,7 +1165,7 @@ namespace Microsoft.Build.CommandLine
 #if MSBUILDENABLEVSPROFILING
                     DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
 #endif
-                    BuildResult results = null;
+                    BuildResultCode? result = null;
                     buildManager.BeginBuild(parameters);
                     Exception exception = null;
                     try
@@ -1127,13 +1173,32 @@ namespace Microsoft.Build.CommandLine
                         try
                         {
                             // Determine if the user specified /Target:Restore which means we should only execute a restore in the fancy way that /restore is executed
-                            bool restoreOnly = request.TargetNames.Count == 1 && String.Equals(request.TargetNames.First(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
+                            bool restoreOnly = targets.Length == 1 && String.Equals(targets[0], MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
+
+                            // ExecuteRestore below changes the current working directory and does not change back. Therefore, if we try to create the request after
+                            // the restore call we end up with incorrectly normalized paths to the project. To avoid that, we are preparing the request before the first
+                            // build (restore) request.
+                            // PS: We couldn't find a straight forward way to make the restore invocation clean up after itself, so we should this ugly but less risky
+                            // approach.
+                            GraphBuildRequestData graphBuildRequest = null;
+                            BuildRequestData buildRequest = null;
+                            if (!restoreOnly)
+                            {
+                                if (graphBuild)
+                                {
+                                    graphBuildRequest = new GraphBuildRequestData(new ProjectGraphEntryPoint(projectFile, globalProperties), targets, null);
+                                }
+                                else
+                                {
+                                    buildRequest = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
+                                }
+                            }
 
                             if (enableRestore || restoreOnly)
                             {
-                                results = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
+                                (result, exception) = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
 
-                                if (results.OverallResult != BuildResultCode.Success)
+                                if (result != BuildResultCode.Success)
                                 {
                                     return false;
                                 }
@@ -1141,7 +1206,19 @@ namespace Microsoft.Build.CommandLine
 
                             if (!restoreOnly)
                             {
-                                results = ExecuteBuild(buildManager, request);
+                                if (graphBuild)
+                                {
+                                    (result, exception) = ExecuteGraphBuild(buildManager, graphBuildRequest);
+                                }
+                                else
+                                {
+                                    (result, exception) = ExecuteBuild(buildManager, buildRequest);
+                                }
+                            }
+
+                            if (result != null && exception == null)
+                            {
+                                success = result == BuildResultCode.Success;
                             }
                         }
                         finally
@@ -1155,18 +1232,13 @@ namespace Microsoft.Build.CommandLine
                         success = false;
                     }
 
-                    if (results != null && exception == null)
-                    {
-                        success = results.OverallResult == BuildResultCode.Success;
-                        exception = results.Exception;
-                    }
-
                     if (exception != null)
                     {
                         success = false;
 
-                        // InvalidProjectFileExceptions have already been logged.
-                        if (exception.GetType() != typeof(InvalidProjectFileException))
+                        // InvalidProjectFileExceptions and its aggregates have already been logged.
+                        if (exception.GetType() != typeof(InvalidProjectFileException)
+                            && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException)))
                         {
                             if
                                 (
@@ -1222,11 +1294,13 @@ namespace Microsoft.Build.CommandLine
             return success;
         }
 
-        private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
+        private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)
         {
+            BuildSubmission submission;
             lock (s_buildLock)
             {
-                s_activeBuild = buildManager.PendBuildRequest(request);
+                submission = buildManager.PendBuildRequest(request);
+                s_hasBuildStarted = true;
 
                 // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
                 // That's so the build does not appear to have completed successfully.
@@ -1236,10 +1310,31 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            return s_activeBuild.Execute();
+            var result = submission.Execute();
+            return (result.OverallResult, result.Exception);
         }
 
-        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
+        private static (BuildResultCode result, Exception exception) ExecuteGraphBuild(BuildManager buildManager, GraphBuildRequestData request)
+        {
+            GraphBuildSubmission submission;
+            lock (s_buildLock)
+            {
+                submission = buildManager.PendBuildRequest(request);
+                s_hasBuildStarted = true;
+
+                // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
+                // That's so the build does not appear to have completed successfully.
+                if (s_buildCancellationSource.IsCancellationRequested)
+                {
+                    buildManager.CancelAllSubmissions();
+                }
+            }
+
+            GraphBuildResult result = submission.Execute();
+            return (result.OverallResult, result.Exception);
+        }
+
+        private static (BuildResultCode result, Exception exception) ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
         {
             // Make a copy of the global properties
             Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
@@ -1912,9 +2007,14 @@ namespace Microsoft.Build.CommandLine
             ref ISet<string> warningsAsErrors,
             ref ISet<string> warningsAsMessages,
             ref bool enableRestore,
+            ref bool interactive,
             ref ProfilerLogger profilerLogger,
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
+            ref bool isolateProjects,
+            ref bool graphBuild,
+            ref string[] inputResultsCaches,
+            ref string outputResultsCache,
             bool recursing
         )
         {
@@ -2022,9 +2122,14 @@ namespace Microsoft.Build.CommandLine
                                                                ref warningsAsErrors,
                                                                ref warningsAsMessages,
                                                                ref enableRestore,
+                                                               ref interactive,
                                                                ref profilerLogger,
                                                                ref enableProfiler,
                                                                ref restoreProperties,
+                                                               ref isolateProjects,
+                                                               ref graphBuild,
+                                                               ref inputResultsCaches,
+                                                               ref outputResultsCache,
                                                                recursing: true
                                                              );
                         }
@@ -2064,8 +2169,27 @@ namespace Microsoft.Build.CommandLine
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Restore))
                     {
-                        enableRestore = ProcessRestoreSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Restore]);
+                        enableRestore = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Restore], defaultValue: true, resourceName: "InvalidRestoreValue");
                     }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Interactive))
+                    {
+                        interactive = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Interactive], defaultValue: true, resourceName: "InvalidInteractiveValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.IsolateProjects))
+                    {
+                        isolateProjects = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects], defaultValue: true, resourceName: "InvalidIsolateProjectsValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
+                    {
+                        graphBuild = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild], defaultValue: true, resourceName: "InvalidGraphBuildValue");
+                    }
+
+                    inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
+
+                    outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2096,7 +2220,7 @@ namespace Microsoft.Build.CommandLine
                     // the Engine, and we don't want to do that.
                     if (usingSwitchesFromAutoResponseFile && LoggerVerbosity.Diagnostic == verbosity)
                     {
-                        Console.WriteLine(ResourceUtilities.FormatResourceString("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
                     }
 
                     if (verbosity == LoggerVerbosity.Diagnostic)
@@ -2130,6 +2254,20 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!invokeBuild || !String.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        private static string ProcessOutputResultsCache(CommandLineSwitches commandLineSwitches)
+        {
+            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.OutputResultsCache)
+                ? commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.OutputResultsCache].FirstOrDefault(p => p != null) ?? string.Empty
+                : null;
+        }
+
+        private static string[] ProcessInputResultsCaches(CommandLineSwitches commandLineSwitches)
+        {
+            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.InputResultsCaches)
+                ? commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.InputResultsCaches].Where(p => p != null).ToArray()
+                : null;
         }
 
         /// <summary>
@@ -2213,7 +2351,7 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string code in parameters
-                .SelectMany(parameter => parameter?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
+                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
             {
                 if (code == null)
                 {
@@ -2242,7 +2380,7 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string code in parameters
-                .SelectMany(parameter => parameter?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries))
                 .Where(i => !String.IsNullOrWhiteSpace(i))
                 .Select(i => i.Trim()))
             {
@@ -2252,27 +2390,27 @@ namespace Microsoft.Build.CommandLine
             return warningsAsMessages;
         }
 
-        internal static bool ProcessRestoreSwitch(string[] parameters)
+        internal static bool ProcessBooleanSwitch(string[] parameters, bool defaultValue, string resourceName)
         {
-            bool enableRestore = true;
+            bool value = defaultValue;
 
             if (parameters.Length > 0)
             {
                 try
                 {
-                    enableRestore = bool.Parse(parameters[parameters.Length - 1]);
+                    value = bool.Parse(parameters[parameters.Length - 1]);
                 }
                 catch (FormatException ex)
                 {
-                    CommandLineSwitchException.Throw("InvalidRestoreValue", parameters[parameters.Length - 1], ex.Message);
+                    CommandLineSwitchException.Throw(resourceName, parameters[parameters.Length - 1], ex.Message);
                 }
                 catch (ArgumentNullException ex)
                 {
-                    CommandLineSwitchException.Throw("InvalidRestoreValue", parameters[parameters.Length - 1], ex.Message);
+                    CommandLineSwitchException.Throw(resourceName, parameters[parameters.Length - 1], ex.Message);
                 }
             }
 
-            return enableRestore;
+            return value;
         }
 
         /// <summary>
@@ -2362,30 +2500,12 @@ namespace Microsoft.Build.CommandLine
                 bool restart = true;
                 while (restart)
                 {
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-                    if (commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ClientToServerPipeHandle].Length == 0)
-                    {
-                        CommandLineSwitchException.Throw("ParameterRequiredError", "", "clientToServerPipeHandle");
-                    }
-                    if (commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerToClientPipeHandle].Length == 0)
-                    {
-                        CommandLineSwitchException.Throw("ParameterRequiredError", "", "serverToClientPipeHandle");
-                    }
-
-                    string clientToServerPipeHandle = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ClientToServerPipeHandle][0];
-                    string serverToClientPipeHandle = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerToClientPipeHandle][0];
-#endif
-
                     Exception nodeException = null;
                     NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
                     // normal OOP node case
                     if (nodeModeNumber == 1)
                     {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         OutOfProcNode node = new OutOfProcNode();
-#else
-                        OutOfProcNode node = new OutOfProcNode(clientToServerPipeHandle, serverToClientPipeHandle);
-#endif
 
                         // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
@@ -2396,11 +2516,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if (nodeModeNumber == 2)
                     {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-#else
-                        OutOfProcTaskHostNode node = new OutOfProcTaskHostNode(clientToServerPipeHandle, serverToClientPipeHandle);
-#endif
                         shutdownReason = node.Run(out nodeException);
                     }
                     else
@@ -2733,12 +2849,12 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The = sign is used to pair properties with their values on the command line.
         /// </summary>
-        private static readonly char[] s_propertyValueSeparator = { '=' };
+        private static readonly char[] s_propertyValueSeparator = MSBuildConstants.EqualsChar;
 
         /// <summary>
         /// This is a set of wildcard chars which can cause a file extension to be invalid 
         /// </summary>
-        private static readonly char[] s_wildcards = { '*', '?' };
+        private static readonly char[] s_wildcards = MSBuildConstants.WildcardChars;
 
         /// <summary>
         /// Determines which ToolsVersion was specified on the command line.  If more than
@@ -2856,7 +2972,7 @@ namespace Microsoft.Build.CommandLine
         {
             for (int i = 0; i < parametersToAggregate.Length; i++)
             {
-                parametersToAggregate[i] = parametersToAggregate[i].Trim(';');
+                parametersToAggregate[i] = parametersToAggregate[i].Trim(MSBuildConstants.SemicolonChar);
             }
 
             // Join the logger parameters into one string seperated by semicolons
@@ -3083,7 +3199,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static string ExtractAnyLoggerParameter(string parameters, params string[] parameterNames)
         {
-            string[] nameValues = parameters.Split(';');
+            string[] nameValues = parameters.Split(MSBuildConstants.SemicolonChar);
             string result = null;
 
             foreach (string nameValue in nameValues)
@@ -3113,7 +3229,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!String.IsNullOrEmpty(parameter))
             {
-                string[] nameValuePair = parameter.Split('=');
+                string[] nameValuePair = parameter.Split(MSBuildConstants.EqualsChar);
 
                 value = (nameValuePair.Length > 1) ? nameValuePair[1] : null;
             }
@@ -3418,7 +3534,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception ex)
             {
-                var message = ResourceUtilities.FormatResourceString("InvalidLogFileFormat", ex.Message);
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidLogFileFormat", ex.Message);
                 Console.WriteLine(message);
             }
 
@@ -3472,13 +3588,13 @@ namespace Microsoft.Build.CommandLine
                 toolsVersionList = toolsVersionList.Substring(0, toolsVersionList.Length - 2);
             }
 
-            string message = ResourceUtilities.FormatResourceString
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword
                 (
                 "UnrecognizedToolsVersion",
                 toolsVersion,
                 toolsVersionList
                 );
-            message = ResourceUtilities.FormatResourceString("InvalidToolsVersionError", message);
+            message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidToolsVersionError", message);
 
             InitializationException.Throw(message, toolsVersion);
         }
@@ -3500,9 +3616,9 @@ namespace Microsoft.Build.CommandLine
 #endif
 
 #if THISASSEMBLY
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ThisAssembly.AssemblyInformationalVersion, frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CopyrightMessage", ThisAssembly.AssemblyInformationalVersion, frameworkName));
 #else
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString(), frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CopyrightMessage", ProjectCollection.Version.ToString(), frameworkName));
 #endif
         }
 
@@ -3545,6 +3661,11 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_33_RestorePropertySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_34_InteractiveSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_35_IsolateProjectsSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_InputCachesFiles"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_OutputCacheFile"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

@@ -162,11 +162,11 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (!string.IsNullOrEmpty(projectStartedEvent.TargetNames))
                 {
-                    stackTrace.Add(ResourceUtilities.FormatResourceString("ProjectStackWithTargetNames", projectStartedEvent.ProjectFile, projectStartedEvent.TargetNames, projectStartedEvent.FullProjectKey));
+                    stackTrace.Add(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStackWithTargetNames", projectStartedEvent.ProjectFile, projectStartedEvent.TargetNames, projectStartedEvent.FullProjectKey));
                 }
                 else
                 {
-                    stackTrace.Add(ResourceUtilities.FormatResourceString("ProjectStackWithDefaultTargets", projectStartedEvent.ProjectFile, projectStartedEvent.FullProjectKey));
+                    stackTrace.Add(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStackWithDefaultTargets", projectStartedEvent.ProjectFile, projectStartedEvent.FullProjectKey));
                 }
             }
             stackTrace.Reverse();

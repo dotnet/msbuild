@@ -233,8 +233,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             List<ProjectItemGroupTaskMetadataInstance> metadata3 = Helpers.MakeList(items[2].Metadata);
 
             Assert.Equal(2, metadata1.Count);
-            Assert.Equal(0, metadata2.Count);
-            Assert.Equal(1, metadata3.Count);
+            Assert.Empty(metadata2);
+            Assert.Single(metadata3);
 
             Assert.Equal("c3", metadata1[0].Condition);
             Assert.Equal("m1", metadata1[0].Value);
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Assert.Equal(true, p.TaskRegistry != null);
+            Assert.True(p.TaskRegistry != null);
         }
 
         /// <summary>
@@ -546,7 +546,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectInstance second = first.DeepCopy();
 
-            Assert.Equal(true, second.TranslateEntireState);
+            Assert.True(second.TranslateEntireState);
         }
 
         /// <summary>
@@ -685,7 +685,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             original.TranslateEntireState = true;
 
-            ((INodePacketTranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, copy, new ProjectInstanceComparer());
@@ -728,7 +728,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     pi.AddItem("foo", "bar");
                     pi.TranslateEntireState = true;
 
-                    ((INodePacketTranslatable) pi).Translate(TranslationHelpers.GetWriteTranslator());
+                    ((ITranslatable) pi).Translate(TranslationHelpers.GetWriteTranslator());
                     var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
                     return copy;

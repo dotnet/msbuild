@@ -33,13 +33,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _cache.Clear();
         }
 
-        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive)
         {
             SdkResult result;
 
             if (Traits.Instance.EscapeHatches.DisableSdkResolutionCache)
             {
-                result = base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+                result = base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive);
             }
             else
             {
@@ -53,7 +53,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                  */
                 result = cached.GetOrAdd(
                     sdk.Name,
-                    key => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
+                    key => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive));
             }
 
             if (result != null &&

@@ -808,6 +808,7 @@ namespace Microsoft.Build.Tasks
         // CreateSymbolicLink
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.I1)]
         internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
 
         [DllImport("libc", SetLastError = true)]

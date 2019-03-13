@@ -53,6 +53,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RestoreBuildInParallel Condition=" '$(RestoreBuildInParallel)' == '' ">true</RestoreBuildInParallel>
     <!-- Check if the restore target was executed on a sln file -->
     <_RestoreSolutionFileUsed Condition=" '$(_RestoreSolutionFileUsed)' == '' AND '$(SolutionDir)' != '' AND $(MSBuildProjectFullPath.EndsWith('.metaproj')) == 'true' " >true</_RestoreSolutionFileUsed>
+    <!-- We default to MSBuildInteractive. -->
+    <NuGetInteractive Condition=" '$(NuGetInteractive)' == '' ">$(MSBuildInteractive)</NuGetInteractive>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -78,6 +80,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       _RestoreSolutionFileUsed=true;
       SolutionDir=$(SolutionDir);
       SolutionName=$(SolutionName);
+      SolutionFileName=$(SolutionFileName);
+      SolutionPath=$(SolutionPath);
+      SolutionExt=$(SolutionExt);
     </_GenerateRestoreGraphProjectEntryInputProperties>
   </PropertyGroup>
 
@@ -119,7 +124,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       RestoreRecursive="$(RestoreRecursive)"
       RestoreForce="$(RestoreForce)"
       HideWarningsAndErrors="$(HideWarningsAndErrors)"
-      Interactive="$(NuGetInteractive)"/>
+      Interactive="$(NuGetInteractive)"
+      RestoreForceEvaluate="$(RestoreForceEvaluate)"/>
   </Target>
 
   <!--
@@ -657,6 +663,9 @@ Copyright (c) .NET Foundation. All rights reserved.
         <TreatWarningsAsErrors>$(TreatWarningsAsErrors)</TreatWarningsAsErrors>
         <WarningsAsErrors>$(WarningsAsErrors)</WarningsAsErrors>
         <NoWarn>$(NoWarn)</NoWarn>
+        <RestorePackagesWithLockFile>$(RestorePackagesWithLockFile)</RestorePackagesWithLockFile>
+        <NuGetLockFilePath>$(NuGetLockFilePath)</NuGetLockFilePath>
+        <RestoreLockedMode>$(RestoreLockedMode)</RestoreLockedMode>
       </_RestoreGraphEntry>
     </ItemGroup>
 

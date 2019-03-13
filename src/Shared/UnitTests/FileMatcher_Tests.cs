@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Gets the test data
             /// </summary>
-            public static IEnumerable<object> GetTestData()
+            public static IEnumerable<object[]> GetTestData()
             {
                 yield return new object[]
                 {
@@ -724,7 +724,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -742,7 +742,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -765,7 +765,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -783,7 +783,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -806,7 +806,7 @@ namespace Microsoft.Build.UnitTests
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
 
-            Assert.Equal(longPath, @"LongDirectoryName\LongSubDirectory\LongFileName.txt");
+            Assert.Equal(@"LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
         /*
@@ -1147,8 +1147,6 @@ namespace Microsoft.Build.UnitTests
             ValidateIllegal("*.cs**");
             ValidateIllegal("...\\*.cs");
             ValidateIllegal("http://www.website.com");
-            ValidateIllegal("<:tag:>");
-            ValidateIllegal("<:\\**");
         }
 
         [Fact]
@@ -1215,8 +1213,8 @@ namespace Microsoft.Build.UnitTests
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
-            Assert.False(result.Contains("**"));
-            Assert.True(result.Contains("MyFile.txt"));
+            Assert.DoesNotContain("**", result);
+            Assert.Contains("MyFile.txt", result);
         }
 
         [Fact]
@@ -1235,7 +1233,7 @@ namespace Microsoft.Build.UnitTests
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
-            Assert.Equal(1, files.Length);
+            Assert.Single(files);
         }
 
         [Fact]
@@ -1280,7 +1278,7 @@ namespace Microsoft.Build.UnitTests
         {
             string[] strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file" };
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/").ToArray();
-            Assert.Equal(strings[0], "1.file");
+            Assert.Equal("1.file", strings[0]);
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directory\\1.file" : "/directory/1.file"};
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/").ToArray();
@@ -1288,7 +1286,7 @@ namespace Microsoft.Build.UnitTests
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directory\\1.file" : "/directory/1.file" };
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory").ToArray();
-            Assert.Equal(strings[0], "1.file");
+            Assert.Equal("1.file", strings[0]);
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file" };
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory" ).ToArray();
@@ -1302,23 +1300,23 @@ namespace Microsoft.Build.UnitTests
             {
                 strings = new string[1] { "\\Machine\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine").ToArray();
-                Assert.Equal(strings[0], "1.file");
+                Assert.Equal("1.file", strings[0]);
 
                 strings = new string[1] { "\\Machine\\directory\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine").ToArray();
-                Assert.Equal(strings[0], "directory\\1.file");
+                Assert.Equal("directory\\1.file", strings[0]);
 
                 strings = new string[1] { "\\Machine\\directory\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
-                Assert.Equal(strings[0], "1.file");
+                Assert.Equal("1.file", strings[0]);
 
                 strings = new string[1] { "\\Machine\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
-                Assert.Equal(strings[0], "\\Machine\\1.file");
+                Assert.Equal("\\Machine\\1.file", strings[0]);
 
                 strings = new string[1] { "\\Machine\\directorymorechars\\1.file" };
                 strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
-                Assert.Equal(strings[0], "\\Machine\\directorymorechars\\1.file");
+                Assert.Equal("\\Machine\\directorymorechars\\1.file", strings[0]);
             }
         }
 
@@ -1557,6 +1555,287 @@ namespace Microsoft.Build.UnitTests
         {
             MatchDriverWithDifferentSlashes(include, exclude, matching, nonMatching, untouchable);
         }
+
+        [Theory]
+        // Empty string is valid
+        [InlineData(
+            "",
+            "",
+            "",
+            "",
+            "^(?<FIXEDDIR>)(?<WILDCARDDIR>)(?<FILENAME>)$",
+            false,
+            true
+        )]
+        // ... anywhere is invalid
+        [InlineData(
+            @"...\foo",
+            "",
+            "",
+            "",
+            null,
+            false,
+            false
+        )]
+        // : not placed at second index is invalid
+        [InlineData(
+            "http://www.website.com",
+            "",
+            "",
+            "",
+            null,
+            false,
+            false
+        )]
+        // ** not alone in filename part is invalid
+        [InlineData(
+            "**foo",
+            "",
+            "",
+            "**foo",
+            "",
+            false,
+            false
+        )]
+        // ** not alone in filename part is invalid
+        [InlineData(
+            "foo**",
+            "",
+            "",
+            "foo**",
+            "",
+            false,
+            false
+        )]
+        // ** not alone between slashes in wildcard part is invalid
+        [InlineData(
+            @"**foo\bar",
+            "",
+            @"**foo\",
+            "bar",
+            "",
+            false,
+            false
+        )]
+        // .. placed after any ** is invalid
+        [InlineData(
+            @"**\..\bar",
+            "",
+            @"**\..\",
+            "bar",
+            "",
+            false,
+            false
+        )]
+        // Common wildcard characters in wildcard and filename part
+        [InlineData(
+            @"*fo?ba?\*fo?ba?",
+            "",
+            @"*fo?ba?\",
+            "*fo?ba?",
+            @"^(?<FIXEDDIR>)(?<WILDCARDDIR>[^/\\]*fo.ba.[/\\]+)(?<FILENAME>[^/\\]*fo.ba.)$",
+            true,
+            true
+        )]
+        // Special case for ? and * when trailing . in filename part
+        [InlineData(
+            "?oo*.",
+            "",
+            "",
+            "?oo*.",
+            @"^(?<FIXEDDIR>)(?<WILDCARDDIR>)(?<FILENAME>[^\.].oo[^\.]*)$",
+            false,
+            true
+        )]
+        // Skip the .* portion of any *.* sequence in filename part
+        [InlineData(
+            "*.*foo*.*",
+            "",
+            "",
+            "*.*foo*.*",
+            @"^(?<FIXEDDIR>)(?<WILDCARDDIR>)(?<FILENAME>[^/\\]*foo[^/\\]*)$",
+            false,
+            true
+        )]
+        // Collapse successive directory separators
+        [InlineData(
+            @"\foo///bar\\\?foo///bar\\\foo",
+            @"\foo///bar\\\",
+            @"?foo///bar\\\",
+            "foo",
+            @"^(?<FIXEDDIR>[/\\]+foo[/\\]+bar[/\\]+)(?<WILDCARDDIR>.foo[/\\]+bar[/\\]+)(?<FILENAME>foo)$",
+            true,
+            true
+        )]
+        // Collapse successive relative separators
+        [InlineData(
+            @"\./.\foo/.\./bar\./.\?foo/.\./bar\./.\foo",
+            @"\./.\foo/.\./bar\./.\",
+            @"?foo/.\./bar\./.\",
+            "foo",
+            @"^(?<FIXEDDIR>[/\\]+foo[/\\]+bar[/\\]+)(?<WILDCARDDIR>.foo[/\\]+bar[/\\]+)(?<FILENAME>foo)$",
+            true,
+            true
+        )]
+        // Collapse successive recursive operators
+        [InlineData(
+            @"foo\**/**\bar/**\**/foo\**/**\bar",
+            @"foo\",
+            @"**/**\bar/**\**/foo\**/**\",
+            "bar",
+            @"^(?<FIXEDDIR>foo[/\\]+)(?<WILDCARDDIR>((.*/)|(.*\\)|())bar((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/))foo((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/)))(?<FILENAME>bar)$",
+            true,
+            true
+        )]
+        // Collapse all three cases combined
+        [InlineData(
+            @"foo\\\.///**\\\.///**\\\.///bar\\\.///**\\\.///**\\\.///foo\\\.///**\\\.///**\\\.///bar",
+            @"foo\\\.///",
+            @"**\\\.///**\\\.///bar\\\.///**\\\.///**\\\.///foo\\\.///**\\\.///**\\\.///",
+            "bar",
+            @"^(?<FIXEDDIR>foo[/\\]+)(?<WILDCARDDIR>((.*/)|(.*\\)|())bar((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/))foo((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/)))(?<FILENAME>bar)$",
+            true,
+            true
+        )]
+        public void GetFileSpecInfoCommon(
+            string filespec,
+            string expectedFixedDirectoryPart,
+            string expectedWildcardDirectoryPart,
+            string expectedFilenamePart,
+            string expectedMatchFileExpression,
+            bool expectedNeedsRecursion,
+            bool expectedIsLegalFileSpec
+        )
+        {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
+                expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+            }
+            TestGetFileSpecInfo(
+                filespec,
+                expectedFixedDirectoryPart,
+                expectedWildcardDirectoryPart,
+                expectedFilenamePart,
+                expectedMatchFileExpression,
+                expectedNeedsRecursion,
+                expectedIsLegalFileSpec
+            );
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        // Escape pecial regex characters valid in Windows paths
+        [InlineData(
+            @"$()+.[^{\?$()+.[^{\$()+.[^{",
+            @"$()+.[^{\",
+            @"?$()+.[^{\",
+            "$()+.[^{",
+            @"^(?<FIXEDDIR>\$\(\)\+\.\[\^\{[/\\]+)(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{)$",
+            true,
+            true
+        )]
+        // Preserve UNC paths in fixed directory part
+        [InlineData(
+            @"\\\.\foo/bar",
+            @"\\\.\foo/",
+            "",
+            "bar",
+            @"^(?<FIXEDDIR>\\\\foo[/\\]+)(?<WILDCARDDIR>)(?<FILENAME>bar)$",
+            false,
+            true
+        )]
+        public void GetFileSpecInfoWindows(
+            string filespec,
+            string expectedFixedDirectoryPart,
+            string expectedWildcardDirectoryPart,
+            string expectedFilenamePart,
+            string expectedMatchFileExpression,
+            bool expectedNeedsRecursion,
+            bool expectedIsLegalFileSpec
+        )
+        {
+            TestGetFileSpecInfo(
+                filespec,
+                expectedFixedDirectoryPart,
+                expectedWildcardDirectoryPart,
+                expectedFilenamePart,
+                expectedMatchFileExpression,
+                expectedNeedsRecursion,
+                expectedIsLegalFileSpec
+            );
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        // Escape regex characters valid in Unix paths
+        [InlineData(
+            @"$()+.[^{|\?$()+.[^{|\$()+.[^{|",
+            @"$()+.[^{|/",
+            @"?$()+.[^{|/",
+            "$()+.[^{|",
+            @"^(?<FIXEDDIR>\$\(\)\+\.\[\^\{\|[/\\]+)(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{\|[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{\|)$",
+            true,
+            true
+        )]
+        // Collapse leading successive directory separators in fixed directory part
+        [InlineData(
+            @"\\\.\foo/bar",
+            @"///./foo/",
+            "",
+            "bar",
+            @"^(?<FIXEDDIR>[/\\]+foo[/\\]+)(?<WILDCARDDIR>)(?<FILENAME>bar)$",
+            false,
+            true
+        )]
+        public void GetFileSpecInfoUnix(
+            string filespec,
+            string expectedFixedDirectoryPart,
+            string expectedWildcardDirectoryPart,
+            string expectedFilenamePart,
+            string expectedMatchFileExpression,
+            bool expectedNeedsRecursion,
+            bool expectedIsLegalFileSpec
+        )
+        {
+            TestGetFileSpecInfo(
+                filespec,
+                expectedFixedDirectoryPart,
+                expectedWildcardDirectoryPart,
+                expectedFilenamePart,
+                expectedMatchFileExpression,
+                expectedNeedsRecursion,
+                expectedIsLegalFileSpec
+            );
+        }
+
+        private void TestGetFileSpecInfo(
+            string filespec,
+            string expectedFixedDirectoryPart,
+            string expectedWildcardDirectoryPart,
+            string expectedFilenamePart,
+            string expectedMatchFileExpression,
+            bool expectedNeedsRecursion,
+            bool expectedIsLegalFileSpec
+        )
+        {
+            FileMatcher.Default.GetFileSpecInfo(
+                filespec,
+                out string fixedDirectoryPart,
+                out string wildcardDirectoryPart,
+                out string filenamePart,
+                out string matchFileExpression,
+                out bool needsRecursion,
+                out bool isLegalFileSpec
+            );
+            fixedDirectoryPart.ShouldBe(expectedFixedDirectoryPart);
+            wildcardDirectoryPart.ShouldBe(expectedWildcardDirectoryPart);
+            filenamePart.ShouldBe(expectedFilenamePart);
+            matchFileExpression.ShouldBe(expectedMatchFileExpression);
+            needsRecursion.ShouldBe(expectedNeedsRecursion);
+            isLegalFileSpec.ShouldBe(expectedIsLegalFileSpec);
+        }
+
 
 
         #region Support functions.

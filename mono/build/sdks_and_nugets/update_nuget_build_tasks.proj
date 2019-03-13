@@ -33,7 +33,7 @@
         <Exec Command="find $(TmpPackageDirectory) -type f -iwholename '*any/native/*.targets' -exec cp {} $(NuGetExtensionsPath) &quot;;&quot;" />
 
         <MakeDir Directories="$(NuGetExtensionsPathToolsVersion)/SolutionFile/ImportAfter" />
-        <Exec Command="curl $(CLIBlobBaseURL)/resources/MSBuildImports/15.0/SolutionFile/ImportAfter/Microsoft.NuGet.ImportAfter.targets -o $(NuGetExtensionsPathToolsVersion)/SolutionFile/ImportAfter/Microsoft.NuGet.ImportAfter.targets" />
+        <Exec Command="curl $(CLIBlobBaseURL)/resources/MSBuildImports/Current/SolutionFile/ImportAfter/Microsoft.NuGet.ImportAfter.targets -o $(NuGetExtensionsPathToolsVersion)/SolutionFile/ImportAfter/Microsoft.NuGet.ImportAfter.targets" />
 
         <Exec Command="find $(NuGetExtensionsPath) -type f -exec chmod -x {} &quot;;&quot;" />
         <Exec Command="find $(NuGetExtensionsPathToolsVersion) -type f -exec chmod -x {} &quot;;&quot;" />

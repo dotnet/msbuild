@@ -120,12 +120,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 _upperLog = _upperLog.ToUpperInvariant();
             }
 
-            Assert.True(
-                _upperLog.Contains
-                (
-                    contains.ToUpperInvariant()
-                )
-            );
+            Assert.Contains(contains.ToUpperInvariant(), _upperLog);
         }
 
         /// <summary>
@@ -140,10 +135,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 _upperLog = _upperLog.ToUpperInvariant();
             }
 
-            Assert.False(_upperLog.Contains
-                (
-                    contains.ToUpperInvariant()
-                ));
+            Assert.DoesNotContain(contains.ToUpperInvariant(), _upperLog);
         }
     }
 }

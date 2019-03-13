@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             Assert.Equal(0, Helpers.Count(project.Children));
-            Assert.Equal(null, project.ItemDefinitionGroups.GetEnumerator().Current);
+            Assert.Null(project.ItemDefinitionGroups.GetEnumerator().Current);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             itemDefinitionGroup.Condition = "c";
 
             Assert.Equal("c", itemDefinitionGroup.Condition);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             itemDefinitionGroup.Label = "c";
 
             Assert.Equal("c", itemDefinitionGroup.Label);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
     }
 }

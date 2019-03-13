@@ -3,6 +3,12 @@
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Configurations>Debug;Release;Debug-MONO;Release-MONO</Configurations>
+    <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
+    <DebugType Condition="'$(MonoBuild)' == 'true' and '$(Configuration)' == 'Debug-MONO'">full</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <FullFrameworkTFM>net472</FullFrameworkTFM>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -18,7 +24,7 @@
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OS)</TargetPlatformIdentifier>
   </PropertyGroup>
 
-  <Import Project="build\NuGet.props"/>
+  <Import Project="eng\NuGet.props"/>
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -26,7 +32,7 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
 
-    <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\</DOTNET_INSTALL_DIR>
+    <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot).dotnet\</DOTNET_INSTALL_DIR>
 
     <!-- Repository and project URLs (used in nuget packages) -->
     <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
@@ -34,7 +40,7 @@
     <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
     <PackageTags>MSBuild</PackageTags>
 
-    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
+    <TargetMSBuildToolsVersion>Current</TargetMSBuildToolsVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -49,23 +55,20 @@
          NU5105: we're explicitly opting in to semver2, as is most of .NET Core
         CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
         you don't get those defaults.
+        NU5125: Arcade uses licenseUrl when doing pack, which now causes NU5125 warning. This disables that warning until arcade can switch over.
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
-    <MonoBuild>true</MonoBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
-    <MonoBuild>true</MonoBuild>
   </PropertyGroup>
   <!-- Configuration MSBuild for portable (xcopy-install) toolsets: works on WinNT and linux/mac via Mono, isolates from machine environment:
     uses only tools installed with it, ignores Registry and GAC and Visual Studio installations to provide the same build experience on all machines -->
@@ -79,5 +82,11 @@
   <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);*.log</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
+
+    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
+
+
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 </Project>

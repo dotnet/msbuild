@@ -9,9 +9,13 @@
 
         <PropertyGroup>
             <MSBuildInstallBinDir>$(MonoInstallPrefix)\lib\mono\msbuild\$(TargetMSBuildToolsVersion)\bin</MSBuildInstallBinDir>
+
+            <!-- Roslyn still installs to 15.0 -->
+            <RoslynInstallBinDir>$(MonoInstallPrefix)\lib\mono\msbuild\15.0\bin\Roslyn</RoslynInstallBinDir>
+
             <XBuildDir>$(MonoInstallPrefix)\lib\mono\xbuild</XBuildDir>
 
-            <MSBuildBinSrcDir>$(RepoRoot)artifacts\2\$(Configuration)\bin\MSBuild.Bootstrap\net471\</MSBuildBinSrcDir>
+            <MSBuildBinSrcDir>$(RepoRoot)artifacts\2\bin\MSBuild.Bootstrap\$(Configuration)\net472\</MSBuildBinSrcDir>
 
             <AllInstalledFiles_FileCanonical>$(MSBuildThisFileDirectory)\all_files.canon.txt</AllInstalledFiles_FileCanonical>
             <AllInstalledFiles_File>$(MSBuildThisFileDirectory)\all_files.new.txt</AllInstalledFiles_File>
@@ -90,6 +94,21 @@
             <RemainingMSBuildBinFiles_Relative Include="@(RemainingMSBuildBinFiles -> '$([MSBuild]::MakeRelative('$(MSBuildBinSrcDir)', %(RemainingMSBuildBinFiles.Identity)))' )" />
         </ItemGroup>
 
+        <MakeDir Directories="$(MSBuildInstallBinDir);$(XBuildDir)">
+            <Output TaskParameter="DirectoriesCreated" ItemName="CopiedFiles" />
+        </MakeDir>
+
+        <Exec
+            WorkingDirectory="$(XBuildDir)"
+            Command="ln -sfh Current 15.0" />
+        <Exec
+            WorkingDirectory="$(MonoInstallPrefix)\lib\mono\msbuild"
+            Command="ln -s Current 15.0" />
+        <ItemGroup>
+            <CopiedFiles Include="$(MonoInstallPrefix)\bin\msbuild\15.0" />
+            <CopiedFiles Include="$(XBuildDir)\15.0" />
+        </ItemGroup>
+
         <Copy SourceFiles="@(MSBuildFiles)" DestinationFolder="$(MSBuildInstallBinDir)">
             <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
         </Copy>
@@ -134,6 +153,9 @@
         <Exec
             WorkingDirectory="$(MSBuildInstallBinDir)"
             Command="ln -s Roslyn/System.Reflection.Metadata.dll System.Reflection.Metadata.dll" />
+        <ItemGroup>
+            <CopiedFiles Include="$(MSBuildInstallBinDir)\System.Reflection.Metadata.dll" />
+        </ItemGroup>
 
         <Exec Command="$(RepoRoot)\mono\build\gen_msbuild_wrapper.sh $(MonoInstallPrefix) $(MonoInstallPrefix)\bin" />
         <ItemGroup>
@@ -155,11 +177,11 @@
         <Exec
             Condition="Exists('$(AllInstalledFiles_FileCanonical)')"
             IgnoreExitCode="$(IgnoreDiffFailure)"
-            Command="diff -u $(AllInstalledFiles_FileCanonical) $(AllInstalledFiles_File)"/>
+            Command="sort -o $(AllInstalledFiles_File) $(AllInstalledFiles_File) ; diff -u $(AllInstalledFiles_FileCanonical) $(AllInstalledFiles_File)" />
 
         <Exec
             Condition="Exists('$(RemainingFiles_FileCanonical)')"
             IgnoreExitCode="$(IgnoreDiffFailure)"
-            Command="diff -u $(RemainingFiles_FileCanonical) $(RemainingFiles_File)" />
+            Command="sort -o $(RemainingFiles_File) $(RemainingFiles_File); diff -u $(RemainingFiles_FileCanonical) $(RemainingFiles_File)" />
     </Target>
 </Project>

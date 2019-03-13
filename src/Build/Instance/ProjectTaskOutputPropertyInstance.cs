@@ -13,7 +13,7 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// Immutable.
     /// </remarks>
-    public sealed class ProjectTaskOutputPropertyInstance : ProjectTaskInstanceChild, INodePacketTranslatable
+    public sealed class ProjectTaskOutputPropertyInstance : ProjectTaskInstanceChild, ITranslatable
     {
         /// <summary>
         /// Name of the property to put the output in
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Execution
             get { return _taskParameterLocation; }
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {

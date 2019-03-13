@@ -43,12 +43,45 @@ namespace Microsoft.Build.Tasks.UnitTests
             Assert.Null(zeroLengthItemsHash);
         }
 
-        private string ExecuteHashTask(ITaskItem[] items)
+        [Fact]
+        public void HashTaskIgnoreCaseTest()
+        {
+            var uppercaseHash =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("ITEM1"),
+                        new TaskItem("ITEM2"),
+                        new TaskItem("ITEM3")
+                    },
+                    true);
+            var mixedcaseHash =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("Item1"),
+                        new TaskItem("iTEm2"),
+                        new TaskItem("iteM3")
+                    },
+                    true);
+            var lowercaseHash =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("item1"),
+                        new TaskItem("item2"),
+                        new TaskItem("item3")
+                    },
+                    true);
+            Assert.Equal(uppercaseHash, lowercaseHash);
+            Assert.Equal(uppercaseHash, mixedcaseHash);
+            Assert.Equal(mixedcaseHash, lowercaseHash);
+        }
+
+        private string ExecuteHashTask(ITaskItem[] items, bool ignoreCase = false)
         {
             var hashTask = new Hash
             {
                 BuildEngine = new MockEngine(),
-                ItemsToHash = items
+                ItemsToHash = items,
+                IgnoreCase = ignoreCase
             };
 
             Assert.True(hashTask.Execute());

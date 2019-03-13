@@ -1,8 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -420,7 +419,15 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (_directoryExists(assemblyFileName))
+                if (_fileExists(assemblyFileName))
+                {
+                    assemblyName = _getAssemblyName(assemblyFileName);
+                    if (assemblyName != null)
+                    {
+                        reference.ResolvedSearchPath = assemblyFileName;
+                    }
+                }
+                else if (_directoryExists(assemblyFileName))
                 {
                     assemblyName = new AssemblyNameExtension("*directory*");
 
@@ -428,30 +435,19 @@ namespace Microsoft.Build.Tasks
                     (
                         new ReferenceResolutionException
                         (
-                            ResourceUtilities.FormatResourceString("General.ExpectedFileGotDirectory", reference.FullPath),
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileGotDirectory", reference.FullPath),
                             null
                         )
                     );
                     reference.FullPath = String.Empty;
                 }
-                else
-                {
-                    if (_fileExists(assemblyFileName))
-                    {
-                        assemblyName = _getAssemblyName(assemblyFileName);
-                        if (assemblyName != null)
-                        {
-                            reference.ResolvedSearchPath = assemblyFileName;
-                        }
-                    }
 
-                    if (assemblyName == null)
-                    {
-                        reference.AddError
-                        (
-                            new DependencyResolutionException(ResourceUtilities.FormatResourceString("General.ExpectedFileMissing", reference.FullPath), null)
-                        );
-                    }
+                if (assemblyName == null)
+                {
+                    reference.AddError
+                    (
+                        new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
+                    );
                 }
             }
             catch (BadImageFormatException e)
@@ -485,7 +481,7 @@ namespace Microsoft.Build.Tasks
         (
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
-            ArrayList exceptions
+            List<Exception> exceptions
         )
         {
             // Loop over the referenceAssemblyFiles provided and add each one that doesn't exist.
@@ -528,9 +524,9 @@ namespace Microsoft.Build.Tasks
             string executableExtension = referenceAssemblyName.GetMetadata(ItemMetadataNames.executableExtension);
 
             // Get the assembly name, if possible.
-            string rawFileNameCandidate = referenceAssemblyName.ItemSpec;
-            AssemblyNameExtension assemblyName = null;
             string itemSpec = referenceAssemblyName.ItemSpec;
+            string rawFileNameCandidate = itemSpec;
+            AssemblyNameExtension assemblyName = null;
             string fusionName = referenceAssemblyName.GetMetadata(ItemMetadataNames.fusionName);
             bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyName, ItemMetadataNames.IgnoreVersionForFrameworkReference, out bool metadataFound);
             bool ignoreVersionForFrameworkReference = false;
@@ -831,18 +827,19 @@ namespace Microsoft.Build.Tasks
                 // Create the reference.
                 var reference = new Reference(_isWinMDFile, _fileExists, _getRuntimeVersion);
 
+                string itemSpec = referenceAssemblyFile.ItemSpec;
                 bool hasSpecificVersionMetadata = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyFile, ItemMetadataNames.specificVersion);
                 reference.MakePrimaryAssemblyReference
                 (
                     referenceAssemblyFile,
                     hasSpecificVersionMetadata,
-                    Path.GetExtension(referenceAssemblyFile.ItemSpec)
+                    Path.GetExtension(itemSpec)
                 );
 
                 AssemblyNameExtension assemblyName = NameAssemblyFileReference
                 (
                     reference,
-                    referenceAssemblyFile.ItemSpec  // Contains the assembly file name.
+                    itemSpec  // Contains the assembly file name.
                 );
 
                 // Embed Interop Types aka "NOPIAs" support is not available for Fx < 4.0
@@ -926,7 +923,9 @@ namespace Microsoft.Build.Tasks
                 }
 
                 string[] subDirectories = _getDirectories(reference.DirectoryName, "*");
-                string sateliteFilename = reference.FileNameWithoutExtension + ".resources.dll";
+                string sateliteFilename = subDirectories.Length > 0
+                    ? reference.FileNameWithoutExtension + ".resources.dll"
+                    : string.Empty;
 
                 foreach (string subDirectory in subDirectories)
                 {
@@ -959,15 +958,6 @@ namespace Microsoft.Build.Tasks
             Reference reference
         )
         {
-            // If the directory doesn't exist (which is possible in the situation
-            // where we were passed in a pre-resolved reference from a P2P reference
-            // that hasn't actually been built yet), then GetDirectories will throw.
-            // Avoid that by just short-circuiting here.
-            if (!_directoryExists(reference.DirectoryName))
-            {
-                return;
-            }
-
             string serializationAssemblyFilename = reference.FileNameWithoutExtension + ".XmlSerializers.dll";
             string serializationAssemblyPath = Path.Combine(reference.DirectoryName, serializationAssemblyFilename);
             if (_fileExists(serializationAssemblyPath))
@@ -1089,7 +1079,7 @@ namespace Microsoft.Build.Tasks
             {
                 reference.AddError
                       (
-                          new DependencyResolutionException(ResourceUtilities.FormatResourceString("General.ExpectedFileMissing", reference.FullPath), null)
+                          new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
                       );
 
                 return;
@@ -1193,7 +1183,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private static bool IsPseudoAssembly(string name)
         {
-            return String.Compare(name, "mscorlib", StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Equals(name, "mscorlib", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -1248,7 +1238,7 @@ namespace Microsoft.Build.Tasks
             bool userRequestedSpecificFile = false;
 
             // A list of assemblies that might have been matches but weren't
-            var assembliesConsideredAndRejected = new ArrayList();
+            var assembliesConsideredAndRejected = new List<ResolutionSearchLocation>();
 
             // First, look for the dependency in the parents' directories. Unless they are resolved from the GAC or assemblyFoldersEx then 
             // we should make sure we use the GAC and assemblyFolders resolvers themserves rather than a directory resolver to find the reference.
@@ -1327,7 +1317,7 @@ namespace Microsoft.Build.Tasks
                     (
                         new ReferenceResolutionException
                         (
-                            ResourceUtilities.FormatResourceString("General.CouldNotLocateAssembly", assemblyName.FullName),
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.CouldNotLocateAssembly", assemblyName.FullName),
                             null
                         )
                     );
@@ -1391,7 +1381,7 @@ namespace Microsoft.Build.Tasks
 
                     // A Primary reference can also be dependency of other references. This means there may be other primary reference which depend on 
                     // the current primary reference and they need to be removed.
-                    ICollection dependees = assemblyReference.GetSourceItems();
+                    ICollection<ITaskItem> dependees = assemblyReference.GetSourceItems();
 
                     // Need to deal with dependencies, this can also include primary references who are dependencies themselves and are in the black list
                     if (!assemblyReference.IsPrimary || (assemblyReference.IsPrimary && isMarkedForExclusion && (dependees != null && dependees.Count > 1)))
@@ -1463,7 +1453,7 @@ namespace Microsoft.Build.Tasks
         {
             // For a dependency we would like to remove the primary references which caused this dependency to be found.
             // Source Items is the list of primary itemspecs which lead to the current reference being discovered. 
-            ICollection dependees = assemblyReference.GetSourceItems();
+            ICollection<ITaskItem> dependees = assemblyReference.GetSourceItems();
             foreach (ITaskItem dependee in dependees)
             {
                 string dependeeItemSpec = dependee.ItemSpec;
@@ -1471,7 +1461,7 @@ namespace Microsoft.Build.Tasks
                 if (assemblyReference.IsPrimary)
                 {
                     // Dont process yourself
-                    if (String.Compare(dependeeItemSpec, assemblyReference.PrimarySourceItem.ItemSpec, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(dependeeItemSpec, assemblyReference.PrimarySourceItem.ItemSpec, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -1594,7 +1584,7 @@ namespace Microsoft.Build.Tasks
             IEnumerable<DependentAssembly> remappedAssembliesValue,
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
-            ArrayList exceptions
+            List<Exception> exceptions
         )
         {
 #if (!STANDALONEBUILD)
@@ -1689,7 +1679,7 @@ namespace Microsoft.Build.Tasks
                             // frameworkPath is guaranteed to have a trailing slash, because 
                             // ResolveAssemblyReference.Execute takes care of adding it.
 
-                            if (String.Compare(referenceDirectoryName, frameworkPath, StringComparison.OrdinalIgnoreCase) == 0)
+                            if (string.Equals(referenceDirectoryName, frameworkPath, StringComparison.OrdinalIgnoreCase))
                             {
                                 hasFrameworkPath = true;
                             }
@@ -1780,36 +1770,39 @@ namespace Microsoft.Build.Tasks
         /// This methods looks for conflicts between assemblies and attempts to 
         /// resolve them.
         /// </summary>
-        private int ResolveConflictsBetweenReferences()
+        private void ResolveConflictsBetweenReferences(Dictionary<string, List<AssemblyNameReference>> baseNameToReferences)
         {
-            int count = 0;
-
-            // Get a table of simple name mapped to (perhaps multiple) reference.
-            Dictionary<string, List<AssemblyNameReference>> baseNames = BuildSimpleNameTable();
-
             // Now we have references organized into groups that would conflict.
-            foreach (List<AssemblyNameReference> assemblyReferences in baseNames.Values)
+            foreach (List<AssemblyNameReference> assemblyReferences in baseNameToReferences.Values)
             {
-                // Sort to make it predictable. Choose to sort by ascending version number
-                // since this is known to reveal bugs in at least one circumstance.
-                assemblyReferences.Sort(AssemblyNameReferenceAscendingVersionComparer.comparer);
-
-                // Two or more references required for there to be a conflict.
-                while (assemblyReferences.Count > 1)
-                {
-                    // Resolve the conflict. Victim is the index of the item that lost.
-                    int victim = ResolveAssemblyNameConflict
-                    (
-                        assemblyReferences[0],
-                        assemblyReferences[1]
-                    );
-
-                    assemblyReferences.RemoveAt(victim);
-                    count++;
-                }
+                ResolveConflictsBetweenReferences(assemblyReferences);
             }
+        }
 
-            return count;
+        private void ResolveConflictsBetweenReferences(List<AssemblyNameReference> assemblyReferences)
+        {
+            // Sort to make it predictable. Choose to sort by ascending version number
+            // since this is known to reveal bugs in at least one circumstance.
+            assemblyReferences.Sort(AssemblyNameReferenceAscendingVersionComparer.comparer);
+
+            int currentWinnerIndex = 0;
+            int comparisonIndex = 1;
+
+            while (comparisonIndex < assemblyReferences.Count)
+            {
+                bool isLeftVictim = ResolveAssemblyNameConflict
+                (
+                    assemblyReferences[currentWinnerIndex],
+                    assemblyReferences[comparisonIndex]
+                ) == 0;
+
+                if (isLeftVictim)
+                {
+                    currentWinnerIndex = comparisonIndex;
+                }
+
+                comparisonIndex++;
+            }
         }
 
         /// <summary>
@@ -1825,83 +1818,82 @@ namespace Microsoft.Build.Tasks
             idealRemappings = null;
             conflictingReferences = null;
 
-            // First, resolve all conflicts between references.
-            if (0 == ResolveConflictsBetweenReferences())
+            // Get a table of simple name mapped to (perhaps multiple) reference.
+            Dictionary<string, List<AssemblyNameReference>> baseNameToReferences = BuildSimpleNameTable();
+            RemoveReferencesWithoutConflicts(baseNameToReferences);
+
+            // If there were no basename conflicts then there can be no version-to-version conflicts.
+            // In this case, short-circuit now rather than building up all the tables below.
+            if (baseNameToReferences.Count == 0)
             {
-                // If there were no basename conflicts then there can be no version-to-version conflicts.
-                // In this case, short-circuit now rather than building up all the tables below.
                 return;
             }
 
-            // Build two tables, one with a count and one with the corresponding references.
+            // First, resolve all conflicts between references.
+            ResolveConflictsBetweenReferences(baseNameToReferences);
+
+            // Build a set of assembly names with conflicts and a table with the corresponding references.
             // Dependencies which differ only by version number need a suggested redirect.
-            // The count tells us whether there are two or more.
-            var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            var references = new Dictionary<string, AssemblyNameReference>(StringComparer.OrdinalIgnoreCase);
+            var conflictingFullNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var fullNameToReference = new Dictionary<string, AssemblyNameReference>(References.Count, StringComparer.OrdinalIgnoreCase);
 
-            foreach (KeyValuePair<AssemblyNameExtension, Reference> kvp in References)
+            foreach (List<AssemblyNameReference> references in baseNameToReferences.Values)
             {
-                AssemblyNameExtension assemblyName = kvp.Key;
-                Reference reference = kvp.Value;
-
-                // If the assembly has a parent which has specific version set to true then we need to see if it is framework assembly
-                if (reference.CheckForSpecificVersionMetadataOnParentsReference(true))
+                foreach (AssemblyNameReference assemblyNameReference in references)
                 {
+                    AssemblyNameExtension assemblyName = assemblyNameReference.assemblyName;
+                    Reference reference = assemblyNameReference.reference;
+
+                    // If the assembly has a parent which has specific version set to true then we need to see if it is framework assembly
                     // Try and find an entry in the redist list by comparing everything except the version.
-                    AssemblyEntry entry = null;
+                    bool isFrameworkAssembly = _installedAssemblies != null
+                                               && reference.CheckForSpecificVersionMetadataOnParentsReference(true)
+                                               && _installedAssemblies.FindHighestVersionInRedistList(assemblyName) != null;
 
-                    if (_installedAssemblies != null)
-                    {
-                        entry = _installedAssemblies.FindHighestVersionInRedistList(assemblyName);
-                    }
-
-                    if (entry != null)
+                    if (isFrameworkAssembly)
                     {
                         // We have found an entry in the redist list that this assembly is a framework assembly of some version
                         // also one if its parent references has specific version set to true, therefore we need to make sure
                         // that we do not consider it for conflict resolution.
                         continue;
                     }
-                }
 
-                byte[] pkt = assemblyName.GetPublicKeyToken();
-                if (pkt != null && pkt.Length > 0)
-                {
-                    AssemblyName baseKey = assemblyName.AssemblyName.CloneIfPossible();
-                    Version version = baseKey.Version;
-                    baseKey.Version = null;
-                    string key = baseKey.ToString();
-
-                    if (counts.TryGetValue(key, out int c))
+                    byte[] pkt = assemblyName.GetPublicKeyToken();
+                    if (pkt != null && pkt.Length > 0)
                     {
-                        counts[key] = c + 1;
-                        Version lastVersion = references[key].assemblyName.Version;
+                        AssemblyName baseKey = assemblyName.AssemblyName.CloneIfPossible();
+                        Version version = baseKey.Version;
+                        baseKey.Version = null;
+                        string key = baseKey.ToString();
 
-                        if (lastVersion == null || lastVersion < version)
+                        if (fullNameToReference.TryGetValue(key, out AssemblyNameReference conflictingReference))
                         {
-                            references[key] = AssemblyNameReference.Create(assemblyName, reference);
+                            conflictingFullNames.Add(key);
+                            Version lastVersion = conflictingReference.assemblyName.Version;
+
+                            if (lastVersion == null || lastVersion < version)
+                            {
+                                fullNameToReference[key] = assemblyNameReference;
+                            }
                         }
-                    }
-                    else
-                    {
-                        counts[key] = 1;
-                        references[key] = AssemblyNameReference.Create(assemblyName, reference);
+                        else
+                        {
+                            fullNameToReference[key] = assemblyNameReference;
+                        }
                     }
                 }
             }
 
             // Build the list of conflicted assemblies.
-            var assemblyNamesList = new List<AssemblyNameReference>();
-            foreach (string versionLessAssemblyName in counts.Keys)
+            var assemblyNamesList = new List<AssemblyNameReference>(conflictingFullNames.Count);
+            foreach (string versionLessAssemblyName in conflictingFullNames)
             {
-                if (counts[versionLessAssemblyName] > 1)
-                {
-                    assemblyNamesList.Add(references[versionLessAssemblyName]);
-                }
+                assemblyNamesList.Add(fullNameToReference[versionLessAssemblyName]);
             }
 
             // Pass over the list of conflicting references and make a binding redirect for each.
-            var idealRemappingsList = new List<DependentAssembly>();
+            var idealRemappingsList = new List<DependentAssembly>(assemblyNamesList.Count);
+            var zeroVersion = new Version(0, 0, 0, 0);
 
             foreach (AssemblyNameReference assemblyNameReference in assemblyNamesList)
             {
@@ -1911,7 +1903,7 @@ namespace Microsoft.Build.Tasks
                 };
                 var bindingRedirect = new BindingRedirect
                 {
-                    OldVersionLow = new Version("0.0.0.0"),
+                    OldVersionLow = zeroVersion,
                     OldVersionHigh = assemblyNameReference.assemblyName.AssemblyName.Version,
                     NewVersion = assemblyNameReference.assemblyName.AssemblyName.Version
                 };
@@ -2160,29 +2152,47 @@ namespace Microsoft.Build.Tasks
         {
             // Build a list of base file names from references.
             // These would conflict with each other if copied to the output directory.
-            var baseNames = new Dictionary<string, List<AssemblyNameReference>>(StringComparer.CurrentCultureIgnoreCase);
+            var baseNameToReferences = new Dictionary<string, List<AssemblyNameReference>>(References.Count, StringComparer.OrdinalIgnoreCase);
 
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assemblyNameWithReference in References)
             {
-                AssemblyNameReference assemblyReference;
-                assemblyReference.assemblyName = assemblyName;
-                assemblyReference.reference = GetReference(assemblyName);
+                AssemblyNameExtension assemblyName = assemblyNameWithReference.Key;
+                Reference reference = assemblyNameWithReference.Value;
+                AssemblyNameReference assemblyReference = AssemblyNameReference.Create(assemblyName, reference);
 
                 // Notice that unresolved assemblies are still added to the table.
                 // This is because an unresolved assembly may have a different version 
                 // which would influence unification. We want to report this to the user.
                 string baseName = assemblyName.Name;
 
-                if (!baseNames.TryGetValue(baseName, out List<AssemblyNameReference> refs))
+                if (!baseNameToReferences.TryGetValue(baseName, out List<AssemblyNameReference> refs))
                 {
                     refs = new List<AssemblyNameReference>();
-                    baseNames[baseName] = refs;
+                    baseNameToReferences[baseName] = refs;
                 }
 
                 refs.Add(assemblyReference);
             }
 
-            return baseNames;
+            return baseNameToReferences;
+        }
+
+        private static void RemoveReferencesWithoutConflicts
+        (
+            Dictionary<string, List<AssemblyNameReference>> baseNameToReferences
+        )
+        {
+            string[] baseNames = new string[baseNameToReferences.Count];
+            baseNameToReferences.Keys.CopyTo(baseNames, 0);
+
+            foreach (string baseName in baseNames)
+            {
+                if (baseNameToReferences[baseName].Count == 1)
+                {
+                    baseNameToReferences.Remove(baseName);
+
+                }
+            }
         }
 
         /// <summary>
@@ -2195,56 +2205,58 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrow(assemblyReference0.assemblyName.FullName != null, "Got a null assembly name fullname. (0)");
             ErrorUtilities.VerifyThrow(assemblyReference1.assemblyName.FullName != null, "Got a null assembly name fullname. (1)");
 
-            string[] conflictFusionNames = { assemblyReference0.assemblyName.FullName, assemblyReference1.assemblyName.FullName };
-            Reference[] conflictReferences = { assemblyReference0.reference, assemblyReference1.reference };
-            AssemblyNameExtension[] conflictAssemblyNames = { assemblyReference0.assemblyName, assemblyReference1.assemblyName };
-            bool[] conflictLegacyUnified = { assemblyReference0.reference.IsPrimary, assemblyReference1.reference.IsPrimary };
-
-            //  If both assemblies being compared are primary references, the caller should pass in a zero-flag 
-            // (non-unified) for both. (This conforms to the C# assumption that two direct references are meant to be 
-            // SxS.)
-            if (conflictReferences[0].IsPrimary && conflictReferences[1].IsPrimary)
-            {
-                conflictLegacyUnified[0] = false;
-                conflictLegacyUnified[1] = false;
-            }
-
-            // This is ok here because even if the method says two versions are equivilant the algorithm below will still pick the highest version.
-            NativeMethods.CompareAssemblyIdentity
-            (
-                conflictFusionNames[0],
-                conflictLegacyUnified[0],
-                conflictFusionNames[1],
-                conflictLegacyUnified[1],
-                out bool equivalent,
-                out _
-            );
+            Reference leftConflictReference = assemblyReference0.reference;
+            Reference rightConflictReference = assemblyReference1.reference;
 
             // Remove one and provide some information about why.
             var victim = 0;
             ConflictLossReason reason = ConflictLossReason.InsolubleConflict;
 
             // Pick the one with the highest version number.
-            if (conflictReferences[0].IsPrimary && !conflictReferences[1].IsPrimary)
+            if (leftConflictReference.IsPrimary && !rightConflictReference.IsPrimary)
             {
                 // Choose the primary version.
                 victim = 1;
                 reason = ConflictLossReason.WasNotPrimary;
             }
-            else if (!conflictReferences[0].IsPrimary && conflictReferences[1].IsPrimary)
+            else if (!leftConflictReference.IsPrimary && rightConflictReference.IsPrimary)
             {
                 // Choose the primary version.
                 victim = 0;
                 reason = ConflictLossReason.WasNotPrimary;
             }
-            else if (!conflictReferences[0].IsPrimary && !conflictReferences[1].IsPrimary)
+            else if (!leftConflictReference.IsPrimary && !rightConflictReference.IsPrimary)
             {
+                string leftConflictFusionName = assemblyReference0.assemblyName.FullName;
+                string rightConflictFusionName = assemblyReference1.assemblyName.FullName;
+
+                //  If both assemblies being compared are primary references, the caller should pass in a zero-flag 
+                // (non-unified) for both. (This conforms to the C# assumption that two direct references are meant to be 
+                // SxS.)
+                bool isNonUnified = leftConflictReference.IsPrimary && rightConflictReference.IsPrimary;
+                bool leftConflictLegacyUnified = !isNonUnified && assemblyReference0.reference.IsPrimary;
+                bool rightConflictLegacyUnified = !isNonUnified && assemblyReference1.reference.IsPrimary;
+
+                // This is ok here because even if the method says two versions are equivalent the algorithm below will still pick the highest version.
+                NativeMethods.CompareAssemblyIdentity
+                (
+                    leftConflictFusionName,
+                    leftConflictLegacyUnified,
+                    rightConflictFusionName,
+                    rightConflictLegacyUnified,
+                    out bool equivalent,
+                    out _
+                );
+
+                Version leftConflictVersion = assemblyReference0.assemblyName.Version;
+                Version rightConflictVersion = assemblyReference1.assemblyName.Version;
+
                 if
                 (
                     // Version comparison only if there are two versions to compare.
                     // Null versions can occur when simply-named assemblies are unresolved.
-                    conflictAssemblyNames[0].Version != null && conflictAssemblyNames[1].Version != null
-                    && conflictAssemblyNames[0].Version > conflictAssemblyNames[1].Version
+                    leftConflictVersion != null && rightConflictVersion != null
+                    && leftConflictVersion > rightConflictVersion
                 )
                 {
                     // Choose the higher version
@@ -2258,8 +2270,8 @@ namespace Microsoft.Build.Tasks
                 (
                     // Version comparison only if there are two versions to compare.
                     // Null versions can occur when simply-named assemblies are unresolved.
-                    conflictAssemblyNames[0].Version != null && conflictAssemblyNames[1].Version != null
-                    && conflictAssemblyNames[0].Version < conflictAssemblyNames[1].Version
+                    leftConflictVersion != null && rightConflictVersion != null
+                    && leftConflictVersion < rightConflictVersion
                 )
                 {
                     // Choose the higher version
@@ -2283,9 +2295,18 @@ namespace Microsoft.Build.Tasks
             
             // Remove the one chosen.
             int victor = 1 - victim;
-            conflictReferences[victim].ConflictVictorName = conflictAssemblyNames[victor];
-            conflictReferences[victim].ConflictLossExplanation = reason;
-            conflictReferences[victor].AddConflictVictim(conflictAssemblyNames[victim]);
+
+            AssemblyNameExtension leftAssemblyName = assemblyReference0.assemblyName;
+            AssemblyNameExtension rightAssemblyName = assemblyReference1.assemblyName;
+
+            Reference victimReference = victim == 0 ? leftConflictReference : rightConflictReference;
+            Reference victorReference = victor == 0 ? leftConflictReference : rightConflictReference;
+            AssemblyNameExtension victimAssemblyName = victim == 0 ? leftAssemblyName : rightAssemblyName;
+            AssemblyNameExtension victorAssemblyName = victor == 0 ? leftAssemblyName : rightAssemblyName;
+
+            victimReference.ConflictVictorName = victorAssemblyName;
+            victimReference.ConflictLossExplanation = reason;
+            victorReference.AddConflictVictim(victimAssemblyName);
 
             return victim;
         }
@@ -2404,7 +2425,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (0 != String.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -2517,8 +2538,8 @@ namespace Microsoft.Build.Tasks
             serializationAssemblyFiles = serializationAssemblyItems.ToArray();
             scatterFiles = scatterItems.ToArray();
 
-            // Sort for stable outputs. (These came from a hashtable, which as undefined enumeration order.)
-            Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.Comparer);
+             // Sort for stable outputs. (These came from a dictionary, which has undefined enumeration order.)
+            Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.GenericComparer);
 
             // Find the copy-local items.
             FindCopyLocalItems(primaryFiles, copyLocalItems);
@@ -2641,7 +2662,7 @@ namespace Microsoft.Build.Tasks
                 bool hasWinMDFile = referenceItem.GetMetadata(ItemMetadataNames.winMDFile).Length > 0;
 
                 // If there were non-primary source items, then forward metadata from them.
-                ICollection sourceItems = reference.GetSourceItems();
+                ICollection<ITaskItem> sourceItems = reference.GetSourceItems();
                 foreach (ITaskItem sourceItem in sourceItems)
                 {
                     sourceItem.CopyMetadataTo(referenceItem);
@@ -2996,7 +3017,7 @@ namespace Microsoft.Build.Tasks
         /// Rather than have exclusion lists float around, we may as well just mark the reference themselves. This allows us to attach to a reference
         /// whether or not it is excluded and why.  This method will do a number of checks in a specific order and mark the reference as being excluded or not.
         /// </summary>
-        internal bool MarkReferencesForExclusion(Hashtable exclusionList)
+        internal bool MarkReferencesForExclusion(Dictionary<string, string> exclusionList)
         {
             bool anyMarkedReference = false;
             ListOfExcludedAssemblies = new List<string>();

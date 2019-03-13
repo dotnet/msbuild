@@ -11,6 +11,11 @@ namespace Microsoft.Build.Framework
     public abstract class SdkResolverContext
     {
         /// <summary>
+        /// Gets a value indicating if the resolver is allowed to be interactive.
+        /// </summary>
+        public virtual bool Interactive { get; protected set; }
+
+        /// <summary>
         ///     Logger to log real-time messages back to MSBuild.
         /// </summary>
         public virtual SdkLogger Logger { get; protected set; }

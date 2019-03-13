@@ -3,35 +3,22 @@ trigger:
 - exp/*
 - vs*
 
-phases:
-- phase: FullOnWindows
+jobs:
+- job: FullOnWindows
   displayName: "Build and test on Windows using full MSBuild"
-  queue: 'Hosted VS2017'
+  pool: 'Hosted VS2017'
   steps:
-  - task: BatchScript@1
-    displayName: VsDevCmd
-    inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      modifyEnvironment: true
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'build/cibuild.cmd'
+      filename: 'eng/cibuild.cmd'
+      arguments: '-test'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.0 Test Results
-    inputs:
-      testRunTitle: 'Windows-on-full .NET Core 2.0'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -40,100 +27,241 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
-
-- phase: CoreOnWindows
-  displayName: "Build and test on Windows using .NET Core MSBuild"
-  queue: 'Hosted VS2017'
-  steps:
-  - task: BatchScript@1
-    displayName: VsDevCmd
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
     inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      modifyEnvironment: true
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'FullOnWindows build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'FullOnWindows test logs'
+    condition: succeededOrFailed()
+
+- job: BootstrapMSBuildOnFullFrameworkWindows
+  displayName: "Build and test on Windows using bootstrapped full MSBuild"
+  pool: 'Hosted VS2017'
+  steps:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'build/cibuild.cmd'
-      arguments: '-hostType Core'
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
-      testRunTitle: 'Windows-on-core Full Framework'
+      testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.0 Test Results
-    inputs:
-      testRunTitle: 'Windows-on-core .NET Core 2.0'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
-      testRunTitle: 'Windows-on-core .NET Core 2.1'
+      testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
-
-- phase: CoreOnLinux
-  displayName: "Build and test on Linux using .NET Core MSBuild"
-  queue: Hosted Linux Preview
-  steps:
-  - bash: . 'build/cibuild.sh'
-    displayName: CI Build
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.0 Test Results
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
     inputs:
-      testRunTitle: 'Linux .NET Core 2.0'
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'FullOnWindows build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'FullOnWindows test logs'
+    condition: succeededOrFailed()
+
+- job: BootstrapMSBuildOnCoreWindows
+  displayName: "Build and test on Windows using bootstrapped core MSBuild"
+  pool: 'Hosted VS2017'
+  steps:
+  - task: BatchScript@1
+    displayName: cibuild.cmd
+    inputs:
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: '-hostType core'
+  - task: PublishTestResults@2
+    displayName: Publish .NET Framework Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.1 Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full .NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'FullOnWindows build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'FullOnWindows test logs'
+    condition: succeededOrFailed()
+
+- job: FullReleaseOnWindows
+  displayName: "Build and test Release on Windows using full MSBuild"
+  pool: 'Hosted VS2017'
+  steps:
+  - task: BatchScript@1
+    displayName: cibuild.cmd
+    inputs:
+      filename: 'eng/cibuild.cmd'
+      arguments: '-configuration Release -test'
+  - task: PublishTestResults@2
+    displayName: Publish .NET Framework Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full Release Full Framework'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.1 Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full Release .NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/Log/Release'
+      ArtifactName: 'FullOnWindows Release build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'FullOnWindows Release test logs'
+    condition: succeededOrFailed()
+
+# Disabling the hostType CI for now: https://github.com/Microsoft/msbuild/issues/4001
+# - job: CoreOnWindows
+#   displayName: "Build and test on Windows using .NET Core MSBuild"
+#   pool: 'Hosted VS2017'
+#   steps:
+#   - task: BatchScript@1
+#     displayName: VsDevCmd
+#     inputs:
+#       filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
+#       modifyEnvironment: true
+#   - task: BatchScript@1
+#     displayName: cibuild.cmd
+#     inputs:
+#       filename: 'eng/common/cibuild.cmd'
+#       arguments: '-hostType Core'
+#   - task: PublishTestResults@2
+#     displayName: Publish .NET Framework Test Results
+#     inputs:
+#       testRunTitle: 'Windows-on-core Full Framework'
+#       testRunner: XUnit
+#       testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
+#       publishRunAttachments: true
+#       mergeTestResults: true
+#     condition: always()
+#   - task: PublishTestResults@2
+#     displayName: Publish .NET Core 2.1 Test Results
+#     inputs:
+#       testRunTitle: 'Windows-on-core .NET Core 2.1'
+#       testRunner: XUnit
+#       testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+#       publishRunAttachments: true
+#       mergeTestResults: true
+#     condition: always()
+#   - task: PublishBuildArtifacts@1
+#     displayName: 'Publish Artifact: logs'
+#     inputs:
+#       PathtoPublish: 'artifacts/log/Debug'
+#       ArtifactName: 'CoreOnWindows build logs'
+#     condition: succeededOrFailed()
+#   - task: PublishBuildArtifacts@1
+#     displayName: 'Publish Artifact: logs/TestResults'
+#     inputs:
+#       PathtoPublish: 'artifacts/log/Debug/TestResults'
+#       ArtifactName: 'CoreOnWindows test logs'
+#     condition: succeededOrFailed()
+
+- job: CoreBootstrappedOnLinux
+  displayName: "Build and test on Linux using bootstrapped .NET Core MSBuild"
+  pool: 'Hosted Ubuntu 1604'
+  steps:
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
+    displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
       testRunTitle: 'Linux .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
-
-
-- phase: CoreOnMac
-  displayName: "Build and test on macOS using .NET Core MSBuild"
-  queue: 'Hosted macOS Preview'
-  steps:
-  - bash: . 'build/cibuild.sh'
-    displayName: CI Build
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.0 Test Results
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
     inputs:
-      testRunTitle: 'macOS .NET Core 2.0'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'CoreOnLinux build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'CoreOnLinux test logs'
+    condition: succeededOrFailed()
+
+- job: CoreOnMac
+  displayName: "Build and test on macOS using .NET Core MSBuild"
+  pool: 'Hosted macOS'
+  steps:
+  - bash: . 'eng/common/cibuild.sh'
+    displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
       testRunTitle: 'macOS .NET Core 2.1'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'CoreOnMac build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'CoreOnMac test logs'
+    condition: succeededOrFailed()
+

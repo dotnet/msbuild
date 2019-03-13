@@ -1,10 +1,10 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <NoWarn>$(NoWarn);618</NoWarn>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <CreateTlb>true</CreateTlb>
+    <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>
     <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
     <GenerateAssemblyRefs>true</GenerateAssemblyRefs>
@@ -13,7 +13,6 @@
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
-    <DebugType>full</DebugType>
   </PropertyGroup>
   
   <ItemGroup>
@@ -217,5 +216,5 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
 </Project>

@@ -81,7 +81,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
       PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
       PackageId="$(PackageId)"
-      PackageVersion="$(Version)"
+      PackageVersion="$(PackageVersion)"
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectPath="$(MSBuildProjectFullPath)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"

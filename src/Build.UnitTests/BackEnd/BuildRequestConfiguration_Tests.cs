@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
                 BuildRequestConfiguration config1 = new BuildRequestConfiguration(1, data, "2.0");
-                BuildRequestConfiguration config2 = config1.ShallowCloneWithNewId(0);
+                config1.ShallowCloneWithNewId(0);
             }
            );
         }
@@ -111,15 +111,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(-1, data1, "2.0");
-            Assert.Equal(config1.ConfigurationId, -1);
+            Assert.Equal(-1, config1.ConfigurationId);
 
             BuildRequestData data2 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
             BuildRequestConfiguration config2 = new BuildRequestConfiguration(1, data2, "2.0");
-            Assert.Equal(config2.ConfigurationId, 1);
+            Assert.Equal(1, config2.ConfigurationId);
 
             BuildRequestData data3 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
             BuildRequestConfiguration config3 = new BuildRequestConfiguration(0, data3, "2.0");
-            Assert.Equal(config3.ConfigurationId, 0);
+            Assert.Equal(0, config3.ConfigurationId);
         }
 
         [Fact]
@@ -138,9 +138,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data, "2.0");
-            Assert.Equal(config1.ConfigurationId, 0);
+            Assert.Equal(0, config1.ConfigurationId);
             config1.ConfigurationId = 1;
-            Assert.Equal(config1.ConfigurationId, 1);
+            Assert.Equal(1, config1.ConfigurationId);
         }
 
         [Fact]
@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data1, "2.0");
-            Assert.Equal(config1.ToolsVersion, "toolsVersion");
+            Assert.Equal("toolsVersion", config1.ToolsVersion);
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data1, "2.0");
-            Assert.Equal(config1.Type, NodePacketType.BuildRequestConfiguration);
+            Assert.Equal(NodePacketType.BuildRequestConfiguration, config1.Type);
         }
 
         [Fact]
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(NodePacketType.BuildRequestConfiguration, config.Type);
 
-            ((INodePacketTranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = BuildRequestConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
@@ -319,8 +319,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 int fooCount = instance.ItemsToBuildWith["Foo"].Count;
                 Assert.True(fooCount > 0);
-                Assert.Equal(1, instance.ItemsToBuildWith["Bar"].Count);
-                Assert.Equal(1, instance.ItemsToBuildWith["Baz"].Count);
+                Assert.Single(instance.ItemsToBuildWith["Bar"]);
+                Assert.Single(instance.ItemsToBuildWith["Baz"]);
                 Assert.Equal("bazfile", instance.ItemsToBuildWith["Baz"].First().EvaluatedInclude);
 
                 Lookup lookup = configuration.BaseLookup;
@@ -345,8 +345,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal("2", instance.PropertiesToBuildWith["Two"].EvaluatedValue);
                 Assert.Equal("3", instance.PropertiesToBuildWith["Three"].EvaluatedValue);
                 Assert.Equal(fooCount, instance.ItemsToBuildWith["Foo"].Count);
-                Assert.Equal(1, instance.ItemsToBuildWith["Bar"].Count);
-                Assert.Equal(1, instance.ItemsToBuildWith["Baz"].Count);
+                Assert.Single(instance.ItemsToBuildWith["Bar"]);
+                Assert.Single(instance.ItemsToBuildWith["Baz"]);
                 Assert.Equal("bazfile", instance.ItemsToBuildWith["Baz"].First().EvaluatedInclude);
 
                 lookup = configuration.BaseLookup;
@@ -418,7 +418,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 FileUtilities.ClearCacheDirectoryPath();
                 string cacheFilePath = configuration.GetCacheFile();
-                Assert.True(cacheFilePath.StartsWith(problematicTmpPath, StringComparison.OrdinalIgnoreCase));
+                Assert.StartsWith(problematicTmpPath, cacheFilePath);
             }
             finally
             {

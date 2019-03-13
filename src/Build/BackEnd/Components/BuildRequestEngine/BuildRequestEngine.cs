@@ -517,6 +517,12 @@ namespace Microsoft.Build.BackEnd
                                     {
                                         // We have a result, give it back to this request.
                                         currentEntry.ReportResult(cacheResponse.Results);
+
+                                        TraceEngine(
+                                            "Request {0} (node request {1}) with targets ({2}) satisfied from cache",
+                                            request.GlobalRequestId,
+                                            request.NodeRequestId,
+                                            string.Join(";", request.Targets));
                                     }
                                     else
                                     {
@@ -1151,6 +1157,12 @@ namespace Microsoft.Build.BackEnd
                             // Log the fact that we handled this from the cache.
                             _nodeLoggingContext.LogRequestHandledFromCache(newRequest, _configCache[newRequest.ConfigurationId], response.Results);
 
+                            TraceEngine(
+                                "Request {0} (node request {1}) with targets ({2}) satisfied from cache",
+                                newRequest.GlobalRequestId,
+                                newRequest.NodeRequestId,
+                                string.Join(",", request.Targets));
+
                             // Can't report the result directly here, because that could cause the request to go from
                             // Waiting to Ready.
                             existingResultsToReport.Add(response.Results);
@@ -1345,6 +1357,8 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (this)
                 {
+                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
                     using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, stuff);

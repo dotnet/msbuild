@@ -15,7 +15,7 @@ namespace Microsoft.Build.Shared
     /// This is not public because the current implementation only provides correct data for unedited projects.
     /// DO NOT make it public without considering a solution to this problem.
     /// </summary>
-    internal interface IElementLocation : INodePacketTranslatable
+    internal interface IElementLocation : ITranslatable
     {
         /// <summary>
         /// The file from which this particular element originated.  It may

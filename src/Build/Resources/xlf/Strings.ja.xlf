@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <target state="translated">MSB4249: Web サイト プロジェクト "{0}" をビルドできません。ASP.NET コンパイラは MSBuild の .Net Framework バージョンでのみ利用可能です。</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -31,22 +31,97 @@
         <target state="translated">ビルドは既に進行中であるため、操作を完了できません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </source>
+        <target state="translated">MSB4252: プロジェクト "{0}" には "{1}" ({2} ターゲット) への参照が含まれていますが、参照のビルド結果がエンジン キャッシュ内にありません。分離されたビルドの場合、これは以下のいずれかを意味する可能性があります。
+    - 参照が "{0}" 内で ProjectReference 項目として明示的に指定されていなかった
+    - 参照が、指定された入力キャッシュ内に含まれていなかった
+    - 参照の呼び出しで指定されたターゲットが、"{0}" 内の ProjectReferenceTargets 項目で指定されていなかった
+    </target>
+        <note>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <target state="translated">MSB4248: 式 "{0}" の中のメタデータを展開できません。 {1}</target>
         <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="translated">MSB4251: 以下のプロジェクトを含む、循環依存の関係があります: {0}</target>
+        <note>
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </note>
+      </trans-unit>
+      <trans-unit id="EmptyOutputCacheFile">
+        <source>MSB4257: The specified output result cache file is empty.</source>
+        <target state="translated">MSB4257: 指定された出力結果キャッシュ ファイルは空です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingCacheFile">
+        <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4256: パス "{0}" から入力結果キャッシュ ファイルを読み取る処理でエラーが発生しました: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingCacheFile">
+        <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4258: パス "{0}" の出力結果キャッシュ ファイルに書き込む処理でエラーが発生しました: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InputCacheFilesDoNotExist">
+        <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
+        <target state="translated">MSB4255: 以下の入力結果キャッシュ ファイルが存在しません: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
-        <target state="new">Metaproject "{0}" generated.</target>
+        <target state="translated">メタプロジェクト "{0}" が生成されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">BeginBuild がまだ呼び出されていないため、操作を完了できません。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="NullReferenceFromProjectInstanceFactory">
+        <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
+        <target state="translated">MSB4253: ユーザー提供の ProjectInstanceFactoryFunc コールバックから null 参照が返されました。これは許可されていません。</target>
+        <note>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
+        <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
+        <target state="translated">MSB4250: ProjectGraph では、ToolsVersion メタデータが設定された ProjectReference 項目はサポートしていません。ToolsVersion が含まれる ProjectReference "{0}" がファイル "{1}" で見つかりました</target>
+        <note>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
+      </trans-unit>
+      <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="translated">MSB4254: ProjectReference 項目で指定されていないプロジェクト {0} が MSBuild タスクによってビルドされています。分離されたビルドでは、これは多くの場合、参照が "{1}" で ProjectReference 項目として明示的に指定されていないことを意味します</target>
+        <note>
+      {StrBegin="MSB4254:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
+    </note>
+      </trans-unit>
+      <trans-unit id="UsingInputCaches">
+        <source>Using input build results caches: {0}</source>
+        <target state="translated">次の入力ビルド結果キャッシュを使用しています: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
+    </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
@@ -190,9 +265,9 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: 子ノード "{0}" は処理の途中で終了しました。シャット ダウンしています。診断情報は "{1}" のファイル内で見つかる可能性があり、MSBuild_*.failure.txt という名前になります。この場所は変更できます。変更するには、MSBUILDDEBUGPATH 環境変数を別のディレクトリに設定します。</target>
-        <note>{StrBegin="MSB4166: "}</note>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
+        <target state="translated">MSB4166: 子ノード "{0}" は処理の途中で終了しました。シャットダウンしています。診断情報は "{1}" のファイル内で見つかる可能性があり、MSBuild_*.failure.txt という名前になります。この場所は変更できます。変更するには、MSBUILDDEBUGPATH 環境変数を別のディレクトリに設定します。{2}</target>
+        <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
         <source>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</source>
@@ -586,8 +661,8 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
-        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). </source>
-        <target state="translated">MSB4186: 無効な静的メソッド呼び出し構文: "{0}"。{1} 静的メソッド呼び出しは $([FullTypeName]::Method()) の形式である必要があります。例: $([System.IO.Path]::Combine(`a`, `b`)) </target>
+        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
+        <target state="translated">MSB4186: 無効な静的メソッド呼び出し構文: "{0}"。{1} 静的メソッド呼び出しは $([FullTypeName]::Method()) という形式である必要があります。例: $([System.IO.Path]::Combine(`a`, `b`))。 すべてのパラメーターが指定され、それらの型と指定順序が正しいことを確認してください。</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -1046,7 +1121,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">"$(AspNetConfiguration)" 構成はこの Web プロジェクトではサポートされていないため、省略します。AspNetConfiguration プロパティを使用し、/p:AspNetConfiguration=&lt;value&gt; をコマンド ラインに追加することによって、Web プロジェクトをビルドするのに使われた構成を上書きすることができます。現在、Web プロジェクトでは、Debug 構成と Release 構成のみがサポートされています。</target>
+        <target state="translated">"$(AspNetConfiguration)" 構成はこの Web プロジェクトではサポートされていないため、省略します。AspNetConfiguration プロパティを使用し、/p:AspNetConfiguration=&lt;value&gt; をコマンド ラインに追加することによって、Web プロジェクトをビルドするのに使われた構成をオーバーライドすることができます。現在、Web プロジェクトでは、Debug 構成と Release 構成のみがサポートされています。</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1555,6 +1630,13 @@
         <target state="translated">値 "{1}" が指定されたプロパティ "{0}" は別のバッチによってオーバーライドされています。現在のプロパティ: "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="WritingToOutputCache">
+        <source>Writing build results caches to: {0}</source>
+        <target state="translated">ビルド結果キャッシュを以下に書き込んでいます: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a file path
+    </note>
+      </trans-unit>
       <trans-unit id="logfilePathNullOrEmpty">
         <source>The log file path cannot be null or empty.</source>
         <target state="translated">ログ ファイル パスは null または空にできません。</target>
@@ -2000,7 +2082,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: バイナリー ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
+        <target state="translated">MSB4234: バイナリ ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">

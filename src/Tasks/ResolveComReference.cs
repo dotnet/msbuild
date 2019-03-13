@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if FEATURE_APPDOMAIN
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,85 +21,213 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-    /// <summary>
-    /// Main class for the COM reference resolution task
-    /// </summary>
-    public sealed partial class ResolveComReference : AppDomainIsolatedTaskExtension, IComReferenceResolver
+    internal interface IResolveComReferenceTaskContract
     {
         #region Properties
 
         /// <summary>
         /// COM references specified by guid/version/lcid
         /// </summary>
-        public ITaskItem[] TypeLibNames { get; set; }
+        ITaskItem[] TypeLibNames { get; set; }
 
         /// <summary>
         /// COM references specified by type library file path
         /// </summary>
-        public ITaskItem[] TypeLibFiles { get; set; }
+        ITaskItem[] TypeLibFiles { get; set; }
 
         /// <summary>
         /// Array of equals-separated pairs of environment
         /// variables that should be passed to the spawned tlbimp.exe and aximp.exe,
         /// in addition to (or selectively overriding) the regular environment block.
         /// </summary>
-        public string[] EnvironmentVariables { get; set; }
-
-        /// <summary>
-        /// merged array containing typeLibNames and typeLibFiles (internal for unit testing)
-        /// </summary>
-        internal List<ComReferenceInfo> allProjectRefs;
-
-        /// <summary>
-        /// array containing all dependency references
-        /// </summary>
-        internal List<ComReferenceInfo> allDependencyRefs;
+        string[] EnvironmentVariables { get; set; }
 
         /// <summary>
         /// the directory wrapper files get generated into
         /// </summary>
-        public string WrapperOutputDirectory { get; set; }
+        string WrapperOutputDirectory { get; set; }
 
         /// <summary>
         /// When set to true, the typelib version will be included in the wrapper name.  Default is false.
         /// </summary>
-        public bool IncludeVersionInInteropName { get; set; }
+        bool IncludeVersionInInteropName { get; set; }
 
         /// <summary>
         /// source of resolved .NET assemblies - we need this for ActiveX wrappers, since we can't resolve .NET assembly
         /// references ourselves
         /// </summary>
-        public ITaskItem[] ResolvedAssemblyReferences { get; set; }
+        ITaskItem[] ResolvedAssemblyReferences { get; set; }
 
         /// <summary>
         /// container name for public/private keys
         /// </summary>
-        public string KeyContainer { get; set; } 
+        string KeyContainer { get; set; }
 
         /// <summary>
         /// file containing public/private keys
         /// </summary>
-        public string KeyFile { get; set; }
+        string KeyFile { get; set; }
 
         /// <summary>
         /// delay sign wrappers?
         /// </summary>
-        public bool DelaySign { get; set; }
+        bool DelaySign { get; set; }
 
         /// <summary>
         /// Passes the TypeLibImporterFlags.PreventClassMembers flag to tlb wrapper generation
         /// </summary>
-        public bool NoClassMembers { get; set; } 
+        bool NoClassMembers { get; set; }
 
         /// <summary>
         /// If true, do not log messages or warnings.  Default is false. 
         /// </summary>
-        public bool Silent { get; set; }
+        bool Silent { get; set; }
 
         /// <summary>
         /// The preferred target processor architecture. Passed to tlbimp.exe /machine flag after translation. 
         /// Should be a member of Microsoft.Build.Utilities.ProcessorArchitecture.
         /// </summary>
+        string TargetProcessorArchitecture { get; set; }
+
+        /// <summary>
+        /// Property to allow multitargeting of ResolveComReferences:  If true, tlbimp.exe
+        /// from the appropriate target framework will be run out-of-proc to generate
+        /// the necessary wrapper assemblies. Aximp is always run out of proc.
+        /// </summary>
+        bool ExecuteAsTool { get; set; }
+
+        /// <summary>
+        /// paths to found/generated reference wrappers
+        /// </summary>
+        [Output]
+        ITaskItem[] ResolvedFiles { get; set; }
+
+        /// <summary>
+        /// paths to found modules (needed for isolation)
+        /// </summary>
+        [Output]
+        ITaskItem[] ResolvedModules { get; set; }
+
+        /// <summary>
+        /// If ExecuteAsTool is true, this must be set to the SDK
+        /// tools path for the framework version being targeted.
+        /// </summary>
+        string SdkToolsPath { get; set; }
+
+        /// <summary>
+        /// Cache file for COM component timestamps. If not present, every run will regenerate all the wrappers.
+        /// </summary>
+        string StateFile { get; set; }
+
+        /// <summary>
+        /// The project target framework version.
+        ///
+        /// Default is empty. which means there will be no filtering for the reference based on their target framework.
+        /// </summary>
+        string TargetFrameworkVersion { get; set; }
+
+        #endregion
+    }
+
+#if NETSTANDARD || !FEATURE_APPDOMAIN
+
+    /// <summary>
+    /// Main class for the COM reference resolution task for .NET Core
+    /// </summary>
+    public sealed partial class ResolveComReference : Microsoft.Build.Tasks.TaskExtension, IResolveComReferenceTaskContract
+    {
+        #region Properties
+
+        public ITaskItem[] TypeLibNames { get; set; }
+
+        public ITaskItem[] TypeLibFiles { get; set; }
+
+        public string[] EnvironmentVariables { get; set; }
+
+        public string WrapperOutputDirectory { get; set; }
+
+        public bool IncludeVersionInInteropName { get; set; }
+
+        public ITaskItem[] ResolvedAssemblyReferences { get; set; }
+
+        public string KeyContainer { get; set; }
+
+        public string KeyFile { get; set; }
+
+        public bool DelaySign { get; set; }
+
+        public bool NoClassMembers { get; set; }
+
+        public bool Silent { get; set; }
+
+        public string TargetProcessorArchitecture { get; set; }
+
+        public bool ExecuteAsTool { get; set; } = true;
+
+        [Output]
+        public ITaskItem[] ResolvedFiles { get; set; }
+
+        [Output]
+        public ITaskItem[] ResolvedModules { get; set; }
+
+        public string SdkToolsPath { get; set; }
+
+        public string StateFile { get; set; }
+
+        public string TargetFrameworkVersion { get; set; } = String.Empty;
+
+        #endregion
+
+        #region ITask members
+
+        /// <summary>
+        /// Task entry point.
+        /// </summary>
+        /// <returns></returns>
+        public override bool Execute()
+        {
+            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
+            return false;
+        }
+
+        #endregion
+    }
+
+#else
+
+    /// <summary>
+    /// Main class for the COM reference resolution task
+    /// </summary>
+    public sealed partial class ResolveComReference : AppDomainIsolatedTaskExtension, IResolveComReferenceTaskContract, IComReferenceResolver
+    {
+        #region Properties
+
+        public ITaskItem[] TypeLibNames { get; set; }
+
+        public ITaskItem[] TypeLibFiles { get; set; }
+
+        public string[] EnvironmentVariables { get; set; }
+
+        internal List<ComReferenceInfo> allProjectRefs;
+
+        internal List<ComReferenceInfo> allDependencyRefs;
+
+        public string WrapperOutputDirectory { get; set; }
+
+        public bool IncludeVersionInInteropName { get; set; }
+
+        public ITaskItem[] ResolvedAssemblyReferences { get; set; }
+
+        public string KeyContainer { get; set; }
+
+        public string KeyFile { get; set; }
+
+        public bool DelaySign { get; set; }
+
+        public bool NoClassMembers { get; set; }
+
+        public bool Silent { get; set; }
+
         public string TargetProcessorArchitecture
         {
             get => _targetProcessorArchitecture;
@@ -137,42 +263,18 @@ namespace Microsoft.Build.Tasks
 
         private string _targetProcessorArchitecture;
 
-        /// <summary>
-        /// Property to allow multitargeting of ResolveComReferences:  If true, tlbimp.exe 
-        /// from the appropriate target framework will be run out-of-proc to generate
-        /// the necessary wrapper assemblies. Aximp is always run out of proc.
-        /// </summary>
         public bool ExecuteAsTool { get; set; } = true;
 
-        /// <summary>
-        /// paths to found/generated reference wrappers
-        /// </summary>
         [Output]
         public ITaskItem[] ResolvedFiles { get; set; }
 
-        /// <summary>
-        /// paths to found modules (needed for isolation)
-        /// </summary>
         [Output]
         public ITaskItem[] ResolvedModules { get; set; }
 
-        /// <summary>
-        /// If ExecuteAsTool is true, this must be set to the SDK 
-        /// tools path for the framework version being targeted. 
-        /// </summary>
         public string SdkToolsPath { get; set; }
 
-        /// <summary>
-        /// Cache file for COM component timestamps. If not present, every run will regenerate all the wrappers.
-        /// </summary>
         public string StateFile { get; set; }
 
-        /// <summary>
-        /// The project target framework version.
-        ///
-        /// Default is empty. which means there will be no filtering for the reference based on their target framework.
-        /// </summary>
-        /// <value></value>
         public string TargetFrameworkVersion { get; set; } = String.Empty;
 
         private Version _projectTargetFramework;
@@ -1655,6 +1757,6 @@ namespace Microsoft.Build.Tasks
 
         #endregion
     }
-}
 
 #endif
+}

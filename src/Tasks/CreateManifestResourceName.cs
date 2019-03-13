@@ -315,7 +315,7 @@ namespace Microsoft.Build.Tasks
             var everettId = new StringBuilder(name.Length + 1);
 
             // split folder name into subnames separated by '.', if any
-            string[] subNames = name.Split('.');
+            string[] subNames = name.Split(MSBuildConstants.DotChar);
 
             // convert each subname separately
             everettId.Append(MakeValidEverettSubFolderIdentifier(subNames[0]));
@@ -346,7 +346,7 @@ namespace Microsoft.Build.Tasks
             var everettId = new StringBuilder(name.Length);
 
             // split the name into folder names
-            string[] subNames = name.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            string[] subNames = name.Split(MSBuildConstants.ForwardSlashBackslash);
 
             // convert every folder name
             everettId.Append(MakeValidEverettFolderIdentifier(subNames[0]));

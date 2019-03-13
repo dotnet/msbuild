@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -204,13 +204,23 @@ namespace Microsoft.Build.Shared
             using (var stream = File.OpenRead(path))
             using (var peFile = new PEReader(stream))
             {
-                // If the file does not contain PE metadata, throw BadImageFormatException to preserve
-                // behavior from AssemblyName.GetAssemblyName(). RAR will deal with this correctly.
-                if (!peFile.HasMetadata)
+                bool hasMetadata = false;
+                try
                 {
-                    throw new BadImageFormatException(string.Format(CultureInfo.CurrentCulture,
-                        AssemblyResources.GetString("ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata"),
-                        path));
+                    // This can throw if the stream is too small, which means
+                    // the assembly doesn't have metadata.
+                    hasMetadata = peFile.HasMetadata;
+                }
+                finally
+                {
+                    // If the file does not contain PE metadata, throw BadImageFormatException to preserve
+                    // behavior from AssemblyName.GetAssemblyName(). RAR will deal with this correctly.
+                    if (!hasMetadata)
+                    {
+                        throw new BadImageFormatException(string.Format(CultureInfo.CurrentCulture,
+                            AssemblyResources.GetString("ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata"),
+                            path));
+                    }
                 }
 
                 var metadataReader = peFile.GetMetadataReader();
@@ -740,7 +750,7 @@ namespace Microsoft.Build.Shared
             }
 
             // Do the names match?
-            if (0 != string.Compare(Name, that.Name, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(Name, that.Name, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }

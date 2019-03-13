@@ -2283,6 +2283,11 @@
         <target state="translated">MSB3353: Nebyl zadán veřejný klíč nezbytný ke zpožděnému podepsání.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
+        <target state="translated">MSB4803: Úloha {0} se nepodporuje ve verzi MSBuildu pro .NET Core. Použijte prosím verzi MSBuildu pro .NET Framework. Další podrobnosti najdete na stránce https://aka.ms/msbuild/MSB4803.</target>
+        <note>{StrBegin="MSB4803: "}</note>
+      </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>
         <target state="translated">MSB3661: Vlastnosti Transform byla předána neplatná hodnota {0}.</target>

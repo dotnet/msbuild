@@ -1021,7 +1021,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
         <source>MSB3562: The "[strings]" tag is no longer necessary in text resources; please remove it.</source>
-        <target state="translated">MSB3562: 在您的文字資源中已不再需要使用 "[strings]" 標記。請移除此標記。</target>
+        <target state="translated">MSB3562: 在您的文字資源中已不再需要使用 "[strings]" 標籤。請移除此標記。</target>
         <note>{StrBegin="MSB3562: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnexpectedInfBracket">
@@ -1507,7 +1507,7 @@
 			but its name "{1}"
 			didn't match the expected name "{2}".</source>
         <target state="translated">已考慮 "{0}"，
-			但其名稱 "{1}" 
+			但其名稱 "{1}"
 			與預期名稱 "{2}" 不相符。</target>
         <note />
       </trans-unit>
@@ -2282,6 +2282,11 @@
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
         <target state="translated">MSB3353: 未指定延遲簽署所需的公開金鑰。</target>
         <note>{StrBegin="MSB3353: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
+        <target state="translated">MSB4803: MSBuild 的 .NET Core 版本不支援工作 "{0}"。請使用 MSBuild 的 .NET Framework 版本。如需進一步的詳細資料，請參閱 https://aka.ms/msbuild/MSB4803。</target>
+        <note>{StrBegin="MSB4803: "}</note>
       </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>

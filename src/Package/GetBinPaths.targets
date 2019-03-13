@@ -12,7 +12,7 @@
          We have to treat these separately from normal project references, as the AssignProjectConfiguration task would overwrite
          the SetPlatform item metadata if they were ProjectReferences.
     -->
-    <X64ProjectReference SetPlatform="Platform=x64" SetTargetFramework="TargetFramework=net46" Include="..\..\MSBuild\MSBuild.csproj" OutputItemType="MSBuildX64ResolvedProjectReferencePath" />
+    <X64ProjectReference SetPlatform="Platform=x64" SetTargetFramework="TargetFramework=$(FullFrameworkTFM)" Include="..\..\MSBuild\MSBuild.csproj" OutputItemType="MSBuildX64ResolvedProjectReferencePath" />
     <X64ProjectReference SetPlatform="Platform=x64" Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" OutputItemType="MSBuildTaskHostX64ResolvedProjectReferencePath" />
 
   </ItemGroup>

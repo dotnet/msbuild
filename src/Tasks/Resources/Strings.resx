@@ -2673,6 +2673,12 @@
     <comment>{StrBegin="MSB4801: "}</comment>
   </data>
 
+  <!-- Some tasks are only supported on .NET Framework -->
+  <data name="TaskRequiresFrameworkFailure" xml:space="preserve">
+    <value>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</value>
+    <comment>{StrBegin="MSB4803: "}</comment>
+  </data>
+
   <!--
         MSB3921 - MSB3930   Task: DownloadFile
   -->

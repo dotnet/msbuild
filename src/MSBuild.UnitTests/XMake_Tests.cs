@@ -1565,7 +1565,7 @@ namespace Microsoft.Build.UnitTests
                     MSBuildApp.ProcessProjectSwitch(new[] { projectDirectory }, extensionsToIgnore, projectHelper.GetFiles);
                 });
 
-                exception.Message.ShouldBe(ResourceUtilities.FormatResourceString("AmbiguousProjectDirectoryError", projectDirectory));
+                exception.Message.ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AmbiguousProjectDirectoryError", projectDirectory));
             }
             finally
             {
@@ -1889,7 +1889,7 @@ namespace Microsoft.Build.UnitTests
 
   <Target Name=""Restore"">
     <ItemGroup>
-      <Lines Include=""&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
     </ItemGroup>
     
     <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
@@ -1925,7 +1925,7 @@ namespace Microsoft.Build.UnitTests
   <Target Name=""Restore"">
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
     <ItemGroup>
-      <Lines Include=""&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
     </ItemGroup>
     
     <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
@@ -1935,7 +1935,7 @@ namespace Microsoft.Build.UnitTests
 
             IDictionary<string, string> preExistingProps = new Dictionary<string, string>
             {
-                { restoreFirstProps, $@"<Project ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                { restoreFirstProps, $@"<Project ToolsVersion=""Current"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <PropertyGroup>
     <PropertyA>{guid1}</PropertyA>
   </PropertyGroup>
@@ -1972,7 +1972,7 @@ namespace Microsoft.Build.UnitTests
   <Target Name=""Restore"">
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
     <ItemGroup>
-      <Lines Include=""&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
     </ItemGroup>
     
     <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
@@ -1982,7 +1982,7 @@ namespace Microsoft.Build.UnitTests
 
             IDictionary<string, string> preExistingProps = new Dictionary<string, string>
             {
-                { restoreFirstProps, $@"<Project ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                { restoreFirstProps, $@"<Project ToolsVersion=""Current"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <PropertyGroup>
     <PropertyA>{guid1}</PropertyA>
   </PropertyGroup>
@@ -2015,6 +2015,25 @@ namespace Microsoft.Build.UnitTests
 
             logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", () => logContents);
             logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", () => logContents);
+        }
+
+        [Theory]
+        [InlineData("/interactive")]
+        [InlineData("/p:NuGetInteractive=true")]
+        [InlineData("/interactive /p:NuGetInteractive=true")]
+        public void InteractiveSetsBuiltInProperty(string arguments)
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+
+  <Target Name=""Build"">
+    <Message Text=""MSBuildInteractive = [$(MSBuildInteractive)]"" />
+  </Target>
+  
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: arguments);
+
+            logContents.ShouldContain("MSBuildInteractive = [true]");
         }
 
         private string CopyMSBuild()

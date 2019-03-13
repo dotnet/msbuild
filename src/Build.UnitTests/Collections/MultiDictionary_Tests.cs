@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Equal(0, dictionary.KeyCount);
             Assert.Equal(0, dictionary.ValueCount);
 
-            Assert.Equal(false, dictionary.Remove("x", "y"));
+            Assert.False(dictionary.Remove("x", "y"));
 
             foreach (string value in dictionary["x"])
             {
@@ -50,17 +50,17 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dictionary.Add("x", "x2");
             dictionary.Add("y", "y1");
 
-            Assert.Equal(true, dictionary.Remove("x", "x1"));
+            Assert.True(dictionary.Remove("x", "x1"));
 
             Assert.Equal(2, dictionary.KeyCount);
             Assert.Equal(2, dictionary.ValueCount);
 
-            Assert.Equal(true, dictionary.Remove("x", "x2"));
+            Assert.True(dictionary.Remove("x", "x2"));
 
             Assert.Equal(1, dictionary.KeyCount);
             Assert.Equal(1, dictionary.ValueCount);
 
-            Assert.Equal(true, dictionary.Remove("y", "y1"));
+            Assert.True(dictionary.Remove("y", "y1"));
 
             Assert.Equal(0, dictionary.KeyCount);
             Assert.Equal(0, dictionary.ValueCount);
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dictionary.Add("x", "x1");
             dictionary.Add("x", "x2");
 
-            Assert.Equal(true, dictionary.Remove("x", "x2"));
+            Assert.True(dictionary.Remove("x", "x2"));
 
             Assert.Equal(1, dictionary.KeyCount);
             Assert.Equal(1, dictionary.ValueCount);
@@ -86,9 +86,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dictionary.Add("x", "x2");
             dictionary.Add("y", "y1");
 
-            Assert.Equal(false, dictionary.Remove("z", "y1"));
-            Assert.Equal(false, dictionary.Remove("x", "y1"));
-            Assert.Equal(false, dictionary.Remove("y", "y2"));
+            Assert.False(dictionary.Remove("z", "y1"));
+            Assert.False(dictionary.Remove("x", "y1"));
+            Assert.False(dictionary.Remove("y", "y2"));
 
             Assert.Equal(2, dictionary.KeyCount);
             Assert.Equal(3, dictionary.ValueCount);
@@ -115,12 +115,12 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             values = Helpers.MakeList<string>(dictionary["y"]);
 
-            Assert.Equal(1, values.Count);
+            Assert.Single(values);
             Assert.Equal("y1", values[0]);
 
             values = Helpers.MakeList<string>(dictionary["z"]);
 
-            Assert.Equal(0, values.Count);
+            Assert.Empty(values);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             List<string> values = Helpers.MakeList<string>(dictionary["x"]);
 
-            Assert.Equal(1, values.Count);
+            Assert.Single(values);
             Assert.Equal("x2", values[0]);
         }
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
@@ -12,9 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Security.Principal.Windows" Version="4.3.0" />
-    <PackageReference Include="System.Xml.XPath" Version="4.3.0" />
-    <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
+    <PackageReference Include="System.Security.Principal.Windows" />
+    <PackageReference Include="System.Xml.XPath" />
+    <PackageReference Include="Shouldly" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
@@ -28,6 +28,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -43,6 +44,7 @@
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
     <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
@@ -113,7 +115,6 @@
     <Compile Remove="AssemblyDependency\NonSpecificVersionStrictPrimary.cs" />
     <Compile Remove="AssemblyDependency\Perf.cs" />
     <Compile Remove="AssemblyDependency\ReferenceTests.cs" />
-    <Compile Remove="AssemblyDependency\ResolveAssemblyReferenceTestFixture.cs" />
     <Compile Remove="AssemblyDependency\SpecificVersionPrimary.cs" />
     <Compile Remove="AssemblyDependency\StronglyNamedDependency.cs" />
     <Compile Remove="AssemblyDependency\StronglyNamedDependencyAppConfig.cs" />

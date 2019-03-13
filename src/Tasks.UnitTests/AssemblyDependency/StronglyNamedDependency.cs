@@ -5,17 +5,23 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.Prerequisite
 {
     public sealed class StronglyNamedDependency : ResolveAssemblyReferenceTestFixture
     {
+        public StronglyNamedDependency(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-            new internal string[] DefaultPaths
+        new internal string[] DefaultPaths
             {
                 get { return new string[] { s_myApp_V10Path, @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
             }
@@ -42,7 +48,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             Console.WriteLine("Performing VersioningAndUnification.Prerequisite.StronglyNamedDependency.Exists() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -59,13 +65,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            AssertNoCase
-                (
-                    "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=" + AssemblyRef.EcmaPublicKey, t.ResolvedDependencyFiles[0].GetMetadata("FusionName")
-                );
+            t.ResolvedDependencyFiles[0].GetMetadata("FusionName")
+                .ShouldBe("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=" + AssemblyRef.EcmaPublicKey, StringCompareShould.IgnoreCase);
 
             engine.AssertLogContains
                 (
@@ -77,7 +81,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.NotCopyLocalBecausePrerequisite"))
                 );
 
-            AssertNoCase("false", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
+            t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -98,7 +102,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         public void HighVersionDoesntExist()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -115,7 +119,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(0, t.ResolvedDependencyFiles.Length);
+            Assert.Empty(t.ResolvedDependencyFiles);
             engine.AssertLogContains
                 (
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"))
@@ -125,7 +129,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         [Fact]
         public void VerifyAssemblyPulledOutOfFrameworkDoesntGetFrameworkFileAttribute()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
                 string actualFrameworkDirectory = s_myVersion20Path;
                 string alternativeFrameworkDirectory = s_myVersion40Path;

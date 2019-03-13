@@ -347,7 +347,7 @@ End Namespace
 
             ITaskItem[] resourceNames = t.ManifestResourceNames;
 
-            Assert.Equal(1, resourceNames.Length);
+            Assert.Single(resourceNames);
             Assert.Equal(@"CustomToolTest.SR1", resourceNames[0].ItemSpec);
         }
 
@@ -452,11 +452,9 @@ End Namespace
                     c.Log
                 );
 
-            Assert.True(
-                m.Log.Contains
-                (
-                    String.Format(AssemblyResources.GetString("CreateManifestResourceName.DefinitionFoundWithinConditionalDirective"), "MyForm.vb", "MyForm.resx")
-                )
+            Assert.Contains(
+                String.Format(AssemblyResources.GetString("CreateManifestResourceName.DefinitionFoundWithinConditionalDirective"), "MyForm.vb", "MyForm.resx"),
+                m.Log
             );
         }
 
@@ -480,7 +478,7 @@ End Namespace
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
-            Assert.Equal(1, resourceFiles.Length);
+            Assert.Single(resourceFiles);
             Assert.Equal(@"strings.resx", resourceFiles[0].ItemSpec);
             Assert.Equal(@"ResourceRoot.strings", resourceFiles[0].GetMetadata("ManifestResourceName"));
         }
@@ -506,7 +504,7 @@ End Namespace
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
-            Assert.Equal(1, resourceFiles.Length);
+            Assert.Single(resourceFiles);
             Assert.Equal(@"pic.bmp", resourceFiles[0].ItemSpec);
             Assert.Equal(@"ResourceRoot.pic.bmp", resourceFiles[0].GetMetadata("LogicalName"));
         }
@@ -532,7 +530,7 @@ End Namespace
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
-            Assert.Equal(1, resourceFiles.Length);
+            Assert.Single(resourceFiles);
             Assert.Equal(@"pic.bmp", resourceFiles[0].ItemSpec);
             Assert.Equal(@"foo", resourceFiles[0].GetMetadata("LogicalName"));
         }
@@ -557,7 +555,7 @@ End Namespace
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
-            Assert.Equal(1, resourceFiles.Length);
+            Assert.Single(resourceFiles);
             Assert.Equal(@"strings.resx", resourceFiles[0].ItemSpec);
             Assert.Equal(String.Empty, resourceFiles[0].GetMetadata("LogicalName"));
         }

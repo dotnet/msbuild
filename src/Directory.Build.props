@@ -2,20 +2,16 @@
   <!-- Import the repo root props -->
   <Import Project="..\Directory.Build.props"/>
 
-  <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4'))" />
+  <PropertyGroup>
+      <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(ShouldUseIBCOptimization)' == 'true'" />
 
   <!-- Override project defaults provided by Repo toolset -->
   <PropertyGroup>
-    <!-- Set DebugType.  This logic is repeated in Directory.Build.targets, because xunit.core.targets overrides it -->
-    <DebugType Condition=" '$(TargetFramework)' == '' and '$(DebugType)' == ''">full</DebugType>
-    <DebugType Condition=" '$(TargetFramework)' != '' and '$(DebugType)' == ''">embedded</DebugType>
-    <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
-
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
-
-    <!-- Some hash code implementations may overflow -->
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
 
     <!-- Set up BeforeCommon.targets -->
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Directory.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
@@ -23,14 +19,14 @@
     <Platforms>AnyCPU;x64</Platforms>
     
     <!-- Defaults for target frameworks and architecture -->
-    <LibraryTargetFrameworks>net46;netstandard2.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">net471</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks>$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM)</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
-    <RuntimeOutputTargetFrameworks>netcoreapp2.0;netcoreapp2.1</RuntimeOutputTargetFrameworks>
-    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
-    <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">net471</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks>netcoreapp2.1</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">$(FullFrameworkTFM)</RuntimeOutputTargetFrameworks>
 
     <!-- Don't automatically append target framework to output path, since we want to put the Platform Target beforehand, if it's not AnyCPU -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -56,19 +52,16 @@
     <!-- Disable warnings from XML documentation. https://github.com/Microsoft/msbuild/issues/2927 -->
     <NoWarn>$(NoWarn);1570;1572;1573;1587</NoWarn>
 
-    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -excludeApiList:$(RepoRoot)ref\ExcludeAPIList.txt</GenAPIAdditionalParameters>
-    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -excludeAttributesList:$(RepoRoot)ref\ExcludeAttributeList.txt</GenAPIAdditionalParameters>
-    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -headerFile:$(RepoRoot)ref\LicenseHeader.txt</GenAPIAdditionalParameters>
+    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -excludeApiList:&quot;$(RepoRoot)ref\ExcludeAPIList.txt&quot;</GenAPIAdditionalParameters>
+    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -excludeAttributesList:&quot;$(RepoRoot)ref\ExcludeAttributeList.txt&quot;</GenAPIAdditionalParameters>
+    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -headerFile:&quot;$(RepoRoot)ref\LicenseHeader.txt&quot;</GenAPIAdditionalParameters>
 
     <PackageLicenseUrl>http://go.microsoft.com/fwlink/?LinkId=329770</PackageLicenseUrl>
     <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
     <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
-  </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Condition="'$(DisableNerdbankVersioning)' != 'true'" Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-003" PrivateAssets="all"/>
-  </ItemGroup>
+    <DevDivPackagesDir>$(VisualStudioSetupOutputPath)DevDivPackages\</DevDivPackagesDir>
+  </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <!-- When targeting .NET Framework, Exe and unit test projects build with x86 architecture if Platform is AnyCPU,
@@ -80,5 +73,4 @@
     <!-- When targeting .NET Core, Exe and unit tests projects always use AnyCPU architecture -->
     <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
   </PropertyGroup>
-
 </Project>

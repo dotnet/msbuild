@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="badChar"></param>
         private void InvalidNameErrorLocationHelper(string name, string badChar)
         {
-            string expected = ResourceUtilities.FormatResourceString("OM_NameInvalid", name, badChar);
+            string expected = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OM_NameInvalid", name, badChar);
             string actual = String.Empty;
 
             try

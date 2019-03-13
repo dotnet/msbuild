@@ -67,6 +67,11 @@
         <target state="translated">MSB6004: Określona lokalizacja pliku wykonywalnego zadania „{0}” jest nieprawidłowa.</target>
         <note>{StrBegin="MSB6004: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.ValidateParametersFailed">
+        <source>MSB6011: Invalid parameters passed to the {0} task.</source>
+        <target state="translated">MSB6011: Przekazano nieprawidłowe parametry do zadania {0}.</target>
+        <note>{StrBegin="MSB6011: "}</note>
+      </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
         <target state="translated">Wystąpił błąd odczytu pliku listy redystrybucyjnej „{0}”. {1}</target>

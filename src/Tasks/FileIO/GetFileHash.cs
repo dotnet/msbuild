@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks
         public string MetadataName { get; set; } = "FileHash";
 
         /// <summary>
-        /// The encoding to use for generated hashs. Defaults to "hex". Allowed values = "hex", "base64"
+        /// The encoding to use for generated hashs. Defaults to "hex". Allowed values = "hex", "base64".
         /// </summary>
         public string HashEncoding { get; set; } = _hashEncodingHex;
 
@@ -83,7 +83,7 @@ namespace Microsoft.Build.Tasks
             foreach (var file in Files)
             {
                 var hash = ComputeHash(Algorithm, file.ItemSpec);
-                file.SetMetadata("FileHashAlgoritm", Algorithm);
+                file.SetMetadata("FileHashAlgorithm", Algorithm);
                 file.SetMetadata(MetadataName, EncodeHash(encoding, hash));
             }
 

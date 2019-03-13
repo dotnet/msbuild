@@ -250,7 +250,7 @@ namespace Microsoft.Build.Tasks
             // as there's no point writing the file
             return haveGeneratedContent ? code : String.Empty;
         }
-#endif
+#else
 
         /// <summary>
         /// Generates the code into a string.
@@ -384,7 +384,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return string.Join(", ", orderedParameters.Union(namedParameters).Where(p => !string.IsNullOrWhiteSpace(p)));
+            return string.Join(", ", orderedParameters.Concat(namedParameters).Where(p => !string.IsNullOrWhiteSpace(p)));
         }
 
         private const int MaxLineLength = 80;
@@ -595,5 +595,6 @@ namespace Microsoft.Build.Tasks
             b.Append("&\"");
             fInDoubleQuotes = true;
         }
+#endif
     }
 }

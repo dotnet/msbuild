@@ -454,6 +454,7 @@ namespace Microsoft.Build.Framework
     public abstract partial class SdkResolverContext
     {
         protected SdkResolverContext() { }
+        public virtual bool Interactive { get { throw null; } protected set { } }
         public virtual Microsoft.Build.Framework.SdkLogger Logger { get { throw null; } protected set { } }
         public virtual System.Version MSBuildVersion { get { throw null; } protected set { } }
         public virtual string ProjectFilePath { get { throw null; } protected set { } }

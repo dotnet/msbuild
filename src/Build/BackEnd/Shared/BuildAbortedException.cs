@@ -27,7 +27,7 @@ namespace Microsoft.Build.Exceptions
         public BuildAbortedException()
             : base(ResourceUtilities.GetResourceString("BuildAborted"))
         {
-            ResourceUtilities.FormatResourceString(out string errorCode, out _, "BuildAborted");
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAborted");
 
             ErrorCode = errorCode;
         }
@@ -36,9 +36,9 @@ namespace Microsoft.Build.Exceptions
         /// Constructs a BuildAbortedException with an additional message attached.
         /// </summary>
         public BuildAbortedException(string message)
-            : base(ResourceUtilities.FormatResourceString("BuildAbortedWithMessage", message))
+            : base(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildAbortedWithMessage", message))
         {
-            ResourceUtilities.FormatResourceString(out string errorCode, out _, "BuildAbortedWithMessage", message);
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAbortedWithMessage", message);
 
             ErrorCode = errorCode;
         }
@@ -47,9 +47,9 @@ namespace Microsoft.Build.Exceptions
         /// Constructs a BuildAbortedException with an additional message attached and an inner exception.
         /// </summary>
         public BuildAbortedException(string message, Exception innerException)
-            : base(ResourceUtilities.FormatResourceString("BuildAbortedWithMessage", message), innerException)
+            : base(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildAbortedWithMessage", message), innerException)
         {
-            ResourceUtilities.FormatResourceString(out string errorCode, out _, "BuildAbortedWithMessage", message);
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAbortedWithMessage", message);
 
             ErrorCode = errorCode;
         }

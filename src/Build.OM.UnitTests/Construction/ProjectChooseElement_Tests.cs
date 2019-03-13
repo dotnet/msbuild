@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
-                Assert.Equal(null, Helpers.GetFirst(choose.Children));
+                Assert.Null(Helpers.GetFirst(choose.Children));
             }
            );
         }
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
             Assert.Equal(1, Helpers.Count(choose.WhenElements));
-            Assert.Equal(null, choose.OtherwiseElement);
+            Assert.Null(choose.OtherwiseElement);
         }
 
         /// <summary>
@@ -259,7 +259,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 content += builder2.ToString();
                 content += @"</Project>";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }

@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             property.Value = "vb";
             Assert.Equal("vb", property.Value);
-            Assert.Equal(true, property.ContainingProject.HasUnsavedChanges);
+            Assert.True(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             property.Value = "v1";
             Assert.Equal("v1", property.Value);
-            Assert.Equal(false, property.ContainingProject.HasUnsavedChanges);
+            Assert.False(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             property.Name = "p2";
             Assert.Equal("p2", property.Name);
-            Assert.Equal(true, property.ContainingProject.HasUnsavedChanges);
+            Assert.True(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             property.Name = "p";
             Assert.Equal("p", property.Name);
-            Assert.Equal(false, property.ContainingProject.HasUnsavedChanges);
+            Assert.False(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             property.Value = String.Empty;
             Assert.Equal(String.Empty, property.Value);
-            Assert.Equal(true, property.ContainingProject.HasUnsavedChanges);
+            Assert.True(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             property.Condition = "c";
             Assert.Equal("c", property.Condition);
-            Assert.Equal(true, property.ContainingProject.HasUnsavedChanges);
+            Assert.True(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>

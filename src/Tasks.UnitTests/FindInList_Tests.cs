@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             f.CaseSensitive = true;
             f.List = new ITaskItem[] { new TaskItem("A.CS"), new TaskItem("b.cs") };
             Assert.True(f.Execute());
-            Assert.Equal(null, f.ItemFound);
+            Assert.Null(f.ItemFound);
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests
             f.FindLastMatch = true;
             f.List = new ITaskItem[] { };
             Assert.True(f.Execute());
-            Assert.Equal(null, f.ItemFound);
+            Assert.Null(f.ItemFound);
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             f.ItemSpecToFind = "a.cs";
             f.List = new ITaskItem[] { new TaskItem("foo\a.cs"), new TaskItem("b.cs") };
             Assert.True(f.Execute());
-            Assert.Equal(null, f.ItemFound);
+            Assert.Null(f.ItemFound);
         }
 
         [Fact]

@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
         {
             var state = new FileState(Path.GetTempPath());
 
-            Assert.Equal(true, state.IsDirectory);
+            Assert.True(state.IsDirectory);
         }
 
         [Fact]
@@ -196,9 +196,9 @@ namespace Microsoft.Build.UnitTests
 
                 Assert.Equal(info.Exists, state.FileExists);
                 File.Delete(file);
-                Assert.Equal(true, state.FileExists);
+                Assert.True(state.FileExists);
                 state.Reset();
-                Assert.Equal(false, state.FileExists);
+                Assert.False(state.FileExists);
             }
             finally
             {
@@ -331,7 +331,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(info.IsReadOnly, state.IsReadOnly);
                 info.IsReadOnly = !info.IsReadOnly;
                 state.Reset();
-                Assert.Equal(true, state.IsReadOnly);
+                Assert.True(state.IsReadOnly);
             }
             finally
             {
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests
         public void ExistsButDirectory()
         {
             Assert.Equal(new FileInfo(Path.GetTempPath()).Exists, new FileState(Path.GetTempPath()).FileExists);
-            Assert.Equal(true, (new FileState(Path.GetTempPath()).IsDirectory));
+            Assert.True((new FileState(Path.GetTempPath()).IsDirectory));
         }
 
         [Fact]
@@ -424,8 +424,8 @@ namespace Microsoft.Build.UnitTests
         {
             string file = Guid.NewGuid().ToString("N") + "\\x"; // presumably doesn't exist
 
-            Assert.Equal(false, new FileState(file).FileExists);
-            Assert.Equal(false, new FileState(file).DirectoryExists);
+            Assert.False(new FileState(file).FileExists);
+            Assert.False(new FileState(file).DirectoryExists);
         }
     }
 }

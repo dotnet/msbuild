@@ -8,7 +8,7 @@ using Microsoft.Build.Framework;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
 using Microsoft.VisualStudio.Profiler;
 #endif
 #endif
@@ -130,7 +130,7 @@ namespace Microsoft.Build.Construction
                 ProjectParser parser = new ProjectParser(document, projectRootElement);
                 parser.Parse();
             }
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
             }
             finally
             {
@@ -406,7 +406,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Parse a ProjectMetadataElement 
+        /// Parse a ProjectMetadataElement
         /// </summary>
         private ProjectMetadataElement ParseProjectMetadataElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
@@ -636,7 +636,7 @@ namespace Microsoft.Build.Construction
 
                     case XMakeElements.onError:
                         // Previous OM accidentally didn't verify ExecuteTargets on parse,
-                        // but we do, as it makes no sense 
+                        // but we do, as it makes no sense
                         ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnOnError);
                         ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(childElement, XMakeAttributes.executeTargets);
                         ProjectXmlUtilities.VerifyThrowProjectNoChildElements(childElement);
@@ -748,13 +748,33 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectItemDefinitionElement ParseProjectItemDefinitionXml(XmlElementWithLocation element, ProjectItemDefinitionGroupElement parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
-
             // Orcas inadvertently did not check for reserved item types (like "Choose") in item definitions,
             // as we do for item types in item groups. So we do not have a check here.
-            // Although we could perhaps add one, as such item definitions couldn't be used 
+            // Although we could perhaps add one, as such item definitions couldn't be used
             // since no items can have the reserved itemType.
             ProjectItemDefinitionElement itemDefinition = new ProjectItemDefinitionElement(element, parent, _project);
+
+            foreach (XmlAttributeWithLocation attribute in element.Attributes)
+            {
+                CheckMetadataAsAttributeName(attribute.Name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute);
+
+                if (!isKnownAttribute && !isValidMetadataNameInAttribute)
+                {
+                    ProjectXmlUtilities.ThrowProjectInvalidAttribute(attribute);
+                }
+                else if (isValidMetadataNameInAttribute)
+                {
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    metadatum.ExpressedAsAttribute = true;
+                    metadatum.Parent = itemDefinition;
+
+                    itemDefinition.AppendParentedChildNoChecks(metadatum);
+                }
+                else if (!ValidAttributesOnlyConditionAndLabel.Contains(attribute.Name))
+                {
+                    ProjectXmlUtilities.ThrowProjectInvalidAttribute(attribute);
+                }
+            }
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {

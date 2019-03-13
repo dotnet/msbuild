@@ -436,6 +436,7 @@ namespace Microsoft.Build.Tasks
         public Hash() { }
         [Microsoft.Build.Framework.OutputAttribute]
         public string HashResult { get { throw null; } set { } }
+        public bool IgnoreCase { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] ItemsToHash { get { throw null; } set { } }
         public override bool Execute() { throw null; }
@@ -599,6 +600,31 @@ namespace Microsoft.Build.Tasks
         public string MSBuildProjectDirectory { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public string ResolvedCodeAnalysisRuleSet { get { throw null; } }
+        public override bool Execute() { throw null; }
+    }
+    public sealed partial class ResolveComReference : Microsoft.Build.Tasks.TaskExtension
+    {
+        public ResolveComReference() { }
+        public bool DelaySign { get { throw null; } set { } }
+        public string[] EnvironmentVariables { get { throw null; } set { } }
+        public bool ExecuteAsTool { get { throw null; } set { } }
+        public bool IncludeVersionInInteropName { get { throw null; } set { } }
+        public string KeyContainer { get { throw null; } set { } }
+        public string KeyFile { get { throw null; } set { } }
+        public bool NoClassMembers { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] ResolvedAssemblyReferences { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] ResolvedFiles { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] ResolvedModules { get { throw null; } set { } }
+        public string SdkToolsPath { get { throw null; } set { } }
+        public bool Silent { get { throw null; } set { } }
+        public string StateFile { get { throw null; } set { } }
+        public string TargetFrameworkVersion { get { throw null; } set { } }
+        public string TargetProcessorArchitecture { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] TypeLibFiles { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] TypeLibNames { get { throw null; } set { } }
+        public string WrapperOutputDirectory { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
     public partial class ResolveKeySource : Microsoft.Build.Tasks.TaskExtension

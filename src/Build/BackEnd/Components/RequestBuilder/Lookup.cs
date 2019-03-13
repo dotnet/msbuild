@@ -2,15 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 
@@ -220,7 +216,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             errorMessages = new List<string>();
                         }
-                        errorMessages.Add(ResourceUtilities.FormatResourceString("PropertyOutputOverridden", propertyName, EscapingUtilities.UnescapeAll(lookupHash[propertyName]), property.EvaluatedValue));
+                        errorMessages.Add(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyOutputOverridden", propertyName, EscapingUtilities.UnescapeAll(lookupHash[propertyName]), property.EvaluatedValue));
                     }
 
                     // Set the value of the hash to the new property value
@@ -1016,7 +1012,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// A set of explicitly-specified modifications.
             /// </summary>
-            private HybridDictionary<string, MetadataModification> _modifications;
+            private Dictionary<string, MetadataModification> _modifications;
 
             /// <summary>
             /// Constructor.
@@ -1026,7 +1022,7 @@ namespace Microsoft.Build.BackEnd
             public MetadataModifications(bool keepOnlySpecified)
             {
                 _keepOnlySpecified = keepOnlySpecified;
-                _modifications = new HybridDictionary<string, MetadataModification>(MSBuildNameIgnoreCaseComparer.Default);
+                _modifications = new Dictionary<string, MetadataModification>(MSBuildNameIgnoreCaseComparer.Default);
             }
 
             /// <summary>
@@ -1036,7 +1032,7 @@ namespace Microsoft.Build.BackEnd
             private MetadataModifications(MetadataModifications other)
             {
                 _keepOnlySpecified = other._keepOnlySpecified;
-                _modifications = new HybridDictionary<string, MetadataModification>(other._modifications, MSBuildNameIgnoreCaseComparer.Default);
+                _modifications = new Dictionary<string, MetadataModification>(other._modifications, MSBuildNameIgnoreCaseComparer.Default);
             }
 
             /// <summary>

@@ -12,6 +12,11 @@ The scripts don't remove the existing files first, so that has to be done manual
 Usage:
 	$ msbuild mono/build/build.proj /p:CLICommitHash=<cli_commit_hash>
 
+To generate a commit message:
+    $ msbuild build.proj /p:CLICommitHash=<cli_commit_hash> /p:CLIBranchName=<cli_branch_name> /t:GenerateCommitMessage
+The generated message includes versions for all the SDKs. Edit this manually to remove the sdks
+that were unchanged in this commit.
+
 Also, whenever this is updated, please add the Microsoft.NET.Build.Extensions version in mono's
 `tools/nuget-hash-extractor/download.sh` and update the denied lists.
 

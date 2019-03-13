@@ -231,12 +231,12 @@ namespace Microsoft.Build.Tasks
 
                 if (xn.Attributes["Name"] == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XsltParameterNoAttribute", "Name"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.XsltParameterNoAttribute", "Name"));
                 }
 
                 if (xn.Attributes["Value"] == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XsltParameterNoAttribute", "Value"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.XsltParameterNoAttribute", "Value"));
                 }
 
                 string ns = String.Empty;
@@ -460,7 +460,7 @@ namespace Microsoft.Build.Tasks
                     case XslModes.XsltCompiledDll:
                         // We accept type in format: assembly_name[;type_name]. type_name may be omitted if assembly has just one type defined
                         string dll = _data;
-                        string[] pair = dll.Split(';');
+                        string[] pair = dll.Split(MSBuildConstants.SemicolonChar);
                         string assemblyPath = pair[0];
                         string typeName = (pair.Length == 2) ? pair[1] : null;
 
@@ -506,7 +506,7 @@ namespace Microsoft.Build.Tasks
                         return types[0];
                     }
 
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.MustSpecifyType", assemblyPath));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.MustSpecifyType", assemblyPath));
                 }
             }
         }

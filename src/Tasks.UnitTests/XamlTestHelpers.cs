@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Console.WriteLine(sw.ToString());
                 }
-                Assert.Equal(0, cr.Errors.Count);
+                Assert.Empty(cr.Errors);
                 if (cr.Errors.Count > 0)
                 {
                     foreach (CompilerError error in cr.Errors)

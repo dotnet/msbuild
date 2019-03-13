@@ -1,8 +1,9 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework Condition="$(MonoBuild) != 'true'">netcoreapp2.1</TargetFramework>
-    <TargetFramework Condition="$(MonoBuild) == 'true'">net471</TargetFramework>
+    <TargetFramework Condition="$(MonoBuild) == 'true'">net472</TargetFramework>
     <NuspecFile>Microsoft.Build.Localization.nuspec</NuspecFile>
+    <IsShipping>false</IsShipping>
     <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 

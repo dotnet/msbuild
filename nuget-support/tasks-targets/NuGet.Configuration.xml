@@ -65,6 +65,96 @@
             instead of relying on DefaultNetworkCredentials
             </summary>
         </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.LoadPackageSources">
+            <summary>
+            Gets an enumerable of all of the package sources
+            </summary>
+            <returns>Enumerable of all of the package sources</returns>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.GetPackageSourceByName(System.String)">
+            <summary>
+            Gets the source that matches a given name.
+            </summary>
+            <param name="name">Name of source to be searched for</param>
+            <returns>PackageSource that matches the given name. Null if none was found</returns>
+            <throws>ArgumentException when <paramref name="name" /> is null or empty.</throws>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.GetPackageSourceBySource(System.String)">
+            <summary>
+            Gets the source that matches a given source url.
+            </summary>
+            <param name="source">Url of source to be searched for</param>
+            <returns>PackageSource that matches the given source. Null if none was found</returns>
+            <throws>ArgumentException when <paramref name="source" /> is null or empty.</throws>
+        </member>
+        <member name="E:NuGet.Configuration.IPackageSourceProvider.PackageSourcesChanged">
+            <summary>
+            Event raised when the package sources have been changed.
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.RemovePackageSource(System.String)">
+            <summary>
+            Removes the package source that matches the given name
+            </summary>
+            <param name="name">Name of source to remove</param>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.EnablePackageSource(System.String)">
+            <summary>
+            Enables the package source that matches the given name
+            </summary>
+            <param name="name">Name of source to enable</param>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.DisablePackageSource(System.String)">
+            <summary>
+            Disables the package source that matches the given name
+            </summary>
+            <param name="name">Name of source to disable</param>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.UpdatePackageSource(NuGet.Configuration.PackageSource,System.Boolean,System.Boolean)">
+            <summary>
+            Updates the values of the given package source.
+            </summary>
+            <remarks>The package source is matched by name.</remarks>
+            <param name="source">Source with updated values</param>
+            <param name="updateCredentials">Describes if credentials values from <paramref name="source" /> should be updated or ignored</param>
+            <param name="updateEnabled">Describes if enabled value from <paramref name="source" /> should be updated or ignored</param>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.AddPackageSource(NuGet.Configuration.PackageSource)">
+            <summary>
+            Adds a package source to the current configuration
+            </summary>
+            <param name="source">PackageSource to add</param>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.SavePackageSources(System.Collections.Generic.IEnumerable{NuGet.Configuration.PackageSource})">
+            <summary>
+            Compares the given list of PackageSources with the current PackageSources in the configuration
+            and adds, removes or updates each source as needed.
+            </summary>
+            <param name="sources">PackageSources to be saved</param>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.IsPackageSourceEnabled(System.String)">
+            <summary>
+            Checks if a package source with a given name is part of the disabled sources configuration
+            </summary>
+            <param name="name">Name of the source to be queried</param>
+            <returns>true if the source with the given name is not part of the disabled sources</returns>
+        </member>
+        <member name="P:NuGet.Configuration.IPackageSourceProvider.ActivePackageSourceName">
+            <summary>
+            Gets the name of the active PackageSource
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.IPackageSourceProvider.DefaultPushSource">
+            <summary>
+            Gets the Default push source
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.IPackageSourceProvider.SaveActivePackageSource(NuGet.Configuration.PackageSource)">
+            <summary>
+            Updates the active package source with the given source.
+            </summary>
+            <param name="source">Source to be set as the active package source</param>
+        </member>
         <member name="F:NuGet.Configuration.NuGetConstants.DefaultGalleryServerUrl">
             <summary>
             NuGet.org gallery Url used as a source display name and as a default "id" when storing nuget.org API key.
@@ -106,16 +196,6 @@
             True if the source path is file based. Unc shares are not included.
             </summary>
         </member>
-        <member name="P:NuGet.Configuration.PackageSource.Origin">
-            <summary>
-            Gets the <see cref="T:NuGet.Configuration.ISettings" /> that this source originated from. May be null.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.PackageSource.TrustedSource">
-            <summary>
-            Corresponding trusted source details. Null if the package source does not have trusted sources information.
-            </summary>
-        </member>
         <member name="T:NuGet.Configuration.PackageSourceCredential">
             <summary>
             Represents credentials required to authenticate user within package source web requests.
@@ -136,6 +216,18 @@
             Indicates if password is stored in clear text.
             </summary>
         </member>
+        <member name="P:NuGet.Configuration.PackageSourceCredential.ValidAuthenticationTypes">
+            <summary>
+            List of authentication types the credential is valid for, e.g. 'basic'. If empty, all authentication types
+            are allowed.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.PackageSourceCredential.ValidAuthenticationTypesText">
+            <summary>
+            Comma-delimited list of authentication types the credential is valid for as stored in the config file.
+            If null or empty, all authentication types are valid. Example: 'basic,negotiate'
+            </summary>
+        </member>
         <member name="P:NuGet.Configuration.PackageSourceCredential.Password">
             <summary>
             Retrieves password in clear text. Decrypts on-demand.
@@ -152,7 +244,7 @@
             </summary>
             <returns>True if credentials object is valid</returns>
         </member>
-        <member name="M:NuGet.Configuration.PackageSourceCredential.#ctor(System.String,System.String,System.String,System.Boolean)">
+        <member name="M:NuGet.Configuration.PackageSourceCredential.#ctor(System.String,System.String,System.String,System.Boolean,System.String)">
             <summary>
             Instantiates the credential instance out of raw values read from a config file.
             </summary>
@@ -160,8 +252,12 @@
             <param name="username">User name</param>
             <param name="passwordText">Password as stored in config file</param>
             <param name="isPasswordClearText">Hints if password provided in clear text</param>
+            <param name="validAuthenticationTypesText">
+            Comma-delimited list of authentication types the credential is valid for as stored in the config file.
+            If null or empty, all authentication types are valid. Example: 'basic,negotiate'
+            </param>
         </member>
-        <member name="M:NuGet.Configuration.PackageSourceCredential.FromUserInput(System.String,System.String,System.String,System.Boolean)">
+        <member name="M:NuGet.Configuration.PackageSourceCredential.FromUserInput(System.String,System.String,System.String,System.Boolean,System.String)">
             <summary>
             Creates new instance of credential object out values provided by user.
             </summary>
@@ -169,7 +265,29 @@
             <param name="username">User name</param>
             <param name="password">Password text in clear</param>
             <param name="storePasswordInClearText">Hints if the password should be stored in clear text on disk.</param>
+            <param name="validAuthenticationTypesText">
+            Comma-delimited list of authentication types the credential is valid for as stored in the config file.
+            If null or empty, all authentication types are valid. Example: 'basic,negotiate'
+            </param>
             <returns>New instance of <see cref="T:NuGet.Configuration.PackageSourceCredential" /></returns>
+        </member>
+        <member name="M:NuGet.Configuration.PackageSourceCredential.ToICredentials">
+            <summary>
+            Converts this object to an ICredentials, capturing the username, password and valid authentication types
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.PackageSourceCredential.ParseAuthTypeFilterString(System.String)">
+            <summary>
+            Converts an authentication type filter string from the config file syntax to a list of valid authentication
+            types
+            </summary>
+            <param name="str">
+            Comma-delimited list of authentication types the credential is valid for as stored in the config file.
+            If null or empty, all authentication types are valid. Example: 'basic,negotiate'
+            </param>
+            <returns>
+            Enumeration of valid authentication types. If empty, all authentication types are valid.
+            </returns>
         </member>
         <member name="M:NuGet.Configuration.PackageSourceProvider.LoadPackageSources">
             <summary>
@@ -254,9 +372,69 @@
               Looks up a localized string similar to Value cannot be null or empty string..
             </summary>
         </member>
+        <member name="P:NuGet.Configuration.Resources.AttributeNotAllowed">
+            <summary>
+              Looks up a localized string similar to Attribute '{0}' is not allowed in element '{1}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.AttributeValueNotAllowed">
+            <summary>
+              Looks up a localized string similar to The attribute '{0}' has an unallowed value '{1}' in element '{2}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.CannotUpdateDifferentItems">
+            <summary>
+              Looks up a localized string similar to The item passed to the Update method cannot refer to a different item than the one being updated..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.CannotUpdateMachineWide">
+            <summary>
+              Looks up a localized string similar to Unable to update setting since it is in a machine-wide NuGet.Config..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.CannotUpdateNode">
+            <summary>
+              Looks up a localized string similar to Cannot update the node of a setting..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.CannotUpdateOrigin">
+            <summary>
+              Looks up a localized string similar to Cannot update the origin of a setting..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.CredentialsItemMustHaveUsernamePassword">
+            <summary>
+              Looks up a localized string similar to Credentials item must have username and password..
+            </summary>
+        </member>
         <member name="P:NuGet.Configuration.Resources.Error_EncryptionUnsupported">
             <summary>
               Looks up a localized string similar to Encryption is not supported on non-Windows platforms..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.Error_InvalidAttribute">
+            <summary>
+              Looks up a localized string similar to The attribute {0}-{1} is not valid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.Error_MergeTwoDifferentSections">
+            <summary>
+              Looks up a localized string similar to Cannot merge two different sections..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.Error_MoreThanOnePassword">
+            <summary>
+              Looks up a localized string similar to A credentials item must have only one Password or ClearTextPassword entry..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.Error_MoreThanOneUsername">
+            <summary>
+              Looks up a localized string similar to A credentials item must have only one Username entry..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.Error_MoreThanOneValidAuthenticationTypes">
+            <summary>
+              Looks up a localized string similar to A credentials item must have only one ValidAuthenticationTypes entry..
             </summary>
         </member>
         <member name="P:NuGet.Configuration.Resources.Error_NoWritableConfig">
@@ -274,9 +452,39 @@
               Looks up a localized string similar to "{0}" cannot be called on a NullSettings. This may be caused on account of insufficient permissions to read or write to "%AppData%\NuGet\NuGet.config"..
             </summary>
         </member>
+        <member name="P:NuGet.Configuration.Resources.ItemDoesNotExist">
+            <summary>
+              Looks up a localized string similar to The item does not exist in the {0} section..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.MissingRequiredAttribute">
+            <summary>
+              Looks up a localized string similar to Missing required attribute '{0}' in element '{1}'..
+            </summary>
+        </member>
         <member name="P:NuGet.Configuration.Resources.MustContainAbsolutePath">
             <summary>
               Looks up a localized string similar to '{0}' must contain an absolute path '{1}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.NoAttributesAllowed">
+            <summary>
+              Looks up a localized string similar to The {0} item should not have any attributes and it was found with {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.NoWritteableConfig">
+            <summary>
+              Looks up a localized string similar to There is no NuGet.Config that could be used for writing settings. Please create one at the desired location and restart the client..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.OwnersItemMustHaveAtLeastOneOwner">
+            <summary>
+              Looks up a localized string similar to Owners item must have at least one owner..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.OwnersMustOnlyHaveContent">
+            <summary>
+              Looks up a localized string similar to Owners item must only have text content and cannot be empty..
             </summary>
         </member>
         <member name="P:NuGet.Configuration.Resources.PackageSource_Invalid">
@@ -284,14 +492,34 @@
               Looks up a localized string similar to The package source does not belong to the collection of available sources..
             </summary>
         </member>
+        <member name="P:NuGet.Configuration.Resources.PropertyCannotBeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to {0} cannot be null or empty..
+            </summary>
+        </member>
         <member name="P:NuGet.Configuration.Resources.RelativeEnvVarPath">
             <summary>
               Looks up a localized string similar to Environment variable '{0}' must contain an absolute path, the full path of '{1}' cannot be determined..
             </summary>
         </member>
+        <member name="P:NuGet.Configuration.Resources.RepositoryMustHaveOneOwners">
+            <summary>
+              Looks up a localized string similar to The repository item with name '{0}' and service index '{1}' has more than one owners item in it..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.SectionDoesNotExist">
+            <summary>
+              Looks up a localized string similar to The section '{0}' does not exist in the settings..
+            </summary>
+        </member>
         <member name="P:NuGet.Configuration.Resources.Settings_FileName_Cannot_Be_A_Path">
             <summary>
-              Looks up a localized string similar to Parameter 'fileName' to Settings must be just a fileName and not a path.
+              Looks up a localized string similar to Parameter 'fileName' to Settings must be just a file name and not a path..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.ShowError_CannotHaveChildren">
+            <summary>
+              Looks up a localized string similar to Error parsing NuGet.Config. Element '{0}' cannot have descendant elements. Path: '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Configuration.Resources.ShowError_ConfigInvalidOperation">
@@ -314,9 +542,24 @@
               Looks up a localized string similar to Failed to read NuGet.Config due to unauthorized access. Path: '{0}'..
             </summary>
         </member>
+        <member name="P:NuGet.Configuration.Resources.TextShouldNotBeEmpty">
+            <summary>
+              Looks up a localized string similar to Text elements should not be empty..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.TrustedSignerMustHaveCertificates">
+            <summary>
+              Looks up a localized string similar to A trusted signer entry must have at least one certificate entry..
+            </summary>
+        </member>
         <member name="P:NuGet.Configuration.Resources.Unknown_Config_Exception">
             <summary>
               Looks up a localized string similar to Unexpected failure reading NuGet.Config. Path: '{0}'..
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.Resources.UnknownHashAlgorithmNotSupported">
+            <summary>
+              Looks up a localized string similar to Unknown hash algorithm is not supported..
             </summary>
         </member>
         <member name="P:NuGet.Configuration.Resources.UnsupportedDecryptPassword">
@@ -329,9 +572,14 @@
               Looks up a localized string similar to Password encryption is not supported on .NET Core for this platform. The following feed try to use an encrypted password: '{0}'. You can use a clear text password as a workaround..
             </summary>
         </member>
+        <member name="P:NuGet.Configuration.Resources.UnsupportedHashAlgorithm">
+            <summary>
+              Looks up a localized string similar to Certificate entry has an unsupported hash algorithm: '{0}'..
+            </summary>
+        </member>
         <member name="P:NuGet.Configuration.Resources.UserSettings_UnableToParseConfigFile">
             <summary>
-              Looks up a localized string similar to Unable to parse config file '{0}'..
+              Looks up a localized string similar to Unable to parse config file because: {0} Path: '{1}'..
             </summary>
         </member>
         <member name="M:NuGet.Configuration.ConfigurationDefaults.#ctor(System.String,System.String)">
@@ -349,121 +597,81 @@
             Interface to expose NuGet Settings
             </summary>
         </member>
-        <member name="P:NuGet.Configuration.ISettings.Root">
+        <member name="M:NuGet.Configuration.ISettings.GetSection(System.String)">
             <summary>
-            Folder under which the config file is present
+            Gets the section with a given name.
             </summary>
+            <param name="sectionName">name to match sections</param>
+            <returns>null if no section with the given name was found</returns>
         </member>
-        <member name="P:NuGet.Configuration.ISettings.FileName">
+        <member name="M:NuGet.Configuration.ISettings.AddOrUpdate(System.String,NuGet.Configuration.SettingItem)">
             <summary>
-            The file name of the config file. Joining <see cref="P:NuGet.Configuration.ISettings.Root" /> and
-            <see cref="P:NuGet.Configuration.ISettings.FileName" /> results in the full path to the config file.
+            Adds or updates the given <paramref name="item" /> to the settings.
+            If the <paramref name="item" /> has to be added this method will add it
+            in the user wide settings file, or walk down the hierarchy (starting from the user wide config)
+            until it finds a config where the given section is not cleared.
             </summary>
+            <param name="sectionName">section where the <paramref name="item" /> has to be added. If this section does not exist, one will be created.</param>
+            <param name="item">item to be added to the settings.</param>
+            <returns>true if the item was successfully updated or added in the settings</returns>
         </member>
-        <member name="P:NuGet.Configuration.ISettings.Priority">
+        <member name="M:NuGet.Configuration.ISettings.Remove(System.String,NuGet.Configuration.SettingItem)">
             <summary>
-            Enumerates the sequence of <see cref="T:NuGet.Configuration.ISettings" /> instances used to fetch settings
-            values (e.g. with <see cref="M:NuGet.Configuration.ISettings.GetValue(System.String,System.String,System.Boolean)" />). This enumeration includes this instance
-            itself.
+            Removes the given <paramref name="item" /> from the settings.
+            If the <paramref name="item" /> is the last item in the section, the section will also be removed.
+            If the item is overriding any items from other configs it will delete all the merged items that are
+            not in a machine wide config.
             </summary>
+            <param name="sectionName">Section where the <paramref name="item" /> is stored. If this section does not exist, the method will throw</param>
+            <param name="item">item to be removed from the settings</param>
+            <remarks> If the <paramref name="item" /> is in a machine wide config this method will throw</remarks>
         </member>
-        <member name="M:NuGet.Configuration.ISettings.GetValue(System.String,System.String,System.Boolean)">
+        <member name="M:NuGet.Configuration.ISettings.SaveToDisk">
             <summary>
-            Gets a value for the given key from the given section
-            If isPath is true, then the value represents a path. If the path value is already rooted, it is simply
-            returned
-            Otherwise, path relative to ISettings.Root is returned
+            Flushes any update that has been done in memory through the ISettings API to the settings file in disk.
             </summary>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.GetAllSubsections(System.String)">
-            <summary>
-            Gets all subsection element names under section as a List of string.
-            </summary>
-            <param name="section">Name of the section.</param>
-            <returns>List of string containing subsection element names.</returns>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.GetSettingValues(System.String,System.Boolean)">
-            <summary>
-            Gets all the values under section
-            </summary>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.GetNestedValues(System.String,System.String)">
-            <summary>
-            Gets all the values under section as List of KeyValuePair
-            </summary>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.GetNestedSettingValues(System.String,System.String)">
-            <summary>
-            Gets all the values under section as List of SettingValue
-            </summary>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.SetValue(System.String,System.String,System.String)">
-            <summary>
-            Sets the value under the specified <paramref name="section" />.
-            </summary>
-            <param name="section">The name of the section.</param>
-            <param name="key">The key to set set.</param>
-            <param name="value">The value to set.</param>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.SetValues(System.String,System.Collections.Generic.IReadOnlyList{NuGet.Configuration.SettingValue})">
-            <summary>
-            Sets the values under the specified <paramref name="section" />.
-            </summary>
-            <param name="section">The name of the section.</param>
-            <param name="values">The values to set.</param>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.UpdateSections(System.String,System.Collections.Generic.IReadOnlyList{NuGet.Configuration.SettingValue})">
-            <summary>
-            Updates the <paramref name="values" /> across multiple <see cref="T:NuGet.Configuration.ISettings" /> instances in the hierarchy.
-            Values are updated in the <see cref="T:NuGet.Configuration.ISettings" /> with the nearest priority.
-            </summary>
-            <param name="section">The name of the section.</param>
-            <param name="values">The values to set.</param>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.UpdateSubsections(System.String,System.String,System.Collections.Generic.IReadOnlyList{NuGet.Configuration.SettingValue})">
-            <summary>
-            Updates nested <paramref name="values" /> across multiple <see cref="T:NuGet.Configuration.ISettings" /> instances in the hierarchy.
-            Values are updated in the <see cref="T:NuGet.Configuration.ISettings" /> with the nearest priority.
-            </summary>
-            <param name="section">The name of the section.</param>
-            <param name="subsection">The name of the subsection.</param>
-            <param name="values">The values to set.</param>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.SetNestedValues(System.String,System.String,System.Collections.Generic.IList{System.Collections.Generic.KeyValuePair{System.String,System.String}})">
-            <summary>
-            Sets the values under the specified <paramref name="section" /> and <paramref name="subsection" />.
-            </summary>
-            <param name="section">The name of the section.</param>
-            <param name="subsection">The name of the subsection.</param>
-            <param name="values">The values to set.</param>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.SetNestedSettingValues(System.String,System.String,System.Collections.Generic.IList{NuGet.Configuration.SettingValue})">
-            <summary>
-            Sets the setting values under the specified <paramref name="section" /> and <paramref name="subsection" />.
-            </summary>
-            <param name="section">The name of the section.</param>
-            <param name="subsection">The name of the subsection.</param>
-            <param name="values">The setting values to set.</param>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.DeleteValue(System.String,System.String)">
-            <summary>
-            Deletes a key from the specified <paramref name="section" />.
-            </summary>
-            <param name="section">The name of the section.</param>
-            <param name="key">The key to be delted.</param>
-            <returns>bool indicating success.</returns>
-        </member>
-        <member name="M:NuGet.Configuration.ISettings.DeleteSection(System.String)">
-            <summary>
-            Deletes the specified <paramref name="section" />.
-            </summary>
-            <param name="section">The name of the section.</param>
-            <returns>bool indicating success.</returns>
         </member>
         <member name="E:NuGet.Configuration.ISettings.SettingsChanged">
             <summary>
             Event raised when the setting have been changed.
             </summary>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.GetConfigFilePaths">
+            <summary>
+            Get a list of all the paths of the settings files used as part of this settings object
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.GetConfigRoots">
+            <summary>
+            Get a list of all the roots of the settings files used as part of this settings object
+            </summary>
+        </member>
+        <member name="T:NuGet.Configuration.CredentialsItem">
+            <summary>
+            A CredentialsItem has a name and it can have between 2 or 3 children:
+                - [Required] Username (AddItem)
+                - [Required] Either Password or ClearTextPassword (AddItem)
+                - [Optional] ValidAuthenticationTypes (AddItem)
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.CredentialsItem.Update(NuGet.Configuration.SettingItem)">
+            <remarks>
+            This method is internal because it updates directly the xElement behind this abstraction.
+            It should only be called whenever the underlaying config file is intended to be changed.
+            To persist changes to disk one must save the corresponding setting files
+            </remarks>
+        </member>
+        <member name="M:NuGet.Configuration.NuGetConfiguration.#ctor(System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Collections.Generic.IEnumerable{NuGet.Configuration.SettingSection})">
+            <remarks>
+            There should not be a NuGetConfiguration without an Origin.
+            This constructor should only be used for tests.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Configuration.NuGetConfiguration.#ctor(NuGet.Configuration.SettingSection[])">
+            <remarks>
+            There should not be a NuGetConfiguration without an Origin.
+            This constructor should only be used for tests.
+            </remarks>
         </member>
         <member name="P:NuGet.Configuration.NuGetPathContext.FallbackPackageFolders">
             <summary>
@@ -493,15 +701,134 @@
             </summary>
             <param name="settingsRoot">Root directory of the solution or project.</param>
         </member>
+        <member name="M:NuGet.Configuration.SettingBase.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingBase.IsAbstract">
+            <summary>
+            Specifies if the setting is an in-memory-only setting. 
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingBase.IsCopy">
+            <summary>
+            Specifies if the setting is a copy of a concrete setting in a file.
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingBase.IsEmpty">
+            <summary>
+            Specifies if the setting has attributes or values.
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingBase.AsXNode">
+            <summary>
+            Gives the representation of this setting as an XNode object
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingBase.Clone">
+            <summary>
+            Creates a shallow copy of the setting.
+            Does not copy any pointer to the original data structure.
+            Just copies the abstraction.
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingBase.SetOrigin(NuGet.Configuration.SettingsFile)">
+            <summary>
+            Convenience method to add an element to an origin.
+            Since an origin should not be updated, any update will be ignored.
+            </summary>
+            <remarks>Each setting can override this method to include any descendants to the origin</remarks>
+        </member>
+        <member name="M:NuGet.Configuration.SettingBase.RemoveFromSettings">
+            <summary>
+            Convenience method to remove an element from it's origin and convert to abstract
+            </summary>
+            <remarks>Each setting can override this method to remove any descendants from their origin</remarks>
+        </member>
+        <member name="P:NuGet.Configuration.SettingElement.ElementName">
+            <summary>
+            Text that differentiates element tag
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingElement.AllowedAttributes">
+            <summary>
+            Specifies the keys for the attributes that the element can have
+            </summary>
+            <remarks>If null then all attributes are allowed</remarks>
+        </member>
+        <member name="P:NuGet.Configuration.SettingElement.RequiredAttributes">
+            <summary>
+            Specifies the keys for the attributes that the element should have
+            </summary>
+            <remarks>If null or empty then no attributes are required</remarks>
+        </member>
+        <member name="P:NuGet.Configuration.SettingElement.AllowedValues">
+            <summary>
+            Specifies which values are allowed for a specific attribute.
+            If an attribute is not defined every value is allowed.
+            Having allowed values does not imply that the attribute is required.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingElement.DisallowedValues">
+            <summary>
+            Specifies values that are explicitely disallowed for a specific attribute.
+            If an attribute is not defined no value is disallowed.
+            Having disallowed values does not imply that the attribute is required.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingElement.MutableAttributes">
+            <summary>
+             Key-value pairs that give more information about the element
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingElement.Attributes">
+            <summary>
+            Read only key-value pairs that give more information about the element
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingElement.IsEmpty">
+            <summary>
+            Specifies if the element is empty.
+            Each element defines its own definition of empty.
+            The default definition of empty is an element without attributes.
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingElement.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingElement.#ctor(System.Xml.Linq.XElement,NuGet.Configuration.SettingsFile)">
+            <summary>
+            Constructor used when element is read from a file
+            </summary>
+            <param name="element">Xelement read from XML file document tree</param>
+            <param name="origin">Settings file that this element was read from</param>
+        </member>
+        <member name="F:NuGet.Configuration.SettingElementType.ActivePackageSource">
+            ---- Known sections --- *
+        </member>
+        <member name="F:NuGet.Configuration.SettingElementType.Add">
+            ---- Known items --- *
+        </member>
+        <member name="M:NuGet.Configuration.SettingItem.Update(NuGet.Configuration.SettingItem)">
+            <remarks>
+            This method is internal because it updates directly the xElement behind this abstraction.
+            It should only be called whenever the underlying config file is intended to be changed.
+            To persist changes to disk one must save the corresponding setting files
+            </remarks>
+        </member>
         <member name="T:NuGet.Configuration.Settings">
             <summary>
             Concrete implementation of ISettings to support NuGet Settings
+            Wrapper for computed settings from given settings files
             </summary>
         </member>
         <member name="F:NuGet.Configuration.Settings.DefaultSettingsFileName">
             <summary>
             Default file name for a settings file is 'NuGet.config'
-            Also, the machine level setting file at '%APPDATA%\NuGet' always uses this name
+            Also, the user level setting file at '%APPDATA%\NuGet' always uses this name
             </summary>
         </member>
         <member name="F:NuGet.Configuration.Settings.OrderedSettingsFileNames">
@@ -509,14 +836,10 @@
             NuGet config names with casing ordered by precedence.
             </summary>
         </member>
-        <member name="P:NuGet.Configuration.Settings.Root">
+        <member name="P:NuGet.Configuration.Settings.Priority">
             <summary>
-            Folder under which the config file is present
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.Settings.ConfigFilePath">
-            <summary>
-            Full path to the ConfigFile corresponding to this Settings object
+            Enumerates the sequence of <see cref="T:NuGet.Configuration.SettingsFile" /> instances
+            ordered from closer to user to further
             </summary>
         </member>
         <member name="M:NuGet.Configuration.Settings.LoadDefaultSettings(System.String)">
@@ -563,7 +886,7 @@
             which is file <paramref name="configFileName" />from <paramref name="root" />.
             </summary>
         </member>
-        <member name="M:NuGet.Configuration.Settings.LoadDefaultSettings(System.String,System.String,NuGet.Configuration.IMachineWideSettings,System.Boolean,System.Boolean)">
+        <member name="M:NuGet.Configuration.Settings.LoadSettings(System.String,System.String,NuGet.Configuration.IMachineWideSettings,System.Boolean,System.Boolean)">
             <summary>
             For internal use only
             </summary>
@@ -584,42 +907,17 @@
             <param name="paths">The additional paths under which to look for settings files.</param>
             <returns>The list of settings read.</returns>
         </member>
-        <member name="M:NuGet.Configuration.Settings.UpdateSection(System.Xml.Linq.XElement,System.String,System.Collections.Generic.IEnumerable{NuGet.Configuration.SettingValue})">
+        <member name="M:NuGet.Configuration.Settings.GetConfigFilePaths">
             <summary>
-            Adds or Updates a section in the root element with the values.
+            Get a list of all the paths of the settings files used as part of this settings object
             </summary>
-            <param name="root">Root element.</param>
-            <param name="section">Name of the section.</param>
-            <param name="valuesToWrite">Values to be added or updated in the section.</param>
         </member>
-        <member name="M:NuGet.Configuration.Settings.RemoveElementBeforeClearTag(System.Xml.Linq.XElement)">
+        <member name="M:NuGet.Configuration.Settings.GetConfigRoots">
             <summary>
-            Removes all element nodes in the sectionElement which appear before a clear element.
+            Get a list of all the roots of the settings files used as part of this settings object
             </summary>
-            <param name="sectionElement">XElement section.</param>
         </member>
-        <member name="M:NuGet.Configuration.Settings.ContainsClearTag(System.Xml.Linq.XElement)">
-            <summary>
-            Checks if a section contains clear tag.
-            </summary>
-            <param name="section">XElement section.</param>
-        </member>
-        <member name="M:NuGet.Configuration.Settings.IsElement(System.Xml.Linq.XNode)">
-            <summary>
-            Checks if an XNode is an XElement.
-            </summary>
-            <param name="node">XNode</param>
-            <returns>Bool indicating if the node is an element.</returns>
-        </member>
-        <member name="M:NuGet.Configuration.Settings.HasName(System.Xml.Linq.XElement,System.String)">
-            <summary>
-            Checks if an XElement has a specific local name. Performs an OrdinalIgnoreCase comparison.
-            </summary>
-            <param name="element">XElement to be matched</param>
-            <param name="name">name to be matched</param>
-            <returns>Bool indicating if the element and has the same local name as the name parameter.</returns>
-        </member>
-        <member name="M:NuGet.Configuration.Settings.GetSettingsFileNames(System.String)">
+        <member name="M:NuGet.Configuration.Settings.GetSettingsFilesFullPath(System.String)">
             <remarks>
             Order is most significant (e.g. applied last) to least significant (applied first)
             ex:
@@ -634,6 +932,113 @@
             </summary>
             <remarks>For windows <see cref="F:NuGet.Configuration.Settings.OrderedSettingsFileNames" /> contains a single casing since
             the file system is case insensitive.</remarks>
+        </member>
+        <member name="P:NuGet.Configuration.SettingsFile.ConfigFilePath">
+            <summary>
+            Full path to the settings file
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingsFile.DirectoryPath">
+            <summary>
+            Folder under which the settings file is present
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingsFile.FileName">
+            <summary>
+            Filename of the settings file
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingsFile.Next">
+            <summary>
+            Next config file to read in the hierarchy
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingsFile.IsDirty">
+            <summary>
+            Defines if the configuration settings have been changed but have not been saved to disk
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.SettingsFile.IsMachineWide">
+            <summary>
+            Defines if the settings file is considered a machine wide settings file
+            </summary>
+            <remarks>Machine wide settings files cannot be eddited.</remarks>
+        </member>
+        <member name="P:NuGet.Configuration.SettingsFile.Priority">
+            <summary>
+            Order in which the files will be read.
+            A larger number means closer to the user.
+            </summary>
+        </member>
+        <member name="F:NuGet.Configuration.SettingsFile._xDocument">
+            <summary>
+            XML element for settings file
+            </summary>
+        </member>
+        <member name="F:NuGet.Configuration.SettingsFile._rootElement">
+            <summary>
+            Root element of configuration file.
+            By definition of a nuget.config, the root element has to be a 'configuration' element
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingsFile.#ctor(System.String)">
+            <summary>
+            Creates an instance of a non machine wide SettingsFile with the default filename.
+            </summary>
+            <param name="directoryPath">path to the directory where the file is</param>
+        </member>
+        <member name="M:NuGet.Configuration.SettingsFile.#ctor(System.String,System.String)">
+            <summary>
+            Creates an instance of a non machine wide SettingsFile.
+            </summary>
+            <param name="directoryPath">path to the directory where the file is</param>
+            <param name="fileName">name of config file</param>
+        </member>
+        <member name="M:NuGet.Configuration.SettingsFile.#ctor(System.String,System.String,System.Boolean)">
+            <summary>
+            Creates an instance of a SettingsFile
+            </summary>
+            <remarks>It will parse the specified document,
+            if it doesn't exist it will create one with the default configuration.</remarks>
+            <param name="directoryPath">path to the directory where the file is</param>
+            <param name="fileName">name of config file</param>
+            <param name="isMachineWide">specifies if the SettingsFile is machine wide</param>
+        </member>
+        <member name="M:NuGet.Configuration.SettingsFile.GetSection(System.String)">
+            <summary>
+            Gets the section with a given name.
+            </summary>
+            <param name="sectionName">name to match sections</param>
+            <returns>null if no section with the given name was found</returns>
+        </member>
+        <member name="M:NuGet.Configuration.SettingsFile.AddOrUpdate(System.String,NuGet.Configuration.SettingItem)">
+            <summary>
+            Adds or updates the given <paramref name="item" /> to the settings.
+            </summary>
+            <param name="sectionName">section where the <paramref name="item" /> has to be added. If this section does not exist, one will be created.</param>
+            <param name="item">item to be added to the settings.</param>
+            <returns>true if the item was successfully updated or added in the settings</returns>
+        </member>
+        <member name="M:NuGet.Configuration.SettingsFile.Remove(System.String,NuGet.Configuration.SettingItem)">
+            <summary>
+            Removes the given <paramref name="item" /> from the settings.
+            If the <paramref name="item" /> is the last item in the section, the section will also be removed.
+            </summary>
+            <param name="sectionName">Section where the <paramref name="item" /> is stored. If this section does not exist, the method will throw</param>
+            <param name="item">item to be removed from the settings</param>
+            <remarks> If the SettingsFile is a machine wide config this method will throw</remarks>
+        </member>
+        <member name="M:NuGet.Configuration.SettingsFile.SaveToDisk">
+            <summary>
+            Flushes any in-memory updates in the SettingsFile to disk.
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.SettingsFile.TryGetSection(System.String,NuGet.Configuration.SettingSection@)">
+            <remarks>
+            This method gives you a reference to the actual abstraction instead of a clone of it.
+            It should be used only when intended. For most purposes you should be able to use
+            GetSection(...) instead.
+            </remarks>
         </member>
         <member name="T:NuGet.Configuration.SettingValue">
             <summary>
@@ -686,90 +1091,6 @@
         <member name="T:NuGet.Configuration.XPlatMachineWideSetting">
             <summary>
             Machine wide settings based on the default machine wide config directory.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.CertificateTrustEntry.Fingerprint">
-            <summary>
-            Certificate fingerprint.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.CertificateTrustEntry.SubjectName">
-            <summary>
-            Certificate subject name.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.CertificateTrustEntry.FingerprintAlgorithm">
-            <summary>
-            Hash algorithm used to generate the certificate fingerprint.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.CertificateTrustEntry.Priority">
-            <summary>
-            The priority of this certificate entry in the nuget.config hierarchy. Same as SettingValue.Priority.
-            Null if this entry is not read from a config file.
-            </summary>
-        </member>
-        <member name="M:NuGet.Configuration.ITrustedSourceProvider.LoadTrustedSources">
-            <summary>
-            Loads all trusted sources.
-            </summary>
-            <returns>IEnumerable of TrustedSource.</returns>
-        </member>
-        <member name="M:NuGet.Configuration.ITrustedSourceProvider.LoadTrustedSource(System.String)">
-            <summary>
-            Loads a trusted source corresponding to a package source.
-            </summary>
-            <param name="packageSourceName">Name of the PackageSource used for lookup.</param>
-            <returns>TrustedSource corresponding to the PackageSource. Null if none found.</returns>
-        </member>
-        <member name="M:NuGet.Configuration.ITrustedSourceProvider.SaveTrustedSources(System.Collections.Generic.IEnumerable{NuGet.Configuration.TrustedSource})">
-            <summary>
-            Saves all trusted sources. Creates new entries or updates existing trusted source entries.
-            </summary>
-            <param name="sources">IEnumerable of TrustedSource to be saved.</param>
-        </member>
-        <member name="M:NuGet.Configuration.ITrustedSourceProvider.SaveTrustedSource(NuGet.Configuration.TrustedSource)">
-            <summary>
-            Saves a trusted sources. Creates new entry or updates existing trusted source entry.
-            </summary>
-            <param name="source">TrustedSource to be saved.</param>
-        </member>
-        <member name="M:NuGet.Configuration.ITrustedSourceProvider.DeleteTrustedSource(System.String)">
-            <summary>
-            Deletes a trusted source.
-            </summary>
-            <param name="sourceName">Name of the TrustedSource to be deleted.</param>
-        </member>
-        <member name="P:NuGet.Configuration.ITrustEntry.Priority">
-            <summary>
-            The priority of this entry in the nuget.config hierarchy. Same as SettingValue.Priority.
-            Null if this entry is not read from a config file.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.ServiceIndexTrustEntry.Value">
-            <summary>
-            Service index uri.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.ServiceIndexTrustEntry.Priority">
-            <summary>
-            The priority of this entry in the nuget.config hierarchy. Same as SettingValue.Priority.
-            Null if this entry is not read from a config file.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.TrustedSource.SourceName">
-            <summary>
-            Name of the associated package source.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.TrustedSource.ServiceIndex">
-            <summary>
-            Service index of the source.
-            </summary>
-        </member>
-        <member name="P:NuGet.Configuration.TrustedSource.Certificates">
-            <summary>
-            List of trusted certificates.
             </summary>
         </member>
         <member name="T:NuGet.Configuration.IExtensionLocator">
@@ -901,4 +1222,4 @@
             </summary>
         </member>
     </members>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>8bj4ztDcFP34TFmo1brzazbOuvc=</DigestValue></Reference></SignedInfo><SignatureValue>mvHVR8M/k3Es0jN5YePQvvwD+xn42NMKjQqC5vQfrMSZVbzcg+TYJAini1Rca/Fxt4g6XjlfkHgEbm3faHldvSj+8yQ/1xZdsr+psMT5YZVwwTK+irQwY5W/lc1ECPQrJhhxmGvpNQJfEjpRtDW3ITM8A8HJwDNya1dsUuLfgWQtFivwXCpKGHX7paGFs5oZoBLauJCRQ93gEr9kLk+f0/shrYJimjutfDmUyi32CgJzx6F7VmHo9Ecc6nINm7n4CCxtFnjap/XozC90iB7yVPewUN2fbrUHATORlN4cA6HcEUjIksNvBEmznricgZvvx/ClJ4Z7KuDVC5pGew1tSQ==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>m1K+Tyy0HVPLPV0jHraDo5/A5UrgV7PC+C3WipFfzBLODN0Ct0Z49Gub3ufLICGP1D4OJZRyOnhjZi61X+Hbl/2IjqiIl1VMHR4+qWlJLRNj+X7DparTv3/CBzkhMGY2lZdvp96rpRL2heloKGkmmxqet6/sU3hvw8wxMIf29zYrMEBZSEaAUajNDIDd40qeLXRV7OanRHrVE770wiR9DP0zzeYjX5rN1CltAtUyWmonz7DJAYuUr+UMi3offSITg4byWkvThGNXGmtJeDpU6Y/hhcblP5Yl5175yMvHofLyGw0iW7kv/Izp2yjEVRe26PTXes/9nNOP7ul2KoKMoQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE2zCCA8OgAwIBAgITMwAAAbHd7bpU6WW4XwABAAABsTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xODA3MTIyMDExMTlaFw0xOTA3MjYyMDExMTlaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xHjAcBgNVBAMTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJtSvk8stB1Tyz1dIx62g6OfwOVK4Fezwvgt1oqRX8wSzgzdArdGePRrm97nyyAhj9Q+DiWUcjp4Y2YutV/h25f9iI6oiJdVTB0ePqlpSS0TY/l+w6Wq079/wgc5ITBmNpWXb6feq6US9oXpaChpJpsanrev7FN4b8PMMTCH9vc2KzBAWUhGgFGozQyA3eNKni10Vezmp0R61RO+9MIkfQz9M83mI1+azdQpbQLVMlpqJ8+wyQGLlK/lDIt6H30iE4OG8lpL04RjVxprSXg6VOmP4YXG5T+WJede+cjLx6Hy8hsNIlu5L/yM6dsoxFUXtuj013rP/ZzTj+7pdiqCjKECAwEAAaOCAV8wggFbMBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBREE7QCnXc+kFVx9eQcf6wXFM8+czBQBgNVHREESTBHpEUwQzEpMCcGA1UECxMgTWljcm9zb2Z0IE9wZXJhdGlvbnMgUHVlcnRvIFJpY28xFjAUBgNVBAUTDTIyOTgwMys0Mzc5NTAwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAIOp8qYzxaF7HNJegK7spKbD6ShdVyUjjd0lCWlw6E1pFi+UuwXZm4DsWdBoZBuDNKjcz2ONnWt2APV7r0J0B8X8kcDirEUzll2x/fqORrJJ4kMGGZiFcXjTnunblRZBMTRwLEOWogJ3qS89YUpjWfGXfdFSlWCFqLwbRQc/2cGP91D1uX4IieRCxFiOQcCVOEkf1x34ME8pLztHWZI37pch7RdmkBwvLW1r/wt15aoS3fqvxBG04CEyWr8FzkX5P41Wrs5R1syufQQZMBLyv59IJpwOAA0oraXeRC3M1If/lEmVVwxNNJwjCt3DjTIJ9L01KMXe0Ig/qRIToTBwoBE=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIE2jCCA8KgAwIBAgITMwAAAO87PT5gr0llIAAAAAAA7zANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTgwODIzMjAxOTQ0WhcNMTkxMTIzMjAxOTQ0WjCByjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjElMCMGA1UECxMcTWljcm9zb2Z0IEFtZXJpY2EgT3BlcmF0aW9uczEmMCQGA1UECxMdVGhhbGVzIFRTUyBFU046RDIzNi0zN0RBLTk3NjExJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDKAoM+JZXt2QHAW0fzq1A+Eo16GzOcOwaU0Md9QcQgH4vFA7R5Xec8Y0+rH89t/hcWGC9zFc900QCAia3VZgM7i6bRFRL5A0YUMv6F7UPWTqppirccYGjVrs7RiJtGbPUKaKCKhhTZ1NA1FC6QwsWmyo+a/R1gFtcoHdCN6xn0RMvh4RcIGSIiDr6VmtdW3N0qDDo8/TXxDS1roCh5bOTIFjSlNAFbqYnp7L8zPYwdizWy/URm75I+dxfNhngTgGj7KyJhksgIlSzko0XdKRnyaF22PL806UaXylklK5SDdTDk05GaAyV8e+tIsMdVQ0hwgh05BGExE0R06NHjnxUrAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUlB6M3h0tMwUDjaUAKcF+hH9WAQUwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAOyvqWaVgRVzte8SCJjkB4tn6LHoWT+a3vrtOckmUgC4Lmz0dxCRsixSVnz4RXwM3Y9i3Yry65S570jHbUM2Cw2ZN9Z86wjSwn7S4XGgFPSh+Q1l0fyqpDm7pHKk+B1maKEeqfQxFVIcrGmaVfRm/l0OWSplyxZ70Z2EfK6nVruSbELs/2HMPJh5pcc+w7xKGGWpnIVwYHj6ahacDbIyD72HqpFqHkRv4ufWFbAzgoW+2eXXDSi5Eg54PYjXzRGTkj3d1MGlLJaRiwsf5ZHty2uZlComeJ/bNoCCWuyBmxY/1mmWo6hGvFcOoxxjauDui4lOJYhgXue6OUzSnH1vdLQ==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>+KO1FEDyfaXQN6WIIABdZGb8/Xs=</DigestValue></Reference></SignedInfo><SignatureValue>cFFWJezyef2XqMaztQTgfyZ5xOs5iw9xfU3EpGlsXT9uIHSmjT0ZQyg676RWRhe3gGDHTmOwVcNnteXXPGQyrdi1jddz/Wran8M4cGVjNnINGA8LqdnDC0T0a5MqdVBfWP49VkO3kHq0bhHSPYniIs2AdPI87hewaOOG8eX+Yblo2vuwIEdXPIm0Yxl4lAdcjiupHs7Oo+UFSxi10ql0A8wpkjArxEoABkJRjWHGzLR++pmf9IqqHnBGyML8gCQ9EeQnmA5+7zx0DQycJgOvwHew1jK60JPWAF58vtBgPQImHclLLw3k+zNk6073SvoBCud8Py/RCcfiDUGo4xWGYg==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>m1K+Tyy0HVPLPV0jHraDo5/A5UrgV7PC+C3WipFfzBLODN0Ct0Z49Gub3ufLICGP1D4OJZRyOnhjZi61X+Hbl/2IjqiIl1VMHR4+qWlJLRNj+X7DparTv3/CBzkhMGY2lZdvp96rpRL2heloKGkmmxqet6/sU3hvw8wxMIf29zYrMEBZSEaAUajNDIDd40qeLXRV7OanRHrVE770wiR9DP0zzeYjX5rN1CltAtUyWmonz7DJAYuUr+UMi3offSITg4byWkvThGNXGmtJeDpU6Y/hhcblP5Yl5175yMvHofLyGw0iW7kv/Izp2yjEVRe26PTXes/9nNOP7ul2KoKMoQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE2zCCA8OgAwIBAgITMwAAAbHd7bpU6WW4XwABAAABsTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xODA3MTIyMDExMTlaFw0xOTA3MjYyMDExMTlaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xHjAcBgNVBAMTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJtSvk8stB1Tyz1dIx62g6OfwOVK4Fezwvgt1oqRX8wSzgzdArdGePRrm97nyyAhj9Q+DiWUcjp4Y2YutV/h25f9iI6oiJdVTB0ePqlpSS0TY/l+w6Wq079/wgc5ITBmNpWXb6feq6US9oXpaChpJpsanrev7FN4b8PMMTCH9vc2KzBAWUhGgFGozQyA3eNKni10Vezmp0R61RO+9MIkfQz9M83mI1+azdQpbQLVMlpqJ8+wyQGLlK/lDIt6H30iE4OG8lpL04RjVxprSXg6VOmP4YXG5T+WJede+cjLx6Hy8hsNIlu5L/yM6dsoxFUXtuj013rP/ZzTj+7pdiqCjKECAwEAAaOCAV8wggFbMBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBREE7QCnXc+kFVx9eQcf6wXFM8+czBQBgNVHREESTBHpEUwQzEpMCcGA1UECxMgTWljcm9zb2Z0IE9wZXJhdGlvbnMgUHVlcnRvIFJpY28xFjAUBgNVBAUTDTIyOTgwMys0Mzc5NTAwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAIOp8qYzxaF7HNJegK7spKbD6ShdVyUjjd0lCWlw6E1pFi+UuwXZm4DsWdBoZBuDNKjcz2ONnWt2APV7r0J0B8X8kcDirEUzll2x/fqORrJJ4kMGGZiFcXjTnunblRZBMTRwLEOWogJ3qS89YUpjWfGXfdFSlWCFqLwbRQc/2cGP91D1uX4IieRCxFiOQcCVOEkf1x34ME8pLztHWZI37pch7RdmkBwvLW1r/wt15aoS3fqvxBG04CEyWr8FzkX5P41Wrs5R1syufQQZMBLyv59IJpwOAA0oraXeRC3M1If/lEmVVwxNNJwjCt3DjTIJ9L01KMXe0Ig/qRIToTBwoBE=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>MIIE2jCCA8KgAwIBAgITMwAAARhuSzTqYe0wLAAAAAABGDANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTgxMDI0MjEwNzMxWhcNMjAwMTEwMjEwNzMxWjCByjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjElMCMGA1UECxMcTWljcm9zb2Z0IEFtZXJpY2EgT3BlcmF0aW9uczEmMCQGA1UECxMdVGhhbGVzIFRTUyBFU046RDZCRC1FM0U3LTE2ODUxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCNm8DGT1JXc44SEnc6lxrk9H6rADjsN9xAECOEuBYAzLZpBdOmJRlMX0xuCsHtqE2t/tlnGXWvKTGexEwKbuYUHfsa2o/ulylRVrZcOv+YItq9b6/YcDd5b9r+IDotDPlZXXi3CE2oTgRFCXcGSlNbBdiGfZ/mKyTU8LVSG4MaQ5DFAHM5PvgqxjFLIHlyG+icfgyVxKgqai1kK77bm5Xyn09oz6W+zc24U2XRdnKPYqQ92cRVSkS/Vb/OhmcX0+5wGFrcT23ztr1uskuypuW0Uut64nlkKZJEZjtSeisQbwj1hPLLqBMfu62fw6Cv3EL5RpQW7PK7+uSSgf47v5mfAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUai3c2GNzocCUXoSXVqn54PKU4SYwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEALSq4iUHNMoQmFfUfmYukbW+hMP9apO2W/XhJUBDP/yCoEU25WTmWXNjLGRWfInH4Ld4+pYxaU8hoHYkk7zVrXoyRtjdsoOlnweE8MVJdhz7MuVBXzvadp4MjEuh9BH6wS7nqHxGoEZiesQNSwV6Yhki0GVryo3GOZYuqAcpx0J6tZpVCzz6QrUJrH1V+9KER344Sv+2t1lUcYV9R2L9Yl1SN3RnAC+rfHBR6tT+ISeInTAJUytYL1gkmm0gYGvR6faUn1pbDyxoyOZY0Fchq8CA5ubyMCBx7W8zRhl2MYhDqrckauGb0oX4yk8wXKMnkSGgq8hv0EjsDaVDZ+/OyHg==</X509Certificate><X509Certificate>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</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>

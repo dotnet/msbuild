@@ -2283,6 +2283,11 @@
         <target state="translated">MSB3353: Klucz publiczny jest niezbędny, ponieważ nie określono znaku opóźnienia.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
+        <target state="translated">MSB4803: Zadanie „{0}” nie jest obsługiwane w wersji programu MSBuild dla platformy .NET Core. Użyj wersji programu MSBuild dla platformy .NET Framework. Zobacz https://aka.ms/msbuild/MSB4803, aby uzyskać więcej szczegółów.</target>
+        <note>{StrBegin="MSB4803: "}</note>
+      </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>
         <target state="translated">MSB3661: Nieprawidłową wartość '{0}' przekazano do właściwości Transform.</target>
@@ -2290,7 +2295,7 @@
       </trans-unit>
       <trans-unit id="TlbImp.NoInputFileSpecified">
         <source>MSB3662: No input file has been passed to the task, exiting.</source>
-        <target state="translated">MSB3662: Plik danych wejściowych nie został przekazany do zadania, kończenie.</target>
+        <target state="translated">MSB3662: Plik wejściowy nie został przekazany do zadania, kończenie.</target>
         <note>{StrBegin="MSB3662: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotCreateFile">

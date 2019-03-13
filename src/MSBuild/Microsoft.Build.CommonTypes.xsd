@@ -1100,6 +1100,16 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="AspNetConfiguration" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AspNetCoreHostingModel" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_textPackageId _locComment="" -->Indicates whether to run an ASP.NET Core application using IIS in-process or out-of-process.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="AspNetCoreModuleName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_textPackageId _locComment="" -->Indicates which AspNetCoreModule version to use. Versions include V1 and V2.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="AssemblyKeyContainerName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AssemblyKeyProviderName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AssemblyName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1664,6 +1674,7 @@ elementFormDefault="qualified">
     <xs:element name="TargetFrameworkVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetPlatformIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetPlatformVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="TargetPlatformMinVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetZone" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TreatWarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TrustUrlParameters" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -3658,6 +3669,18 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
 
+    <xs:element name="AppxPackageSigningTimestampServerUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AppxPackageSigningTimestampServerUrl" _locComment="" -->RFC 3161 timestamp server's URL.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="AppxPackageSigningTimestampDigestAlgorithm" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AppxPackageSigningTimestampDigestAlgorithm" _locComment="" -->Digest algorithm used by the RFC 3161 timestamp server.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
     <xs:element name="AppxPackageIncludePrivateSymbols" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackageIncludePrivateSymbols" _locComment="" -->Flag indicating whether to include private symbols in symbol packages.</xs:documentation>
@@ -3685,6 +3708,18 @@ elementFormDefault="qualified">
     <xs:element name="AppxHarvestWinmdRegistration" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxHarvestWinmdRegistration" _locComment="" -->Flag indicating whether to enable harvesting of WinMD registration information.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="AppxWinMdCacheEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AppxWinMdCacheEnabled" _locComment="" -->Flag indicating whether to cache the harvested WinMD registration information.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="AppxWinMdCacheDir" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AppxWinMdCacheDir" _locComment="" -->Path to the folder where harvested WinMD registration information will be cached.</xs:documentation>
         </xs:annotation>
     </xs:element>
 
@@ -4231,6 +4266,44 @@ elementFormDefault="qualified">
     <xs:element name="AppxValidateStoreManifest" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxValidateStoreManifest" _locComment="" -->Flag indicating whether to validate store manifest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="UapAppxPackageBuildMode" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UapAppxPackageBuildMode" _locComment="" -->Configures the created packages. Possible values are: StoreAndSideload (produces the appxupload and the sideloaded packages), StoreUpload (produces only the appxupload package), and SideloadOnly(produces only the packages for sideloading).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="EntryPointExe" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EntryPointExe" _locComment="" -->Windows Application Packaging project-specific: Enables the packaging of an executable without having the source code available.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <!-- Properties enabling Store submission of appx/msix packages. -->
+    <xs:element name="EnableDirectStoreSubmission" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDirectStoreSubmission" _locComment="" -->Enable Store Submission from the packaging wizard.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="OverwritePendingSubmission" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="OverwritePendingSubmission" _locComment="" -->Overwrite Store Submission that has been queued by a previous build.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <!-- Properties controlling the consumption of UWP controls. -->
+    <xs:element name="AppxExcludeXbfFromSdkPayloadWhenXamlIsPresent" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AppxExcludeXbfFromSdkPayloadWhenXamlIsPresent" _locComment="" -->Flag to exclude XBF files when XAML is present.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="AppxExcludeXamlFromLibraryLayoutsWhenXbfIsPresent" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AppxExcludeXamlFromLibraryLayoutsWhenXbfIsPresent" _locComment="" -->Flag to exclude XAML files when XBF is present.</xs:documentation>
         </xs:annotation>
     </xs:element>
 

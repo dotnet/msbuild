@@ -68,9 +68,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
         private const string UpdateInTarget = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <Target Name='t'>
                             <ItemGroup>
                                 <i Update='i'/>
                             </ItemGroup>
+                        </Target>
                     </Project>
                 ";
 
@@ -351,7 +353,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("i", items[0].Include);
 
             var metadata1 = Helpers.MakeList(items[0].Metadata);
-            Assert.Equal(1, metadata1.Count);
+            Assert.Single(metadata1);
             Assert.Equal("m1", metadata1[0].Name);
             Assert.Equal("v1", metadata1[0].Value);
 
@@ -359,7 +361,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("i2", items[1].ItemType);
             Assert.Equal("i", items[1].Include);
             Assert.Equal("j", items[1].Exclude);
-            Assert.Equal(1, metadata2.Count);
+            Assert.Single(metadata2);
             Assert.Equal("m2", metadata2[0].Name);
             Assert.Equal("v2", metadata2[0].Value);
         }
@@ -961,7 +963,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Xml.Condition = "false";
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(0, Helpers.MakeList(project.Items).Count);
+            Assert.Empty(Helpers.MakeList(project.Items));
         }
 
         /// <summary>
@@ -993,7 +995,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Xml.Exclude = "i1";
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(0, Helpers.MakeList(project.Items).Count);
+            Assert.Empty(Helpers.MakeList(project.Items));
         }
 
         /// <summary>
@@ -1008,12 +1010,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Include = null;
             Helpers.ClearDirtyFlag(project);
 
-            Assert.Equal(false, project.HasUnsavedChanges);
+            Assert.False(project.HasUnsavedChanges);
 
             item.Remove = "i2";
 
             Assert.Equal("i2", item.Remove);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -1028,12 +1030,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Include = null;
             Helpers.ClearDirtyFlag(project);
 
-            Assert.Equal(false, project.HasUnsavedChanges);
+            Assert.False(project.HasUnsavedChanges);
 
             item.Update = "i2";
 
             Assert.Equal("i2", item.Update);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         private static ProjectItemElement GetItemFromContent(string content)

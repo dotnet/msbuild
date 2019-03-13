@@ -66,7 +66,7 @@
   <data name="AtSignInTaskOutputItemName" UESanitized="false" Visibility="Public">
     <value>MSB4081: The value "{0}" of the "ItemName" attribute in element &lt;Output&gt; contains an "@" character. If you intended to use an item name then remove the @( ) around the item name.</value>
     <comment>{StrBegin="MSB4081: "}UE: This message is shown when an output tag has an itemname that contains an @. They probably typed @(foo) instead of foo in the ItemName.LOCALIZATION: Output and ItemName should not be localized.</comment>
-  </data>      
+  </data>
   <data name="AttributeTypeLoadError" UESanitized="false" Visibility="Public">
     <value>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</value>
     <comment>{StrBegin="MSB4002: "}UE: This message is shown when the .NET attributes that a task's .NET properties are decorated with, cannot be
@@ -84,7 +84,7 @@
   </data>
   <data name="BuildCompletedTime" UESanitized="false" Visibility="Public">
     <value>Build completed in {0}.</value>
-  </data> 
+  </data>
   <data name="BuildFinishedFailure" UESanitized="false" Visibility="Public">
     <value>Build FAILED.</value>
   </data>
@@ -182,7 +182,7 @@
     <comment>{StrBegin="MSB4115: "}
         UE: This error is shown when a project tries to pass multiple items into a function in a conditional expression, that can only accept a scalar value (such as the "exists()" function).
     </comment>
-  </data>    
+  </data>
   <data name="CannotReassociateTask" UESanitized="false" Visibility="Private_OM">
     <value>The task is currently associated with a project object, and should not be added to a different one.</value>
   </data>
@@ -207,7 +207,7 @@
   <data name="CannotSetDefaultToolsVersionAfterLoadingProjects" UESanitized="false" Visibility="Private_OM">
     <value>MSB4134: DefaultToolsVersion cannot be set after a project has been loaded into the Engine.</value>
     <comment>{StrBegin="MSB4134: "}</comment>
-  </data>  
+  </data>
   <data name="CannotSetExcludeOnEvaluatedItem" UESanitized="false" Visibility="Private_OM">
     <value>Assigning the "{0}" attribute on an item that has been evaluated is not allowed. This operation is only allowed on the original persisted item that came directly from the project file.</value>
   </data>
@@ -219,7 +219,7 @@
   </data>
   <data name="CannotSetPropertyToNull" UESanitized="false" Visibility="Private_OM">
     <value>A property cannot be set to null.</value>
-  </data>  
+  </data>
   <data name="CannotUseParameters" UESanitized="false" Visibility="Private_OM">
     <value>Cannot get or set parameters on a task not associated with a project object.</value>
   </data>
@@ -230,7 +230,7 @@
   <data name="ChildExitedPrematurely" UESanitized="false" Visibility="Public">
     <value>MSB4166: Child node "{0}" exited prematurely. Shutting down.</value>
     <comment>{StrBegin="MSB4166: "}</comment>
-  </data>  
+  </data>
   <data name="ChooseMustContainWhen" UESanitized="false" Visibility="Public">
     <value>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</value>
     <comment>{StrBegin="MSB4085: "}</comment>
@@ -239,7 +239,7 @@
     <value>MSB4114: &lt;Choose&gt; elements cannot be nested more than {0} levels deep.</value>
     <comment>{StrBegin="MSB4114: "}UE: This message appears if the project file contains unreasonably nested Choose elements.
     LOCALIZATION: Do not localize "Choose" as it is an XML element name.</comment>
-  </data>    
+  </data>
   <data name="CircularDependency" UESanitized="false" Visibility="Public">
     <value>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</value>
     <comment>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
@@ -308,7 +308,7 @@
   <data name="DollarSignInTaskOutputPropertyName" UESanitized="false" Visibility="Public">
     <value>MSB4080: The value "{0}" of the "PropertyName" attribute in element &lt;Output&gt; contains a "$" character. If you intended to use a property name then remove the $( ) around the property name.</value>
     <comment>{StrBegin="MSB4080: "}UE: This message is shown when an output tag has an property name that contains an $. They probably typed $(foo) instead of foo in the PropertyName. LOCALIZATION: Output and PropertyName should not be localized.</comment>
-  </data>     
+  </data>
   <data name="DuplicateImport" UESanitized="false" Visibility="Public">
     <value>MSB4011: There is a circular reference involving the import of file "{0}". This file may have been imported more than once, or you may have attempted to import the main project file. All except the first instance of this file will be ignored.</value>
     <comment>{StrBegin="MSB4011: "}</comment>
@@ -316,7 +316,7 @@
   <data name="DuplicateProjectExtensions" UESanitized="false" Visibility="Public">
     <value>MSB4079: The &lt;ProjectExtensions&gt; element occurs more than once.</value>
     <comment>{StrBegin="MSB4079: "}</comment>
-  </data>    
+  </data>
   <data name="EmbeddedItemVectorCannotBeItemized" UESanitized="false" Visibility="Public">
     <value>MSB4012: The expression "{0}" cannot be used in this context. Item lists cannot be concatenated with other strings where an item list is expected. Use a semicolon to separate multiple item lists.</value>
     <comment>{StrBegin="MSB4012: "}UE: This message is shown when the user does not properly specify an item list when an item list is expected
@@ -325,11 +325,11 @@
   <data name="EmptyProjectFileName" UESanitized="false" Visibility="Private_OM">
     <value>Need to specify the project file name.</value>
     <comment>UE: This message is shown when the user calls into the engine to build a project without specifying a filename.</comment>
-  </data> 
+  </data>
   <data name="EndOfInputTokenName" UESanitized="false" Visibility="Public">
     <value>end of input</value>
     <comment>This is the name of the "EndOfInput" token. It is displayed in quotes as the
-    unexpected char or token when the end of a conditional was unexpectedly reached.</comment>      
+    unexpected char or token when the end of a conditional was unexpectedly reached.</comment>
   </data>
   <data name="ErrorConvertedIntoWarning" UESanitized="false" Visibility="Public">
     <value>The previous error was converted to a warning because the task was called with ContinueOnError=true.</value>
@@ -355,7 +355,7 @@
   <data name="FailedToRetrieveTaskOutputs" UESanitized="false" Visibility="Public">
     <value>MSB4028: The "{0}" task's outputs could not be retrieved from the "{1}" parameter. {2}</value>
     <comment>{StrBegin="MSB4028: "}</comment>
-  </data>  
+  </data>
   <data name="FatalBuildError" UESanitized="false" Visibility="Public">
     <value>MSB4014: The build was aborted because of an internal failure.</value>
     <comment>{StrBegin="MSB4014: "}UE: This message is shown when an unhandled exception terminates the build. The cause is most likely a programming
@@ -388,7 +388,7 @@
   <data name="FailedToReceiveChildStatus" UESanitized="false" Visibility="Public">
     <value>MSB4165: Failed to receive a response from the child node "{0}" in the timeout period "{1}" ms. Shutting down.</value>
     <comment>{StrBegin="MSB4165: "}</comment>
-  </data>  
+  </data>
   <data name="IllFormedCondition" UESanitized="false" Visibility="Public">
     <value>MSB4088: Condition "{0}" is improperly constructed.</value>
     <comment>{StrBegin="MSB4088: "}</comment>
@@ -396,11 +396,11 @@
   <data name="IllFormedEqualsInCondition" UESanitized="false" Visibility="Public">
     <value>MSB4105: Found an unexpected character '{2}' at position {1} in condition "{0}". Did you intend to use "=="?</value>
     <comment>{StrBegin="MSB4105: "}</comment>
-  </data>    
+  </data>
   <data name="IllFormedItemListCloseParenthesisInCondition" UESanitized="false" Visibility="Public">
     <value>MSB4106: Expected an item list at position {1} in condition "{0}". Did you forget the closing parenthesis?</value>
     <comment>{StrBegin="MSB4106: "}</comment>
-  </data>    
+  </data>
   <data name="IllFormedItemListOpenParenthesisInCondition" UESanitized="false" Visibility="Public">
       <value>MSB4107: Expected an item list at position {1} in condition "{0}". Did you forget the opening parenthesis after the '@'? To use a literal '@', use '%40' instead.</value>
     <comment>{StrBegin="MSB4107: "}</comment>
@@ -441,7 +441,7 @@
     <value>MSB4102: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is invalid. {3}</value>
     <comment>{StrBegin="MSB4102: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
         attributes. At the end of the message we show the exception text we got trying to use the value.</comment>
-  </data>  
+  </data>
   <data name="InvalidContinueOnErrorAttribute" UESanitized="false" Visibility="Public">
     <value>MSB4021: The "ContinueOnError" attribute of the "{0}" task is not valid. {1}</value>
     <comment>{StrBegin="MSB4021: "}LOCALIZATION: "ContinueOnError" should not be localized. "{1}" is a message from another exception explaining the problem.</comment>
@@ -449,7 +449,7 @@
   <data name="InvalidDefaultToolsVersionInRegistry" UESanitized="false" Visibility="Public">
     <value>MSB4139: Invalid value for default ToolsVersion is specified in registry key "{0}".</value>
     <comment>{StrBegin="MSB4139: "}</comment>
-  </data> 
+  </data>
   <data name="InvalidEvaluatedAttributeValue" UESanitized="false" Visibility="Public">
     <value>MSB4022: The result "{0}" of evaluating the value "{1}" of the "{2}" attribute in element &lt;{3}&gt; is not valid.</value>
     <comment>{StrBegin="MSB4022: "}UE: This message is shown when the engine is checking the correctness of the value (after evaluating embedded
@@ -464,7 +464,7 @@
   <data name="InvalidFileLoggerFile" UESanitized="false" Visibility="Private_OM">
     <value>MSB4104: Failed to write to log file "{0}". {1}</value>
     <comment>{StrBegin="MSB4104: "}UE: This is shown when the File Logger can't create or write to the file it was instructed to log to.</comment>
-  </data>    
+  </data>
   <data name="InvalidImportedProjectFile" UESanitized="false" Visibility="Public">
     <value>MSB4024: The imported project file could not be loaded. {0}</value>
     <comment>{StrBegin="MSB4024: "}UE: This message is shown when an imported project file cannot be loaded because of incorrect XML. The project
@@ -479,9 +479,9 @@
   </data>
   <data name="InvalidMessageImportance" UESanitized="false" Visibility="Public">
     <value>MSB4071: The value Importance="{0}" in the &lt;Message&gt; element is invalid. Valid values are: High, Normal and Low.</value>
-    <comment>{StrBegin="MSB4071: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.  
+    <comment>{StrBegin="MSB4071: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
     The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
-    LOCALIZATION: "Importance" should not be localized.  
+    LOCALIZATION: "Importance" should not be localized.
                   "Message" should not be localized.
                   High should not be localized.
                   Normal should not be localized.
@@ -508,7 +508,7 @@
       UE: This message is shown when the user attempts to provide an expression like "$(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
-  </data>  
+  </data>
   <data name="InvalidFunctionPropertyExpression" UESanitized="false" Visibility="Public">
     <value>MSB4184: The expression "{0}" cannot be evaluated. {1}</value>
     <comment>{StrBegin="MSB4184: "}
@@ -516,7 +516,7 @@
       UE: This message is shown when the user attempts to provide an expression like "$(SomeProperty.ToLower())"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
-  </data>  
+  </data>
   <data name="InvalidFunctionMethodUnavailable" UESanitized="false" Visibility="Public">
     <value>MSB4185: The function "{0}" on type "{1}" has not been enabled for execution.</value>
     <comment>{StrBegin="MSB4185: "}
@@ -561,7 +561,7 @@
   <data name="InvalidVerbosity" UESanitized="false" Visibility="Public">
     <value>MSB4103: "{0}" is not a valid logger verbosity level.</value>
     <comment>{StrBegin="MSB4103: "}</comment>
-  </data>    
+  </data>
   <data name="ItemDefinitionGroupNotLegalInsideTarget" UESanitized="false" Visibility="Public">
     <value>MSB4163: &lt;ItemDefinitionGroup&gt; is not allowed inside a target.</value>
     <comment>{StrBegin="MSB4163: "}</comment>
@@ -589,7 +589,7 @@
   </data>
   <data name="ItemListHeader" UESanitized="false" Visibility="Public">
     <value>Initial Items:</value>
-  </data>    
+  </data>
   <data name="MissingCondition" UESanitized="false" Visibility="Public">
     <value>MSB4083: Expected a Condition attribute on element "{0}".</value>
     <comment>{StrBegin="MSB4083: "}</comment>
@@ -597,7 +597,7 @@
   <data name="MetadataDefinitionCannotContainItemVectorExpression" UESanitized="false" Visibility="Public">
     <value>MSB4164: The value "{0}" of metadata "{1}" contains an item list expression. Item list expressions are not allowed on default metadata values.</value>
     <comment>{StrBegin="MSB4164: "}</comment>
-  </data>  
+  </data>
   <data name="MissingProject" UESanitized="false" Visibility="Private_OM">
     <value>MSBuild is expecting a valid "{0}" object.</value>
     <comment></comment>
@@ -647,7 +647,7 @@
   <data name="NonStringDataInRegistry" UESanitized="false" Visibility="Public">
     <value>MSB4138: Non-string data was specified at the registry location "{0}".</value>
     <comment>{StrBegin="MSB4138: "}</comment>
-  </data> 
+  </data>
   <data name="NoRootProjectElement" UESanitized="false" Visibility="Public">
     <value>MSB4039: No "{0}" element was found in the project file.</value>
     <comment>{StrBegin="MSB4039: "}</comment>
@@ -664,11 +664,11 @@
   </data>
   <data name="OverridingTarget" UESanitized="false" Visibility="Public">
     <value>Overriding target "{0}" in project "{1}" with target "{2}" from project "{3}".</value>
-  </data>  
+  </data>
   <data name="ParentProcessUnexpectedlyDied" UESanitized="false" Visibility="Public">
     <value>MSB4167: The parent process unexpectedly exited. Shutting down child node "{0}".</value>
     <comment>{StrBegin="MSB4167: "}</comment>
-  </data>  
+  </data>
   <data name="PerformanceLine" UESanitized="false" Visibility="Public">
     <value>{0} ms  {1} {2} calls</value>
   </data>
@@ -695,7 +695,7 @@
   </data>
   <data name="ProjectPerformanceSummary" UESanitized="false" Visibility="Public">
     <value>Project Performance Summary:</value>
-  </data>  
+  </data>
   <data name="ProjectSchemaErrorHalt" UESanitized="false" Visibility="Public">
     <value>MSB4042: Stopping because of syntax errors in project file.</value>
     <comment>{StrBegin="MSB4042: "}</comment>
@@ -708,7 +708,7 @@
   </data>
   <data name="ProjectStartedPrefixForTopLevelProjectWithTargetNames" UESanitized="false" Visibility="Public">
     <value>Project "{0}" ({1} target(s)):</value>
-  </data> 
+  </data>
   <data name="ProjectStartedPrefixForTopLevelProjectWithDefaultTargets" UESanitized="false" Visibility="Public">
     <value>Project "{0}" (default targets):</value>
   </data>
@@ -786,13 +786,13 @@
   </data>
   <data name="SkipTargetBecauseNoInputsDetail" UESanitized="false" Visibility="Public">
     <value>Though the target has declared its inputs, the input specification only references empty properties and/or empty item lists.</value>
-  </data>    
+  </data>
   <data name="SkipTargetBecauseNoOutputs" UESanitized="false" Visibility="Public">
     <value>Skipping target "{0}" because it has no outputs.</value>
   </data>
   <data name="SkipTargetBecauseNoOutputsDetail" UESanitized="false" Visibility="Public">
     <value>Though the target has declared its outputs, the output specification only references empty properties and/or empty item lists.</value>
-  </data>    
+  </data>
   <data name="SkipTargetBecauseOutputsUpToDate" UESanitized="false" Visibility="Public">
     <value>Skipping target "{0}" because all output files are up-to-date with respect to the input files.</value>
   </data>
@@ -811,27 +811,27 @@
   <data name="SolutionCacheBeingUsed" UESanitized="false" Visibility="Public">
     <value>Using solution cache file "{0}" for configuration "{1}" and tools version "{2}".</value>
     <comment>UE: This is not an error, so doesn't need an error code.</comment>
-  </data>   
+  </data>
   <data name="SolutionCacheReadError" UESanitized="false" Visibility="Public">
     <value>Failed to read solution cache file "{0}". {1} Using solution file directly.</value>
     <comment>UE: This is not a true error, so doesn't need an error code.</comment>
-  </data>   
+  </data>
   <data name="SolutionCacheWriteError" UESanitized="false" Visibility="Public">
     <value>Failed to write solution cache file "{0}". {1}</value>
     <comment>UE: This is not a true error, so doesn't need an error code.</comment>
-  </data>   
+  </data>
   <data name="SolutionCacheNotApplicable" UESanitized="false" Visibility="Public">
     <value>Solution cache file was created for a "{0}" value of "{1}" but the current value is "{2}". Refreshing cache file.</value>
     <comment>UE: This is not an error, so doesn't need an error code.</comment>
-  </data>    
+  </data>
   <data name="SolutionCacheNotApplicableDueToCacheVersion" UESanitized="false" Visibility="Public">
     <value>Solution cache file has an internal version number "{0}" but the current value is "{1}". Refreshing cache file.</value>
     <comment>UE: This is not an error, so doesn't need an error code.</comment>
-  </data>      
+  </data>
   <data name="SolutionCacheOutOfDate" UESanitized="false" Visibility="Public">
     <value>Solution cache file is out of date. Refreshing cache file. {0}</value>
     <comment>UE: This is not an error, so doesn't need an error code.</comment>
-  </data>  
+  </data>
   <data name="SolutionCircularDependencyError" UESanitized="false" Visibility="Public">
     <value>MSB4160: A circular dependency involving project "{0}" has been detected.</value>
     <comment>{StrBegin="MSB4160: "}</comment>
@@ -1022,7 +1022,7 @@
     <value>Time Elapsed {0}</value>
   </data>
   <data name="ToolsVersionInEffectForBuild" UESanitized="false" Visibility="Public">
-    <value>Building with tools version "{0}".</value>    
+    <value>Building with tools version "{0}".</value>
   </data>
   <data name="TreatingHigherToolsVersionAs40" UESanitized="false" Visibility="Public">
     <value>Project file contains ToolsVersion="{0}". This toolset is unknown or missing. You may be able to resolve this by installing the appropriate .NET Framework for this toolset. Treating the project as if it had ToolsVersion="4.0".</value>
@@ -1080,7 +1080,7 @@
   <data name="UsingTaskAssemblySpecification" UESanitized="false" Visibility="Public">
     <value>MSB4072: A &lt;{0}&gt; element must contain either the "{1}" attribute or the "{2}" attribute (but not both).</value>
     <comment>{StrBegin="MSB4072: "}</comment>
-  </data> 
+  </data>
   <data name="WarningCount" UESanitized="false" Visibility="Public">
     <value>{0} Warning(s)</value>
   </data>
@@ -1184,14 +1184,14 @@
 
   <!--
         The engine message bucket is: MSB4001 - MSB4999
-        
+
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
         MSB4192 is being used to indicate a need to upgrade to .vcxproj: ported from new OM
         MSB4184 MSB4185 MSB4186 are also in use
 
         Next message code should be MSB4169.
-              
+
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
 

@@ -62,7 +62,7 @@
       </trans-unit>
       <trans-unit id="Shared.PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
-        <target state="new">Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</target>
+        <target state="translated">Yol: {0}, işletim sisteminin en yüksek yol sınırını aşıyor. Tam dosya adı en fazla {1} karakter olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">

@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectPropertyInstance clone = property.DeepClone();
 
-            Assert.Equal(false, Object.ReferenceEquals(property, clone));
+            Assert.False(Object.ReferenceEquals(property, clone));
             Assert.Equal("p", clone.Name);
             Assert.Equal("v1", clone.EvaluatedValue);
         }
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void ProjectPropertyInstanceSerializationTest_Mutable()
         {
             var property = ProjectPropertyInstance.Create("p", "v", false /*mutable*/);
-            Assert.Equal(false, property.IsImmutable);
+            Assert.False(property.IsImmutable);
 
             TranslationHelpers.GetWriteTranslator().Translate(ref property, ProjectPropertyInstance.FactoryForDeserialization);
             ProjectPropertyInstance deserializedProperty = null;
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void ProjectPropertyInstanceSerializationTest_Immutable()
         {
             var property = ProjectPropertyInstance.Create("p", "v", mayBeReserved: true, isImmutable: true);
-            Assert.Equal(true, property.IsImmutable);
+            Assert.True(property.IsImmutable);
 
             TranslationHelpers.GetWriteTranslator().Translate(ref property, ProjectPropertyInstance.FactoryForDeserialization);
             ProjectPropertyInstance deserializedProperty = null;

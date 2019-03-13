@@ -18,6 +18,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Experimental.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -120,19 +121,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Single(_logger.ProjectStartedEvents);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty1", propertyValue);
 
             Assert.True(properties.TryGetValue("InitialProperty2", out propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty2", propertyValue);
 
             Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty3", propertyValue);
+        }
+
+        /// <summary>
+        /// A simple successful graph build.
+        /// </summary>
+        [Fact]
+        public void SimpleGraphBuild()
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+<PropertyGroup>
+       <InitialProperty1>InitialProperty1</InitialProperty1>
+       <InitialProperty2>InitialProperty2</InitialProperty2>
+       <InitialProperty3>InitialProperty3</InitialProperty3>
+</PropertyGroup>
+ <Target Name='test'>
+    <Message Text='[success]'/>
+ </Target>
+</Project>
+");
+            GraphBuildRequestData data = GetGraphBuildRequestData(contents);
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            _logger.AssertLogContains("[success]");
+            _logger.ProjectStartedEvents.Count.ShouldBe(1);
+
+            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+
+            properties.TryGetValue("InitialProperty1", out string propertyValue).ShouldBeTrue();
+            propertyValue.ShouldBe("InitialProperty1", StringCompareShould.IgnoreCase);
+
+            properties.TryGetValue("InitialProperty2", out propertyValue).ShouldBeTrue();
+            propertyValue.ShouldBe("InitialProperty2", StringCompareShould.IgnoreCase);
+
+            properties.TryGetValue("InitialProperty3", out propertyValue).ShouldBeTrue();
+            propertyValue.ShouldBe("InitialProperty3", StringCompareShould.IgnoreCase);
         }
 
 #if FEATURE_CODETASKFACTORY
@@ -197,8 +235,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/2057")]
-        [InlineData(8, false)]
 #endif
+        [InlineData(8, false)]
         public void ShutdownNodesAfterParallelBuild(int numberOfParallelProjectsToBuild, bool enbaleDebugComm)
         {
             // This test has previously been failing silently. With the addition of TestEnvironment the
@@ -298,7 +336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Runs a build and verifies it happens out of proc by checking the process ID.
         /// </summary>
         /// <param name="buildParametersModifier">Runs a test out of proc.</param>
-        public void RunOutOfProcBuild(Action<BuildParameters> buildParametersModifier)
+        private void RunOutOfProcBuild(Action<BuildParameters> buildParametersModifier)
         {
             const string contents = @"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -452,19 +490,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Single(_logger.ProjectStartedEvents);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty1", propertyValue);
 
             Assert.True(properties.TryGetValue("InitialProperty2", out propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty2", propertyValue);
 
             Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty3", propertyValue);
         }
 
         /// <summary>
@@ -492,19 +530,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Single(_logger.ProjectStartedEvents);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty1", propertyValue);
 
             Assert.True(properties.TryGetValue("InitialProperty2", out propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty2", propertyValue);
 
             Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty3", propertyValue);
         }
 
         /// <summary>
@@ -536,19 +574,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Single(_logger.ProjectStartedEvents);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty1", propertyValue);
 
             Assert.True(properties.TryGetValue("InitialProperty2", out propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty2", propertyValue);
 
             Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty3", propertyValue);
         }
 
         /// <summary>
@@ -587,15 +625,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Single(_logger.ProjectStartedEvents);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
-            Assert.Equal(1, properties.Count);
+            Assert.Single(properties);
 
             Assert.True(properties.TryGetValue("InitialProperty3", out string propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty3", propertyValue);
         }
 
         /// <summary>
@@ -661,10 +699,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
             Assert.NotNull(properties);
-            Assert.Equal(1, properties.Count);
+            Assert.Single(properties);
 
             Assert.True(properties.TryGetValue("InitialProperty3", out string propertyValue));
-            Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("InitialProperty3", propertyValue);
 
             projectStartedEvent = _logger.ProjectStartedEvents[2];
             Assert.Null(projectStartedEvent.Properties);
@@ -704,7 +742,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
             _logger.AssertLogContains("[success]");
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Single(_logger.ProjectStartedEvents);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
@@ -807,7 +845,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Single(_logger.ProjectStartedEvents);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
@@ -857,14 +895,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[errormessage]");
             _logger.AssertLogContains("[warn]");
             _logger.AssertLogDoesntContain("[message]");
-            Assert.Equal(1, _logger.BuildStartedEvents.Count);
-            Assert.Equal(1, _logger.BuildFinishedEvents.Count);
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
-            Assert.Equal(1, _logger.ProjectFinishedEvents.Count);
-            Assert.Equal(0, _logger.TargetStartedEvents.Count);
-            Assert.Equal(0, _logger.TargetFinishedEvents.Count);
-            Assert.Equal(0, _logger.TaskStartedEvents.Count);
-            Assert.Equal(0, _logger.TaskFinishedEvents.Count);
+            Assert.Single(_logger.BuildStartedEvents);
+            Assert.Single(_logger.BuildFinishedEvents);
+            Assert.Single(_logger.ProjectStartedEvents);
+            Assert.Single(_logger.ProjectFinishedEvents);
+            Assert.Empty(_logger.TargetStartedEvents);
+            Assert.Empty(_logger.TargetFinishedEvents);
+            Assert.Empty(_logger.TaskStartedEvents);
+            Assert.Empty(_logger.TaskFinishedEvents);
         }
 
         /// <summary>
@@ -891,12 +929,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[errormessage]");
             _logger.AssertLogContains("[warn]");
             _logger.AssertLogContains("[message]");
-            Assert.Equal(1, _logger.BuildStartedEvents.Count);
-            Assert.Equal(1, _logger.BuildFinishedEvents.Count);
-            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
-            Assert.Equal(1, _logger.ProjectFinishedEvents.Count);
-            Assert.Equal(1, _logger.TargetStartedEvents.Count);
-            Assert.Equal(1, _logger.TargetFinishedEvents.Count);
+            Assert.Single(_logger.BuildStartedEvents);
+            Assert.Single(_logger.BuildFinishedEvents);
+            Assert.Single(_logger.ProjectStartedEvents);
+            Assert.Single(_logger.ProjectFinishedEvents);
+            Assert.Single(_logger.TargetStartedEvents);
+            Assert.Single(_logger.TargetFinishedEvents);
             Assert.Equal(3, _logger.TaskStartedEvents.Count);
             Assert.Equal(3, _logger.TaskFinishedEvents.Count);
         }
@@ -907,25 +945,38 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void BuildRequestWithoutBegin()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-                {
-                    BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-                    _buildManager.BuildRequest(data);
-                }
-           );
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            Should.Throw<InvalidOperationException>(() => _buildManager.BuildRequest(data));
         }
+
+        /// <summary>
+        /// Submitting a synchronous graph build request before calling BeginBuild yields an InvalidOperationException.
+        /// </summary>
+        [Fact]
+        public void GraphBuildRequestWithoutBegin()
+        {
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            Should.Throw<InvalidOperationException>(() => _buildManager.BuildRequest(data));
+        }
+
         /// <summary>
         /// Pending a build request before calling BeginBuild yields an InvalidOperationException.
         /// </summary>
         [Fact]
         public void PendBuildRequestWithoutBegin()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-                {
-                    BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-                    _buildManager.PendBuildRequest(data);
-                }
-           );
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
+        }
+
+        /// <summary>
+        /// Pending a build request before calling BeginBuild yields an InvalidOperationException.
+        /// </summary>
+        [Fact]
+        public void PendGraphBuildRequestWithoutBegin()
+        {
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
         }
 
         /// <summary>
@@ -1002,29 +1053,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void ExtraEnds()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                _buildManager.BeginBuild(new BuildParameters());
-                _buildManager.EndBuild();
-                _buildManager.EndBuild();
-            }
-           );
+            _buildManager.BeginBuild(new BuildParameters());
+            _buildManager.EndBuild();
+
+            Assert.Throws<InvalidOperationException>(() => _buildManager.EndBuild());
         }
+
         /// <summary>
         /// Pending a request after EndBuild has been called yields an InvalidOperationException.
         /// </summary>
         [Fact]
         public void PendBuildRequestAfterEnd()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-                _buildManager.BeginBuild(new BuildParameters());
-                _buildManager.EndBuild();
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            _buildManager.BeginBuild(new BuildParameters());
+            _buildManager.EndBuild();
 
-                _buildManager.PendBuildRequest(data);
-            }
-           );
+            Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
+        }
+
+        /// <summary>
+        /// Pending a request after EndBuild has been called yields an InvalidOperationException.
+        /// </summary>
+        [Fact]
+        public void PendGraphBuildRequestAfterEnd()
+        {
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            _buildManager.BeginBuild(new BuildParameters());
+            _buildManager.EndBuild();
+
+            Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
         }
 
         /// <summary>
@@ -1642,7 +1700,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Project project = _projectCollection.LoadProject(data.ProjectFullPath);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
-            Assert.Equal(instance.GetPropertyValue("Foo"), "bar");
+            Assert.Equal("bar", instance.GetPropertyValue("Foo"));
         }
 
         /// <summary>
@@ -1700,7 +1758,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Project project = _projectCollection.LoadProject(data.ProjectFullPath);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
-            Assert.Equal(instance.GetPropertyValue("Foo"), "bar");
+            Assert.Equal("bar", instance.GetPropertyValue("Foo"));
 
             _logger.ClearLog();
             _parameters.ResetCaches = false;
@@ -1709,8 +1767,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
 
             // We should have built the same instance, with the same results, so the target will be skipped.
-            string skippedMessage = ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "test");
-            Assert.Equal(true, _logger.FullLog.Contains(skippedMessage));
+            string skippedMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteSuccess", "test");
+            Assert.Contains(skippedMessage, _logger.FullLog);
 
             ProjectInstance instance2 = _buildManager.GetProjectInstanceForBuild(project);
             Assert.Equal(instance, instance2); // "Instances are not the same"
@@ -1879,14 +1937,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // First a normal build
             BuildRequestData data = GetBuildRequestData(contents);
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.Equal(result.OverallResult, BuildResultCode.Success);
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
             // Now a build using a different build manager.
             using (var newBuildManager = new BuildManager())
             {
                 GetBuildRequestData(contents);
                 BuildResult result2 = newBuildManager.Build(_parameters, data);
-                Assert.Equal(result2.OverallResult, BuildResultCode.Success);
+                Assert.Equal(BuildResultCode.Success, result2.OverallResult);
             }
         }
 
@@ -2472,7 +2530,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // We should, however, end up skipping Error1 on the second call to B.
             string skippedMessage =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Error1");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Error1");
             _logger.AssertLogContains(skippedMessage);
             _buildManager.EndBuild();
         }
@@ -2579,20 +2637,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // We should end up skipping Error1 on the second call to B.
             string skippedMessage1 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Error1");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Error1");
             _logger.AssertLogContains(skippedMessage1);
 
             // We shouldn't, however, see skip messages for the OnError targets
             string skippedMessage2 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Target2");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Target2");
             _logger.AssertLogDoesntContain(skippedMessage2);
 
             string skippedMessage3 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "Target3");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteSuccess", "Target3");
             _logger.AssertLogDoesntContain(skippedMessage3);
 
             string skippedMessage4 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "Target4");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteSuccess", "Target4");
             _logger.AssertLogDoesntContain(skippedMessage4);
             _buildManager.EndBuild();
         }
@@ -2678,11 +2736,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // We should also end up skipping them both.
             string skippedMessage1 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Error1");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Error1");
             _logger.AssertLogContains(skippedMessage1);
 
             string skippedMessage2 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Error2");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Error2");
             _logger.AssertLogContains(skippedMessage2);
 
             _buildManager.EndBuild();
@@ -2879,7 +2937,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequestData requestData = new BuildRequestData(pi, new[] { "Build" });
                 BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
-                BuildResult br = submission.Execute();
+                submission.Execute();
                 project1DoneEvent.Set();
             });
 
@@ -2889,7 +2947,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project2);
                 BuildRequestData requestData = new BuildRequestData(pi, new[] { "Build" });
                 BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
-                BuildResult br = submission.Execute();
+                submission.Execute();
                 project2DoneEvent.Set();
             });
 
@@ -3256,7 +3314,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var services = new HostServices();
                 BuildRequestData data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "One", "Two", "Three" }, services);
                 var result = localBuildManager.PendBuildRequest(data).Execute();
-                Assert.Equal(result.OverallResult, BuildResultCode.Success); // "Test project failed to build correctly."
+                Assert.Equal(BuildResultCode.Success, result.OverallResult); // "Test project failed to build correctly."
             }
             finally
             {
@@ -3271,9 +3329,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var resultsFiles = Directory.EnumerateFiles(directory).Select(Path.GetFileName);
 
             Assert.Equal(3, resultsFiles.Count());
-            Assert.True(resultsFiles.Contains("One.cache"));
-            Assert.True(resultsFiles.Contains("Two.cache"));
-            Assert.True(resultsFiles.Contains("Three.cache"));
+            Assert.Contains("One.cache", resultsFiles);
+            Assert.Contains("Two.cache", resultsFiles);
+            Assert.Contains("Three.cache", resultsFiles);
 
             // Return the cache directory created for this build.
             return directory;
@@ -3292,22 +3350,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieves a BuildRequestData using the specified contents, default targets and an empty project collection.
         /// </summary>
-        private BuildRequestData GetBuildRequestData(string projectContents)
-        {
-            return GetBuildRequestData(projectContents, new string[] { });
-        }
+        private BuildRequestData GetBuildRequestData(string projectContents) => GetBuildRequestData(projectContents, Array.Empty<string>());
+
+        /// <summary>
+        /// Retrieves a GraphBuildRequestData using the specified contents, default targets and an empty project collection.
+        /// </summary>
+        private GraphBuildRequestData GetGraphBuildRequestData(string projectContents) => GetGraphBuildRequestData(projectContents, Array.Empty<string>());
 
         /// <summary>
         /// Retrieves a BuildRequestData using the specified contents, targets and project collection.
         /// </summary>
         private BuildRequestData GetBuildRequestData(string projectContents, string[] targets, string toolsVersion = null)
-        {
-            var data = new BuildRequestData(
-                CreateProjectInstance(projectContents, toolsVersion, _projectCollection, true), targets,
-                _projectCollection.HostServices);
+            => new BuildRequestData(CreateProjectInstance(projectContents, toolsVersion, _projectCollection, true), targets, _projectCollection.HostServices);
 
-            return data;
-        }
+        /// <summary>
+        /// Retrieves a GraphBuildRequestData using the specified contents, targets and project collection.
+        /// </summary>
+        private GraphBuildRequestData GetGraphBuildRequestData(string projectContents, string[] targets)
+            => new GraphBuildRequestData(CreateProjectGraph(projectContents, _projectCollection), targets, _projectCollection.HostServices);
 
         /// <summary>
         /// Retrieve a ProjectInstance evaluated with the specified contents using the specified projectCollection
@@ -3316,6 +3376,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Project project = CreateProject(contents, toolsVersion, projectCollection, deleteTempProject);
             return project.CreateProjectInstance();
+        }
+
+        /// <summary>
+        /// Retrieve a CreateProjectGraph evaluated with the specified contents using the specified projectCollection
+        /// </summary>
+        private ProjectGraph CreateProjectGraph(string contents, ProjectCollection projectCollection)
+        {
+            var projectFilePath = _env.CreateFile().Path;
+            File.WriteAllText(projectFilePath, contents);
+
+            return new ProjectGraph(projectFilePath, projectCollection);
         }
 
         /// <summary>
@@ -3435,7 +3506,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var mainProject = new Project(mainRootElement, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection);
                     var mainInstance = mainProject.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(isImmutable: false);
 
-                    Assert.Equal(0, mainInstance.GlobalProperties.Count);
+                    Assert.Empty(mainInstance.GlobalProperties);
 
                     var request = new BuildRequestData(mainInstance, new[] {"BuildOther"});
 
@@ -3470,7 +3541,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         submission = manager.PendBuildRequest(request);
                         results = submission.Execute();
 
-                        Assert.Equal(0, p2pInstance.GlobalProperties.Count);
+                        Assert.Empty(p2pInstance.GlobalProperties);
 
                         Assert.Equal(BuildResultCode.Success, results.OverallResult);
                         Assert.Equal(newPropertyValue, results.ResultsByTarget["Foo"].Items.First().ItemSpec);
@@ -3877,6 +3948,155 @@ $@"<Project InitialTargets=`Sleep`>
                     manager.Dispose();
                 }
             }
+        }
+
+        [Fact]
+        public void GraphBuildValid()
+        {
+            string project1 = _env.CreateFile(".proj").Path;
+            string project2 = _env.CreateFile(".proj").Path;
+
+            File.WriteAllText(project1, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project2}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project2}' Targets='Build' />
+  </Target>
+</Project>
+"));
+            File.WriteAllText(project2, CleanupFileContents(@"
+<Project>
+  <Target Name='Build' />
+</Project>
+"));
+
+            var graph = new ProjectGraph(project1);
+            graph.ProjectNodes.Count.ShouldBe(2);
+
+            var data = new GraphBuildRequestData(graph, Array.Empty<string>());
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            var node1 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project1, StringComparison.OrdinalIgnoreCase));
+            result.ResultsByNode.ContainsKey(node1).ShouldBeTrue();
+            result.ResultsByNode[node1].OverallResult.ShouldBe(BuildResultCode.Success);
+
+            var node2 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project2, StringComparison.OrdinalIgnoreCase));
+            result.ResultsByNode.ContainsKey(node2).ShouldBeTrue();
+            result.ResultsByNode[node2].OverallResult.ShouldBe(BuildResultCode.Success);
+        }
+
+        [Fact]
+        public void GraphBuildInvalid()
+        {
+            string project1 = _env.CreateFile(".proj").Path;
+            string project2 = _env.CreateFile(".proj").Path;
+
+            File.WriteAllText(project1, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project2}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project2}' Targets='Build' />
+  </Target>
+</Project>
+"));
+            File.WriteAllText(project2, CleanupFileContents(@"
+<Project>
+  <WellThisIsntValid>
+</Project>
+"));
+
+            var data = new GraphBuildRequestData(new ProjectGraphEntryPoint(project1), Array.Empty<string>());
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            result.Exception.ShouldBeOfType<AggregateException>().InnerExceptions.Count.ShouldBe(1);
+            result.Exception.ShouldBeOfType<AggregateException>().InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBe(project2);
+        }
+
+        [Fact]
+        public void GraphBuildFail()
+        {
+            string project1 = _env.CreateFile(".proj").Path;
+            string project2 = _env.CreateFile(".proj").Path;
+
+            File.WriteAllText(project1, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project2}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project2}' Targets='Build' />
+  </Target>
+</Project>
+"));
+            File.WriteAllText(project2, CleanupFileContents(@"
+<Project>
+  <Target Name='Build'>
+    <Error Text='Fail!'/>
+  </Target>
+</Project>
+"));
+
+            var graph = new ProjectGraph(project1);
+            graph.ProjectNodes.Count.ShouldBe(2);
+
+            var data = new GraphBuildRequestData(graph, Array.Empty<string>());
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            var node1 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project1, StringComparison.OrdinalIgnoreCase));
+            result.ResultsByNode.ContainsKey(node1).ShouldBeTrue();
+            result.ResultsByNode[node1].OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            var node2 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project2, StringComparison.OrdinalIgnoreCase));
+            result.ResultsByNode.ContainsKey(node2).ShouldBeTrue();
+            result.ResultsByNode[node2].OverallResult.ShouldBe(BuildResultCode.Failure);
+        }
+
+        [Fact]
+        public void GraphBuildCircular()
+        {
+            string project1 = _env.CreateFile(".proj").Path;
+            string project2 = _env.CreateFile(".proj").Path;
+
+            File.WriteAllText(project1, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project2}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project2}' Targets='Build' />
+  </Target>
+</Project>
+"));
+            File.WriteAllText(project2, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project1}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project1}' Targets='Build' />
+  </Target>
+</Project>
+"));
+
+            var data = new GraphBuildRequestData(new ProjectGraphEntryPoint(project1), Array.Empty<string>());
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            result.CircularDependency.ShouldBeTrue();
         }
     }
 }

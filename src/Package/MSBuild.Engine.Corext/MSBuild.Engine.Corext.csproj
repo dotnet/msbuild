@@ -1,15 +1,26 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Don't try to build this package if building for Mono, using .NET Core, or building on non-Windows -->
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <DisableProject Condition="'$(MonoBuild)' == 'true'">true</DisableProject>
+    <DisableProject Condition="'$(MSBuildRuntimeType)' == 'Core'">true</DisableProject>
+    <DisableProject Condition="'$(OsEnvironment)'!='windows'">true</DisableProject>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(DisableProject)' == 'true'" />
+
+  <PropertyGroup>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <NuspecFile>MSBuild.Engine.Corext.nuspec</NuspecFile>
     <PlatformTarget>x86</PlatformTarget>
 
+    <IsShipping>false</IsShipping>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <NuspecProperties>$(NuspecProperties);repoRoot=$(RepoRoot.TrimEnd('\\/'))</NuspecProperties>
+    <DisableSemVer2>true</DisableSemVer2>
+    <IsVisualStudioInsertionPackage>true</IsVisualStudioInsertionPackage>
   </PropertyGroup>
 
-  <Import Project="..\NuspecProject.targets" />
-  <Import Project="..\GetBinPaths.targets" />
+  <Import Project="..\NuspecProject.targets"  Condition="'$(DisableProject)' != 'true'" />
+  <Import Project="..\GetBinPaths.targets" Condition="'$(DisableProject)' != 'true'" />
 
   <Target Name="SetNuspecBinPathProperties" DependsOnTargets="SetBinPaths" BeforeTargets="SetNuspecProperties">
     <PropertyGroup>
@@ -20,13 +31,4 @@
       <NuspecProperties>$(NuspecProperties);MSBuildConversionBinPath=$(MSBuildConversionBinPath.TrimEnd('\\/'))</NuspecProperties>
     </PropertyGroup>
   </Target>
-
-  <!-- Don't try to build this package if building for Mono, using .NET Core, or building on non-Windows -->
-  <PropertyGroup>
-    <DisableProject Condition="'$(MonoBuild)' == 'true'">true</DisableProject>
-    <DisableProject Condition="'$(MSBuildRuntimeType)' == 'Core'">true</DisableProject>
-    <DisableProject Condition="'$(OsEnvironment)'!='windows'">true</DisableProject>
-  </PropertyGroup>
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(DisableProject)' == 'true'" />
-  
 </Project>

@@ -269,12 +269,28 @@ namespace Microsoft.Build.Execution
             _baseOverallResult = result.OverallResult == BuildResultCode.Success;
         }
 
+        internal BuildResult(BuildResult result, int submissionId, int configurationId, int requestId, int parentRequestId, int nodeRequestId)
+        {
+            _submissionId = submissionId;
+            _configurationId = configurationId;
+            _globalRequestId = requestId;
+            _parentGlobalRequestId = parentRequestId;
+            _nodeRequestId = nodeRequestId;
+
+            _requestException = result._requestException;
+            _resultsByTarget = result._resultsByTarget;
+            _circularDependency = result._circularDependency;
+            _initialTargets = result._initialTargets;
+            _defaultTargets = result._defaultTargets;
+            _baseOverallResult = result.OverallResult == BuildResultCode.Success;
+        }
+
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        private BuildResult(INodePacketTranslator translator)
+        private BuildResult(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -455,17 +471,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Returns true if this result belongs to a root request (that is, no node is waiting for 
-        /// these results.
-        /// </summary>
-        internal bool ResultBelongsToRootRequest
-        {
-            [DebuggerStepThrough]
-            get
-            { return _parentGlobalRequestId == BuildRequest.InvalidGlobalRequestId; }
-        }
-
-        /// <summary>
         /// Indexer which sets or returns results for the specified target
         /// </summary>
         /// <param name="target">The target</param>
@@ -519,10 +524,8 @@ namespace Microsoft.Build.Execution
                 // cached results after the first time the target is built.  As such, we can allow "duplicates" to be merged in because there is
                 // no change.  If, however, this turns out not to be the case, we need to re-evaluate this merging and possibly re-enable the
                 // assertion below.
-#if false
-                // Allow no duplicates.
-                ErrorUtilities.VerifyThrow(!HasResultsForTarget(targetResult.Key), "Results already exist");
-#endif
+                // ErrorUtilities.VerifyThrow(!HasResultsForTarget(targetResult.Key), "Results already exist");
+
                 // Copy the new results in.
                 _resultsByTarget[targetResult.Key] = targetResult.Value;
             }
@@ -546,7 +549,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _submissionId);
             translator.Translate(ref _configurationId);
@@ -567,7 +570,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization
         /// </summary>
-        internal static BuildResult FactoryForDeserialization(INodePacketTranslator translator)
+        internal static BuildResult FactoryForDeserialization(ITranslator translator)
         {
             return new BuildResult(translator);
         }

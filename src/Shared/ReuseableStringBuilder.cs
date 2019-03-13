@@ -186,6 +186,36 @@ namespace Microsoft.Build.Shared
             return this;
         }
 
+        public ReuseableStringBuilder AppendSeparated(char separator, ICollection<string> strings)
+        {
+            LazyPrepare();
+            _cachedString = null;
+
+            var separatorsRemaining = strings.Count - 1;
+
+            foreach (var s in strings)
+            {
+                _borrowedBuilder.Append(s);
+
+                if (separatorsRemaining > 0)
+                {
+                    _borrowedBuilder.Append(separator);
+                }
+
+                separatorsRemaining--;
+            }
+
+            return this;
+        }
+
+        public ReuseableStringBuilder Clear()
+        {
+            LazyPrepare();
+            _cachedString = null;
+            _borrowedBuilder.Clear();
+            return this;
+        }
+
         /// <summary>
         /// Remove a substring.
         /// </summary>
@@ -232,11 +262,6 @@ namespace Microsoft.Build.Shared
             private static StringBuilder s_sharedBuilder;
 
 #if DEBUG
-            /// <summary>
-            /// Flag to help expose bugs
-            /// </summary>
-            private static bool s_stress = String.Equals(Environment.GetEnvironmentVariable("MSBUILDRSBSTRESS"), "1", StringComparison.Ordinal);
-
             /// <summary>
             /// Count of successful reuses
             /// </summary>

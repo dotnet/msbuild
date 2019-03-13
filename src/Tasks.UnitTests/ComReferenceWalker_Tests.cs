@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests
                 ComDependencyWalker walker = new ComDependencyWalker(new MarshalReleaseComObject(MockReleaseComObject));
                 walker.AnalyzeTypeLibrary(mainTypeLib);
 
-                Assert.Equal(1, walker.EncounteredProblems.Count); // "Test failed for failure point " + failurePoint.ToString()
+                Assert.Single(walker.EncounteredProblems); // "Test failed for failure point " + failurePoint.ToString()
                 Assert.Equal(failureException, walker.EncounteredProblems[0]); // "Test failed for failure point " + failurePoint.ToString()
 
                 mainTypeLib.AssertAllHandlesReleased();

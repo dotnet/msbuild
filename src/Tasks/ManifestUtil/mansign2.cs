@@ -255,6 +255,8 @@ namespace System.Deployment.Internal.CodeSigning
 
         private const string Sha256SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha256";
         private const string Sha256DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha256";
+        private const string Sha1SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+        private const string Sha1DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha1";
 
         private const string wintrustPolicyFlagsRegPath = "Software\\Microsoft\\Windows\\CurrentVersion\\WinTrust\\Trust Providers\\Software Publishing";
         private const string wintrustPolicyFlagsRegName = "State";
@@ -646,7 +648,13 @@ namespace System.Deployment.Internal.CodeSigning
             signedXml.SigningKey = rsaCsp;
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
             if (signer.UseSha256)
+            {
                 signedXml.SignedInfo.SignatureMethod = Sha256SignatureMethodUri;
+            }
+            else
+            {
+                signedXml.SignedInfo.SignatureMethod = Sha1SignatureMethodUri;
+            }
 
             // Add the key information.
             signedXml.KeyInfo.AddClause(new RSAKeyValue(rsaCsp));
@@ -656,7 +664,13 @@ namespace System.Deployment.Internal.CodeSigning
             Reference reference = new Reference();
             reference.Uri = "";
             if (signer.UseSha256)
+            {
                 reference.DigestMethod = Sha256DigestMethod;
+            }
+            else
+            {
+                reference.DigestMethod = Sha1DigestMethod;
+            }
 
             // Add an enveloped and an Exc-C14N transform.
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
@@ -773,7 +787,13 @@ namespace System.Deployment.Internal.CodeSigning
             }
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
             if (signer.UseSha256)
+            {
                 signedXml.SignedInfo.SignatureMethod = Sha256SignatureMethodUri;
+            }
+            else
+            {
+                signedXml.SignedInfo.SignatureMethod = Sha1SignatureMethodUri;
+            }
 
             // Add the key information.
             signedXml.KeyInfo.AddClause(new RSAKeyValue(snKey));
@@ -787,7 +807,13 @@ namespace System.Deployment.Internal.CodeSigning
             Reference enveloped = new Reference();
             enveloped.Uri = "";
             if (signer.UseSha256)
+            {
                 enveloped.DigestMethod = Sha256DigestMethod;
+            }
+            else
+            {
+                enveloped.DigestMethod = Sha1DigestMethod;
+            }
 
             // Add an enveloped then Exc-C14N transform.
             enveloped.AddTransform(new XmlDsigEnvelopedSignatureTransform());

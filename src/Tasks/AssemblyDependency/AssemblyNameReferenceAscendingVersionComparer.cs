@@ -1,8 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks
@@ -13,6 +12,8 @@ namespace Microsoft.Build.Tasks
     internal sealed class AssemblyNameReferenceAscendingVersionComparer : IComparer<AssemblyNameReference>
     {
         internal static readonly IComparer<AssemblyNameReference> comparer = new AssemblyNameReferenceAscendingVersionComparer();
+
+        private static Version DummyVersion { get; } = new Version(0, 0);
 
         /// <summary>
         /// Private construct so there's only one instance.
@@ -31,12 +32,12 @@ namespace Microsoft.Build.Tasks
 
             if (v1 == null)
             {
-                v1 = new Version(0, 0);
+                v1 = DummyVersion;
             }
 
             if (v2 == null)
             {
-                v2 = new Version(0, 0);
+                v2 = DummyVersion;
             }
 
             return v1.CompareTo(v2);

@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal("t1", ((ProjectTaskInstance)target.Children[0]).Name);
 
             IList<ProjectTaskInstance> tasks = Helpers.MakeList(target.Tasks);
-            Assert.Equal(1, tasks.Count);
+            Assert.Single(tasks);
             Assert.Equal("t1", tasks[0].Name);
         }
 

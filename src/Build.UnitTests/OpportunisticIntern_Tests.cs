@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
         {
             var result = AssertInternable(new char[] { 'a', 't', 'r', 'u', 'e' }, 1, 4);
 
-            Assert.Equal(result, "true");
+            Assert.Equal("true", result);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         {
             var result = AssertInternable(new char[] { 'a', 't', 'r', 'u', 'e', 'x' }, 1, 4);
 
-            Assert.Equal(result, "true");
+            Assert.Equal("true", result);
         }
 
         /// <summary>

@@ -26,7 +26,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
         /// <summary>
         /// Clear out the cache
         /// </summary>
-        public void Setup()
+        private void Setup()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             GC.Collect();

@@ -2450,7 +2450,7 @@ namespace Microsoft.Build.Evaluation
 
             string evaluatedExistingInclude = _data.Expander.ExpandIntoStringLeaveEscaped(candidateExistingItemXml.Include, ExpanderOptions.ExpandProperties, candidateExistingItemXml.IncludeLocation);
 
-            string[] existingIncludePieces = evaluatedExistingInclude.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] existingIncludePieces = evaluatedExistingInclude.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string existingIncludePiece in existingIncludePieces)
             {

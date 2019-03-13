@@ -45,12 +45,6 @@ namespace Microsoft.Build.UnitTests
         {
             int emptySplits = 0;
             string[] pieces = (string[])QuotingUtilities.SplitUnquoted(cl, int.MaxValue, false, true, out emptySplits, ' ', '\n').ToArray(typeof(string));
-#if NEVER
-            foreach(string s in pieces)
-            {
-                Console.WriteLine("Found = [{0}]", s);
-            }
-#endif
             return pieces;
         }
 

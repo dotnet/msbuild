@@ -16,10 +16,10 @@ namespace Microsoft.Build.Shared
     {
         // Since this class is added as 'link' to shared source in multiple projects,
         // MSBuildConstants.CurrentVisualStudioVersion is not available in all of them.
-        private const string CurrentVisualStudioVersion = "15.0";
+        private const string CurrentVisualStudioVersion = "16.0";
 
         // MSBuildConstants.CurrentToolsVersion
-        private const string CurrentToolsVersion = "15.0";
+        private const string CurrentToolsVersion = "Current";
 
         /// <summary>
         /// Name of the Visual Studio (and Blend) process.
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Shared
 
             return msBuildExePath == null
                 ? null
-                : TryFromMSBuildAssemblyUnderVisualStudio(msBuildExePath, msBuildExePath) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
+                : TryFromMSBuildAssemblyUnderVisualStudio(msBuildExePath, msBuildExePath, true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
         }
 
         private static BuildEnvironment TryFromVisualStudioProcess()
@@ -210,10 +210,14 @@ namespace Microsoft.Build.Shared
 
         }
 
-        private static BuildEnvironment TryFromMSBuildAssemblyUnderVisualStudio(string msbuildAssembly, string msbuildExe)
+        private static BuildEnvironment TryFromMSBuildAssemblyUnderVisualStudio(string msbuildAssembly, string msbuildExe, bool allowLegacyToolsVersion = false)
         {
+            string msBuildPathPattern = allowLegacyToolsVersion
+                ? $@".*\\MSBuild\\({CurrentToolsVersion}|\d+\.0)\\Bin\\.*"
+                : $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*";
+
             if (NativeMethodsShared.IsWindows &&
-                Regex.IsMatch(msbuildAssembly, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*", RegexOptions.IgnoreCase))
+                Regex.IsMatch(msbuildAssembly, msBuildPathPattern, RegexOptions.IgnoreCase))
             {
                 // In a Visual Studio path we must have MSBuild.exe
                 if (FileSystems.Default.FileExists(msbuildExe))
@@ -318,7 +322,7 @@ namespace Microsoft.Build.Shared
         private static string GetVsRootFromMSBuildAssembly(string msBuildAssembly)
         {
             return FileUtilities.GetFolderAbove(msBuildAssembly,
-                Regex.IsMatch(msBuildAssembly, $@".\\MSBuild\\{CurrentToolsVersion}\\Bin\\Amd64\\MSBuild\.exe", RegexOptions.IgnoreCase)
+                Regex.IsMatch(msBuildAssembly, $@"\\Bin\\Amd64\\MSBuild\.exe", RegexOptions.IgnoreCase)
                     ? 5
                     : 4);
         }
@@ -604,7 +608,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Path to the root Visual Studio install directory
-        /// (e.g. 'c:\Program Files (x86)\Microsoft Visual Studio 15.0')
+        /// (e.g. 'C:\Program Files (x86)\Microsoft Visual Studio\Preview\Enterprise')
         /// </summary>
         internal string VisualStudioInstallRootDirectory { get; }
 

@@ -1,9 +1,5 @@
 <Project>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" />
-  </ItemGroup>
-
   <PropertyGroup>
     <ThirdPartyNotice Condition=" '$(ThirdPartyNotice)' == '' ">$(RepoRoot)THIRDPARTYNOTICES.txt</ThirdPartyNotice>
   </PropertyGroup>
@@ -14,7 +10,14 @@
 
   <Target Name="_RemoveMSSourceLinkGitHub" AfterTargets="CollectPackageReferences" Condition="'$(MonoBuild)' == 'true'">
     <ItemGroup>
-      <PackageReference Remove="Microsoft.SourceLink.$(SourceLinkProvider)" />
+      <PackageReference Remove="Microsoft.SourceLink.GitHub" />
+      <PackageReference Remove="Microsoft.SourceLink.Vsts.Git" />
     </ItemGroup>
   </Target>
+
+  <PropertyGroup>
+    <CentralPackagesFile>$(MSBuildThisFileDirectory)eng/Packages.props</CentralPackagesFile>
+  </PropertyGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.Build.CentralPackageVersions" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 </Project>

@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <target state="translated">MSB4249: Não foi possível compilar o projeto do site da Web "{0}". O compilador do ASP.NET está disponível apenas na versão .NET Framework do MSBuild.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -31,22 +31,96 @@
         <target state="translated">A operação não pode ser concluída porque uma compilação está em andamento.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </source>
+        <target state="translated">MSB4252: o projeto "{0}" tem uma referência a "{1}" ({2} destinos, mas o resultado do build da referência não está no cache do mecanismo. Em builds isolados, isso poderia significar uma das opções a seguir:
+    – a referência não foi especificada explicitamente como um item ProjectReference em "{0}"
+    – a referência não foi incluída nos caches de entrada fornecidos
+    – a referência foi chamada com um destino que não está especificado no item ProjectReferenceTargets em "{0}"</target>
+        <note>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <target state="translated">MSB4248: Não é possível expandir os metadados na expressão "{0}". {1}</target>
         <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="translated">MSB4251: Uma dependência circular envolve os seguintes projetos: {0}</target>
+        <note>
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </note>
+      </trans-unit>
+      <trans-unit id="EmptyOutputCacheFile">
+        <source>MSB4257: The specified output result cache file is empty.</source>
+        <target state="translated">MSB4257: o arquivo de cache do resultado de saída especificado está vazio.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingCacheFile">
+        <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4256: a leitura dos arquivos de cache do resultado de entrada do caminho "{0}" encontrou um erro: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingCacheFile">
+        <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4258: a gravação do arquivo de cache do resultado de saída no caminho "{0}" encontrou um erro: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InputCacheFilesDoNotExist">
+        <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
+        <target state="translated">MSB4255: os arquivos de cache do resultado de entrada a seguir não existem: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
-        <target state="new">Metaproject "{0}" generated.</target>
+        <target state="translated">Metaprojeto "{0}" gerado.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">A operação não pode ser concluída porque BeginBuild ainda não foi chamado.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="NullReferenceFromProjectInstanceFactory">
+        <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
+        <target state="translated">MSB4253: Uma referência nula foi devolvida de um retorno de chamada do ProjectInstanceFactoryFunc fornecido pelo usuário. Isso não é permitido.</target>
+        <note>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
+        <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
+        <target state="translated">MSB4250: O ProjectGraph não tem suporte para os itens ProjectReference com o conjunto de metadados ToolsVersion. O ProjectReference "{0}" foi encontrado com ToolsVersion no arquivo "{1}"</target>
+        <note>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
+      </trans-unit>
+      <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="translated">MSB4254: A tarefa MSBuild está compilando projetos {0} que não estão especificados no item ProjectReference. Em builds isolados, isso provavelmente significa que as referências não são especificadas de forma explícita como um item de ProjectReference em "{1}"</target>
+        <note>
+      {StrBegin="MSB4254:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
+    </note>
+      </trans-unit>
+      <trans-unit id="UsingInputCaches">
+        <source>Using input build results caches: {0}</source>
+        <target state="translated">Usando caches de resultados de build de entrada: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
+    </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
@@ -190,9 +264,9 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: O nó filho "{0}" foi encerrado prematuramente. Desligando. Informações de diagnóstico poderão ser encontradas nos arquivos em "{1}" e estarão nomeadas como MSBuild_*.failure.txt. Esse local pode ser alterado por meio da configuração da variável de ambiente MSBUILDDEBUGPATH para um diretório diferente.</target>
-        <note>{StrBegin="MSB4166: "}</note>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
+        <target state="translated">MSB4166: O nó filho "{0}" foi encerrado prematuramente. Desligando. Informações de diagnóstico poderão ser encontradas nos arquivos em "{1}" e estarão nomeadas como MSBuild_*.failure.txt. Esse local pode ser alterado por meio da configuração da variável de ambiente MSBUILDDEBUGPATH para um diretório diferente.{2}</target>
+        <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
         <source>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</source>
@@ -372,7 +446,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Não há mais suporte para a marcação &lt;{0}&gt; como filho do elemento &lt;Project&gt;. Posicione essa marcação dentro de um destino e adicione o nome do destino ao atributo "InitialTargets" do elemento &lt;Project&gt;.</target>
+        <target state="translated">Não há mais suporte para a tag &lt;{0}&gt; como filho do elemento &lt;Project&gt;. Posicione essa tag dentro de um destino e adicione o nome do destino ao atributo "InitialTargets" do elemento &lt;Project&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -586,8 +660,8 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
-        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). </source>
-        <target state="translated">MSB4186: Sintaxe de invocação de método estático inválida: "({0})". {1} A invocação de método estático deve estar no formato: $([FullTypeName]::Method()), por exemplo. $([System.IO.Path]::Combine(`a`, `b`)). </target>
+        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
+        <target state="translated">MSB4186: Sintaxe de invocação de método estático inválida: "{0}". {1} A invocação do método estático deve estar no formato: $([FullTypeName]::Method()), por exemplo $([System.IO.Path]::Combine(`a`, `b`)). Verifique se todos os parâmetros estão definidos, se são do tipo correto e se estão especificados na ordem correta.</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -1269,7 +1343,7 @@
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureErrorInvalidCast">
         <source>MSB4127: The "{0}" task could not be instantiated from the assembly "{1}". Please verify the task assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</source>
-        <target state="translated">MSB4127: A tarefa "{0}" não foi instanciada do assembly "{1}". Verifique se o assembly da tarefa foi compilado com a mesma versão de assembly do Microsoft.Build.Framework instalada em seu computador e se não está faltando um redirecionamento de associação para o Microsoft.Build.Framework no aplicativo host. {2}</target>
+        <target state="translated">MSB4127: A tarefa "{0}" não foi iniciada do assembly "{1}". Verifique se o assembly da tarefa foi compilado com a mesma versão de assembly do Microsoft.Build.Framework instalada em seu computador e se não está faltando um redirecionamento de associação para o Microsoft.Build.Framework no aplicativo host. {2}</target>
         <note>{StrBegin="MSB4127: "}UE: This message is a specialized version of the TaskInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</note>
       </trans-unit>
@@ -1554,6 +1628,13 @@
         <source>The property "{0}" with value "{1}" is being overridden by another batch. The property is now: "{2}"</source>
         <target state="translated">A propriedade "{0}" com o valor "{1}" está sendo substituída por outro lote. Agora, a propriedade é: "{2}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="WritingToOutputCache">
+        <source>Writing build results caches to: {0}</source>
+        <target state="translated">Gravando caches de resultados de build em: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a file path
+    </note>
       </trans-unit>
       <trans-unit id="logfilePathNullOrEmpty">
         <source>The log file path cannot be null or empty.</source>

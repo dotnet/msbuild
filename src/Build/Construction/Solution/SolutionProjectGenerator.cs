@@ -41,11 +41,13 @@ namespace Microsoft.Build.Construction
         /// Name of the property used to store the path to the solution being built.
         /// </summary>
         internal const string SolutionPathPropertyName = "SolutionPath";
-        
+
+#if FEATURE_ASPNET_COMPILER
         /// <summary>
         /// The path node to add in when the output directory for a website is overridden.
         /// </summary>
         private const string WebProjectOverrideFolder = "_PublishedWebsites";
+#endif // FEATURE_ASPNET_COMPILER
 
         /// <summary>
         /// The set of properties all projects in the solution should be built with
@@ -67,6 +69,7 @@ namespace Microsoft.Build.Construction
             "Publish"
             );
 
+#if FEATURE_ASPNET_COMPILER
         /// <summary>
         /// Version 2.0
         /// </summary>
@@ -76,6 +79,7 @@ namespace Microsoft.Build.Construction
         /// Version 4.0
         /// </summary>
         private readonly Version _version40 = new Version(4, 0);
+#endif // FEATURE_ASPNET_COMPILER
 
         /// <summary>
         /// The list of global properties we set on each metaproject and which get passed to each project when building.
@@ -138,9 +142,9 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private readonly int _submissionId;
 
-        #endregion // Private Fields
+#endregion // Private Fields
 
-        #region Constructors
+#region Constructors
 
         /// <summary>
         /// Constructor.
@@ -165,13 +169,13 @@ namespace Microsoft.Build.Construction
 
             if (targetNames != null)
             {
-                _targetNames = targetNames.Select(i => i.Split(new[] {':'}, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
+                _targetNames = targetNames.Select(i => i.Split(MSBuildConstants.ColonChar, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
             }
         }
 
-        #endregion // Constructors
+#endregion // Constructors
 
-        #region Methods
+#region Methods
 
         /// <summary>
         /// This method generates an MSBuild project file from the list of projects and project dependencies 
@@ -301,7 +305,7 @@ namespace Microsoft.Build.Construction
             params object[] args
             )
         {
-            string text = ResourceUtilities.FormatResourceString(out string code, out string helpKeyword, textResourceName, args);
+            string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, textResourceName, args);
 
             if (treatAsLiteral)
             {
@@ -380,6 +384,7 @@ namespace Microsoft.Build.Construction
             return wrapperProjectToolsVersion;
         }
 
+#if FEATURE_ASPNET_COMPILER
         /// <summary>
         /// Add a call to the ResolveAssemblyReference task to crack the pre-resolved referenced 
         /// assemblies for the complete list of dependencies, PDBs, satellites, etc.  The invoke
@@ -531,6 +536,7 @@ namespace Microsoft.Build.Construction
             string projectGuid = proj.ProjectGuid.Substring(1, proj.ProjectGuid.Length - 2);
             return "Project_" + projectGuid + "_" + propertyName;
         }
+#endif // FEATURE_ASPNET_COMPILER
 
         /// <summary>
         /// Makes a legal item name from a given string by replacing invalid characters with '_'
@@ -571,7 +577,7 @@ namespace Microsoft.Build.Construction
             params object[] args
             )
         {
-            string text = ResourceUtilities.FormatResourceString(out string code, out string helpKeyword, textResourceName, args);
+            string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, textResourceName, args);
 
             if (treatAsLiteral)
             {
@@ -1282,6 +1288,7 @@ namespace Microsoft.Build.Construction
             }
         }
 
+#if FEATURE_ASPNET_COMPILER
         /// <summary>
         /// Add a target for a Venus project into the XML doc that's being generated.  This
         /// target will call the AspNetCompiler task.
@@ -1750,6 +1757,7 @@ namespace Microsoft.Build.Construction
             createItemTask.SetParameter("Include", @"@(_CombinedTargetFrameworkDirectoriesItem->'%(Identity)\RedistList\*.xml')");
             createItemTask.AddOutputItem("Include", "InstalledAssemblyTables", null);
         }
+#endif // FEATURE_ASPNET_COMPILER
 
         /// <summary>
         /// Adds a target for a project whose type is unknown and we cannot build.  We will emit an error or warning as appropriate.

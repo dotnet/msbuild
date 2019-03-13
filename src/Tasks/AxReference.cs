@@ -62,8 +62,6 @@ namespace Microsoft.Build.Tasks
             // give nice messages in errors cases.
             GetAndValidateStrongNameKey(out _, out _);
 
-            string tlbName = ReferenceInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.tlbReferenceName);
-
             // Generate wrapper out-of-proc using aximp.exe from the target framework.  MUST
             // HAVE SET SDKTOOLSPATH TO THE TARGET SDK TO WORK
 

@@ -16,8 +16,6 @@ namespace Microsoft.Build.Evaluation
     {
         private string _value;
 
-        private NumericExpressionNode() { }
-
         internal NumericExpressionNode(string value)
         {
             _value = value;

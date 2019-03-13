@@ -327,7 +327,6 @@ namespace Microsoft.Build.CommandLine
                     , out _taskAppDomain
 #endif
                     );
-                Type wrappedTaskType = wrappedTask.GetType();
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }

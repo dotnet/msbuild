@@ -1,33 +1,28 @@
-﻿<Project>
-   <!-- AssemblyName must be set before importing Sdk.props to set the vsix file name. -->
-   <PropertyGroup>
-       <AssemblyName>Microsoft.Build</AssemblyName>
-       <ShouldSkipProject>false</ShouldSkipProject>
-       <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
-   </PropertyGroup>
+﻿<!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
+    <!-- <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization> -->
 
-   <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.props" />
+    <!-- VS Insertion -->
+    <TargetVsixContainerName>Microsoft.Build.vsix</TargetVsixContainerName>
+    <VisualStudioInsertionComponent Condition="'$(MonoBuild)' != 'true'">Microsoft.Build</VisualStudioInsertionComponent>
 
-   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
-
-    <!-- The IBCMerge process tries to treat this project as
-         the real Microsoft.Build.dll, producing thousands
-         of avoidable warnings. The real output of this
-         project isn't a product DLL, so just disable PGO. -->
-    <MicroBuild_EnablePGO>false</MicroBuild_EnablePGO>
-
-    <!-- Not sure what the right ID is here -->
-    <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
+    <ShouldSkipProject>false</ShouldSkipProject>
+    <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
   </PropertyGroup>
-  
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" PrivateAssets="All"/>
+  </ItemGroup>
+
   <ItemGroup>
     <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
     <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />
 
-  </ItemGroup>
-  <ItemGroup>
-     <SwrFile Include="*.swr" /> 
+    <!-- Only add the swr file when building on full framework msbuild, otherwise,
+    this triggers a build of the swixproj, which is not supported in core msbuild. -->
+    <SwrFile Include="*.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
   </ItemGroup>
 
   <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
@@ -47,7 +42,5 @@
     </ItemGroup>
   </Target>
 
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
-
-  <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.targets" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 </Project>

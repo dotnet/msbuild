@@ -107,7 +107,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
         {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
@@ -133,9 +132,6 @@ namespace Microsoft.Build.BackEnd
                     nodeStream.Dispose();
                 }
             }
-#else
-            throw new PlatformNotSupportedException("Shutting down nodes by enumerating processes and connecting to them is not supported when using anonymous pipes.");
-#endif
         }
 
         /// <summary>
@@ -233,18 +229,11 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 #endif
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-                var clientToServerStream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
-                var serverToClientStream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
-
-                commandLineArgs += $" /clientToServerPipeHandle:{clientToServerStream.GetClientHandleAsString()} /serverToClientPipeHandle:{serverToClientStream.GetClientHandleAsString()}";
-#endif
 
                 // Create the node process
                 int msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
                 _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, clientHandshake, msbuildProcessId));
 
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
@@ -257,18 +246,6 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
                     return new NodeContext(nodeId, msbuildProcessId, nodeStream, factory, terminateNode);
                 }
-#else
-                if (WaitForConnectionFromProcess(clientToServerStream, serverToClientStream, msbuildProcessId, hostHandshake, clientHandshake))
-                {
-                    // Connection successful, use this node.
-
-                    clientToServerStream.DisposeLocalCopyOfClientHandle();
-                    serverToClientStream.DisposeLocalCopyOfClientHandle();
-
-                    CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
-                    return new NodeContext(nodeId, msbuildProcessId, clientToServerStream, serverToClientStream, factory, terminateNode);
-                }
-#endif
             }
 
             // We were unable to launch a node.
@@ -301,8 +278,6 @@ namespace Microsoft.Build.BackEnd
         {
             return hostHandshake.ToString(CultureInfo.InvariantCulture) + "|" + clientHandshake.ToString(CultureInfo.InvariantCulture) + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
-
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
@@ -401,47 +376,6 @@ namespace Microsoft.Build.BackEnd
 
             return null;
         }
-#else
-        private bool WaitForConnectionFromProcess(AnonymousPipeServerStream clientToServerStream,
-                                                  AnonymousPipeServerStream serverToClientStream,
-                                                  int nodeProcessId, long hostHandshake, long clientHandshake)
-        {
-            try
-            {
-                CommunicationsUtilities.Trace("Attempting to handshake with PID {0}", nodeProcessId);
-
-                CommunicationsUtilities.Trace("Writing handshake to pipe");
-                serverToClientStream.WriteLongForHandshake(hostHandshake);
-
-                CommunicationsUtilities.Trace("Reading handshake from pipe");
-                long handshake = clientToServerStream.ReadLongForHandshake();
-
-                if (handshake != clientHandshake)
-                {
-                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from client not {1}. Probably the client is a different MSBuild build.", handshake, clientHandshake);
-                    throw new InvalidOperationException();
-                }
-
-                // We got a connection.
-                CommunicationsUtilities.Trace("Successfully connected got connection from PID {0}...!", nodeProcessId);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (ExceptionHandling.IsCriticalException(ex))
-                {
-                    throw;
-                }
-
-                CommunicationsUtilities.Trace("Failed to get connection from PID {0}. {1}", nodeProcessId, ex.ToString());
-
-                clientToServerStream.Dispose();
-                serverToClientStream.Dispose();
-
-                return false;
-            }
-        }
-#endif
 
         /// <summary>
         /// Creates a new MSBuild process
@@ -453,7 +387,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!FileSystems.Default.FileExists(msbuildLocation))
             {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceString("CouldNotFindMSBuildExe", msbuildLocation));
+                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
             }
 
             // Repeat the executable name as the first token of the command line because the command line
@@ -562,11 +496,7 @@ namespace Microsoft.Build.BackEnd
                         commandLineArgs,
                         ref processSecurityAttributes,
                         ref threadSecurityAttributes,
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         false,
-#else
-                        true, // Inherit handles for the anonymous pipes for IPC
-#endif
                         creationFlags,
                         BackendNativeMethods.NullPtr,
                         null,
@@ -638,12 +568,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal class NodeContext
         {
-            /// <summary>
-            /// Whether to trace communications.
-            /// Stored here as a field to avoid a function call when writing packets
-            /// </summary>
-            private static bool s_trace = String.Equals(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"), "1", StringComparison.Ordinal);
-
             // The pipe(s) used to communicate with the node.
             private Stream _clientToServerStream;
             private Stream _serverToClientStream;
@@ -692,23 +616,13 @@ namespace Microsoft.Build.BackEnd
             /// Constructor.
             /// </summary>
             public NodeContext(int nodeId, int processId,
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 Stream nodePipe,
-#else
-                AnonymousPipeServerStream clientToServerStream,
-                AnonymousPipeServerStream serverToClientStream,
-#endif
                 INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
             {
                 _nodeId = nodeId;
                 _processId = processId;
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 _clientToServerStream = nodePipe;
                 _serverToClientStream = nodePipe;
-#else
-                _clientToServerStream = clientToServerStream;
-                _serverToClientStream = serverToClientStream;
-#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _smallReadBuffer = new byte[1000]; // 1000 was just an average seen on one profile run.
@@ -805,7 +719,7 @@ namespace Microsoft.Build.BackEnd
             public void SendData(INodePacket packet)
             {
                 MemoryStream writeStream = new MemoryStream();
-                INodePacketTranslator writeTranslator = NodePacketTranslator.GetWriteTranslator(writeStream);
+                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
                 try
                 {
                     writeStream.WriteByte((byte)packet.Type);
@@ -817,13 +731,6 @@ namespace Microsoft.Build.BackEnd
                     // Now plug in the real packet length
                     writeStream.Position = 1;
                     writeStream.Write(BitConverter.GetBytes((int)writeStream.Length - 5), 0, 4);
-
-#if FALSE
-                    if (trace) // Avoid method call
-                    {
-                        CommunicationsUtilities.Trace(nodeId, "Sending Packet of type {0} with length {1}", packet.Type.ToString(), writeStream.Length - 5);
-                    }
-#endif
 
                     byte[] writeStreamBuffer = writeStream.GetBuffer();
 
@@ -967,7 +874,6 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                NodePacketType packetType = (NodePacketType)_headerByte[0];
                 int packetLength = BitConverter.ToInt32(_headerByte, 1);
 
                 byte[] packetData;
@@ -1005,7 +911,7 @@ namespace Microsoft.Build.BackEnd
                     // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
                     using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
                     {
-                        INodePacketTranslator readTranslator = NodePacketTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
+                        ITranslator readTranslator = BinaryTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
                         _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
                     }
                 }

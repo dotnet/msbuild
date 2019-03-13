@@ -460,7 +460,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     //If no targetName was specified then do not show the target where the error occurred
                     if (!string.IsNullOrEmpty(valuePair.Key.TargetName))
                     {
-                        WriteMessageAligned(ResourceUtilities.FormatResourceString("ErrorWarningInTarget", valuePair.Key.TargetName), false);
+                        WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWarningInTarget", valuePair.Key.TargetName), false);
                     }
                     previousTarget = valuePair.Key.TargetName;
                 }
@@ -581,22 +581,22 @@ namespace Microsoft.Build.BackEnd.Logging
                         {
                             if (e.Succeeded)
                             {
-                                WriteMessageAligned(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithDefaultTargetsMultiProc", projectName), true);
+                                WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectFinishedPrefixWithDefaultTargetsMultiProc", projectName), true);
                             }
                             else
                             {
-                                WriteMessageAligned(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithDefaultTargetsMultiProcFailed", projectName), true);
+                                WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectFinishedPrefixWithDefaultTargetsMultiProcFailed", projectName), true);
                             }
                         }
                         else
                         {
                             if (e.Succeeded)
                             {
-                                WriteMessageAligned(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", projectName, targets), true);
+                                WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectFinishedPrefixWithTargetNamesMultiProc", projectName, targets), true);
                             }
                             else
                             {
-                                WriteMessageAligned(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProcFailed", projectName, targets), true);
+                                WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectFinishedPrefixWithTargetNamesMultiProcFailed", projectName, targets), true);
                             }
                         }
 
@@ -790,7 +790,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             WriteMessageAligned(ResourceUtilities.GetResourceString("TargetOutputItemsHeader"), false);
                             foreach (ITaskItem item in targetOutputs)
                             {
-                                WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetOutputItem", item.ItemSpec), false);
+                                WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetOutputItem", item.ItemSpec), false);
 
                                 IDictionary metadata = item.CloneCustomMetadata();
 
@@ -809,7 +809,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         setColor(ConsoleColor.Cyan);
                         if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || _showEventId)
                         {
-                            WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetMessageWithId", e.Message, e.BuildEventContext.TargetId), true);
+                            WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetMessageWithId", e.Message, e.BuildEventContext.TargetId), true);
                         }
                         else
                         {
@@ -847,7 +847,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkCyan);
                     if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || _showEventId)
                     {
-                        WriteMessageAligned(ResourceUtilities.FormatResourceString("TaskMessageWithId", e.Message, e.BuildEventContext.TaskId), prefixAlreadyWritten);
+                        WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskMessageWithId", e.Message, e.BuildEventContext.TaskId), prefixAlreadyWritten);
                     }
                     else
                     {
@@ -891,7 +891,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkCyan);
                     if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || _showEventId)
                     {
-                        WriteMessageAligned(ResourceUtilities.FormatResourceString("TaskMessageWithId", e.Message, e.BuildEventContext.TaskId), prefixAlreadyWritten);
+                        WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskMessageWithId", e.Message, e.BuildEventContext.TaskId), prefixAlreadyWritten);
                     }
                     else
                     {
@@ -1150,7 +1150,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if ((IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || _showEventId) && e.BuildEventContext.TaskId != BuildEventContext.InvalidTaskId)
             {
                 bool prefixAlreadyWritten = WriteTargetMessagePrefix(e, e.BuildEventContext, e.Timestamp);
-                WriteMessageAligned(ResourceUtilities.FormatResourceString("TaskMessageWithId", nonNullMessage, e.BuildEventContext.TaskId), prefixAlreadyWritten, prefixAdjustment);
+                WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskMessageWithId", nonNullMessage, e.BuildEventContext.TaskId), prefixAlreadyWritten, prefixAdjustment);
             }
             else
             {
@@ -1207,7 +1207,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.Cyan);
                     if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || _showEventId)
                     {
-                        WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetMessageWithId", targetName, e.BuildEventContext.TargetId), prefixAlreadyWritten);
+                        WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetMessageWithId", targetName, e.BuildEventContext.TargetId), prefixAlreadyWritten);
                     }
                     else
                     {
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 string targetName;
                 if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || _showEventId)
                 {
-                    targetName = ResourceUtilities.FormatResourceString("TargetMessageWithId", targetStartedEvent.TargetName, targetStartedEvent.ProjectBuildEventContext.TargetId);
+                    targetName = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetMessageWithId", targetStartedEvent.TargetName, targetStartedEvent.ProjectBuildEventContext.TargetId);
                 }
                 else
                 {
@@ -1364,28 +1364,28 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         if (!String.IsNullOrEmpty(targetStartedEvent.ParentTarget))
                         {
-                            WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetStartedProjectDepends", targetName, currentProjectFile, targetStartedEvent.ParentTarget), true);
+                            WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetStartedProjectDepends", targetName, currentProjectFile, targetStartedEvent.ParentTarget), true);
                         }
                         else
                         {
-                            WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetStartedProjectEntry", targetName, currentProjectFile), true);
+                            WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetStartedProjectEntry", targetName, currentProjectFile), true);
                         }
                     }
                     else
                     {
                         if (!String.IsNullOrEmpty(targetStartedEvent.ParentTarget))
                         {
-                            WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetStartedFileProjectDepends", targetName, targetStartedEvent.TargetFile, currentProjectFile, targetStartedEvent.ParentTarget), true);
+                            WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetStartedFileProjectDepends", targetName, targetStartedEvent.TargetFile, currentProjectFile, targetStartedEvent.ParentTarget), true);
                         }
                         else
                         {
-                            WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetStartedFileProjectEntry", targetName, targetStartedEvent.TargetFile, currentProjectFile), true);
+                            WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetStartedFileProjectEntry", targetName, targetStartedEvent.TargetFile, currentProjectFile), true);
                         }
                     }
                 }
                 else
                 {
-                    WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetStartedFileProjectEntry", targetName, targetStartedEvent.TargetFile, currentProjectFile), true);
+                    WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetStartedFileProjectEntry", targetName, targetStartedEvent.TargetFile, currentProjectFile), true);
                 }
 
                 resetColor();
@@ -1431,11 +1431,11 @@ namespace Microsoft.Build.BackEnd.Logging
                         string message;
                         if ((targetNames == null) || (targetNames.Length == 0))
                         {
-                            message = ResourceUtilities.FormatResourceString("ProjectStartedTopLevelProjectWithDefaultTargets", current, currentProjectNodeId);
+                            message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedTopLevelProjectWithDefaultTargets", current, currentProjectNodeId);
                         }
                         else
                         {
-                            message = ResourceUtilities.FormatResourceString("ProjectStartedTopLevelProjectWithTargetNames", current, currentProjectNodeId, targetNames);
+                            message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedTopLevelProjectWithTargetNames", current, currentProjectNodeId, targetNames);
                         }
 
                         WriteMessageAligned(message, true);
@@ -1447,11 +1447,11 @@ namespace Microsoft.Build.BackEnd.Logging
                         setColor(ConsoleColor.Cyan);
                         if ((targetNames == null) || (targetNames.Length == 0))
                         {
-                            WriteMessageAligned(ResourceUtilities.FormatResourceString("ProjectStartedWithDefaultTargetsMultiProc", previous, parentStartedEvent.FullProjectKey, current, projectStartedEvent.FullProjectKey, currentProjectNodeId), true);
+                            WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedWithDefaultTargetsMultiProc", previous, parentStartedEvent.FullProjectKey, current, projectStartedEvent.FullProjectKey, currentProjectNodeId), true);
                         }
                         else
                         {
-                            WriteMessageAligned(ResourceUtilities.FormatResourceString("ProjectStartedWithTargetsMultiProc", previous, parentStartedEvent.FullProjectKey, current, projectStartedEvent.FullProjectKey, currentProjectNodeId, targetNames), true);
+                            WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedWithTargetsMultiProc", previous, parentStartedEvent.FullProjectKey, current, projectStartedEvent.FullProjectKey, currentProjectNodeId, targetNames), true);
                         }
                         resetColor();
                     }
@@ -1513,11 +1513,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (!isMessagePrefix || IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
-                prefixString = ResourceUtilities.FormatResourceString("BuildEventContext", context, key) + ">";
+                prefixString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildEventContext", context, key) + ">";
             }
             else
             {
-                prefixString = ResourceUtilities.FormatResourceString("BuildEventContext", context, string.Empty) + " ";
+                prefixString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildEventContext", context, string.Empty) + " ";
             }
 
             WritePretty(prefixString);

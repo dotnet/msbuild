@@ -2,6 +2,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -10,6 +11,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class ReferenceTests : ResolveAssemblyReferenceTestFixture
     {
+        public ReferenceTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Check to make sure if, the specific version metadata is set on a primary reference, that true is returned from CheckForSpecificMetadataOnParent
         /// </summary>

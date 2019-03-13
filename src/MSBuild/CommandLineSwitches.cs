@@ -93,16 +93,17 @@ namespace Microsoft.Build.CommandLine
             FileLoggerParameters9,
             NodeReuse,
             Preprocess,
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-            ClientToServerPipeHandle,
-            ServerToClientPipeHandle,
-#endif
             WarningsAsErrors,
             WarningsAsMessages,
             BinaryLogger,
             Restore,
             ProfileEvaluation,
             RestoreProperty,
+            Interactive,
+            IsolateProjects,
+            GraphBuild,
+            InputResultsCaches,
+            OutputResultsCache,
             NumberOfParameterizedSwitches,
         }
 
@@ -122,17 +123,12 @@ namespace Microsoft.Build.CommandLine
             (
                 string[] switchNames,
                 ParameterlessSwitch parameterlessSwitch,
-                string duplicateSwitchErrorMessage,
-                string lightUpRegistryKey
-
+                string duplicateSwitchErrorMessage
             )
             {
                 this.switchNames = switchNames;
                 this.duplicateSwitchErrorMessage = duplicateSwitchErrorMessage;
                 this.parameterlessSwitch = parameterlessSwitch;
-                this.lightUpKey = lightUpRegistryKey;
-                this.lightUpKeyRead = false;
-                this.lightUpKeyResult = false;
             }
 
             // names of the switch (without leading switch indicator)
@@ -142,12 +138,6 @@ namespace Microsoft.Build.CommandLine
             internal string duplicateSwitchErrorMessage;
             // the switch id
             internal ParameterlessSwitch parameterlessSwitch;
-            // The registry key that lights up this switch.
-            internal string lightUpKey;
-            // Holds the result of reading the lightUpKey.
-            internal bool lightUpKeyRead;
-            // Holds the result of reading the lightUpKey.
-            internal bool lightUpKeyResult;
         }
 
         /// <summary>
@@ -213,28 +203,28 @@ namespace Microsoft.Build.CommandLine
             //---------------------------------------------------------------------------------------------------------------------------------------------------
             //                                          Switch Names                        Switch Id                             Dup Error  Light up key
             //---------------------------------------------------------------------------------------------------------------------------------------------------
-            new ParameterlessSwitchInfo(  new string[] { "help", "h", "?" },                ParameterlessSwitch.Help,                  null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "version", "ver" },                ParameterlessSwitch.Version,               null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "nologo" },                        ParameterlessSwitch.NoLogo,                null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "noautoresponse", "noautorsp" },   ParameterlessSwitch.NoAutoResponse,        null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "noconsolelogger", "noconlog" },   ParameterlessSwitch.NoConsoleLogger,       null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger", "fl" },              ParameterlessSwitch.FileLogger,            null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger1", "fl1" },            ParameterlessSwitch.FileLogger1,           null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger2", "fl2" },            ParameterlessSwitch.FileLogger2,           null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger3", "fl3" },            ParameterlessSwitch.FileLogger3,           null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger4", "fl4" },            ParameterlessSwitch.FileLogger4,           null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger5", "fl5" },            ParameterlessSwitch.FileLogger5,           null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger6", "fl6" },            ParameterlessSwitch.FileLogger6,           null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger7", "fl7" },            ParameterlessSwitch.FileLogger7,           null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },            ParameterlessSwitch.FileLogger8,           null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },            ParameterlessSwitch.FileLogger9,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "help", "h", "?" },                ParameterlessSwitch.Help,                  null),
+            new ParameterlessSwitchInfo(  new string[] { "version", "ver" },                ParameterlessSwitch.Version,               null),
+            new ParameterlessSwitchInfo(  new string[] { "nologo" },                        ParameterlessSwitch.NoLogo,                null),
+            new ParameterlessSwitchInfo(  new string[] { "noautoresponse", "noautorsp" },   ParameterlessSwitch.NoAutoResponse,        null),
+            new ParameterlessSwitchInfo(  new string[] { "noconsolelogger", "noconlog" },   ParameterlessSwitch.NoConsoleLogger,       null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger", "fl" },              ParameterlessSwitch.FileLogger,            null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger1", "fl1" },            ParameterlessSwitch.FileLogger1,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger2", "fl2" },            ParameterlessSwitch.FileLogger2,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger3", "fl3" },            ParameterlessSwitch.FileLogger3,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger4", "fl4" },            ParameterlessSwitch.FileLogger4,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger5", "fl5" },            ParameterlessSwitch.FileLogger5,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger6", "fl6" },            ParameterlessSwitch.FileLogger6,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger7", "fl7" },            ParameterlessSwitch.FileLogger7,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },            ParameterlessSwitch.FileLogger8,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },            ParameterlessSwitch.FileLogger9,           null),
 #if (!STANDALONEBUILD)
-            new ParameterlessSwitchInfo(  new string[] { "oldom" },                         ParameterlessSwitch.OldOM,                 null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "oldom" },                         ParameterlessSwitch.OldOM,                 null),
 #endif
-            new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null, null              ),
-            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null             ),
+            new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null),
+            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null),
 #if DEBUG
-            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null , null             ),
+            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null),
 #endif
         };
 
@@ -271,16 +261,17 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false  ),
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-            new ParameterizedSwitchInfo(  new string[] { "clientToServerPipeHandle", "c2s" },   ParameterizedSwitch.ClientToServerPipeHandle,   null,                           false,          null,                                  true,   false  ),
-            new ParameterizedSwitchInfo(  new string[] { "serverToClientPipeHandle", "s2c" },   ParameterizedSwitch.ServerToClientPipeHandle,   null,                           false,          null,                                  true,   false  ),
-#endif
             new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "restore", "r" },                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "profileevaluation", "prof" },         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingRestorePropertyError",         true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "interactive" },                       ParameterizedSwitch.Interactive,                null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "isolateprojects", "isolate" },        ParameterizedSwitch.IsolateProjects,            null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "inputResultsCaches", "irc" },         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true   ),
+            new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true   ),
         };
 
         /// <summary>
@@ -302,16 +293,13 @@ namespace Microsoft.Build.CommandLine
 
             foreach (ParameterlessSwitchInfo switchInfo in s_parameterlessSwitchesMap)
             {
-                if (IsParameterlessSwitchEnabled(switchInfo))
+                foreach (string parameterlessSwitchName in switchInfo.switchNames)
                 {
-                    foreach (string parameterlessSwitchName in switchInfo.switchNames)
+                    if (String.Compare(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        if (String.Compare(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase) == 0)
-                        {
-                            parameterlessSwitch = switchInfo.parameterlessSwitch;
-                            duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
-                            break;
-                        }
+                        parameterlessSwitch = switchInfo.parameterlessSwitch;
+                        duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
+                        break;
                     }
                 }
             }
@@ -892,91 +880,5 @@ namespace Microsoft.Build.CommandLine
                 }
             }
         }
-
-#region Flag Lightup Support
-        /// <summary>
-        /// Read a lightup key from either HKLM or HKCU depending on what is passed in root.
-        /// The key may either be a string, in which case it needs to be like "true" or "false"
-        /// or it may be a DWORD in which case it should be 0 or !=0.
-        /// </summary>
-        private static bool? ReadLightupBool(string root, string valueName)
-        {
-#if FEATURE_WIN32_REGISTRY
-            try
-            {
-                string key = String.Format(CultureInfo.InvariantCulture, @"{0}\software\microsoft\msbuild\{1}", root, MSBuildConstants.CurrentProductVersion);
-                object value = Registry.GetValue(key, valueName, null);
-                if (value != null)
-                {
-                    if (value is int)
-                    {
-                        return ((int)value) != 0;
-                    }
-                    else if (value is string)
-                    {
-                        bool result;
-                        if (bool.TryParse((string)value, out result))
-                        {
-                            return result;
-                        }
-                        return null;
-                    }
-                    else
-                    {
-                        // Recover by assuming the flag is not set.
-                        Debug.Assert(false, "Could not read debugger enabled flag. Key was found but it had type {0}" + value.GetType().ToString());
-                        return null;
-                    }
-                }
-                return null;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
-                // Recover by assuming the flag is not set.
-                Debug.Assert(false, "Could not read debugger enabled flag. {0}" + e.ToString());
-                return null;
-            }
-#else
-            return null;
-#endif
-        }
-
-        /// <summary>
-        /// Try to read a lightup key first from HKCU and then HKLM.
-        /// </summary>
-        private static bool ReadLightupBool(string valueName)
-        {
-            bool? result = ReadLightupBool("hkey_current_user", valueName) ?? ReadLightupBool("hkey_local_machine", valueName);
-            if (result.HasValue)
-            {
-                return result.Value;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Returns true if the switch is enabled. Handles lightup logic.
-        /// </summary>
-        private static bool IsParameterlessSwitchEnabled(ParameterlessSwitchInfo parameterlessSwitch)
-        {
-            if (parameterlessSwitch.lightUpKey == null)
-            {
-                return true;
-            }
-            if (parameterlessSwitch.lightUpKeyRead)
-            {
-                return parameterlessSwitch.lightUpKeyResult;
-            }
-            // Need to read the registry
-            parameterlessSwitch.lightUpKeyRead = true;
-            parameterlessSwitch.lightUpKeyResult = ReadLightupBool(parameterlessSwitch.lightUpKey);
-            return parameterlessSwitch.lightUpKeyResult;
-        }
-#endregion
     }
 }

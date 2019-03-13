@@ -1252,7 +1252,7 @@ namespace Microsoft.Build.Utilities
         {
             // Get path from the environment and split path separator
             return Environment.GetEnvironmentVariable("PATH")?
-                .Split(Path.PathSeparator)?
+                .Split(MSBuildConstants.PathSeparatorChar)?
                 .Where(path =>
                 {
                     try
@@ -1279,10 +1279,15 @@ namespace Microsoft.Build.Utilities
         /// <returns>true, if task executes successfully</returns>
         public override bool Execute()
         {
-            // Let the tool validate its parameters. ToolTask is responsible for logging
-            // useful information about what was wrong with the parameters.
+            // Let the tool validate its parameters.
             if (!ValidateParameters())
             {
+                // The ToolTask is responsible for logging useful information about what was wrong with the
+                // parameters; if it didn't, at least emit a generic message.
+                if (!Log.HasLoggedErrors)
+                {
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.ValidateParametersFailed", this.GetType().FullName);
+                }
                 return false;
             }
 
@@ -1495,31 +1500,15 @@ namespace Microsoft.Build.Utilities
             {
                 if (!_terminatedTool)
                 {
-                    LogPrivate.LogErrorWithCodeFromResources("General.InvalidToolSwitch", ToolExe, GetErrorMessageWithDiagnosticsCheck(e));
+                    LogPrivate.LogErrorWithCodeFromResources("General.InvalidToolSwitch", ToolExe, e.ToString());
                 }
                 return false;
             }
-            catch (Win32Exception e)
+            catch (Exception e) when (e is Win32Exception || e is IOException || e is UnauthorizedAccessException)
             {
                 if (!_terminatedTool)
                 {
-                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", ToolExe, GetErrorMessageWithDiagnosticsCheck(e));
-                }
-                return false;
-            }
-            catch (IOException e)
-            {
-                if (!_terminatedTool)
-                {
-                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", ToolExe, GetErrorMessageWithDiagnosticsCheck(e));
-                }
-                return false;
-            }
-            catch (UnauthorizedAccessException e)
-            {
-                if (!_terminatedTool)
-                {
-                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", ToolExe, GetErrorMessageWithDiagnosticsCheck(e));
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", ToolExe, e.ToString());
                 }
                 return false;
             }
@@ -1574,27 +1563,6 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// This method takes in an exception and if MSBuildDiagnostics is set then it will display the stack trace
-        /// if it is not set only the message will be displayed, this is to fix the problem where the user was getting
-        /// stack trace when a shorter message was better
-        /// </summary>
-        /// <returns>exception message</returns>
-        private static string GetErrorMessageWithDiagnosticsCheck(Exception e)
-        {
-            // If MSBuildDiagnostics is set show stack trace information
-            if (Environment.GetEnvironmentVariable("MSBuildDiagnostics") != null)
-            {
-                // Includes stack trace
-                return e.ToString();
-            }
-            else
-            {
-                // does not include stack trace
-                return e.Message;
-            }
-        }
-
-        /// <summary>
         /// Log a single environment variable that's about to be applied to the tool
         /// </summary>
         private bool LogEnvironmentVariable(bool alreadyLoggedEnvironmentHeader, string key, string value)
@@ -1622,7 +1590,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Splitter for environment variables
         /// </summary>
-        private static readonly char[] s_equalsSplitter = new char[] { '=' };
+        private static readonly char[] s_equalsSplitter = MSBuildConstants.EqualsChar;
 
         /// <summary>
         /// The actual importance at which standard out messages will be logged 

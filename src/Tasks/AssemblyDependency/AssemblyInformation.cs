@@ -46,17 +46,17 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
+#if FEATURE_ASSEMBLY_LOADFROM
         // Borrowed from genman.
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
         private const int GENMAN_ENUM_TOKEN_BUF_SIZE = 16; // 128 from genman seems too big.
 
-#if FEATURE_ASSEMBLY_LOADFROM
         static AssemblyInformation()
         {
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ReflectionOnlyAssemblyResolve;
         }
-#endif
+#endif // FEATURE_ASSEMBLY_LOADFROM
 
         /// <summary>
         /// Construct an instance for a source file.
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM
         private static Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            string[] nameParts = args.Name.Split(',');
+            string[] nameParts = args.Name.Split(MSBuildConstants.CommaChar);
             Assembly assembly = null;
 
             if (args.RequestingAssembly != null && !string.IsNullOrEmpty(args.RequestingAssembly.Location) && nameParts.Length > 0)
@@ -363,53 +363,22 @@ namespace Microsoft.Build.Tasks
                 {
                     var metadataReader = peFile.GetMetadataReader();
 
-                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
+                    var assemblyReferences = metadataReader.AssemblyReferences;
 
-                    foreach (var handle in metadataReader.AssemblyReferences)
+                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>(assemblyReferences.Count);
+
+                    foreach (var handle in assemblyReferences)
                     {
-                        var entry = metadataReader.GetAssemblyReference(handle);
-
-                        string cultureString = metadataReader.GetString(entry.Culture);
-                        var assemblyName = new AssemblyName
-                        {
-                            Name = metadataReader.GetString(entry.Name),
-                            Version = entry.Version
-                        };
-
-                        if (!NativeMethodsShared.IsMono)
-                        {
-                            // set_CultureName throws NotImplementedException on Mono
-                            assemblyName.CultureName = cultureString;
-                        }
-                        else if (cultureString != null)
-                        {
-                            assemblyName.CultureInfo = new CultureInfo(cultureString);
-                        }
-
-                        var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
-                        if (publicKeyOrToken != null)
-                        {
-                            if (publicKeyOrToken.Length <= 8)
-                            {
-                                assemblyName.SetPublicKeyToken(publicKeyOrToken);
-                            }
-                            else
-                            {
-                                assemblyName.SetPublicKey(publicKeyOrToken);
-                            }
-                        }
-                        assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
-
+                        var assemblyName = GetAssemblyName(metadataReader, handle);
                         ret.Add(new AssemblyNameExtension(assemblyName));
                     }
 
                     _assemblyDependencies = ret.ToArray();
 
-                    var attrs = metadataReader.GetAssemblyDefinition().GetCustomAttributes()
-                        .Select(ah => metadataReader.GetCustomAttribute(ah));
-
-                    foreach (var attr in attrs)
+                    foreach (var attrHandle in metadataReader.GetAssemblyDefinition().GetCustomAttributes())
                     {
+                        var attr = metadataReader.GetCustomAttribute(attrHandle);
+
                         var ctorHandle = attr.Constructor;
                         if (ctorHandle.Kind != HandleKind.MemberReference)
                         {
@@ -429,10 +398,57 @@ namespace Microsoft.Build.Tasks
                             _frameworkName = new FrameworkName(arguments[0]);
                         }
                     }
+
+                    var assemblyFilesCollection = metadataReader.AssemblyFiles;
+
+                    List<string> assemblyFiles = new List<string>(assemblyFilesCollection.Count);
+
+                    foreach (var fileHandle in assemblyFilesCollection)
+                    {
+                        assemblyFiles.Add(metadataReader.GetString(metadataReader.GetAssemblyFile(fileHandle).Name));
+                    }
+
+                    _assemblyFiles = assemblyFiles.ToArray();
                 }
 
                 _metadataRead = true;
             }
+        }
+
+        // https://github.com/Microsoft/msbuild/issues/4002
+        // https://github.com/dotnet/corefx/issues/34008
+        //
+        // We do not use AssemblyReference.GetAssemblyName() here because its behavior
+        // is different from other code paths with respect to neutral culture. We will
+        // get unspecified culture instead of explicitly neutral culture. This in turn
+        // leads string comparisons of assembly-name-modulo-version in RAR to false
+        // negatives that break its conflict resolution and binding redirect generation.
+        private static AssemblyName GetAssemblyName(MetadataReader metadataReader, AssemblyReferenceHandle handle)
+        {
+            var entry = metadataReader.GetAssemblyReference(handle);
+
+            var assemblyName = new AssemblyName
+            {
+                Name = metadataReader.GetString(entry.Name),
+                Version = entry.Version,
+                CultureName = metadataReader.GetString(entry.Culture)
+            };
+
+            var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
+            if (publicKeyOrToken != null)
+            {
+                if (publicKeyOrToken.Length <= 8)
+                {
+                    assemblyName.SetPublicKeyToken(publicKeyOrToken);
+                }
+                else
+                {
+                    assemblyName.SetPublicKey(publicKeyOrToken);
+                }
+            }
+
+            assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+            return assemblyName;
         }
 #endif
 
@@ -667,11 +683,6 @@ namespace Microsoft.Build.Tasks
         /// <returns>The extra files of assembly dependencies.</returns>
         private string[] ImportFiles()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return Array.Empty<string>();
-            }
-
 #if FEATURE_ASSEMBLY_LOADFROM
             var files = new List<string>();
             IntPtr fileEnum = IntPtr.Zero;
@@ -710,7 +721,8 @@ namespace Microsoft.Build.Tasks
 
             return files.ToArray();
 #else
-            return Array.Empty<string>();
+            CorePopulateMetadata();
+            return _assemblyFiles;
 #endif
         }
 

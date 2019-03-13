@@ -1174,7 +1174,7 @@ namespace Microsoft.Build.BackEnd
                 _componentHost.BuildParameters,
                 _nodeLoggingContext.LoggingService,
                 new BuildEventContext(
-                    _requestEntry.Request.BuildEventContext.SubmissionId,
+                    _requestEntry.Request.SubmissionId,
                     _nodeLoggingContext.BuildEventContext.NodeId,
                     BuildEventContext.InvalidEvaluationId,
                     BuildEventContext.InvalidProjectInstanceId,

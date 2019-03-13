@@ -43,15 +43,6 @@ namespace Microsoft.Build.Tasks
             this.HelpKeywordPrefix = helpKeywordPrefix;
         }
 
-        /// <summary>
-        /// private default constructor - we should be using the constructor accepting an ITask argument
-        /// to create instances of this class
-        /// </summary>
-        private TaskLoggingHelperExtension() :
-            base(null)
-        {
-        }
-
         #endregion
 
         #region Properties

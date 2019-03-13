@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks.Xaml
                     parseErrors.AppendLine(error);
                 }
 
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.RuleParseFailed", parseErrors.ToString()));
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleParseFailed", parseErrors.ToString()));
             }
 
             return parseSuccessful;
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 // valid *absolute* file path
 
                 if (!FileSystems.Default.FileExists(contentOrFile))
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.RuleFileNotFound", contentOrFile));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleFileNotFound", contentOrFile));
 
                 return ParseXamlDocument(new StreamReader(contentOrFile), desiredRule);
             }
@@ -168,7 +168,7 @@ namespace Microsoft.Build.Tasks.Xaml
             //
             // On Windows, this means that @contentOrFile is really a non-existant file name
             if (NativeMethodsShared.IsWindows)
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.RuleFileNotFound", maybeFullPath));
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleFileNotFound", maybeFullPath));
             else // On !Windows, try parsing as XML
                 return ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
         }
@@ -199,7 +199,7 @@ namespace Microsoft.Build.Tasks.Xaml
                         }
                     }
 
-                    throw new XamlParseException(ResourceUtilities.FormatResourceString("Xaml.RuleNotFound", desiredRule));
+                    throw new XamlParseException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleNotFound", desiredRule));
                 }
                 else
                 {

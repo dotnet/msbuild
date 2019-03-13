@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         internal static BuildMessage CreateMessage(BuildMessageSeverity severity, string resourceName, params object[] args)
         {
-            string message = ResourceUtilities.FormatResourceString(out string helpCode, out string helpKeyword, resourceName, args);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string helpCode, out string helpKeyword, resourceName, args);
 
             return new BuildMessage(severity, message, helpKeyword, helpCode);
         }

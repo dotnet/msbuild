@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <target state="translated">MSB4249: "{0}" 웹 사이트 프로젝트를 빌드할 수 없습니다. ASP.NET 컴파일러는 .NET Framework 버전의 MSBuild에서만 사용할 수 있습니다.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -31,22 +31,97 @@
         <target state="translated">빌드가 이미 진행되고 있으므로 작업을 완료할 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </source>
+        <target state="translated">MSB4252: "{0}" 프로젝트에 "{1}"(대상 {2}개)에 대한 참조가 있지만 참조의 빌드 결과가 엔진 캐시에 있지 않습니다. 격리된 빌드에서는 다음 중 하나를 의미할 수 있습니다.
+    - 참조가 "{0}"에서 ProjectReference 항목으로 명시적으로 지정되지 않았음
+    - 참조가 제공된 입력 캐시에 포함되지 않았음
+    - 참조가 "{0}"에서 ProjectReferenceTargets 항목에 지정되지 않은 대상으로 호출되었음
+    </target>
+        <note>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <target state="translated">MSB4248: "{0}" 식에서 메타데이터를 확장할 수 없습니다. {1}</target>
         <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="translated">MSB4251: {0} 프로젝트와 관련된 순환 종속성이 있습니다.</target>
+        <note>
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </note>
+      </trans-unit>
+      <trans-unit id="EmptyOutputCacheFile">
+        <source>MSB4257: The specified output result cache file is empty.</source>
+        <target state="translated">MSB4257: 지정한 출력 결과 캐시 파일이 비어 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingCacheFile">
+        <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4256: "{0}" 경로에서 입력 결과 캐시 파일을 읽는 중 오류가 발생했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingCacheFile">
+        <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4258: "{0}" 경로에서 출력 결과 캐시 파일을 쓰는 중 오류가 발생했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InputCacheFilesDoNotExist">
+        <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
+        <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
-        <target state="new">Metaproject "{0}" generated.</target>
+        <target state="translated">메타프로젝트 "{0}"이(가) 생성되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">BeginBuild가 아직 호출되지 않았으므로 작업을 완료할 수 없습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="NullReferenceFromProjectInstanceFactory">
+        <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
+        <target state="translated">MSB4253: 사용자가 제공한 ProjectInstanceFactoryFunc 콜백에서 Null 참조가 반환되었습니다. 이는 허용되지 않습니다.</target>
+        <note>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
+        <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
+        <target state="translated">MSB4250: ProjectGraph는 ToolsVersion 메타데이터가 설정된 ProjectReference 항목을 지원하지 않습니다. "{1}" 파일에 ToolsVersion이 포함된 ProjectReference "{0}"이(가) 있습니다.</target>
+        <note>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
+      </trans-unit>
+      <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="translated">MSB4254: MSBuild 작업이 ProjectReference 항목에 지정되지 않은 {0} 프로젝트를 빌드하고 있습니다. 격리된 빌드에서 이는 참조가 "{1}"에서 ProjectReference 항목으로 명시적으로 지정되지 않았음을 의미할 수 있습니다.</target>
+        <note>
+      {StrBegin="MSB4254:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
+    </note>
+      </trans-unit>
+      <trans-unit id="UsingInputCaches">
+        <source>Using input build results caches: {0}</source>
+        <target state="translated">입력 빌드 결과 캐시 사용: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
+    </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
@@ -190,9 +265,9 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료하는 중입니다. 진단 정보는 "{1}"의 파일에서 MSBuild_*.failure.txt 이름으로 찾을 수 있습니다. 이 위치는 MSBUILDDEBUGPATH 환경 변수를 다른 디렉터리로 설정하여 변경할 수 있습니다.</target>
-        <note>{StrBegin="MSB4166: "}</note>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
+        <target state="translated">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료하는 중입니다. 진단 정보는 "{1}"의 파일에서 MSBuild_*.failure.txt 이름으로 찾을 수 있습니다. 이 위치는 MSBUILDDEBUGPATH 환경 변수를 다른 디렉터리로 설정하여 변경할 수 있습니다.{2}</target>
+        <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
         <source>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</source>
@@ -586,8 +661,8 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
-        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). </source>
-        <target state="translated">MSB4186: 정적 메서드 호출 구문 "{0}"이(가) 잘못되었습니다. {1} 정적 메서드 호출의 형식은 $([FullTypeName]::Method())여야 합니다. 예: $([System.IO.Path]::Combine(`a`, `b`)) </target>
+        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
+        <target state="translated">MSB4186: 정적 메서드 호출 구문 "{0}"이(가) 잘못되었습니다. {1} 정적 메서드 호출의 형식은 $([FullTypeName]::Method())여야 합니다. 예: $([System.IO.Path]::Combine(`a`, `b`)). 모든 매개 변수가 정의되어 있으며, 형식이 올바르고, 올바른 순서로 지정되어 있는지 확인하세요.</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -1269,13 +1344,13 @@
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureErrorInvalidCast">
         <source>MSB4127: The "{0}" task could not be instantiated from the assembly "{1}". Please verify the task assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</source>
-        <target state="translated">MSB4127: "{1}" 어셈블리에서 "{0}" 작업을 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 작업 어셈블리가 빌드되었는지, 호스트 응용 프로그램에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하세요. {2}</target>
+        <target state="translated">MSB4127: "{1}" 어셈블리에서 "{0}" 작업을 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 작업 어셈블리가 빌드되었는지, 호스트 애플리케이션에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하세요. {2}</target>
         <note>{StrBegin="MSB4127: "}UE: This message is a specialized version of the TaskInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</note>
       </trans-unit>
       <trans-unit id="LoggerInstantiationFailureErrorInvalidCast">
         <source>MSB4180: The "{0}" logger could not be instantiated from the assembly "{1}". Please verify the logger assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</source>
-        <target state="translated">MSB4180: "{1}" 어셈블리에서 "{0}" 로거를 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 로거 어셈블리가 빌드되었는지, 호스트 응용 프로그램에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하세요. {2}</target>
+        <target state="translated">MSB4180: "{1}" 어셈블리에서 "{0}" 로거를 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 로거 어셈블리가 빌드되었는지, 호스트 애플리케이션에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하세요. {2}</target>
         <note>
       {StrBegin="MSB4180: "}
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized
@@ -1307,7 +1382,7 @@
       </trans-unit>
       <trans-unit id="TaskFactoryInstantiationFailureErrorInvalidCast">
         <source>MSB4176: The "{0}" task factory could not be instantiated from the assembly "{1}". Please verify the task assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</source>
-        <target state="translated">MSB4176: "{1}" 어셈블리에서 "{0}" 작업 팩터리를 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 작업 어셈블리가 빌드되었는지, 호스트 응용 프로그램에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하세요. {2}</target>
+        <target state="translated">MSB4176: "{1}" 어셈블리에서 "{0}" 작업 팩터리를 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 작업 어셈블리가 빌드되었는지, 호스트 애플리케이션에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하세요. {2}</target>
         <note>{StrBegin="MSB4176: "}UE: This message is a specialized version of the TaskFactoryInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</note>
       </trans-unit>
@@ -1554,6 +1629,13 @@
         <source>The property "{0}" with value "{1}" is being overridden by another batch. The property is now: "{2}"</source>
         <target state="translated">값이 "{1}"인 "{0}" 속성을 다른 일괄 처리에서 재정의하고 있습니다. 속성은 이제 "{2}"입니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="WritingToOutputCache">
+        <source>Writing build results caches to: {0}</source>
+        <target state="translated">다음에 빌드 결과 캐시 쓰기: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a file path
+    </note>
       </trans-unit>
       <trans-unit id="logfilePathNullOrEmpty">
         <source>The log file path cannot be null or empty.</source>

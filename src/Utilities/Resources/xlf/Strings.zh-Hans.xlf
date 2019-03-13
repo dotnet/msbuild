@@ -67,6 +67,11 @@
         <target state="translated">MSB6004: 指定的任务可执行文件位置“{0}”无效。</target>
         <note>{StrBegin="MSB6004: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.ValidateParametersFailed">
+        <source>MSB6011: Invalid parameters passed to the {0} task.</source>
+        <target state="translated">MSB6011: 传递给 {0} 任务的参数无效。</target>
+        <note>{StrBegin="MSB6011: "}</note>
+      </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
         <target state="translated">读取 redist 列表文件“{0}”时出错。{1}</target>

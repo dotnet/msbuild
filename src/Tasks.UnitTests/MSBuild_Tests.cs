@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj");
-            Assert.True(logger.FullLog.Contains("MSB3202")); // project file not found
+            Assert.Contains("MSB3202", logger.FullLog); // project file not found
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(1, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("MSB3202")); // project file not found
+            Assert.Contains("MSB3202", logger.FullLog); // project file not found
         }
 
         /// <summary>
@@ -240,8 +240,8 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(0, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("this_project_does_not_exist.csproj")); // for the missing project
-            Assert.False(logger.FullLog.Contains("MSB3202")); // project file not found error
+            Assert.Contains("this_project_does_not_exist.csproj", logger.FullLog); // for the missing project
+            Assert.DoesNotContain("MSB3202", logger.FullLog); // project file not found error
         }
 
         /// <summary>
@@ -275,8 +275,8 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(0, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("this_project_does_not_exist.csproj")); // for the missing project
-            Assert.False(logger.FullLog.Contains("MSB3202")); // project file not found error
+            Assert.Contains("this_project_does_not_exist.csproj", logger.FullLog); // for the missing project
+            Assert.DoesNotContain("MSB3202", logger.FullLog); // project file not found error
         }
 
         [Fact]
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(1, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("MSB3204")); // upgrade to vcxproj needed
+            Assert.Contains("MSB3204", logger.FullLog); // upgrade to vcxproj needed
         }
 
         /// <summary>

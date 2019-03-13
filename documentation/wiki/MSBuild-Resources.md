@@ -32,6 +32,9 @@
    * [https://msbuildprofiler.codeplex.com/](https://msbuildprofiler.codeplex.com/)
  * MSBuild Shell Extension
    * [https://msbuildshellex.codeplex.com/](https://msbuildshellex.codeplex.com/)
+ * MsBuildPipeLogger
+   * [https://msbuildpipelogger.netlify.com/](https://msbuildpipelogger.netlify.com/)
+   * [https://github.com/daveaglick/MsBuildPipeLogger](https://github.com/daveaglick/MsBuildPipeLogger)
 
 # Books
  * [Inside the Microsoft Build Engine: Using MSBuild and Team Foundation Build (2nd Edition) by Sayed Hashimi, William Bartholomew](http://www.amazon.com/Inside-Microsoft-Build-Engine-Foundation/dp/0735645248)

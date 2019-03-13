@@ -142,7 +142,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Private constructor for deserialization
         /// </summary>
-        private BuildRequest(INodePacketTranslator translator)
+        private BuildRequest(ITranslator translator)
         {
             Translate(translator);
         }
@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Reads/writes this packet
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref _submissionId);
             translator.Translate(ref _configurationId);
@@ -350,18 +350,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslator translator)
         {
             return new BuildRequest(translator);
         }
 
         #endregion
-        /// <summary>
-        /// Returns true if the result applies to this request.
-        /// </summary>
-        internal bool DoesResultApplyToRequest(BuildResult result)
-        {
-            return _globalRequestId == result.GlobalRequestId && _nodeRequestId == result.NodeRequestId;
-        }
     }
 }

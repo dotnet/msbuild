@@ -68,7 +68,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Constructor
         /// </summary>
-        internal XmlDocumentWithLocation(bool loadAsReadOnly)
+        internal XmlDocumentWithLocation(bool? loadAsReadOnly)
             : this()
         {
             _loadAsReadOnly = loadAsReadOnly;
@@ -166,7 +166,7 @@ namespace Microsoft.Build.Construction
 
             _fullPath = fullPath;
 
-            using(var xtr = XmlReaderExtension.Create(fullPath))
+            using(var xtr = XmlReaderExtension.Create(fullPath, _loadAsReadOnly ?? false))
             {
                 this.Load(xtr.Reader);
             }

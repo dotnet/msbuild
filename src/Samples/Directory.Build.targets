@@ -1,5 +1,11 @@
 ﻿<Project>
-  
+
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="2.2.13" Condition="'$(DisableNerdbankVersioning)' != 'true'" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-004" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+  </ItemGroup>
+
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
 

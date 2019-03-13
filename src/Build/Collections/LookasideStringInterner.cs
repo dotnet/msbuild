@@ -16,7 +16,7 @@ namespace Microsoft.Build.Collections
     /// original strings.  The interner itself is also transmitted ahead of time, with the IDs, allowing 
     /// reconstruction of the original strings.  This ensures each string is transmitted exactly once.
     /// </remarks>
-    internal class LookasideStringInterner : INodePacketTranslatable
+    internal class LookasideStringInterner : ITranslatable
     {
         /// <summary>
         /// Index used for null strings.
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Collections
         /// Intern cannot be used on this interner if it came from serialization, since we do 
         /// not reconstruct the interning dictionary.
         /// </remarks>
-        public LookasideStringInterner(INodePacketTranslator translator)
+        public LookasideStringInterner(ITranslator translator)
         {
             Translate(translator);
         }
@@ -114,7 +114,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// The translator, for serialization.
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref _strings);
         }

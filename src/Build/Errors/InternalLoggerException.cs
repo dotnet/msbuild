@@ -229,7 +229,7 @@ namespace Microsoft.Build.Exceptions
 
             string errorCode;
             string helpKeyword;
-            string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, messageResourceName, messageArgs);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, messageResourceName, messageArgs);
 
             throw new InternalLoggerException(message, innerException, e, errorCode, helpKeyword, initializationException);
         }

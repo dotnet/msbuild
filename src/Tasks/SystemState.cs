@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -26,33 +26,35 @@ namespace Microsoft.Build.Tasks
         /// Cache at the SystemState instance level. Has the same contents as <see cref="instanceLocalFileStateCache"/>.
         /// It acts as a flag to enforce that an entry has been checked for staleness only once.
         /// </summary>
-        private Hashtable upToDateLocalFileStateCache = new Hashtable();
+        private Dictionary<string, FileState> upToDateLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
-        private Hashtable instanceLocalFileStateCache = new Hashtable();
+        private Hashtable instanceLocalFileStateCache = new Hashtable(StringComparer.OrdinalIgnoreCase);
+
 
         /// <summary>
-        /// FileExists information is purely instance-local. It doesn't make sense to
+        /// LastModified information is purely instance-local. It doesn't make sense to
         /// cache this for long periods of time since there's no way (without actually 
-        /// calling File.Exists) to tell whether the cache is out-of-date.
+        /// calling File.GetLastWriteTimeUtc) to tell whether the cache is out-of-date.
         /// </summary>
-        private Hashtable instanceLocalFileExists = new Hashtable();
+        private Dictionary<string, DateTime> instanceLocalLastModifiedCache = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// DirectoryExists information is purely instance-local. It doesn't make sense to
         /// cache this for long periods of time since there's no way (without actually 
         /// calling Directory.Exists) to tell whether the cache is out-of-date.
         /// </summary>
-        private Hashtable instanceLocalDirectoryExists = new Hashtable();
+        private Dictionary<string, bool> instanceLocalDirectoryExists = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
 
         /// <summary>
         /// GetDirectories information is also purely instance-local. This information
         /// is only considered good for the lifetime of the task (or whatever) that owns 
         /// this instance.
         /// </summary>
-        private Hashtable instanceLocalDirectories = new Hashtable();
+        private Dictionary<string, string[]> instanceLocalDirectories = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Additional level of caching kept at the process level.
@@ -366,7 +368,7 @@ namespace Microsoft.Build.Tasks
             // as calls to GetLastWriteTime can add up over hundreds and hundreds of files, we only check for
             // invalidation once per assembly per ResolveAssemblyReference session.
 
-            FileState state = (FileState)upToDateLocalFileStateCache[path];
+            upToDateLocalFileStateCache.TryGetValue(path, out FileState state);
             if (state == null)
             {   // We haven't seen this file this ResolveAssemblyReference session
 
@@ -379,85 +381,59 @@ namespace Microsoft.Build.Tasks
 
         private FileState ComputeFileStateFromCachesAndDisk(string path)
         {
-            // Is it in the process-wide cache?
-            FileState cacheFileState = null;
-            FileState processFileState = null;
-            s_processWideFileStateCache.TryGetValue(path, out processFileState);
-            FileState instanceLocalFileState = instanceLocalFileState = (FileState)instanceLocalFileStateCache[path];
+            DateTime lastModified = GetAndCacheLastModified(path);
+            FileState cachedInstanceFileState = (FileState)instanceLocalFileStateCache[path];
+            bool isCachedInInstance = cachedInstanceFileState != null;
+            bool isCachedInProcess =
+                s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
+            
+            bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
+            bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
-            // Sync the caches.
-            if (processFileState == null && instanceLocalFileState != null)
+            // If the process-wide cache contains an up-to-date FileState, always use it
+            if (isProcessFileStateUpToDate)
             {
-                cacheFileState = instanceLocalFileState;
-                SystemState.s_processWideFileStateCache[path] = instanceLocalFileState;
-            }
-            else if (processFileState != null && instanceLocalFileState == null)
-            {
-                cacheFileState = processFileState;
-                instanceLocalFileStateCache[path] = processFileState;
-            }
-            else if (processFileState != null && instanceLocalFileState != null)
-            {
-                if (processFileState.LastModified > instanceLocalFileState.LastModified)
+                // If a FileState already exists in this instance cache due to deserialization, remove it;
+                // another instance has taken responsibility for serialization, and keeping this would
+                // result in multiple instances serializing the same data to disk
+                if (isCachedInInstance)
                 {
-                    cacheFileState = processFileState;
-                    instanceLocalFileStateCache[path] = processFileState;
-                }
-                else
-                {
-                    cacheFileState = instanceLocalFileState;
-                    SystemState.s_processWideFileStateCache[path] = instanceLocalFileState;
-                }
-            }
-
-            // Still no--need to create.            
-            if (cacheFileState == null) // Or check time stamp
-            {
-                cacheFileState = new FileState(getLastWriteTime(path));
-                instanceLocalFileStateCache[path] = cacheFileState;
-                SystemState.s_processWideFileStateCache[path] = cacheFileState;
-                isDirty = true;
-            }
-            else
-            {
-                // If time stamps have changed, then purge.
-                DateTime lastModified = getLastWriteTime(path);
-                if (lastModified != cacheFileState.LastModified)
-                {
-                    cacheFileState = new FileState(getLastWriteTime(path));
-                    instanceLocalFileStateCache[path] = cacheFileState;
-                    SystemState.s_processWideFileStateCache[path] = cacheFileState;
+                    instanceLocalFileStateCache.Remove(path);
                     isDirty = true;
                 }
+
+                return cachedProcessFileState;
+            }
+            // If the process-wide FileState is missing or out-of-date, this instance owns serialization;
+            // sync the process-wide cache and signal other instances to avoid data duplication
+            if (isInstanceFileStateUpToDate)
+            {
+                return s_processWideFileStateCache[path] = cachedInstanceFileState;
             }
 
-            return cacheFileState;
+            // If no up-to-date FileState exists at this point, create one and take ownership
+            return InitializeFileState(path, lastModified);
         }
 
-        private FileState GetFileStateFromProcessWideCache(string path, FileState template)
+        private DateTime GetAndCacheLastModified(string path)
         {
-            // When reading from the process-wide cache, we always check to see if our data
-            // is up-to-date to avoid getting stale data from a previous build.
-            DateTime lastModified = getLastWriteTime(path);
-
-            // Has another build seen this file before?
-            FileState state;
-            if (!s_processWideFileStateCache.TryGetValue(path, out state) || state.LastModified != lastModified)
-            {   // We've never seen it before, or we're out of date
-
-                state = CreateFileState(lastModified, template);
-                s_processWideFileStateCache[path] = state;
+            if (!instanceLocalLastModifiedCache.TryGetValue(path, out DateTime lastModified))
+            {
+                lastModified = getLastWriteTime(path);
+                instanceLocalLastModifiedCache[path] = lastModified;
             }
 
-            return state;
+            return lastModified;
         }
 
-        private FileState CreateFileState(DateTime lastModified, FileState template)
+        private FileState InitializeFileState(string path, DateTime lastModified)
         {
-            if (template != null && template.LastModified == lastModified)
-                return template;    // Our serialized data is up-to-date
+            var fileState = new FileState(lastModified);
+            instanceLocalFileStateCache[path] = fileState;
+            s_processWideFileStateCache[path] = fileState;
+            isDirty = true;
 
-            return new FileState(lastModified);
+            return fileState;
         }
 
         /// <summary>
@@ -472,16 +448,17 @@ namespace Microsoft.Build.Tasks
             if (redistList != null)
             {
                 string extension = Path.GetExtension(path);
-                if (String.Compare(extension, ".dll", StringComparison.OrdinalIgnoreCase) == 0)
+
+                if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
                 {
                     IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName
                         (
                             Path.GetFileNameWithoutExtension(path)
                         );
+                    string filename = Path.GetFileName(path);
 
                     foreach (AssemblyEntry a in assemblyNames)
                     {
-                        string filename = Path.GetFileName(path);
                         string pathFromRedistList = Path.Combine(a.FrameworkDirectory, filename);
 
                         if (String.Equals(path, pathFromRedistList, StringComparison.OrdinalIgnoreCase))
@@ -583,14 +560,14 @@ namespace Microsoft.Build.Tasks
             // is a string-copy.
             if (pattern == "*")
             {
-                object cached = instanceLocalDirectories[path];
+                instanceLocalDirectories.TryGetValue(path, out string[] cached);
                 if (cached == null)
                 {
                     string[] directories = getDirectories(path, pattern);
                     instanceLocalDirectories[path] = directories;
                     return directories;
                 }
-                return (string[])cached;
+                return cached;
             }
 
             // This path is currently uncalled. Use assert to tell the dev that adds a new code-path 
@@ -607,21 +584,14 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the file exists.</returns>
         private bool FileExists(string path)
         {
-            /////////////////////////////////////////////////////////////////////////////////////////////
-            // FIRST -- Look in the primary cache for this path.
-            /////////////////////////////////////////////////////////////////////////////////////////////
-            object flag = instanceLocalFileExists[path];
-            if (flag != null)
-            {
-                return (bool)flag;
-            }
+            DateTime lastModified = GetAndCacheLastModified(path);
+            return FileTimestampIndicatesFileExists(lastModified);
+        }
 
-            /////////////////////////////////////////////////////////////////////////////////////////////
-            // SECOND -- fall back to plain old File.Exists and cache the result.
-            /////////////////////////////////////////////////////////////////////////////////////////////
-            bool exists = fileExists(path);
-            instanceLocalFileExists[path] = exists;
-            return exists;
+        private bool FileTimestampIndicatesFileExists(DateTime lastModified)
+        {
+            // TODO: Standardize LastWriteTime value for nonexistent files. See https://github.com/Microsoft/msbuild/issues/3699
+            return lastModified != DateTime.MinValue && lastModified != NativeMethodsShared.MinFileDate;
         }
 
         /// <summary>
@@ -631,10 +601,9 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the directory exists.</returns>
         private bool DirectoryExists(string path)
         {
-            object flag = instanceLocalDirectoryExists[path];
-            if (flag != null)
+            if (instanceLocalDirectoryExists.TryGetValue(path, out bool flag))
             {
-                return (bool)flag;
+                return flag;
             }
 
             bool exists = directoryExists(path);

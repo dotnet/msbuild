@@ -1,23 +1,18 @@
-<Project>
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <AssemblyName>Mono.Build.Tasks</AssemblyName>
+        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
         <DebugType>full</DebugType>
-        <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     </PropertyGroup>
 
-    <Import Project="..\..\build\Versions.props" />
     <ItemGroup>
-        <Compile Include="FilterDeniedAssemblies.cs" />
-
         <Reference Include="Microsoft.Build.Framework" HintPath="$(OutDir)\Microsoft.Build.Framework.dll" />
         <Reference Include="Microsoft.Build.Utilities.Core" HintPath="$(OutDir)\Microsoft.Build.Utilities.Core.dll" />
 
-        <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
-        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+        <PackageReference Include="System.Reflection.Metadata" />
+        <PackageReference Include="System.Collections.Immutable" />
     </ItemGroup>
 
     <Target Name="Test" />
-
-    <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -14,11 +14,6 @@ namespace Microsoft.Build.UnitTests
     public class TaskStartedEventArgs_Tests
     {
         /// <summary>
-        /// Default event to use in tests.
-        /// </summary>
-        private TaskStartedEventArgs _baseTaskStartedEvent = new TaskStartedEventArgs("Message", "HelpKeyword", "ProjectFile", "TaskFile", "TaskName");
-
-        /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
         [Fact]
