@@ -3804,6 +3804,62 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetCurrentToolsDirectory), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.GetCurrentToolsDirectory();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetToolsDirectory32), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.GetToolsDirectory32();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetToolsDirectory64), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.GetToolsDirectory64();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetMSBuildSDKsPath), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.GetMSBuildSDKsPath();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetVsInstallRoot), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.GetVsInstallRoot();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetMSBuildExtensionsPath), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.GetMSBuildExtensionsPath();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetProgramFiles32), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.GetProgramFiles32();
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Path))
                     {
