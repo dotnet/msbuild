@@ -494,5 +494,40 @@ public static class Program
                 .And
                 .HaveStdOutContaining("NETSDK1085");
         }
+
+        [Fact]
+        public void It_contains_no_duplicates_in_resolved_publish_assets()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NoDuplicatesInResolvedPublishAssets",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.0",
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0"),
+                IsExe = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "12.0.1"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    project.Root.Add(XElement.Parse(@"
+<Target Name=""VerifyNoDuplicatesInPublishAssets"" AfterTargets=""Publish"">
+    <RemoveDuplicates Inputs=""@(_ResolvedCopyLocalPublishAssets)"">
+        <Output TaskParameter=""Filtered"" ItemName=""FilteredAssets""/>
+    </RemoveDuplicates>
+    <Message Condition=""'@(_ResolvedCopyLocalPublishAssets)' != '@(FilteredAssets)'"" Importance=""High"" Text=""Duplicates are present!"" />
+</Target>"));
+                })
+                .Restore(Log, testProject.Name);
+
+            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("Duplicates are present!");
+        }
     }
 }
