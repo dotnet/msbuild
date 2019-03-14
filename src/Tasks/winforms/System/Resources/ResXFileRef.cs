@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -44,7 +44,6 @@ namespace System.Resources {
             this.typeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
         }
 
-        
         [OnDeserializing]      
         private void OnDeserializing(StreamingContext ctx) {
             textFileEncoding = null;
@@ -69,7 +68,6 @@ namespace System.Resources {
             return new ResXFileRef(fileName, typeName, textFileEncoding);
         }
 
-
         /// <include file='doc\ResXFileRef.uex' path='docs/doc[@for="ResXFileRef.FileName"]/*' />
         public string FileName {
             get {
@@ -90,7 +88,6 @@ namespace System.Resources {
                 return textFileEncoding;
             }
         }
-
 
         /// <include file='doc\ResXFileRef.uex' path='docs/doc[@for="ResXFileRef.PathDifference"]/*' />
         /// <devdoc>
@@ -131,7 +128,6 @@ namespace System.Resources {
             return relPath.ToString() + path2.Substring(si + 1);
         }
 
-        
         internal void MakeFilePathRelative(string basePath) {
             
             if(string.IsNullOrEmpty(basePath)) {
@@ -155,9 +151,6 @@ namespace System.Resources {
             }
             return result;
         }
-
-       
-
 
         /// <include file='doc\ResXFileRef.uex' path='docs/doc[@for="ResXFileRef.Converter"]/*' />
         public class Converter : TypeConverter {
@@ -227,8 +220,6 @@ namespace System.Resources {
             }
 
             /// <include file='doc\ResXFileRef.uex' path='docs/doc[@for="ResXFileRef.Converter.ConvertFrom"]/*' />
-            [ResourceExposure(ResourceScope.Machine)]
-            [ResourceConsumption(ResourceScope.Machine)]
             public override object ConvertFrom(ITypeDescriptorContext context, 
                                                CultureInfo culture,
                                                object value) {

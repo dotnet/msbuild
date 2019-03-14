@@ -353,7 +353,6 @@ namespace System.Resources {
         
         }
         
-
         private object GenerateObjectFromDataNodeInfo(DataNodeInfo dataNodeInfo, ITypeResolutionService typeResolver) {
             object result = null;
             string mimeTypeName = dataNodeInfo.MimeType;
@@ -632,7 +631,6 @@ namespace System.Resources {
             return Convert.FromBase64String(text);
         }
 
-
         private Type ResolveType(string typeName, ITypeResolutionService typeResolver) {
             Type resolvedType = null;            
             if (typeResolver != null) {
@@ -797,7 +795,6 @@ namespace System.Resources {
         }
     }
 
-
     internal class AssemblyNamesTypeResolutionService : ITypeResolutionService {
         private AssemblyName[] names;
         private Hashtable cachedAssemblies;
@@ -808,17 +805,13 @@ namespace System.Resources {
         internal AssemblyNamesTypeResolutionService(AssemblyName[] names) {
             this.names = names;
         }
-
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
+        
         public Assembly GetAssembly(AssemblyName name) {
             return GetAssembly(name, true);
         }
 
         //
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods")]
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         public Assembly GetAssembly(AssemblyName name, bool throwOnError) {
 
             Assembly result = null;
@@ -864,13 +857,10 @@ namespace System.Resources {
             return result;
         }
 
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         public string GetPathOfAssembly(AssemblyName name) {
             return name.CodeBase;
         }
 
-      
         public Type GetType(string name) {
             return GetType(name, true);
         }
