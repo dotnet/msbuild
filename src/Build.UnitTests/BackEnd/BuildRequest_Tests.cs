@@ -2,13 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-
+using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
-
-
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -135,6 +134,66 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Assert.Equal(request.Targets[i], deserializedRequest.Targets[i]);
             }
+        }
+
+#if FEATURE_COM_INTEROP
+        [Fact]
+        public void TestTranslationRemoteHostObjects()
+        {
+            var stateInHostObject = 3;
+
+            var hostServices = new HostServices();
+            var rot = new MockRunningObjectTable();
+            hostServices.SetTestRunningObjectTable(rot);
+            var moniker = nameof(TestTranslationRemoteHostObjects) + Guid.NewGuid();
+            var remoteHost = new MockRemoteHostObject(stateInHostObject);
+            using (var result = rot.Register(moniker, remoteHost))
+            {
+                hostServices.RegisterHostObject(
+                    "WithOutOfProc.targets",
+                    "DisplayMessages",
+                    "ATask",
+                    moniker);
+
+                BuildRequest request = new BuildRequest(
+                    submissionId: 1,
+                    _nodeRequestId++,
+                    1,
+                    new string[] { "alpha", "omega" },
+                    hostServices: hostServices,
+                    BuildEventContext.Invalid,
+                    parentRequest: null);
+
+                ((ITranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
+                INodePacket packet = BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+                BuildRequest deserializedRequest = packet as BuildRequest;
+                deserializedRequest.HostServices.SetTestRunningObjectTable(rot);
+                var hostObject = deserializedRequest.HostServices.GetHostObject(
+                    "WithOutOfProc.targets",
+                    "DisplayMessages",
+                    "ATask") as ITestRemoteHostObject;
+
+                Assert.Equal(stateInHostObject, hostObject.GetState());
+            }
+        }
+#endif
+
+        [Fact]
+        public void TestTranslationHostObjectsWhenEmpty()
+        {
+            var hostServices = new HostServices();
+            BuildRequest request = new BuildRequest(
+                submissionId: 1,
+                _nodeRequestId++,
+                1,
+                new string[] { "alpha", "omega" },
+                hostServices: hostServices,
+                BuildEventContext.Invalid,
+                parentRequest: null);
+
+            ((ITranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
+            BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
         }
 
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
