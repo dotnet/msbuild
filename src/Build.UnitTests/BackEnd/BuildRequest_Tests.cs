@@ -136,6 +136,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+#if FEATURE_COM_INTEROP
         [Fact]
         public void TestTranslationRemoteHostObjects()
         {
@@ -176,6 +177,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(stateInHostObject, hostObject.GetState());
             }
         }
+#endif
 
         [Fact]
         public void TestTranslationHostObjectsWhenEmpty()

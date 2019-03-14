@@ -56,8 +56,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private Dictionary<string, NodeAffinity> _projectAffinities;
 
+#if FEATURE_COM_INTEROP
         private IRunningObjectTableWrapper _runningObjectTable = new RunningObjectTable();
-
+#endif
         /// <summary>
         /// Gets any host object applicable to this task name
         /// where the task appears within a target and project with the specified names.
@@ -86,9 +87,13 @@ namespace Microsoft.Build.Execution
             {
                 if (monikerNameOrITaskHost.IsMoniker)
                 {
+#if FEATURE_COM_INTEROP
                     object objectFromRunningObjectTable =
                         _runningObjectTable.GetObject(monikerNameOrITaskHost.MonikerName);
                     return (ITaskHost)objectFromRunningObjectTable;
+#else
+                    return null;
+#endif
                 }
                 else
                 {
@@ -119,6 +124,7 @@ namespace Microsoft.Build.Execution
             hostObjects.RegisterHostObject(targetName, taskName, hostObject);
         }
 
+#if FEATURE_COM_INTEROP
         /// <summary>
         /// Register a remote host object for a particular task/target pair.
         /// The remote host object require registered in Running Object Table(ROT) already.
@@ -143,6 +149,7 @@ namespace Microsoft.Build.Execution
 
             hostObjects.RegisterHostObject(targetName, taskName, monikerName);
         }
+#endif
 
         /// <summary>
         /// Unregister the project's host objects, if any and remove any node affinities associated with it.
@@ -347,6 +354,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
+#if FEATURE_COM_INTEROP
         /// <summary>
         /// Test only
         /// </summary>
@@ -355,6 +363,7 @@ namespace Microsoft.Build.Execution
         {
             _runningObjectTable = runningObjectTable;
         }
+#endif
 
         internal class MonikerNameOrITaskHost
         {
@@ -420,6 +429,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+#if FEATURE_COM_INTEROP
             /// <summary>
             /// Registers a host object for this project file
             /// </summary>
@@ -434,6 +444,7 @@ namespace Microsoft.Build.Execution
                     _hostObjects[new TargetTaskKey(targetName, taskName)] = new MonikerNameOrITaskHost(monikerName);
                 }
             }
+#endif
 
             /// <summary>
             /// Gets any host object for this project file matching the task and target names specified.

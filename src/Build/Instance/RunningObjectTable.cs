@@ -4,6 +4,7 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace Microsoft.Build.Execution
 {
+#if FEATURE_COM_INTEROP
     /// <summary>
     /// Wrapper for the COM Running Object Table.
     /// </summary>
@@ -66,4 +67,5 @@ namespace Microsoft.Build.Execution
                 out IRunningObjectTable pprot);
         }
     }
+#endif
 }
