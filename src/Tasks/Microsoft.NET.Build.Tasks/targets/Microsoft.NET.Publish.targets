@@ -300,7 +300,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       </ResolveCopyLocalAssets>
 
       <ItemGroup>
-        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"/>
+        <!-- If CopyLocalLockFileAssemblies is true, then ReferenceCopyLocalPaths (added below) already contains the runtime pack assets. -->
+        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)" Condition="'$(CopyLocalLockFileAssemblies)' != 'true'" />
       </ItemGroup>
 
       <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
