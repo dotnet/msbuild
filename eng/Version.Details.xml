@@ -39,9 +39,9 @@
       <Sha>
       </Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview4.19159.1">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview4.19162.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>cc3d996a68cfa94071b5d4403e604ce401df7636</Sha>
+      <Sha>64b4e63f985dae64925e3e3d88594b00fb3e73fe</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
