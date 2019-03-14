@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
@@ -49,7 +50,7 @@ namespace Microsoft.DotNet.Cli
                                     .With(name: LocalizableStrings.CmdPackageDirectory)
                                     .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}")),
                 Create.Option("--interactive",
-                              LocalizableStrings.CmdInteractiveRestoreDescription,
+                              CommonLocalizableStrings.CommandInteractiveOptionDescription,
                               Accept.NoArguments()
                                     .ForwardAs("--interactive")));
         }

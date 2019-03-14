@@ -656,7 +656,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ターミナルを再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
@@ -904,6 +904,11 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">プロジェクト | ソリューション</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">コマンドを停止して、ユーザーの入力またはアクション (認証の完了など) を待機できるようにします。</target>
         <note />
       </trans-unit>
     </body>
