@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -10,6 +11,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     internal class MockRunningObjectTable : IRunningObjectTableWrapper
     {
         private readonly Dictionary<string, object> _dictionary = new Dictionary<string, object>();
+
         public void Dispose()
         {
         }
@@ -20,11 +22,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 return obj;
             }
-            else
-            {
-                throw new System.Runtime.InteropServices.COMException(
-                    "Operation unavailable(Exception from HRESULT: 0x800401E3(MK_E_UNAVAILABLE))");
-            }
+
+            throw new COMException(
+                "Operation unavailable(Exception from HRESULT: 0x800401E3(MK_E_UNAVAILABLE))");
         }
 
         public IDisposable Register(string itemName, object obj)

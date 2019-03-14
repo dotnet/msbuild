@@ -112,7 +112,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
 
-            // We can only set the host object to a non-null value if the affinity for the project is not out of proc, or if it is, it is only implicitly 
+            // We can only set the host object to a non-null value if the affinity for the project is not out of proc, or if it is, it is only implicitly
             // out of proc, in which case it will become in-proc after this call completes.  See GetNodeAffinity.
             bool isExplicit;
             bool hasExplicitOutOfProcAffinity = (GetNodeAffinity(projectFile, out isExplicit) == NodeAffinity.OutOfProc) && (isExplicit == true);
@@ -272,14 +272,13 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // Attempts to find a specific affinity failed, so just go with Any. 
+            // Attempts to find a specific affinity failed, so just go with Any.
             return NodeAffinity.Any;
         }
 
         private HostObjects GetHostObjectsFromMapByKeyOrCreateNew(string projectFile)
         {
-            HostObjects hostObjects;
-            if (!_hostObjectMap.TryGetValue(projectFile, out hostObjects))
+            if (!_hostObjectMap.TryGetValue(projectFile, out var hostObjects))
             {
                 hostObjects = new HostObjects();
                 _hostObjectMap[projectFile] = hostObjects;
@@ -298,10 +297,10 @@ namespace Microsoft.Build.Execution
                 for (int i = 0; i < count; i++)
                 {
                     var pairKey = translator.Reader.ReadString();
-                    var hostObjectMappairKeyTargetName = translator.Reader.ReadString();
-                    var hostObjectMappairKeyTaskName = translator.Reader.ReadString();
-                    var hostObjectMappairValueMonikerName = translator.Reader.ReadString();
-                    var targetTaskKey = new HostObjects.TargetTaskKey(hostObjectMappairKeyTargetName, hostObjectMappairKeyTaskName);
+                    var hostObjectMapPairKeyTargetName = translator.Reader.ReadString();
+                    var hostObjectMapPairKeyTaskName = translator.Reader.ReadString();
+                    var hostObjectMapPairValueMonikerName = translator.Reader.ReadString();
+                    var targetTaskKey = new HostObjects.TargetTaskKey(hostObjectMapPairKeyTargetName, hostObjectMapPairKeyTaskName);
                     if (!hostObjectMap.ContainsKey(pairKey))
                     {
                         hostObjectMap[pairKey] = new HostObjects();
@@ -309,7 +308,7 @@ namespace Microsoft.Build.Execution
 
                     if (!hostObjectMap[pairKey]._hostObjects.ContainsKey(targetTaskKey))
                     {
-                        hostObjectMap[pairKey]._hostObjects.Add(targetTaskKey, new MonikerNameOrITaskHost(hostObjectMappairValueMonikerName));
+                        hostObjectMap[pairKey]._hostObjects.Add(targetTaskKey, new MonikerNameOrITaskHost(hostObjectMapPairValueMonikerName));
                     }
                 }
                 _hostObjectMap = hostObjectMap;
@@ -326,9 +325,9 @@ namespace Microsoft.Build.Execution
                     var count = 0;
                     foreach (var pair in _hostObjectMap)
                     {
-                        foreach (var hostObjectMappair in pair.Value._hostObjects)
+                        foreach (var hostObjectMapPair in pair.Value._hostObjects)
                         {
-                            if (hostObjectMappair.Value.IsMoniker)
+                            if (hostObjectMapPair.Value.IsMoniker)
                             {
                                 count++;
                             }
@@ -339,14 +338,14 @@ namespace Microsoft.Build.Execution
 
                     foreach (var pair in _hostObjectMap)
                     {
-                        foreach (var hostObjectMappair in pair.Value._hostObjects)
+                        foreach (var hostObjectMapPair in pair.Value._hostObjects)
                         {
-                            if (hostObjectMappair.Value.IsMoniker)
+                            if (hostObjectMapPair.Value.IsMoniker)
                             {
                                 translator.Writer.Write(pair.Key);
-                                translator.Writer.Write(hostObjectMappair.Key._targetName);
-                                translator.Writer.Write(hostObjectMappair.Key._taskName);
-                                translator.Writer.Write(hostObjectMappair.Value.MonikerName);
+                                translator.Writer.Write(hostObjectMapPair.Key._targetName);
+                                translator.Writer.Write(hostObjectMapPair.Key._taskName);
+                                translator.Writer.Write(hostObjectMapPair.Value.MonikerName);
                             }
                         }
                     }
