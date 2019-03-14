@@ -1,0 +1,17 @@
+{
+  "products": [
+    {
+      "name": "Microsoft.Build.vsix",
+      "tests": [
+        {
+          "container": "TeamEng",
+          "testCases": [
+            "TeamEng.OptProfTest.vs_debugger_interop_managedclient"
+          ]
+        }
+      ]
+    }
+  ],
+  "assemblies": [
+  ]
+}

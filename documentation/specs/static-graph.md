@@ -155,7 +155,7 @@ To enable further optimizations (and strictness), graph builds can run [isolated
 This is a proposal for what the public API for ProjectGraph may look like:
 
 ```csharp
-namespace Microsoft.Build.Graph
+namespace Microsoft.Build.Experimental.Graph
 {
     public class ProjectGraph
     {

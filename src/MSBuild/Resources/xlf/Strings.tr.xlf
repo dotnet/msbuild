@@ -853,7 +853,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <target state="translated">  -preprocess[:file]
                      Bir derleme sırasında içeri aktarılacak tüm dosyaları
                      satır içinde kullanarak ve sınırlarını belirleyerek
-                     tek bir toplanmış proje dosyası oluşturur. Bu, hangi
+                    tek bir kümelenmiş proje dosyası oluşturur. Bu, hangi
                      dosyaların nereden içeri aktarılacağını ve derlemeye
                      nasıl katkıda bulunacağını belirlemede yararlı
                      olabilir. Çıkış, varsayılan olarak

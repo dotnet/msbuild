@@ -176,7 +176,7 @@ namespace Microsoft.Build.Internal
             ErrorUtilities.VerifyThrowArgumentLength(name, "name");
 
             RegistryKeyWrapper wrapper = this;
-            string[] keyNames = name.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] keyNames = name.Split(MSBuildConstants.BackslashChar, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < keyNames.Length && wrapper.Exists(); ++i)
             {

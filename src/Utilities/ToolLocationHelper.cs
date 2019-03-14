@@ -252,7 +252,7 @@ namespace Microsoft.Build.Utilities
         /// Character used to separate search paths specified for MSBuildExtensionsPath* in
         /// the config file
         /// </summary>
-        private static char _separatorForFallbackSearchPaths = ';';
+        private static readonly char[] _separatorForFallbackSearchPaths = MSBuildConstants.SemicolonChar;
 
         private const string retailConfigurationName = "Retail";
         private const string neutralArchitectureName = "Neutral";
@@ -264,7 +264,7 @@ namespace Microsoft.Build.Utilities
         private const string uapDirectoryName = "Windows Kits";
         private const string uapRegistryName = "Windows";
         private const int uapVersion = 10;
-        private static readonly char[] s_diskRootSplitChars = { ';' };
+        private static readonly char[] s_diskRootSplitChars = MSBuildConstants.SemicolonChar;
 
         /// <summary>
         /// Delegate to a method which takes a version enumeration and return a string path
@@ -1477,8 +1477,8 @@ namespace Microsoft.Build.Utilities
         {
             if (!string.IsNullOrEmpty(possibleRoots))
             {
-                var roots = possibleRoots.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                var files = relativeFilePaths.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                var roots = possibleRoots.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+                var files = relativeFilePaths.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
 
                 bool allFilesFound;
                 foreach (var root in roots)
@@ -2181,7 +2181,7 @@ namespace Microsoft.Build.Utilities
 
             if (!string.IsNullOrEmpty(targetFrameworkFallbackSearchPaths))
             {
-                foreach (string rootPath in targetFrameworkFallbackSearchPaths.Split(new[]{_separatorForFallbackSearchPaths}, StringSplitOptions.RemoveEmptyEntries))
+                foreach (string rootPath in targetFrameworkFallbackSearchPaths.Split(_separatorForFallbackSearchPaths, StringSplitOptions.RemoveEmptyEntries))
                 {
                     pathsList = GetPathToReferenceAssemblies(rootPath, frameworkName);
                     if (pathsList?.Count > 0)

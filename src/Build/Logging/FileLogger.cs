@@ -258,12 +258,12 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// File logger parameters delimiters.
         /// </summary>
-        private static readonly char[] s_fileLoggerParameterDelimiters = { ';' };
+        private static readonly char[] s_fileLoggerParameterDelimiters = MSBuildConstants.SemicolonChar;
 
         /// <summary>
         /// File logger parameter value split character.
         /// </summary>
-        private static readonly char[] s_fileLoggerParameterValueSplitCharacter = { '=' };
+        private static readonly char[] s_fileLoggerParameterValueSplitCharacter = MSBuildConstants.EqualsChar;
 
         #endregion
     }

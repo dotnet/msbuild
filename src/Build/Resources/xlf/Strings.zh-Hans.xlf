@@ -447,7 +447,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">不再支持将 &lt;{0}&gt; 标记作为 &lt;{0}&gt; 元素的子元素。请将此标记放在某个目标中，然后向 &lt;Project&gt; 元素的“InitialTargets”特性中添加该目标的名称。</target>
+        <target state="translated">不再支持将 &lt;{0}&gt; 标记作为 &lt;Project&gt; 元素的子元素。请将此标记放在某个目标中，然后向 &lt;Project&gt; 元素的“InitialTargets”特性中添加该目标的名称。</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -662,7 +662,7 @@
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
         <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
-        <target state="needs-review-translation">MSB4186: 静态方法调用语法“{0}”无效。{1} 静态方法调用应采用以下形式:$([FullTypeName]::Method())，例如 $([System.IO.Path]::Combine(`a`, `b`))。 </target>
+        <target state="translated">MSB4186: 静态方法调用语法无效:“{0}”。{1} 静态方法调用应采用以下形式:$([FullTypeName]::Method())，例如 $([System.IO.Path]::Combine(`a`, `b`))。请检查确保所有参数均已定义、其类型正确无误，并且按正确的顺序指定。</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.

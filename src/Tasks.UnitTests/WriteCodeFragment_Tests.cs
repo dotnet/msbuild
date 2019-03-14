@@ -11,6 +11,7 @@ using Microsoft.Build.Shared;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -690,7 +691,7 @@ namespace Microsoft.Build.UnitTests
             // we tolerate differences in whitespace and comments between platforms
             string normalizedActualContent = string.Join(
                 Environment.NewLine,
-                actualContent.Split('\r', '\n')
+                actualContent.Split(MSBuildConstants.CrLf)
                              .Select(line => line.Trim())
                              .Where(line => line.Length > 0 && !line.StartsWith(commentStart)));
 

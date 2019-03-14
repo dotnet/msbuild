@@ -16,10 +16,10 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.Helpers;
 
-using ExpectedOutputDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
-using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string>;
+using ExpectedOutputDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Experimental.Graph.ProjectGraphNode, string[]>;
+using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Experimental.Graph.ProjectGraphNode, string>;
 
-namespace Microsoft.Build.Graph.UnitTests
+namespace Microsoft.Build.Experimental.Graph.UnitTests
 {
     public class ResultCacheBasedBuilds_Tests : IDisposable
     {

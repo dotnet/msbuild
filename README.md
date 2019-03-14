@@ -6,11 +6,15 @@ For more information on MSBuild, see the [MSBuild documentation](https://docs.mi
 
 ### Build Status
 
-The current development branch is `master`. It builds for .NET Core and the full desktop .NET framework. Changes in `master` will go into the next "major" update of MSBuild.
+The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.1.
 
-[![Build Status](https://dnceng.visualstudio.com/9ee6d478-d288-47f7-aacc-f6e6d082ae6d/_apis/build/status/86?branchname=master)](https://dnceng.visualstudio.com/public/public%20Team/_build?definitionId=86&_a=summary&branchName=master)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=master)
 
-We have forked for MSBuild 15.9 in the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9).
+We have forked for MSBuild 16.0 in the branch [`vs16.0`](https://github.com/Microsoft/msbuild/tree/vs16.0). Changes to that branch need special approval.
+
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.0)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.0)
+
+MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
 
 | Runtime\OS | Windows | Ubuntu 16.04 |Mac OS X|
 |:------|:------:|:------:|:------:|

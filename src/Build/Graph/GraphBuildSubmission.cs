@@ -4,9 +4,10 @@
 using System;
 using System.Globalization;
 using System.Threading;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Execution
+namespace Microsoft.Build.Experimental.Graph
 {
     /// <summary>
     /// A callback used to receive notification that a build has completed.

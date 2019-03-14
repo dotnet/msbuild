@@ -2201,6 +2201,148 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
+                /// Intrinsic function that returns the subset of items that actually exist on disk.
+                /// </summary>
+                internal static IEnumerable<Pair<string, S>> Exists(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+
+                    foreach (Pair<string, S> item in itemsOfType)
+                    {
+                        if (String.IsNullOrEmpty(item.Key))
+                        {
+                            continue;
+                        }
+
+                        // Unescape as we are passing to the file system
+                        string unescapedPath = EscapingUtilities.UnescapeAll(item.Key);
+
+                        string rootedPath = null;
+                        try
+                        {
+                            // If we're a projectitem instance then we need to get
+                            // the project directory and be relative to that
+                            if (Path.IsPathRooted(unescapedPath))
+                            {
+                                rootedPath = unescapedPath;
+                            }
+                            else
+                            {
+                                // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
+                                // In that case, we're safe to get the current directory as we'll be running on TaskItems which
+                                // only exist within a target where we can trust the current directory
+                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? String.Empty;
+                                rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
+                            }
+                        }
+                        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
+                        }
+
+                        if (File.Exists(rootedPath) || Directory.Exists(rootedPath))
+                        {
+                            yield return item;
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Intrinsic function that combines the existing paths of the input items with a given relative path.
+                /// </summary>
+                internal static IEnumerable<Pair<string, S>> Combine(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+
+                    string relativePath = arguments[0];
+
+                    foreach (Pair<string, S> item in itemsOfType)
+                    {
+                        if (String.IsNullOrEmpty(item.Key))
+                        {
+                            continue;
+                        }
+
+                        // Unescape as we are passing to the file system
+                        string unescapedPath = EscapingUtilities.UnescapeAll(item.Key);
+                        string combinedPath = Path.Combine(unescapedPath, relativePath);
+                        string escapedPath = EscapingUtilities.Escape(combinedPath);
+                        yield return new Pair<string, S>(escapedPath, null);
+                    }
+                }
+
+                /// <summary>
+                /// Intrinsic function that returns all ancestor directories of the given items.
+                /// </summary>
+                internal static IEnumerable<Pair<string, S>> GetPathsOfAllDirectoriesAbove(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+
+                    // Phase 1: find all the applicable directories.
+
+                    SortedSet<string> directories = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                    foreach (Pair<string, S> item in itemsOfType)
+                    {
+                        if (String.IsNullOrEmpty(item.Key))
+                        {
+                            continue;
+                        }
+
+                        string directoryName = null;
+
+                        // Unescape as we are passing to the file system
+                        string unescapedPath = EscapingUtilities.UnescapeAll(item.Key);
+
+                        try
+                        {
+                            string rootedPath;
+
+                            // If we're a projectitem instance then we need to get
+                            // the project directory and be relative to that
+                            if (Path.IsPathRooted(unescapedPath))
+                            {
+                                rootedPath = unescapedPath;
+                            }
+                            else
+                            {
+                                // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
+                                // In that case, we're safe to get the current directory as we'll be running on TaskItems which
+                                // only exist within a target where we can trust the current directory
+                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? String.Empty;
+                                rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
+                            }
+
+                            directoryName = Path.GetDirectoryName(rootedPath);
+                        }
+                        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
+                        }
+
+                        while (!String.IsNullOrEmpty(directoryName))
+                        {
+                            if (directories.Contains(directoryName))
+                            {
+                                // We've already got this directory (and all its ancestors) in the set.
+                                break;
+                            }
+
+                            directories.Add(directoryName);
+                            directoryName = Path.GetDirectoryName(directoryName);
+                        }
+                    }
+
+                    // Phase 2: Go through the directories and return them in order
+
+                    foreach (string directoryPath in directories)
+                    {
+                        string escapedDirectoryPath = EscapingUtilities.Escape(directoryPath);
+                        yield return new Pair<string, S>(escapedDirectoryPath, null);
+                    }
+                }
+
+                /// <summary>
                 /// Intrinsic function that returns the DirectoryName of the items in itemsOfType
                 /// UNDONE: This can be removed in favor of a built-in %(DirectoryName) metadata in future.
                 /// </summary>

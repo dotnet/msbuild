@@ -421,8 +421,8 @@ namespace Microsoft.Build.UnitTests
                 actualContent = sr.ReadToEnd();
             }
 
-            string[] actualLines = actualContent.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] expectedLines = expectedContent.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] actualLines = actualContent.Split(MSBuildConstants.NewlineChar, StringSplitOptions.RemoveEmptyEntries);
+            string[] expectedLines = expectedContent.Split(MSBuildConstants.NewlineChar, StringSplitOptions.RemoveEmptyEntries);
 
             Assert.Equal(expectedLines.Length, actualLines.Length);
 

@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests
             c.AppendTextUnquoted("C7E1720B16E5477D8D15733006E68278");
 
 
-            string[] actual = c.ToString().Split(new[] {Environment.NewLine}, StringSplitOptions.None);
+            string[] actual = c.ToString().Split(MSBuildConstants.EnvironmentNewLine, StringSplitOptions.None);
             string[] expected = 
             {
                 "/foo:bar",

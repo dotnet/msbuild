@@ -13,7 +13,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.Build.Graph.UnitTests
+namespace Microsoft.Build.Experimental.Graph.UnitTests
 {
     public class IsolateProjectsTests
     {

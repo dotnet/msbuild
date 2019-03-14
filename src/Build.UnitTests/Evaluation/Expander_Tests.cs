@@ -3841,5 +3841,162 @@ $(
             string result = expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             result.ShouldBe(expected);
         }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_GetPathsOfAllDirectoriesAbove()
+        {
+            // Directory structure:
+            // <temp>\
+            //    alpha\
+            //        .proj
+            //        One.cs
+            //        beta\
+            //            Two.cs
+            //            Three.cs
+            //        gamma\
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var alpha = root.CreateDirectory("alpha");
+                var projectFile = env.CreateFile(alpha, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <Compile Include=""One.cs"" />
+    <Compile Include=""beta\Two.cs"" />
+    <Compile Include=""beta\Three.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <MyDirectories Include=""@(Compile->GetPathsOfAllDirectoriesAbove())"" />
+  </ItemGroup>
+</Project>");
+
+                var beta = alpha.CreateDirectory("beta");
+                var gamma = alpha.CreateDirectory("gamma");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> myDirectories = projectInstance.GetItems("MyDirectories");
+
+                var includes = myDirectories.Select(i => i.EvaluatedInclude);
+                includes.ShouldContain(root.Path);
+                includes.ShouldContain(alpha.Path);
+                includes.ShouldContain(beta.Path);
+                includes.ShouldNotContain(gamma.Path);
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Combine()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <MyDirectory Include=""Alpha;Beta;Alpha\Gamma"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Squiggle Include=""@(MyDirectory->Combine('.squiggle'))"" />
+  </ItemGroup>
+</Project>");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggles = projectInstance.GetItems("Squiggle");
+
+                var expectedAlphaSquigglePath = Path.Combine("Alpha", ".squiggle");
+                var expectedBetaSquigglePath = Path.Combine("Beta", ".squiggle");
+                var expectedAlphaGammaSquigglePath = Path.Combine("Alpha", "Gamma", ".squiggle");
+                squiggles.Select(i => i.EvaluatedInclude).ShouldBe(new[]
+                {
+                    expectedAlphaSquigglePath,
+                    expectedBetaSquigglePath,
+                    expectedAlphaGammaSquigglePath
+                }, Case.Insensitive);
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Exists_Files()
+        {
+            // Directory structure:
+            // <temp>\
+            //    .proj
+            //    alpha\
+            //        One.cs   // exists
+            //        Two.cs   // does not exist
+            //        Three.cs // exists
+            //        Four.cs  // does not exist
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <PotentialCompile Include=""alpha\One.cs"" />
+    <PotentialCompile Include=""alpha\Two.cs"" />
+    <PotentialCompile Include=""alpha\Three.cs"" />
+    <PotentialCompile Include=""alpha\Four.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include=""@(PotentialCompile->Exists())"" />
+  </ItemGroup>
+</Project>");
+
+                var alpha = root.CreateDirectory("alpha");
+                var one = alpha.CreateFile("One.cs");
+                var three = alpha.CreateFile("Three.cs");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Compile");
+
+                var alphaOnePath = Path.Combine("alpha", "One.cs");
+                var alphaThreePath = Path.Combine("alpha", "Three.cs");
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { alphaOnePath, alphaThreePath }, Case.Insensitive);
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Exists_Directories()
+        {
+            // Directory structure:
+            // <temp>\
+            //    .proj
+            //    alpha\
+            //        beta\    // exists
+            //        gamma\   // does not exist
+            //        delta\   // exists
+            //        epsilon\ // does not exist
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <PotentialDirectory Include=""alpha\beta"" />
+    <PotentialDirectory Include=""alpha\gamma"" />
+    <PotentialDirectory Include=""alpha\delta"" />
+    <PotentialDirectory Include=""alpha\epsilon"" />
+  </ItemGroup>
+  <ItemGroup>
+    <MyDirectory Include=""@(PotentialDirectory->Exists())"" />
+  </ItemGroup>
+</Project>");
+
+                var alpha = root.CreateDirectory("alpha");
+                var beta = alpha.CreateDirectory("beta");
+                var delta = alpha.CreateDirectory("delta");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("MyDirectory");
+
+                var alphaBetaPath = Path.Combine("alpha", "beta");
+                var alphaDeltaPath = Path.Combine("alpha", "delta");
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { alphaBetaPath, alphaDeltaPath }, Case.Insensitive);
+            }
+        }
     }
 }

@@ -3248,7 +3248,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             var itemSpace = "    ";
             var metadataSpace = itemSpace + "  ";
 
-            var splits = expectedItem.Split('\n');
+            var splits = expectedItem.Split(MSBuildConstants.NewlineChar);
             splits = splits.Select(s => s.Trim()).ToArray();
 
             Assert.True(splits.Length >= 1);

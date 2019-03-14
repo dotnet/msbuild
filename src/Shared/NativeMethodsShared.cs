@@ -19,6 +19,12 @@ using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Microsoft.Build.Utilities;
 
+#if MICROSOFT_BUILD_TASKS
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+#else
+using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
+#endif
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -1177,7 +1183,7 @@ namespace Microsoft.Build.Shared
                     // One of the fields is the process name. It may contain any characters, but since it's
                     // in parenthesis, we can finds its end by looking for the last parenthesis. After that,
                     // there comes a space, then the second fields separated by a space is the parent id.
-                    string[] statFields = line.Substring(line.LastIndexOf(')')).Split(new[] { ' ' }, 4);
+                    string[] statFields = line.Substring(line.LastIndexOf(')')).Split(MSBuildConstants.SpaceChar, 4);
                     if (statFields.Length >= 3)
                     {
                         ParentID = Int32.Parse(statFields[2]);

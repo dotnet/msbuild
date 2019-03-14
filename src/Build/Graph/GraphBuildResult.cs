@@ -3,9 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Graph;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.Graph;
 
-namespace Microsoft.Build.Execution
+namespace Microsoft.Build.Experimental.Graph
 {
     public sealed class GraphBuildResult
     {

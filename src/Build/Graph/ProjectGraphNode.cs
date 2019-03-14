@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 
-namespace Microsoft.Build.Graph
+namespace Microsoft.Build.Experimental.Graph
 {
     /// <summary>
     /// Represents the node for a particular project in a project graph.

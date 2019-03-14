@@ -446,7 +446,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Não há mais suporte para a marcação &lt;{0}&gt; como filho do elemento &lt;Project&gt;. Posicione essa marcação dentro de um destino e adicione o nome do destino ao atributo "InitialTargets" do elemento &lt;Project&gt;.</target>
+        <target state="translated">Não há mais suporte para a tag &lt;{0}&gt; como filho do elemento &lt;Project&gt;. Posicione essa tag dentro de um destino e adicione o nome do destino ao atributo "InitialTargets" do elemento &lt;Project&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -661,7 +661,7 @@
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
         <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
-        <target state="needs-review-translation">MSB4186: Sintaxe de invocação de método estático inválida: "({0})". {1} A invocação de método estático deve estar no formato: $([FullTypeName]::Method()), por exemplo. $([System.IO.Path]::Combine(`a`, `b`)). </target>
+        <target state="translated">MSB4186: Sintaxe de invocação de método estático inválida: "{0}". {1} A invocação do método estático deve estar no formato: $([FullTypeName]::Method()), por exemplo $([System.IO.Path]::Combine(`a`, `b`)). Verifique se todos os parâmetros estão definidos, se são do tipo correto e se estão especificados na ordem correta.</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.

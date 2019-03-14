@@ -15,7 +15,7 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Graph;
+using Microsoft.Build.Experimental.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -470,7 +470,7 @@ namespace Microsoft.Build.UnitTests
 
             // First, parse this massive string that we've been given, and create an ITaskItem[] out of it,
             // so we can more easily compare it against the actual items.
-            string[] expectedItemsStringSplit = expectedItemsString.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] expectedItemsStringSplit = expectedItemsString.Split(MSBuildConstants.CrLf, StringSplitOptions.RemoveEmptyEntries);
             foreach (string singleExpectedItemString in expectedItemsStringSplit)
             {
                 string singleExpectedItemStringTrimmed = singleExpectedItemString.Trim();
@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests
 
                         ITaskItem expectedItem = new Utilities.TaskItem(itemSpec);
 
-                        string[] itemMetadataPieces = itemMetadataString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] itemMetadataPieces = itemMetadataString.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
                         foreach (string itemMetadataPiece in itemMetadataPieces)
                         {
                             string itemMetadataPieceTrimmed = itemMetadataPiece.Trim();
@@ -1556,7 +1556,7 @@ namespace Microsoft.Build.UnitTests
             sb.Append("</ItemGroup>");
 
             
-            foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(new[]{';'}, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
                 sb.Append($"<Target Name='{defaultTarget}'/>");
             }
@@ -1630,7 +1630,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Both Path.AltDirectorSeparatorChar and Path.DirectorySeparator char return '/' on OSX,
             // which renders them useless for the following case where I want to split a path that may contain either separator
-            var splits = path.Split('/', '\\');
+            var splits = path.Split(MSBuildConstants.ForwardSlashBackslash);
 
             // if the path is rooted then the first split is either empty (Unix) or 'c:' (Windows)
             // in this case the root must be restored back to '/' (Unix) or 'c:\' (Windows)

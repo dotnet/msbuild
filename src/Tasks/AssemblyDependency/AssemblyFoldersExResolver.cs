@@ -147,7 +147,7 @@ namespace Microsoft.Build.Tasks
                         string value = conditions.Value.Trim();
 
                         // Parse the condition statement for OSVersion and Platform
-                        foreach (string c in value.Split(':'))
+                        foreach (string c in value.Split(MSBuildConstants.ColonChar))
                         {
                             if (String.Compare(c, 0, "OSVERSION=", 0, 10, StringComparison.OrdinalIgnoreCase) == 0)
                             {

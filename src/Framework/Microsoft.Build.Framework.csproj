@@ -4,9 +4,9 @@
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <IsPackable>true</IsPackable>
-    <Description>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</Description>
+    <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
-    <UsingToolIbcOptimization>$(ShouldUseIBCOptimization)</UsingToolIbcOptimization>
+    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="BinaryWriterExtensions.cs" />

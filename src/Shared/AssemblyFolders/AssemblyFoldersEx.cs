@@ -5,6 +5,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
@@ -269,7 +270,7 @@ namespace Microsoft.Build.Shared
 
             if (platformValue != null && platformValue.Length > 0)
             {
-                string[] platforms = platformValue.Split(';');
+                string[] platforms = platformValue.Split(MSBuildConstants.SemicolonChar);
                 foreach (string p in platforms)
                 {
                     if (String.Compare(p, platform, StringComparison.OrdinalIgnoreCase) == 0)

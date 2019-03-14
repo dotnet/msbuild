@@ -747,7 +747,7 @@ namespace Microsoft.Build.Execution
             // Get a list of properties which should be serialized
             if (!String.IsNullOrEmpty(forwardPropertiesFromChild))
             {
-                propertyListToSerialize = forwardPropertiesFromChild.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                propertyListToSerialize = forwardPropertiesFromChild.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             }
 
             _loggingService.PropertiesToSerialize = propertyListToSerialize;

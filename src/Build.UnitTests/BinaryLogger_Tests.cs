@@ -69,6 +69,31 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
         }
 
+        [Fact]
+        public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()
+        {
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = $"LogFile={_logFile}"
+            };
+
+            const string project = @"
+<Project>
+<ItemDefinitionGroup>
+  <F>
+   <MetadataFileName>a\b\%(Filename).c</MetadataFileName>
+  </F>
+ </ItemDefinitionGroup>
+ <ItemGroup>
+  <F Include=""-in &quot;x\y\z&quot;"" />
+ </ItemGroup>
+ <Target Name=""X"" />
+</Project>";
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
+        }
+
+
         public void Dispose()
         {
             _env.Dispose();

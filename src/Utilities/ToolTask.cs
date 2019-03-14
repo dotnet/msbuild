@@ -1252,7 +1252,7 @@ namespace Microsoft.Build.Utilities
         {
             // Get path from the environment and split path separator
             return Environment.GetEnvironmentVariable("PATH")?
-                .Split(Path.PathSeparator)?
+                .Split(MSBuildConstants.PathSeparatorChar)?
                 .Where(path =>
                 {
                     try
@@ -1590,7 +1590,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Splitter for environment variables
         /// </summary>
-        private static readonly char[] s_equalsSplitter = new char[] { '=' };
+        private static readonly char[] s_equalsSplitter = MSBuildConstants.EqualsChar;
 
         /// <summary>
         /// The actual importance at which standard out messages will be logged 

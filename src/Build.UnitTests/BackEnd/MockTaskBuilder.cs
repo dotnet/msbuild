@@ -113,8 +113,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 if (String.Equals(taskInstance.Name, "CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
                     taskInstance.GetParameter("Targets");
-                    char[] splitter = new char[] { ';' };
-                    targetBuilderCallback.LegacyCallTarget(taskInstance.GetParameter("Targets").Split(splitter), false, taskInstance.Location);
+                    targetBuilderCallback.LegacyCallTarget(taskInstance.GetParameter("Targets").Split(MSBuildConstants.SemicolonChar), false, taskInstance.Location);
                 }
 
                 _taskNumber++;
