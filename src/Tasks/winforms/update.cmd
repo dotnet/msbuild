@@ -43,7 +43,7 @@ exit /b 1
 
 md %MSBUILD_WINFORMS_DIRECTORY%\misc
 
-copy /y %WINFORMS_REPO_PATH%\src\System.Windows.Forms\src\misc\ClientUtils.cs %MSBUILD_WINFORMS_DIRECTORY%\misc
+copy /y %WINFORMS_REPO_PATH%\src\Common\src\ClientUtils.cs %MSBUILD_WINFORMS_DIRECTORY%\misc
 if errorlevel 1 (
     echo Failed copying ClientUtils.cs
     exit /b 1
