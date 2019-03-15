@@ -14,13 +14,17 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     sealed public class MSBuildTask_Tests : IDisposable
     {
-        public MSBuildTask_Tests()
+        private readonly ITestOutputHelper _testOutput;
+
+        public MSBuildTask_Tests(ITestOutputHelper testOutput)
         {
+            _testOutput = testOutput;
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
@@ -70,13 +74,14 @@ namespace Microsoft.Build.UnitTests
                 projectFile1 += Path.Combine(tempPathNoRoot, fileName);
                 try
                 {
-                    MSBuild msbuildTask = new MSBuild();
-                    msbuildTask.BuildEngine = new MockEngine();
+                    MSBuild msbuildTask = new MSBuild
+                    {
+                        BuildEngine = new MockEngine(_testOutput),
 
-                    msbuildTask.Projects = new ITaskItem[] { new TaskItem(projectFile1) };
+                        Projects = new ITaskItem[] { new TaskItem(projectFile1) }
+                    };
 
-                    bool success = msbuildTask.Execute();
-                    Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                    msbuildTask.Execute().ShouldBeTrue("Build failed.  See 'Standard Out' tab for details.");
                 }
                 finally
                 {
