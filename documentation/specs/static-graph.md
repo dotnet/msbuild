@@ -6,6 +6,7 @@
       - [Crosstargeting](#crosstargeting)
     - [Building a project graph](#building-a-project-graph)
     - [Inferring which targets to run for a project within the graph](#inferring-which-targets-to-run-for-a-project-within-the-graph)
+      - [Crosstargeting details](#crosstargeting-details)
     - [Underspecified graphs](#underspecified-graphs)
     - [Public API](#public-api)
   - [Isolated builds](#isolated-builds)
@@ -76,8 +77,6 @@ Crosstargeting supporting SDKs need to implement the following properties and se
   - When project A references crosstargeting project B, and B is identified as an outer build, the graph node for project A will reference both the outer build of B, and all the inner builds of B. The edges to the inner builds are speculative, as at build time only one inner build gets referenced. However, the graph cannot know at evaluation time which inner build will get chosen.
   - When crosstargeting project B is a root, then the outer build node for B will reference the inner builds of B.
   - For crosstargeting projects, the `ProjectReference` item gets applied only to inner builds. It is the inner builds that reference other project files, not the outer build.
-
-**OPEN ISSUE:** Current implementation does not disambiguate between the two types of inner builds, leading to overbuilding certain targets.
 
 These specific rules represent the minimal rules required to represent crosstargeting in `Microsoft.Net.Sdk`. As we adopt SDKs whose crosstargeting complexity that cannot be expressed with the above rules, we'll extend the rules.
 For example, `InnerBuildProperty` could become `InnerBuildProperties` for SDKs where there's multiple crosstargeting global properties. 
@@ -182,6 +181,44 @@ We'll represent the project reference protocols as `ProjectReferenceTargets` ite
 <ItemGroup>
   <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)"/>
 </ItemGroup>
+```
+
+#### Crosstargeting details
+
+A crosstargeting project can get called with different targets for the outer build and the inner builds. In this case, the `ProjectReferenceTargets` items containing targets for the outer build are marked with the `OuterBuild=true` metadata. Here are the rules for how targets from `ProjectReferenceTargets` get assigned to different project types:
+  - *Outer build*: targets with `OuterBuild=true` metadata
+  - *Dependent inner build*: targets without `OuterBuild=true` metadata
+  - *Standalone inner build*: the same as non crosstargeting builds.
+  - *Non crosstargeting build*: concatenation of targets with `OuterBuild=true` metadata and targets without `OuterBuild=true` metadata
+
+**OPEN ISSUE:** Current implementation does not disambiguate between the two types of inner builds, leading to overbuilding certain targets by conservatively treating both inner build types as standalone inner builds.
+
+For example, consider the graph of `A (non crosstargeting) -> B (crosstargeting with 2 innerbuilds) -> C (standalone inner build)`, with the following target propagation rules:
+```
+A -> Ao when OuterBuild=true
+A -> Ai, A
+```
+
+According to the graph construction rules defined in the [crosstargeting section](#crosstargeting), we get the following graph, annotated with the target propagation for target `A`.
+
+```
+                   A+-->ProjA
+                      /   |   \
+                     /    |    \
+                    /     |     \
+                Ao /      |      \ Ai, A
+                  /       |       \
+                 /  Ai, A |        \
+                v         v         v
+       ProjB(outer)  ProjB(inner1)  ProjB(inner2)
+                          |         /
+                          |        /
+                          |       /
+                Ao, Ai, A |      / Ao, Ai, A
+                          |     /
+                          |    /
+                          v   v
+                          projC
 ```
 
 ### Underspecified graphs
