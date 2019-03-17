@@ -961,8 +961,9 @@ namespace Microsoft.Build.Tasks
             // By default all file types that get here are considered dangerous
             bool dangerous = true;
 
-            if (String.Equals(Path.GetExtension(filename), ".resx", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(Path.GetExtension(filename), ".resw", StringComparison.OrdinalIgnoreCase))
+            string extension = Path.GetExtension(filename);
+            if (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // XML files are only dangerous if there are unrecognized objects in them
                 dangerous = false;
@@ -1521,8 +1522,9 @@ namespace Microsoft.Build.Tasks
 
             DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(sourceFilePath);
 
-            if (!String.Equals(Path.GetExtension(sourceFilePath), ".resx", StringComparison.OrdinalIgnoreCase) &&
-                !String.Equals(Path.GetExtension(sourceFilePath), ".resw", StringComparison.OrdinalIgnoreCase))
+            string extension = Path.GetExtension(sourceFilePath);
+            if (!String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) &&
+                !String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // If source file is NOT a .resx, for example a .restext file, 
                 // timestamp checking is simple, because there's no linked files to examine, and no references.
