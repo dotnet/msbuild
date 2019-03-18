@@ -522,7 +522,7 @@ namespace Microsoft.Build
 #if !CLR2COMPATIBILITY
             // ConcurrentDictionary starts with capacity 31 but we're usually adding far more than that. Make a better first capacity guess to reduce
             // ConcurrentDictionary having to take all internal locks to upgrade its bucket list. Note that the number should be prime per the
-            // comments on the code at https://referencesource.microsoft.com/#mscorlib/system/Collections/Concurrent/ConcurrentDictionary.cs,122
+            // comments on the code at https://referencesource.microsoft.com/#mscorlib/system/Collections/Concurrent/ConcurrentDictionary.cs,122 
             // Also note default lock count is Environment.ProcessorCount from the same code.
             private const int InitialCapacity = 2053;
             private readonly ConcurrentDictionary<string, string> _internedStrings = new ConcurrentDictionary<string, string>(Environment.ProcessorCount, InitialCapacity, StringComparer.Ordinal);
