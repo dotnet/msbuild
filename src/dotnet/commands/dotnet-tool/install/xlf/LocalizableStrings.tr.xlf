@@ -25,9 +25,9 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
-        <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+        <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="translated">Şu komutu kullanarak aracı bu dizinden çağırabilirsiniz: dotnet tool run {0}
+        <target state="needs-review-translation">Şu komutu kullanarak aracı bu dizinden çağırabilirsiniz: dotnet tool run {0}
 '{1}' aracı (sürüm '{2}') başarıyla yüklendi. {3} bildirim dosyasına giriş eklendi.</target>
         <note />
       </trans-unit>

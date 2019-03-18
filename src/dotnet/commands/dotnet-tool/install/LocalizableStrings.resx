@@ -161,7 +161,7 @@
 Tool '{1}' (version '{2}') was successfully installed.</value>
   </data>
   <data name="LocalToolInstallationSucceeded" xml:space="preserve">
-    <value>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+    <value>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</value>
   </data>
   <data name="GlobalOptionDescription" xml:space="preserve">

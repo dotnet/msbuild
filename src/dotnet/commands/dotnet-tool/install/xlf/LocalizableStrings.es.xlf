@@ -25,9 +25,9 @@ La herramienta "{1}" (versión '{2}') se instaló correctamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
-        <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+        <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="translated">Se puede invocar la herramienta de este directorio mediante el comando siguiente: dotnet tool run {0}
+        <target state="needs-review-translation">Se puede invocar la herramienta de este directorio mediante el comando siguiente: dotnet tool run {0}
 La herramienta "{1}" (versión "{2}") se instaló correctamente. La entrada se ha agregado al archivo del manifiesto {3}.</target>
         <note />
       </trans-unit>
