@@ -319,6 +319,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Path.GetExtension(resourceOutput).ShouldBe(".resources");
             Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
 
+            Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
+
 #if FEATURE_RESGENCACHE
             Utilities.AssertStateFileWasWritten(t);
 #endif
@@ -333,6 +335,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Utilities.ExecuteTask(t2);
 
             File.GetLastAccessTime(t2.OutputResources[0].ItemSpec).ShouldBe(DateTime.Now, TimeSpan.FromSeconds(5));
+
+            Utilities.AssertLogContainsResource(t2, "GenerateResource.InputNewer", t2.Sources[0].ItemSpec, t2.OutputResources[0].ItemSpec);
         }
 
         /// <summary>
@@ -377,6 +381,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Utilities.ExecuteTask(t2);
 
                 Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+
+                // ToUpper because WriteTestResX uppercases links
+                Utilities.AssertLogContainsResource(t2, "GenerateResource.LinkedInputNewer", bitmap.ToUpper(), t2.OutputResources[0].ItemSpec);
             }
             finally
             {
@@ -446,6 +453,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             t2.OutputResources[1].ItemSpec.ShouldBe(createResources.OutputResources[1].ItemSpec);
             t2.FilesWritten[0].ItemSpec.ShouldBe(createResources.FilesWritten[0].ItemSpec);
             t2.FilesWritten[1].ItemSpec.ShouldBe(createResources.FilesWritten[1].ItemSpec);
+
+            Utilities.AssertLogContainsResource(t2, "GenerateResource.InputNewer", firstResx, t2.OutputResources[0].ItemSpec);
         }
 
         /// <summary>
@@ -633,6 +642,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 File.GetLastWriteTime(incrementalOutOfDate.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstWriteTime);
 
                 resourcesFile = incrementalOutOfDate.OutputResources[0].ItemSpec;
+
+                Utilities.AssertLogContainsResource(incrementalOutOfDate, "GenerateResource.InputNewer", localSystemDll, incrementalOutOfDate.OutputResources[0].ItemSpec);
             }
             finally
             {
@@ -689,6 +700,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t3.StateFile = new TaskItem(t.StateFile);
                 Utilities.ExecuteTask(t3);
                 Utilities.AssertLogNotContainsResource(t3, "GenerateResource.NothingOutOfDate", "");
+                Utilities.AssertLogContainsResource(t3, "GenerateResource.InputNewer", additionalInputs[1].ItemSpec, t3.OutputResources[0].ItemSpec);
                 resourcesFile = t3.OutputResources[0].ItemSpec;
             }
             finally
