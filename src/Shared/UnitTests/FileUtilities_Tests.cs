@@ -640,7 +640,7 @@ namespace Microsoft.Build.UnitTests
             string inputPath = longPart + @"\..\..\..\" + Environment.SystemDirectory.Substring(3);
             Console.WriteLine(inputPath.Length);
 
-            // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
+            // "c:\windows\system32\<verylong>\..\..\..\windows\system32" exists
 
             string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -648,8 +648,8 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
-                Assert.True(FileUtilities.DirectoryExistsNoThrow(inputPath));
-                Assert.False(FileUtilities.DirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
+                FileUtilities.DirectoryExistsNoThrow(inputPath).ShouldBeTrue();
+                FileUtilities.DirectoryExistsNoThrow(inputPath.Replace('\\', 'X')).ShouldBeFalse();
             }
             finally
             {
