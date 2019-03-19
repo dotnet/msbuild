@@ -65,7 +65,7 @@ Crosstargeting is implemented by having a project reference itself multiple time
 
 In order for the graph to represent inner and outer builds as nodes, it imposes a contract on what crosstargeting means, and requires the crosstargeting supporting SDKs to implement this contract.
 
-Crosstargeting supporting SDKs need to implement the following properties and semantics:
+Crosstargeting supporting SDKs MUST implement the following properties and semantics:
 - `InnerBuildProperty`. It contains the property name that defines the crosstargeting build dimension.
 - `InnerBuildPropertyValues`. It contains the property name that holds the possible values for the `InnerBuildProperty`.
 - Project classification:
@@ -83,7 +83,7 @@ For example, `InnerBuildProperty` could become `InnerBuildProperties` for SDKs w
 
 For example, here is a trimmed down `Microsoft.Net.Sdk` crosstargeting project:
 ```xml
-<Project>
+<Project Sdk="Microsoft.Net.Sdk">
   <!-- This property group is defined in the sdk -->
   <PropertyGroup>
     <InnerBuildProperty>TargetFramework</InnerBuildProperty>
@@ -113,7 +113,7 @@ Note that graph cycles are disallowed, even if they're using disconnected target
 ### Inferring which targets to run for a project within the graph
 In the classic traversal, the referencing project chooses which targets to call on the referenced projects and may call into a project multiple times with different target lists and global properties (examples in [project reference protocol](../ProjectReference-Protocol.md)). When building a graph, where projects are built before the projects that reference them, we have to determine the target list to execute on each project statically.
 
-To do this, we need to explicitly describe the project-to-project calling patterns in such a way that a graph build can infer the entry targets for a project.
+To do this, SDKs MUST explicitly describe the project-to-project calling patterns in such a way that a graph build can infer the entry targets for a project.
 
 Each project specifies the project reference protocol targets it supports, in the form of a target mapping: `target -> targetList`. The `target` represents the project reference entry target, and the `targetList` represents the list of targets that `target` ends up calling on each referenced project.
 
@@ -333,7 +333,7 @@ Cache structure: `(project path, global properties) -> results`
 The caches are applicable for the entire duration of the MSBuild.exe process. The input and output caches have the same lifetime as the `ConfigCache` and the `ResultsCache`. The `ConfigCache` and the `ResultsCache` are owned by the [BuildManager](https://github.com/Microsoft/msbuild/blob/master/src/Build/BackEnd/BuildManager/BuildManager.cs), and their lifetimes are one `BuildManager.BeginBuild` / `BuildManager.EndBuild` session. Since MSBuild.exe uses one BuildManager with one BeginBuild / EndBuild session, the cache lifetime is the same as the entire process lifetime.
 
 <!-- constraints -->
-The following are some constraints enforced by the engine. They're just for 
+The following are cache file constraints enforced by the engine.
 
 Input cache files constraints:
 - A ConfigCache / ResultsCache mapping must be unique between all input caches (multiple input caches cannot provide information for the same cache entry)

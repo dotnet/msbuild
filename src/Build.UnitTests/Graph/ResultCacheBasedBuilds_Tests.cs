@@ -391,8 +391,19 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             results["1"].Logger.Errors.First().Message.ShouldContain("MSB4252");
         }
 
-        // These method runs in two modes:
-        // populateDictionaries = true
+        /// <summary>
+        /// This method runs in two modes.
+        /// When <param name="generateCacheFiles"></param> is true, the method will fill in the empty <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/>, simulating a build from scratch.
+        /// When it is false, it uses the filled in <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/> to simulate a fully cached build.
+        /// 
+        /// </summary>
+        /// <param name="topoSortedNodes"></param>
+        /// <param name="expectedNodeBuildOutput"></param>
+        /// <param name="outputCaches"></param>
+        /// <param name="generateCacheFiles"></param>
+        /// <param name="assertBuildResults"></param>
+        /// <param name="expectedOutputProducer"></param>
+        /// <returns></returns>
         private Dictionary<string, (BuildResult Result, MockLogger Logger)> BuildUsingCaches(
             IReadOnlyCollection<ProjectGraphNode> topoSortedNodes,
             ExpectedNodeBuildOutput expectedNodeBuildOutput,
@@ -405,6 +416,12 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             expectedOutputProducer = expectedOutputProducer ?? ((node, expectedOutputs) => expectedOutputs[node]);
 
             var results = new Dictionary<string, (BuildResult Result, MockLogger Logger)>(topoSortedNodes.Count);
+
+            if (generateCacheFiles)
+            {
+                outputCaches.ShouldBeEmpty();
+                expectedNodeBuildOutput.ShouldBeEmpty();
+            }
 
             foreach (var node in topoSortedNodes)
             {
