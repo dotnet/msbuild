@@ -322,7 +322,7 @@ The output cache file can be ommited in which case the build would just reuse pr
 
 The presence of either input or output caches turns on the isolated build constraints. The engine will fail the build on:
 - `MSBuild` task calls to project files which were not defined in the `ProjectReference` item at evaluation time.
-- MSBuild task calls which cannot be served from the cache
+- `MSBuild` task calls which cannot be served from the cache
 
 <!-- cache structure -->
 These cache files contain the serialized state of MSBuild's [ConfigCache](https://github.com/Microsoft/msbuild/blob/master/src/Build/BackEnd/Components/Caching/ConfigCache.cs) and [ResultsCache](https://github.com/Microsoft/msbuild/blob/master/src/Build/BackEnd/Components/Caching/ResultsCache.cs). These two caches have been traditionally used by the engine to cache build results.
