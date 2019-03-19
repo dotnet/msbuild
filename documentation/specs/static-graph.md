@@ -321,7 +321,7 @@ The output cache file tells MSBuild where it should serialize the results of the
 The output cache file can be ommited in which case the build would just reuse prior results but not write out any new results. This could be useful when one wants to replay a build from previous caches.
 
 The presence of either input or output caches turns on the isolated build constraints. The engine will fail the build on:
-- MSBuild task calls on projects files which were not defined in the `ProjectReference` item at evaluation time.
+- `MSBuild` task calls to project files which were not defined in the `ProjectReference` item at evaluation time.
 - MSBuild task calls which cannot be served from the cache
 
 <!-- cache structure -->
