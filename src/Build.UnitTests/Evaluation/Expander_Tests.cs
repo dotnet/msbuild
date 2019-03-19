@@ -3683,6 +3683,36 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringIndexOfAny()
+        {
+            TestPropertyFunction("$(prop.IndexOfAny('y'))", "prop", "x-y-z", "2");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringLastIndexOf()
+        {
+            TestPropertyFunction("$(prop.LastIndexOf('y'))", "prop", "x-x-y-y-y-z", "8");
+
+            TestPropertyFunction("$(prop.LastIndexOf('y', 7))", "prop", "x-x-y-y-y-z", "6");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringCopy()
+        {
+            string propertyFunction = @"$([System.String]::Copy($(X)).LastIndexOf(
+                                                '.designer.cs',
+                                                System.StringComparison.OrdinalIgnoreCase))";
+            TestPropertyFunction(propertyFunction,
+                                "X", "test.designer.cs", "4");
+        }
+
+        [Fact]
+        public void PropertyFunctionVersionParse()
+        {
+            TestPropertyFunction(@"$([System.Version]::Parse('$(X)').ToString(1))", "X", "4.0", "4");
+        }
+
+        [Fact]
         public void PropertyFunctionStringArrayIndexerGetter()
         {
             TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");

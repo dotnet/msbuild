@@ -3529,6 +3529,42 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(string.IndexOfAny), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.IndexOfAny(arg0.ToCharArray());
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.LastIndexOf), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.LastIndexOf(arg0);
+                            return true;
+                        }
+                        else if (TryGetArgs(args, out arg0, out int startIndex))
+                        {
+                            returnVal = text.LastIndexOf(arg0, startIndex);
+                            return true;
+                        }
+                        else if (TryGetArgs(args, out arg0, out string arg1))
+                        {
+                            string comparisonType = arg1;
+
+                            // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
+                            if (comparisonType.Contains("."))
+                            {
+                                comparisonType = arg1.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
+                            }
+                            if (Enum.TryParse<StringComparison>(comparisonType, out StringComparison comparison))
+                            {
+                                returnVal = text.LastIndexOf(arg0, comparison);
+                                return true;
+                            }
+                        }
+                    }
                     else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
                     {
                         if (args.Length == 0)
@@ -3621,7 +3657,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                else if (objectInstance == null)
+                else if (objectInstance == null) // Calling a well-known static function
                 {
                     if (_receiverType == typeof(string))
                     {
@@ -3638,6 +3674,14 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArg(args, out string arg0))
                             {
                                 returnVal = string.IsNullOrEmpty(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(string.Copy), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = string.Copy(arg0);
                                 return true;
                             }
                         }
@@ -3722,7 +3766,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetPathOfFileAbove), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out string arg0, out var arg1))
+                            if (TryGetArgs(args, out string arg0, out string arg1))
                             {
                                 returnVal = IntrinsicFunctions.GetPathOfFileAbove(arg0, arg1, _fileSystem);
                                 return true;
@@ -3730,7 +3774,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Add), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
+                            if (TryGetArgs(args, out double arg0, out double arg1))
                             {
                                 returnVal = arg0 + arg1;
                                 return true;
@@ -3738,7 +3782,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Subtract), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
+                            if (TryGetArgs(args, out double arg0, out double arg1))
                             {
                                 returnVal = arg0 - arg1;
                                 return true;
@@ -3746,7 +3790,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Multiply), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
+                            if (TryGetArgs(args, out double arg0, out double arg1))
                             {
                                 returnVal = arg0 * arg1;
                                 return true;
@@ -3754,7 +3798,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Divide), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
+                            if (TryGetArgs(args, out double arg0, out double arg1))
                             {
                                 returnVal = arg0 / arg1;
                                 return true;
@@ -3854,6 +3898,17 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArg(args, out string arg0))
                             {
                                 returnVal = Path.GetDirectoryName(arg0);
+                                return true;
+                            }
+                        }
+                    }
+                    else if (_receiverType == typeof(Version))
+                    {
+                        if (string.Equals(_methodMethodName, nameof(Version.Parse), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Version.Parse(arg0);
                                 return true;
                             }
                         }
@@ -4068,6 +4123,28 @@ namespace Microsoft.Build.Evaluation
                 if (value0 != null &&
                     arg1 != null &&
                     int.TryParse(value0, out arg0))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryGetArgs(object[] args, out string arg0, out int arg1)
+            {
+                arg0 = null;
+                arg1 = 0;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                var value1 = args[1] as string;
+                arg0 = args[0] as string;
+                if (value1 != null &&
+                    arg0 != null &&
+                    int.TryParse(value1, out arg1))
                 {
                     return true;
                 }
