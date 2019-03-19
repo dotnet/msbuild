@@ -65,6 +65,10 @@
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
+    <!-- Dependencies from https://github.com/mono/linker -->
+    <ILLinkTasksPackageVersion>0.1.6-prerelease.19164.1</ILLinkTasksPackageVersion>
+  </PropertyGroup>  
+  <PropertyGroup>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftDotNetCliUtilsPackageVersion>2.2.100-refac-20180613-1</MicrosoftDotNetCliUtilsPackageVersion>
     <SystemDataSqlClientVersionPackageVersion>4.3.0</SystemDataSqlClientVersionPackageVersion>
