@@ -337,7 +337,7 @@ The following are some constraints enforced by the engine. They're just for
 
 Input cache files constraints:
 - A ConfigCache / ResultsCache mapping must be unique between all input caches (multiple input caches cannot provide information for the same cache entry)
-- For each input cache, ConfigCache.Entries.Size == ResultsCache.Entries.Size
+- For each input cache, `ConfigCache.Entries.Size == ResultsCache.Entries.Size`
 - For each input cache, there is exactly one mapping from ConfigCache to ResultsCache
 
 Output cache file constraints:
