@@ -34,11 +34,11 @@ namespace Microsoft.Build.Experimental.Graph
         {
         }
 
-        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonCrosstargetingNodes = new[] {(GlobalPropertiesModifier) ProjectReferenceGlobalPropertiesModifier}.ToImmutableList();
+        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] {(GlobalPropertiesModifier) ProjectReferenceGlobalPropertiesModifier}.ToImmutableList();
 
         internal enum ProjectType
         {
-            OuterBuild, InnerBuild, NonCrossTargeting
+            OuterBuild, InnerBuild, NonMultitargeting
         }
 
         public IEnumerable<ConfigurationMetadata> GetReferences(ProjectInstance requesterInstance)
@@ -52,11 +52,11 @@ namespace Microsoft.Build.Experimental.Graph
                     references = GetInnerBuildReferences(requesterInstance);
                     break;
                 case ProjectType.InnerBuild:
-                    globalPropertiesModifiers = ModifierForNonCrosstargetingNodes.Add((parts, reference) => parts.AddPropertyToUndefine(GetInnerBuildPropertyName(requesterInstance)));
+                    globalPropertiesModifiers = ModifierForNonMultitargetingNodes.Add((parts, reference) => parts.AddPropertyToUndefine(GetInnerBuildPropertyName(requesterInstance)));
                     references = requesterInstance.GetItems(ItemTypeNames.ProjectReference);
                     break;
-                case ProjectType.NonCrossTargeting:
-                    globalPropertiesModifiers = ModifierForNonCrosstargetingNodes;
+                case ProjectType.NonMultitargeting:
+                    globalPropertiesModifiers = ModifierForNonMultitargetingNodes;
                     references = requesterInstance.GetItems(ItemTypeNames.ProjectReference);
                     break;
                 default:
@@ -112,7 +112,7 @@ namespace Microsoft.Build.Experimental.Graph
                 ? ProjectType.OuterBuild
                 : isInnerBuild
                     ? ProjectType.InnerBuild
-                    : ProjectType.NonCrossTargeting;
+                    : ProjectType.NonMultitargeting;
         }
 
         public static void PostProcess(ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allNodes)
@@ -376,7 +376,7 @@ namespace Microsoft.Build.Experimental.Graph
                         return _allTargets;
                     case ProjectType.OuterBuild:
                         return _outerBuildTargets;
-                    case ProjectType.NonCrossTargeting:
+                    case ProjectType.NonMultitargeting:
                         return _allTargets;
                     default:
                         throw new ArgumentOutOfRangeException();

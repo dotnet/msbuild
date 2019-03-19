@@ -30,7 +30,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                                                                         <InnerBuildPropertyValues>InnerBuildProperties</InnerBuildPropertyValues>
                                                                         <InnerBuildProperties>a;b</InnerBuildProperties>
                                                                      </PropertyGroup>";
-        private static readonly string ProjectReferenceTargetsWithCrosstargeting = @"<ItemGroup>
+        private static readonly string ProjectReferenceTargetsWithMultitargeting = @"<ItemGroup>
                                                                                         <!-- Item order is important to ensure outer build targets are put in front of inner build ones -->
                                                                                         <ProjectReferenceTargets Include='A' Targets='AHelperInner;A' />
                                                                                         <ProjectReferenceTargets Include='A' Targets='AHelperOuter' OuterBuild='true' />
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         private static string[] NonOuterBuildTargets = {"AHelperOuter", "AHelperInner", "A"};
         private static string[] OuterBuildTargets = {"AHelperOuter"};
 
-        private static readonly string OuterBuildSpecificationWithProjectReferenceTargets = OuterBuildSpecification + ProjectReferenceTargetsWithCrosstargeting;
+        private static readonly string OuterBuildSpecificationWithProjectReferenceTargets = OuterBuildSpecification + ProjectReferenceTargetsWithMultitargeting;
 
         public ProjectGraphTests(ITestOutputHelper outputHelper)
         {
@@ -656,11 +656,11 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
-        public void GetTargetListsUsesAllTargetsForNonCrosstargetingNodes()
+        public void GetTargetListsUsesAllTargetsForNonMultitargetingNodes()
         {
             using (var env = TestEnvironment.Create())
             {
-                var root1 = CreateProjectFile(env, 1, new[] {2}, null, null, ProjectReferenceTargetsWithCrosstargeting).Path;
+                var root1 = CreateProjectFile(env, 1, new[] {2}, null, null, ProjectReferenceTargetsWithMultitargeting).Path;
                 CreateProjectFile(env, 2);
                 
                 var projectGraph = new ProjectGraph(root1);
@@ -724,7 +724,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                var root1 = CreateProjectFile(env, 1, new[] {2}, null, null, ProjectReferenceTargetsWithCrosstargeting).Path;
+                var root1 = CreateProjectFile(env, 1, new[] {2}, null, null, ProjectReferenceTargetsWithMultitargeting).Path;
                 CreateProjectFile(env, 2, null, null, null, OuterBuildSpecificationWithProjectReferenceTargets);
                 
                 var projectGraph = new ProjectGraph(root1);
@@ -752,7 +752,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
-        public void GetTargetListsForComplexCrosstargetingGraph()
+        public void GetTargetListsForComplexMultitargetingGraph()
         {
             using (var env = TestEnvironment.Create())
             {
@@ -778,7 +778,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                     null,
                     null,
                     null,
-                    ProjectReferenceTargetsWithCrosstargeting +
+                    ProjectReferenceTargetsWithMultitargeting +
                     $@"<ItemGroup>
                             <ProjectReference Include=`1.proj` Properties=`{InnerBuildProperty}=b`/>
                             <ProjectReference Include=`4.proj`/>
@@ -800,7 +800,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                     new []{6},
                     null,
                     null,
-                    ProjectReferenceTargetsWithCrosstargeting);
+                    ProjectReferenceTargetsWithMultitargeting);
 
                 CreateProjectFile(
                     env,
@@ -837,16 +837,16 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
                 targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
 
-                AssertCrossTargetingNode(1, projectGraph, targetLists, new []{"A"}, NonOuterBuildTargets);
-                AssertCrossTargetingNode(3, projectGraph, targetLists, OuterBuildTargets, NonOuterBuildTargets);
-                AssertCrossTargetingNode(6, projectGraph, targetLists, OuterBuildTargets, NonOuterBuildTargets);
+                AssertMultitargetingNode(1, projectGraph, targetLists, new []{"A"}, NonOuterBuildTargets);
+                AssertMultitargetingNode(3, projectGraph, targetLists, OuterBuildTargets, NonOuterBuildTargets);
+                AssertMultitargetingNode(6, projectGraph, targetLists, OuterBuildTargets, NonOuterBuildTargets);
 
                 targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBe(new []{"A"});
                 targetLists[GetFirstNodeWithProjectNumber(projectGraph, 4)].ShouldBe(NonOuterBuildTargets);
                 targetLists[GetFirstNodeWithProjectNumber(projectGraph, 5)].ShouldBe(NonOuterBuildTargets);
             }
 
-            void AssertCrossTargetingNode(int projectNumber, ProjectGraph projectGraph, IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists, string[] outerBuildTargets, string[] nonOuterBuildTargets)
+            void AssertMultitargetingNode(int projectNumber, ProjectGraph projectGraph, IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists, string[] outerBuildTargets, string[] nonOuterBuildTargets)
             {
                 targetLists[GetNodesWithProjectNumber(projectGraph, projectNumber).First(IsOuterBuild)].ShouldBe(outerBuildTargets);
 
@@ -1184,16 +1184,16 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.InnerBuild;
         }
 
-        private static bool IsNotCrossTargeting(ProjectGraphNode project)
+        private static bool IsNotMultitargeting(ProjectGraphNode project)
         {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.NonCrossTargeting;
+            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.NonMultitargeting;
         }
 
-        private static void AssertNonCrossTargetingNode(ProjectGraphNode node, Dictionary<string, string> additionalGlobalProperties = null)
+        private static void AssertNonMultitargetingNode(ProjectGraphNode node, Dictionary<string, string> additionalGlobalProperties = null)
         {
             additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
 
-            IsNotCrossTargeting(node).ShouldBeTrue();
+            IsNotMultitargeting(node).ShouldBeTrue();
             node.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
             node.ProjectInstance.GetProperty(InnerBuildProperty).ShouldBeNull();
         }
@@ -1249,7 +1249,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
-        public void ReferenceOfCrosstargetingProjectShouldNotInheritInnerBuildSpecificGlobalProperties()
+        public void ReferenceOfMultitargetingProjectShouldNotInheritInnerBuildSpecificGlobalProperties()
         {
             var root = CreateProjectFile(_env, 1, new[] {2}, null, null, OuterBuildSpecification).Path;
             CreateProjectFile(_env, 2);
@@ -1262,9 +1262,9 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
             AssertOuterBuildAsRoot(graph.GraphRoots.First());
 
-            var nonCrosstargetingNode = GetFirstNodeWithProjectNumber(graph, 2);
+            var nonMultitargetingNode = GetFirstNodeWithProjectNumber(graph, 2);
 
-            AssertNonCrossTargetingNode(nonCrosstargetingNode);
+            AssertNonMultitargetingNode(nonMultitargetingNode);
         }
 
         [Fact]
@@ -1290,9 +1290,9 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
             AssertInnerBuildEvaluation(graph.GraphRoots.First(), false, new Dictionary<string, string>());
 
-            var nonCrosstargetingNode = GetFirstNodeWithProjectNumber(graph, 2);
+            var nonMultitargetingNode = GetFirstNodeWithProjectNumber(graph, 2);
 
-            AssertNonCrossTargetingNode(nonCrosstargetingNode);
+            AssertNonMultitargetingNode(nonMultitargetingNode);
         }
 
         [Fact]
@@ -1309,9 +1309,9 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
             AssertInnerBuildEvaluation(graph.GraphRoots.First(), true, new Dictionary<string, string>());
 
-            var nonCrosstargetingNode = GetFirstNodeWithProjectNumber(graph, 2);
+            var nonMultitargetingNode = GetFirstNodeWithProjectNumber(graph, 2);
 
-            AssertNonCrossTargetingNode(nonCrosstargetingNode);
+            AssertNonMultitargetingNode(nonMultitargetingNode);
         }
 
         [Fact]
@@ -1331,8 +1331,8 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             AssertOuterBuildAsRoot(graph.GraphRoots.First());
             AssertOuterBuildAsNonRoot(GetNodesWithProjectNumber(graph, 4).First(IsOuterBuild));
 
-            AssertNonCrossTargetingNode(GetFirstNodeWithProjectNumber(graph, 2));
-            AssertNonCrossTargetingNode(GetFirstNodeWithProjectNumber(graph, 3));
+            AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 2));
+            AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 3));
         }
 
         [Fact]
@@ -1359,8 +1359,8 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             AssertOuterBuildAsNonRoot(GetNodesWithProjectNumber(graph, 2).First(IsOuterBuild));
             AssertOuterBuildAsNonRoot(GetNodesWithProjectNumber(graph, 4).First(IsOuterBuild));
 
-            AssertNonCrossTargetingNode(GetFirstNodeWithProjectNumber(graph, 3));
-            AssertNonCrossTargetingNode(GetFirstNodeWithProjectNumber(graph, 5));
+            AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 3));
+            AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 5));
 
             var innerBuildWithCommonReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties[InnerBuildProperty] == "a");
 
@@ -1398,7 +1398,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             var outerBuild = graph.GraphRoots.First(IsOuterBuild);
 
             AssertOuterBuildAsRoot(outerBuild, additionalGlobalProperties);
-            AssertNonCrossTargetingNode(GetFirstNodeWithProjectNumber(graph, 2), additionalGlobalProperties);
+            AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 2), additionalGlobalProperties);
 
             var referencedInnerBuild = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GetPropertyValue(InnerBuildProperty) == "a");
 
@@ -1430,7 +1430,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             graph.ProjectNodes.Count.ShouldBe(3);
 
             var rootNode = graph.GraphRoots.First();
-            AssertNonCrossTargetingNode(rootNode, additionalGlobalProperties);
+            AssertNonMultitargetingNode(rootNode, additionalGlobalProperties);
 
             rootNode.ProjectReferences.ShouldHaveSingleItem();
             var innerBuildNode = rootNode.ProjectReferences.First();
@@ -1438,7 +1438,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             AssertInnerBuildEvaluation(innerBuildNode, false, additionalGlobalProperties);
 
             innerBuildNode.ProjectReferences.ShouldHaveSingleItem();
-            AssertNonCrossTargetingNode(innerBuildNode.ProjectReferences.First(), additionalGlobalProperties);
+            AssertNonMultitargetingNode(innerBuildNode.ProjectReferences.First(), additionalGlobalProperties);
         }
 
         public static IEnumerable<object[]> AllNodesShouldHaveGraphBuildGlobalPropertyData
