@@ -3,10 +3,10 @@
     - [Motivations](#motivations)
   - [Project Graph](#project-graph)
     - [Build dimensions](#build-dimensions)
-      - [Crosstargeting](#crosstargeting)
+      - [Multitargeting](#multitargeting)
     - [Building a project graph](#building-a-project-graph)
     - [Inferring which targets to run for a project within the graph](#inferring-which-targets-to-run-for-a-project-within-the-graph)
-      - [Crosstargeting details](#crosstargeting-details)
+      - [Multitargeting details](#multitargeting-details)
     - [Underspecified graphs](#underspecified-graphs)
     - [Public API](#public-api)
   - [Isolated builds](#isolated-builds)
@@ -51,37 +51,37 @@ The graph also supports multiple entry points, so this enables scenarios where p
 
 For example, if project A had a project reference to project B with `GlobalPropertiesToRemove=Platform`, and we wanted to build project A for x86 and x64 so used both as entry points, the graph would consist of 3 nodes: project A with `Platform=x86`, project A with `Platform=x64`, and project B with no global properties set.
 
-#### Crosstargeting
+#### Multitargeting
 
 <!-- definition and TF example-->
-Crosstargeting refers to projects that specify multiple build dimensions applicable to themselves. For example, `Microsoft.Net.Sdk` based projects can target multiple target frameworks (e.g. `<TargetFrameworks>net472;netcoreapp2.2</TargetFrameworks>`). As discussed, build dimensions are expressed as global properties. Let's call the global properties that define the crosstargeting set as the crosstargeting global properties.
+Multitargeting refers to projects that specify multiple build dimensions applicable to themselves. For example, `Microsoft.Net.Sdk` based projects can target multiple target frameworks (e.g. `<TargetFrameworks>net472;netcoreapp2.2</TargetFrameworks>`). As discussed, build dimensions are expressed as global properties. Let's call the global properties that define the multitargeting set as the multitargeting global properties.
 
 <!-- how it works: outer builds and inner builds -->
-Crosstargeting is implemented by having a project reference itself multiple times, once for each combination of crosstargeting global properties. This leads to multiple evaluations of the same project, with different global properties. These evaluations can be classified in two groups
-1.  Multiple inner builds. Each inner build is evaluated with one set of crosstargeting global properties (e.g. the `TargetFramework=net472` inner build, or the `TargetFramework=netcoreapp2.2` inner build).
-2.  One outer build. This evaluation does not have any crosstargeting global properties set. It can be viewed as a proxy for the inner builds. Other projects query the outer build in order to learn the set of valid crosstargeting global properties (the set of valid inner builds). When the outer build is also the root of the project to project graph, the outer build multicasts the entry target (i.e. `Build`, `Clean`, etc) to all inner builds.
+Multitargeting is implemented by having a project reference itself multiple times, once for each combination of multitargeting global properties. This leads to multiple evaluations of the same project, with different global properties. These evaluations can be classified in two groups
+1.  Multiple inner builds. Each inner build is evaluated with one set of multitargeting global properties (e.g. the `TargetFramework=net472` inner build, or the `TargetFramework=netcoreapp2.2` inner build).
+2.  One outer build. This evaluation does not have any multitargeting global properties set. It can be viewed as a proxy for the inner builds. Other projects query the outer build in order to learn the set of valid multitargeting global properties (the set of valid inner builds). When the outer build is also the root of the project to project graph, the outer build multicasts the entry target (i.e. `Build`, `Clean`, etc) to all inner builds.
 
 <!-- contract with the graph -->
 
-In order for the graph to represent inner and outer builds as nodes, it imposes a contract on what crosstargeting means, and requires the crosstargeting supporting SDKs to implement this contract.
+In order for the graph to represent inner and outer builds as nodes, it imposes a contract on what multitargeting means, and requires the multitargeting supporting SDKs to implement this contract.
 
-Crosstargeting supporting SDKs MUST implement the following properties and semantics:
-- `InnerBuildProperty`. It contains the property name that defines the crosstargeting build dimension.
+Multitargeting supporting SDKs MUST implement the following properties and semantics:
+- `InnerBuildProperty`. It contains the property name that defines the multitargeting build dimension.
 - `InnerBuildPropertyValues`. It contains the property name that holds the possible values for the `InnerBuildProperty`.
 - Project classification:
   - *Outer build*, when `$($(InnerBuildProperty))` is empty AND  `$($(InnerBuildPropertyValues))` is not empty.
   - *Dependent inner build*, when both `$($(InnerBuildProperty))` and  `$($(InnerBuildPropertyValues))` are non empty. These are inner builds that were generated from an outer build.
   - *Standalone inner build*, when `$($(InnerBuildProperty))` is not empty and `$($(InnerBuildPropertyValues))` is empty. These are inner builds that were not generated from an outer build.
-  - *Non crosstargeting build*, when both `$($(InnerBuildProperty))` and  `$($(InnerBuildPropertyValues))` are empty.
+  - *Non multitargeting build*, when both `$($(InnerBuildProperty))` and  `$($(InnerBuildPropertyValues))` are empty.
 - Node edges
-  - When project A references crosstargeting project B, and B is identified as an outer build, the graph node for project A will reference both the outer build of B, and all the inner builds of B. The edges to the inner builds are speculative, as at build time only one inner build gets referenced. However, the graph cannot know at evaluation time which inner build will get chosen.
-  - When crosstargeting project B is a root, then the outer build node for B will reference the inner builds of B.
-  - For crosstargeting projects, the `ProjectReference` item gets applied only to inner builds. It is the inner builds that reference other project files, not the outer build.
+  - When project A references multitargeting project B, and B is identified as an outer build, the graph node for project A will reference both the outer build of B, and all the inner builds of B. The edges to the inner builds are speculative, as at build time only one inner build gets referenced. However, the graph cannot know at evaluation time which inner build will get chosen.
+  - When multitargeting project B is a root, then the outer build node for B will reference the inner builds of B.
+  - For multitargeting projects, the `ProjectReference` item gets applied only to inner builds. It is the inner builds that reference other project files, not the outer build.
 
-These specific rules represent the minimal rules required to represent crosstargeting in `Microsoft.Net.Sdk`. As we adopt SDKs whose crosstargeting complexity that cannot be expressed with the above rules, we'll extend the rules.
-For example, `InnerBuildProperty` could become `InnerBuildProperties` for SDKs where there's multiple crosstargeting global properties. 
+These specific rules represent the minimal rules required to represent multitargeting in `Microsoft.Net.Sdk`. As we adopt SDKs whose multitargeting complexity that cannot be expressed with the above rules, we'll extend the rules.
+For example, `InnerBuildProperty` could become `InnerBuildProperties` for SDKs where there's multiple multitargeting global properties. 
 
-For example, here is a trimmed down `Microsoft.Net.Sdk` crosstargeting project:
+For example, here is a trimmed down `Microsoft.Net.Sdk` multitargeting project:
 ```xml
 <Project Sdk="Microsoft.Net.Sdk">
   <!-- This property group is defined in the sdk -->
@@ -98,7 +98,7 @@ For example, here is a trimmed down `Microsoft.Net.Sdk` crosstargeting project:
 ```
 
 To summarize, there are two main patterns for build dimensions which are handled:
-1. The project crosstargets, in which case the SDK needs to specify the crosstargeting build dimensions.
+1. The project multitargets, in which case the SDK needs to specify the multitargeting build dimensions.
 2. A different set of global properties are used to choose the dimension like with Configuration or Platform. The project graph supports this via multiple entry points.
 
 ### Building a project graph
@@ -183,23 +183,23 @@ We'll represent the project reference protocols as `ProjectReferenceTargets` ite
 </ItemGroup>
 ```
 
-#### Crosstargeting details
+#### Multitargeting details
 
-A crosstargeting project can get called with different targets for the outer build and the inner builds. In this case, the `ProjectReferenceTargets` items containing targets for the outer build are marked with the `OuterBuild=true` metadata. Here are the rules for how targets from `ProjectReferenceTargets` get assigned to different project types:
+A multitargeting project can get called with different targets for the outer build and the inner builds. In this case, the `ProjectReferenceTargets` items containing targets for the outer build are marked with the `OuterBuild=true` metadata. Here are the rules for how targets from `ProjectReferenceTargets` get assigned to different project types:
   - *Outer build*: targets with `OuterBuild=true` metadata
   - *Dependent inner build*: targets without `OuterBuild=true` metadata
-  - *Standalone inner build*: the same as non crosstargeting builds.
-  - *Non crosstargeting build*: concatenation of targets with `OuterBuild=true` metadata and targets without `OuterBuild=true` metadata
+  - *Standalone inner build*: the same as non multitargeting builds.
+  - *Non multitargeting build*: concatenation of targets with `OuterBuild=true` metadata and targets without `OuterBuild=true` metadata
 
 **OPEN ISSUE:** Current implementation does not disambiguate between the two types of inner builds, leading to overbuilding certain targets by conservatively treating both inner build types as standalone inner builds.
 
-For example, consider the graph of `A (non crosstargeting) -> B (crosstargeting with 2 innerbuilds) -> C (standalone inner build)`, with the following target propagation rules:
+For example, consider the graph of `A (non multitargeting) -> B (multitargeting with 2 innerbuilds) -> C (standalone inner build)`, with the following target propagation rules:
 ```
 A -> Ao when OuterBuild=true
 A -> Ai, A
 ```
 
-According to the graph construction rules defined in the [crosstargeting section](#crosstargeting), we get the following graph, annotated with the target propagation for target `A`.
+According to the graph construction rules defined in the [multitargeting section](#multitargeting), we get the following graph, annotated with the target propagation for target `A`.
 
 ```
                    A+-->ProjA
