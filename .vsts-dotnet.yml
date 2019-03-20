@@ -2,10 +2,6 @@ trigger:
 - master
 - vs*
 
-variables:
-  SignType: real
-  SkipApplyOptimizationData: false
-
 jobs:
 - job: Windows_NT
   pool: 
