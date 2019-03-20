@@ -270,6 +270,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
+            testProject.AdditionalProperties["DisableRuntimeTargets"] = "false";
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
@@ -293,6 +294,39 @@ namespace Microsoft.NET.Build.Tests
                 "runtimes/osx-x64/native/libsqlite3.dylib",
                 "runtimes/win7-x64/native/sqlite3.dll",
                 "runtimes/win7-x86/native/sqlite3.dll"
+            });
+        }
+
+        [Fact]
+        public void It_does_not_copy_local_runtime_dependencies_for_netframework_projects()
+        {
+            const string ProjectName = "TestProjWithPackageDependencies";
+
+            TestProject testProject = new TestProject()
+            {
+                Name = ProjectName,
+                IsSdkProject = true,
+                TargetFrameworks = "net46"
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
+
+             var testProjectInstance = _testAssetsManager
+                .CreateTestProject(testProject)
+                .Restore(Log, ProjectName);
+
+            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{ProjectName}.dll",
+                $"{ProjectName}.pdb",
+                "Newtonsoft.Json.dll",
             });
         }
 

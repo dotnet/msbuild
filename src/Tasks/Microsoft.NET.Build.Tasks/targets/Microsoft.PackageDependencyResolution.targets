@@ -215,6 +215,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <EnsureRuntimePackageDependencies>true</EnsureRuntimePackageDependencies>
     </PropertyGroup>
 
+    <!-- Disable resolution of runtime target assets if not targeting .NETCoreApp -->
+    <PropertyGroup Condition="'$(DisableRuntimeTargets)' == '' and '$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
+      <DisableRuntimeTargets>true</DisableRuntimeTargets>
+    </PropertyGroup>
+
     <ItemGroup>
       <_PackAsToolShimRuntimeIdentifiers Condition="@(_PackAsToolShimRuntimeIdentifiers) ==''" Include="$(PackAsToolShimRuntimeIdentifiers)"/>
 
@@ -239,6 +244,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"
       DisablePackageAssetsCache="$(DisablePackageAssetsCache)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
+      DisableRuntimeTargets="$(DisableRuntimeTargets)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
       DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
