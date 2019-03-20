@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview4.19168.1">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview4.19169.1">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>2f5c76e70d1cc33661cdd7b3bb02f6f29fcc2563</Sha>
+      <Sha>dac13e01872f17c82db0b13ab13ef548e39a8fb4</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview4.19165.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
@@ -45,7 +45,8 @@
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19164.1">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
