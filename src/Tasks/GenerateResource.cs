@@ -1618,7 +1618,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool NeedToRebuildSourceFile(string sourceFilePath, DateTime sourceTime, string outputFilePath, DateTime outputTime)
         {
-
             if (outputTime == DateTime.MinValue)
             {
                 // Output file is missing, need to build
