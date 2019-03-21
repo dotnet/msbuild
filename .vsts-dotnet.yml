@@ -2,9 +2,12 @@ trigger:
 - master
 - vs*
 
-variables:
-  SignType: real
-  SkipApplyOptimizationData: false
+# If defined here, these values are not overrideable
+# Once they exist, we should define these as "runtime parameters"
+# https://github.com/Microsoft/azure-pipelines-yaml/pull/129
+# variables:
+#   SignType: real
+#   SkipApplyOptimizationData: false
 
 jobs:
 - job: Windows_NT
