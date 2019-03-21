@@ -1,5 +1,5 @@
-﻿using Microsoft.DotNet.Cli.Utils;
-using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
     {
         string CommandName { get; }
 
-        LaunchSettingsApplyResult TryApplySettings(JObject document, JObject model, ref ICommand command);
+        LaunchSettingsApplyResult TryApplySettings(JsonElement document, JsonElement model, ref ICommand command);
     }
 
 }

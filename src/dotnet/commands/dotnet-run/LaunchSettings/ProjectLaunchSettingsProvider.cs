@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.DotNet.Cli.Utils;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
@@ -11,9 +11,35 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         public string CommandName => CommandNameValue;
 
-        public LaunchSettingsApplyResult TryApplySettings(JObject document, JObject model, ref ICommand command)
+        public LaunchSettingsApplyResult TryApplySettings(JsonElement document, JsonElement model, ref ICommand command)
         {
-            var config = model.ToObject<ProjectLaunchSettingsModel>();
+            var config = new ProjectLaunchSettingsModel();
+            foreach (var property in model.EnumerateObject())
+            {
+                if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.CommandLineArgs), StringComparison.OrdinalIgnoreCase))
+                {
+                    config.CommandLineArgs = property.Value.GetString();
+                }
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchBrowser), StringComparison.OrdinalIgnoreCase))
+                {
+                    config.LaunchBrowser = property.Value.GetBoolean();
+                }
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchUrl), StringComparison.OrdinalIgnoreCase))
+                {
+                    config.LaunchUrl = property.Value.GetString();
+                }
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.ApplicationUrl), StringComparison.OrdinalIgnoreCase))
+                {
+                    config.ApplicationUrl = property.Value.ToString();
+                }
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.EnvironmentVariables), StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach(var environmentVariable in property.Value.EnumerateObject())
+                    {
+                        config.EnvironmentVariables[environmentVariable.Name] = environmentVariable.Value.GetString();
+                    }
+                }
+            }
 
             if (!string.IsNullOrEmpty(config.ApplicationUrl))
             {
@@ -36,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
         {
             public ProjectLaunchSettingsModel()
             {
-                EnvironmentVariables = new Dictionary<string, string>();
+                EnvironmentVariables = new Dictionary<string, string>(StringComparer.Ordinal);
             }
 
             public string CommandLineArgs { get; set; }
