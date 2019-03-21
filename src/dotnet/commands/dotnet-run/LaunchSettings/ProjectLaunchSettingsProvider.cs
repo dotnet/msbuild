@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                 }
                 else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.ApplicationUrl), StringComparison.OrdinalIgnoreCase))
                 {
-                    config.ApplicationUrl = property.Value.ToString();
+                    config.ApplicationUrl = property.Value.GetString();
                 }
                 else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.EnvironmentVariables), StringComparison.OrdinalIgnoreCase))
                 {
