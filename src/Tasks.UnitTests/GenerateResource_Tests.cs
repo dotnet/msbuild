@@ -339,6 +339,33 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Utilities.AssertLogContainsResource(t2, "GenerateResource.InputNewer", t2.Sources[0].ItemSpec, t2.OutputResources[0].ItemSpec);
         }
 
+        [Fact]
+        public void ForceOutOfDateByDeletion()
+        {
+            var folder = _env.CreateFolder();
+            string resxFileInput = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
+
+            GenerateResource t = Utilities.CreateTask(_output);
+            t.StateFile = new TaskItem(_env.GetTempFile(".cache").Path);
+            t.Sources = new ITaskItem[] { new TaskItem(resxFileInput) };
+
+            Utilities.ExecuteTask(t);
+
+            Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
+
+            GenerateResource t2 = Utilities.CreateTask(_output);
+            t2.StateFile = new TaskItem(t.StateFile);
+            t2.Sources = new ITaskItem[] { new TaskItem(resxFileInput) };
+
+            // Execute the task again when the input (5m ago) is newer than the previous outputs (10m ago)
+            File.Delete(resxFileInput);
+
+            t2.Execute().ShouldBeFalse();
+
+            Utilities.AssertLogContainsResource(t2, "GenerateResource.InputDoesntExist", t2.Sources[0].ItemSpec);
+        }
+
+
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
@@ -384,6 +411,60 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 // ToUpper because WriteTestResX uppercases links
                 Utilities.AssertLogContainsResource(t2, "GenerateResource.LinkedInputNewer", bitmap.ToUpper(), t2.OutputResources[0].ItemSpec);
+            }
+            finally
+            {
+                // Done, so clean up.
+                File.Delete(t.Sources[0].ItemSpec);
+                File.Delete(bitmap);
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    if (File.Exists(item.ItemSpec))
+                    {
+                        File.Delete(item.ItemSpec);
+                    }
+                }
+            }
+        }
+
+#if FEATURE_LINKED_RESOURCES
+        [Fact]
+#else
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
+#endif
+        public void ForceOutOfDateLinkedByDeletion()
+        {
+            string bitmap = Utilities.CreateWorldsSmallestBitmap();
+            string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
+
+            GenerateResource t = Utilities.CreateTask(_output);
+            t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+            try
+            {
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+                Utilities.ExecuteTask(t);
+
+                string resourcesFile = t.OutputResources[0].ItemSpec;
+                Path.GetExtension(resourcesFile).ShouldBe(".resources");
+                resourcesFile = t.FilesWritten[0].ItemSpec;
+                Path.GetExtension(resourcesFile).ShouldBe(".resources");
+
+#if FEATURE_RESGENCACHE
+                Utilities.AssertStateFileWasWritten(t);
+#endif
+
+                GenerateResource t2 = Utilities.CreateTask(_output);
+                t2.StateFile = new TaskItem(t.StateFile);
+                t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+                File.Delete(bitmap);
+
+                t2.Execute().ShouldBeFalse();
+
+                // ToUpper because WriteTestResX uppercases links
+                Utilities.AssertLogContainsResource(t2, "GenerateResource.LinkedInputDoesntExist", bitmap.ToUpper());
             }
             finally
             {
