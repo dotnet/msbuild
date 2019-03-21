@@ -24,9 +24,9 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
         private static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}}.ToImmutableDictionary();
 
-        private static readonly string InnerBuildProperty = "InnerBuild";
-        private static readonly string OuterBuildSpecification = $@"<PropertyGroup>
-                                                                        <InnerBuildProperty>{InnerBuildProperty}</InnerBuildProperty>
+        private static readonly string InnerBuildPropertyName = "InnerBuild";
+        private static readonly string MultitargetingSpecification = $@"<PropertyGroup>
+                                                                        <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>InnerBuildProperties</InnerBuildPropertyValues>
                                                                         <InnerBuildProperties>a;b</InnerBuildProperties>
                                                                      </PropertyGroup>";
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         private static string[] NonOuterBuildTargets = {"AHelperOuter", "AHelperInner", "A"};
         private static string[] OuterBuildTargets = {"AHelperOuter"};
 
-        private static readonly string OuterBuildSpecificationWithProjectReferenceTargets = OuterBuildSpecification + ProjectReferenceTargetsWithMultitargeting;
+        private static readonly string OuterBuildSpecificationWithProjectReferenceTargets = MultitargetingSpecification + ProjectReferenceTargetsWithMultitargeting;
 
         public ProjectGraphTests(ITestOutputHelper outputHelper)
         {
@@ -537,10 +537,10 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3 }, new Dictionary<string, string[]> { { "A", new[] { "B" } } });
-                CreateProjectFile(env, 2, new[] { 4 }, new Dictionary<string, string[]> { { "B", new[] { "C" } } });
-                CreateProjectFile(env, 3, new[] { 4 }, new Dictionary<string, string[]> { { "B", new[] { "D" } } });
-                CreateProjectFile(env, 4);
+                TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2, 3 }, projectReferenceTargets: new Dictionary<string, string[]> { { "A", new[] { "B" } } });
+                CreateProjectFile(env: env, projectNumber: 2, projectReferences: new[] { 4 }, projectReferenceTargets: new Dictionary<string, string[]> { { "B", new[] { "C" } } });
+                CreateProjectFile(env: env, projectNumber: 3, projectReferences: new[] { 4 }, projectReferenceTargets: new Dictionary<string, string[]> { { "B", new[] { "D" } } });
+                CreateProjectFile(env: env, projectNumber: 4);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(4);
@@ -566,9 +566,9 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 }, projectReferenceTargets);
-                CreateProjectFile(env, 2, new[] { 3 }, projectReferenceTargets);
-                CreateProjectFile(env, 3, Array.Empty<int>(), projectReferenceTargets);
+                TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: projectReferenceTargets);
+                CreateProjectFile(env: env, projectNumber: 2, projectReferences: new[] { 3 }, projectReferenceTargets: projectReferenceTargets);
+                CreateProjectFile(env: env, projectNumber: 3, projectReferences: Array.Empty<int>(), projectReferenceTargets: projectReferenceTargets);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(3);
@@ -594,12 +594,12 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3, 5 }, projectReferenceTargets);
-                CreateProjectFile(env, 2, new[] { 4, 5 }, projectReferenceTargets);
-                CreateProjectFile(env, 3, new[] { 5, 6 }, projectReferenceTargets);
-                CreateProjectFile(env, 4, new[] { 5 }, projectReferenceTargets);
-                CreateProjectFile(env, 5, new[] { 6 }, projectReferenceTargets);
-                CreateProjectFile(env, 6, Array.Empty<int>(), projectReferenceTargets);
+                TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2, 3, 5 }, projectReferenceTargets: projectReferenceTargets);
+                CreateProjectFile(env: env, projectNumber: 2, projectReferences: new[] { 4, 5 }, projectReferenceTargets: projectReferenceTargets);
+                CreateProjectFile(env: env, projectNumber: 3, projectReferences: new[] { 5, 6 }, projectReferenceTargets: projectReferenceTargets);
+                CreateProjectFile(env: env, projectNumber: 4, projectReferences: new[] { 5 }, projectReferenceTargets: projectReferenceTargets);
+                CreateProjectFile(env: env, projectNumber: 5, projectReferences: new[] { 6 }, projectReferenceTargets: projectReferenceTargets);
+                CreateProjectFile(env: env, projectNumber: 6, projectReferences: Array.Empty<int>(), projectReferenceTargets: projectReferenceTargets);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(6);
@@ -620,8 +620,8 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "A", new[] { "B" } } }, "A");
-                CreateProjectFile(env, 2);
+                TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: new Dictionary<string, string[]> { { "A", new[] { "B" } } }, defaultTargets: "A");
+                CreateProjectFile(env: env, projectNumber: 2);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(2);
@@ -638,9 +638,9 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                var root1 = CreateProjectFile(env, 1, new[] {2}, new Dictionary<string, string[]> {{"A", new[] {"B"}}}, "A").Path;
-                var root2 = CreateProjectFile(env, 2, new[] {3}, new Dictionary<string, string[]> {{"B", new[] {"C"}}, {"X", new[] {"Y"}}}, "X").Path;
-                CreateProjectFile(env, 3);
+                var root1 = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: new Dictionary<string, string[]> {{"A", new[] {"B"}}}, defaultTargets: "A").Path;
+                var root2 = CreateProjectFile(env: env, projectNumber: 2, projectReferences: new[] {3}, projectReferenceTargets: new Dictionary<string, string[]> {{"B", new[] {"C"}}, {"X", new[] {"Y"}}}, defaultTargets: "X").Path;
+                CreateProjectFile(env: env, projectNumber: 3);
                 
 
                 var projectGraph = new ProjectGraph(new []{root1, root2});
@@ -660,7 +660,14 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                var root1 = CreateProjectFile(env, 1, new[] {2}, null, null, ProjectReferenceTargetsWithMultitargeting).Path;
+                var root1 = CreateProjectFile(
+                    env: env,
+                    projectNumber: 1,
+                    projectReferences: new[] {2},
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: ProjectReferenceTargetsWithMultitargeting)
+                    .Path;
                 CreateProjectFile(env, 2);
                 
                 var projectGraph = new ProjectGraph(root1);
@@ -682,27 +689,26 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                string outerBuildSpec = OuterBuildSpecificationWithProjectReferenceTargets +
+                string singleTargetedSpec = OuterBuildSpecificationWithProjectReferenceTargets +
                         $@"<PropertyGroup>
-                            <{InnerBuildProperty}>a</{InnerBuildProperty}>
+                            <{InnerBuildPropertyName}>a</{InnerBuildPropertyName}>
                           </PropertyGroup>";
 
-                var root1 =
-                    CreateProjectFile(
-                        env,
-                        1,
-                        new[] {2},
-                        null,
-                        null,
-                        outerBuildSpec)
-                        .Path;
+                var root1 =CreateProjectFile(
+                            env: env,
+                            projectNumber: 1,
+                            projectReferences: new[] {2},
+                            projectReferenceTargets: null,
+                            defaultTargets: null,
+                            extraContent: singleTargetedSpec)
+                            .Path;
                 CreateProjectFile(
-                    env,
-                    2,
-                    null,
-                    null,
-                    null,
-                    outerBuildSpec);
+                    env: env,
+                    projectNumber: 2,
+                    projectReferences: null,
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: singleTargetedSpec);
                 
                 
                 var projectGraph = new ProjectGraph(root1);
@@ -724,8 +730,20 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                var root1 = CreateProjectFile(env, 1, new[] {2}, null, null, ProjectReferenceTargetsWithMultitargeting).Path;
-                CreateProjectFile(env, 2, null, null, null, OuterBuildSpecificationWithProjectReferenceTargets);
+                var root1 = CreateProjectFile(
+                    env: env,
+                    projectNumber: 1,
+                    projectReferences: new[] { 2 },
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: ProjectReferenceTargetsWithMultitargeting).Path;
+                CreateProjectFile(
+                    env: env,
+                    projectNumber: 2,
+                    projectReferences: null,
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: OuterBuildSpecificationWithProjectReferenceTargets);
                 
                 var projectGraph = new ProjectGraph(root1);
 
@@ -757,75 +775,75 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 var root1 = CreateProjectFile(
-                    env,
-                    1,
-                    null,
-                    null,
-                    null,
-                    OuterBuildSpecificationWithProjectReferenceTargets +
+                    env: env,
+                    projectNumber: 1,
+                    projectReferences: null,
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: OuterBuildSpecificationWithProjectReferenceTargets +
                     $@"<ItemGroup>
-                            <ProjectReference Include=`3.proj` Condition=`'$({InnerBuildProperty})'=='a'`/>
+                            <ProjectReference Include=`3.proj` Condition=`'$({InnerBuildPropertyName})'=='a'`/>
 
-                            <ProjectReference Include=`4.proj` Condition=`'$({InnerBuildProperty})'=='b'`/>
-                            <ProjectReference Include=`5.proj` Condition=`'$({InnerBuildProperty})'=='b'`/>
-                            <ProjectReference Include=`6.proj` Condition=`'$({InnerBuildProperty})'=='b'` Properties=`{InnerBuildProperty}=a`/>
+                            <ProjectReference Include=`4.proj` Condition=`'$({InnerBuildPropertyName})'=='b'`/>
+                            <ProjectReference Include=`5.proj` Condition=`'$({InnerBuildPropertyName})'=='b'`/>
+                            <ProjectReference Include=`6.proj` Condition=`'$({InnerBuildPropertyName})'=='b'` Properties=`{InnerBuildPropertyName}=a`/>
                        </ItemGroup>".Cleanup())
                     .Path;
 
                 var root2 = CreateProjectFile(
-                    env,
-                    2,
-                    null,
-                    null,
-                    null,
-                    ProjectReferenceTargetsWithMultitargeting +
+                    env: env,
+                    projectNumber: 2,
+                    projectReferences: null,
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: ProjectReferenceTargetsWithMultitargeting +
                     $@"<ItemGroup>
-                            <ProjectReference Include=`1.proj` Properties=`{InnerBuildProperty}=b`/>
+                            <ProjectReference Include=`1.proj` Properties=`{InnerBuildPropertyName}=b`/>
                             <ProjectReference Include=`4.proj`/>
                             <ProjectReference Include=`5.proj`/>
                        </ItemGroup>".Cleanup())
                     .Path;
 
                 CreateProjectFile(
-                    env,
-                    3,
-                    null,
-                    null,
-                    null,
-                    OuterBuildSpecificationWithProjectReferenceTargets);
+                    env: env,
+                    projectNumber: 3,
+                    projectReferences: null,
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: OuterBuildSpecificationWithProjectReferenceTargets);
 
                 CreateProjectFile(
-                    env,
-                    4,
-                    new []{6},
-                    null,
-                    null,
-                    ProjectReferenceTargetsWithMultitargeting);
+                    env: env,
+                    projectNumber: 4,
+                    projectReferences: new []{6},
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: ProjectReferenceTargetsWithMultitargeting);
 
                 CreateProjectFile(
-                    env,
-                    5,
-                    null,
-                    null,
-                    null,
-                    OuterBuildSpecificationWithProjectReferenceTargets +
+                    env: env,
+                    projectNumber: 5,
+                    projectReferences: null,
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: OuterBuildSpecificationWithProjectReferenceTargets +
                     $@"
                        <PropertyGroup>
-                            <{InnerBuildProperty}>a</{InnerBuildProperty}>
+                            <{InnerBuildPropertyName}>a</{InnerBuildPropertyName}>
                        </PropertyGroup>
 
                        <ItemGroup>
-                            <ProjectReference Include=`3.proj` Properties=`{InnerBuildProperty}=a`/>
+                            <ProjectReference Include=`3.proj` Properties=`{InnerBuildPropertyName}=a`/>
                             <ProjectReference Include=`6.proj`/>
                        </ItemGroup>".Cleanup());
 
                 CreateProjectFile(
-                    env,
-                    6,
-                    null,
-                    null,
-                    null,
-                    OuterBuildSpecificationWithProjectReferenceTargets);
+                    env: env,
+                    projectNumber: 6,
+                    projectReferences: null,
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: OuterBuildSpecificationWithProjectReferenceTargets);
                 
                 var projectGraph = new ProjectGraph(new[] {root1, root2});
 
@@ -863,7 +881,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "A", new[] { ".default" } } }, defaultTargets: "A");
-                CreateProjectFile(env, 2, defaultTargets: "B");
+                CreateProjectFile(env: env, projectNumber: 2, defaultTargets: "B");
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(2);
@@ -880,8 +898,13 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "Build", new[] { "A", ".default" } } });
-                CreateProjectFile(env, 2);
+                TransientTestFile entryProject = CreateProjectFile(
+                    env: env,
+                    projectNumber: 1,
+                    projectReferences: new[] { 2 },
+                    projectReferenceTargets: new Dictionary<string, string[]> { { "Build", new[] { "A", ".default" } } });
+
+                CreateProjectFile(env: env, projectNumber: 2);
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(2);
@@ -906,12 +929,12 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2, 3, 4 }, projectReferenceTargets);
-                CreateProjectFile(env, 2, new[] { 5 }, projectReferenceTargets);
-                CreateProjectFile(env, 3, new[] { 6 }, projectReferenceTargets, defaultTargets: "X");
-                CreateProjectFile(env, 4, new[] { 7 }, projectReferenceTargets, defaultTargets: "Y");
-                CreateProjectFile(env, 5);
-                CreateProjectFile(env, 6);
-                CreateProjectFile(env, 7, defaultTargets: "Z;W");
+                CreateProjectFile(env: env, projectNumber: 2, projectReferences: new[] { 5 }, projectReferenceTargets: projectReferenceTargets);
+                CreateProjectFile(env: env, projectNumber: 3, projectReferences: new[] { 6 }, projectReferenceTargets: projectReferenceTargets, defaultTargets: "X");
+                CreateProjectFile(env: env, projectNumber: 4, projectReferences: new[] { 7 }, projectReferenceTargets: projectReferenceTargets, defaultTargets: "Y");
+                CreateProjectFile(env: env, projectNumber: 5);
+                CreateProjectFile(env: env, projectNumber: 6);
+                CreateProjectFile(env: env, projectNumber: 7, defaultTargets: "Z;W");
 
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(7);
@@ -1162,7 +1185,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 var innerBuilds =
                     outerBuildReferencer.ProjectReferences.Where(
                         p =>
-                            IsInnerBuild(p)
+                            IsInnerBuild(p) 
                             && p.ProjectInstance.FullPath == outerBuild.ProjectInstance.FullPath).ToArray();
 
                 innerBuilds.Length.ShouldBe(2);
@@ -1195,7 +1218,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
             IsNotMultitargeting(node).ShouldBeTrue();
             node.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
-            node.ProjectInstance.GetProperty(InnerBuildProperty).ShouldBeNull();
+            node.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
         }
 
         private static void AssertOuterBuildEvaluation(ProjectGraphNode outerBuild, Dictionary<string, string> additionalGlobalProperties)
@@ -1205,7 +1228,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             IsOuterBuild(outerBuild).ShouldBeTrue();
             IsInnerBuild(outerBuild).ShouldBeFalse();
 
-            outerBuild.ProjectInstance.GetProperty(InnerBuildProperty).ShouldBeNull();
+            outerBuild.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
             outerBuild.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
         }
 
@@ -1219,7 +1242,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             IsOuterBuild(innerBuild).ShouldBeFalse();
             IsInnerBuild(innerBuild).ShouldBeTrue();
 
-            var innerBuildPropertyValue = innerBuild.ProjectInstance.GetPropertyValue(InnerBuildProperty);
+            var innerBuildPropertyValue = innerBuild.ProjectInstance.GetPropertyValue(InnerBuildPropertyName);
 
             innerBuildPropertyValue.ShouldNotBeNullOrEmpty();
 
@@ -1227,7 +1250,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             {
                 innerBuild.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(
                     EmptyGlobalProperties
-                        .Add(InnerBuildProperty, innerBuildPropertyValue)
+                        .Add(InnerBuildPropertyName, innerBuildPropertyValue)
                         .AddRange(additionalGlobalProperties));
             }
         }
@@ -1235,7 +1258,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         [Fact]
         public void OuterBuildAsRootShouldDirectlyReferenceInnerBuilds()
         {
-            var projectFile = _env.CreateTestProjectWithFiles($@"<Project>{OuterBuildSpecification}</Project>").ProjectFile;
+            var projectFile = _env.CreateTestProjectWithFiles($@"<Project>{MultitargetingSpecification}</Project>").ProjectFile;
 
             var graph = new ProjectGraph(projectFile);
 
@@ -1251,8 +1274,8 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         [Fact]
         public void ReferenceOfMultitargetingProjectShouldNotInheritInnerBuildSpecificGlobalProperties()
         {
-            var root = CreateProjectFile(_env, 1, new[] {2}, null, null, OuterBuildSpecification).Path;
-            CreateProjectFile(_env, 2);
+            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecification).Path;
+            CreateProjectFile(env: _env, projectNumber: 2);
 
             var graph = new ProjectGraph(root);
 
@@ -1270,17 +1293,17 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         [Fact]
         public void InnerBuildAsRootViaLocalPropertyShouldNotPropagateInnerBuildPropertyToReference()
         {
-            var innerBuildViaLocalProperty = OuterBuildSpecification + $"<PropertyGroup><{InnerBuildProperty}>foo</{InnerBuildProperty}></PropertyGroup>";
+            var innerBuildViaLocalProperty = MultitargetingSpecification + $"<PropertyGroup><{InnerBuildPropertyName}>foo</{InnerBuildPropertyName}></PropertyGroup>";
 
             var root = CreateProjectFile(
-                _env,
-                1,
-                new[] {2},
-                null,
-                null,
-                innerBuildViaLocalProperty).Path;
+                env: _env,
+                projectNumber: 1,
+                projectReferences: new[] {2},
+                projectReferenceTargets: null,
+                defaultTargets: null,
+                extraContent: innerBuildViaLocalProperty).Path;
 
-            CreateProjectFile(_env, 2);
+            CreateProjectFile(env: _env, projectNumber: 2);
 
             var graph = new ProjectGraph(root);
 
@@ -1298,10 +1321,10 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         [Fact]
         public void InnerBuildAsRootViaGlobalPropertyShouldNotPropagateInnerBuildPropertyToReference()
         {
-            var root = CreateProjectFile(_env, 1, new[] {2}, null, null, OuterBuildSpecification).Path;
-            CreateProjectFile(_env, 2);
+            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecification).Path;
+            CreateProjectFile(env: _env, projectNumber: 2);
 
-            var graph = new ProjectGraph(root, new Dictionary<string, string>{{InnerBuildProperty, "foo"}});
+            var graph = new ProjectGraph(root, new Dictionary<string, string>{{InnerBuildPropertyName, "foo"}});
 
             var dot = graph.ToDot();
 
@@ -1315,12 +1338,12 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
-        public void NonOuterBuildProjectsInTheMiddle()
+        public void NonMultitargetingProjectsAreCompatibleWithMultitargetingProjects()
         {
-            var root = CreateProjectFile(_env, 1, new[] {2, 3}, null, null, OuterBuildSpecification).Path;
-            CreateProjectFile(_env, 2, new[] {4});
-            CreateProjectFile(_env, 3, new[] {4});
-            CreateProjectFile(_env, 4, null, null, null, OuterBuildSpecification);
+            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2, 3}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecification).Path;
+            CreateProjectFile(env: _env, projectNumber: 2, projectReferences: new[] {4});
+            CreateProjectFile(env: _env, projectNumber: 3, projectReferences: new[] {4});
+            CreateProjectFile(env: _env, projectNumber: 4, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecification);
 
             var graph = new ProjectGraph(root);
 
@@ -1338,16 +1361,16 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         [Fact]
         public void InnerBuildsCanHaveSeparateReferences()
         {
-            var extraInnerBuildReferenceSpec = OuterBuildSpecification +
+            var extraInnerBuildReferenceSpec = MultitargetingSpecification +
                                           $@"<ItemGroup>
-                                                <ProjectReference Condition=`'$({InnerBuildProperty})'=='b'` Include=`4.proj;5.proj`/>
+                                                <ProjectReference Condition=`'$({InnerBuildPropertyName})'=='b'` Include=`4.proj;5.proj`/>
                                             </ItemGroup>".Cleanup();
 
-            var root = CreateProjectFile(_env, 1, new[] {2, 3}, null, null, extraInnerBuildReferenceSpec).Path;
-            CreateProjectFile(_env, 2, null, null, null, OuterBuildSpecification);
-            CreateProjectFile(_env, 3);
-            CreateProjectFile(_env, 4, null, null, null, OuterBuildSpecification);
-            CreateProjectFile(_env, 5);
+            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2, 3}, projectReferenceTargets: null, defaultTargets: null, extraContent: extraInnerBuildReferenceSpec).Path;
+            CreateProjectFile(env: _env, projectNumber: 2, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecification);
+            CreateProjectFile(env: _env, projectNumber: 3);
+            CreateProjectFile(env: _env, projectNumber: 4, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecification);
+            CreateProjectFile(env: _env, projectNumber: 5);
 
             var graph = new ProjectGraph(root);
 
@@ -1362,13 +1385,13 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 3));
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 5));
 
-            var innerBuildWithCommonReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties[InnerBuildProperty] == "a");
+            var innerBuildWithCommonReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
 
             innerBuildWithCommonReferences.ProjectReferences.Count.ShouldBe(4);
             var referenceNumbersSet = innerBuildWithCommonReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstance.FullPath)).ToHashSet();
             referenceNumbersSet.ShouldBeEquivalentTo(new HashSet<string>{"2", "3"});
 
-            var innerBuildWithAdditionalReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties[InnerBuildProperty] == "b");
+            var innerBuildWithAdditionalReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "b");
 
             innerBuildWithAdditionalReferences.ProjectReferences.Count.ShouldBe(8);
             referenceNumbersSet = innerBuildWithAdditionalReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstance.FullPath)).ToHashSet();
@@ -1379,15 +1402,15 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         public void InnerBuildProducedByOuterBuildCanBeReferencedByAnotherNode()
         {
             var referenceToInnerBuild = $@"<ItemGroup>
-                                               <ProjectReference Include='1.proj' Properties='{InnerBuildProperty}=a'/>
+                                               <ProjectReference Include='1.proj' Properties='{InnerBuildPropertyName}=a'/>
                                            </ItemGroup>";
 
             var additionalGlobalProperties = new Dictionary<string, string>{{"x", "y"}};
 
             var graph = new ProjectGraph(new []
             {
-                CreateProjectFile(_env, 1, null, null, null, OuterBuildSpecification).Path,
-                CreateProjectFile(_env, 2, null, null, null, referenceToInnerBuild).Path
+                CreateProjectFile(env: _env, projectNumber: 1, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecification).Path,
+                CreateProjectFile(env: _env, projectNumber: 2, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: referenceToInnerBuild).Path
             },
             additionalGlobalProperties);
 
@@ -1400,7 +1423,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             AssertOuterBuildAsRoot(outerBuild, additionalGlobalProperties);
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 2), additionalGlobalProperties);
 
-            var referencedInnerBuild = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GetPropertyValue(InnerBuildProperty) == "a");
+            var referencedInnerBuild = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GetPropertyValue(InnerBuildPropertyName) == "a");
 
             var two = GetFirstNodeWithProjectNumber(graph, 2);
 
@@ -1414,12 +1437,12 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         public void InnerBuildCanBeReferencedWithoutItsOuterBuild()
         {
             var referenceToInnerBuild = $@"<ItemGroup>
-                                               <ProjectReference Include='2.proj' Properties='{InnerBuildProperty}=a'/>
+                                               <ProjectReference Include='2.proj' Properties='{InnerBuildPropertyName}=a'/>
                                            </ItemGroup>";
 
-            var root = CreateProjectFile(_env, 1, null, null, null, referenceToInnerBuild).Path;
-            CreateProjectFile(_env, 2, new []{3}, null, null, OuterBuildSpecification + $"<PropertyGroup><{InnerBuildProperty}>a</{InnerBuildProperty}></PropertyGroup>");
-            CreateProjectFile(_env, 3);
+            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: referenceToInnerBuild).Path;
+            CreateProjectFile(env: _env, projectNumber: 2, projectReferences: new []{3}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecification + $"<PropertyGroup><{InnerBuildPropertyName}>a</{InnerBuildPropertyName}></PropertyGroup>");
+            CreateProjectFile(env: _env, projectNumber: 3);
 
             var additionalGlobalProperties = new Dictionary<string, string>{{"x", "y"}};
 

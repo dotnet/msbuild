@@ -110,10 +110,10 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Specifies whether the current evaluation / build is happening during a graph build
         /// </summary>
-        internal const string IsGraphBuild = "IsGraphBuild";
+        internal const string IsGraphBuild = nameof(IsGraphBuild);
 
-        internal const string InnerBuildProperty = "InnerBuildProperty";
-        internal const string InnerBuildPropertyValues = "InnerBuildPropertyValues";
+        internal const string InnerBuildProperty = nameof(InnerBuildProperty);
+        internal const string InnerBuildPropertyValues = nameof(InnerBuildPropertyValues);
     }
 
     internal static class ItemTypeNames
@@ -121,12 +121,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// References to other msbuild projects
         /// </summary>
-        internal const string ProjectReference = "ProjectReference";
+        internal const string ProjectReference = nameof(ProjectReference);
 
         /// <summary>
         /// Statically specifies what targets a project calls on its references
         /// </summary>
-        internal const string ProjectReferenceTargets = "ProjectReferenceTargets";
+        internal const string ProjectReferenceTargets = nameof(ProjectReferenceTargets);
     }
 
     /// <summary>

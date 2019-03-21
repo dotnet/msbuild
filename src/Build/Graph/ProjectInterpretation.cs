@@ -329,15 +329,16 @@ namespace Microsoft.Build.Experimental.Graph
             {
                 _outerBuildTargets = outerBuildTargets;
 
-                // Since non outer builds act both as outer and inner builds, they need to implement both sets of targets
-                // Outer build targets go first because at build time outer builds are built before inner builds
+                // This is used as the list of entry targets for both inner builds and non-multitargeting projects
+                // It represents the concatenation of outer build targets and non outer build targets, in this order.
+                // Non-multitargeting projects use these targets because they act as both outer and inner builds.
                 _allTargets = outerBuildTargets.AddRange(nonOuterBuildTargets);
             }
 
             public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, ImmutableList<string> entryTargets)
             {
-                var targetsForOuterBuild = new List<string>();
-                var targetsForInnerBuild = new List<string>();
+                var targetsForOuterBuild = ImmutableList.CreateBuilder<string>();
+                var targetsForInnerBuild = ImmutableList.CreateBuilder<string>();
 
                 var projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
 
@@ -365,7 +366,7 @@ namespace Microsoft.Build.Experimental.Graph
                     }
                 }
 
-                return new TargetsToPropagate(targetsForOuterBuild.ToImmutableList(), targetsForInnerBuild.ToImmutableList());
+                return new TargetsToPropagate(targetsForOuterBuild.ToImmutable(), targetsForInnerBuild.ToImmutable());
             }
 
             public ImmutableList<string> GetApplicableTargets(ProjectInstance project)
