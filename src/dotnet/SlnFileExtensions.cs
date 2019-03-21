@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Construction;
@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Common
 {
     internal static class SlnFileExtensions
     {
-        public static void AddProject(this SlnFile slnFile, string fullProjectPath, bool inRoot)
+        public static void AddProject(this SlnFile slnFile, string fullProjectPath, bool inRoot, string relativeRoot = null)
         {
             if (string.IsNullOrEmpty(fullProjectPath))
             {
@@ -70,6 +70,17 @@ namespace Microsoft.DotNet.Tools.Common
                     return;
                 }
 
+                // Identify the intended solution folders
+                IList<string> solutionFolders;
+                if (!string.IsNullOrEmpty(relativeRoot))
+                {
+                    solutionFolders = relativeRoot.Split(Path.DirectorySeparatorChar);
+                }
+                else
+                {
+                    solutionFolders = SlnProjectExtensions.GetSolutionFoldersFromProject(slnProject);
+                }
+
                 // NOTE: The order you create the sections determines the order they are written to the sln
                 // file. In the case of an empty sln file, in order to make sure the solution configurations
                 // section comes first we need to add it first. This doesn't affect correctness but does
@@ -83,7 +94,7 @@ namespace Microsoft.DotNet.Tools.Common
 
                 if (!inRoot)
                 {
-                    slnFile.AddSolutionFolders(slnProject);
+                    slnFile.AddSolutionFolders(slnProject, solutionFolders);
                 }
 
                 slnFile.Projects.Add(slnProject);
@@ -212,10 +223,8 @@ namespace Microsoft.DotNet.Tools.Common
             return $"{projectConfiguration}|{(projectPlatform == "AnyCPU" ? "Any CPU" : projectPlatform)}";
         }
 
-        private static void AddSolutionFolders(this SlnFile slnFile, SlnProject slnProject)
+        private static void AddSolutionFolders(this SlnFile slnFile, SlnProject slnProject, IList<string> solutionFolders)
         {
-            var solutionFolders = slnProject.GetSolutionFoldersFromProject();
-
             if (solutionFolders.Any())
             {
                 var nestedProjectsSection = slnFile.Sections.GetOrCreateSection(

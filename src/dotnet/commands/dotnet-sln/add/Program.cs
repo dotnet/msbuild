@@ -55,9 +55,15 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
             var preAddProjectCount = slnFile.Projects.Count;
 
+            string relativeRoot = null;
+            if (_appliedCommand.AppliedOptions != null && _appliedCommand.AppliedOptions.Contains("solution-folder"))
+            {
+                relativeRoot = _appliedCommand.AppliedOptions["solution-folder"].Value<string>();
+            }
+
             foreach (var fullProjectPath in fullProjectPaths)
             {
-                slnFile.AddProject(fullProjectPath, _inRoot);
+                slnFile.AddProject(fullProjectPath, _inRoot, relativeRoot);
             }
 
             if (slnFile.Projects.Count > preAddProjectCount)

@@ -165,4 +165,7 @@
   <data name="InRoot" xml:space="preserve">
     <value>Place project in root of the solution, rather than creating a solution folder.</value>
   </data>
+  <data name="AddProjectSolutionFolderArgumentDescription" xml:space="preserve">
+    <value>The destination solution folder path to add the projects to</value>
+  </data>
 </root>
