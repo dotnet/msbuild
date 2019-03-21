@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             t2.Execute().ShouldBeFalse();
 
-            Utilities.AssertLogContainsResource(t2, "GenerateResource.InputDoesntExist", t2.Sources[0].ItemSpec);
+            Utilities.AssertLogContainsResource(t2, "GenerateResource.ResourceNotFound", t2.Sources[0].ItemSpec);
         }
 
 
