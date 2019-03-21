@@ -890,25 +890,25 @@ EndGlobal
         [Fact(Skip = "https://github.com/dotnet/sdk/issues/522")]
         public void WhenPassedAnUnknownProjectTypeItFails()
         {
-           var projectDirectory = TestAssets
-               .Get("SlnFileWithNoProjectReferencesAndUnknownProject")
-               .CreateInstance()
-               .WithSourceFiles()
-               .Root
-               .FullName;
-        
-           var slnFullPath = Path.Combine(projectDirectory, "App.sln");
-           var contentBefore = File.ReadAllText(slnFullPath);
-        
-           var projectToAdd = Path.Combine("UnknownProject", "UnknownProject.unknownproj");
-           var cmd = new DotnetCommand()
-               .WithWorkingDirectory(projectDirectory)
-               .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
-           cmd.Should().Fail();
-           cmd.StdErr.Should().BeVisuallyEquivalentTo("Unsupported project type. Please check with your sdk provider.");
-        
-           File.ReadAllText(slnFullPath)
-               .Should().BeVisuallyEquivalentTo(contentBefore);
+            var projectDirectory = TestAssets
+                .Get("SlnFileWithNoProjectReferencesAndUnknownProject")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+            
+            var slnFullPath = Path.Combine(projectDirectory, "App.sln");
+            var contentBefore = File.ReadAllText(slnFullPath);
+            
+            var projectToAdd = Path.Combine("UnknownProject", "UnknownProject.unknownproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unsupported project type. Please check with your sdk provider.");
+            
+            File.ReadAllText(slnFullPath)
+                .Should().BeVisuallyEquivalentTo(contentBefore);
         }
 
         [Theory]
