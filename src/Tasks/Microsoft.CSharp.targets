@@ -156,7 +156,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore')"/>
    </ImportGroup> 
 
-   <Import Project="$(MSBuildToolsPath)\Microsoft.ManagedLanguages.targets" />
+   <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.targets" />
 
    <Import Project="$(CSharpTargetsPath)" />
 
