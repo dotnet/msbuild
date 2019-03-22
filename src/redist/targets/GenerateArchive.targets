@@ -18,12 +18,12 @@
 
     <ZipFileCreateFromDirectory
         SourceDirectory="$(SdkLayoutOutputDirectory)"
-        DestinationArchive="$(ArtifactsShippingPackagesDir)$(ArtifactNameWithVersionSdk).zip"
+        DestinationArchive="$(ArtifactsNonShippingPackagesDir)$(ArtifactNameWithVersionSdk).zip"
         OverwriteDestination="true" />
 
     <ZipFileCreateFromDirectory
         SourceDirectory="$(SdkLanguagePackOutputDirectory)"
-        DestinationArchive="$(ArtifactsShippingPackagesDir)$(ArtifactNameWithVersionSdkLanguagePack).zip"
+        DestinationArchive="$(ArtifactsNonShippingPackagesDir)$(ArtifactNameWithVersionSdkLanguagePack).zip"
         OverwriteDestination="true" />
   </Target>
 </Project>
