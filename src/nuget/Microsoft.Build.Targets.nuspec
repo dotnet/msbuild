@@ -39,6 +39,7 @@
     <file src="Microsoft.VisualBasic.CrossTargeting.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Managed.targets" target="runtimes\any\native" />
     <file src="Microsoft.CSharp.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.CSharp.targets" target="runtimes\any\native" />
     <file src="Microsoft.NETFramework.CurrentVersion.targets" target="runtimes\any\native" />

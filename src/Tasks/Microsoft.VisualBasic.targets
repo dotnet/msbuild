@@ -17,15 +17,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!-- 
-       We are doing a cross-targeting build if there is no list of target frameworks specified
-       nor is there a current target framework being built individually. In that case, this import is
-       redirected to Microsoft.VisualBasic.CrossTargeting.targets.
-   -->
-   <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
-      <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
-   </PropertyGroup>
-
    <!--
         In VS 2010 SP1 and VS 2012, both supported for asset compatibility, the MSBuild installed 
         as part of them did not enforce using the local ToolsVersion (4.0) in all cases, but instead 
@@ -164,6 +155,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBefore40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore')"/>
     <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore')"/>
   </ImportGroup> 
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.targets" />
 
   <Import Project="$(VisualBasicTargetsPath)" />
   

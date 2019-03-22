@@ -285,9 +285,10 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             var topoSortedNodes =
                 CreateProjectGraph(
-                    _env,
-                    edges,
-                    CreateProjectFileWrapper)
+                    env: _env,
+                    dependencyEdges: edges,
+                    globalProperties: null,
+                    createProjectFile: CreateProjectFileWrapper)
                     .ProjectNodesTopologicallySorted.ToArray();
 
             var expectedOutput = new ExpectedNodeBuildOutput();
@@ -330,9 +331,10 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             var topoSortedNodes =
                 CreateProjectGraph(
-                    _env,
-                    new Dictionary<int, int[]> { { 1, new[] { 2, 3 } } },
-                    CreateProjectFileWrapper)
+                    env: _env,
+                    dependencyEdges: new Dictionary<int, int[]> { { 1, new[] { 2, 3 } } },
+                    globalProperties: null,
+                    createProjectFile: CreateProjectFileWrapper)
                     .ProjectNodesTopologicallySorted.ToArray();
 
             var expectedOutput = new ExpectedNodeBuildOutput();
@@ -367,9 +369,10 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             var topoSortedNodes =
                 CreateProjectGraph(
-                    _env,
-                    new Dictionary<int, int[]> { { 1, new[] { 2, 3 } } },
-                    CreateProjectFileWrapper)
+                    env: _env,
+                    dependencyEdges: new Dictionary<int, int[]> { { 1, new[] { 2, 3 } } },
+                    globalProperties: null,
+                    createProjectFile: CreateProjectFileWrapper)
                     .ProjectNodesTopologicallySorted.ToArray();
 
             var expectedOutput = new ExpectedNodeBuildOutput();

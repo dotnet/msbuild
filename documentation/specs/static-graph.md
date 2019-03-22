@@ -76,7 +76,7 @@ Multitargeting supporting SDKs MUST implement the following properties and seman
 - Node edges
   - When project A references multitargeting project B, and B is identified as an outer build, the graph node for project A will reference both the outer build of B, and all the inner builds of B. The edges to the inner builds are speculative, as at build time only one inner build gets referenced. However, the graph cannot know at evaluation time which inner build will get chosen.
   - When multitargeting project B is a root, then the outer build node for B will reference the inner builds of B.
-  - For multitargeting projects, the `ProjectReference` item gets applied only to inner builds. It is the inner builds that reference other project files, not the outer build.
+  - For multitargeting projects, the `ProjectReference` item gets applied only to inner builds. An outer build cannot have its own distinct `ProjectReference`s, it is the inner builds that reference other project files, not the outer build. This constraint might get relaxed in the future via additional configuration, to allow outer build specific references. 
 
 These specific rules represent the minimal rules required to represent multitargeting in `Microsoft.Net.Sdk`. As we adopt SDKs whose multitargeting complexity that cannot be expressed with the above rules, we'll extend the rules.
 For example, `InnerBuildProperty` could become `InnerBuildProperties` for SDKs where there's multiple multitargeting global properties. 
