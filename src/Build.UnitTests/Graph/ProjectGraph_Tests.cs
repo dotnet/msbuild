@@ -1434,7 +1434,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
-        public void InnerBuildCanBeReferencedWithoutItsOuterBuild()
+        public void StandaloneInnerBuildsCanBeReferencedWithoutOuterBuilds()
         {
             var referenceToInnerBuild = $@"<ItemGroup>
                                                <ProjectReference Include='2.proj' Properties='{InnerBuildPropertyName}=a'/>
@@ -1462,6 +1462,60 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
             innerBuildNode.ProjectReferences.ShouldHaveSingleItem();
             AssertNonMultitargetingNode(innerBuildNode.ProjectReferences.First(), additionalGlobalProperties);
+        }
+
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/4262")]
+        public void InnerBuildsProducedByOuterBuildsCanBeReferencedByOtherInnerBuilds()
+        {
+            var referenceToInnerBuild = $@"<ItemGroup>
+                                               <ProjectReference Include='2.proj' Condition=`'$({InnerBuildPropertyName})' == 'a'` Properties='{InnerBuildPropertyName}=a'/>
+                                           </ItemGroup>".Cleanup();
+
+            var additionalGlobalProperties = new Dictionary<string, string>{{"x", "y"}};
+
+            var root = CreateProjectFile(
+                env: _env,
+                projectNumber: 1,
+                projectReferences: null,
+                projectReferenceTargets: null,
+                defaultTargets: null,
+                extraContent: MultitargetingSpecification + referenceToInnerBuild)
+                .Path;
+
+            CreateProjectFile(
+                env: _env,
+                projectNumber: 2,
+                projectReferences: null,
+                projectReferenceTargets: null,
+                defaultTargets: null,
+                extraContent: MultitargetingSpecification);
+
+            var graph = new ProjectGraph(new [] { root }, additionalGlobalProperties);
+
+            var dot = graph.ToDot();
+
+            graph.ProjectNodes.Count.ShouldBe(5);
+
+            var outerBuild1 = GetNodesWithProjectNumber(graph, 1).First(IsOuterBuild);
+
+            AssertOuterBuildAsRoot(outerBuild1, additionalGlobalProperties);
+
+            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => IsInnerBuild(n) && n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
+            innerBuild1WithReferenceToInnerBuild2.ShouldNotBeNull();
+
+            var outerBuild2 = GetNodesWithProjectNumber(graph, 2).FirstOrDefault(IsOuterBuild);
+            outerBuild2.ShouldNotBeNull();
+
+            var innerBuild2 = GetNodesWithProjectNumber(graph, 2).FirstOrDefault(IsInnerBuild);
+            innerBuild2.ShouldNotBeNull();
+
+            innerBuild2.ProjectInstance.GlobalProperties[InnerBuildPropertyName].ShouldBe("a");
+
+            // project 2 has two nodes: the outer build and the referenced inner build
+            // the outer build is necessary as the referencing inner build can still call targets on it
+            GetNodesWithProjectNumber(graph, 2).Count().ShouldBe(2);
+
+            innerBuild1WithReferenceToInnerBuild2.ProjectReferences.ShouldBeEquivalentTo(new []{outerBuild2, innerBuild2});
         }
 
         public static IEnumerable<object[]> AllNodesShouldHaveGraphBuildGlobalPropertyData
