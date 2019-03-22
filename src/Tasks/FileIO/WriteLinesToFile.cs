@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks
         public bool Overwrite { get; set; }
 
         /// <summary>
-        /// If true, overwrite any existing file contents.
+        /// Encoding to be used.
         /// </summary>
         public string Encoding { get; set; }
 
