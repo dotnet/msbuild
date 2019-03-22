@@ -2961,6 +2961,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="File" use="required" />
                     <xs:attribute name="Lines" />
                     <xs:attribute name="Overwrite" type="msb:boolean" />
+                    <xs:attribute name="WriteOnlyWhenDifferent" type="msb:boolean" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
