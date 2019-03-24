@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Test which ensures the remote host object cannot affect a project which has the Any affinity specifically set.
         /// </summary>
         [Fact]
-        public void TestReigsterRemoteHostObjectNoAffect_Any2()
+        public void TestRegisterRemoteHostObjectNoAffect_Any2()
         {
             HostServices hostServices = new HostServices();
             hostServices.SetNodeAffinity("project", NodeAffinity.Any);
