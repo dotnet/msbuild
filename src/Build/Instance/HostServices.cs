@@ -88,9 +88,16 @@ namespace Microsoft.Build.Execution
                 if (monikerNameOrITaskHost.IsMoniker)
                 {
 #if FEATURE_COM_INTEROP
-                    object objectFromRunningObjectTable =
-                        _runningObjectTable.GetObject(monikerNameOrITaskHost.MonikerName);
-                    return (ITaskHost)objectFromRunningObjectTable;
+                    try
+                    {
+                        object objectFromRunningObjectTable =
+                            _runningObjectTable.GetObject(monikerNameOrITaskHost.MonikerName);
+                        return (ITaskHost)objectFromRunningObjectTable;
+                    }
+                    catch (Exception ex) when (ex is COMException || ex is InvalidCastException)
+                    {
+                        throw new HostObjectException(projectFile, targetName, taskName, ex);
+                    }
 #else
                     return null;
 #endif
