@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.Cli
                                  .With(name: LocalizableStrings.AddProjectPathArgumentName,
                                        description: LocalizableStrings.AddProjectPathArgumentDescription),
                            Create.Option(
-                               "--place-project-in-root",
-                               LocalizableStrings.PlaceProjectInRoot,
+                               "--in-root",
+                               LocalizableStrings.InRoot,
                                Accept.NoArguments()),
                            CommonOptions.HelpOption());
     }

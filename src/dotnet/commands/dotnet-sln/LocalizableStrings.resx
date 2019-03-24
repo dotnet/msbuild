@@ -162,7 +162,7 @@
   <data name="ProjectsHeader" xml:space="preserve">
     <value>Project(s)</value>
   </data>
-  <data name="PlaceProjectInRoot" xml:space="preserve">
+  <data name="InRoot" xml:space="preserve">
     <value>Place project in root of the solution, rather than creating a solution folder.</value>
   </data>
 </root>

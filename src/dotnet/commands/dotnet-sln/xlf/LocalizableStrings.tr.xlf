@@ -22,7 +22,7 @@
         <target state="translated">Bir çözüm dosyasına bir veya daha fazla proje ekler.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PlaceProjectInRoot">
+      <trans-unit id="InRoot">
         <source>Place project in root of the solution, rather than creating a solution folder.</source>
         <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
         <note />

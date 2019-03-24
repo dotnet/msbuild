@@ -24,8 +24,8 @@ Arguments:
   <PROJECT_PATH>   The paths to the projects to add to the solution.
 
 Options:
-  --place-project-in-root   Place project in root of the solution, rather than creating a solution folder.
-  -h, --help                Show command line help.";
+  --in-root    Place project in root of the solution, rather than creating a solution folder.
+  -h, --help   Show command line help.";
 
         private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
 
@@ -320,7 +320,7 @@ Global
 EndGlobal
 ";
 
-    private const string ExpectedSlnFileAfterAddingProjectWithPlaceProjectInRootOption = @"
+    private const string ExpectedSlnFileAfterAddingProjectWithInRootOption = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26006.2
@@ -1124,7 +1124,7 @@ EndGlobal
         }
 
         [Fact]
-        public void WhenNestedProjectIsAddedAndPlaceProjectInRootOptionIsPassedNoSolutionFoldersAreCreated()
+        public void WhenNestedProjectIsAddedAndInRootOptionIsPassedNoSolutionFoldersAreCreated()
         {
             var projectDirectory = TestAssets
                 .Get("TestAppWithSlnAndCsprojInSubDir")
@@ -1136,11 +1136,11 @@ EndGlobal
             var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln App.sln add --place-project-in-root {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln App.sln add --in-root {projectToAdd}");
             cmd.Should().Pass();
             
             var slnPath = Path.Combine(projectDirectory, "App.sln");
-            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithPlaceProjectInRootOption);
+            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithInRootOption);
             File.ReadAllText(slnPath)
                 .Should().BeVisuallyEquivalentTo(expectedSlnContents);
         }

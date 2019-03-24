@@ -22,7 +22,7 @@
         <target state="translated">為解決方案檔新增一或多個專案。</target>
         <note />
       </trans-unit>
-      <trans-unit id="PlaceProjectInRoot">
+      <trans-unit id="InRoot">
         <source>Place project in root of the solution, rather than creating a solution folder.</source>
         <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
         <note />
