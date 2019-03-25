@@ -21,7 +21,7 @@ def static getBuildJobName(def configuration, def os) {
         ['x86'].each { arch ->
             def jobName = "SDK_Perf_${os}_${arch}"
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
-            def perfWorkingDirectory = "%WORKSPACE%\\artifacts\\${config}\\TestResults\\Performance"
+            def perfWorkingDirectory = "%WORKSPACE%\\artifacts\\TestResults\\${config}\\Performance"
 
                 // Set the label.
                 label('windows_server_2016_clr_perf')
@@ -41,7 +41,7 @@ def static getBuildJobName(def configuration, def os) {
 
                 steps {
                    // Build solution and run the performance tests
-                   batchFile("\"%WORKSPACE%\\build.cmd\" -configuration ${config} -ci -perf /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
+                   batchFile("\"%WORKSPACE%\\build.cmd\" -configuration ${config} -ci -msbuildEngine dotnet -performanceTest /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
 
                    // Upload perf results to BenchView
                    batchFile("set perfWorkingDirectory=${perfWorkingDirectory}\n" +
@@ -54,7 +54,7 @@ def static getBuildJobName(def configuration, def os) {
             }
 
             def archiveSettings = new ArchivalSettings()
-            archiveSettings.addFiles("artifacts/${config}/TestResults/Performance/**,artifacts/Release/log/**") 
+            archiveSettings.addFiles("artifacts/TestResults/${config}/Performance/**,artifacts/log/Release/**") 
             archiveSettings.setAlwaysArchive()
             Utilities.addArchival(newJob, archiveSettings)
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
@@ -100,7 +100,7 @@ def static getBuildJobName(def configuration, def os) {
         ['x64'].each { arch ->
             def jobName = "SDK_Perf_${os}_${arch}"
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
-            def perfWorkingDirectory = "\${WORKSPACE}/artifacts/${config}/TestResults/Performance"
+            def perfWorkingDirectory = "\${WORKSPACE}/artifacts/TestResults/${config}/Performance"
 
                 // Set the label.
                 label('ubuntu_1604_clr_perf')
@@ -120,7 +120,7 @@ def static getBuildJobName(def configuration, def os) {
 
                 steps {
                    // Build solution and run the performance tests
-                   shell("./build.sh --configuration ${config} --ci --perf /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
+                   shell("./build.sh --configuration ${config} --ci --performancetest /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
 
                    // Upload perf results to BenchView
                    shell("export perfWorkingDirectory=${perfWorkingDirectory}\n" +

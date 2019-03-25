@@ -611,6 +611,83 @@ namespace Microsoft.NET.Build.Tests
                 .And.HaveStdOutContaining("'NETStandard.Library'");
         }
 
+        [Fact]
+        public void ImplicitFrameworkReferencesAreOverriddenByProjectFile()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "OverrideImplicitFrameworkReference",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "FrameworkReference",
+                        new XAttribute("Include", "Microsoft.NETCore.App")));
+                });
+
+            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            restoreCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("NETSDK1086");
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("NETSDK1086");
+        }
+
+        [Fact]
+        public void DuplicateFrameworkReferencesCauseError()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DuplicateFrameworkReference",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Element(ns + "PropertyGroup").Add(
+                        new XElement(ns + "DisableImplicitFrameworkReferences", "true"));
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "FrameworkReference",
+                        new XAttribute("Include", "Microsoft.NETCore.App")));
+
+                    itemGroup.Add(new XElement(ns + "FrameworkReference",
+                        new XAttribute("Include", "Microsoft.NETCore.App")));
+                });
+
+            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            restoreCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("NETSDK1085");
+
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]

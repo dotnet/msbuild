@@ -123,9 +123,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void SuccedsWithWarningOnLockedFile()
+        public void SucceedsWithWarningOnLockedFile()
         {
-            var lockedFile = $"{nameof(SuccedsWithWarningOnLockedFile)}.dll";
+            var lockedFile = $"{nameof(SucceedsWithWarningOnLockedFile)}.dll";
 
             try
             {

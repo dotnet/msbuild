@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildADesktopExeWtihNetStandardLib : SdkTest
+    public class GivenThatWeWantToBuildADesktopExeWithNetStandardLib : SdkTest
     {
         private const string AppName = "TestApp";
         private const string LibraryName = "TestLibrary";
@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         private const string TemplateNamePackagesConfig = "DesktopAppWithLibrary-PackagesConfig";
         private const string TemplateNameNonSdk = "DesktopAppWithLibrary-NonSDK";
 
-        public GivenThatWeWantToBuildADesktopExeWtihNetStandardLib(ITestOutputHelper log) : base(log)
+        public GivenThatWeWantToBuildADesktopExeWithNetStandardLib(ITestOutputHelper log) : base(log)
         {
         }
 
@@ -343,7 +343,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
-        public void It_does_not_include_netstandard_when_libary_targets_netstandard14(bool isSdk)
+        public void It_does_not_include_netstandard_when_library_targets_netstandard14(bool isSdk)
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset(GetTemplateName(isSdk), identifier: isSdk.ToString())
@@ -383,7 +383,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
-        public void It_includes_netstandard_when_libary_targets_netstandard15(bool isSdk)
+        public void It_includes_netstandard_when_library_targets_netstandard15(bool isSdk)
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset(GetTemplateName(isSdk), identifier: isSdk.ToString())

@@ -9,6 +9,18 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks
 {
+    /// <summary>
+    /// These are Projects for which there is no csproj path info in RAR (indirect project references)
+    /// </summary>
+    internal class UnreferencedProjectInfo : SingleProjectInfo
+    {
+        internal static UnreferencedProjectInfo Default = new UnreferencedProjectInfo();
+
+        private UnreferencedProjectInfo() : base(string.Empty, string.Empty, string.Empty, string.Empty, new List<ReferenceInfo>(), new List<ResourceAssemblyInfo>())
+        {
+        }
+    }
+
     internal class SingleProjectInfo
     {
         public string ProjectPath { get; }
@@ -28,7 +40,11 @@ namespace Microsoft.NET.Build.Tasks
             get { return _resourceAssemblies; }
         }
 
-        private SingleProjectInfo(string projectPath, string name, string version, string outputName, List<ReferenceInfo> dependencyReferences, List<ResourceAssemblyInfo> resourceAssemblies)
+        protected SingleProjectInfo()
+        {
+        }
+
+        protected SingleProjectInfo(string projectPath, string name, string version, string outputName, List<ReferenceInfo> dependencyReferences, List<ResourceAssemblyInfo> resourceAssemblies)
         {
             ProjectPath = projectPath;
             Name = name;
@@ -62,7 +78,7 @@ namespace Microsoft.NET.Build.Tasks
             Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>(StringComparer.OrdinalIgnoreCase);
 
             IEnumerable<ITaskItem> projectReferencePaths = referencePaths
-                .Where(r => string.Equals(r.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase));
+                .Where(r => IsProjectReference(r));
 
             foreach (ITaskItem projectReferencePath in projectReferencePaths)
             {
@@ -85,7 +101,7 @@ namespace Microsoft.NET.Build.Tasks
 
             //  Include direct references of referenced projects, but only if they are CopyLocal
             IEnumerable<ITaskItem> projectReferenceDependencyPaths = referenceDependencyPaths
-                .Where(r => string.Equals(r.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase) &&
+                .Where(r => IsProjectReference(r) &&
                             MSBuildUtilities.ConvertStringToBool(r.GetMetadata(MetadataKeys.CopyLocal)));
 
             foreach (ITaskItem projectReferenceDependencyPath in projectReferenceDependencyPaths)
@@ -105,8 +121,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            IEnumerable<ITaskItem> projectReferenceSatellitePaths = referenceSatellitePaths
-                .Where(r => string.Equals(r.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase));
+            IEnumerable<ITaskItem> projectReferenceSatellitePaths = referenceSatellitePaths.Where(r => IsProjectReference(r));
 
             foreach (ITaskItem projectReferenceSatellitePath in projectReferenceSatellitePaths)
             {
@@ -139,6 +154,11 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return projectReferences;
+        }
+
+        private static bool IsProjectReference(ITaskItem i)
+        {
+            return string.Equals(i.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

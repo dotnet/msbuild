@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "TestTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.2",
+                TargetFrameworks = "netcoreapp3.0",
                 IsExe = true
             };
 
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DependencyContextTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.2",
+                TargetFrameworks = "netcoreapp3.0",
                 IsExe = true
             };
 
@@ -103,7 +103,7 @@ class Program
 
             NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
-            // Workaorund https://github.com/dotnet/cli/issues/9701
+            // Workaround https://github.com/dotnet/cli/issues/9701
             var useBundledNETCoreAppPackage = "/p:UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion=true";
 
             toolProjectInstance.Restore(Log, toolProject.Name, "/v:n", useBundledNETCoreAppPackage);

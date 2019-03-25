@@ -88,23 +88,8 @@ namespace Microsoft.NET.TestFramework
                 testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
             }
 
-            if (runAsTool)
-            {
-                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(), "dotnetSdkTests");
-                
-            }
-            else
-            {
-                // This is dependent on the current artifacts layout:
-                // * $(RepoRoot)/artifacts/$(Configuration)/tmp
-                // * $(RepoRoot)/artifacts/$(Configuration)/bin/Tests/$(MSBuildProjectName)
-                testContext.TestExecutionDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "tmp"));
-
-                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
-            }
-
             string repoRoot = null;
-            string repoConfiguration = null;
+            string repoConfiguration = "Debug";
 
             if (commandLine.SDKRepoPath != null)
             {
@@ -116,9 +101,23 @@ namespace Microsoft.NET.TestFramework
 
                 if (repoRoot != null)
                 {
-                    // assumes tests are always executed from the "artifacts/$Configuration/bin/Tests/$MSBuildProjectFile" directory
-                    repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Parent.Parent.Name;
+                    // assumes tests are always executed from the "artifacts/bin/Tests/$MSBuildProjectFile/$Configuration" directory
+                    repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Name;
                 }
+            }
+
+            if (runAsTool)
+            {
+                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(), "dotnetSdkTests");
+            }
+            else
+            {
+                // This is dependent on the current artifacts layout:
+                // * $(RepoRoot)/artifacts/tmp/$Configuration)
+                // * $(RepoRoot)/artifacts/bin/Tests/$(MSBuildProjectName)/$(Configuration)
+                testContext.TestExecutionDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "tmp", repoConfiguration));
+
+                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
             }
 
             string artifactsDir = Environment.GetEnvironmentVariable("DOTNET_SDK_ARTIFACTS_DIR");
@@ -203,6 +202,24 @@ namespace Microsoft.NET.TestFramework
                     }
                 }
                 currentPath = parent.FullName;
+            }
+        }
+
+        public void WriteGlobalJson(string path)
+        {
+            WriteGlobalJson(path, this.SdkVersion);
+        }
+
+        public static void WriteGlobalJson(string path, string sdkVersion)
+        {
+            if (!string.IsNullOrEmpty(sdkVersion))
+            {
+                string globalJsonPath = System.IO.Path.Combine(path, "global.json");
+                File.WriteAllText(globalJsonPath, @"{
+  ""sdk"": {
+    ""version"": """ + sdkVersion + @"""
+  }
+}");
             }
         }
     }

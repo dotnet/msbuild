@@ -43,7 +43,10 @@ namespace Microsoft.NET.Build.Tasks
             this LockFile lockFile,
             NuGetFramework framework,
             string runtime,
+            //  Trimmed from publish output, and if there are no runtimeFrameworks, written to runtimeconfig.json
             string platformLibraryName,
+            //  Written to runtimeconfig.json
+            Microsoft.Build.Framework.ITaskItem[] runtimeFrameworks,
             bool isSelfContained)
         {
             if (lockFile == null)
@@ -58,9 +61,12 @@ namespace Microsoft.NET.Build.Tasks
             var lockFileTarget = lockFile.GetTargetAndThrowIfNotFound(framework, runtime);
 
             LockFileTargetLibrary platformLibrary = lockFileTarget.GetLibrary(platformLibraryName);
-            bool isFrameworkDependent = platformLibrary != null && (!isSelfContained || string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier));
+            bool isFrameworkDependent = (platformLibrary != null || runtimeFrameworks?.Any() == true) &&
+                (!isSelfContained || string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier));
 
-            return new ProjectContext(lockFile, lockFileTarget, platformLibrary, isFrameworkDependent);
+            return new ProjectContext(lockFile, lockFileTarget, platformLibrary,
+                runtimeFrameworks?.Select(i => new ProjectContext.RuntimeFramework(i))?.ToArray(),
+                isFrameworkDependent);
         }
 
         public static LockFileTargetLibrary GetLibrary(this LockFileTarget lockFileTarget, string libraryName)

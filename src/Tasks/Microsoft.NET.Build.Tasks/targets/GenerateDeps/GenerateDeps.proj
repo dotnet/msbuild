@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="BuildDepsJson">
+﻿<Project DefaultTargets="BuildDepsJson">
   <!--
 ***********************************************************************************************
 GenerateDeps.proj
@@ -21,6 +21,13 @@ Copyright (c) .NET Foundation. All rights reserved.
         This is a workaround until NuGet can generate .props and .targets files for imports from packages referenced
         by tools, which is tracked by https://github.com/NuGet/Home/issues/5037.
   -->
+  
+  <PropertyGroup>
+    <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+    <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <Import Project="$(AdditionalImport)"
           Condition=" '$(AdditionalImport)' != '' And Exists($(AdditionalImport))" />
@@ -50,5 +57,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="DontRestore" BeforeTargets="Restore">
     <Error Text="This project should not be restored" />
   </Target>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

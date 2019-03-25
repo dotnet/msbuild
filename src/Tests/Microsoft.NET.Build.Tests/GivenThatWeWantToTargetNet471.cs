@@ -154,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.exe.config",
                 $"{testProject.Name}.pdb",
                 
-                // These two will be includded because Netstandard1.x has a higher version of these two contracts than net4.7.1 which is why they will be added.
+                // These two will be included because Netstandard1.x has a higher version of these two contracts than net4.7.1 which is why they will be added.
                 "System.Net.Http.dll",
                 "System.IO.Compression.dll",
 

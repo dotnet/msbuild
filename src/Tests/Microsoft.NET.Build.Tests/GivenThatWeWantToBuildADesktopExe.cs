@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tests
         // If we set AnyCPU and do use native dependency, we get any CPU app that can't find its native dependency.
         // Tests current behavior, but ideally we'd also raise a build diagnostic in this case: https://github.com/dotnet/sdk/issues/843
         [InlineData("AnyCPUNative", "AnyCPU", true, "Native code failed (MSIL)")]
-        public void It_handles_native_depdencies_and_platform_target(
+        public void It_handles_native_dependencies_and_platform_target(
              string identifier,
              string platformTarget,
              bool useNativeCode,
@@ -125,7 +125,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        // implict rid with option to append rid to output path off -> do not append
+        // implicit rid with option to append rid to output path off -> do not append
         [InlineData("implicitOff", "", false, false)]
         // implicit rid with option to append rid to output path on -> do not append (never append implicit rid irrespective of option)
         [InlineData("implicitOn", "", true, false)]

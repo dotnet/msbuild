@@ -46,15 +46,7 @@ namespace Microsoft.NET.TestFramework
 
             Directory.CreateDirectory(path);
 
-            if (!string.IsNullOrEmpty(sdkVersion))
-            {
-                string globalJsonPath = System.IO.Path.Combine(path, "global.json");
-                File.WriteAllText(globalJsonPath, @"{
-  ""sdk"": {
-    ""version"": """ + sdkVersion + @"""
-  }
-}");
-            }
+            TestContext.WriteGlobalJson(path, sdkVersion);
         }
     }
 }

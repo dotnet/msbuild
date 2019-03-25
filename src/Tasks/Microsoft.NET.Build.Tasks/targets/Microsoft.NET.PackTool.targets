@@ -21,12 +21,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--
-    Mark all dependecy as private assets. But keep them as Publish. So dependency DLLs will be included in NuGet package, while
+    Mark all dependency as private assets. But keep them as Publish. So dependency DLLs will be included in NuGet package, while
     there is no dependency in nuspec. And add Microsoft.NETCore.Platforms, which is used to select correct RID assets.
     -->
   <PropertyGroup>
     <_ToolsSettingsFilePath>$(BaseIntermediateOutputPath)DotnetToolSettings.xml</_ToolsSettingsFilePath>
     <SuppressDependenciesWhenPacking Condition=" '$(PackAsTool)' == 'true' ">true</SuppressDependenciesWhenPacking>
+    <UseAppHost Condition=" '$(SelfContained)' != 'true' and '$(PackAsTool)' == 'true' ">false</UseAppHost>
   </PropertyGroup>
 
   <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish;_PackToolValidation" Condition=" '$(PackAsTool)' == 'true' ">
@@ -97,7 +98,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateShimsAssets"
           BeforeTargets="CopyFilesToOutputDirectory"
           DependsOnTargets="ResolvePackageAssets;_PackToolValidation;_GenerateShimInputCache;_ComputeExpectedEmbeddedApphostPaths"
-          Condition="'$(PackAsTool)' == 'true'"
+          Condition="'$(PackAsTool)' == 'true' and $(PackAsToolShimRuntimeIdentifiers) != '' "
           Inputs="@(_GenerateShimsAssetsInput)"
           Outputs="$(_ShimCreatedSentinelFile)">
 

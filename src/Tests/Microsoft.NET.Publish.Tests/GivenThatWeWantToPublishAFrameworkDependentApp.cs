@@ -32,13 +32,16 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(null, "netcoreapp2.2")]
         [InlineData("true", "netcoreapp2.2")]
         [InlineData("false", "netcoreapp2.2")]
+        [InlineData(null, "netcoreapp3.0")]
+        [InlineData("true", "netcoreapp3.0")]
+        [InlineData("false", "netcoreapp3.0")]
         public void It_publishes_with_or_without_apphost(string useAppHost, string targetFramework)
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             var appHostName = $"{TestProjectName}{Constants.ExeSuffix}";
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}")
+                .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}_{targetFramework}")
                 .WithSource();
 
             var msbuildArgs = new List<string>()
@@ -87,31 +90,13 @@ namespace Microsoft.NET.Publish.Tests
                         Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)",
                         Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath))
                     .CaptureStdOut()
+                    .CaptureStdErr()
                     .Execute()
                     .Should()
                     .Pass()
                     .And
                     .HaveStdOutContaining("Hello World!");
             }
-        }
-
-        [Fact]
-        public void It_errors_when_using_app_host_without_rid()
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName)
-                .WithSource();
-
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
-            publishCommand
-                .Execute(
-                    "/p:SelfContained=false",
-                    "/p:UseAppHost=true",
-                    "/p:TargetFramework=netcoreapp2.2")
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotUseAppHostWithoutRuntimeIdentifier);
         }
 
         [Fact]

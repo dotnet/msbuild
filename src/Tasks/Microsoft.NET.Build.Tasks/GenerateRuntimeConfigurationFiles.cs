@@ -38,6 +38,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string PlatformLibraryName { get; set; }
 
+        public ITaskItem[] RuntimeFrameworks { get; set; }
+
         public string UserRuntimeConfig { get; set; }
 
         public ITaskItem[] HostConfigurationOptions { get; set; }
@@ -45,6 +47,8 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] AdditionalProbingPaths { get; set; }
 
         public bool IsSelfContained { get; set; }
+
+        public bool WriteAdditionalProbingPathsToMainConfig { get; set; }
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
@@ -58,9 +62,12 @@ namespace Microsoft.NET.Build.Tasks
         {
             bool writeDevRuntimeConfig = !string.IsNullOrEmpty(RuntimeConfigDevPath);
 
-            if (AdditionalProbingPaths?.Any() == true && !writeDevRuntimeConfig)
+            if (!WriteAdditionalProbingPathsToMainConfig)
             {
-                Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
+                if (AdditionalProbingPaths?.Any() == true && !writeDevRuntimeConfig)
+                {
+                    Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
+                }
             }
 
             LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
@@ -68,6 +75,7 @@ namespace Microsoft.NET.Build.Tasks
                 NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
                 RuntimeIdentifier,
                 PlatformLibraryName,
+                RuntimeFrameworks,
                 IsSelfContained);
 
             WriteRuntimeConfig(projectContext);
@@ -83,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks
             RuntimeConfig config = new RuntimeConfig();
             config.RuntimeOptions = new RuntimeOptions();
 
-            AddFramework(config.RuntimeOptions, projectContext);
+            AddFrameworks(config.RuntimeOptions, projectContext);
             AddUserRuntimeOptions(config.RuntimeOptions);
 
             // HostConfigurationOptions are added after AddUserRuntimeOptions so if there are
@@ -91,23 +99,67 @@ namespace Microsoft.NET.Build.Tasks
             // can be changed using MSBuild properties, which can be specified at build time.
             AddHostConfigurationOptions(config.RuntimeOptions);
 
+            if (WriteAdditionalProbingPathsToMainConfig)
+            {
+                AddAdditionalProbingPaths(config.RuntimeOptions, projectContext);
+            }
+
             WriteToJsonFile(RuntimeConfigPath, config);
             _filesWritten.Add(new TaskItem(RuntimeConfigPath));
         }
 
-        private void AddFramework(RuntimeOptions runtimeOptions, ProjectContext projectContext)
+        private void AddFrameworks(RuntimeOptions runtimeOptions, ProjectContext projectContext)
         {
             if (projectContext.IsFrameworkDependent)
             {
-                var platformLibrary = projectContext.PlatformLibrary;
-                if (platformLibrary != null)
+                runtimeOptions.tfm = TargetFramework;
+
+                if (projectContext.RuntimeFrameworks == null || projectContext.RuntimeFrameworks.Length == 0)
                 {
+                    //  If there are no RuntimeFrameworks (which would be set in the ResolveFrameworkReference task based
+                    //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
+                    //  the runtimeconfig
                     RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                    framework.Name = platformLibrary.Name;
-                    framework.Version = platformLibrary.Version.ToNormalizedString();
+                    framework.Name = projectContext.PlatformLibrary.Name;
+                    framework.Version = projectContext.PlatformLibrary.Version.ToNormalizedString();
 
                     runtimeOptions.Framework = framework;
-                    runtimeOptions.tfm = TargetFramework;
+                }
+                else
+                {
+                    foreach (var platformLibrary in projectContext.RuntimeFrameworks)
+                    {
+                        if (projectContext.RuntimeFrameworks.Length > 1 &&
+                            platformLibrary.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //  If there are multiple runtime frameworks, then exclude Microsoft.NETCore.App,
+                            //  as a workaround for https://github.com/dotnet/core-setup/issues/4947
+                            continue;
+                        }
+
+                        RuntimeConfigFramework framework = new RuntimeConfigFramework();
+                        framework.Name = platformLibrary.Name;
+                        framework.Version = platformLibrary.Version;
+
+                        //  If there is only one runtime framework, then it goes in the framework property of the json
+                        //  If there are multiples, then we leave the framework property unset and put the list in
+                        //  the frameworks property.
+                        if (runtimeOptions.Framework == null && runtimeOptions.Frameworks == null)
+                        {
+                            runtimeOptions.Framework = framework;
+                        }
+                        else
+                        {
+                            if (runtimeOptions.Frameworks == null)
+                            {
+                                runtimeOptions.Frameworks = new List<RuntimeConfigFramework>();
+                                runtimeOptions.Frameworks.Add(runtimeOptions.Framework);
+                                runtimeOptions.Framework = null;
+                            }
+
+                            runtimeOptions.Frameworks.Add(framework);
+                        }
+                    }
                 }
             }
         }

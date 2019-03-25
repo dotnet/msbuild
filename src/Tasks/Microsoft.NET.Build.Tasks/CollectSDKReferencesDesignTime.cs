@@ -10,9 +10,9 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Aggregates the sdk specified as project items and implicit packages raferences.
+    /// Aggregates the sdk specified as project items and implicit packages references.
     /// Note: this task is not used temporarily as a hack for RTM to be able to get all
-    /// implicit SDKs accross all TFMs. In U1 we will switch back to this task when multiple
+    /// implicit SDKs across all TFMs. In U1 we will switch back to this task when multiple
     /// TFM support is added to Dependencies logic. 
     /// Tracking issue https://github.com/dotnet/roslyn-project-system/issues/587
     /// </summary>
