@@ -1112,14 +1112,35 @@ namespace Microsoft.Build.Evaluation
                         return expression;
                     }
 
+                    // Calculate the expected size of the results to receive a stringbuilder
+                    // of a proper size.
+                    int expectedSize = 0;
+
+                    if(results != null)
+                    {
+                        foreach(object component in results)
+                        {
+                            expectedSize += component.ToString().Length;
+                        }
+                    }
+
+                    if(lastResult != null)
+                    {
+                        expectedSize += lastResult.ToString().Length;
+                    }
+
+                    if(expression.Length - sourceIndex > 0)
+                    {
+                        expectedSize += (expression.Length - sourceIndex);
+                    }
+
                     // We have more than one result collected, therefore we need to concatenate
                     // into the final result string. This does mean that we will lose type information.
                     // However since the user wanted contatenation, then they clearly wanted that to happen.
 
                     // Initialize our output string to empty string.
                     // This method is called very often - of the order of 3,000 times per project.
-                    // With the reuseable string builder, there's no particular need to initialize the length as it will already have grown.
-                    using (var result = new ReuseableStringBuilder())
+                    using (var result = new ReuseableStringBuilder(expectedSize))
                     {
                         // Append our collected results
                         if (results != null)
