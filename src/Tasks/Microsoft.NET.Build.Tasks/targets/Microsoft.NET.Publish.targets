@@ -294,6 +294,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                               ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
                               RuntimeStorePackages="@(RuntimeStorePackages)"
                               PreserveStoreLayout="$(PreserveStoreLayout)"
+                              DisableRuntimeTargets="$(DisableRuntimeTargets)"
                               IsSelfContained="$(SelfContained)"
                               Condition="'$(_UseBuildDependencyFile)' != 'true'">
         <Output TaskParameter="ResolvedAssets" ItemName="_ResolvedCopyLocalPublishAssets" />

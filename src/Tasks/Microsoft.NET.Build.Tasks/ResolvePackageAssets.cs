@@ -90,6 +90,11 @@ namespace Microsoft.NET.Build.Tasks
         public bool DisableFrameworkAssemblies { get; set; }
 
         /// <summary>
+        /// Do not resolve runtime targets.
+        /// </summary>
+        public bool DisableRuntimeTargets { get; set; }
+
+        /// <summary>
         /// Log messages from assets log to build error/warning/message.
         /// </summary>
         public bool EmitAssetsLogMessages { get; set; }
@@ -256,7 +261,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 5;
+        private const int CacheFormatVersion = 6;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -358,6 +363,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     writer.Write(DisablePackageAssetsCache);
                     writer.Write(DisableFrameworkAssemblies);
+                    writer.Write(DisableRuntimeTargets);
                     writer.Write(DisableTransitiveProjectReferences);
                     writer.Write(DotNetAppHostExecutableNameWithoutExtension);
                     writer.Write(EmitAssetsLogMessages);
@@ -593,17 +599,18 @@ namespace Microsoft.NET.Build.Tasks
             private List<int> _bufferedMetadata;
             private HashSet<string> _platformPackageExclusions;
             private Placeholder _metadataStringTablePosition;
+            private NuGetFramework _targetFramework;
             private int _itemCount;
 
             public CacheWriter(ResolvePackageAssets task, Stream stream = null)
             {
-                var targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
+                _targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
 
                 _task = task;
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
                 _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile);
-                _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, runtime: null);
-                _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, _task.RuntimeIdentifier);
+                _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtime: null);
+                _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier);
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
                 _bufferedMetadata = new List<int>();
@@ -948,9 +955,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteApphostsForShimRuntimeIdentifiers()
             {
-                NuGetFramework targetFramework = NuGetUtils.ParseFrameworkName(_task.TargetFrameworkMoniker);
-
-                if (!CanResolveApphostFromFrameworkReference(targetFramework))
+                if (!CanResolveApphostFromFrameworkReference())
                 {
                     return;
                 }
@@ -962,7 +967,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var runtimeIdentifier in _task.ShimRuntimeIdentifiers.Select(r => r.ItemSpec))
                 {
-                    LockFileTarget runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, runtimeIdentifier);
+                    LockFileTarget runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier);
 
                     var apphostName = _task.DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(runtimeIdentifier);
 
@@ -976,10 +981,10 @@ namespace Microsoft.NET.Build.Tasks
             /// <summary>
             /// After netcoreapp3.0 apphost is resolved during ResolveFrameworkReferences. It should return nothing here
             /// </summary>
-            private static bool CanResolveApphostFromFrameworkReference(NuGetFramework targetFramework)
+            private bool CanResolveApphostFromFrameworkReference()
             {
-                if (targetFramework.Version.Major >= 3
-                    && targetFramework.Framework.Equals(".NETCoreApp", StringComparison.OrdinalIgnoreCase))
+                if (_targetFramework.Version.Major >= 3
+                    && _targetFramework.Framework.Equals(".NETCoreApp", StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -1038,6 +1043,11 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteRuntimeTargets()
             {
+                if (_task.DisableRuntimeTargets)
+                {
+                    return;
+                }
+
                 WriteItems(
                     _runtimeTarget,
                     package => package.RuntimeTargets,

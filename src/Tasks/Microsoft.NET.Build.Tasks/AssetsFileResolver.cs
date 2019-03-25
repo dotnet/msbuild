@@ -31,7 +31,7 @@ namespace Microsoft.NET.Build.Tasks
             _preserveStoreLayout = preserveStoreLayout;
             return this;
         }
-        public IEnumerable<ResolvedFile> Resolve(ProjectContext projectContext)
+        public IEnumerable<ResolvedFile> Resolve(ProjectContext projectContext, bool resolveRuntimeTargets = true)
         {
             List<ResolvedFile> results = new List<ResolvedFile>();
 
@@ -49,23 +49,26 @@ namespace Microsoft.NET.Build.Tasks
                 results.AddRange(GetResolvedFiles(targetLibrary.RuntimeAssemblies, targetLibraryPackage, libraryPath, pkgRoot, AssetType.Runtime));
                 results.AddRange(GetResolvedFiles(targetLibrary.NativeLibraries, targetLibraryPackage, libraryPath, pkgRoot, AssetType.Native));
 
-                foreach (LockFileRuntimeTarget runtimeTarget in targetLibrary.RuntimeTargets.FilterPlaceholderFiles())
+                if (resolveRuntimeTargets)
                 {
-                    if (string.Equals(runtimeTarget.AssetType, "native", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(runtimeTarget.AssetType, "runtime", StringComparison.OrdinalIgnoreCase))
+                    foreach (LockFileRuntimeTarget runtimeTarget in targetLibrary.RuntimeTargets.FilterPlaceholderFiles())
                     {
-                        string sourcePath = Path.Combine(libraryPath, runtimeTarget.Path);
-                        AssetType _assetType = AssetType.None;
-                        Enum.TryParse<AssetType>(runtimeTarget.AssetType, true, out _assetType);
+                        if (string.Equals(runtimeTarget.AssetType, "native", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(runtimeTarget.AssetType, "runtime", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string sourcePath = Path.Combine(libraryPath, runtimeTarget.Path);
+                            AssetType _assetType = AssetType.None;
+                            Enum.TryParse<AssetType>(runtimeTarget.AssetType, true, out _assetType);
 
-                        results.Add(
-                            new ResolvedFile(
-                                sourcePath: sourcePath,
-                                destinationSubDirectory: GetDestinationSubDirectory(sourcePath,
-                                                                                    pkgRoot,
-                                                                                    GetRuntimeTargetDestinationSubDirectory(runtimeTarget)),
-                                package: targetLibraryPackage,
-                                assetType: _assetType));
+                            results.Add(
+                                new ResolvedFile(
+                                    sourcePath: sourcePath,
+                                    destinationSubDirectory: GetDestinationSubDirectory(sourcePath,
+                                                                                        pkgRoot,
+                                                                                        GetRuntimeTargetDestinationSubDirectory(runtimeTarget)),
+                                    package: targetLibraryPackage,
+                                    assetType: _assetType));
+                        }
                     }
                 }
 
