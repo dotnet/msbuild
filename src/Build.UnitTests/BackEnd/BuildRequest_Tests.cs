@@ -7,6 +7,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -174,7 +175,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     "DisplayMessages",
                     "ATask") as ITestRemoteHostObject;
 
-                Assert.Equal(stateInHostObject, hostObject.GetState());
+                hostObject.GetState().ShouldBe(stateInHostObject);
             }
         }
 #endif

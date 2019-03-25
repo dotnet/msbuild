@@ -10,6 +10,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
@@ -305,7 +306,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             HostServices hostServices = new HostServices();
             hostServices.SetNodeAffinity("project", NodeAffinity.Any);
             hostServices.RegisterHostObject("project", "target", "task", "moniker");
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+            hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.Any);
         }
 #endif
 
@@ -343,10 +344,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             HostServices hostServices = new HostServices();
             hostServices.RegisterHostObject("project", "target", "task", "moniker");
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+            hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.Any);
             TestHostObject hostObject = new TestHostObject();
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+            hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.InProc);
         }
 #endif
 
@@ -471,7 +472,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             hostServices.RegisterHostObject("project", "test", "Message", newMoniker);
             var resultObject = (ITestRemoteHostObject)hostServices.GetHostObject("project", "test", "Message");
 
-            Assert.Equal(2, resultObject.GetState());
+            resultObject.GetState().ShouldBe(2);
         }
 #endif
 
