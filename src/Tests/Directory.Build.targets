@@ -35,6 +35,7 @@
   <Target Name="TestAsTool" DependsOnTargets="Pack;LayoutSdk;_InnerGetTestsToRun">
     <PropertyGroup>
       <TestLocalToolFolder>$(ArtifactsTmpDir)$(ToolCommandName)\</TestLocalToolFolder>
+      <DOTNET_CLI_HOME>$(ArtifactsTmpDir)DOTNET_CLI_HOME\</DOTNET_CLI_HOME>
     </PropertyGroup>
 
     <RemoveDir Directories="$(TestLocalToolFolder)" />
@@ -47,13 +48,16 @@
     <RemoveDir Directories="$(NuGetPackageRoot)$(ToolCommandName)\$(PackageVersion)" />
 
     <Exec Command="dotnet new tool-manifest"
-      WorkingDirectory="$(TestLocalToolFolder)"/>
+      WorkingDirectory="$(TestLocalToolFolder)"
+      EnvironmentVariables="DOTNET_CLI_HOME=$(DOTNET_CLI_HOME)"/>
     
     <Exec Command="dotnet tool install --local $(ToolCommandName) --version $(PackageVersion) --add-source $(ArtifactsShippingPackagesDir)"
-      WorkingDirectory="$(TestLocalToolFolder)"/>
+      WorkingDirectory="$(TestLocalToolFolder)"
+      EnvironmentVariables="DOTNET_CLI_HOME=$(DOTNET_CLI_HOME)"/>
     
     <Exec Command="dotnet tool restore"
-      WorkingDirectory="$(TestLocalToolFolder)"/>
+      WorkingDirectory="$(TestLocalToolFolder)"
+      EnvironmentVariables="DOTNET_CLI_HOME=$(DOTNET_CLI_HOME)"/>
 
     <PropertyGroup>
       <ResultsXmlPath>@(TestToRun->'%(ResultsXmlPath)')</ResultsXmlPath>
@@ -69,6 +73,7 @@
 
     <Exec Command="dotnet tool run $(ToolCommandName) -- $(TestArgs)"
           WorkingDirectory="$(TestLocalToolFolder)"
+          EnvironmentVariables="DOTNET_CLI_HOME=$(DOTNET_CLI_HOME)"
           IgnoreStandardErrorWarningFormat="true" />
   </Target>
 
