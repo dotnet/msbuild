@@ -59,6 +59,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_COM_INTEROP
         private IRunningObjectTableWrapper _runningObjectTable = new RunningObjectTable();
 #endif
+
         /// <summary>
         /// Gets any host object applicable to this task name
         /// where the task appears within a target and project with the specified names.
