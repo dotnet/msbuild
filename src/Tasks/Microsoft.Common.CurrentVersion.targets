@@ -6019,6 +6019,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Returns="@(DesignerRuntimeImplementationProjectOutputGroupOutput)">
   </Target>
 
+  <!--
+    ============================================================
+                       .editorconfig support
+    ============================================================
+  -->
+  <!-- Expose the set of potential .editorconfig files so the project system can
+       retrieve them. -->
+  <Target Name="GetPotentialEditorConfigFiles" Returns="@(PotentialEditorConfigFiles)" />
+  
   <PropertyGroup>
     <CodeAnalysisTargets Condition="'$(CodeAnalysisTargets)'==''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeAnalysis\Microsoft.CodeAnalysis.targets</CodeAnalysisTargets>
   </PropertyGroup>
