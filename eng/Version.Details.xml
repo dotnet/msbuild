@@ -5,5 +5,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>26e4b7ad355f3c08eea8296d1733ada986d6edf3</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.DotNet.SignTool" Version="1.0.0-beta.19171.6">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>2eb45ff0eed6f86f1071b16b11a447cadeeeec59</Sha>
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
