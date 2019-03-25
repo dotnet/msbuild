@@ -51,6 +51,9 @@
     
     <Exec Command="dotnet tool install --local $(ToolCommandName) --version $(PackageVersion) --add-source $(ArtifactsShippingPackagesDir)"
       WorkingDirectory="$(TestLocalToolFolder)"/>
+    
+    <Exec Command="dotnet tool restore"
+      WorkingDirectory="$(TestLocalToolFolder)"/>
 
     <PropertyGroup>
       <ResultsXmlPath>@(TestToRun->'%(ResultsXmlPath)')</ResultsXmlPath>
@@ -64,7 +67,7 @@
       <TestArgs>$(TestArgs) &gt; $(ResultsStdOutPath)</TestArgs>
     </PropertyGroup>
 
-    <Exec Command="dotnet tool run $(ToolCommandName) $(TestArgs)"
+    <Exec Command="dotnet tool run $(ToolCommandName) -- $(TestArgs)"
           WorkingDirectory="$(TestLocalToolFolder)"
           IgnoreStandardErrorWarningFormat="true" />
   </Target>
