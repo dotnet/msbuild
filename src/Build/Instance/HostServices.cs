@@ -100,7 +100,11 @@ namespace Microsoft.Build.Execution
                         throw new HostObjectException(projectFile, targetName, taskName, ex);
                     }
 #else
-                    return null;
+                    throw new HostObjectException(
+                        projectFile,
+                        targetName,
+                        taskName,
+                        "When FEATURE_COM_INTEROP is disabled(non full framework). moniker can only be ITaskHost");
 #endif
                 }
                 else
