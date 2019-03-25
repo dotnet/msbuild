@@ -640,7 +640,10 @@ namespace Microsoft.NET.Build.Tests
             buildCommand
                 .Execute()
                 .Should()
-                .Pass();
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1071");
+                ;
 
             LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(buildCommand.ProjectRootPath, "obj", "project.assets.json"), NullLogger.Instance);
 

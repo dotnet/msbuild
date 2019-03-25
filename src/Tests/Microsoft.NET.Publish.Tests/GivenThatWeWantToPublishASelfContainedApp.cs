@@ -64,5 +64,33 @@ namespace Microsoft.NET.Publish.Tests
                 .And
                 .HaveStdOutContaining(Strings.CannotUseSelfContainedWithoutAppHost);
         }
+
+        // repro https://github.com/dotnet/sdk/issues/2466
+        [Fact]
+        public void It_does_not_fail_publishing_a_self_twice()
+        {
+            var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(TestProjectName)
+                .WithSource();
+
+            var msbuidArgs = new string[] { "/p:SelfContained=true",
+                    $"/p:TargetFramework={TargetFramework}",
+                    $"/p:RuntimeIdentifier={runtimeIdentifier}"};
+
+            var restoreCommand = new RestoreCommand(Log, testAsset.TestRoot);
+
+            restoreCommand.Execute(msbuidArgs);
+
+            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            publishCommand
+                .Execute(msbuidArgs)
+                .Should().Pass();
+
+            publishCommand
+                .Execute(msbuidArgs)
+                .Should().Pass().And.NotHaveStdOutContaining("HelloWorld.exe' already exists");
+        }
     }
 }

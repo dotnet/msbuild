@@ -52,6 +52,7 @@ namespace Microsoft.NET.Build.Tests
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.exe",
+                "TestApp.exe.config",
                 "TestApp.pdb",
                 "FSharp.Core.dll",
                 "System.ValueTuple.dll",

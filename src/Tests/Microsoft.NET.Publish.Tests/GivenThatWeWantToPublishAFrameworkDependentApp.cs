@@ -20,17 +20,19 @@ namespace Microsoft.NET.Publish.Tests
     public class GivenThatWeWantToPublishAFrameworkDependentApp : SdkTest
     {
         private const string TestProjectName = "HelloWorld";
-        private const string TargetFramework = "netcoreapp2.1";
 
         public GivenThatWeWantToPublishAFrameworkDependentApp(ITestOutputHelper log) : base(log)
         {
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("true")]
-        [InlineData("false")]
-        public void It_publishes_with_or_without_apphost(string useAppHost)
+        [InlineData(null, "netcoreapp2.1")]
+        [InlineData("true", "netcoreapp2.1")]
+        [InlineData("false", "netcoreapp2.1")]
+        [InlineData(null, "netcoreapp2.2")]
+        [InlineData("true", "netcoreapp2.2")]
+        [InlineData("false", "netcoreapp2.2")]
+        public void It_publishes_with_or_without_apphost(string useAppHost, string targetFramework)
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             var appHostName = $"{TestProjectName}{Constants.ExeSuffix}";
@@ -45,7 +47,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"/p:RuntimeIdentifier={runtimeIdentifier}",
                 $"/p:TestRuntimeIdentifier={runtimeIdentifier}",
                 "/p:SelfContained=false",
-                $"/p:TargetFramework={TargetFramework}"
+                $"/p:TargetFramework={targetFramework}"
             };
 
             if (useAppHost != null)
@@ -59,7 +61,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(TargetFramework, runtimeIdentifier: runtimeIdentifier);
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
 
             var expectedFiles = new List<string>()
             {
@@ -69,7 +71,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{TestProjectName}.runtimeconfig.json",
             };
 
-            if (useAppHost == "true")
+            if (useAppHost != "false")
             {
                 expectedFiles.Add(appHostName);
             }
@@ -78,7 +80,7 @@ namespace Microsoft.NET.Publish.Tests
             publishDirectory.Should().OnlyHaveFiles(expectedFiles);
 
             // Run the apphost if one was generated
-            if (useAppHost == "true")
+            if (useAppHost != "false")
             {
                 Command.Create(Path.Combine(publishDirectory.FullName, appHostName), Enumerable.Empty<string>())
                     .EnvironmentVariable(
@@ -105,7 +107,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(
                     "/p:SelfContained=false",
                     "/p:UseAppHost=true",
-                    $"/p:TargetFramework={TargetFramework}")
+                    "/p:TargetFramework=netcoreapp2.2")
                 .Should()
                 .Fail()
                 .And

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
@@ -34,12 +35,6 @@ namespace Microsoft.NET.Build.Tasks
             var bytesToWrite = Encoding.UTF8.GetBytes(appBinaryFilePath);
             var destinationDirectory = new FileInfo(appHostDestinationFilePath).Directory.FullName;
 
-            if (File.Exists(appHostDestinationFilePath))
-            {
-                //We have already done the required modification to apphost.exe
-                return;
-            }
-
             if (bytesToWrite.Length > 1024)
             {
                 throw new BuildErrorException(Strings.FileNameIsTooLong, appBinaryFilePath);
@@ -61,6 +56,9 @@ namespace Microsoft.NET.Build.Tasks
                     SearchAndReplace(accessor, _bytesToSearch, bytesToWrite, appHostSourceFilePath);
                 }
             }
+
+            // Memory-mapped write does not updating last write time
+            File.SetLastWriteTimeUtc(appHostDestinationFilePath, DateTime.UtcNow);
         }
 
         // See: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
