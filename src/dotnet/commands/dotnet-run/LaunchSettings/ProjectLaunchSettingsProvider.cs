@@ -16,27 +16,35 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             var config = new ProjectLaunchSettingsModel();
             foreach (var property in model.EnumerateObject())
             {
-                if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.CommandLineArgs), StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.CommandLineArgs), StringComparison.OrdinalIgnoreCase) 
+                    && TryGetStringValue(property.Value, out var commandLineArgsValue))
                 {
-                    config.CommandLineArgs = property.Value.GetString();
+                    config.CommandLineArgs = commandLineArgsValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchBrowser), StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchBrowser), StringComparison.OrdinalIgnoreCase) 
+                    && TryGetBooleanValue(property.Value, out var launchBrowserValue))
                 {
-                    config.LaunchBrowser = property.Value.GetBoolean();
+                    config.LaunchBrowser = launchBrowserValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchUrl), StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchUrl), StringComparison.OrdinalIgnoreCase) 
+                    && TryGetStringValue(property.Value, out var launchUrlValue))
                 {
-                    config.LaunchUrl = property.Value.GetString();
+                    config.LaunchUrl = launchUrlValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.ApplicationUrl), StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.ApplicationUrl), StringComparison.OrdinalIgnoreCase) 
+                    && TryGetStringValue(property.Value, out var applicationUrlValue))
                 {
-                    config.ApplicationUrl = property.Value.GetString();
+                    config.ApplicationUrl = applicationUrlValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.EnvironmentVariables), StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.EnvironmentVariables), StringComparison.OrdinalIgnoreCase) 
+                    && property.Value.Type == JsonValueType.Object)
                 {
                     foreach(var environmentVariable in property.Value.EnumerateObject())
                     {
-                        config.EnvironmentVariables[environmentVariable.Name] = environmentVariable.Value.GetString();
+                        if (TryGetStringValue(environmentVariable.Value, out var environmentVariableValue))
+                        {
+                            config.EnvironmentVariables[environmentVariable.Name] = environmentVariableValue;
+                        }
                     }
                 }
             }
@@ -56,6 +64,70 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             }
 
             return new LaunchSettingsApplyResult(true, null, config.LaunchUrl);
+        }
+
+        private static bool TryGetBooleanValue(JsonElement element, out bool value)
+        {
+            switch (element.Type)
+            {
+                case JsonValueType.True:
+                    value = true;
+                    return true;
+                case JsonValueType.False:
+                    value = false;
+                    return true;
+                case JsonValueType.Number:
+                    if (element.TryGetDouble(out var doubleValue))
+                    {
+                        value = doubleValue != 0;
+                        return true;
+                    }
+                    value = false;
+                    return false;
+                case JsonValueType.String:
+                    return bool.TryParse(element.GetString(), out value);
+                default:
+                    value = false;
+                    return false;
+            }
+        }
+
+        private static bool TryGetStringValue(JsonElement element, out string value)
+        {
+            switch (element.Type)
+            {
+                case JsonValueType.True:
+                    value = "true";
+                    return true;
+                case JsonValueType.False:
+                    value = "false";
+                    return true;
+                case JsonValueType.Null:
+                    value = null;
+                    return true;
+                case JsonValueType.Number:
+                    if (element.TryGetDouble(out var doubleValue))
+                    {
+                        value = doubleValue.ToString();
+                        return true;
+                    }
+                    value = null;
+                    return false;
+                case JsonValueType.String:
+                    try
+                    {
+                        value = element.GetString();
+                        return true;
+                    }
+                    catch(InvalidOperationException)
+                    {
+                        value = null;
+                        return false;
+                    }
+                default:
+                    value = null;
+                    return false;
+            }
         }
 
         private class ProjectLaunchSettingsModel
