@@ -16,29 +16,49 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             var config = new ProjectLaunchSettingsModel();
             foreach (var property in model.EnumerateObject())
             {
-                if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.CommandLineArgs), StringComparison.OrdinalIgnoreCase) 
-                    && TryGetStringValue(property.Value, out var commandLineArgsValue))
+                if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.CommandLineArgs), StringComparison.OrdinalIgnoreCase))
                 {
+                    if (!TryGetStringValue(property.Value, out var commandLineArgsValue))
+                    {
+                        return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.CouldNotConvertToString, property.Name));
+                    }
+
                     config.CommandLineArgs = commandLineArgsValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchBrowser), StringComparison.OrdinalIgnoreCase) 
-                    && TryGetBooleanValue(property.Value, out var launchBrowserValue))
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchBrowser), StringComparison.OrdinalIgnoreCase))
                 {
+                    if (!TryGetBooleanValue(property.Value, out var launchBrowserValue))
+                    {
+                        return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.CouldNotConvertToBoolean, property.Name));
+                    }
+
                     config.LaunchBrowser = launchBrowserValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchUrl), StringComparison.OrdinalIgnoreCase) 
-                    && TryGetStringValue(property.Value, out var launchUrlValue))
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.LaunchUrl), StringComparison.OrdinalIgnoreCase))
                 {
+                    if (!TryGetStringValue(property.Value, out var launchUrlValue))
+                    {
+                        return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.CouldNotConvertToString, property.Name));
+                    }
+
                     config.LaunchUrl = launchUrlValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.ApplicationUrl), StringComparison.OrdinalIgnoreCase) 
-                    && TryGetStringValue(property.Value, out var applicationUrlValue))
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.ApplicationUrl), StringComparison.OrdinalIgnoreCase))
                 {
+                    if (!TryGetStringValue(property.Value, out var applicationUrlValue))
+                    {
+                        return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.CouldNotConvertToString, property.Name));
+                    }
+
                     config.ApplicationUrl = applicationUrlValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.EnvironmentVariables), StringComparison.OrdinalIgnoreCase) 
-                    && property.Value.Type == JsonValueType.Object)
+                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.EnvironmentVariables), StringComparison.OrdinalIgnoreCase))
                 {
+                    if (property.Value.Type != JsonValueType.Object)
+                    {
+                        return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.ValueMustBeAnObject, property.Name));
+                    }
+
                     foreach(var environmentVariable in property.Value.EnumerateObject())
                     {
                         if (TryGetStringValue(environmentVariable.Value, out var environmentVariableValue))

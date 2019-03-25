@@ -22,6 +22,16 @@
         <target state="translated">Ścieżka do pliku projektu, który ma zostać uruchomiony (w przypadku tylko jednego projektu wartością domyślną jest bieżący katalog).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Please fix the build errors and run again.</source>
         <target state="translated">Kompilacja nie powiodła się. Napraw błędy kompilacji i uruchom ją ponownie.</target>
@@ -149,6 +159,11 @@ Bieżący element {1}: „{2}”.</target>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
         <target state="translated">Docelowe środowisko uruchomieniowe na potrzeby uruchamiania.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="new">The property '{0}' must be an object if it is specified.</target>
         <note />
       </trans-unit>
     </body>
