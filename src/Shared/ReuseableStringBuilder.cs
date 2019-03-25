@@ -226,7 +226,7 @@ namespace Microsoft.Build.Shared
         {
             LazyPrepare();
             _cachedString = null;
-            _borrowedBuilder.Clear();
+            _borrowedBuilder.Length = 0;
             return this;
         }
 
