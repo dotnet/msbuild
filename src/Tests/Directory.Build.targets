@@ -51,7 +51,7 @@
       WorkingDirectory="$(TestLocalToolFolder)"
       EnvironmentVariables="DOTNET_CLI_HOME=$(DOTNET_CLI_HOME)"/>
     
-    <Exec Command="dotnet tool install --local $(ToolCommandName) --version $(PackageVersion) --add-source $(ArtifactsShippingPackagesDir)"
+    <Exec Command="dotnet tool install --local $(ToolCommandName) --version $(PackageVersion) --add-source $(ArtifactsNonShippingPackagesDir)"
       WorkingDirectory="$(TestLocalToolFolder)"
       EnvironmentVariables="DOTNET_CLI_HOME=$(DOTNET_CLI_HOME)"/>
     
