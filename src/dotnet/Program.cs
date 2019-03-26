@@ -227,6 +227,8 @@ namespace Microsoft.DotNet.Cli
                     .Execute();
                 exitCode = result.ExitCode;
             }
+
+            telemetryClient.Flush();
             return exitCode;
         }
 

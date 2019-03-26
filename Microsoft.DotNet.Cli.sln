@@ -138,6 +138,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.CommandFac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-fsi.Tests", "test\dotnet-fsi.Tests\dotnet-fsi.Tests.csproj", "{4D433E32-3E46-4807-BF08-826E411C076C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests", "test\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests.csproj", "{7BD0AB3A-BF27-474A-BFE0-DEFC14A0C096}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -324,6 +326,10 @@ Global
 		{4D433E32-3E46-4807-BF08-826E411C076C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D433E32-3E46-4807-BF08-826E411C076C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D433E32-3E46-4807-BF08-826E411C076C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BD0AB3A-BF27-474A-BFE0-DEFC14A0C096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BD0AB3A-BF27-474A-BFE0-DEFC14A0C096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BD0AB3A-BF27-474A-BFE0-DEFC14A0C096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BD0AB3A-BF27-474A-BFE0-DEFC14A0C096}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -377,6 +383,7 @@ Global
 		{14C91E15-BD00-4218-9674-6AD216D89AB8} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{40081AD2-610C-4771-9007-758E3B339C62} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{4D433E32-3E46-4807-BF08-826E411C076C} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+		{7BD0AB3A-BF27-474A-BFE0-DEFC14A0C096} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B526D2CE-EE2D-4AD4-93EF-1867D90FF1F5}

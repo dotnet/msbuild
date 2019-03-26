@@ -16,6 +16,10 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         }
 
+        public void Flush()
+        {
+        }
+
         public LogEntry LogEntry { get; private set; }
 
     }
