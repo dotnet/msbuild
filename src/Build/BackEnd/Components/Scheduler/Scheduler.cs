@@ -2229,7 +2229,7 @@ namespace Microsoft.Build.BackEnd
                 scale = 1000;
             }
 
-            string durationBar = new String(barSegment, durationElementCount / scale);
+            string durationBar = new string(barSegment, durationElementCount / scale);
             if (scale > 1)
             {
                 durationBar = String.Format ("{0} (scale 1:{1})", durationBar, scale);
