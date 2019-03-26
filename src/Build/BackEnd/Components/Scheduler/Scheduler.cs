@@ -2232,7 +2232,7 @@ namespace Microsoft.Build.BackEnd
             string durationBar = new string(barSegment, durationElementCount / scale);
             if (scale > 1)
             {
-                durationBar = String.Format ("{0} (scale 1:{1})", durationBar, scale);
+                durationBar = $"{durationBar} (scale 1:{scale})";
             }
             if (haveNonIdleNode)
             {
