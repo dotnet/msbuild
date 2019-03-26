@@ -20,6 +20,10 @@ A remote host object must be registered in the [Running Object Table (ROT)](http
     proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" /> -- universal marshaler built in Windows
 ```
 
+## Bigger context
+
+If is part of the work for [allowing out-of-proc tasks to access unsaved changes](https://github.com/dotnet/project-system/issues/4406)
+
 ## More reference:
 
 [RegFree COM Walkthrough](https://msdn.microsoft.com/library/ms973913.aspx)
