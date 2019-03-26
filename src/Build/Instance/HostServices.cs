@@ -104,7 +104,7 @@ namespace Microsoft.Build.Execution
                         projectFile,
                         targetName,
                         taskName,
-                        "When FEATURE_COM_INTEROP is disabled(non full framework). moniker can only be ITaskHost");
+                        "FEATURE_COM_INTEROP is disabled (non full framework). Host object can only be ITaskHost");
 #endif
                 }
                 else
