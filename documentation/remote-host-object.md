@@ -6,7 +6,7 @@ Remote host object need to be registered in [Running Object Table(ROT)](https://
 
 ## Change in  msbuild.exe.manifest file.
 ```
-<file name="Microsoft.Build.Framework.tlb"> --Location of the tlb, it should be in the same directory of msbuild.exe
+<file name="Microsoft.Build.Framework.tlb"> -- Location of the tlb, it should be in the same directory as msbuild.exe
     <typelib
         tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}" -- matches what is embedded in the tlb with ITaskHost
         version="15.1" -- matches the version in tlb
