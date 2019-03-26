@@ -11,6 +11,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup>
+    <!--
+      Configure the Razor SDK to add support for the MVC configuration unless the project configured it or the user opted out of the implicit reference to
+      Microsoft.AspNetCore.App.
+     -->
+    <AddRazorSupportForMvc Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(AddRazorSupportForMvc)' != 'true'">true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.targets" />
