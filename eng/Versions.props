@@ -30,5 +30,6 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>2.1.401</DotNetCliVersion>
+    <MicrosoftDotNetSignToolVersion>1.0.0-beta.19171.6</MicrosoftDotNetSignToolVersion>
   </PropertyGroup>
 </Project>
