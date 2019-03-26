@@ -1054,6 +1054,7 @@ namespace Microsoft.Build.Execution
         public Microsoft.Build.Execution.NodeAffinity GetNodeAffinity(string projectFile) { throw null; }
         public void OnRenameProject(string oldFullPath, string newFullPath) { }
         public void RegisterHostObject(string projectFile, string targetName, string taskName, Microsoft.Build.Framework.ITaskHost hostObject) { }
+        public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName) { }
         public void SetNodeAffinity(string projectFile, Microsoft.Build.Execution.NodeAffinity nodeAffinity) { }
         public void UnregisterProject(string projectFullPath) { }
     }
