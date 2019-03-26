@@ -4,7 +4,7 @@ Remote host object need to be registered in [Running Object Table(ROT)](https://
 
 [The registration of interfaces](https://docs.microsoft.com/en-us/dotnet/framework/interop/how-to-register-primary-interop-assemblies) is the only thing interop with COM that need extra care. Registration could be global with register or without. Other interface needed is registered globally by Visual Studio during installation. Ony `ITaskHost` does not use global registration. On VS side, the proxy is written. But on MsBuild side it was not. That result the change in msbuild.exe.manifest file and the change to generate tlb file for ITaskHost.
 
-## Change in  msbuild.exe.manifest file.
+## Annotated additions to the msbuild.exe.manifest file.
 ```
 <file name="Microsoft.Build.Framework.tlb"> -- Location of the tlb, it should be in the same directory as msbuild.exe
     <typelib
