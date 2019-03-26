@@ -1112,8 +1112,7 @@ namespace Microsoft.Build.Evaluation
                         return expression;
                     }
 
-                    // Calculate the expected size of the results to receive a stringbuilder
-                    // of a proper size.
+                    // Calculate the required size for the stringbuilder
                     int expectedSize = 0;
 
                     if(results != null)
