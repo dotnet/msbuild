@@ -17,6 +17,8 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class DependencyContextBuilder
     {
+        private const string _runtimePackPrefix = "runtimepack.";
+
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
         private readonly SingleProjectInfo _mainProjectInfo;
         private readonly ProjectContext _projectContext;
@@ -169,7 +171,7 @@ namespace Microsoft.NET.Build.Tasks
 
             var libraryLookup = new LockFileLookup(_projectContext.LockFile);
 
-            var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
+            var runtimeSignature = string.Empty;
 
             IEnumerable<RuntimeLibrary> runtimeLibraries = Enumerable.Empty<RuntimeLibrary>();
             if (_includeMainProjectInDepsFile)
@@ -222,30 +224,6 @@ namespace Microsoft.NET.Build.Tasks
                 compilationLibraries,
                 runtimeLibraries,
                 new RuntimeFallbacks[] { });
-        }
-
-        private static string GenerateRuntimeSignature(IEnumerable<LockFileTargetLibrary> runtimeExports)
-        {
-            var sha1 = SHA1.Create();
-            var builder = new StringBuilder();
-            var packages = runtimeExports
-                .Where(libraryExport => libraryExport.IsPackage());
-            var separator = "|";
-            foreach (var libraryExport in packages)
-            {
-                builder.Append(libraryExport.Name);
-                builder.Append(separator);
-                builder.Append(libraryExport.Version.ToString());
-                builder.Append(separator);
-            }
-            var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
-
-            builder.Clear();
-            foreach (var hashByte in hash)
-            {
-                builder.AppendFormat("{0:x2}", hashByte);
-            }
-            return builder.ToString();
         }
 
         private List<Dependency> GetProjectDependencies(
@@ -324,7 +302,7 @@ namespace Microsoft.NET.Build.Tasks
             List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup, includeCompilationLibraries);
             foreach (var runtimePackGroup in _runtimePackAssets.GroupBy(asset => asset.PackageName + "/" + asset.PackageVersion))
             {
-                dependencies.Add(new Dependency("runtimepack." + runtimePackGroup.First().PackageName, runtimePackGroup.First().PackageVersion));
+                dependencies.Add(new Dependency(_runtimePackPrefix + runtimePackGroup.First().PackageName, runtimePackGroup.First().PackageVersion));
             }
 
             return CreateRuntimeLibrary(
@@ -376,7 +354,7 @@ namespace Microsoft.NET.Build.Tasks
                     };
                     
                     return new RuntimeLibrary("runtimepack",
-                        "runtimepack." + runtimePackAssetGroup.First().PackageName,
+                        _runtimePackPrefix + runtimePackAssetGroup.First().PackageName,
                         runtimePackAssetGroup.First().PackageVersion,
                         hash: string.Empty,
                         runtimeAssemblyGroups,
