@@ -139,6 +139,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-fsi.Tests", "test\dotnet-fsi.Tests\dotnet-fsi.Tests.csproj", "{4D433E32-3E46-4807-BF08-826E411C076C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests", "test\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests.csproj", "{7BD0AB3A-BF27-474A-BFE0-DEFC14A0C096}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-sln-add.Tests", "test\dotnet-sln-add.Tests\dotnet-sln-add.Tests.csproj", "{F6DD425E-415B-46D9-BF87-EB56F972CF70}"
 EndProject
 Global
