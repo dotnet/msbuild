@@ -1,5 +1,6 @@
 # Getting Started
 
+ * [What is MSBuild?](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild)
  * Building Testing and Debugging
    * [Full Framework MSBuild](Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
    * [.Net Core MSBuild](Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
