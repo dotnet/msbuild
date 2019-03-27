@@ -498,16 +498,17 @@ public static class Program
         [Fact]
         public void It_contains_no_duplicates_in_resolved_publish_assets()
         {
+            // Use a specific RID to guarantee a consistent set of assets
             var testProject = new TestProject()
             {
                 Name = "NoDuplicatesInResolvedPublishAssets",
                 IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0"),
+                RuntimeIdentifier = "win-x64",
                 IsExe = true
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "12.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "9.0.1"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
                 .WithProjectChanges(project =>
@@ -517,7 +518,14 @@ public static class Program
     <RemoveDuplicates Inputs=""@(_ResolvedCopyLocalPublishAssets)"">
         <Output TaskParameter=""Filtered"" ItemName=""FilteredAssets""/>
     </RemoveDuplicates>
-    <Message Condition=""'@(_ResolvedCopyLocalPublishAssets)' != '@(FilteredAssets)'"" Importance=""High"" Text=""Duplicates are present!"" />
+    <Message Condition=""'@(_ResolvedCopyLocalPublishAssets)' != '@(FilteredAssets)'"" Importance=""High"" Text=""Duplicate items are present in: @(_ResolvedCopyLocalPublishAssets)!"" />
+    <ItemGroup>
+        <AssetFilenames Include=""@(_ResolvedCopyLocalPublishAssets->'%(Filename)%(Extension)')"" />
+    </ItemGroup>
+    <RemoveDuplicates Inputs=""@(AssetFilenames)"">
+        <Output TaskParameter=""Filtered"" ItemName=""FilteredAssetFilenames""/>
+    </RemoveDuplicates>
+    <Message Condition=""'@(AssetFilenames)' != '@(FilteredAssetFilenames)'"" Importance=""High"" Text=""Duplicate filenames are present in: @(_ResolvedCopyLocalPublishAssets)!"" />
 </Target>"));
                 })
                 .Restore(Log, testProject.Name);
@@ -527,7 +535,9 @@ public static class Program
                 .Should()
                 .Pass()
                 .And
-                .NotHaveStdOutContaining("Duplicates are present!");
+                .NotHaveStdOutContaining("Duplicate items are present")
+                .And
+                .NotHaveStdOutContaining("Duplicate filenames are present");
         }
     }
 }

@@ -301,8 +301,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </ResolveCopyLocalAssets>
 
       <ItemGroup>
-        <!-- If CopyLocalLockFileAssemblies is true, then ReferenceCopyLocalPaths (added below) already contains the runtime pack assets. -->
-        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)" Condition="'$(CopyLocalLockFileAssemblies)' != 'true'" />
+        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)" />
       </ItemGroup>
 
       <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
@@ -398,7 +397,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <_ResolvedCopyLocalPublishAssets Include="@(ReferenceCopyLocalPaths)"
-                                       Exclude="@(_ResolvedCopyLocalBuildAssets)"
+                                       Exclude="@(_ResolvedCopyLocalBuildAssets);@(RuntimePackAsset)"
                                        Condition="'$(PublishReferencesDocumentationFiles)' == 'true' or '%(Extension)' != '.xml'">
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(Filename)%(Extension)</DestinationSubPath>
       </_ResolvedCopyLocalPublishAssets>
