@@ -22,6 +22,11 @@
         <target state="translated">為解決方案檔新增一或多個專案。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InRoot">
+        <source>Place project in root of the solution, rather than creating a solution folder.</source>
+        <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
         <target state="translated">從解決方案檔移除一或多個專案。</target>
