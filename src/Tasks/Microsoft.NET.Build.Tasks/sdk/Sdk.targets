@@ -33,7 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- If LanguageTargets isn't otherwise set, then just import the common targets.  This should allow the restore target to run,
          which could bring in NuGet packages that set the LanguageTargets to something else.  This means support for different
          languages could either be supplied via an SDK or via a NuGet package. -->
-    <LanguageTargets Condition="'$(LanguageTargets)' == ''">$(MSBuildToolsPath)\Microsoft.Common.CurrentVersion.targets</LanguageTargets>
+    <LanguageTargets Condition="'$(LanguageTargets)' == ''">$(MSBuildToolsPath)\Microsoft.Common.targets</LanguageTargets>
   </PropertyGroup>
 
   <!-- REMARK: Dont remove/rename, the LanguageTargets property is used by F# to hook inside the project's sdk 

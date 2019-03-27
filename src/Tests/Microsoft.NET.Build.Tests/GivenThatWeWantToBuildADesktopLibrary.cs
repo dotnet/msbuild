@@ -278,7 +278,7 @@ public static class {project.Name}
 
                     itemGroup.Add(new XElement(ns + "PackageReference",
                         new XAttribute("Include", "NETStandard.Library"),
-                        new XAttribute("Version", "$(BundledNETStandardPackageVersion)")));
+                        new XAttribute("Version", "2.0.3")));
 
                     foreach (var dependency in ConflictResolutionAssets.ConflictResolutionDependencies)
                     {
