@@ -16,6 +16,7 @@ phases:
       _HelixType: build/product
       _HelixBuildConfig: $(_BuildConfig)
       _TeamName: DotNetCore
+      _PerformanceArgs: /p:PerfIterations=4
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
         _OfficialBuildIdArgs: ''
@@ -85,7 +86,26 @@ phases:
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
 
-    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools') }}:
+    - ${{ if eq(parameters.agentOs, 'Windows_Performance') }}:
+      - script: eng\common\CIBuild.cmd 
+                  -configuration $(_BuildConfig)
+                  -performanceTest
+                  -msbuildEngine dotnet 
+                  $(_PerformanceArgs)
+        displayName: Build
+        env:
+          BuildConfig: $(_BuildConfig)
+
+    - ${{ if eq(parameters.agentOs, 'Linux_Performance') }}:
+      - script: eng/common/cibuild.sh 
+                  --configuration $(_BuildConfig)
+                  --performancetest
+                  $(_PerformanceArgs)
+        displayName: Build
+        env:
+          BuildConfig: $(_BuildConfig)
+
+    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools', 'Windows_Performance', 'Linux_Performance') }}:
       - script: eng/common/cibuild.sh 
                   --configuration $(_BuildConfig)
                   $(_PublishArgs)
