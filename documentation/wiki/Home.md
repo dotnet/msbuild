@@ -12,7 +12,8 @@
  * [Binary log](Binary-Log.md)
  * [Rebuilding when nothing changed](Rebuilding-when-nothing-changed.md)
  * [Something's wrong in my build](Something's-wrong-in-my-build.md)
- * [Microsoft.Build.Framework](Microsoft.Build.Framework.md) - Some gotchas around the Microsoft.Build.Framework project/assembly.
+ * [Microsoft.Build.Framework](Microsoft.Build.Framework.md)
+   *  Some gotchas around the Microsoft.Build.Framework project/assembly.
  * [Target Maps](Target-Maps.md)
  * Tasks
    * [ResolveAssemblyReference](ResolveAssemblyReference.md)
