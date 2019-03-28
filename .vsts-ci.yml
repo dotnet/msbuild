@@ -104,7 +104,7 @@ jobs:
             _RuntimeIdentifier: ''
             _BuildArchitecture: 'x64'
             _DropSuffix: ''
-          Build_Debian_8_2_Debug_x64:
+          Build_Debian_jessie_Debug_x64:
             _BuildConfig: Debug
             _DockerParameter: '--docker debian'
             _LinuxPortable: ''
