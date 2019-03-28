@@ -30,7 +30,7 @@
 
   -->
   <PropertyGroup Label="Automated">
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>3.0.0-preview4-19172-03</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>3.0.0-preview4-19172-03</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>3.0.0-preview4-19177-02</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>3.0.0-preview4-19177-02</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
   </PropertyGroup>
 </Project>
