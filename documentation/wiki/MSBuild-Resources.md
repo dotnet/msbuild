@@ -1,8 +1,8 @@
 # General Resources
  * [MSBuild Concepts](https://msdn.microsoft.com/en-us/library/dd637714.aspx)
  * [MSBuild Reserved and Well-Known Properties](https://msdn.microsoft.com/en-us/library/ms164309.aspx)
+ * [MSBuild Tips & Tricks](MSBuild-Tips-&-Tricks.md)
  * [Target Maps](Target-Maps.md)
-*  [MSBuild Tips & Tricks](MSBuild-Tips-&-Tricks.md)
 
 # MSBuild Source Code
  * [https://github.com/Microsoft/MSBuild](https://github.com/Microsoft/MSBuild)
