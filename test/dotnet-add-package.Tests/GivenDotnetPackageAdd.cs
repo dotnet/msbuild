@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
 
             cmd.StdErr.Should().BeEmpty();
 
-            var restoredPackageDirectory = Path.Combine(packageDirectory, packageName, packageVersion);
+            var restoredPackageDirectory = Path.Combine(packageDirectory, packageName.ToLowerInvariant(), packageVersion);
             var packageDirectoryExists = Directory.Exists(restoredPackageDirectory);
             Assert.True(packageDirectoryExists);
         }
