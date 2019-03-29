@@ -80,6 +80,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string CopyToOutput = "CopyToOutput";
         public const string BuildAction = "BuildAction";
         public const string OutputPath = "OutputPath";
+        public const string CopyToPublishDirectory = "CopyToPublishDirectory";
 
         // Resource assemblies
         public const string Culture = "Culture";

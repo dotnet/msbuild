@@ -103,6 +103,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="ComputeAndCopyFilesToPublishDirectory"
           DependsOnTargets="ComputeFilesToPublish;
+                            CreateReadyToRunImages;
                             CopyFilesToPublishDirectory" />
 
   <!--
@@ -172,6 +173,175 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </Copy>
 
+  </Target>
+
+  <!--
+    ============================================================
+                                        CreateReadyToRunImages
+
+    Create ReadyToRun images for managed assemblies in _ResolvedFileToPublishAlways and _ResolvedFileToPublishPreserveNewest.
+    ============================================================
+    -->
+  <Target Name="CreateReadyToRunImages"
+          Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(ReadyToRun)' == 'true' And '$(RuntimeIdentifier)' != '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+          DependsOnTargets="_ComputeResolvedFilesToPublishTypes;
+                            _PrepareForReadyToRunCompilation;
+                            _CreateR2RImagePreserveNewest;
+                            _CreateR2RSymbolsPreserveNewest;
+                            _CreateR2RImagePublishAlways;
+                            _CreateR2RSymbolsPublishAlways">
+
+    <NETSdkError Condition="'@(_ReadyToRunCompilationFailures)' != ''" ResourceName="ReadyToRunCompilationFailed" />
+
+    <ItemGroup>
+      <!-- 
+      Note: we only remove the entries for the IL images and replace them with the entries for the R2R images.
+      We do not do the same for PDBs, because the native PDBs created by the R2R compiler complement the IL PDBs
+      and do not replace them. IL PDBs are still required for debugging. Native PDBs emitted by the R2R compiler are
+      only used for profiling purposes.
+      -->
+      <_ResolvedFileToPublishAlways Remove="@(_ReadyToRunCompileListPublishAlways)" />
+      <_ResolvedFileToPublishAlways Include="@(_ReadyToRunFilesToPublishAlways)" />
+
+      <_ResolvedFileToPublishPreserveNewest Remove="@(_ReadyToRunCompileListPreserveNewest)" />
+      <_ResolvedFileToPublishPreserveNewest Include="@(_ReadyToRunFilesToPreserveNewest)" />
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _PrepareForReadyToRunCompilation
+
+    Prepare build for ReadyToRun compilations. Builds list of assemblies to compile, and computes paths to ReadyToRun compiler bits
+    ============================================================
+    -->
+  <UsingTask TaskName="PrepareForReadyToRunCompilation" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="_PrepareForReadyToRunCompilation">
+
+    <PropertyGroup>
+      <_ReadyToRunOutputPath>$(IntermediateOutputPath)R2R</_ReadyToRunOutputPath>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(_ReadyToRunOutputPath)" />
+
+    <PrepareForReadyToRunCompilation TargetFramework="$(TargetFramework)"
+                                     RuntimePacks="@(ResolvedRuntimePack)"
+                                     RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                                     KnownFrameworkReferences="@(KnownFrameworkReference)"
+                                     NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
+                                     OutputPath="$(_ReadyToRunOutputPath)"
+                                     FilesToPublishAlways="@(_ResolvedFileToPublishAlways)"
+                                     FilesToPublishPreserveNewest="@(_ResolvedFileToPublishPreserveNewest)"
+                                     ReadyToRunExcludeList="@(ReadyToRunExclude)"
+                                     ReadyToRunEmitSymbols="$(ReadyToRunEmitSymbols)">
+
+      <Output TaskParameter="CrossgenTool" ItemName="_CrossgenTool" />
+
+      <Output TaskParameter="ReadyToRunCompileListPublishAlways" ItemName="_ReadyToRunCompileListPublishAlways" />
+      <Output TaskParameter="ReadyToRunSymbolsCompileListPublishAlways" ItemName="_ReadyToRunSymbolsCompileListPublishAlways" />
+
+      <Output TaskParameter="ReadyToRunCompileListPreserveNewest" ItemName="_ReadyToRunCompileListPreserveNewest" />
+      <Output TaskParameter="ReadyToRunSymbolsCompileListPreserveNewest" ItemName="_ReadyToRunSymbolsCompileListPreserveNewest" />
+
+      <Output TaskParameter="ReadyToRunFilesToPublishAlways" ItemName="_ReadyToRunFilesToPublishAlways" />
+      <Output TaskParameter="ReadyToRunFilesToPreserveNewest" ItemName="_ReadyToRunFilesToPreserveNewest" />
+
+    </PrepareForReadyToRunCompilation>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _CreateR2RImagePreserveNewest
+
+    Compiles assemblies in the _ReadyToRunCompileListPreserveNewest list into ReadyToRun images
+    ============================================================
+    -->
+  <UsingTask TaskName="RunReadyToRunCompiler" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="_CreateR2RImagePreserveNewest"
+          Inputs="@(_ReadyToRunCompileListPreserveNewest)"
+          Outputs="%(_ReadyToRunCompileListPreserveNewest.OutputR2RImage)">
+
+    <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
+                           CompilationEntry="@(_ReadyToRunCompileListPreserveNewest)"
+                           ContinueOnError="ErrorAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
+    </RunReadyToRunCompiler>
+
+    <ItemGroup>
+      <_ReadyToRunCompilationFailures Condition="'$(_ReadyToRunCompilerExitCode)' != '' And $(_ReadyToRunCompilerExitCode) != 0"
+                                      Include="@(_ReadyToRunCompileListPreserveNewest)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                        _CreateR2RSymbolsPreserveNewest
+
+    Emit native symbols for ReadyToRun images in the _ReadyToRunSymbolsCompileListPreserveNewest list
+    ============================================================
+    -->
+  <Target Name="_CreateR2RSymbolsPreserveNewest"
+          Inputs="@(_ReadyToRunSymbolsCompileListPreserveNewest)"
+          Outputs="%(_ReadyToRunSymbolsCompileListPreserveNewest.OutputPDBImage)">
+
+    <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
+                           CompilationEntry="@(_ReadyToRunSymbolsCompileListPreserveNewest)"
+                           ContinueOnError="ErrorAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
+    </RunReadyToRunCompiler>
+
+    <ItemGroup>
+      <_ReadyToRunCompilationFailures Condition="'$(_ReadyToRunCompilerExitCode)' != '' And $(_ReadyToRunCompilerExitCode) != 0"
+                                      Include="@(_ReadyToRunSymbolsCompileListPreserveNewest)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                        _CreateR2RImagePublishAlways
+
+    Compiles assemblies in the _ReadyToRunCompileListPublishAlways list into ReadyToRun images
+    ============================================================
+    -->
+  <Target Name="_CreateR2RImagePublishAlways"
+          Inputs="@(_ReadyToRunCompileListPublishAlways)"
+          Outputs="%(_ReadyToRunCompileListPublishAlways.OutputR2RImage)">
+
+    <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
+                           CompilationEntry="@(_ReadyToRunCompileListPublishAlways)"
+                           ContinueOnError="ErrorAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
+    </RunReadyToRunCompiler>
+
+    <ItemGroup>
+      <_ReadyToRunCompilationFailures Condition="'$(_ReadyToRunCompilerExitCode)' != '' And $(_ReadyToRunCompilerExitCode) != 0"
+                                      Include="@(_ReadyToRunCompileListPublishAlways)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                        _CreateR2RSymbolsPublishAlways
+
+    Emit native symbols for ReadyToRun images in the _ReadyToRunSymbolsCompileListPublishAlways list
+    ============================================================
+    -->
+  <Target Name="_CreateR2RSymbolsPublishAlways"
+          Inputs="@(_ReadyToRunSymbolsCompileListPublishAlways)"
+          Outputs="%(_ReadyToRunSymbolsCompileListPublishAlways.OutputPDBImage)">
+
+    <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
+                           CompilationEntry="@(_ReadyToRunSymbolsCompileListPublishAlways)"
+                           ContinueOnError="ErrorAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
+    </RunReadyToRunCompiler>
+
+    <ItemGroup>
+      <_ReadyToRunCompilationFailures Condition="'$(_ReadyToRunCompilerExitCode)' != '' And $(_ReadyToRunCompilerExitCode) != 0"
+                                      Include="@(_ReadyToRunSymbolsCompileListPublishAlways)" />
+    </ItemGroup>
   </Target>
 
   <!--

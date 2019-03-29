@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
@@ -26,6 +28,8 @@ namespace Microsoft.NET.Build.Tasks
         public string RuntimeGraphPath { get; set; }
 
         public bool SelfContained { get; set; }
+
+        public bool ReadyToRunEnabled { get; set; }
 
         public string RuntimeIdentifier { get; set; }
 
@@ -134,7 +138,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 bool processedPrimaryRuntimeIdentifier = false;
 
-                if (SelfContained &&
+                if ((SelfContained || ReadyToRunEnabled) &&
                     !string.IsNullOrEmpty(RuntimeIdentifier) &&
                     !string.IsNullOrEmpty(knownFrameworkReference.RuntimePackNamePatterns))
                 {
