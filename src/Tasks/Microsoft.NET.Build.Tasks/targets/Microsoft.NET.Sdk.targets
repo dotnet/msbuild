@@ -734,6 +734,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ObsoleteReferences.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Publish.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PreserveCompilationContext.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ConflictResolution.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />

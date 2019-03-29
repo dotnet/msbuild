@@ -391,6 +391,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1059: '{0}' 도구가 현재 .NET Core SDK에 포함되어 있습니다. 이 경고를 해결하는 방법은 https://aka.ms/dotnetclitools-in-box를 참조하세요.</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
+      <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
+        <source>NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
+        <target state="new">NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</target>
+        <note>{StrBegin="NETSDK1093: "}</note>
+      </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
         <source>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</source>
         <target state="translated">NETSDK1083: 지정한 RuntimeIdentifier '{0}'을(를) 인식할 수 없습니다.</target>

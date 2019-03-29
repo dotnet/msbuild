@@ -464,7 +464,7 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</value>
     <comment>{StrBegin="NETSDK1087: "}</comment>
   </data>
-    <data name="ClsidMapExportedTypesRequireExplicitGuid" xml:space="preserve">
+  <data name="ClsidMapExportedTypesRequireExplicitGuid" xml:space="preserve">
     <value>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</value>
     <comment>{StrBegin="NETSDK1088: "}
 {0} - The ComVisible class that doesn't have a GuidAttribute on it.</comment>
@@ -488,5 +488,9 @@ The following are names of parameters or literal values and should not be transl
   <data name="CannotEmbedClsidMapIntoComhost" xml:space="preserve">
     <value>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</value>
     <comment>{StrBegin="NETSDK1092: "}</comment>
+  </data>
+  <data name="ProjectToolOnlySupportTFMLowerThanNetcoreapp22" xml:space="preserve">
+    <value>NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</value>
+    <comment>{StrBegin="NETSDK1093: "}</comment>
   </data>
 </root>
