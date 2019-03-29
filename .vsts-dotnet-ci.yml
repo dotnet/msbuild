@@ -238,10 +238,10 @@ jobs:
     condition: succeededOrFailed()
 
 - job: CoreOnMac
-  displayName: "Build and test on macOS using .NET Core MSBuild"
+  displayName: "Build and test on macOS using bootstrapped .NET Core MSBuild"
   pool: 'Hosted macOS'
   steps:
-  - bash: . 'eng/common/cibuild.sh'
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
