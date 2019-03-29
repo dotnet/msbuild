@@ -10,26 +10,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SdkAssetsToPublish Include="$(ArtifactsShippingPackagesDir)*.zip" />
+    <ToolsetAssetsToPublish Include="$(ArtifactsNonShippingPackagesDir)*.nupkg" />
   </ItemGroup>
   
-  <Target Name="PublishCoreSdkAssets" BeforeTargets="Publish" Condition="$(PublishToAzure)">
+  <!-- We use a separate target to publish this to blob storage so that we can push this to
+       a relative path inside the blob storage. -->
+  <Target Name="PublishToolsetAssets" BeforeTargets="Publish" Condition="$(PublishToAzure)">
     <PropertyGroup>
       <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
       <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
     </PropertyGroup>
 
     <ItemGroup>
-      <SdkAssetsToPushToBlobFeed Include="@(SdkAssetsToPublish)" IsShipping="true" >
+      <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)" IsShipping="false" >
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(Version)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
         <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
-      </SdkAssetsToPushToBlobFeed>
+      </ToolsetAssetsToPushToBlobFeed>
     </ItemGroup>
 
     <PushToBlobFeed
       ExpectedFeedUrl="$(DotNetPublishBlobFeedUrl)"
       AccountKey="$(DotNetPublishBlobFeedKey)"
-      ItemsToPush="@(SdkAssetsToPushToBlobFeed)"
+      ItemsToPush="@(ToolsetAssetsToPushToBlobFeed)"
       ManifestBuildData="Location=$(DotNetPublishBlobFeedUrl)"
       ManifestRepoUri="$(BUILD_REPOSITORY_URI)"
       ManifestBranch="$(BUILD_SOURCEBRANCH)"
