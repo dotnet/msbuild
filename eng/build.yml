@@ -43,6 +43,7 @@ phases:
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         - group: DotNet-Symbol-Server-PATs
         - group: DotNet-HelixApi-Access
+        - group: DotNet-Blob-Feed
         - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
         - _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                     /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
