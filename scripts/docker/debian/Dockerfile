@@ -4,7 +4,7 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM microsoft/dotnet-buildtools-prereqs:debian-8.2-debpkg-d770b8b-20180628122423
+FROM mcr.microsoft.com/dotnet-buildtools/prereqs:debian-jessie-debpkg-58e4974-20190328133153
 
 # Misc Dependencies for build
 RUN rm -rf /var/lib/apt/lists/* && \
