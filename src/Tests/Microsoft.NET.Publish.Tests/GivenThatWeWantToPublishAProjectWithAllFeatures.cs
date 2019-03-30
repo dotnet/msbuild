@@ -69,7 +69,6 @@ namespace Microsoft.NET.Publish.Tests
             ""System.GC.Concurrent"": false,
             ""System.GC.Server"": true,
             ""System.GC.RetainVM"": false,
-            ""System.Runtime.QuickJitForLoops"": true,
             ""System.Runtime.TieredCompilation"": true,
             ""System.Runtime.TieredCompilation.StartupTierQuickJit"": true,
             ""System.Threading.ThreadPool.MinThreads"": 2,

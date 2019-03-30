@@ -16,7 +16,6 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <TieredCompilation>true</TieredCompilation>
     <StartupTierQuickJit>true</StartupTierQuickJit>
-    <QuickJitForLoops>true</QuickJitForLoops>
   </PropertyGroup>
 
   <ItemGroup>
