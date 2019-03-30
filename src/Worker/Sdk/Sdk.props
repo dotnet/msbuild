@@ -24,7 +24,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
 
-  <Import Project="$(MSBuildThisFileDirectory)..\build\netstandard1.0\Microsoft.NET.Sdk.Worker.props"
-		Condition="Exists('$(MSBuildThisFileDirectory)..\build\netstandard1.0\Microsoft.NET.Sdk.Worker.props')" />
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Worker.props"
+		Condition="Exists('$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Worker.props')" />
 
 </Project>

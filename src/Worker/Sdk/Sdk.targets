@@ -13,7 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
-  <Import Project="$(MSBuildThisFileDirectory)..\build\netstandard1.0\Microsoft.NET.Sdk.Worker.targets"
-		Condition="Exists('$(MSBuildThisFileDirectory)..\build\netstandard1.0\Microsoft.NET.Sdk.Worker.targets')" />
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Worker.targets"
+		Condition="Exists('$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Worker.targets')" />
 
 </Project>

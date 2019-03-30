@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <ProjectSystemRoot Condition="'$(ProjectSystemRoot)' == ''">$(RepoRoot)\src\ProjectSystem\</ProjectSystemRoot>
@@ -12,12 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(ProjectSystemRoot)\Targets\netstandard1.0\**\*.*">
+    <Content Include="$(ProjectSystemRoot)\Sdk\Targets\**\*.*">
       <Pack>true</Pack>
-      <PackagePath>build\netstandard1.0</PackagePath>
+      <PackagePath>targets</PackagePath>
     </Content>
 
-    <Content Include="$(ProjectSystemRoot)\Targets\Sdk.*">
+    <Content Include="$(ProjectSystemRoot)\Sdk\Sdk.*">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
     </Content>
