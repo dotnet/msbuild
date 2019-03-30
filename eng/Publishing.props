@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ToolsetAssetsToPublish Include="$(ArtifactsNonShippingPackagesDir)*.nupkg" />
+    <ToolsetAssetsToPublish Include="$(ArtifactsNonShippingPackagesDir)*.zip" />
   </ItemGroup>
   
   <!-- We use a separate target to publish this to blob storage so that we can push this to
