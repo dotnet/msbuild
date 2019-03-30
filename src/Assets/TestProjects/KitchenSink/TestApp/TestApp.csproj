@@ -15,7 +15,8 @@
     <ThreadPoolMaxThreads>9</ThreadPoolMaxThreads>
     <InvariantGlobalization>true</InvariantGlobalization>
     <TieredCompilation>true</TieredCompilation>
-    <DisableTier0Jit>true</DisableTier0Jit>
+    <StartupTierQuickJit>true</StartupTierQuickJit>
+    <QuickJitForLoops>true</QuickJitForLoops>
   </PropertyGroup>
 
   <ItemGroup>
