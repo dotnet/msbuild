@@ -1,20 +1,17 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.Sln.Internal;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Common
 {
     internal static class SlnProjectExtensions
     {
-        public static IList<string> GetSolutionFoldersFromProject(this SlnProject project)
+        public static IList<string> GetSolutionFoldersFromProjectPath(string projectFilePath)
         {
             var solutionFolders = new List<string>();
 
-            var projectFilePath = project.FilePath;
             if (IsPathInTreeRootedAtSolutionDirectory(projectFilePath))
             {
                 var currentDirString = $".{Path.DirectorySeparatorChar}";

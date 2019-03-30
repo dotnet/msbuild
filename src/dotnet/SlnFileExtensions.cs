@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Common
 {
     internal static class SlnFileExtensions
     {
-        public static void AddProject(this SlnFile slnFile, string fullProjectPath, bool inRoot, string relativeRoot = null)
+        public static void AddProject(this SlnFile slnFile, string fullProjectPath, IList<string> solutionFolders)
         {
             if (string.IsNullOrEmpty(fullProjectPath))
             {
@@ -70,17 +70,6 @@ namespace Microsoft.DotNet.Tools.Common
                     return;
                 }
 
-                // Identify the intended solution folders
-                IList<string> solutionFolders;
-                if (!string.IsNullOrEmpty(relativeRoot))
-                {
-                    solutionFolders = relativeRoot.Split(Path.DirectorySeparatorChar);
-                }
-                else
-                {
-                    solutionFolders = SlnProjectExtensions.GetSolutionFoldersFromProject(slnProject);
-                }
-
                 // NOTE: The order you create the sections determines the order they are written to the sln
                 // file. In the case of an empty sln file, in order to make sure the solution configurations
                 // section comes first we need to add it first. This doesn't affect correctness but does
@@ -92,7 +81,7 @@ namespace Microsoft.DotNet.Tools.Common
                     projectInstance,
                     slnFile.ProjectConfigurationsSection.GetOrCreatePropertySet(slnProject.Id));
 
-                if (!inRoot)
+                if (solutionFolders != null)
                 {
                     slnFile.AddSolutionFolders(slnProject, solutionFolders);
                 }
