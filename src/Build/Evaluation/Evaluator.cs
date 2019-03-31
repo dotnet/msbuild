@@ -1274,10 +1274,8 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance toolsetProperty in _data.Toolset.Properties.Values)
             {
-                P predecessor = _data.GetProperty(toolsetProperty.Name);
-                P property = _data.SetProperty(toolsetProperty.Name, ((IProperty)toolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
+                P property = SetProperty(PropertySources.Toolset, toolsetProperty);
                 toolsetProperties.Add(property);
-                LogPropertyAssignment(predecessor, property, PropertySources.Toolset);
             }
 
             if (_data.SubToolsetVersion == null)
@@ -1286,10 +1284,8 @@ namespace Microsoft.Build.Evaluation
                 // is most likely not a subtoolset now, we need to add VisualStudioVersion if its not already a property.
                 if (!_data.Properties.Contains(Constants.VisualStudioVersionPropertyName))
                 {
-                    P subToolsetVersionPredecessor = _data.GetProperty(Constants.VisualStudioVersionPropertyName);
-                    P subToolsetVersionProperty = _data.SetProperty(Constants.VisualStudioVersionPropertyName, MSBuildConstants.CurrentVisualStudioVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
-                    toolsetProperties.Add(subToolsetVersionProperty);
-                    LogPropertyAssignment(subToolsetVersionPredecessor, subToolsetVersionProperty, PropertySources.Toolset);
+                    P property = SetProperty(PropertySources.Toolset, Constants.VisualStudioVersionPropertyName, MSBuildConstants.CurrentVisualStudioVersion);
+                    toolsetProperties.Add(property);
                 }
             }
             else
@@ -1301,20 +1297,16 @@ namespace Microsoft.Build.Evaluation
                 // set the property even if there is no matching sub-toolset.  
                 if (!_data.Properties.Contains(Constants.SubToolsetVersionPropertyName))
                 {
-                    P subToolsetVersionPredecessor = _data.GetProperty(Constants.SubToolsetVersionPropertyName);
-                    P subToolsetVersionProperty = _data.SetProperty(Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
-                    toolsetProperties.Add(subToolsetVersionProperty);
-                    LogPropertyAssignment(subToolsetVersionPredecessor, subToolsetVersionProperty, PropertySources.Toolset);
+                    P property = SetProperty(PropertySources.Toolset, Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion);
+                    toolsetProperties.Add(property);
                 }
 
                 if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out subToolset))
                 {
                     foreach (ProjectPropertyInstance subToolsetProperty in subToolset.Properties.Values)
                     {
-                        P predecessor = _data.GetProperty(subToolsetProperty.Name);
-                        P property = _data.SetProperty(subToolsetProperty.Name, ((IProperty)subToolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
+                        P property = SetProperty(PropertySources.Toolset, subToolsetProperty);
                         toolsetProperties.Add(property);
-                        LogPropertyAssignment(predecessor, property, PropertySources.Toolset);
                     }
                 }
             }
@@ -1336,10 +1328,8 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
             {
-                P predecessor = _data.GetProperty(globalProperty.Name);
-                P property = _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */);
+                P property = SetProperty(PropertySources.Global, globalProperty, isGlobalProperty: true);
                 globalProperties.Add(property);
-                LogPropertyAssignment(predecessor, property, PropertySources.Global);
             }
 
             return globalProperties;
@@ -1409,8 +1399,35 @@ namespace Microsoft.Build.Evaluation
 
                 P property = _data.SetProperty(propertyElement, evaluatedValue, predecessor);
 
-                LogPropertyAssignment(predecessor, property, propertyElement.Location.LocationString);
+                if (!_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                {
+                    LogPropertyAssignment(predecessor, property, propertyElement.Location.LocationString);
+                }
             }
+        }
+
+        private P SetProperty(string propertySource, ProjectPropertyInstance propertyInstance, bool isGlobalProperty = false, bool mayBeReserved = false)
+        {
+            string propertyName = propertyInstance.Name;
+            string propertyValue = ((IProperty)propertyInstance).EvaluatedValueEscaped;
+            return SetProperty(propertySource, propertyName, propertyValue, predecessor: null, isGlobalProperty, mayBeReserved);
+        }
+
+        private P SetProperty(string propertySource, string propertyName, string propertyValue, P predecessor = null, bool isGlobalProperty = false, bool mayBeReserved = false)
+        {
+            if (predecessor == null && !_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+            {
+                predecessor = _data.GetProperty(propertyName);
+            }
+
+            P property = _data.SetProperty(propertyName, propertyValue, isGlobalProperty, mayBeReserved);
+
+            if (!_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+            {
+                LogPropertyAssignment(predecessor, property, propertySource);
+            }
+
+            return property;
         }
 
         private void LogPropertyAssignment(P predecessor, P property, string location)
@@ -2695,15 +2712,13 @@ namespace Microsoft.Build.Evaluation
             {
                 P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
 
-                P newValue = _data.SetProperty(
+                SetProperty(
+                    propertySource: string.Empty,
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
                         ? _lastModifiedProject.FullPath
                         : $"{_lastModifiedProject.FullPath};{oldValue.EvaluatedValue}",
-                    isGlobalProperty: false,
-                    mayBeReserved: false);
-
-                LogPropertyAssignment(oldValue, newValue, String.Empty);
+                    oldValue);
             }
         }
 
