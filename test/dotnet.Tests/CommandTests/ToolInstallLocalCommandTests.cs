@@ -17,7 +17,6 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System.Runtime.InteropServices;
