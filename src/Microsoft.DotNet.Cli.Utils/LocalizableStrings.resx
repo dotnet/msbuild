@@ -130,7 +130,11 @@
     <value>The project may not have been restored or restore failed - run `dotnet restore`</value>
   </data>
   <data name="NoExecutableFoundMatchingCommand" xml:space="preserve">
-    <value>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</value>
+    <value>Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</value>
   </data>
   <data name="WaitingForDebuggerToAttach" xml:space="preserve">
     <value>Waiting for debugger to attach. Press ENTER to continue</value>
