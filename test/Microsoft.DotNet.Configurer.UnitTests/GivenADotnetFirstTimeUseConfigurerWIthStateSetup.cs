@@ -47,26 +47,17 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Theory]
-        [InlineData(false, false, false, false, Never, FirstRun, Never, FirstRun, Never, Never, true, true)]
-        [InlineData(true, false, false, false, FirstRun, FirstRun, Never, FirstRun, Never, FirstRun, true, true)]
-        [InlineData(false, true, false, false, Never, Never, FirstRun, Never, FirstRun, Never, true, true)]
-        [InlineData(true, true, false, false, Never, Never, FirstRun, Never, FirstRun, Never, true, true)]
-        [InlineData(false, false, true, false, Never, FirstRun, Never, Never, Never, Never, false, false)]
-        [InlineData(true, false, true, false, FirstRun, FirstRun, Never, Never, Never, FirstRun, false, false)]
-        [InlineData(false, true, true, false, Never, Never, FirstRun, Never, FirstRun, Never, false, false)]
-        [InlineData(true, true, true, false, Never, Never, FirstRun, Never, FirstRun, Never, false, false)]
-        [InlineData(false, false, false, true, Never, SecondRun, Never, SecondRun, Never, Never, true, true)]
-        [InlineData(true, false, false, true, SecondRun, SecondRun, Never, SecondRun, Never, SecondRun, true, true)]
-        [InlineData(false, true, false, true, Never, Never, SecondRun, Never, SecondRun, Never, true, true)]
-        [InlineData(true, true, false, true, Never, Never, SecondRun, Never, SecondRun, Never, true, true)]
-        [InlineData(false, false, true, true, Never, SecondRun, Never, Never, Never, Never, false, false)]
-        [InlineData(true, false, true, true, SecondRun, SecondRun, Never, Never, Never, SecondRun, false, false)]
-        [InlineData(false, true, true, true, Never, Never, SecondRun, Never, SecondRun, Never, false, false)]
-        [InlineData(true, true, true, true, Never, Never, SecondRun, Never, SecondRun, Never, false, false)]
+        [InlineData(false, false, false, Never, FirstRun, FirstRun, true, true)]
+        [InlineData(true, false, false, FirstRun, FirstRun, FirstRun, true, true)]
+        [InlineData(false, true, false, Never, FirstRun, Never, false, false)]
+        [InlineData(true, true, false, FirstRun, FirstRun, Never, false, false)]
+        [InlineData(false, false, true, Never, SecondRun, SecondRun, true, true)]
+        [InlineData(true, false, true, SecondRun, SecondRun, SecondRun, true, true)]
+        [InlineData(false, true, true, Never, SecondRun, Never, false, false)]
+        [InlineData(true, true, true, SecondRun, SecondRun, Never, false, false)]
         public void FlagsCombinationAndAction(
             // Inputs
             bool DOTNET_GENERATE_ASPNET_CERTIFICATE,
-            bool DOTNET_SKIP_FIRST_TIME_EXPERIENCE,
             bool DOTNET_CLI_TELEMETRY_OPTOUT,
             //   true to simulate install via installer. The first run is during installer,
             //   silent but has sudo permission
@@ -75,10 +66,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             // Outputs
             ActionCalledTime aspnetCertInstalledTimeShouldBeCalledAt,
             ActionCalledTime printFirstTimeWelcomeMessageShouldBeCalledAt,
-            ActionCalledTime printShortFirstTimeWelcomeMessageShouldBeCalledAt,
             ActionCalledTime printTelemetryMessageShouldBeCalledAt,
-            ActionCalledTime printShortTelemetryMessageShouldBeCalledAt,
-            ActionCalledTime printAspNetCertificateInstalledMessageShouldBeCalledAt,
             bool telemetryFirstRunShouldBeEnabled,
             bool telemetrySecondRunShouldBeEnabled
             )
@@ -89,11 +77,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", It.IsAny<bool>()))
             .Returns(DOTNET_GENERATE_ASPNET_CERTIFICATE);
             _environmentProvider
-                .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", It.IsAny<bool>()))
-                .Returns(DOTNET_SKIP_FIRST_TIME_EXPERIENCE);
-            _environmentProvider
                 .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", It.IsAny<bool>()))
                 .Returns(DOTNET_CLI_TELEMETRY_OPTOUT);
+            _environmentProvider
+                .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", It.IsAny<bool>()))
+                .Returns(true);
             _pathAdderMock.Setup(p => p.AddPackageExecutablePathToUserPath()).Verifiable();
             // box a bool so it will be captured by reference in closure
             object generateAspNetCoreDevelopmentCertificateCalled = false;
@@ -107,33 +95,19 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     "aspnetCertInstalledTime");
             var printFirstTimeWelcomeMessage
                 = new FirstRunExperienceAction(
-                    () => _reporterMock.Lines.Contains(LocalizableStrings.FirstTimeWelcomeMessage),
+                    () => _reporterMock.Lines.Contains(string.Format(LocalizableStrings.FirstTimeMessageWelcome, Product.Version))
+                            && _reporterMock.Lines.Contains(LocalizableStrings.FirstTimeMessageMoreInformation),
                     "printFirstTimeWelcomeMessage");
-            var printShortFirstTimeWelcomeMessage
-                = new FirstRunExperienceAction(
-                    () => _reporterMock.Lines.Contains(LocalizableStrings.ShortFirstTimeWelcomeMessage),
-                    "printShortFirstTimeWelcomeMessage");
             var printTelemetryMessage
                 = new FirstRunExperienceAction(
                     () => _reporterMock.Lines.Contains(LocalizableStrings.TelemetryMessage),
                     "printTelemetryMessage");
-            var printShortTelemetryMessage
-                = new FirstRunExperienceAction(
-                    () => _reporterMock.Lines.Contains(LocalizableStrings.ShortFirstTimeWelcomeMessage),
-                    "printShortTelemetryMessage");
-            var printAspNetCertificateInstalledMessage
-                = new FirstRunExperienceAction(
-                    () => _reporterMock.Lines.Contains(LocalizableStrings.AspNetCertificateInstalled),
-                    "printAspNetCertificateInstalledMessage");
 
             List<FirstRunExperienceAction> firstRunExperienceActions
                 = new List<FirstRunExperienceAction>() {
                     aspnetCertInstalledTime,
                     printFirstTimeWelcomeMessage,
-                    printShortFirstTimeWelcomeMessage,
-                    printTelemetryMessage,
-                    printShortTelemetryMessage,
-                    printAspNetCertificateInstalledMessage };
+                    printTelemetryMessage };
 
             // First run
             var telemetryFirstRun = RunConfigUsingMocks(isFirstRunInstallerRun);
@@ -148,10 +122,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             // Assertion
             aspnetCertInstalledTime.Assert(aspnetCertInstalledTimeShouldBeCalledAt);
             printFirstTimeWelcomeMessage.Assert(printFirstTimeWelcomeMessageShouldBeCalledAt);
-            printShortFirstTimeWelcomeMessage.Assert(printShortFirstTimeWelcomeMessageShouldBeCalledAt);
             printTelemetryMessage.Assert(printTelemetryMessageShouldBeCalledAt);
-            printShortTelemetryMessage.Assert(printShortTelemetryMessageShouldBeCalledAt);
-            printAspNetCertificateInstalledMessage.Assert(printAspNetCertificateInstalledMessageShouldBeCalledAt);
             telemetryFirstRun.Enabled.Should().Be(telemetryFirstRunShouldBeEnabled);
             telemetrySecondRun.Enabled.Should().Be(telemetrySecondRunShouldBeEnabled);
         }
@@ -227,10 +198,10 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var _environmentProviderObject = _environmentProvider.Object;
             bool generateAspNetCertificate =
                  _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
-            bool skipFirstRunExperience =
-                _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
             bool telemetryOptout =
                 _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", false);
+            bool addGlobalToolsToPath =
+                _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
 
             IAspNetCertificateSentinel aspNetCertificateSentinel;
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel;
@@ -241,10 +212,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
                 firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
                 toolPathSentinel = new NoOpFileSentinel(exists: false);
-
-                // When running through a native installer, we want the cache expansion to happen, so
-                // we need to override this.
-                skipFirstRunExperience = false;
             }
             else
             {
@@ -261,8 +228,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                  dotnetFirstRunConfiguration: new DotnetFirstRunConfiguration
                  (
                      generateAspNetCertificate: generateAspNetCertificate,
-                     skipFirstRunExperience: skipFirstRunExperience,
-                     telemetryOptout: telemetryOptout
+                     telemetryOptout: telemetryOptout,
+                     addGlobalToolsToPath: addGlobalToolsToPath
                  ),
                  reporter: _reporterMock,
                  cliFallbackFolderPath: CliFallbackFolderPath,
