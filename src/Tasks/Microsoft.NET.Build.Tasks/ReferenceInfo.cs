@@ -16,17 +16,25 @@ namespace Microsoft.NET.Build.Tasks
         public string FullPath { get; }
         public string FileName => Path.GetFileName(FullPath);
 
+        public string PackageName { get; }
+        public string PackageVersion { get; }
+        public string RelativePath { get; }
+
         private List<ResourceAssemblyInfo> _resourceAssemblies;
         public IEnumerable<ResourceAssemblyInfo> ResourceAssemblies
         {
             get { return _resourceAssemblies; }
         }
 
-        private ReferenceInfo(string name, string version, string fullPath)
+        private ReferenceInfo(string name, string version, string fullPath,
+            string packageName, string packageVersion, string relativePath)
         {
             Name = name;
             Version = version;
             FullPath = fullPath;
+            PackageName = packageName;
+            PackageVersion = packageVersion;
+            RelativePath = relativePath;
 
             _resourceAssemblies = new List<ResourceAssemblyInfo>();
         }
@@ -107,7 +115,22 @@ namespace Microsoft.NET.Build.Tasks
             string name = Path.GetFileNameWithoutExtension(fullPath);
             string version = GetVersion(referencePath);
 
-            return new ReferenceInfo(name, version, fullPath);
+            var packageName = referencePath.GetMetadata(MetadataKeys.NuGetPackageId);
+            if (string.IsNullOrEmpty(packageName))
+            {
+                packageName = referencePath.GetMetadata(MetadataKeys.PackageName);
+            }
+
+            var packageVersion = referencePath.GetMetadata(MetadataKeys.NuGetPackageVersion);
+            if (string.IsNullOrEmpty(packageVersion))
+            {
+                packageVersion = referencePath.GetMetadata(MetadataKeys.PackageVersion);
+            }
+
+            var relativePath = referencePath.GetMetadata(MetadataKeys.RelativePath);
+
+            return new ReferenceInfo(name, version, fullPath,
+                packageName, packageVersion, relativePath);
         }
 
         private static string GetVersion(ITaskItem referencePath)
