@@ -202,14 +202,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GetPackageDirectory>
 
     <ItemGroup>
-      <_ApphostsForShimRuntimeIdentifiers Include="%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.PackageDirectory)\%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.RelativePath)" >
+      <_ApphostsForShimRuntimeIdentifiers Include="%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.PackageDirectory)\%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.PathInPackage)" >
         <RuntimeIdentifier>%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.RuntimeIdentifier)</RuntimeIdentifier>
        </_ApphostsForShimRuntimeIdentifiers>
     </ItemGroup>
 
     <ItemGroup>
       <ResolvedAppHostPack Condition="'%(ResolvedAppHostPack.Path)' == '' and '%(ResolvedAppHostPack.PackageDirectory)' != ''">
-        <Path>%(ResolvedAppHostPack.PackageDirectory)\%(ResolvedAppHostPack.RelativePath)</Path>
+        <Path>%(ResolvedAppHostPack.PackageDirectory)\%(ResolvedAppHostPack.PathInPackage)</Path>
       </ResolvedAppHostPack>      
     </ItemGroup>
 
@@ -219,7 +219,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <ResolvedComHostPack Condition="'%(ResolvedComHostPack.Path)' == '' and '%(ResolvedComHostPack.PackageDirectory)' != ''">
-        <Path>%(ResolvedComHostPack.PackageDirectory)\%(ResolvedComHostPack.RelativePath)</Path>
+        <Path>%(ResolvedComHostPack.PackageDirectory)\%(ResolvedComHostPack.PathInPackage)</Path>
       </ResolvedComHostPack>
     </ItemGroup>
 

@@ -781,11 +781,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 WriteItems(
                     _compileTimeTarget,
-                    package => package.CompileTimeAssemblies,
-                    writeMetadata: (package, asset) =>
-                    {
-                        WriteMetadata(MetadataKeys.RelativePath, asset.Path);
-                    });
+                    package => package.CompileTimeAssemblies);
             }
 
             private void WriteContentFilesToPreprocess()
@@ -1125,6 +1121,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
                         WriteItem(itemSpec, library);
+                        WriteMetadata(MetadataKeys.PathInPackage, asset.Path);
                         writeMetadata?.Invoke(library, asset);
                     }
                 }

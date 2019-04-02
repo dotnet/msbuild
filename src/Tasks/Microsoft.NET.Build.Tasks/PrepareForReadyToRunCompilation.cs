@@ -139,7 +139,7 @@ namespace Microsoft.NET.Build.Tasks
                 if (!InputFileEligibleForCompilation(file))
                     continue;
 
-                var outputR2RImageRelativePath = file.GetMetadata(MetadataKeys.RelativePath);
+                var outputR2RImageRelativePath = file.GetMetadata("RelativePath");
                 var outputR2RImage = Path.Combine(OutputPath, outputR2RImageRelativePath);
 
                 // This TaskItem is the IL->R2R entry, for an input assembly that needs to be compiled into a R2R image. This will be used as
@@ -200,7 +200,7 @@ namespace Microsoft.NET.Build.Tasks
                         // for the newly created PDB image.
                         TaskItem r2rSymbolsFileToPublish = new TaskItem(file);
                         r2rSymbolsFileToPublish.ItemSpec = outputPDBImage;
-                        r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, outputPDBImageRelativePath);
+                        r2rSymbolsFileToPublish.SetMetadata("RelativePath", outputPDBImageRelativePath);
                         r2rSymbolsFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                         r2rFilesPublishList.Add(r2rSymbolsFileToPublish);
                     }

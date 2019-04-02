@@ -21,6 +21,7 @@ namespace Microsoft.NET.Build.Tasks
         public string SourcePath { get; }
         public string PackageName { get; }
         public string PackageVersion { get; }
+        public string PathInPackage { get; }
         public string DestinationSubDirectory { get; }
         public AssetType Asset{ get; }
         public bool IsRuntimeTarget { get; }
@@ -84,6 +85,8 @@ namespace Microsoft.NET.Build.Tasks
             {
                 PackageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
             }
+
+            PathInPackage = item.GetMetadata(MetadataKeys.PathInPackage);
 
             RuntimeIdentifier = item.GetMetadata(MetadataKeys.RuntimeIdentifier);
             Culture = item.GetMetadata(MetadataKeys.Culture);

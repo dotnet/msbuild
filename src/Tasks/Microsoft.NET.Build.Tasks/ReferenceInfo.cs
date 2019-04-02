@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public string PackageName { get; }
         public string PackageVersion { get; }
-        public string RelativePath { get; }
+        public string PathInPackage { get; }
 
         private List<ResourceAssemblyInfo> _resourceAssemblies;
         public IEnumerable<ResourceAssemblyInfo> ResourceAssemblies
@@ -27,14 +27,14 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         private ReferenceInfo(string name, string version, string fullPath,
-            string packageName, string packageVersion, string relativePath)
+            string packageName, string packageVersion, string pathInPackage)
         {
             Name = name;
             Version = version;
             FullPath = fullPath;
             PackageName = packageName;
             PackageVersion = packageVersion;
-            RelativePath = relativePath;
+            PathInPackage = pathInPackage;
 
             _resourceAssemblies = new List<ResourceAssemblyInfo>();
         }
@@ -127,10 +127,10 @@ namespace Microsoft.NET.Build.Tasks
                 packageVersion = referencePath.GetMetadata(MetadataKeys.PackageVersion);
             }
 
-            var relativePath = referencePath.GetMetadata(MetadataKeys.RelativePath);
+            var pathInPackage = referencePath.GetMetadata(MetadataKeys.PathInPackage);
 
             return new ReferenceInfo(name, version, fullPath,
-                packageName, packageVersion, relativePath);
+                packageName, packageVersion, pathInPackage);
         }
 
         private static string GetVersion(ITaskItem referencePath)

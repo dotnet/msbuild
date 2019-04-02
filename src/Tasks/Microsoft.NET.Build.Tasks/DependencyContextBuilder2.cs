@@ -539,7 +539,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 foreach (var compileReference in compileReferences)
                 {
-                    assemblies.Add(compileReference.RelativePath);
+                    assemblies.Add(compileReference.PathInPackage);
                 }
             }
 
@@ -608,7 +608,12 @@ namespace Microsoft.NET.Build.Tasks
 
         private RuntimeFile CreateRuntimeFile(ResolvedFile resolvedFile)
         {
-            return CreateRuntimeFile(resolvedFile.DestinationSubPath, resolvedFile.SourcePath);
+            string relativePath = resolvedFile.PathInPackage;
+            if (string.IsNullOrEmpty(relativePath))
+            {
+                relativePath = resolvedFile.DestinationSubPath;
+            }
+            return CreateRuntimeFile(relativePath, resolvedFile.SourcePath);
         }
 
         private RuntimeFile CreateRuntimeFile(string path, string fullPath)
