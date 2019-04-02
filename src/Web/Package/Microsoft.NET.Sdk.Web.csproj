@@ -12,12 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(WebRoot)\Sdk\Targets\**\*.*">
+    <Content Include="$(WebRoot)\Targets\**\*.*">
       <Pack>true</Pack>
       <PackagePath>targets</PackagePath>
     </Content>
 
-    <Content Include="$(WebRoot)\Sdk\Sdk.*">
+    <Content Include="$(WebRoot)\Sdk\**\*.*">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
     </Content>

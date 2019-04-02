@@ -27,7 +27,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
     <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
-    <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
     <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
   </PropertyGroup>
 
@@ -37,23 +36,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ***********************************************************************************************
-  Import the PublishProfiles
+  Import the PublishProfile
   ***********************************************************************************************
  -->
 
-  <PropertyGroup>
-    <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == ''">$(MSBuildProjectDirectory)\$(AppDesignerFolder)\PublishProfiles\</_PublishProfileRootFolder>
-    <PublishProfile Condition="'$(PublishProfile)' ==''">FileSystem</PublishProfile>
-    <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
-    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(_PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
-    <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(_PublishProfilesDir)$(PublishProfileName).pubxml</PublishProfileFullPath>
-
-    <!-- This is what get passed from the Visual Studio UI.-->
-    <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == ''">$(PublishProfileFullPath)</WebPublishProfileFile>
-  </PropertyGroup>
-
-  <Import Project="$(WebPublishProfileFile)" Condition="Exists('$(WebPublishProfileFile)')" />
-  <Import Project="$(WebPublishProfileFile).user" Condition="Exists('$(WebPublishProfileFile).user')" />
+  <Import Project="$(_PublishSdkDir)ImportPublishProfile.targets" Condition="Exists('ImportPublishProfile.targets') And '$(PublishProfileImported)' != 'true'" />
 
   <!--
   ***********************************************************************************************

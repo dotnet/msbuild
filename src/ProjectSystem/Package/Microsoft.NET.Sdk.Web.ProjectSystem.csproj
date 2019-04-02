@@ -12,12 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(ProjectSystemRoot)\Sdk\Targets\**\*.*">
+    <Content Include="$(ProjectSystemRoot)\Targets\**\*.*">
       <Pack>true</Pack>
       <PackagePath>targets</PackagePath>
     </Content>
 
-    <Content Include="$(ProjectSystemRoot)\Sdk\Sdk.*">
+    <Content Include="$(ProjectSystemRoot)\Sdk\**\*.*">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
     </Content>

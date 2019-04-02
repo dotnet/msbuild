@@ -19,6 +19,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AddRazorSupportForMvc Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(AddRazorSupportForMvc)' != 'true'">true</AddRazorSupportForMvc>
   </PropertyGroup>
 
+  <!-- We can't add it here because the OutputPath and other msbuild properties are not evaluated.-->
+  <!--<Import Sdk="Microsoft.NET.Sdk.Publish" Project="ImportPublishProfile.targets" />-->
+  
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.targets" />

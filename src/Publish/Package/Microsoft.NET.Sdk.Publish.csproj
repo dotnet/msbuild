@@ -41,12 +41,12 @@
       <PackagePath>tools\netcoreapp2.1</PackagePath>
     </Content>
 
-    <Content Include="$(PublishRoot)\Sdk\Targets\**\*.*">
+    <Content Include="$(PublishRoot)\Targets\**\*.*">
       <Pack>true</Pack>
       <PackagePath>targets</PackagePath>
     </Content>
 
-    <Content Include="$(PublishRoot)\Sdk\Sdk.*">
+    <Content Include="$(PublishRoot)\Sdk\**\*.*">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
     </Content>
