@@ -810,6 +810,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
                       RuntimeStorePackages="@(RuntimeStorePackages)"
+                      CompileReferences="@(ResolvedCompileFileDefinitions)"
+                      ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
+                      ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)" />
 

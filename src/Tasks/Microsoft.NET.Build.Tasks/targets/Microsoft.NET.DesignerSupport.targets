@@ -64,6 +64,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
       ProjectPath="$(MSBuildProjectFullPath)"
       RuntimeFrameworks="@(RuntimeFramework)"
+      CompileReferences="@(ResolvedCompileFileDefinitions)"
+      ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
+      ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
       TargetFramework="$(TargetFrameworkMoniker)"
       />
 

@@ -152,6 +152,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeFrameworks="@(RuntimeFramework)"
                       FilesToSkip="@(_ConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
+                      CompileReferences="@(ResolvedCompileFileDefinitions)"
+                      ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
+                      ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)">
     </GenerateDepsFile>

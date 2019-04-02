@@ -71,6 +71,16 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] RuntimeStorePackages { get; set; }
 
+        [Required]
+        public ITaskItem[] CompileReferences { get; set; }
+
+        //  NativeCopyLocalItems, ResourceCopyLocalItems, RuntimeCopyLocalItems
+        [Required]
+        public ITaskItem[] ResolvedNuGetFiles { get; set; }
+
+        [Required]
+        public ITaskItem[] ResolvedRuntimeTargetsFiles { get; set; }
+
         public bool IsSelfContained { get; set; }
 
         public bool IncludeRuntimeFileVersions { get; set; }
@@ -104,7 +114,7 @@ namespace Microsoft.NET.Build.Tasks
             return filteredPackages;
         }
 
-        protected override void ExecuteCore()
+        private void WriteDepsFileOld(string depsFilePath)
         {
             LoadFilesToSkip();
 
@@ -163,11 +173,88 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var writer = new DependencyContextWriter();
-            using (var fileStream = File.Create(DepsFilePath))
+            using (var fileStream = File.Create(depsFilePath))
             {
                 writer.Write(dependencyContext, fileStream);
             }
-            _filesWritten.Add(new TaskItem(DepsFilePath));
+            _filesWritten.Add(new TaskItem(depsFilePath));
+        }
+
+        private void WriteDepsFileNew(string depsFilePath)
+        {
+            LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
+            CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
+
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(
+                ProjectPath,
+                AssemblyName,
+                AssemblyExtension,
+                AssemblyVersion,
+                AssemblySatelliteAssemblies);
+
+            IEnumerable<ReferenceInfo> referenceAssemblyInfos =
+                ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
+
+            IEnumerable<ReferenceInfo> directReferences =
+                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths, ReferenceSatellitePaths);
+
+            IEnumerable<ReferenceInfo> dependencyReferences =
+                ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths);
+
+            Dictionary<string, SingleProjectInfo> referenceProjects = SingleProjectInfo.CreateProjectReferenceInfos(
+                ReferencePaths,
+                ReferenceDependencyPaths,
+                ReferenceSatellitePaths);
+
+            IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
+
+            IEnumerable<RuntimePackAssetInfo> runtimePackAssets =
+                RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item));
+
+
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+                NuGetUtils.ParseFrameworkName(TargetFramework),
+                RuntimeIdentifier,
+                PlatformLibraryName,
+                RuntimeFrameworks,
+                IsSelfContained);
+
+            var builder = new DependencyContextBuilder2(mainProject, projectContext, IncludeRuntimeFileVersions);
+
+            builder = builder
+                .WithMainProjectInDepsFile(IncludeMainProject)
+                .WithReferenceAssemblies(referenceAssemblyInfos)
+                .WithDirectReferences(directReferences)
+                .WithDependencyReferences(dependencyReferences)
+                .WithReferenceProjectInfos(referenceProjects)
+                .WithExcludeFromPublishAssets(excludeFromPublishAssets)
+                .WithRuntimePackAssets(runtimePackAssets)
+                .WithCompilationOptions(compilationOptions)
+                .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
+                .WithPackagesThatWereFiltered(GetFilteredPackages());
+
+            if (CompileReferences.Length > 0)
+            {
+                builder = builder.WithCompileReferences(ReferenceInfo.CreateReferenceInfos(CompileReferences));
+            }
+
+            var resolvedNuGetFiles = ResolvedNuGetFiles.Select(f => new ResolvedFile(f, false))
+                                .Concat(ResolvedRuntimeTargetsFiles.Select(f => new ResolvedFile(f, true)));
+            builder = builder.WithResolvedNuGetFiles(resolvedNuGetFiles);
+
+            DependencyContext dependencyContext = builder.Build();
+
+            var writer = new DependencyContextWriter();
+            using (var fileStream = File.Create(depsFilePath))
+            {
+                writer.Write(dependencyContext, fileStream);
+            }
+            _filesWritten.Add(new TaskItem(depsFilePath));
+        }
+
+        protected override void ExecuteCore()
+        {
+            WriteDepsFileOld(DepsFilePath);
 
         }
 

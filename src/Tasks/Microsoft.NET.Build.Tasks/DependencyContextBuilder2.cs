@@ -24,6 +24,7 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, List<RuntimePackAssetInfo>> _runtimePackAssets;
         private CompilationOptions _compilationOptions;
         private string _referenceAssembliesPath;
+        private Dictionary<PackageIdentity, string> _filteredPackages;
         private bool _includeMainProjectInDepsFile = true;
         private Dictionary<string, DependencyLibrary> _dependencyLibraries;
         private Dictionary<string, List<LibraryDependency>> _libraryDependencies;
@@ -196,6 +197,12 @@ namespace Microsoft.NET.Build.Tasks
                 _referenceAssembliesPath = referenceAssembliesPath + Path.DirectorySeparatorChar;
             }
 
+            return this;
+        }
+
+        public DependencyContextBuilder2 WithPackagesThatWereFiltered(Dictionary<PackageIdentity, string> packagesThatWhereFiltered)
+        {
+            _filteredPackages = packagesThatWhereFiltered;
             return this;
         }
 
@@ -477,13 +484,19 @@ namespace Microsoft.NET.Build.Tasks
 
                     foreach (var runtimeIdentifierGroup in runtimeTargets)
                     {
-                        runtimeAssemblyGroups.Add(new RuntimeAssetGroup(runtimeIdentifierGroup.Key,
-                                                        runtimeIdentifierGroup.Where(f => f.Asset == AssetType.Runtime)
-                                                                              .Select(CreateRuntimeFile)));
+                        var managedRuntimeTargetsFiles = runtimeIdentifierGroup.Where(f => f.Asset == AssetType.Runtime).ToList();
+                        if (managedRuntimeTargetsFiles.Any())
+                        {
+                            runtimeAssemblyGroups.Add(new RuntimeAssetGroup(runtimeIdentifierGroup.Key,
+                                                            managedRuntimeTargetsFiles.Select(CreateRuntimeFile)));
+                        }
 
-                        nativeLibraryGroups.Add(new RuntimeAssetGroup(runtimeIdentifierGroup.Key,
-                                                        runtimeIdentifierGroup.Where(f => f.Asset == AssetType.Native)
-                                                                              .Select(CreateRuntimeFile)));
+                        var nativeRuntimeTargetsFiles = runtimeIdentifierGroup.Where(f => f.Asset == AssetType.Native).ToList();
+                        if (nativeRuntimeTargetsFiles.Any())
+                        {
+                            nativeLibraryGroups.Add(new RuntimeAssetGroup(runtimeIdentifierGroup.Key,
+                                                            nativeRuntimeTargetsFiles.Select(CreateRuntimeFile)));
+                        }
                     }
                 }
 
@@ -761,7 +774,13 @@ namespace Microsoft.NET.Build.Tasks
 
         private string GetRuntimeStoreManifestName(string packageName, string packageVersion)
         {
-            throw new NotImplementedException();
+            string runtimeStoreManifestName = null;
+            if (_filteredPackages != null && _filteredPackages.Any())
+            {
+                var pkg = new PackageIdentity(packageName, NuGetVersion.Parse(packageVersion));
+                _filteredPackages?.TryGetValue(pkg, out runtimeStoreManifestName);
+            }
+            return runtimeStoreManifestName;
         }
 
         private class DependencyLibrary

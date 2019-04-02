@@ -56,15 +56,15 @@ namespace Microsoft.NET.Build.Tasks
             SourcePath = item.ItemSpec;
             DestinationSubDirectory = item.GetMetadata(MetadataKeys.DestinationSubDirectory);
             string assetType = item.GetMetadata(MetadataKeys.AssetType);
-            if (assetType.Equals(nameof(AssetType.Runtime), StringComparison.OrdinalIgnoreCase))
+            if (assetType.Equals("runtime", StringComparison.OrdinalIgnoreCase))
             {
                 Asset = AssetType.Runtime;
             }
-            else if (assetType.Equals(nameof(AssetType.Native), StringComparison.OrdinalIgnoreCase))
+            else if (assetType.Equals("native", StringComparison.OrdinalIgnoreCase))
             {
                 Asset = AssetType.Native;
             }
-            if (assetType.Equals(nameof(AssetType.Resources), StringComparison.OrdinalIgnoreCase))
+            else if (assetType.Equals("resources", StringComparison.OrdinalIgnoreCase))
             {
                 Asset = AssetType.Resources;
             }
