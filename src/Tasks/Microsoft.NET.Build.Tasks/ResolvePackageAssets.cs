@@ -261,7 +261,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 6;
+        private const int CacheFormatVersion = 7;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -946,6 +946,7 @@ namespace Microsoft.NET.Build.Tasks
                     package => package.NativeLibraries,
                     writeMetadata: (package, asset) =>
                     {
+                        WriteMetadata(MetadataKeys.AssetType, "native");
                         if (ShouldCopyLocalPackageAssets(package))
                         {
                             WriteCopyLocalMetadata(package, Path.GetFileName(asset.Path), "native");
@@ -1010,6 +1011,7 @@ namespace Microsoft.NET.Build.Tasks
                             string.Equals(asset.Properties["locale"], lang.ItemSpec, StringComparison.OrdinalIgnoreCase))),
                     writeMetadata: (package, asset) =>
                     {
+                        WriteMetadata(MetadataKeys.AssetType, "resources");
                         string locale = asset.Properties["locale"];
                         if (ShouldCopyLocalPackageAssets(package))
                         {
@@ -1034,6 +1036,7 @@ namespace Microsoft.NET.Build.Tasks
                     package => package.RuntimeAssemblies,
                     writeMetadata: (package, asset) =>
                     {
+                        WriteMetadata(MetadataKeys.AssetType, "runtime");
                         if (ShouldCopyLocalPackageAssets(package))
                         {
                             WriteCopyLocalMetadata(package, Path.GetFileName(asset.Path), "runtime");
@@ -1053,6 +1056,7 @@ namespace Microsoft.NET.Build.Tasks
                     package => package.RuntimeTargets,
                     writeMetadata: (package, asset) =>
                     {
+                        WriteMetadata(MetadataKeys.AssetType, asset.AssetType.ToLowerInvariant());
                         if (ShouldCopyLocalPackageAssets(package))
                         {
                             WriteCopyLocalMetadata(
@@ -1122,6 +1126,9 @@ namespace Microsoft.NET.Build.Tasks
                         string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
                         WriteItem(itemSpec, library);
                         WriteMetadata(MetadataKeys.PathInPackage, asset.Path);
+                        WriteMetadata(MetadataKeys.PackageName, library.Name);
+                        WriteMetadata(MetadataKeys.PackageVersion, library.Version.ToString().ToLowerInvariant());
+
                         writeMetadata?.Invoke(library, asset);
                     }
                 }
@@ -1163,9 +1170,6 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     WriteMetadata(MetadataKeys.DestinationSubDirectory, destinationSubDirectory);
                 }
-                WriteMetadata(MetadataKeys.AssetType, assetType);
-                WriteMetadata(MetadataKeys.PackageName, package.Name);
-                WriteMetadata(MetadataKeys.PackageVersion, package.Version.ToString().ToLowerInvariant());
             }
 
             private int GetMetadataIndex(string value)
