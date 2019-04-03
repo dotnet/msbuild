@@ -23,9 +23,9 @@
       <Uri>https://github.com/dotnet/cli-migrate</Uri>
       <Sha>37e3a01aa1df320a286b0a858876f9994fb6bb18</Sha>
     </Dependency> -->
-    <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19180.1">
+    <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19202.1">
       <Uri>https://github.com/dotnet/cliCommandLineParser</Uri>
-      <Sha>7afd8ced79c18b71b15ba2b24937a064e56c2459</Sha>
+      <Sha>49817a7df8672436d9d23b813fdd5268d6019157</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>
