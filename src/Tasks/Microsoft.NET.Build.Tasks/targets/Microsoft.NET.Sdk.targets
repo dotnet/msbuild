@@ -133,6 +133,14 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
 
+    <ItemGroup>
+      <ResolvedCompileFileDefinitions Remove="@(_ConflictPackageFiles)" />
+      <NativeCopyLocalItems Remove="@(_ConflictPackageFiles)" />
+      <ResourceCopyLocalItems Remove="@(_ConflictPackageFiles)" />
+      <RuntimeCopyLocalItems Remove="@(_ConflictPackageFiles)" />
+      <RuntimeTargetsCopyLocalItems Remove="@(_ConflictPackageFiles)" />
+    </ItemGroup>
+    
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(ProjectDepsFilePath)"
