@@ -730,7 +730,7 @@ namespace Microsoft.NET.Build.Tasks
                 //  Include transitive dependencies of all top-level dependencies which are not
                 //  excluded from publish
 
-                Dictionary<string, DependencyLibrary> includedDependencies = new Dictionary<string, DependencyLibrary>();
+                Dictionary<string, DependencyLibrary> includedDependencies = new Dictionary<string, DependencyLibrary>(StringComparer.OrdinalIgnoreCase);
 
                 Stack<string> dependenciesToWalk = new Stack<string>(
                     _mainProjectDependencies.Except(_excludeFromPublishPackageIds, StringComparer.OrdinalIgnoreCase));
