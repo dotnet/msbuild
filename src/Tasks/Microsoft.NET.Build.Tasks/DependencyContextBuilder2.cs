@@ -208,6 +208,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public DependencyContext Build()
         {
+            CalculateExcludedLibraries();
+
             List<RuntimeLibrary> runtimeLibraries = new List<RuntimeLibrary>();
 
             if (_includeMainProjectInDepsFile)
@@ -217,7 +219,7 @@ namespace Microsoft.NET.Build.Tasks
 
             runtimeLibraries.AddRange(GetRuntimePackLibraries());
 
-            foreach (var library in GetFilteredLibraries(runtime: true))
+            foreach (var library in _dependencyLibraries.Values.Where(l => !l.ExcludeFromRuntime))
             {
                 var runtimeLibrary = GetRuntimeLibrary(library);
                 if (runtimeLibrary != null)
@@ -296,7 +298,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
 
-                foreach (var library in GetFilteredLibraries(runtime: false))
+                foreach (var library in _dependencyLibraries.Values.Where(l => !l.ExcludeFromCompilation))
                 {
                     var compilationLibrary = GetCompilationLibrary(library);
                     if (compilationLibrary != null)
@@ -364,6 +366,14 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_dependencyLibraries.TryGetValue(dependencyName, out var dependencyLibrary))
                 {
+                    if (runtime && dependencyLibrary.ExcludeFromRuntime)
+                    {
+                        continue;
+                    }
+                    if (!runtime && dependencyLibrary.ExcludeFromCompilation)
+                    {
+                        continue;
+                    }
                     dependencies.Add(dependencyLibrary.Dependency);
                 }
             }
@@ -569,9 +579,13 @@ namespace Microsoft.NET.Build.Tasks
             libraryDependencies = new HashSet<Dependency>();
             foreach (var dependency in _libraryDependencies[library.Name])
             {
-                if (_dependencyLibraries.TryGetValue(library.Name, out var libraryDependency))
+                if (_dependencyLibraries.TryGetValue(dependency.Name, out var libraryDependency))
                 {
-                    libraryDependencies.Add(libraryDependency.Dependency);
+                    if (!libraryDependency.ExcludeFromRuntime ||
+                        (!libraryDependency.ExcludeFromCompilation && IncludeCompilationLibraries))
+                    {
+                        libraryDependencies.Add(libraryDependency.Dependency);
+                    }
                 }
             }
 
@@ -657,56 +671,58 @@ namespace Microsoft.NET.Build.Tasks
             return referenceProjectInfo;
         }
 
-        private IEnumerable<DependencyLibrary> GetFilteredLibraries(bool runtime)
+        private void CalculateExcludedLibraries()
         {
             Dictionary<string, DependencyLibrary> libraries = _dependencyLibraries;
 
-            HashSet<string> allExclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> runtimeExclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            if (runtime)
+            if (_isFrameworkDependent && !string.IsNullOrEmpty(_platformLibrary))
             {
-                if (_isFrameworkDependent && !string.IsNullOrEmpty(_platformLibrary))
+                //  Exclude platform library and dependencies.
+                runtimeExclusionList.Add(_platformLibrary);
+
+                Stack<LibraryDependency> dependenciesToWalk = new Stack<LibraryDependency>(_libraryDependencies[_platformLibrary]);
+
+                while (dependenciesToWalk.Any())
                 {
-                    //  Exclude platform library and dependencies.
-                    allExclusionList.Add(_platformLibrary);
-
-                    Stack<LibraryDependency> dependenciesToWalk = new Stack<LibraryDependency>(_libraryDependencies[_platformLibrary]);
-
-                    while (dependenciesToWalk.Any())
+                    var dependency = dependenciesToWalk.Pop();
+                    if (runtimeExclusionList.Contains(dependency.Name))
                     {
-                        var dependency = dependenciesToWalk.Pop();
-                        if (allExclusionList.Contains(dependency.Name))
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        //  Resolved version of library has to match dependency version exactly, so that we
-                        //  don't exclude newer versions of libraries that are part of the platform
-                        if (_dependencyLibraries[dependency.Name].Version == dependency.MinVersion)
+                    //  Resolved version of library has to match dependency version exactly, so that we
+                    //  don't exclude newer versions of libraries that are part of the platform
+                    if (_dependencyLibraries[dependency.Name].Version == dependency.MinVersion)
+                    {
+                        runtimeExclusionList.Add(dependency.Name);
+                        foreach (var newDependency in _libraryDependencies[dependency.Name])
                         {
-                            allExclusionList.Add(dependency.Name);
-                            foreach (var newDependency in _libraryDependencies[dependency.Name])
-                            {
-                                dependenciesToWalk.Push(newDependency);
-                            }
+                            dependenciesToWalk.Push(newDependency);
                         }
                     }
                 }
+            }
 
-                if (_packagesToBeFiltered != null)
+            if (_packagesToBeFiltered != null)
+            {
+                foreach (var packageToFilter in _packagesToBeFiltered)
                 {
-                    foreach (var packageToFilter in _packagesToBeFiltered)
+                    if (_dependencyLibraries.TryGetValue(packageToFilter.Id, out var library))
                     {
-                        if (_dependencyLibraries.TryGetValue(packageToFilter.Id, out var library))
+                        if (library.Type == "package" &&
+                            _dependencyLibraries[packageToFilter.Id].Version == packageToFilter.Version)
                         {
-                            if (library.Type == "package" &&
-                                _dependencyLibraries[packageToFilter.Id].Version == packageToFilter.Version)
-                            {
-                                allExclusionList.Add(packageToFilter.Id);
-                            }
+                            runtimeExclusionList.Add(packageToFilter.Id);
                         }
                     }
                 }
+            }
+
+            foreach (var packageToExcludeFromRuntime in runtimeExclusionList)
+            {
+                _dependencyLibraries[packageToExcludeFromRuntime].ExcludeFromRuntime = true;
             }
 
             if (_excludeFromPublishPackageIds != null)
@@ -732,16 +748,14 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
 
-                libraries = includedDependencies;
-            }
-
-            if (allExclusionList.Any())
-            {
-                return libraries.Values.Where(l => !allExclusionList.Contains(l.Name)).ToList();
-            }
-            else
-            {
-                return libraries.Values;
+                foreach (var dependencyLibrary in _dependencyLibraries.Values)
+                {
+                    if (!includedDependencies.ContainsKey(dependencyLibrary.Name))
+                    {
+                        dependencyLibrary.ExcludeFromCompilation = true;
+                        dependencyLibrary.ExcludeFromRuntime = true;
+                    }
+                }
             }
         }
 
@@ -797,6 +811,10 @@ namespace Microsoft.NET.Build.Tasks
             public string Sha512 { get; set; }
             public string Path { get; set; }
             public string MSBuildProject { get; set; }
+
+            public bool ExcludeFromRuntime { get; set; }
+
+            public bool ExcludeFromCompilation { get; set; }
 
             public DependencyLibrary(string name, NuGetVersion version, string type)
             {
