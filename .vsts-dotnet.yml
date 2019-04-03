@@ -67,7 +67,7 @@ jobs:
               -officialBuildId $(Build.BuildNumber)
               -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
               /p:RepositoryName=$(Build.Repository.Name)
-              /p:VisualStudioIbcSourceBranchName=$(Build.SourceBranchName)
+              /p:VisualStudioIbcSourceBranchName=livarcocc-patch-1
               /p:VisualStudioDropAccessToken=$(System.AccessToken)
               /p:VisualStudioDropName=$(VisualStudio.DropName)
               /p:DotNetSignType=$(SignType)
