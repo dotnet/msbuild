@@ -87,6 +87,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IncludeRuntimeFileVersions { get; set; }
 
+        public string DepsFileGenerationMode { get; set; } = "both";
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         [Output]
@@ -256,20 +258,30 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            var newDepsFilePath = Path.ChangeExtension(DepsFilePath, ".new.json");
+            if (DepsFileGenerationMode.Equals("old", StringComparison.InvariantCultureIgnoreCase))
+            {
+                WriteDepsFileOld(DepsFilePath);
+            }
+            else if (DepsFileGenerationMode.Equals("new", StringComparison.InvariantCultureIgnoreCase))
+            {
+                WriteDepsFileNew(DepsFilePath);
+            }
+            else
+            {
+                var newDepsFilePath = Path.ChangeExtension(DepsFilePath, ".new.json");
 
-            WriteDepsFileOld(DepsFilePath);
+                WriteDepsFileOld(DepsFilePath);
 
-            WriteDepsFileNew(newDepsFilePath);
+                WriteDepsFileNew(newDepsFilePath);
 
-            var oldJson = JObject.Parse(File.ReadAllText(DepsFilePath));
-            var newJson = JObject.Parse(File.ReadAllText(newDepsFilePath));
+                var oldJson = JObject.Parse(File.ReadAllText(DepsFilePath));
+                var newJson = JObject.Parse(File.ReadAllText(newDepsFilePath));
 
-            newJson.Should().BeEquivalentTo(oldJson);
+                newJson.Should().BeEquivalentTo(oldJson);
 
-            //  If the files matched, then delete the .new.json file
-            File.Delete(newDepsFilePath);
-
+                //  If the files matched, then delete the .new.json file
+                File.Delete(newDepsFilePath);
+            }
         }
 
         private void LoadFilesToSkip()

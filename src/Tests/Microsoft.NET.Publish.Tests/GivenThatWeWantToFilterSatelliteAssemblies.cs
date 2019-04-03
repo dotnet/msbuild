@@ -35,6 +35,10 @@ namespace Microsoft.NET.Publish.Tests
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
             testProject.AdditionalProperties.Add("SatelliteResourceLanguages", "en-US;it;fr");
 
+            //  Old deps file generation code still included all satellite languages in deps.json,
+            //  so don't compare both versions
+            testProject.AdditionalProperties["DepsFileGenerationMode"] = "new";
+
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
 
@@ -65,6 +69,10 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = true,
                 IsSdkProject = true
             };
+
+            //  Old deps file generation code still included all satellite languages in deps.json,
+            //  so don't compare both versions
+            testProject.AdditionalProperties["DepsFileGenerationMode"] = "new";
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
 
