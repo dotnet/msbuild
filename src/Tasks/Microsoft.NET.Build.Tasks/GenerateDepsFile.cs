@@ -1,10 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions.Json;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
@@ -254,7 +256,18 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
+            var newDepsFilePath = Path.ChangeExtension(DepsFilePath, ".new.json");
+
             WriteDepsFileOld(DepsFilePath);
+
+            WriteDepsFileNew(newDepsFilePath);
+
+            var oldJson = JObject.Parse(File.ReadAllText(DepsFilePath));
+            var newJson = JObject.Parse(File.ReadAllText(newDepsFilePath));
+
+            newJson.Should().BeEquivalentTo(oldJson);
+
+
 
         }
 
