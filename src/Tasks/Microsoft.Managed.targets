@@ -32,7 +32,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            Do not disable transitive references if BuildProjectReferences is false. If building references is false,
            then MSBuild won't try to build the transitive references, which won't trigger undeclared reference constraints.
           -->
-      <DisableTransitiveProjectReferences Condition="'$(BuildProjectReferences)' != 'false'">true</DisableTransitiveProjectReferences>
+      <DisableTransitiveProjectReferences Condition="'$(BuildProjectReferences)' != 'false' and '$(DisableTransitiveProjectReferences)' == ''">true</DisableTransitiveProjectReferences>
    </PropertyGroup>
 
   <!--
