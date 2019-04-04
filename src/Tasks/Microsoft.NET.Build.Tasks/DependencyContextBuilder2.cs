@@ -167,7 +167,7 @@ namespace Microsoft.NET.Build.Tasks
             _runtimePackAssets = new Dictionary<string, List<RuntimePackAssetInfo>>();
             foreach (var runtimePackGroup in runtimePackAssets.GroupBy(a => a.PackageName))
             {
-                var dependencyLibrary = new DependencyLibrary(runtimePackGroup.Key,
+                var dependencyLibrary = new DependencyLibrary("runtimepack." + runtimePackGroup.Key,
                     NuGetVersion.Parse(runtimePackGroup.First().PackageVersion),
                     "runtimepack");
 
@@ -219,7 +219,8 @@ namespace Microsoft.NET.Build.Tasks
 
             runtimeLibraries.AddRange(GetRuntimePackLibraries());
 
-            foreach (var library in _dependencyLibraries.Values.Where(l => !l.ExcludeFromRuntime))
+            foreach (var library in _dependencyLibraries.Values
+                .Where(l => !l.ExcludeFromRuntime && l.Type != "runtimepack"))
             {
                 var runtimeLibrary = GetRuntimeLibrary(library);
                 if (runtimeLibrary != null)
@@ -298,7 +299,8 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
 
-                foreach (var library in _dependencyLibraries.Values.Where(l => !l.ExcludeFromCompilation))
+                foreach (var library in _dependencyLibraries.Values
+                    .Where(l => !l.ExcludeFromCompilation && l.Type != "runtimepack"))
                 {
                     var compilationLibrary = GetCompilationLibrary(library);
                     if (compilationLibrary != null)
@@ -567,7 +569,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private void GetCommonLibraryProperties(DependencyLibrary library,
                     out string hash,
-                    out HashSet<Dependency> libraryDependencies,
+                    out HashSet<Dependency> dependencies,
                     out bool serviceable,
                     out string path,
                     out string hashPath,
@@ -576,15 +578,19 @@ namespace Microsoft.NET.Build.Tasks
             serviceable = true;
             referenceProjectInfo = null;
 
-            libraryDependencies = new HashSet<Dependency>();
-            foreach (var dependency in _libraryDependencies[library.Name])
+            dependencies = new HashSet<Dependency>();
+            List<LibraryDependency> libraryDependencies;
+            if (_libraryDependencies.TryGetValue(library.Name, out libraryDependencies))
             {
-                if (_dependencyLibraries.TryGetValue(dependency.Name, out var libraryDependency))
+                foreach (var dependency in libraryDependencies)
                 {
-                    if (!libraryDependency.ExcludeFromRuntime ||
-                        (!libraryDependency.ExcludeFromCompilation && IncludeCompilationLibraries))
+                    if (_dependencyLibraries.TryGetValue(dependency.Name, out var libraryDependency))
                     {
-                        libraryDependencies.Add(libraryDependency.Dependency);
+                        if (!libraryDependency.ExcludeFromRuntime ||
+                            (!libraryDependency.ExcludeFromCompilation && IncludeCompilationLibraries))
+                        {
+                            dependencies.Add(libraryDependency.Dependency);
+                        }
                     }
                 }
             }
@@ -612,7 +618,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var dependencyReference in referenceProjectInfo.DependencyReferences)
                 {
-                    libraryDependencies.Add(
+                    dependencies.Add(
                         new Dependency(
                             GetReferenceLibraryName(dependencyReference),
                             dependencyReference.Version));
