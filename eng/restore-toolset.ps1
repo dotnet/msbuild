@@ -45,7 +45,6 @@ function CreateBuildEnvScript()
   $scriptContents = @"
 @echo off
 title CLI Build ($RepoRoot)
-set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 set DOTNET_MULTILEVEL_LOOKUP=0
 
 set PATH=$env:DOTNET_INSTALL_DIR;%PATH%
@@ -65,7 +64,6 @@ function CreateTestEnvScript()
   $scriptContents = @"
 @echo off
 title CLI Test ($RepoRoot)
-set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 set DOTNET_MULTILEVEL_LOOKUP=0
 
 set PATH=$dotnetUnderTest;%PATH%
