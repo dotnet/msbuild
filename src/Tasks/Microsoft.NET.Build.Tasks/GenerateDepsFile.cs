@@ -349,7 +349,11 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var assetGroup in assetGroups)
             {
-                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimRuntimeFiles(assetGroup.RuntimeFiles, filesToTrim));
+                var trimmedFiles = TrimRuntimeFiles(assetGroup.RuntimeFiles, filesToTrim).ToList();
+                if (trimmedFiles.Any())
+                {
+                    yield return new RuntimeAssetGroup(assetGroup.Runtime, trimmedFiles);
+                }
             }
         }
 
