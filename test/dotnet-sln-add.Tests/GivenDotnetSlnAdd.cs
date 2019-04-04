@@ -25,7 +25,7 @@ Arguments:
 
 Options:
   --in-root               Place project in root of the solution, rather than creating a solution folder.
-  -s, --solution-folder   The destination solution folder path to add the projects to
+  -s, --solution-folder   The destination solution folder path to add the projects to.
   -h, --help              Show command line help.";
 
         private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
@@ -1221,6 +1221,32 @@ EndGlobal
             var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithSolutionFolderOption);
             File.ReadAllText(slnPath)
                 .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+        }
+
+        [Fact]
+        public void WhenSolutionFolderAndInRootIsPassedItFails()
+        {
+            var solutionDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojInSubDir")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var solutionPath = Path.Combine(solutionDirectory, "App.sln");
+            var contentBefore = File.ReadAllText(solutionPath);
+
+            var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(solutionDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add --solution-folder blah --in-root {projectToAdd}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Be("The --solution-folder and --in-root options are mutually exclusive");
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+
+            File.ReadAllText(solutionPath)
+                .Should()
+                .BeVisuallyEquivalentTo(contentBefore);
         }
 
         private string GetExpectedSlnContents(
