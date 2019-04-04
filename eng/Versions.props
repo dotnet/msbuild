@@ -111,6 +111,7 @@
       https://dotnet.myget.org/F/vstest/api/v3/index.json;
       https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json;
       https://dotnetfeed.blob.core.windows.net/dotnet-windowsdesktop/index.json
+      https://dotnetfeed.blob.core.windows.net/nuget-nugetclient/index.json;
     </RestoreSources>
   </PropertyGroup>
 </Project>
