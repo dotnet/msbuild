@@ -78,5 +78,30 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
             }
         }
+
+        internal static void RetryOnIOException(Action action)
+        {
+            int nextWaitTime = 10;
+            int remainRetry = 10;
+
+            while (true)
+            {
+                try
+                {
+                    action();
+                    break;
+                }
+                catch (IOException)
+                {
+                    Thread.Sleep(nextWaitTime);
+                    nextWaitTime *= 2;
+                    remainRetry--;
+                    if (remainRetry == 0)
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
     }
 }
