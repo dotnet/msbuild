@@ -251,9 +251,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'$(TieredCompilation)' != ''"
                                     Value="$(TieredCompilation)" />
 
-    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.DisableTier0Jit"
-                                    Condition="'$(DisableTier0Jit)' != ''"
-                                    Value="$(DisableTier0Jit)" />
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.QuickJit"
+                                    Condition="'$(TieredCompilationQuickJit)' != ''"
+                                    Value="$(TieredCompilationQuickJit)" />
 
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
                                     Condition="'$(ThreadPoolMinThreads)' != ''"

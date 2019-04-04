@@ -70,7 +70,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.GC.Server"": true,
             ""System.GC.RetainVM"": false,
             ""System.Runtime.TieredCompilation"": true,
-            ""System.Runtime.TieredCompilation.DisableTier0Jit"": true,
+            ""System.Runtime.TieredCompilation.QuickJit"": true,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,
             ""System.Globalization.Invariant"": true,
