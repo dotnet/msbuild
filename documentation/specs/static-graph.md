@@ -346,7 +346,7 @@ Output cache file constraints:
 #### APIs
 Caches are provided via [BuildParameters](https://github.com/Microsoft/msbuild/blob/2d4dc592a638b809944af10ad1e48e7169e40808/src/Build/BackEnd/BuildManager/BuildParameters.cs#L746-L764). They are applied in `BuildManager.BeginBuild`
 #### Command line 
-Caches are provided to MSBuild.exe via the multi value `/inputCacheFiles` and the single value `/outputCacheFile`.
+Caches are provided to MSBuild.exe via the multi value `/inputResultsCaches` and the single value `/outputResultsCache`.
 
 ## I/O Tracking
 To help facilitate caching of build outputs by a higher-order build engine, MSBuild needs to track all I/O that happens as part of a build.
