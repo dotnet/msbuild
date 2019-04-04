@@ -36,6 +36,7 @@ namespace Microsoft.NET.Build.Tasks
         private bool _includeMainProjectInDepsFile = true;
         private HashSet<string> _usedLibraryNames;
         private Dictionary<ReferenceInfo, string> _referenceLibraryNames;
+        private Dictionary<string, LockFileTargetLibrary> _compilationTargetLibraries;
 
         public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
         {
@@ -51,6 +52,12 @@ namespace Microsoft.NET.Build.Tasks
                 //  This is used to look up the paths to package files on disk, which is only needed in this class if
                 //  it needs to read the file versions
                 _packageResolver = NuGetPackageResolver.CreateResolver(projectContext.LockFile);
+            }
+
+            if (_projectContext.CompilationLockFileTarget != _projectContext.LockFileTarget)
+            {
+                _compilationTargetLibraries = _projectContext.CompilationLockFileTarget.Libraries
+                    .ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
             }
         }
 
@@ -457,7 +464,27 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                IEnumerable<string> assemblies = GetCompileTimeAssemblies(export, referenceProjectInfo);
+                IEnumerable<string> assemblies = Enumerable.Empty<string>();
+
+                //  In some situations, the assets file will include compilation assets under the RID-specific
+                //  target, but not under the RID-less target.  The RID-less target is what is used for project
+                //  compilation, so make sure we get those assets when writing the compile references to the assets
+                //  file.
+                //  This was encountered with the 4.3.0 System.Security.Claims, System.Security.Principal.Windows, and
+                //  System.Threading.Overlapped packages.
+                LockFileTargetLibrary exportWithCompileAssets;
+                if (_compilationTargetLibraries != null)
+                {
+                    _compilationTargetLibraries.TryGetValue(export.Name, out exportWithCompileAssets);
+                }
+                else
+                {
+                    exportWithCompileAssets = export;
+                }
+                if (exportWithCompileAssets != null)
+                {
+                    assemblies = GetCompileTimeAssemblies(exportWithCompileAssets, referenceProjectInfo);
+                }
 
                 return new CompilationLibrary(
                     type.ToLowerInvariant(),

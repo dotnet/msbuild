@@ -393,7 +393,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (references != null)
             {
-                foreach (var directReference in _directReferences)
+                foreach (var directReference in references)
                 {
                     dependencies.Add(
                         new Dependency(
@@ -725,7 +725,7 @@ namespace Microsoft.NET.Build.Tasks
                 _dependencyLibraries[packageToExcludeFromRuntime].ExcludeFromRuntime = true;
             }
 
-            if (_excludeFromPublishPackageIds != null)
+            if (_excludeFromPublishPackageIds != null && _excludeFromPublishPackageIds.Any())
             {
                 //  Include transitive dependencies of all top-level dependencies which are not
                 //  excluded from publish
