@@ -139,6 +139,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResourceCopyLocalItems Remove="@(_ConflictPackageFiles)" />
       <RuntimeCopyLocalItems Remove="@(_ConflictPackageFiles)" />
       <RuntimeTargetsCopyLocalItems Remove="@(_ConflictPackageFiles)" />
+      <RuntimePackAsset Remove="@(_ConflictPackageFiles)" />
     </ItemGroup>
     
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
