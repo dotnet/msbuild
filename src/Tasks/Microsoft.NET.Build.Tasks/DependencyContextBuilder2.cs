@@ -489,7 +489,7 @@ namespace Microsoft.NET.Build.Tasks
                     var resourceFiles = resolvedNuGetFiles.Where(f => f.Asset == AssetType.Resources &&
                                                                 !f.IsRuntimeTarget);
 
-                    resourceAssemblies.AddRange(resourceFiles.Select(f => new ResourceAssembly(f.DestinationSubPath, f.Culture)));
+                    resourceAssemblies.AddRange(resourceFiles.Select(f => new ResourceAssembly(f.PathInPackage, f.Culture)));
 
                     var runtimeTargets = resolvedNuGetFiles.Where(f => f.IsRuntimeTarget)
                                                                 .GroupBy(f => f.RuntimeIdentifier);
