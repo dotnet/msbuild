@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Sln.Add
 {
@@ -37,6 +38,12 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
             var inRoot = appliedCommand.ValueOrDefault<bool>(InRootOption);
             var relativeRoot = _appliedCommand.ValueOrDefault<string>(SolutionFolderOption);
+
+            if (inRoot && !string.IsNullOrEmpty(relativeRoot))
+            {
+                // These two options are mutually exclusive
+                throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
+            }
 
             if (inRoot)
             {
