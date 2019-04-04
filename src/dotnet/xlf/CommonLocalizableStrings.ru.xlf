@@ -905,11 +905,6 @@ setx PATH "%PATH%;{0}"
         <target state="translated">ПРОЕКТ | РЕШЕНИЕ</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Позволяет остановить команду и ожидать ввода или действия пользователя (например, для проверки подлинности).</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>
