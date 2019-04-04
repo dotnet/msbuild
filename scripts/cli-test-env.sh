@@ -16,7 +16,6 @@ REPO_ROOT="$( cd -P "$( dirname "$SOURCE" )/../" && pwd )"
 STAGE2_DIR=$REPO_ROOT/artifacts/tmp/Debug/dotnet
 export PATH=$STAGE2_DIR:$PATH
 
-export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 export NUGET_PACKAGES=$REPO_ROOT/.nuget/packages
