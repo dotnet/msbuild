@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public static class FileAccessRetrier
     {
-        public static async Task<T> RetryOnFileAccessFailure<T>(Func<T> func, int maxRetries = 3000, TimeSpan sleepDuration = default(TimeSpan)) 
+        public static async Task<T> RetryOnFileAccessAssetsFileFailure<T>(Func<T> func, int maxRetries = 3000, TimeSpan sleepDuration = default(TimeSpan)) 
         {
             var attemptsLeft = maxRetries;
 
