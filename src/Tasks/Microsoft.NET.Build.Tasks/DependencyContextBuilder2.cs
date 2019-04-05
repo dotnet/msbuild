@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
+using NuGet.ProjectModel;
 using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
@@ -47,14 +48,15 @@ namespace Microsoft.NET.Build.Tasks
             _mainProjectInfo = mainProjectInfo;
             _includeRuntimeFileVersions = includeRuntimeFileVersions;
 
-            var libraryLookup = projectContext.LockFile.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+            var libraryLookup = new LockFileLookup(projectContext.LockFile);
 
             _dependencyLibraries = projectContext.LockFileTarget.Libraries
                 .Select(lockFileTargetLibrary =>
                 {
                     var dependencyLibrary = new DependencyLibrary(lockFileTargetLibrary.Name, lockFileTargetLibrary.Version, lockFileTargetLibrary.Type);
 
-                    if (libraryLookup.TryGetValue(dependencyLibrary.Name, out var library))
+                    LockFileLibrary library;
+                    if (libraryLookup.TryGetLibrary(lockFileTargetLibrary, out library))
                     {
                         dependencyLibrary.Sha512 = library.Sha512;
                         dependencyLibrary.Path = library.Path;
