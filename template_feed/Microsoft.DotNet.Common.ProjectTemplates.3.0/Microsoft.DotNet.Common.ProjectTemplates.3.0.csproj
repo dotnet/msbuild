@@ -14,7 +14,6 @@
         <Description>Common File Templates for Microsoft Template Engine</Description>
         <language>en-US</language>
         <PackageProjectUrl>https://github.com/dotnet/templating</PackageProjectUrl>
-        <PackageLicenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</PackageLicenseUrl>
         <PackageType>Template</PackageType>
     </PropertyGroup>
     <ItemGroup>
