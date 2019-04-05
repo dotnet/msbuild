@@ -18,6 +18,16 @@ namespace Microsoft.Build.Shared
         // regular expression used to match file-specs comprising exactly "<drive letter>:" (with no trailing characters)
         internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:$", RegexOptions.Compiled);
 
+        internal static bool IsDrivePattern(string input)
+        {
+            // Format must be two characters long. Ex: "C:"
+            // First character must be a letter
+            // Second character must be a ":"
+            return input.Length == 2 &&
+                ((input[0] >= 'A' && input[0] <= 'Z') || (input[0] >= 'a' && input[0] <= 'z')) &&
+                input[1] == ':'; 
+        }
+
         // regular expression used to match file-specs beginning with "<drive letter>:"
         internal static readonly Regex StartWithDrivePattern = new Regex(@"^[A-Za-z]:", RegexOptions.Compiled);
 
