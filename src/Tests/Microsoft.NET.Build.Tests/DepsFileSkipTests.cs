@@ -232,8 +232,7 @@ namespace Microsoft.NET.Build.Tests
 
             if (filenameToSkip.Contains('/'))
             {
-                //  Note: may not need to do this on non-Windows
-                string filenameToSkipWithCorrectSlash = filenameToSkip.Replace('/', '\\');
+                string filenameToSkipWithCorrectSlash = filenameToSkip.Replace('/', Path.DirectorySeparatorChar);
 
                 //  This is a localized resource we need to skip
                 var fileToSkipItem = new XElement(ns + "_FileToSkip",
