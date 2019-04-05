@@ -83,6 +83,9 @@ function InitializeDotNetCli {
   # Don't resolve runtime, shared framework, or SDK from other locations to ensure build determinism
   export DOTNET_MULTILEVEL_LOOKUP=0
 
+  # Disable first run since we want to control all package sources
+  export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
   # Disable telemetry on CI
   if [[ $ci == true ]]; then
     export DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -136,6 +139,7 @@ function InitializeDotNetCli {
     # Make Sure that our bootstrapped dotnet cli is avaliable in future steps of the Azure Pipelines build
     echo "##vso[task.prependpath]$dotnet_root"
     echo "##vso[task.setvariable variable=DOTNET_MULTILEVEL_LOOKUP]0"
+    echo "##vso[task.setvariable variable=DOTNET_SKIP_FIRST_TIME_EXPERIENCE]1"
   fi
 
   # return value

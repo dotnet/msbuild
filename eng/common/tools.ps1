@@ -94,6 +94,9 @@ function InitializeDotNetCli([bool]$install) {
   # Don't resolve runtime, shared framework, or SDK from other locations to ensure build determinism
   $env:DOTNET_MULTILEVEL_LOOKUP=0
 
+  # Disable first run since we do not need all ASP.NET packages restored.
+  $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
   # Disable telemetry on CI.
   if ($ci) {
     $env:DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -142,6 +145,7 @@ function InitializeDotNetCli([bool]$install) {
     # Make Sure that our bootstrapped dotnet cli is avaliable in future steps of the Azure Pipelines build
     Write-Host "##vso[task.prependpath]$dotnetRoot"
     Write-Host "##vso[task.setvariable variable=DOTNET_MULTILEVEL_LOOKUP]0"
+    Write-Host "##vso[task.setvariable variable=DOTNET_SKIP_FIRST_TIME_EXPERIENCE]1"
   }
 
   return $global:_DotNetInstallDir = $dotnetRoot
