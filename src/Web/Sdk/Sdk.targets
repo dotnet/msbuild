@@ -16,7 +16,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Configure the Razor SDK to add support for the MVC configuration unless the project configured it or the user opted out of the implicit reference to
       Microsoft.AspNetCore.App.
      -->
-    <AddRazorSupportForMvc Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(AddRazorSupportForMvc)' == ''" And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">true</AddRazorSupportForMvc>
+    <AddRazorSupportForMvc Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(AddRazorSupportForMvc)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">true</AddRazorSupportForMvc>
   </PropertyGroup>
 
   <!-- We can't add it here because the OutputPath and other msbuild properties are not evaluated.-->
