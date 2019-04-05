@@ -43,6 +43,8 @@ namespace Microsoft.NET.Build.Tasks
         // This resolver is only used for building file names, so that base path is not required.
         private readonly VersionFolderPathResolver _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
 
+        private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
+
         public DependencyContextBuilder2(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
         {
             _mainProjectInfo = mainProjectInfo;
@@ -691,6 +693,20 @@ namespace Microsoft.NET.Build.Tasks
                 runtimeExclusionList.Add(_platformLibrary);
 
                 Stack<LibraryDependency> dependenciesToWalk = new Stack<LibraryDependency>(_libraryDependencies[_platformLibrary]);
+
+                // If the platform library is not Microsoft.NETCore.App, treat it as an implicit dependency.
+                // This makes it so Microsoft.AspNet.* 2.x platforms also exclude Microsoft.NETCore.App files.
+                if (!string.Equals(_platformLibrary, NetCorePlatformLibrary, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (_dependencyLibraries.TryGetValue(NetCorePlatformLibrary, out var netCoreDependencyLibrary))
+                    {
+                        dependenciesToWalk.Push(new LibraryDependency()
+                        {
+                            Name = netCoreDependencyLibrary.Name,
+                            MinVersion = netCoreDependencyLibrary.Version
+                        });
+                    }
+                }
 
                 while (dependenciesToWalk.Any())
                 {
