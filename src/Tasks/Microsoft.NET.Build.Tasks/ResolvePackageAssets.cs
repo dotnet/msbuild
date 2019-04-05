@@ -781,7 +781,11 @@ namespace Microsoft.NET.Build.Tasks
             {
                 WriteItems(
                     _compileTimeTarget,
-                    package => package.CompileTimeAssemblies);
+                    package => package.CompileTimeAssemblies,
+                    writeMetadata: (package, asset) =>
+                    {
+                        WriteMetadata(MetadataKeys.RelativePath, asset.Path);
+                    });
             }
 
             private void WriteContentFilesToPreprocess()
