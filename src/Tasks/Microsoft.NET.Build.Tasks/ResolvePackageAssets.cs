@@ -1065,6 +1065,7 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             WriteMetadata(MetadataKeys.DestinationSubDirectory, Path.GetDirectoryName(asset.Path) + Path.DirectorySeparatorChar);
                         }
+                        WriteMetadata(MetadataKeys.RuntimeIdentifier, asset.Runtime);
                     });
             }
 
