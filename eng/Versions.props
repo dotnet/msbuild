@@ -97,6 +97,7 @@
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
       https://dotnetfeed.blob.core.windows.net/dotnet-sdk/index.json;
       https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore-tooling/index.json;
+      https://dotnetfeed.blob.core.windows.net/nuget-nugetclient/index.json;
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://dotnet.myget.org/F/templating/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-web/api/v3/index.json;
