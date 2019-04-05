@@ -82,11 +82,6 @@
         <target state="translated">'{0}' 프로젝트에 대한 임시 파일을 생성할 수 없습니다. 패키지 참조를 추가할 수 없습니다. 임시 디렉터리를 지우고 다시 시도하세요.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdInteractiveRestoreDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

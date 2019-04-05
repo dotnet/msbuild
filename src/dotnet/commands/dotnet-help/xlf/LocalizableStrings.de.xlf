@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="new">Start F# Interactive / execute F# scripts.</target>
+        <target state="translated">F# Interactive starten/F#-Skripts ausführen</target>
         <note />
       </trans-unit>
     </body>
