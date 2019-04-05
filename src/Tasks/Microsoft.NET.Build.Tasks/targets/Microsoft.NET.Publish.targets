@@ -843,21 +843,21 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        NetCorePublishItemsOutputGroup
+                                            PublishItemsOutputGroup
 
     Emit an output group containing all files that get published.  This will be consumed by VS installer projects.
     ============================================================
     -->
   <PropertyGroup>
-    <NetCorePublishItemsOutputGroupDependsOn>
-      $(NetCorePublishItemsOutputGroupDependsOn);
+    <PublishItemsOutputGroupDependsOn>
+      $(PublishItemsOutputGroupDependsOn);
       ComputeFilesToPublish;
-    </NetCorePublishItemsOutputGroupDependsOn>
+    </PublishItemsOutputGroupDependsOn>
   </PropertyGroup>
 
-  <Target Name="NetCorePublishItemsOutputGroup" DependsOnTargets="$(NetCorePublishItemsOutputGroupDependsOn)" Returns="@(NetCorePublishItemsOutputGroupOutputs)">
+  <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>
-      <NetCorePublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')" TargetPath="%(ResolvedFileToPublish.RelativePath)" OutputGroup="NetCorePublishItemsOutputGroup" />
+      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')" TargetPath="%(ResolvedFileToPublish.RelativePath)" OutputGroup="PublishItemsOutputGroup" />
     </ItemGroup>
   </Target>
 
