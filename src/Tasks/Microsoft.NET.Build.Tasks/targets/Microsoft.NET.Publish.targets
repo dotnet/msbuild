@@ -789,6 +789,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ResolvedCompileFileDefinitions Remove="@(_PublishConflictPackageFiles)" />
+      <NativeCopyLocalItems Remove="@(_PublishConflictPackageFiles)" />
+      <ResourceCopyLocalItems Remove="@(_PublishConflictPackageFiles)" />
+      <RuntimeCopyLocalItems Remove="@(_PublishConflictPackageFiles)" />
+      <RuntimeTargetsCopyLocalItems Remove="@(_PublishConflictPackageFiles)" />
+      <RuntimePackAsset Remove="@(_PublishConflictPackageFiles)" />
+    </ItemGroup>
+
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(PublishDepsFilePath)"
