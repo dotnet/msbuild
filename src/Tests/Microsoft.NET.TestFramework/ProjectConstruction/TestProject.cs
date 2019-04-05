@@ -151,6 +151,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 {
                     packageReferenceElement.Add(new XAttribute("Version", packageReference.Version));
                 }
+                if (packageReference.PrivateAssets != null)
+                {
+                    packageReferenceElement.Add(new XAttribute("PrivateAssets", packageReference.PrivateAssets));
+                }
                 packageReferenceItemGroup.Add(packageReferenceElement);
             }
 
