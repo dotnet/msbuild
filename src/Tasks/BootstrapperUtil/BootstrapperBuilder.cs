@@ -1470,7 +1470,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         }
                         else
                         {
-                            if (settings.ComponentsLocation != ComponentsLocation.HomeSite || !VerifyHomeSiteInformation(packageFileNode, builder, settings, _results))
+                            if (settings.ComponentsLocation == ComponentsLocation.Relative || !VerifyHomeSiteInformation(packageFileNode, builder, settings, _results))
                             {
                                 if (settings.CopyComponents)
                                 {
