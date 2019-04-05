@@ -134,6 +134,8 @@ namespace Microsoft.NET.Build.Tests
             string filenameNotToSkip = "es/Humanizer.resources.dll";
             string assetType = "resources";
 
+            testProject.AdditionalProperties["DepsFileGenerationMode"] = "new";
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
                .WithProjectChanges(project => AddSkipTarget(project, filenameToSkip))
                .Restore(Log, testProject.Name);
@@ -175,6 +177,8 @@ namespace Microsoft.NET.Build.Tests
 
         private void TestSkippingFile(TestProject testProject, string filenameToSkip, string assetType)
         {
+            testProject.AdditionalProperties["DepsFileGenerationMode"] = "new";
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
                 .WithProjectChanges(project => AddSkipTarget(project, filenameToSkip))
                 .Restore(Log, testProject.Name);

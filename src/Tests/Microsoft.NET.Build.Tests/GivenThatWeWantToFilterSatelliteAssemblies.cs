@@ -46,6 +46,10 @@ namespace Microsoft.NET.Build.Tests
                 testProject.AdditionalProperties.Add("CopyLocalLockFileAssemblies", "true");
             }
 
+            //  Old deps file generation code still included all satellite languages in deps.json,
+            //  so don't compare both versions
+            testProject.AdditionalProperties["DepsFileGenerationMode"] = "new";
+
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
                 .Restore(Log, testProject.Name);
 
