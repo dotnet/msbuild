@@ -16,6 +16,7 @@ namespace Microsoft.NET.Build.Tasks
         private readonly bool _includeRuntimeFileVersions;
         private IEnumerable<ReferenceInfo> _referenceAssemblies;
         private IEnumerable<ReferenceInfo> _directReferences;
+        private Dictionary<string, List<ResolvedFile>> _resolvedNuGetFiles;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
         private IEnumerable<string> _excludeFromPublishPackageIds;
         private Dictionary<string, List<RuntimePackAssetInfo>> _runtimePackAssets;
@@ -96,6 +97,17 @@ namespace Microsoft.NET.Build.Tasks
         public DependencyContextBuilder2 WithDirectReferences(IEnumerable<ReferenceInfo> directReferences)
         {
             _directReferences = directReferences;
+            return this;
+        }
+
+        public DependencyContextBuilder2 WithResolvedNuGetFiles(IEnumerable<ResolvedFile> resolvedNuGetFiles)
+        {
+            _resolvedNuGetFiles = new Dictionary<string, List<ResolvedFile>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var group in resolvedNuGetFiles.GroupBy(f => f.PackageName, StringComparer.OrdinalIgnoreCase))
+            {
+                _resolvedNuGetFiles.Add(group.Key, group.ToList());
+            }
+
             return this;
         }
 
@@ -198,14 +210,54 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 List<RuntimeAssetGroup> runtimeAssemblyGroups = new List<RuntimeAssetGroup>();
+                List<RuntimeAssetGroup> nativeLibraryGroups = new List<RuntimeAssetGroup>();
+                List<ResourceAssembly> resourceAssemblies = new List<ResourceAssembly>();
+
                 if (library.Type == "project" && !(referenceProjectInfo is UnreferencedProjectInfo))
                 {
                     runtimeAssemblyGroups.Add(new RuntimeAssetGroup(string.Empty, referenceProjectInfo.OutputName));
+
+                    resourceAssemblies.AddRange(referenceProjectInfo.ResourceAssemblies
+                                    .Select(r => new ResourceAssembly(r.RelativePath, r.Culture)));
                 }
                 else
                 {
-                    //runtimeAssemblyGroups.Add(new RuntimeAssetGroup(string.Empty,))
+                    if (_resolvedNuGetFiles != null && _resolvedNuGetFiles.TryGetValue(library.Name, out var resolvedNuGetFiles))
+                    {
+                        var runtimeFiles = resolvedNuGetFiles.Where(f => f.Asset == AssetType.Runtime &&
+                                                                    !f.IsRuntimeTarget);
+
+                        runtimeAssemblyGroups.Add(new RuntimeAssetGroup(string.Empty,
+                                                    runtimeFiles.Select(CreateRuntimeFile)));
+
+                        var nativeFiles = resolvedNuGetFiles.Where(f => f.Asset == AssetType.Native &&
+                                                                    !f.IsRuntimeTarget);
+
+                        nativeLibraryGroups.Add(new RuntimeAssetGroup(string.Empty,
+                                                    nativeFiles.Select(CreateRuntimeFile)));
+
+                        var resourceFiles = resolvedNuGetFiles.Where(f => f.Asset == AssetType.Resources &&
+                                                                    !f.IsRuntimeTarget);
+
+                        resourceAssemblies.AddRange(resourceFiles.Select(f => new ResourceAssembly(f.DestinationSubPath, f.Culture)));
+
+                        var runtimeTargets = resolvedNuGetFiles.Where(f => f.IsRuntimeTarget)
+                                                                    .GroupBy(f => f.RuntimeIdentifier);
+
+                        foreach (var runtimeIdentifierGroup in runtimeTargets)
+                        {
+                            runtimeAssemblyGroups.Add(new RuntimeAssetGroup(runtimeIdentifierGroup.Key,
+                                                            runtimeIdentifierGroup.Where(f => f.Asset == AssetType.Runtime)
+                                                                                  .Select(CreateRuntimeFile)));
+
+                            nativeLibraryGroups.Add(new RuntimeAssetGroup(runtimeIdentifierGroup.Key,
+                                                            runtimeIdentifierGroup.Where(f => f.Asset == AssetType.Native)
+                                                                                  .Select(CreateRuntimeFile)));
+                        }
+                    }
+                    
                 }
+
 
                 var runtimeLibrary = new RuntimeLibrary(
                     type: library.Type,
@@ -298,6 +350,11 @@ namespace Microsoft.NET.Build.Tasks
                     dependencies: Enumerable.Empty<Dependency>(),
                     serviceable: false);
             });
+        }
+
+        private RuntimeFile CreateRuntimeFile(ResolvedFile resolvedFile)
+        {
+            return CreateRuntimeFile(resolvedFile.DestinationSubPath, resolvedFile.SourcePath);
         }
 
         private RuntimeFile CreateRuntimeFile(string path, string fullPath)
