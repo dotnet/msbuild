@@ -93,6 +93,8 @@ namespace Microsoft.NET.Build.Tasks
 
                         string platformManifestPath = possibleManifestPaths.FirstOrDefault(File.Exists);
 
+                        string packageOverridesPath = Path.Combine(targetingPackDataPath, "PackageOverrides.txt");
+
                         foreach (var dll in Directory.GetFiles(targetingPackDllPath, "*.dll"))
                         {
                             var reference = CreateReferenceItem(dll, targetingPack);
@@ -103,6 +105,11 @@ namespace Microsoft.NET.Build.Tasks
                         if (platformManifestPath != null)
                         {
                             platformManifests.Add(new TaskItem(platformManifestPath));
+                        }
+
+                        if (File.Exists(packageOverridesPath))
+                        {
+                            packageConflictOverrides.Add(CreatePackageOverride(targetingPack.GetMetadata("RuntimeFrameworkName"), packageOverridesPath));
                         }
 
                         if (targetingPack.ItemSpec.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
@@ -123,6 +130,13 @@ namespace Microsoft.NET.Build.Tasks
             ReferencesToAdd = referencesToAdd.ToArray();
             PlatformManifests = platformManifests.ToArray();
             PackageConflictOverrides = packageConflictOverrides.ToArray();
+        }
+
+        private TaskItem CreatePackageOverride(string runtimeFrameworkName, string packageOverridesPath)
+        {
+            TaskItem packageOverride = new TaskItem(runtimeFrameworkName);
+            packageOverride.SetMetadata("OverriddenPackages", File.ReadAllText(packageOverridesPath));
+            return packageOverride;
         }
 
         private void AddNetStandardTargetingPackAssets(ITaskItem targetingPack, string targetingPackRoot, List<TaskItem> referencesToAdd)
