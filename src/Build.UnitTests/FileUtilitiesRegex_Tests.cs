@@ -11,6 +11,9 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     public class FileUtilitiesRegex_Tests
     {
+        /// <summary>
+        /// Tests for DrivePattern regex using valid drive patterns.
+        /// </summary>
         [Fact]
         public void DrivePatternSuccessWithRegex()
         {
@@ -24,6 +27,9 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        /// <summary>
+        /// Tests for IsDrivePattern using valid drive patterns.
+        /// </summary>
         [Fact]
         public void DrivePatternSuccessWithoutRegex()
         {
@@ -37,6 +43,9 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        /// <summary>
+        /// Tests for DrivePattern regex using invalid drive patterns.
+        /// </summary>
         [Fact]
         public void DrivePatternFailureWithRegex()
         {
@@ -49,6 +58,27 @@ namespace Microsoft.Build.Engine.UnitTests
             FileUtilitiesRegex.DrivePattern.IsMatch("C:\\").ShouldBe(false);
             FileUtilitiesRegex.DrivePattern.IsMatch("C\\").ShouldBe(false);
             FileUtilitiesRegex.DrivePattern.IsMatch(":/").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("  ").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("").ShouldBe(false);
+        }
+
+        /// <summary>
+        /// Tests for DrivePattern regex using invalid drive patterns.
+        /// </summary>
+        [Fact]
+        public void DrivePatternFailureWithoutRegex()
+        {
+            FileUtilitiesRegex.IsDrivePattern("C: ").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern(" C:").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern(" :").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("CC:").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("::").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("C:/").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("C:\\").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("C\\").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern(":/").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("  ").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern("").ShouldBe(false);
         }
     }
 }

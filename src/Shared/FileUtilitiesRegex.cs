@@ -18,18 +18,31 @@ namespace Microsoft.Build.Shared
         // regular expression used to match file-specs comprising exactly "<drive letter>:" (with no trailing characters)
         internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:$", RegexOptions.Compiled);
 
-        internal static bool IsDrivePattern(string input)
+        /// <summary>
+        /// Checks for drive pattern without regex. Using this function over regex results in
+        /// improved memory performance.
+        /// </summary>
+        /// <param name="drivePattern"></param>
+        /// <returns>Whether or not the input follows the drive pattern "<drive letter>:" with no trailing characters.</drive></returns>
+        internal static bool IsDrivePattern(string s)
         {
             // Format must be two characters long. Ex: "C:"
-            // First character must be a letter
-            // Second character must be a ":"
-            return input.Length == 2 &&
-                ((input[0] >= 'A' && input[0] <= 'Z') || (input[0] >= 'a' && input[0] <= 'z')) &&
-                input[1] == ':'; 
+            return s.Length == 2 &&
+                DoesStartWithDrivePattern(s); 
         }
 
         // regular expression used to match file-specs beginning with "<drive letter>:"
         internal static readonly Regex StartWithDrivePattern = new Regex(@"^[A-Za-z]:", RegexOptions.Compiled);
+
+        internal static bool DoesStartWithDrivePattern(string input)
+        {
+            // Format dictates a length of at least 2
+            // First character must be a letter
+            // Second character must be a ":"
+            return input.Length >= 2 &&
+                (input[0] >= 'A' && input[0] <= 'Z') || (input[0] >= 'a' && input[0] <= 'z') &&
+                input[1] == ':';
+        }
 
         private static readonly string s_baseUncPattern = string.Format(
             CultureInfo.InvariantCulture,
