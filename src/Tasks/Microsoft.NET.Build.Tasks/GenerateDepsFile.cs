@@ -284,7 +284,10 @@ namespace Microsoft.NET.Build.Tasks
                         "    Deps file from old logic: " + DepsFilePath + Environment.NewLine +
                         "    Deps file from new logic: " + newDepsFilePath + Environment.NewLine;
 
-                    Log.LogError(message);
+                    //  This is a temporary error message that we won't localize or assign an SDK
+                    //  error code to.  So use the Task classes Log property instead of our wrapper
+                    //  around it (which would force it to have an error code)
+                    ((Task) this).Log.LogError(message);
                 }
                 else
                 {
