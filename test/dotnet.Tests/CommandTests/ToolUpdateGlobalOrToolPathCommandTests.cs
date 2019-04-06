@@ -237,30 +237,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 .Be(LowerPackageVersion);
         }
 
-        [Fact]
-        public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
-        {
-            var command = CreateUpdateCommand($"-g --tool-path /tmp/folder {_packageId}");
-
-            Action a = () => command.Execute();
-
-            a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(
-                    LocalizableStrings.UpdateToolCommandInvalidGlobalAndToolPath);
-        }
-
-        [Fact]
-        public void WhenRunWithNeitherOfGlobalNorToolPathShowErrorMessage()
-        {
-            var command = CreateUpdateCommand($"{_packageId}");
-
-            Action a = () => command.Execute();
-
-            a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(
-                    LocalizableStrings.UpdateToolCommandNeedGlobalOrToolPath);
-        }
-
         private ToolInstallGlobalOrToolPathCommand CreateInstallCommand(string options)
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);

@@ -159,5 +159,25 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             appliedOptions.SingleArgumentOrDefault("version").Should().Be("1.2");
         }
+        
+        [Fact]
+        public void UninstallToolParserCanParseLocalOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update --local console.test.app");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
+        }
+        
+        [Fact]
+        public void UninstallToolParserCanParseToolManifestOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update --tool-manifest folder/my-manifest.format console.test.app");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+            appliedOptions.SingleArgumentOrDefault("tool-manifest").Should().Be(@"folder/my-manifest.format");
+        }
     }
 }

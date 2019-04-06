@@ -195,4 +195,19 @@
   <data name="UpdateToLowerVersion" xml:space="preserve">
     <value>The requested version {0} is lower than existing version {1}.</value>
   </data>
+  <data name="UpdateToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
+  </data>
+  <data name="NoManifestGuide" xml:space="preserve">
+    <value>If you intended to update a global tool, add `--global` to the command.</value>
+  </data>
+  <data name="LocalOptionDescription" xml:space="preserve">
+    <value>Update the tool and update from the local tool manifest.</value>
+  </data>
+  <data name="ManifestPathOptionDescription" xml:space="preserve">
+    <value>Path to the manifest file.</value>
+  </data>
+  <data name="ManifestPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
 </root>

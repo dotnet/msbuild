@@ -27,6 +27,10 @@ namespace Microsoft.DotNet.Cli
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.ToolPathOptionName)),
                 Create.Option(
+                    $"--{ToolAppliedOption.LocalOption}",
+                    LocalizableStrings.LocalOptionDescription,
+                    Accept.NoArguments()),
+                Create.Option(
                     "--configfile",
                     LocalizableStrings.ConfigFileOptionDescription,
                     Accept.ExactlyOneArgument()
@@ -46,6 +50,11 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.VersionOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.VersionOptionName)),
+                Create.Option(
+                    $"--{ToolAppliedOption.ToolManifest}",
+                    LocalizableStrings.ManifestPathOptionDescription,
+                    Accept.ZeroOrOneArgument()
+                        .With(name: LocalizableStrings.ManifestPathOptionName)),
                 ToolCommandRestorePassThroughOptions.DisableParallelOption(),
                 ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption(),
                 ToolCommandRestorePassThroughOptions.NoCacheOption(),

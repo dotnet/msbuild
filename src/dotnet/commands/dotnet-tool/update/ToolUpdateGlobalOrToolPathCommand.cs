@@ -161,18 +161,6 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
         private void ValidateArguments()
         {
-            if (string.IsNullOrWhiteSpace(_toolPath) && !_global)
-            {
-                throw new GracefulException(
-                    LocalizableStrings.UpdateToolCommandNeedGlobalOrToolPath);
-            }
-
-            if (!string.IsNullOrWhiteSpace(_toolPath) && _global)
-            {
-                throw new GracefulException(
-                    LocalizableStrings.UpdateToolCommandInvalidGlobalAndToolPath);
-            }
-
             if (_configFilePath != null && !File.Exists(_configFilePath))
             {
                 throw new GracefulException(

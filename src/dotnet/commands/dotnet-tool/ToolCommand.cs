@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Tool
                     appliedOption["uninstall"],
                     ParseResult),
                 ["update"] =
-                appliedOption => new ToolUpdateGlobalOrToolPathCommand(
+                appliedOption => new ToolUpdateCommand(
                     appliedOption["update"],
                     ParseResult),
                 ["list"] =
