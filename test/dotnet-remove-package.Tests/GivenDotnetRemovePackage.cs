@@ -19,7 +19,8 @@ Arguments:
   <PACKAGE_NAME>   The package reference to remove.
 
 Options:
-  -h, --help   Show command line help.";
+  -h, --help      Show command line help.
+  --interactive   Allows the command to stop and wait for user input or action (for example to complete authentication).";
 
         private const string RemoveCommandHelpText = @"Usage: dotnet remove [options] <PROJECT> [command]
 

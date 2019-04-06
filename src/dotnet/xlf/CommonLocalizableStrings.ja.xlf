@@ -656,7 +656,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ターミナルを再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
