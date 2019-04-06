@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         DirectoryPath? nonGlobalLocation = null,
 		IEnumerable<string> additionalRestoreArguments = null);
 
-    internal class ToolUpdateCommand : CommandBase
+    internal class ToolUpdateGlobalOrToolPathCommand : CommandBase
     {
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private readonly IEnumerable<string> _forwardRestoreArguments;
         private readonly string _packageVersion;
 
-        public ToolUpdateCommand(AppliedOption appliedCommand,
+        public ToolUpdateGlobalOrToolPathCommand(AppliedOption appliedCommand,
             ParseResult parseResult,
             CreateToolPackageStoresAndInstallerAndUninstaller createToolPackageStoreInstallerUninstaller = null,
             CreateShellShimRepository createShellShimRepository = null,

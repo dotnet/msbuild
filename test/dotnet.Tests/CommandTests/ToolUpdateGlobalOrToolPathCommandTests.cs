@@ -22,7 +22,7 @@ using System.IO;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
-    public class ToolUpdateCommandTests
+    public class ToolUpdateGlobalOrToolPathCommandTests
     {
         private readonly BufferedReporter _reporter;
         private readonly IFileSystem _fileSystem;
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tests.Commands
         private readonly string _shimsDirectory;
         private readonly string _toolsDirectory;
 
-        public ToolUpdateCommandTests()
+        public ToolUpdateGlobalOrToolPathCommandTests()
         {
             _reporter = new BufferedReporter();
             _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.Tests.Commands
             _reporter.Lines.Clear();
 
             ParseResult result = Parser.Instance.Parse("dotnet tool update " + $"-g {_packageId}");
-            var command = new ToolUpdateCommand(
+            var command = new ToolUpdateGlobalOrToolPathCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
                 (location, forwardArguments) => (_store, _store,
@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Tests.Commands
             _reporter.Lines.Clear();
 
             ParseResult result = Parser.Instance.Parse("dotnet tool update " + $"-g {_packageId}");
-            var command = new ToolUpdateCommand(
+            var command = new ToolUpdateGlobalOrToolPathCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
                 (location, forwardArguments) => (_store, _store,
@@ -281,11 +281,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 _reporter);
         }
 
-        private ToolUpdateCommand CreateUpdateCommand(string options)
+        private ToolUpdateGlobalOrToolPathCommand CreateUpdateCommand(string options)
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool update " + options);
 
-            return new ToolUpdateCommand(
+            return new ToolUpdateGlobalOrToolPathCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
                 (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
