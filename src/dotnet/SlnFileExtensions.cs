@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Common
 {
     internal static class SlnFileExtensions
     {
-        public static void AddProject(this SlnFile slnFile, string fullProjectPath)
+        public static void AddProject(this SlnFile slnFile, string fullProjectPath, bool inRoot)
         {
             if (string.IsNullOrEmpty(fullProjectPath))
             {
@@ -81,7 +81,10 @@ namespace Microsoft.DotNet.Tools.Common
                     projectInstance,
                     slnFile.ProjectConfigurationsSection.GetOrCreatePropertySet(slnProject.Id));
 
-                slnFile.AddSolutionFolders(slnProject);
+                if (!inRoot)
+                {
+                    slnFile.AddSolutionFolders(slnProject);
+                }
 
                 slnFile.Projects.Add(slnProject);
 

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
@@ -12,7 +13,6 @@ using Microsoft.DotNet.ToolPackage.ToolConfigurationDeserialization;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 fakeExecutablePath);
             _fileSystem.File.WriteAllText(
                 assetJsonOutput.WithFile(FakeCommandSettingsFileName).Value,
-                JsonConvert.SerializeObject(new { Name = feedPackage.ToolCommandName }));
+                JsonSerializer.ToString(new {Name = feedPackage.ToolCommandName}));
         }
 
         public MockFeedPackage GetPackage(

@@ -9,7 +9,7 @@
         <licenseUrl>https://www.microsoft.com/net/dotnet_library_license.htm</licenseUrl>
         <projectUrl>https://github.com/dotnet/cli</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
-        <description>Windows Installer (x86) for .Net Core SDK</description>
+        <description>Windows Installer (x86) for .NET Core SDK</description>
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     </metadata>
     <files>

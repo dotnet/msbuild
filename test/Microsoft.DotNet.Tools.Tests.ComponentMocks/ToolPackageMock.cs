@@ -5,11 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json.Linq;
+
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -71,10 +72,17 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
                 var fakeSettingFile = _fileSystem.File.ReadAllText(Path.Combine(PackageDirectory.Value, ProjectRestorerMock.FakeCommandSettingsFileName));
 
+                string name;
+                using (JsonDocument doc = JsonDocument.Parse(fakeSettingFile))
+                {
+                    JsonElement root = doc.RootElement;
+                    name = root.GetProperty("Name").GetString();
+                }
+
                 return new RestoredCommand[]
                 {
                     new RestoredCommand(
-                        new ToolCommandName((string)JObject.Parse(fakeSettingFile)["Name"]),
+                        new ToolCommandName(name),
                         "dotnet",
                         PackageDirectory.WithFile(executablePath))
                 };

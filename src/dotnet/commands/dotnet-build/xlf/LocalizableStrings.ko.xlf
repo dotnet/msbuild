@@ -12,6 +12,11 @@
         <target state="translated">.NET 작성기</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
         <target state="translated">p2p(프로젝트 간) 참조를 빌드하지 않고 지정한 프로젝트만 빌드합니다.</target>

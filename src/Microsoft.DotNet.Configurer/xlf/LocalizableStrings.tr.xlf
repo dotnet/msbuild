@@ -2,64 +2,39 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
-      <trans-unit id="FirstTimeWelcomeMessage">
-        <source>Welcome to .NET Core!
----------------------
-Learn more about .NET Core: https://aka.ms/dotnet-docs
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
-        <target state="translated">.NET Core'a hoş geldiniz!
----------------------
-.NET Core hakkında daha fazla bilgi edinin: https://aka.ms/dotnet-docs
-Kullanılabilen komutları görmek için 'dotnet --help' komutunu kullanın veya şu adresi ziyaret edin: https://aka.ms/dotnet-cli-docs</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnauthorizedAccessMessage">
-        <source>Permission denied to modify the '{0}' folder.
-
-Here are some options to fix this error:
-----------------------------------------
-1. Re-run this command with elevated access.
-2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
-    </source>
-        <target state="translated">'{0}' klasörünü değiştirme izni reddedildi.
-
-İşte bu hatayı düzeltmeye yönelik bazı seçenekler:
-----------------------------------------
-1. Bu komutu yükseltilmiş erişimle yeniden çalıştırın.
-2. DOTNET_SKIP_FIRST_TIME_EXPERIENCE ortam değişkenini true değerine ayarlayarak ilk çalıştırma deneyimini devre dışı bırakın.
-3. .NET Core SDK'yı korunmayan bir konuma kopyalayın ve oradan kullanın.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AspNetCertificateInstalled">
-        <source>ASP.NET Core
-------------
-Successfully installed the ASP.NET Core HTTPS Development Certificate.
-To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
-For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="translated">ASP.NET Core
-------------
-ASP.NET Core HTTPS Geliştirme Sertifikası başarıyla yüklendi.
-Sertifikaya güvenmek için 'dotnet dev-certs https --trust' komutunu çalıştırın (yalnızca Windows ve macOS). Diğer platformlarda güven ilişkisini oluşturmak için ilgili platforma özgü belgelere başvurun.
-HTTPS yapılandırması hakkında daha fazla bilgi edinmek için bkz. https://go.microsoft.com/fwlink/?linkid=848054.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
         <target state="translated">Kullanıcının giriş dizini belirlenemedi. Kullanılacak dizini belirtmek için '{0}' ortam değişkenini ayarlayın.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ShortFirstTimeWelcomeMessage">
-        <source>Welcome to .NET Core!
+      <trans-unit id="FirstTimeMessageMoreInformation">
+        <source>----------------
+More about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Find out what's new: https://aka.ms/dotnet-whats-new
+Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
+Write your first app: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</source>
+        <target state="new">----------------
+More about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Find out what's new: https://aka.ms/dotnet-whats-new
+Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
+Write your first app: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageWelcome">
+        <source>Welcome to .NET Core 3.0!
 ---------------------
-GitHub: https://github.com/dotnet/core
-Docs: https://aka.ms/dotnet-docs
-HTTPS: https://aka.ms/aspnet-core-https</source>
-        <target state="translated">.NET Core'a hoş geldiniz!
+SDK Version: {0}</source>
+        <target state="new">Welcome to .NET Core 3.0!
 ---------------------
-GitHub: https://github.com/dotnet/core
-Belgeler: https://aka.ms/dotnet-docs
-HTTPS: https://aka.ms/aspnet-core-https</target>
+SDK Version: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
@@ -73,11 +48,6 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
 .NET Core araçları, deneyiminizi geliştirmemize yardımcı olmak için kullanım verilerini toplar. Veriler anonimdir. Microsoft tarafından toplanır ve toplulukla paylaşılır. Tercih ettiğiniz kabukla DOTNET_CLI_TELEMETRY_OPTOUT ortam değişkenini '1' veya 'true' değerine ayarlayarak telemetriyi geri çevirebilirsiniz.
 
 .NET Core CLI Araçları telemetrisi hakkında daha fazla bilgi edinin: https://aka.ms/dotnet-cli-telemetry</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShortTelemetryMessage">
-        <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">Telemetri deyimi: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

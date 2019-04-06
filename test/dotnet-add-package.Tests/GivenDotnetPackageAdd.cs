@@ -73,6 +73,41 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
         }
 
         [Fact]
+        public void
+            WhenValidProjectAndPackageWithPackageDirectoryContainingSpaceArePassedItGetsAdded()
+        {
+            var testAsset = "TestAppSimple";
+            var projectDirectory = TestAssets
+                .Get(testAsset)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var packageDirectory = Path.Combine(projectDirectory, "local packages"); 
+
+            var csproj = $"{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj";
+            var packageName = "Newtonsoft.Json";
+            var packageVersion = "9.0.1";
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"add {csproj} package {packageName} --version {packageVersion} --package-directory \"{packageDirectory}\"");
+
+            _output.WriteLine($"[STDOUT] {cmd.StdOut}\n[STDERR]{cmd.StdErr}\n");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should()
+               .Contain($"PackageReference for package \'{packageName}\' version \'{packageVersion}\' added to file '{csproj}'.");
+
+            cmd.StdErr.Should().BeEmpty();
+
+            var restoredPackageDirectory = Path.Combine(packageDirectory, packageName.ToLowerInvariant(), packageVersion);
+            var packageDirectoryExists = Directory.Exists(restoredPackageDirectory);
+            Assert.True(packageDirectoryExists);
+        }
+
+        [Fact]
         public void WhenValidPackageIsPassedAfterVersionItGetsAdded()
         {
             var testAsset = "TestAppSimple";

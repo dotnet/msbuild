@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Win32.SafeHandles;
 
@@ -27,21 +28,40 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <summary>
         /// Creates a new process reaper.
         /// </summary>
-        /// <param name="process">The target process to reap if the current process terminates. The process must already be started.</param>
+        /// <param name="process">The target process to reap if the current process terminates. The process should not yet be started.</param>
         public ProcessReaper(Process process)
         {
             _process = process;
 
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            // The tests need the event handlers registered prior to spawning the child to prevent a race
+            // where the child writes output the test expects before the intermediate dotnet process
+            // has registered the event handlers to handle the signals the tests will generate.
+            Console.CancelKeyPress += HandleCancelKeyPress;
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
             {
-                _job = AssignProcessToJobObject(_process.Handle);
-            }
-            else
-            {
+                _shutdownMutex = new Mutex();
                 AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
             }
+        }
 
-            Console.CancelKeyPress += HandleCancelKeyPress;
+        /// <summary>
+        /// Call to notify the reaper that the process has started.
+        /// </summary>
+        public void NotifyProcessStarted()
+        {
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            {
+                // Limit the use of job objects to versions of Windows that support nested jobs (i.e. Windows 8/2012 or later).
+                // Ideally, we would check for some new API export or OS feature instead of the OS version,
+                // but nested jobs are transparently implemented with respect to the Job Objects API.
+                // Note: Windows 8.1 and later may report as Windows 8 (see https://docs.microsoft.com/en-us/windows/desktop/sysinfo/operating-system-version).
+                //       However, for the purpose of this check that is still sufficient.
+                if (Environment.OSVersion.Version.Major > 6 ||
+                   (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor >= 2))
+                {
+                    _job = AssignProcessToJobObject(_process.Handle);
+                }
+            }
         }
 
         public void Dispose()
@@ -61,6 +81,17 @@ namespace Microsoft.DotNet.Cli.Utils
             else
             {
                 AppDomain.CurrentDomain.ProcessExit -= HandleProcessExit;
+
+                // If there's been a shutdown via the process exit handler,
+                // this will block the current thread so we don't race with the CLR shutdown
+                // from the signal handler.
+                if (_shutdownMutex != null)
+                {
+                    _shutdownMutex.WaitOne();
+                    _shutdownMutex.ReleaseMutex();
+                    _shutdownMutex.Dispose();
+                    _shutdownMutex = null;
+                }
             }
 
             Console.CancelKeyPress -= HandleCancelKeyPress;
@@ -97,21 +128,23 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private void HandleProcessExit(object sender, EventArgs args)
         {
-            var currentPid = Process.GetCurrentProcess().Id;
-            bool sendChildSIGTERM = true;
-
-            // First, try to SIGTERM our process group
-            // If the pgid is not the same as pid, then this process is not the root of the group
-            if (NativeMethods.Posix.getpgid(currentPid) == currentPid)
+            int processId;
+            try
             {
-                if (NativeMethods.Posix.kill(-currentPid, NativeMethods.Posix.SIGTERM) == 0)
-                {
-                    // Successfully sent the signal to the entire group; don't send again to child
-                    sendChildSIGTERM = false;
-                }
+                processId = _process.Id;
+            }
+            catch (InvalidOperationException)
+            {
+                // The process hasn't started yet; nothing to signal
+                return;
             }
 
-            if (sendChildSIGTERM && NativeMethods.Posix.kill(_process.Id, NativeMethods.Posix.SIGTERM) != 0)
+            // Take ownership of the shutdown mutex; this will ensure that the other
+            // thread also waiting on the process to exit won't complete CLR shutdown before
+            // this one does.
+            _shutdownMutex.WaitOne();
+
+            if (!_process.WaitForExit(0) && NativeMethods.Posix.kill(processId, NativeMethods.Posix.SIGTERM) != 0)
             {
                 // Couldn't send the signal, don't wait
                 return;
@@ -159,5 +192,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private Process _process;
         private SafeWaitHandle _job;
+        private Mutex _shutdownMutex;
     }
 }

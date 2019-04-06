@@ -13,18 +13,4 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <Target Name="WriteDefaultPatchVersionsFile" BeforeTargets="Restore">
-    <WriteLinesToFile
-      File="$(MSBuildThisFileDirectory)/.DefaultPatchVersionForAspNetCoreApp2_1"
-      Lines="$(DefaultPatchVersionForAspNetCoreApp2_1)"
-      Overwrite="true"/>
-  </Target>
-
-  <Target Name="WriteBundledVersionsFile" BeforeTargets="Restore">
-    <WriteLinesToFile
-      File="$(MSBuildThisFileDirectory)/.BundledAspNetCoreVersion"
-      Lines="$(MicrosoftAspNetCoreAppPackageVersion)"
-      Overwrite="true"/>
-  </Target>
-  
 </Project>

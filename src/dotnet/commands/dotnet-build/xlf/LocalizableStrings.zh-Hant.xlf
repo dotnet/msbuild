@@ -12,6 +12,11 @@
         <target state="translated">.NET 產生器</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
         <target state="translated">請勿建置專案對專案的參考，而只建置指定的專案。</target>

@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Tool.Run
 
         public override int Execute()
         {
-            CommandSpec commandspec = _localToolsCommandResolver.Resolve(new CommandResolverArguments()
+            CommandSpec commandspec = _localToolsCommandResolver.ResolveStrict(new CommandResolverArguments()
             {
                 // since LocalToolsCommandResolver is a resolver, and all resolver input have dotnet-
                 CommandName = $"dotnet-{_toolCommandName}",

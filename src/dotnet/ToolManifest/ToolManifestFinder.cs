@@ -41,8 +41,9 @@ namespace Microsoft.DotNet.ToolManifest
             if (!findAnyManifest)
             {
                 throw new ToolManifestCannotBeFoundException(
-                    string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched,
-                        string.Join(Environment.NewLine, allPossibleManifests.Select(f => f.manifestfile.Value))));
+                    LocalizableStrings.CannotFindAManifestFile,
+                    string.Format(LocalizableStrings.ListOfSearched,
+                        string.Join(Environment.NewLine, allPossibleManifests.Select(f => "\t" + f.manifestfile.Value))));
             }
 
             return toolManifestPackageAndSource.Select(t => t.toolManifestPackage).ToArray();
@@ -162,9 +163,10 @@ namespace Microsoft.DotNet.ToolManifest
             }
 
             throw new ToolManifestCannotBeFoundException(
-                string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched,
+                LocalizableStrings.CannotFindAManifestFile,
+                string.Format(LocalizableStrings.ListOfSearched,
                     string.Join(Environment.NewLine,
-                        EnumerateDefaultAllPossibleManifests().Select(f => f.manifestfile.Value))));
+                        EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
         }
     }
 }

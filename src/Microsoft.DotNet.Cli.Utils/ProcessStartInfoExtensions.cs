@@ -20,10 +20,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 StartInfo = startInfo
             };
 
-            process.Start();
-
-            using (new ProcessReaper(process))
+            using (var reaper = new ProcessReaper(process))
             {
+                process.Start();
+                reaper.NotifyProcessStarted();
                 process.WaitForExit();
             }
 
@@ -45,10 +45,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
             process.EnableRaisingEvents = true;
 
-            process.Start();
-
-            using (new ProcessReaper(process))
+            using (var reaper = new ProcessReaper(process))
             {
+                process.Start();
+                reaper.NotifyProcessStarted();
+
                 var taskOut = outStream.BeginRead(process.StandardOutput);
                 var taskErr = errStream.BeginRead(process.StandardError);
 

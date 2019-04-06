@@ -25,9 +25,9 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
-        <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+        <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="translated">您可以使用下列命令從這個目錄叫用工具: dotnet tool run {0}
+        <target state="needs-review-translation">您可以使用下列命令從這個目錄叫用工具: dotnet tool run {0}
 工具 '{1}' ('{2}' 版) 已成功安裝。項目已新增到資訊清單檔 {3}。</target>
         <note />
       </trans-unit>
@@ -42,8 +42,9 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
-        <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
-        <target state="translated">若要安裝全域工具，請新增 '-g'。您必須先使用 'dotnet new tool-manifest’ 建立工具資訊清單，才可加以使用。</target>
+        <source>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
+        <target state="needs-review-translation">若要安裝全域工具，請新增 '-g'。您必須先使用 'dotnet new tool-manifest’ 建立工具資訊清單，才可加以使用。</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">

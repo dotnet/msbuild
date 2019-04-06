@@ -2,9 +2,23 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="CannotFindAManifestFile">
+        <source>Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</source>
+        <target state="new">Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotFindPackageIdInManifest">
         <source>Cannot find a package with the package id {0} in the manifest file.</source>
         <target state="translated">매니페스트 파일에서 패키지 ID가 {0}인 패키지를 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListOfSearched">
+        <source>The list of searched paths:
+{0}</source>
+        <target state="new">The list of searched paths:
+{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
@@ -15,6 +29,11 @@
       <trans-unit id="ManifestPackageIdCollision">
         <source>Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</source>
         <target state="translated">패키지를 추가할 수 없습니다. 매니페스트 파일에 {1} 패키지의 버전 {0}이(가) 이미 포함되어 있습니다. 매니페스트 파일 {2}을(를) 제거/설치하거나 편집하여 새 버전 {3}을(를) 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedTypeInJson">
+        <source>Expected a {0} for property '{1}'.</source>
+        <target state="new">Expected a {0} for property '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionIsInvalid">
@@ -32,13 +51,6 @@
 {1}</source>
         <target state="translated">매니페스트 파일이 잘못되었습니다. 경로 {0}:
 {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CannotFindAnyManifestsFileSearched">
-        <source>Cannot find any manifests file. Searched:
-{0}</source>
-        <target state="translated">매니페스트 파일을 찾을 수 없습니다. 검색함:
-{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InPackage">
