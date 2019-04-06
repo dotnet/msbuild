@@ -47,7 +47,7 @@ namespace Microsoft.NET.Publish.Tests
 
             // Check for the existence of a few specific files that should be in the directory where the 
             // contents of PublishItemsOutputGroup were dumped to make sure it's getting populated.
-            testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
+            testOutputDir.Should().HaveFile($"{testProject.Name}.exe");
             testOutputDir.Should().HaveFiles(FrameworkAssemblies);
         }
 
