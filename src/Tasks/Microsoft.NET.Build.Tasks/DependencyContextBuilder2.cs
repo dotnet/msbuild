@@ -263,7 +263,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_includeMainProjectInDepsFile)
                 {
-                    var dependencies = GetProjectDependencies(runtime: false);
+                    var dependencies = GetProjectDependencies();
 
                     var projectCompilationLibrary = new CompilationLibrary(
                         type: "project",
@@ -348,7 +348,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, _mainProjectInfo.OutputName) };
 
-            var dependencies = GetProjectDependencies(runtime: true);
+            var dependencies = GetProjectDependencies();
 
             return new RuntimeLibrary(
                 type: "project",
@@ -365,22 +365,20 @@ namespace Microsoft.NET.Build.Tasks
                 serviceable: false);
         }
 
-        private List<Dependency> GetProjectDependencies(bool runtime)
+        private List<Dependency> GetProjectDependencies()
         {
             List<Dependency> dependencies = new List<Dependency>();
             foreach (var dependencyName in _mainProjectDependencies)
             {
                 if (_dependencyLibraries.TryGetValue(dependencyName, out var dependencyLibrary))
                 {
-                    if (runtime && dependencyLibrary.ExcludeFromRuntime)
+                    //  Include dependency if it would be included either as a runtime or compilation
+                    //  (if compilation libraries are being included) library
+                    if (!dependencyLibrary.ExcludeFromRuntime ||
+                        (IncludeCompilationLibraries && !dependencyLibrary.ExcludeFromCompilation))
                     {
-                        continue;
-                    }
-                    if (!runtime && dependencyLibrary.ExcludeFromCompilation)
-                    {
-                        continue;
-                    }
-                    dependencies.Add(dependencyLibrary.Dependency);
+                        dependencies.Add(dependencyLibrary.Dependency);
+                    }                    
                 }
             }
 
@@ -407,7 +405,7 @@ namespace Microsoft.NET.Build.Tasks
                             directReference.Version));
                 }
             }
-            if (runtime && _runtimePackAssets != null)
+            if (_runtimePackAssets != null)
             {
                 foreach (var runtimePackName in _runtimePackAssets.Keys)
                 {
@@ -756,6 +754,8 @@ namespace Microsoft.NET.Build.Tasks
 
                 Dictionary<string, DependencyLibrary> includedDependencies = new Dictionary<string, DependencyLibrary>(StringComparer.OrdinalIgnoreCase);
 
+                HashSet<string> excludeFromPublishPackageIds = new HashSet<string>(_excludeFromPublishPackageIds);
+
                 Stack<string> dependenciesToWalk = new Stack<string>(
                     _mainProjectDependencies.Except(_excludeFromPublishPackageIds, StringComparer.OrdinalIgnoreCase));
 
@@ -774,7 +774,10 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var dependencyLibrary in _dependencyLibraries.Values)
                 {
-                    if (!includedDependencies.ContainsKey(dependencyLibrary.Name))
+                    //  Libraries explicitly marked as exclude from publish should be excluded from
+                    //  publish even if there are other transitive dependencies to them
+                    if (!includedDependencies.ContainsKey(dependencyLibrary.Name) ||
+                        excludeFromPublishPackageIds.Contains(dependencyLibrary.Name))
                     {
                         dependencyLibrary.ExcludeFromCompilation = true;
                         dependencyLibrary.ExcludeFromRuntime = true;
