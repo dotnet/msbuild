@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions.Json;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
@@ -277,10 +276,21 @@ namespace Microsoft.NET.Build.Tasks
                 var oldJson = JObject.Parse(File.ReadAllText(DepsFilePath));
                 var newJson = JObject.Parse(File.ReadAllText(newDepsFilePath));
 
-                newJson.Should().BeEquivalentTo(oldJson);
+                if (!JToken.DeepEquals(oldJson, newJson))
+                {
+                    string message = "Internal error: new deps file generation logic did not produce the same result as the old logic." + Environment.NewLine +
+                        "    Please file an issue for this at https://github.com/dotnet/sdk" + Environment.NewLine +
+                        "    You can work around this by setting the DepsFileGenerationMode MSBuild property to 'old'" + Environment.NewLine +
+                        "    Deps file from old logic: " + DepsFilePath + Environment.NewLine +
+                        "    Deps file from new logic: " + newDepsFilePath + Environment.NewLine;
 
-                //  If the files matched, then delete the .new.json file
-                File.Delete(newDepsFilePath);
+                    Log.LogError(message);
+                }
+                else
+                {
+                    //  If the files matched, then delete the .new.json file
+                    File.Delete(newDepsFilePath);
+                }
             }
         }
 
