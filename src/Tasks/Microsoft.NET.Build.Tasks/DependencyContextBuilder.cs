@@ -470,6 +470,7 @@ namespace Microsoft.NET.Build.Tasks
                 //  target, but not under the RID-less target.  The RID-less target is what is used for project
                 //  compilation, so make sure we get those assets when writing the compile references to the assets
                 //  file.
+                //  This can happen when the runtime graph adds dependencies which don't have compile assets excluded.
                 //  This was encountered with the 4.3.0 System.Security.Claims, System.Security.Principal.Windows, and
                 //  System.Threading.Overlapped packages.
                 LockFileTargetLibrary exportWithCompileAssets;
