@@ -21,7 +21,7 @@ using NuGet.Versioning;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolRestoreCommandWithMultipleNugetConfigTests
     {

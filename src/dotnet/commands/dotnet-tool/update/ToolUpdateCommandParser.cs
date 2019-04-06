@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools.Tool.Common;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -17,11 +18,11 @@ namespace Microsoft.DotNet.Cli
                     .With(name: LocalizableStrings.PackageIdArgumentName,
                           description: LocalizableStrings.PackageIdArgumentDescription),
                 Create.Option(
-                    "-g|--global",
+                    $"-g|--{ToolAppliedOption.GlobalOption}",
                     LocalizableStrings.GlobalOptionDescription,
                     Accept.NoArguments()),
                 Create.Option(
-                    "--tool-path",
+                    $"--{ToolAppliedOption.ToolPathOption}",
                     LocalizableStrings.ToolPathOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.ToolPathOptionName)),

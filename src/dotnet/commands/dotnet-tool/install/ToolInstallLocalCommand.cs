@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;
 using NuGet.Versioning;
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _sources = appliedCommand.ValueOrDefault<string[]>("add-source");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
-            _explicitManifestFile = appliedCommand.SingleArgumentOrDefault("--tool-manifest");
+            _explicitManifestFile = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolManifest);
 
             _reporter = (reporter ?? Reporter.Output);
 

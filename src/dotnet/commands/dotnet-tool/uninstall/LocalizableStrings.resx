@@ -165,9 +165,6 @@
   <data name="UninstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
     <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
   </data>
-  <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
-    <value>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</value>
-  </data>
   <data name="UninstallLocalToolSucceeded" xml:space="preserve">
     <value>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</value>
   </data>

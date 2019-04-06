@@ -47,11 +47,6 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <target state="needs-review-translation">如果要安装全局工具，请添加 "-g"。如果要使用工具清单，则必须先使用 "dotnet new tool-manifest" 创建该清单。</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="translated">指定工具清单(--tool-manifest)的操作仅在使用本地选项(--local 或默认)时才有效。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
         <target state="translated">要安装的工具的 NuGet 包 ID。</target>

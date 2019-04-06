@@ -17,7 +17,7 @@ using Xunit;
 using LocalizableStrings = Microsoft.DotNet.ToolManifest.LocalizableStrings;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolManifestEditorTests
     {

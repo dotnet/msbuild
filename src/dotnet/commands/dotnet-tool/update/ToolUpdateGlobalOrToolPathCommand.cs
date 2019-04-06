@@ -11,6 +11,7 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -58,9 +59,9 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             _framework = appliedCommand.ValueOrDefault<string>("framework");
             _additionalFeeds = appliedCommand.ValueOrDefault<string[]>("add-source");
             _packageVersion = appliedCommand.SingleArgumentOrDefault("version");
-            _global = appliedCommand.ValueOrDefault<bool>("global");
+            _global = appliedCommand.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
-            _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
+            _toolPath = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
             _forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
 
             _createToolPackageStoreInstallerUninstaller = createToolPackageStoreInstallerUninstaller ??

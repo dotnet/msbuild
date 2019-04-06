@@ -47,11 +47,6 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <target state="needs-review-translation">グローバル ツールをインストールする場合、'-g' を追加します。ツール マニフェストを使用する場合には、'dotnet new tool-manifest' を使用してマニフェストを最初に作成する必要があります。</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="translated">ツール マニフェスト (--tool-manifest) は、ローカル オプション (--local または既定値) と併用する場合にのみ有効です。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
         <target state="translated">インストールするツールの NuGet パッケージ ID。</target>

@@ -24,7 +24,7 @@ using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStri
 using InstallLocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 using Microsoft.DotNet.ShellShim;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolUninstallCommandTests
     {
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolUninstallCommand.Execute();
 
             a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
+                .Should().Contain(Tools.Tool.Common.LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolUninstallCommand.Execute();
 
             a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
+                .Should().Contain(Tools.Tool.Common.LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
     }
 }

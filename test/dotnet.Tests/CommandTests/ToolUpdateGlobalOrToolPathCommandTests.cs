@@ -20,7 +20,7 @@ using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings
 using Microsoft.DotNet.ShellShim;
 using System.IO;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolUpdateGlobalOrToolPathCommandTests
     {

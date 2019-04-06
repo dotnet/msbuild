@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.Uninstall
@@ -37,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             }
 
             _packageId = new PackageId(appliedCommand.Arguments.Single());
-            _explicitManifestFile = appliedCommand.SingleArgumentOrDefault("--tool-manifest");
+            _explicitManifestFile = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolManifest);
 
             _reporter = (reporter ?? Reporter.Output);
 

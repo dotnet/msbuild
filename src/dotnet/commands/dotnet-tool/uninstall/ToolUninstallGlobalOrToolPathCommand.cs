@@ -12,6 +12,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.Uninstall
@@ -45,8 +46,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
         public override int Execute()
         {
-            var global = _options.ValueOrDefault<bool>("global");
-            var toolPath = _options.SingleArgumentOrDefault("tool-path");
+            var global = _options.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
+            var toolPath = _options.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
 
             DirectoryPath? toolDirectoryPath = null;
             if (!string.IsNullOrWhiteSpace(toolPath))

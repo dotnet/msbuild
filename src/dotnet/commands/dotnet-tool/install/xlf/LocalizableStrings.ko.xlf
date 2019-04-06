@@ -47,11 +47,6 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <target state="needs-review-translation">전역 도구를 설치하려는 경우 '-g'를 추가합니다. 도구 매니페스트를 사용하려는 경우 먼저 'dotnet new tool-manifest'를 사용하여 도구 매니패스트를 만들어야 합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="translated">도구 매니페스트 지정(--tool-manifest)은 로컬 옵션(--local 또는 기본값)과 함께 사용되는 경우에만 유효합니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
         <target state="translated">설치할 도구의 NuGet 패키지 ID입니다.</target>
