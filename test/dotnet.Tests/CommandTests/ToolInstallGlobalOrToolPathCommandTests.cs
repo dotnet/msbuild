@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
@@ -17,7 +18,6 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System.Runtime.InteropServices;
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             // It is hard to simulate shell behavior. Only Assert shim can point to executable dll
             _fileSystem.File.Exists(ExpectedCommandPath()).Should().BeTrue();
-            var deserializedFakeShim = JsonConvert.DeserializeObject<AppHostShellShimMakerMock.FakeShim>(
+            var deserializedFakeShim = JsonSerializer.Parse<AppHostShellShimMakerMock.FakeShim>(
                 _fileSystem.File.ReadAllText(ExpectedCommandPath()));
 
             _fileSystem.File.Exists(deserializedFakeShim.ExecutablePath).Should().BeTrue();
@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Tests.Commands
             _fileSystem.File.Exists(ExpectedCommandPath())
             .Should().BeTrue();
             var deserializedFakeShim =
-                JsonConvert.DeserializeObject<AppHostShellShimMakerMock.FakeShim>(
+                JsonSerializer.Parse<AppHostShellShimMakerMock.FakeShim>(
                     _fileSystem.File.ReadAllText(ExpectedCommandPath()));
             _fileSystem.File.Exists(deserializedFakeShim.ExecutablePath).Should().BeTrue();
         }

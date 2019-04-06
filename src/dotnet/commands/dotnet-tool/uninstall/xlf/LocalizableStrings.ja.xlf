@@ -17,6 +17,11 @@
         <target state="translated">PATH</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoManifestGuide">
+        <source>If you intended to uninstall a global tool, add `--global` to the command.</source>
+        <target state="new">If you intended to uninstall a global tool, add `--global` to the command.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
         <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
         <target state="translated">ツール マニフェストの指定 (--tool-manifest) は、ローカル オプション (--local または指定しない) と併用する場合にのみ有効です。</target>

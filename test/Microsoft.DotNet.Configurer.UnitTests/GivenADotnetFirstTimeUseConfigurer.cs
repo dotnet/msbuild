@@ -45,8 +45,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    skipFirstRunExperience: false,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: true
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -54,33 +54,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             dotnetFirstTimeUseConfigurer.Configure();
 
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.FirstTimeWelcomeMessage)), Times.Never);
-            _reporterMock.Verify(r => r.Write(It.IsAny<string>()), Times.Never);
-        }
-
-        [Fact]
-        public void It_does_not_print_the_first_time_use_notice_when_the_user_has_set_the_DOTNET_SKIP_FIRST_TIME_EXPERIENCE_environment_variable()
-        {
-            _firstTimeUseNoticeSentinelMock.Setup(n => n.Exists()).Returns(false);
-
-            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
-                _firstTimeUseNoticeSentinelMock.Object,
-                _aspNetCertificateSentinelMock.Object,
-                _aspNetCoreCertificateGeneratorMock.Object,
-                _toolPathSentinelMock.Object,
-                new DotnetFirstRunConfiguration
-                (
-                    generateAspNetCertificate: true,
-                    skipFirstRunExperience: true,
-                    telemetryOptout: false
-                ),
-                _reporterMock.Object,
-                CliFallbackFolderPath,
-                _pathAdderMock.Object);
-
-            dotnetFirstTimeUseConfigurer.Configure();
-
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.FirstTimeWelcomeMessage)), Times.Never);
+            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str.Contains(LocalizableStrings.FirstTimeMessageMoreInformation))), Times.Never);
             _reporterMock.Verify(r => r.Write(It.IsAny<string>()), Times.Never);
         }
 
@@ -97,8 +71,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    skipFirstRunExperience: false,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: true
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -106,7 +80,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             dotnetFirstTimeUseConfigurer.Configure();
 
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.FirstTimeWelcomeMessage)));
+            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str.Contains(LocalizableStrings.FirstTimeMessageMoreInformation))));
             _reporterMock.Verify(r => r.Write(It.IsAny<string>()), Times.Never);
         }
     
@@ -123,8 +97,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    skipFirstRunExperience: false,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: true
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -149,8 +123,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    skipFirstRunExperience: false,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: true
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -175,8 +149,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    skipFirstRunExperience: false,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: true
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -184,33 +158,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             dotnetFirstTimeUseConfigurer.Configure();
 
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.AspNetCertificateInstalled)), Times.Never);
-            _aspNetCoreCertificateGeneratorMock.Verify(s => s.GenerateAspNetCoreDevelopmentCertificate(), Times.Never);
-        }
-
-        [Fact]
-        public void It_does_not_generate_the_aspnet_https_development_certificate_when_the_user_has_set_the_DOTNET_SKIP_FIRST_TIME_EXPERIENCE_environment_variable()
-        {
-            _aspNetCertificateSentinelMock.Setup(n => n.Exists()).Returns(false);
-
-            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
-                _firstTimeUseNoticeSentinelMock.Object,
-                _aspNetCertificateSentinelMock.Object,
-                _aspNetCoreCertificateGeneratorMock.Object,
-                _toolPathSentinelMock.Object,
-                new DotnetFirstRunConfiguration
-                (
-                    generateAspNetCertificate: true,
-                    skipFirstRunExperience: true,
-                    telemetryOptout: false
-                ),
-                _reporterMock.Object,
-                CliFallbackFolderPath,
-                _pathAdderMock.Object);
-
-            dotnetFirstTimeUseConfigurer.Configure();
-
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.AspNetCertificateInstalled)), Times.Never);
             _aspNetCoreCertificateGeneratorMock.Verify(s => s.GenerateAspNetCoreDevelopmentCertificate(), Times.Never);
         }
 
@@ -227,8 +174,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: false,
-                    skipFirstRunExperience: false,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: true
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -236,7 +183,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             dotnetFirstTimeUseConfigurer.Configure();
 
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.AspNetCertificateInstalled)), Times.Never);
             _aspNetCoreCertificateGeneratorMock.Verify(s => s.GenerateAspNetCoreDevelopmentCertificate(), Times.Never);
         }
 
@@ -253,8 +199,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    skipFirstRunExperience: false,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: true
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -262,13 +208,12 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             dotnetFirstTimeUseConfigurer.Configure();
 
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.FirstTimeWelcomeMessage)));
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.AspNetCertificateInstalled)));
+            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str.Contains(LocalizableStrings.FirstTimeMessageMoreInformation))));
             _aspNetCoreCertificateGeneratorMock.Verify(s => s.GenerateAspNetCoreDevelopmentCertificate(), Times.Once);
         }
 
         [Fact]
-        public void It_adds_the_tool_path_to_the_environment_if_the_first_run_experience_is_not_skipped()
+        public void It_adds_the_tool_path_to_the_environment_if_addGlobalToolsToPath_is_enabled()
         {
             var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
                 _firstTimeUseNoticeSentinelMock.Object,
@@ -278,8 +223,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    skipFirstRunExperience: false,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: true
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -291,7 +236,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
-        public void It_does_not_add_the_tool_path_to_the_environment_if_the_first_run_experience_is_skipped()
+        public void It_does_not_add_the_tool_path_to_the_environment_if_addGlobalToolsToPath_is_disabled()
         {
             var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
                 _firstTimeUseNoticeSentinelMock.Object,
@@ -301,8 +246,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    skipFirstRunExperience: true,
-                    telemetryOptout: false
+                    telemetryOptout: false,
+                    addGlobalToolsToPath: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,

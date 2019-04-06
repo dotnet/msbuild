@@ -49,22 +49,13 @@ namespace Microsoft.DotNet.Configurer
 
             if (ShouldPrintFirstTimeUseNotice())
             {
-                PrintFirstTimeUseNotice();
+                PrintFirstTimeMessageWelcome();
                 if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
                 {
                     PrintTelemetryMessage();
                 }
 
-                _firstTimeUseNoticeSentinel.CreateIfNotExists();
-            }
-            else if (ShouldPrintShortFirstTimeUseNotice())
-            {
-                PrintShortFirstTimeUseNotice();
-                if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
-                {
-                    PrintShorTelemetryMessage();
-                }
-
+                PrintFirstTimeMessageMoreInformation();
                 _firstTimeUseNoticeSentinel.CreateIfNotExists();
             }
 
@@ -78,9 +69,6 @@ namespace Microsoft.DotNet.Configurer
         {
             _aspNetCoreCertificateGenerator.GenerateAspNetCoreDevelopmentCertificate();
 
-            _reporter.WriteLine();
-            _reporter.WriteLine(LocalizableStrings.AspNetCertificateInstalled);
-
             _aspNetCertificateSentinel.CreateIfNotExists();
         }
 
@@ -89,15 +77,15 @@ namespace Microsoft.DotNet.Configurer
 #if EXCLUDE_ASPNETCORE
             return false;
 #else
-            return ShouldRunFirstRunExperience() &&
-                _dotnetFirstRunConfiguration.GenerateAspNetCertificate &&
+            return _dotnetFirstRunConfiguration.GenerateAspNetCertificate &&
                 !_aspNetCertificateSentinel.Exists();
 #endif
         }
 
         private bool ShouldAddPackageExecutablePath()
         {
-            return ShouldRunFirstRunExperience() && !_toolPathSentinel.Exists();
+            return _dotnetFirstRunConfiguration.AddGlobalToolsToPath &&
+                !_toolPathSentinel.Exists();
         }
 
         private void AddPackageExecutablePath()
@@ -109,12 +97,6 @@ namespace Microsoft.DotNet.Configurer
 
         private bool ShouldPrintFirstTimeUseNotice()
         {
-            return ShouldRunFirstRunExperience() &&
-                !_firstTimeUseNoticeSentinel.Exists();
-        }
-
-        private bool ShouldPrintShortFirstTimeUseNotice()
-        {
             return !_firstTimeUseNoticeSentinel.Exists();
         }
 
@@ -123,41 +105,21 @@ namespace Microsoft.DotNet.Configurer
             return !_dotnetFirstRunConfiguration.TelemetryOptout;
         }
 
-        private void PrintFirstTimeUseNotice()
+        private void PrintFirstTimeMessageWelcome()
         {
             _reporter.WriteLine();
-            _reporter.WriteLine(LocalizableStrings.FirstTimeWelcomeMessage);
+            _reporter.WriteLine(string.Format(LocalizableStrings.FirstTimeMessageWelcome, Product.Version));
         }
-
-        private void PrintShortFirstTimeUseNotice()
+        private void PrintFirstTimeMessageMoreInformation()
         {
             _reporter.WriteLine();
-            _reporter.WriteLine(LocalizableStrings.ShortFirstTimeWelcomeMessage);
+            _reporter.WriteLine(LocalizableStrings.FirstTimeMessageMoreInformation);
         }
 
         private void PrintTelemetryMessage()
         {
             _reporter.WriteLine();
             _reporter.WriteLine(LocalizableStrings.TelemetryMessage);
-        }
-
-        private void PrintShorTelemetryMessage()
-        {
-            _reporter.WriteLine();
-            _reporter.WriteLine(LocalizableStrings.ShortTelemetryMessage);
-        }
-
-        private void PrintUnauthorizedAccessMessage()
-        {
-            _reporter.WriteLine();
-            _reporter.WriteLine(string.Format(
-                LocalizableStrings.UnauthorizedAccessMessage,
-                _cliFallbackFolderPath));
-        }
-
-        private bool ShouldRunFirstRunExperience()
-        {
-            return !_dotnetFirstRunConfiguration.SkipFirstRunExperience;
         }
     }
 }

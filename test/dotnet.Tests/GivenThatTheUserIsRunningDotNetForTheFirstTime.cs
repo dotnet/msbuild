@@ -40,7 +40,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = cliTestFallbackFolder;
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
@@ -73,16 +72,8 @@ namespace Microsoft.DotNet.Tests
         {
             _firstDotnetVerbUseCommandResult.StdOut
                 .Should()
-                .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage)
-                .And.NotContain("Restore completed in");
-        }
-
-        [Fact]
-        public void ItShowsTheAspNetCertificateGenerationMessageToTheUser()
-        {
-            _firstDotnetVerbUseCommandResult.StdOut
-                .Should()
-                .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled)
+                .ContainVisuallySameFragment(string.Format(Configurer.LocalizableStrings.FirstTimeMessageWelcome, Product.Version))
+                .And.ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeMessageMoreInformation)
                 .And.NotContain("Restore completed in");
         }
 
@@ -115,7 +106,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = emptyHome;
             command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             // Disable to prevent the creation of the .dotnet folder by optimizationdata.
@@ -147,7 +137,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
@@ -156,7 +145,8 @@ namespace Microsoft.DotNet.Tests
 
             result.StdOut
                 .Should()
-                .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage);
+                .ContainVisuallySameFragment(string.Format(Configurer.LocalizableStrings.FirstTimeMessageWelcome, Product.Version))
+                .And.ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeMessageMoreInformation);
         }
 
         [Fact]
@@ -175,16 +165,11 @@ namespace Microsoft.DotNet.Tests
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
-            var result = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
-
-            result.StdOut
-                .Should()
-                .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled);
+            command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
         }
 
         [LinuxOnlyFact]
@@ -198,7 +183,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = emptyHome;
             command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
@@ -220,7 +204,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = emptyHome;
             command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";

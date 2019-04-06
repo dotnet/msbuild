@@ -27,6 +27,10 @@ namespace Microsoft.DotNet.Tests
                 });
         }
 
+        public void Flush()
+        {
+        }
+
         public ConcurrentBag<LogEntry> LogEntries { get; set; } = new ConcurrentBag<LogEntry>();
 
         public class LogEntry

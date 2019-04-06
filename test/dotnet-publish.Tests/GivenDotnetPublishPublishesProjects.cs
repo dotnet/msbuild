@@ -296,5 +296,25 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Fail();
         }
+
+        [Fact]
+        public void ItDoesNotPrintCopyrightInfo()
+        {
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var cmd = new PublishCommand()
+               .WithWorkingDirectory(testInstance.Root)
+               .ExecuteWithCapturedOutput("--nologo");
+
+            cmd.Should().Pass();
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                cmd.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
+            }
+        }
     }
 }

@@ -31,7 +31,14 @@ namespace Microsoft.DotNet.Tools.New
         {
             var sessionId =
                 Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
-            var telemetry = new Telemetry(new FirstTimeUseNoticeSentinel(), sessionId);
+
+            // senderCount: 0 to disable sender.
+            // When senders in different process running at the same
+            // time they will read from the same global queue and cause
+            // sending duplicated events. Disable sender to reduce it.
+            var telemetry = new Telemetry(new FirstTimeUseNoticeSentinel(),
+                                          sessionId,
+                                          senderCount: 0);
             var logger = new TelemetryLogger(null);
 
             if (telemetry.Enabled)

@@ -48,11 +48,27 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
         public override int Execute()
         {
-            var manifestFile = string.IsNullOrWhiteSpace(_explicitManifestFile)
-                ? _toolManifestFinder.FindFirst()
-                : new FilePath(_explicitManifestFile);
+            FilePath manifestFile;
+
+            try
+            {
+                manifestFile = string.IsNullOrWhiteSpace(_explicitManifestFile)
+                   ? _toolManifestFinder.FindFirst()
+                   : new FilePath(_explicitManifestFile);
+            }
+            catch (ToolManifestCannotBeFoundException e)
+            {
+                throw new GracefulException(new[]
+                    {
+                        e.Message,
+                        LocalizableStrings.NoManifestGuide
+                    },
+                    verboseMessages: new[] { e.VerboseMessage },
+                    isUserError: false);
+            }
 
             _toolManifestEditor.Remove(manifestFile, _packageId);
+
             _reporter.WriteLine(
                 string.Format(
                     LocalizableStrings.UninstallLocalToolSucceeded,

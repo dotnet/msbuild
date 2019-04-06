@@ -12,13 +12,6 @@
         <target state="translated">用于列出项目到项目引用的命令</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">项目 {1} 中没有 {0} 引用。
-{0} 是正在请求的项类型(项目、包、p2p)，{1} 是操作的对象(项目文件或解决方案文件)。</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>
