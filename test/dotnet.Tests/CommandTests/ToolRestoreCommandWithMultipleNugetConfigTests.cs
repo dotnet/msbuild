@@ -186,6 +186,11 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             {
                 throw new NotImplementedException();
             }
+
+            public IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

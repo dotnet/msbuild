@@ -272,6 +272,39 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         }
 
         [Fact]
+        public void GivenManifestFileInDifferentDirectoriesWhenFindContainPackageIdItCanGetResultInOrder()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            string manifestFileInParentDirectory = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFileInParentDirectory,
+                _jsonContentInParentDirectory);
+            string manifestFileInSubDirectory = Path.Combine(subdirectoryOfTestRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFileInSubDirectory,
+                _jsonContentInCurrentDirectory);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(subdirectoryOfTestRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            var manifests = toolManifest.FindContainPackageId(new PackageId("t-rex"));
+
+            manifests.Should().ContainInOrder(new List<FilePath>
+            {
+                new FilePath(manifestFileInSubDirectory),
+                new FilePath(manifestFileInParentDirectory)
+            }, "Order matters, the closest to probe start first.");
+
+            var manifests2 = toolManifest.FindContainPackageId(new PackageId("dotnetsay"));
+
+            manifests2.Should().ContainInOrder(new List<FilePath>
+            {
+                new FilePath(manifestFileInSubDirectory)
+            });
+        }
+
+        [Fact]
         public void GivenConflictedManifestFileInDifferentDirectoriesItOnlyConsiderTheFirstIsRoot()
         {
             var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");

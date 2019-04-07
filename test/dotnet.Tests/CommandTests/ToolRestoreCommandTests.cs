@@ -434,6 +434,11 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             {
                 throw new NotImplementedException();
             }
+
+            public IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class CannotFindManifestFinder : IToolManifestFinder
@@ -444,6 +449,11 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             }
 
             public FilePath FindFirst()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId)
             {
                 throw new NotImplementedException();
             }

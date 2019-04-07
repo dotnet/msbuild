@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ToolManifest
@@ -167,6 +168,24 @@ namespace Microsoft.DotNet.ToolManifest
                 string.Format(LocalizableStrings.ListOfSearched,
                     string.Join(Environment.NewLine,
                         EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
+        }
+
+        public IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId)
+        {
+            var result = new List<FilePath>();
+            foreach ((FilePath possibleManifest,
+                    DirectoryPath correspondingDirectory)
+                in EnumerateDefaultAllPossibleManifests())
+            {
+                if (_fileSystem.File.Exists(possibleManifest.Value) &&
+                    _toolManifestEditor.Read(possibleManifest, correspondingDirectory).content
+                        .Any(t => t.PackageId.Equals(packageId)))
+                {
+                    result.Add(possibleManifest);
+                }
+            }
+
+            return result;
         }
     }
 }
