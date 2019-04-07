@@ -31,6 +31,11 @@ For a list of locations searched, specify the "-d" option before the tool name.<
         <target state="translated">No se puede agregar el paquete. El archivo de manifiesto contiene la versión {0} del paquete {1}. Instale/desinstale o modifique el archivo de manifiesto {2} para especificar la nueva versión {3}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultipleSamePackageId">
+        <source>There are more than one entry for package(s): {0}</source>
+        <target state="new">There are more than one entry for package(s): {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTypeInJson">
         <source>Expected a {0} for property '{1}'.</source>
         <target state="new">Expected a {0} for property '{1}'.</target>

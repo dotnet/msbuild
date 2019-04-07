@@ -31,6 +31,11 @@ For a list of locations searched, specify the "-d" option before the tool name.<
         <target state="translated">无法添加包。清单文件已包含包 {1} 的版本 {0}。卸载/安装或编辑清单文件 {2} 以指定新版本 {3}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultipleSamePackageId">
+        <source>There are more than one entry for package(s): {0}</source>
+        <target state="new">There are more than one entry for package(s): {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTypeInJson">
         <source>Expected a {0} for property '{1}'.</source>
         <target state="new">Expected a {0} for property '{1}'.</target>

@@ -31,6 +31,11 @@ For a list of locations searched, specify the "-d" option before the tool name.<
         <target state="translated">Non è possibile aggiungere il pacchetto. Il file manifesto contiene già la versione {0} del pacchetto {1}. Disinstallare/installare o modificare il file manifesto {2} per specificare la nuova versione {3}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultipleSamePackageId">
+        <source>There are more than one entry for package(s): {0}</source>
+        <target state="new">There are more than one entry for package(s): {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTypeInJson">
         <source>Expected a {0} for property '{1}'.</source>
         <target state="new">Expected a {0} for property '{1}'.</target>

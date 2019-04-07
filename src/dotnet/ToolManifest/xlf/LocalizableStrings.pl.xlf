@@ -31,6 +31,11 @@ For a list of locations searched, specify the "-d" option before the tool name.<
         <target state="translated">Nie można dodać pakietu. Plik manifestu już zawiera wersję {0} pakietu {1}. Odinstaluj i zainstaluj lub edytuj plik manifestu {2}, aby określić nową wersję {3}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultipleSamePackageId">
+        <source>There are more than one entry for package(s): {0}</source>
+        <target state="new">There are more than one entry for package(s): {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTypeInJson">
         <source>Expected a {0} for property '{1}'.</source>
         <target state="new">Expected a {0} for property '{1}'.</target>

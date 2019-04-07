@@ -249,6 +249,40 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(_jsonWithInvalidField);
         }
+        
+        [Fact]
+        public void GivenManifestFileItCanEditEntry()
+        {
+            string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
+
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
+
+            toolManifestFileEditor.Edit(new FilePath(manifestFile),
+                new PackageId("t-rex"),
+                NuGetVersion.Parse("3.0.0"),
+                new[] {new ToolCommandName("t-rex3")});
+
+            _fileSystem.File.ReadAllText(manifestFile).Should().Be(
+                @"{
+  ""version"": 1,
+  ""isRoot"": true,
+  ""tools"": {
+    ""t-rex"": {
+      ""version"": ""3.0.0"",
+      ""commands"": [
+        ""t-rex3""
+      ]
+    },
+    ""dotnetsay"": {
+      ""version"": ""2.1.4"",
+      ""commands"": [
+        ""dotnetsay""
+      ]
+    }
+  }
+}", "And original tools entry order is preserved.");
+        }
 
         private string _jsonContent =
             @"{

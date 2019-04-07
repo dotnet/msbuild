@@ -31,6 +31,11 @@ For a list of locations searched, specify the "-d" option before the tool name.<
         <target state="translated">패키지를 추가할 수 없습니다. 매니페스트 파일에 {1} 패키지의 버전 {0}이(가) 이미 포함되어 있습니다. 매니페스트 파일 {2}을(를) 제거/설치하거나 편집하여 새 버전 {3}을(를) 지정하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultipleSamePackageId">
+        <source>There are more than one entry for package(s): {0}</source>
+        <target state="new">There are more than one entry for package(s): {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTypeInJson">
         <source>Expected a {0} for property '{1}'.</source>
         <target state="new">Expected a {0} for property '{1}'.</target>

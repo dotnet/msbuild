@@ -108,8 +108,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             Action a = () => toolManifest.Find();
 
             a.ShouldThrow<ToolManifestException>().And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.JsonParsingError,
-                Path.Combine(_testDirectoryRoot, _manifestFilename), ""));
+                .Contain(string.Format(string.Format(LocalizableStrings.MultipleSamePackageId,
+                    string.Join(", ", "t-rex")), ""));
         }
 
         [Fact]
