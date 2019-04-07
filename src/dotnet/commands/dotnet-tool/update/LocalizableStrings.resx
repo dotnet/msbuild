@@ -210,4 +210,7 @@
   <data name="ManifestPathOptionName" xml:space="preserve">
     <value>PATH</value>
   </data>
+  <data name="UpdateLocalToolSucceeded" xml:space="preserve">
+    <value>Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</value>
+  </data>
 </root>

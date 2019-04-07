@@ -231,5 +231,11 @@ namespace Microsoft.DotNet.Cli.commands.update {
                 return ResourceManager.GetString("ManifestPathOptionName", resourceCulture);
             }
         }
+        
+        public static string UpdateLocalToolSucceeded {
+            get {
+                return ResourceManager.GetString("UpdateLocalToolSucceeded", resourceCulture);
+            }
+        }
     }
 }
