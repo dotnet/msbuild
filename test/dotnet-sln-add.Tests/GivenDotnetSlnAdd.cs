@@ -1241,7 +1241,7 @@ EndGlobal
                 .WithWorkingDirectory(solutionDirectory)
                 .ExecuteWithCapturedOutput($"sln App.sln add --solution-folder blah --in-root {projectToAdd}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("The --solution-folder and --in-root options are mutually exclusive");
+            cmd.StdErr.Should().Be("The --solution-folder and --in-root options cannot be used together; use only one of the options.");
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
 
             File.ReadAllText(solutionPath)

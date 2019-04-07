@@ -88,8 +88,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
-        <source>The --solution-folder and --in-root options are mutually exclusive</source>
-        <target state="new">The --solution-folder and --in-root options are mutually exclusive</target>
+        <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
+        <target state="new">The --solution-folder and --in-root options cannot be used together; use only one of the options.</target>
         <note />
       </trans-unit>
     </body>
