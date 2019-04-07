@@ -25,7 +25,7 @@
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
       <Sha>cb6f5d0dc7de35046ca50df2c0cadd95e3a70707</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview4.19206.7">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview4.19207.1">
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>a1132a2a7fe48b25716f44680cadebc7dd2f7c64</Sha>
     </Dependency>
