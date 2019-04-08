@@ -283,10 +283,10 @@ namespace Microsoft.NET.Build.Tasks
 
                 WriteDepsFileNew(newDepsFilePath);
 
-                var oldJson = JObject.Parse(File.ReadAllText(DepsFilePath));
-                var newJson = JObject.Parse(File.ReadAllText(newDepsFilePath));
+                var oldJson = File.ReadAllText(DepsFilePath);
+                var newJson = File.ReadAllText(newDepsFilePath);
 
-                if (!JToken.DeepEquals(oldJson, newJson))
+                if (oldJson != newJson)
                 {
                     string message = "Internal error: new deps file generation logic did not produce the same result as the old logic." + Environment.NewLine +
                         "    Please file an issue for this at https://github.com/dotnet/sdk" + Environment.NewLine +
