@@ -39,7 +39,7 @@ namespace Microsoft.NET.Build.Tasks
                 // Only public COM-visible classes can be exposed via the COM host.
                 if (TypeIsPublic(metadataReader, definition) && TypeIsClass(metadataReader, definition) && IsComVisible(metadataReader, definition, isAssemblyComVisible))
                 {
-                    string guid = GetTypeGuid(metadataReader, definition);
+                    string guid = GetTypeGuid(metadataReader, definition).ToString("B");
 
                     if (clsidMap.ContainsKey(guid))
                     {
@@ -177,7 +177,7 @@ namespace Microsoft.NET.Build.Tasks
             return new CustomAttributeHandle();
         }
 
-        private static string GetTypeGuid(MetadataReader reader, TypeDefinition type)
+        private static Guid GetTypeGuid(MetadataReader reader, TypeDefinition type)
         {
             // Find the class' GUID by reading the GuidAttribute value.
             // We do not support implicit runtime-generated GUIDs for the .NET Core COM host.
@@ -189,7 +189,7 @@ namespace Microsoft.NET.Build.Tasks
                 if (reader.StringComparer.Equals(attributeType.Namespace, "System.Runtime.InteropServices") && reader.StringComparer.Equals(attributeType.Name, "GuidAttribute"))
                 {
                     CustomAttributeValue<KnownType> data = attribute.DecodeValue(new TypeResolver());
-                    return (string)data.FixedArguments[0].Value;
+                    return Guid.Parse((string)data.FixedArguments[0].Value);
                 }
             }
             throw new BuildErrorException(Strings.ClsidMapExportedTypesRequireExplicitGuid, GetTypeName(reader, type));
