@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tasks
         /// <param name="comManifestPath">The path to which to write the manifest.</param>
         public static void CreateManifestFromClsidmap(string assemblyName, string comHostName, string assemblyVersion, string clsidMapPath, string comManifestPath)
         {
-            XNamespace ns = "urn:shemas-microsoft-com:asm.v1";
+            XNamespace ns = "urn:schemas-microsoft-com:asm.v1";
 
             XElement manifest = new XElement(ns + "assembly", new XAttribute("manifestVersion", "1.0"));
             manifest.Add(new XElement(ns + "assemblyIdentity",
