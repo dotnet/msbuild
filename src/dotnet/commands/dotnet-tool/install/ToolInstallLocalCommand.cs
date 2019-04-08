@@ -54,6 +54,11 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         {
             FilePath manifestFile = GetManifestFilePath();
 
+            return Install(manifestFile);
+        }
+
+        public int Install(FilePath manifestFile)
+        {
             IToolPackage toolDownloadedPackage =
                 _toolLocalPackageInstaller.Install(manifestFile);
 
@@ -68,16 +73,15 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 _toolLocalPackageInstaller.TargetFrameworkToInstall);
 
             _reporter.WriteLine(
-                string.Format(
-                    LocalizableStrings.LocalToolInstallationSucceeded,
-                    string.Join(", ", toolDownloadedPackage.Commands.Select(c => c.Name)),
-                    toolDownloadedPackage.Id,
-                    toolDownloadedPackage.Version.ToNormalizedString(),
-                    manifestFile.Value).Green());
+                    string.Format(
+                        LocalizableStrings.LocalToolInstallationSucceeded,
+                        string.Join(", ", toolDownloadedPackage.Commands.Select(c => c.Name)),
+                        toolDownloadedPackage.Id,
+                        toolDownloadedPackage.Version.ToNormalizedString(),
+                        manifestFile.Value).Green());
 
             return 0;
         }
-
 
         private FilePath GetManifestFilePath()
         {

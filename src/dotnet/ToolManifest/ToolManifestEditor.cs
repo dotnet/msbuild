@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.ToolManifest
             }
             else
             {
-                // TODO throw and test
+                throw new ArgumentException($"Manifest {to.Value} does not contain package id '{packageId}'.");
             }
 
             _fileSystem.File.WriteAllText(to.Value, deserializedManifest.ToJson());

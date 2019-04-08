@@ -213,4 +213,14 @@
   <data name="UpdateLocalToolSucceeded" xml:space="preserve">
     <value>Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</value>
   </data>
+  <data name="UpdateLocaToolToLowerVersion" xml:space="preserve">
+    <value>The requested version {0} is lower than existing version {1} (manifest file {2}).</value>
+  </data>
+  <data name="UpdateLocaToolSucceededVersionNoChange" xml:space="preserve">
+    <value>Tool '{0}' is up to date (version '{1}' manifest file {2}) .</value>
+  </data>
+  <data name="SamePackageIdInOtherManifestFile" xml:space="preserve">
+    <value>Warning: There are other manifest files could affect local tools in current directory. They are not changed:
+{0}</value>
+  </data>
 </root>

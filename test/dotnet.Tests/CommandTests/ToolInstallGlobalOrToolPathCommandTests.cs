@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
 
             var toolToolPackageInstaller = CreateToolPackageInstaller(
-            feeds: new[] {
+            feeds: new List<MockFeed> {
                     new MockFeed
                     {
                         Type = MockFeedType.ImplicitAdditionalFeed,
@@ -485,7 +485,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         }
 
         private IToolPackageInstaller CreateToolPackageInstaller(
-            IEnumerable<MockFeed> feeds = null,
+            List<MockFeed> feeds = null,
             Action installCallback = null)
         {
             return new ToolPackageInstallerMock(

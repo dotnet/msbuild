@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
-                feeds: new MockFeed[0]);
+                feeds: new List<MockFeed>());
 
             Action a = () => installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion), targetFramework: _testTargetframework);
@@ -711,7 +711,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
-                feeds: new[] { feed },
+                feeds: new List<MockFeed> { feed },
                 writeLocalFeedToNugetConfig: nugetConfigPath);
 
             CultureInfo currentCultureBefore = CultureInfo.CurrentCulture;
@@ -792,11 +792,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             return tempProjectPath;
         }
 
-        private static IEnumerable<MockFeed> GetMockFeedsForConfigFile(FilePath? nugetConfig)
+        private static List<MockFeed> GetMockFeedsForConfigFile(FilePath? nugetConfig)
         {
             if (nugetConfig.HasValue)
             {
-                return new MockFeed[]
+                return new List<MockFeed>
                 {
                     new MockFeed
                     {
@@ -816,13 +816,13 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             }
             else
             {
-                return Array.Empty<MockFeed>();
+                return new List<MockFeed>();
             }
         }
 
-        private static IEnumerable<MockFeed> GetMockFeedsForSource(string source)
+        private static List<MockFeed> GetMockFeedsForSource(string source)
         {
-            return new MockFeed[]
+            return new List<MockFeed>
             {
                 new MockFeed
                 {
@@ -841,9 +841,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
         }
 
-        private static IEnumerable<MockFeed> GetOfflineMockFeed()
+        private static List<MockFeed> GetOfflineMockFeed()
         {
-            return new MockFeed[]
+            return new List<MockFeed>
             {
                 new MockFeed
                 {
@@ -865,7 +865,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         private static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
             ) Setup(
                 bool useMock,
-                IEnumerable<MockFeed> feeds = null,
+                List<MockFeed> feeds = null,
                 FilePath? tempProject = null,
                 DirectoryPath? offlineFeed = null,
                 FilePath? writeLocalFeedToNugetConfig = null)
@@ -893,7 +893,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         reporter: reporter,
                         feeds: feeds == null
                             ? GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig)
-                            : feeds.Concat(GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig))));
+                            : feeds.Concat(GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig)).ToList()));
                 uninstaller = new ToolPackageUninstallerMock(fileSystem, toolPackageStoreMock);
             }
             else

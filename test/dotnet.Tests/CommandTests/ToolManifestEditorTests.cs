@@ -249,7 +249,24 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(_jsonWithInvalidField);
         }
-        
+
+        [Fact]
+        public void GivenManifestFileWhenEditNonExistPackageIdItThrows()
+        {
+            string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
+
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
+
+            Action a = () => toolManifestFileEditor.Edit(new FilePath(manifestFile),
+                new PackageId("non-exist"),
+                NuGetVersion.Parse("3.0.0"),
+                new[] { new ToolCommandName("t-rex3") });
+
+            a.ShouldThrow<ArgumentException>().And.Message.Should().Contain($"Manifest {manifestFile} does not contain package id 'non-exist'.");
+        }
+
+
         [Fact]
         public void GivenManifestFileItCanEditEntry()
         {

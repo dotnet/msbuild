@@ -99,6 +99,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 .Be(HigherPackageVersion);
         }
 
+
         [Fact]
         public void GivenAnExistedLowerversionInstallationWhenCallItCanUpdateThePackageVersion()
         {
@@ -107,6 +108,42 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var command = CreateUpdateCommand($"-g {_packageId}");
 
             command.Execute();
+
+            _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
+                .Be(HigherPackageVersion);
+        }
+
+        [Fact]
+        public void GivenAnExistedLowerversionInstallationWhenCallFromRedirectorItCanUpdateThePackageVersion()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
+
+            ParseResult result = Parser.Instance.Parse("dotnet tool update " + $"-g {_packageId}");
+
+            AppliedOption appliedCommand = result["dotnet"]["tool"]["update"];
+            var toolUpdateGlobalOrToolPathCommand = new ToolUpdateGlobalOrToolPathCommand(
+                appliedCommand,
+                result,
+                (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
+                    _fileSystem,
+                    _store,
+                    new ProjectRestorerMock(
+                        _fileSystem,
+                        _reporter,
+                        _mockFeeds
+                    )),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
+                (_) => GetMockedShellShimRepository(),
+                _reporter);
+
+            var toolUpdateCommand = new ToolUpdateCommand(
+                 appliedCommand,
+                 result,
+                 _reporter,
+                 toolUpdateGlobalOrToolPathCommand,
+                 new ToolUpdateLocalCommand(appliedCommand, result));
+
+            toolUpdateCommand.Execute();
 
             _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
                 .Be(HigherPackageVersion);

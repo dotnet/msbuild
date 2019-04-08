@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 new ProjectRestorerMock(
                     _fileSystem,
                     _reporter,
-                    new[]
+                    new List<MockFeed>
                     {
                         new MockFeed
                         {

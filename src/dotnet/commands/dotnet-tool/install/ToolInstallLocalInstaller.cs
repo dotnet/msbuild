@@ -25,19 +25,19 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly string _verbosity;
 
         public ToolInstallLocalInstaller(
-            AppliedOption appliedCommand,
+            AppliedOption appliedOption,
             IToolPackageInstaller toolPackageInstaller = null)
         {
-            if (appliedCommand == null)
+            if (appliedOption == null)
             {
-                throw new ArgumentNullException(nameof(appliedCommand));
+                throw new ArgumentNullException(nameof(appliedOption));
             }
 
-            _packageId = new PackageId(appliedCommand.Arguments.Single());
-            _packageVersion = appliedCommand.ValueOrDefault<string>("version");
-            _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
-            _sources = appliedCommand.ValueOrDefault<string[]>("add-source");
-            _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
+            _packageId = new PackageId(appliedOption.Arguments.Single());
+            _packageVersion = appliedOption.ValueOrDefault<string>("version");
+            _configFilePath = appliedOption.ValueOrDefault<string>("configfile");
+            _sources = appliedOption.ValueOrDefault<string[]>("add-source");
+            _verbosity = appliedOption.SingleArgumentOrDefault("verbosity");
 
             if (toolPackageInstaller == null)
             {
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                     IToolPackageStoreQuery,
                     IToolPackageInstaller installer) toolPackageStoresAndInstaller
                         = ToolPackageFactory.CreateToolPackageStoresAndInstaller(
-                            additionalRestoreArguments: appliedCommand.OptionValuesToBeForwarded());
+                            additionalRestoreArguments: appliedOption.OptionValuesToBeForwarded());
                 _toolPackageInstaller = toolPackageStoresAndInstaller.installer;
             }
             else

@@ -22,5 +22,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             throw new NotImplementedException();
         }
+
+        public void Clear()
+        {
+            Lines.Clear();
+        }
     }
 }

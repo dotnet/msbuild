@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
     public class ToolUpdateLocalCommandTests
     {
         private readonly IFileSystem _fileSystem;
+        private readonly string _temporaryDirectoryParent;
         private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
         private readonly BufferedReporter _reporter;
@@ -54,15 +55,15 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         {
             _reporter = new BufferedReporter();
             _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
-            _temporaryDirectory = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
+
+            _temporaryDirectoryParent = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
+            _temporaryDirectory = Path.Combine(_temporaryDirectoryParent, "sub");
+            _fileSystem.Directory.CreateDirectory(_temporaryDirectory);
+            _pathToPlacePackages = Path.Combine(_temporaryDirectory, "pathToPlacePackage");
 
             _packageOriginalVersionA = NuGetVersion.Parse("1.0.0");
             _packageNewVersionA = NuGetVersion.Parse("2.0.0");
 
-            _reporter = new BufferedReporter();
-            _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
-            _temporaryDirectory = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
-            _pathToPlacePackages = Path.Combine(_temporaryDirectory, "pathToPlacePackage");
             ToolPackageStoreMock toolPackageStoreMock =
                 new ToolPackageStoreMock(new DirectoryPath(_pathToPlacePackages), _fileSystem);
             _toolPackageStore = toolPackageStoreMock;
@@ -85,7 +86,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 new ProjectRestorerMock(
                     _fileSystem,
                     _reporter,
-                    new[]
+                    new List<MockFeed>
                     {
                         _mockFeed
                     }));
@@ -128,11 +129,51 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void WhenRunWithPackageIdItShouldUpdateFromManifestFile()
         {
             _toolRestoreCommand.Execute();
-            _mockFeed.Packages.Single().Version = _packageOriginalVersionA.ToNormalizedString();
+            _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
 
             _defaultToolUpdateLocalCommand.Execute().Should().Be(0);
 
-            AssertDefaultUpdateSuccess();
+            AssertUpdateSuccess();
+        }
+
+        [Fact]
+        public void WhenRunFromDirectorWithPackageIdItShouldUpdateFromManifestFile()
+        {
+            _toolRestoreCommand.Execute();
+            _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
+
+            var toolUpdateCommand = new ToolUpdateCommand(
+               _appliedCommand,
+               _parseResult,
+               _reporter,
+               new ToolUpdateGlobalOrToolPathCommand(_appliedCommand, _parseResult),
+               _defaultToolUpdateLocalCommand);
+
+            toolUpdateCommand.Execute().Should().Be(0);
+
+            AssertUpdateSuccess();
+        }
+
+        [Fact]
+        public void GivenNoRestoredManifestWhenRunWithPackageIdItShouldUpdateFromManifestFile()
+        {
+            _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
+
+            _defaultToolUpdateLocalCommand.Execute().Should().Be(0);
+
+            AssertUpdateSuccess();
+        }
+
+        [Fact]
+        public void GivenManifestDoesNotHavePackageWhenRunWithPackageIdItShouldUpdate()
+        {
+            _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
+            _fileSystem.File.Delete(_manifestFilePath);
+            _fileSystem.File.WriteAllText(Path.Combine(_temporaryDirectory, _manifestFilePath), _jsonEmptyContent);
+
+            _defaultToolUpdateLocalCommand.Execute().Should().Be(0);
+
+            AssertUpdateSuccess();
         }
 
         [Fact]
@@ -140,10 +181,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         {
             _fileSystem.File.Delete(_manifestFilePath);
             Action a = () => _defaultToolUpdateLocalCommand.Execute().Should().Be(0);
-
-            a.ShouldThrow<GracefulException>()
-                .And.Message.Should()
-                .Contain(LocalizableStrings.NoManifestGuide);
 
             a.ShouldThrow<GracefulException>()
                 .And.Message.Should()
@@ -167,7 +204,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             AppliedOption appliedCommand = parseResult["dotnet"]["tool"]["update"];
 
             _toolRestoreCommand.Execute();
-            _mockFeed.Packages.Single().Version = _packageOriginalVersionA.ToNormalizedString();
+            _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
 
             ToolUpdateLocalCommand toolUpdateLocalCommand = new ToolUpdateLocalCommand(
                 appliedCommand,
@@ -179,7 +216,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 _reporter);
 
             toolUpdateLocalCommand.Execute().Should().Be(0);
-            AssertDefaultUpdateSuccess();
+            AssertUpdateSuccess(new FilePath(explicitManifestFilePath));
         }
 
         [Fact]
@@ -189,7 +226,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             AppliedOption appliedCommand = parseResult["dotnet"]["tool"]["update"];
 
             _toolRestoreCommand.Execute();
-            _mockFeed.Packages.Single().Version = _packageOriginalVersionA.ToNormalizedString();
+            _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
 
             ToolUpdateLocalCommand toolUpdateLocalCommand = new ToolUpdateLocalCommand(
                 appliedCommand,
@@ -205,17 +242,17 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 toolUpdateLocalCommand: toolUpdateLocalCommand);
 
             toolUpdateCommand.Execute().Should().Be(0);
-
-            AssertDefaultUpdateSuccess();
         }
 
         [Fact]
         public void WhenRunWithPackageIdItShouldShowSuccessMessage()
         {
             _toolRestoreCommand.Execute();
-            _mockFeed.Packages.Single().Version = _packageOriginalVersionA.ToNormalizedString();
+            _mockFeed.Packages.Single().Version = _packageNewVersionA.ToNormalizedString();
 
+            _reporter.Clear();
             _defaultToolUpdateLocalCommand.Execute();
+
             _reporter.Lines.Single()
                 .Should().Contain(
                     string.Format(
@@ -226,11 +263,80 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         _manifestFilePath).Green());
         }
 
-        private void AssertDefaultUpdateSuccess()
+        [Fact]
+        public void GivenParentDirHasManifestWithSamePackageIdWhenRunWithPackageIdItShouldOnlyChangTheClosestOne()
         {
-            IReadOnlyCollection<ToolManifestPackage> manifestPackages = _toolManifestFinder.Find();
+            var parentManifestFilePath = Path.Combine(_temporaryDirectoryParent, "dotnet-tools.json");
+            _fileSystem.File.WriteAllText(parentManifestFilePath, _jsonContent);
+
+            _toolRestoreCommand.Execute();
+            _mockFeed.Packages.Single().Version = _packageNewVersionA.ToNormalizedString();
+
+            _reporter.Clear();
+            _defaultToolUpdateLocalCommand.Execute();
+
+            AssertUpdateSuccess();
+
+            _fileSystem.File.ReadAllText(parentManifestFilePath).Should().Be(_jsonContent, "no change");
+        }
+
+        [Fact]
+        public void GivenParentDirHasManifestWithSamePackageIdWhenRunWithPackageIdItShouldWarningTheOtherManifests()
+        {
+            var parentManifestFilePath = Path.Combine(_temporaryDirectoryParent, "dotnet-tools.json");
+            _fileSystem.File.WriteAllText(parentManifestFilePath, _jsonContent);
+
+            _toolRestoreCommand.Execute();
+
+            _reporter.Clear();
+            _mockFeed.Packages.Single().Version = _packageNewVersionA.ToNormalizedString();
+            _defaultToolUpdateLocalCommand.Execute();
+
+            _reporter.Lines[0].Should().Contain(parentManifestFilePath);
+            _reporter.Lines[0].Should().NotContain(_manifestFilePath);
+        }
+
+        [Fact]
+        public void GivenFeedVersionIsTheSameWhenRunWithPackageIdItShouldShowDifferentSuccessMessage()
+        {
+            _toolRestoreCommand.Execute();
+
+            _reporter.Clear();
+            _defaultToolUpdateLocalCommand.Execute();
+
+            AssertUpdateSuccess(packageVersion: _packageOriginalVersionA);
+
+            _reporter.Lines.Single()
+                .Should().Contain(
+                    string.Format(
+                        LocalizableStrings.UpdateLocaToolSucceededVersionNoChange,
+                        _packageIdA,
+                        _packageOriginalVersionA.ToNormalizedString(),
+                        _manifestFilePath));
+        }
+
+        [Fact]
+        public void GivenFeedVersionIsLowerRunPackageIdItShouldThrow()
+        {
+            _toolRestoreCommand.Execute();
+            _mockFeed.Packages.Single().Version = "0.9.0";
+
+            _reporter.Clear();
+            Action a = () => _defaultToolUpdateLocalCommand.Execute();
+            a.ShouldThrow<GracefulException>().And.Message.Should().Contain(string.Format(
+                LocalizableStrings.UpdateLocaToolToLowerVersion,
+                "0.9.0",
+                _packageOriginalVersionA.ToNormalizedString(),
+                _manifestFilePath));
+        }
+
+        private void AssertUpdateSuccess(FilePath? manifestFile = null, NuGetVersion packageVersion = null)
+        {
+            packageVersion ??= _packageNewVersionA;
+            IReadOnlyCollection<ToolManifestPackage> manifestPackages = _toolManifestFinder.Find(manifestFile);
             manifestPackages.Should().HaveCount(1);
             ToolManifestPackage addedPackage = manifestPackages.Single();
+            addedPackage.Version.Should().Be(packageVersion);
             _localToolsResolverCache.TryLoad(new RestoredCommandIdentifier(
                     addedPackage.PackageId,
                     addedPackage.Version,
@@ -241,51 +347,26 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             ).Should().BeTrue();
 
             _fileSystem.File.Exists(restoredCommand.Executable.Value);
-            _fileSystem.File.ReadAllText(_manifestFilePath).Should().Be(_entryUpdatedJsonContent);
         }
-
-        // TODO throw on version lower
-
-        // TODO only deal with the closest manifest
-
-        // TODO throw on cannot find manifest file
-
-        // TODO message on version lower
-
-        // TODO Support version range
-
-        // TODO If not restore install it
-
-        // TODO if no install, install it
-
-        // TODO framework cannot combine with local
 
         private readonly string _jsonContent =
             @"{
-   ""version"":1,
-   ""isRoot"":true,
-   ""tools"":{
-      ""local.tool.console.a"":{
-         ""version"":""1.0.0"",
-         ""commands"":[
-            ""a""
-         ]
-      }
-   }
+  ""version"": 1,
+  ""isRoot"": false,
+  ""tools"": {
+    ""local.tool.console.a"": {
+      ""version"": ""1.0.0"",
+      ""commands"": [
+        ""a""
+      ]
+    }
+  }
 }";
-
-        private readonly string _entryUpdatedJsonContent =
+        private readonly string _jsonEmptyContent =
             @"{
-   ""version"":1,
-   ""isRoot"":true,
-   ""tools"":{
-      ""local.tool.console.a"":{
-         ""version"":""2.0.0"",
-         ""commands"":[
-            ""a""
-         ]
-      }
-   }
+  ""version"": 1,
+  ""isRoot"": false,
+  ""tools"": {}
 }";
     }
 }

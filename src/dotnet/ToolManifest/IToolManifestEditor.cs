@@ -9,5 +9,6 @@ namespace Microsoft.DotNet.ToolManifest
     {
         void Add(FilePath to, PackageId packageId, NuGetVersion nuGetVersion, ToolCommandName[] toolCommandNames);
         void Remove(FilePath fromFilePath, PackageId packageId);
+        void Edit(FilePath to, PackageId packageId, NuGetVersion newNuGetVersion, ToolCommandName[] newToolCommandNames);
     }
 }

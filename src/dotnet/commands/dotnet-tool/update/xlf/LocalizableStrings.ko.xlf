@@ -37,9 +37,26 @@
         <target state="translated">업데이트할 도구의 NuGet 패키지 ID입니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SamePackageIdInOtherManifestFile">
+        <source>Warning: There are other manifest files could affect local tools in current directory. They are not changed:
+{0}</source>
+        <target state="new">Warning: There are other manifest files could affect local tools in current directory. They are not changed:
+{0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to update.</source>
         <target state="translated">업데이트할 도구 패키지 ID를 하나 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
+        <source>Tool '{0}' is up to date (version '{1}' manifest file {2}) .</source>
+        <target state="new">Tool '{0}' is up to date (version '{1}' manifest file {2}) .</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocaToolToLowerVersion">
+        <source>The requested version {0} is lower than existing version {1} (manifest file {2}).</source>
+        <target state="new">The requested version {0} is lower than existing version {1} (manifest file {2}).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocalToolSucceeded">
