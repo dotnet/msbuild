@@ -21,6 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Include="SupportHierarchyContextSvc" />
     <ProjectCapability Include="DynamicDependentFile" />
     <ProjectCapability Include="DynamicFileNesting" />
+    <ProjectCapability Include="LocalUserSecrets" />
     <ProjectCapability Include="WebNestingDefaults" />
   </ItemGroup>
 
