@@ -42,8 +42,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
-                    fileSystemMock.File,
-                    fileSystemMock.Directory);
+                    fileSystemMock);
 
             firstTimeUseNoticeSentinel.Exists().Should().BeTrue();
         }
@@ -56,8 +55,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
-                    fileSystemMock.File,
-                    fileSystemMock.Directory);
+                    fileSystemMock);
 
             firstTimeUseNoticeSentinel.Exists().Should().BeFalse();
         }
@@ -69,8 +67,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
-                    fileSystemMock.File,
-                    fileSystemMock.Directory);
+                    fileSystemMock);
 
             firstTimeUseNoticeSentinel.Exists().Should().BeFalse();
 
@@ -91,8 +88,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
-                    fileSystemMock.File,
-                    fileSystemMock.Directory);
+                    fileSystemMock);
 
             firstTimeUseNoticeSentinel.Exists().Should().BeTrue();
 
@@ -109,8 +105,9 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
-                    fileSystemMock.File,
-                    directoryMock);
+                    new FileSystemMock(
+                        fileSystemMock.File,
+                        directoryMock));
 
             firstTimeUseNoticeSentinel.CreateIfNotExists();
 
@@ -126,12 +123,26 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
-                    fileSystemMock.File,
-                    directoryMock);
+                    new FileSystemMock(
+                        fileSystemMock.File,
+                        directoryMock));
 
             firstTimeUseNoticeSentinel.CreateIfNotExists();
 
             directoryMock.CreateDirectoryInvoked.Should().BeFalse();
+        }
+
+        private class FileSystemMock : IFileSystem
+        {
+            public FileSystemMock(IFile file, IDirectory directory)
+            {
+                File = file;
+                Directory = directory;
+            }
+
+            public IFile File { get; private set; }
+
+            public IDirectory Directory { get; private set; }
         }
 
         private class DirectoryMockWithSpy : IDirectory

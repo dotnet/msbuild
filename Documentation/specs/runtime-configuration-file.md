@@ -2,8 +2,6 @@
 
 The runtime configuration files store the dependencies of an application (formerly stored in the `.deps` file). They also include runtime configuration options, such as the Garbage Collector mode. Optionally they can also include data for runtime compilation (compilation settings used to compile the original application, and reference assemblies used by the application).
 
-**Note:** This document doesn't provide full explanations as to why individual items are needed in this file. That is covered in the [host spec](corehost.md) and via the `Microsoft.Extensions.DependencyModel` assembly.
-
 ## What produces the files and where are they?
 
 There are two runtime configuration files for a particular application. Given a project named `MyApp`, the compilation process produces the following files (on Windows, other platforms are similar):
@@ -155,10 +153,10 @@ This property contains the name of the target from `targets` that should be used
 ### `targets` Section (`.deps.json`)
 
 Each property under `targets` describes a "target", which is a collection of libraries required by the application when run or compiled in a certain framework and platform context. A target **must** specify a Framework name, and **may** specify a Runtime Identifier. Targets without Runtime Identifiers represent the dependencies and assets which are platform agnostic. These targets can also represent dependencies and assets which are used for compiling the application for a particular framework. Targets with Runtime Identifiers represent the dependencies and assets used for running the application under a particular framework and on the platform defined by the Runtime Identifier.  
-In the example above, the `.NETStandardApp,Version=v2.1` target lists the dependencies and assets used to run and compile the application for `netcoreapp2.1`.  
-If the app was published specifically for 64-bit Mac OS X 10.10 machine, it would also contain a target `.NETStandardApp,Version=v2.1/osx.10.10-x64` which would list the dependencies and assets used to run the application on that specific platform.
+In the example above, the `.NETCoreApp,Version=v2.1` target lists the dependencies and assets used to run and compile the application for `netcoreapp2.1`.  
+If the app was published specifically for 64-bit Mac OS X 10.10 machine, it would also contain a target `.NETCoreApp,Version=v2.1/osx.10.10-x64` which would list the dependencies and assets used to run the application on that specific platform.
 
-There will always at least one target in the `[appname].deps.json` file: the platform neutral list of runtime and compilation dependencies. In cases of a platform specific application there would be two targets: a compilation target, and a runtime target. The compilation target will be named with the framework name used for the compilation (`.NETStandardApp,Version=v2.1` in the example above). The runtime target will be named with the framework name and runtime identifier used to execute the application (`.NETStandardApp,Version=v2.5/osx.10.10-x64` in the example above). However, the runtime target will also be identified by name in the `runtimeOptions` section, so that the host does not need to parse and understand target names.
+There will always at least one target in the `[appname].deps.json` file: the platform neutral list of runtime and compilation dependencies. In cases of a platform specific application there would be two targets: a compilation target, and a runtime target. The compilation target will be named with the framework name used for the compilation (`.NETCoreApp,Version=v2.1` in the example above). The runtime target will be named with the framework name and runtime identifier used to execute the application (`.NETCoreApp,Version=v2.5/osx.10.10-x64` in the example above). However, the runtime target will also be identified by name in the `runtimeOptions` section, so that the host does not need to parse and understand target names.
 
 The content of each target property in the JSON is a JSON object. Each property of that JSON object represents a single dependency required by the application when compiled for/run on that target. The name of the property contains the ID and Version of the dependency in the form `[Id]/[Version]`. The content of the property is another JSON object containing metadata about the dependency.
 
@@ -207,7 +205,7 @@ This section is only present in the root framework's (so `Microsoft.NETCore.App`
 
 The file is read by two different components:
 
-* The host uses it to determine what to place on the TPA and Native Library Search Path lists, as well as what runtime settings to apply (GC type, etc.). See [the host spec](corehost.md).
+* The host uses it to determine what to place on the TPA and Native Library Search Path lists, as well as what runtime settings to apply (GC type, etc.). 
 * `Microsoft.Extensions.DependencyModel` uses it to allow a running managed application to query various data about it's dependencies. For example:
   * To find all dependencies that depend on a particular package (used by ASP.NET MVC and other plugin-based systems to identify assemblies that should be searched for possible plugin implementations)
   * To determine the reference assemblies used by the application when it was compiled in order to allow runtime compilation to use the same reference assemblies (used by ASP.NET Razor to compile views)
@@ -220,7 +218,7 @@ Note that ASP.NET projects (those using `Microsoft.NET.Sdk.Web` SDK) has this pr
 
 ## Framework-dependent Deployment Model
 
-An application can be deployed in a "framework-dependent" deployment model. In this case, the RID-specific assets of packages are published within a folder structure that preserves the RID metadata. However the host does not use this folder structure, rather it reads data from the `.deps.json` file. Also, during deployment, the `.exe` file (`apphost.exe` renamed) is not deployed by default.
+An application can be deployed in a "framework-dependent" deployment model. In this case, the RID-specific assets of packages are published within a folder structure that preserves the RID metadata. However the host does not use this folder structure, rather it reads data from the `.deps.json` file. 
 
 In the framework-dependent deployment model, the `*.runtimeConfig.json` file will contain the `runtimeOptions.framework` section:
 
@@ -235,7 +233,7 @@ In the framework-dependent deployment model, the `*.runtimeConfig.json` file wil
 }
 ```
 
-This data is used to locate the shared framework folder. The exact mechanics of which version are selected are defined elsewhere, but in general, it locates the shared runtime in the `shared` folder located beside it by using the relative path `shared/[runtimeOptions.framework.name]/[runtimeOptions.framework.version]`. Once it has applied any version roll-forward logic and come to a final path to the shared framework, it locates the `[runtimeOptions.framework.name].deps.json` file within that folder and loads it **first**.
+This data is used to locate the shared framework folder. The exact mechanics of which version are selected are defined in the [shared framework lookup](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/multilevel-sharedfx-lookup.md) document. In general, it locates the shared runtime in the `shared` folder located beside it by using the relative path `shared/[runtimeOptions.framework.name]/[runtimeOptions.framework.version]`. Once it has applied any version roll-forward logic and come to a final path to the shared framework, it locates the `[runtimeOptions.framework.name].deps.json` file within that folder and loads it **first**.
 
 Note, starting with 3.0, the "framework" section is optional and a new "frameworks" section supports multiple frameworks:
 ```json
@@ -255,7 +253,7 @@ Note, starting with 3.0, the "framework" section is optional and a new "framewor
 }
 ```
 
-Next, the deps file from the application is loaded and merged into this deps file (this is conceptual, the host implementation doesn't necessary have to directly merge the data ;)). Data from the app-local deps file trumps data from the shared framework.
+Next, the deps file from the application is loaded and (conceptually) merged into this deps file. Data from the app-local deps file trumps data from the shared framework.
 
 The shared framework's deps file will also contain a `runtimes` section defining the fallback logic for all RIDs known to that shared framework. For example, a shared framework deps file installed into a Ubuntu machine may look something like the following:
 
@@ -357,22 +355,22 @@ With the addition of the `frameworks` section in 3.0, an application (or another
 In addition to specifying a dependency on more than one framework, the `frameworks` section can also be used to override settings from a framework's `runtimeconfig.json`; this should only be done with the understanding of all consequences including preventing roll-forward compatibility to future versions. The settings include `version`, `rollForwardOnNoCandidateFx` and `applyPatches`, with `version` the most likely value to be changed.
 
 Overriding a value is always "most restrictive". This means if `applyPatches` is already `false` in a lower-level framework, then it cannot be changed to `true`. For `rollForwardOnNoCandidateFx` the value 0=off is the most restrictive, then 1=minor\patch, then 2=major\minor\patch. For `version`, the highest version requested will be used.
- 
+
 As an example of overriding settings, assume the following framework layering: 
 - Application 
 - Microsoft.AspNetCore.All 
 - Microsoft.AspNetCore.App 
 - Microsoft.NetCore.App 
- 
+
 Except for Microsoft.NetCore.App (since it does not have a lower-level framework), each layer has a runtimeconfig.json setting specifying a single lower-layer framework's `name`, `version` and optional `rollForwardOnNoCandidateFx` and `applyPatches`. 
- 
+
 The normal hierarchy processing for most knobs, such as `rollForwardOnNoCandidateFx`: 
  - a) Default value determined by the framework (e.g. roll-forward on [Minor]) 
  - b) Environment variable override (e.g. `DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX`) 
  - c) Each layer's `runtimeOptions` override setting in its runtimeconfig.json, starting with app (e.g. `rollForwardOnNoCandidateFx`). Lower layers can override this. 
  - d) The app's `frameworks` section in `[appname].runtimeconfig.json` which allows knobs per-framework.
  - e) A `--` command line value such as `--roll-forward-on-no-candidate-fx` 
- 
+
 In a hypothetical example, `Microsoft.AspNetCore.App` references version `2.2.0` of `Microsoft.NetCore.App` in `Microsoft.AspNetCore.App.runtimeconfig.json`: 
 ```json 
 { 
@@ -383,7 +381,7 @@ In a hypothetical example, `Microsoft.AspNetCore.App` references version `2.2.0`
         }, 
      } 
 } 
-``` 
+```
 However, if the app requires the newer version `2.2.1` of `Microsoft.NetCore.App`, then mechanism `d` is used. An example of the `frameworks` section for mechanism `d` in the app's `runtimeconfig.json`: 
 ```json 
 { 

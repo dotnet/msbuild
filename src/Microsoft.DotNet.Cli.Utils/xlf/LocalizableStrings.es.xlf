@@ -23,8 +23,12 @@
         <note />
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
-        <source>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</source>
-        <target state="translated">No se ha encontrado un ejecutable que coincida con el comando "{0}". Consulte https://aka.ms/missing-command para obtener más información.</target>
+        <source>Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
+        <target state="needs-review-translation">No se ha encontrado un ejecutable que coincida con el comando "{0}". Consulte https://aka.ms/missing-command para obtener más información.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">

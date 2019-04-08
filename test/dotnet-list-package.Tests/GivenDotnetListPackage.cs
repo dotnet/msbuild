@@ -1,6 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Linq;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -59,6 +62,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .Get(testAsset)
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithProjectChanges(ChangeTargetFrameworkTo2_1)
                 .Root
                 .FullName;
 
@@ -77,6 +81,13 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContainingIgnoreSpaces("Microsoft.NETCore.App(A)")
                 .And.HaveStdOutContainingIgnoreSpaces("(A):Auto-referencedpackage");
+
+            void ChangeTargetFrameworkTo2_1(XDocument project)
+            {
+                project.Descendants()
+                       .Single(e => e.Name.LocalName == "TargetFramework")
+                       .Value = "netcoreapp2.1";
+            }
         }
 
         [Fact]
@@ -103,7 +114,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContainingIgnoreSpaces("Microsoft.NETCore.App");
+                .And.HaveStdOutContainingIgnoreSpaces("NewtonSoft.Json");
         }
 
         [Fact]

@@ -38,7 +38,7 @@ function InitializeCustomSDKToolset {
   InitializeDotNetCli true
   InstallDotNetSharedFramework "1.1.2"
   InstallDotNetSharedFramework "2.0.0"
-  InstallDotNetSharedFramework "2.1.0"
+  InstallDotNetSharedFramework "2.2.0"
 }
 
 # Installs additional shared frameworks for testing purposes

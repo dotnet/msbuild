@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.Cli
                   "test",
                   LocalizableStrings.AppFullName,
                   Accept.ZeroOrMoreArguments()
-                        .With(name: CommonLocalizableStrings.ProjectArgumentName,
-                              description: CommonLocalizableStrings.ProjectArgumentDescription),
+                        .With(name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
+                              description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription),
                   false,
                   CommonOptions.HelpOption(),
                   Create.Option(

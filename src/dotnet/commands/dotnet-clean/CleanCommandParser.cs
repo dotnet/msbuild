@@ -15,14 +15,19 @@ namespace Microsoft.DotNet.Cli
                 "clean",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments()
-                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
-                            description: CommonLocalizableStrings.ProjectArgumentDescription),
+                      .With(name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
+                            description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option("-o|--output", 
                               LocalizableStrings.CmdOutputDirDescription,
                                          Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
                         .ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                Create.Option(
+                    "--nologo|/nologo",
+                    LocalizableStrings.CmdNoLogo,
+                    Accept.NoArguments()
+                          .ForwardAs("-nologo")),
                 CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                 CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),

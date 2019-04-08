@@ -17,7 +17,6 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System.Runtime.InteropServices;
@@ -76,9 +75,17 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             _fileSystem.File.Delete(_manifestFilePath);
             Action a = () => _defaultToolUninstallLocalCommand.Execute().Should().Be(0);
+
+            a.ShouldThrow<GracefulException>()
+               .And.Message.Should()
+               .Contain(LocalizableStrings.NoManifestGuide);
+
             a.ShouldThrow<GracefulException>()
                 .And.Message.Should()
-                .Contain(string.Format(ToolManifest.LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<GracefulException>()
+                .And.VerboseMessage.Should().Contain(string.Format(ToolManifest.LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]

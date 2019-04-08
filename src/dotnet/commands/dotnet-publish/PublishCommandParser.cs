@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.Cli
                 "publish",
                 LocalizableStrings.AppDescription,
                 Accept.ZeroOrMoreArguments()
-                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
-                            description: CommonLocalizableStrings.ProjectArgumentDescription),
+                      .With(name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
+                            description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
@@ -49,6 +49,11 @@ namespace Microsoft.DotNet.Cli
                             string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
                             return $"-property:SelfContained={value}";
                         })),
+                Create.Option(
+                    "--nologo|/nologo",
+                    LocalizableStrings.CmdNoLogo,
+                    Accept.NoArguments()
+                          .ForwardAs("-nologo")),
                 CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());

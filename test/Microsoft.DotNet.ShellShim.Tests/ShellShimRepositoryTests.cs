@@ -474,7 +474,6 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             TestAssetInstance testInstance = TestAssets.Get(testAppName)
                 .CreateInstance(instanceName)
-                .UseCurrentRuntimeFrameworkVersion()
                 .WithRestoreFiles()
                 .WithBuildFiles();
 

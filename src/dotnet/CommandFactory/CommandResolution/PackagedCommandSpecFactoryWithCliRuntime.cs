@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.CommandFactory
 {

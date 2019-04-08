@@ -12,7 +12,6 @@ using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.ShellShim
 {

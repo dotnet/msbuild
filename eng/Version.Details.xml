@@ -7,15 +7,15 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19157.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19205.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>951b378f6b173d58c6d93ef33ce7ca83c2ce5ec5</Sha>
+      <Sha>4217db4a23ffd15abb3771d635b66162994fb9e4</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview3.19206.1">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview4.19206.3">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>b7c9b795dd82107dcb432c78a49b058866563968</Sha>
+      <Sha>4ab3bb37361bf62b9b374e5274929741a6ce5dd1</Sha>
     </Dependency>
     <!-- We don't want migrate being updated by DARC just yet due to the NuGet
     discrepancy between it and the CLI. We will fix that for P3 -->
