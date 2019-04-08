@@ -18,31 +18,8 @@ namespace Microsoft.Build.Shared
         // regular expression used to match file-specs comprising exactly "<drive letter>:" (with no trailing characters)
         internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:$", RegexOptions.Compiled);
 
-        /// <summary>
-        /// Checks for drive pattern without regex. Using this function over regex results in
-        /// improved memory performance.
-        /// </summary>
-        /// <param name="drivePattern"></param>
-        /// <returns>Whether or not the input follows the drive pattern "<drive letter>:" with no trailing characters.</drive></returns>
-        internal static bool IsDrivePattern(string s)
-        {
-            // Format must be two characters long. Ex: "C:"
-            return s.Length == 2 &&
-                DoesStartWithDrivePattern(s); 
-        }
-
         // regular expression used to match file-specs beginning with "<drive letter>:"
         internal static readonly Regex StartWithDrivePattern = new Regex(@"^[A-Za-z]:", RegexOptions.Compiled);
-
-        internal static bool DoesStartWithDrivePattern(string input)
-        {
-            // Format dictates a length of at least 2
-            // First character must be a letter
-            // Second character must be a ":"
-            return input.Length >= 2 &&
-                (input[0] >= 'A' && input[0] <= 'Z') || (input[0] >= 'a' && input[0] <= 'z') &&
-                input[1] == ':';
-        }
 
         private static readonly string s_baseUncPattern = string.Format(
             CultureInfo.InvariantCulture,
@@ -57,5 +34,86 @@ namespace Microsoft.Build.Shared
             new Regex(
                 string.Format(CultureInfo.InvariantCulture, @"{0}$", s_baseUncPattern),
                 RegexOptions.Compiled);
+
+
+        /// <summary>
+        /// Indicates whether the specified string follows the pattern "<drive letter>:".
+        /// Using this function over regex results in improved memory performance.
+        /// </summary>
+        /// <param name="drivePattern"></param>
+        /// <returns></returns>
+        internal static bool IsDrivePattern(string drivePattern)
+        {
+            // Format must be two characters long: "<drive letter>:"
+            return drivePattern.Length == 2 &&
+                DoesStartWithDrivePattern(drivePattern);
+        }
+
+        /// <summary>
+        /// Indicates whether the specified string begins with "<drive letter>:".
+        /// </summary>
+        /// <param name="drivePattern"></param>
+        /// <returns></returns>
+        internal static bool DoesStartWithDrivePattern(string drivePattern)
+        {
+            // Format dictates a length of at least 2
+            // First character must be a letter
+            // Second character must be a ":"
+            return drivePattern.Length >= 2 &&
+                (drivePattern[0] >= 'A' && drivePattern[0] <= 'Z') || (drivePattern[0] >= 'a' && drivePattern[0] <= 'z') &&
+                drivePattern[1] == ':';
+        }
+
+        internal static bool DoesStartWithUncPattern(string drivePattern)
+        {
+            //Format dictates a minimum length of 5: "\\a\b"
+            if (drivePattern.Length < 5)
+            {
+                return false;
+            }
+
+            //Enforce unix/windows slashes &
+            //  first two characters matching
+            if ((drivePattern[0] != Path.DirectorySeparatorChar &&
+                drivePattern[0] != Path.AltDirectorySeparatorChar) ||
+                drivePattern[0] != drivePattern[1])
+            {
+                return false;
+            }
+
+            bool searchingForSlash = false;
+            int slashesFound = 0;
+
+            for (int i = 2; i < drivePattern.Length; i++)
+            {
+                if (drivePattern[i] == Path.DirectorySeparatorChar ||
+                    drivePattern[i] == Path.AltDirectorySeparatorChar)
+                {
+                    if (!searchingForSlash)
+                    {
+                        //We get here in the case of an extra slash somewhere
+                        //Ex: "\\a\b\\c...", "\\\a\\b\c
+                        return false;
+                    }
+
+                    slashesFound++;
+                    searchingForSlash = false;
+                }
+                else
+                {
+                    if(slashesFound >= 1)
+                    {
+                        //Finding a character after a slash verifies the beginning of a unc pattern
+                        //Ex: "\\a\b..."
+                        return true;
+                    }
+
+                    searchingForSlash = true;
+                }
+            }
+
+            return false;
+        }
+
     }
 }
