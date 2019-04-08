@@ -89,24 +89,24 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         {
             var solutionFolders = new List<string>();
 
-            if (IsPathInTreeRootedAtSolutionDirectory(projectFilePath))
-            {
-                var currentDirString = $".{Path.DirectorySeparatorChar}";
-                if (projectFilePath.StartsWith(currentDirString))
-                {
-                    projectFilePath = projectFilePath.Substring(currentDirString.Length);
-                }
+            if (!IsPathInTreeRootedAtSolutionDirectory(projectFilePath))
+                return solutionFolders;
 
-                var projectDirectoryPath = TrimProject(projectFilePath);
-                if (!string.IsNullOrEmpty(projectDirectoryPath))
-                {
-                    var solutionFoldersPath = TrimProjectDirectory(projectDirectoryPath);
-                    if (!string.IsNullOrEmpty(solutionFoldersPath))
-                    {
-                        solutionFolders.AddRange(solutionFoldersPath.Split(Path.DirectorySeparatorChar));
-                    }
-                }
+            var currentDirString = $".{Path.DirectorySeparatorChar}";
+            if (projectFilePath.StartsWith(currentDirString))
+            {
+                projectFilePath = projectFilePath.Substring(currentDirString.Length);
             }
+
+            var projectDirectoryPath = TrimProject(projectFilePath);
+            if (string.IsNullOrEmpty(projectDirectoryPath))
+                return solutionFolders;
+
+            var solutionFoldersPath = TrimProjectDirectory(projectDirectoryPath);
+            if (string.IsNullOrEmpty(solutionFoldersPath))
+                return solutionFolders;
+
+            solutionFolders.AddRange(solutionFoldersPath.Split(Path.DirectorySeparatorChar));
 
             return solutionFolders;
         }
