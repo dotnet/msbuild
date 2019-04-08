@@ -134,12 +134,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="$(ProjectDepsFilePath)">
 
     <ItemGroup>
-      <ResolvedCompileFileDefinitions Remove="@(_ConflictPackageFiles)" />
-      <NativeCopyLocalItems Remove="@(_ConflictPackageFiles)" />
-      <ResourceCopyLocalItems Remove="@(_ConflictPackageFiles)" />
-      <RuntimeCopyLocalItems Remove="@(_ConflictPackageFiles)" />
-      <RuntimeTargetsCopyLocalItems Remove="@(_ConflictPackageFiles)" />
-      <RuntimePackAsset Remove="@(_ConflictPackageFiles)" />
+      <ResolvedCompileFileDefinitions Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' == 'Reference'" />
+      <NativeCopyLocalItems Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <ResourceCopyLocalItems Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <RuntimeCopyLocalItems Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <RuntimeTargetsCopyLocalItems Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <RuntimePackAsset Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' != 'Reference'" />
     </ItemGroup>
     
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"

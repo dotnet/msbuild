@@ -257,11 +257,11 @@ namespace Microsoft.NET.Build.Tests
             itemGroup.Add(conflictItem);
         }
 
-        private List<string> GetDepsJsonAssets(string depsJsonPath, TestProject testProject, string assetType)
+        public static List<string> GetDepsJsonAssets(string depsJsonPath, TestProject testProject, string assetType)
         {
             string frameworkName = NuGetFramework.Parse(testProject.TargetFrameworks).DotNetFrameworkName;
             string targetName;
-            if (string.IsNullOrEmpty(testProject.RuntimeIdentifier))
+            if (testProject.RuntimeIdentifier == null)
             {
                 targetName = frameworkName;
             }
@@ -278,7 +278,7 @@ namespace Microsoft.NET.Build.Tests
             return assetNames;
         }
 
-        private string GetDepsJsonFilename(string depsJsonFilePath)
+        public static string GetDepsJsonFilename(string depsJsonFilePath)
         {
             return depsJsonFilePath.Split('/', StringSplitOptions.RemoveEmptyEntries).Last();
         }

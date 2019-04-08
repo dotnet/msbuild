@@ -790,12 +790,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <ItemGroup>
-      <ResolvedCompileFileDefinitions Remove="@(_PublishConflictPackageFiles)" />
-      <NativeCopyLocalItems Remove="@(_PublishConflictPackageFiles)" />
-      <ResourceCopyLocalItems Remove="@(_PublishConflictPackageFiles)" />
-      <RuntimeCopyLocalItems Remove="@(_PublishConflictPackageFiles)" />
-      <RuntimeTargetsCopyLocalItems Remove="@(_PublishConflictPackageFiles)" />
-      <RuntimePackAsset Remove="@(_PublishConflictPackageFiles)" />
+      <ResolvedCompileFileDefinitions Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' == 'Reference'" />
+      <NativeCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <ResourceCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <RuntimeCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <RuntimeTargetsCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <RuntimePackAsset Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
     </ItemGroup>
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
