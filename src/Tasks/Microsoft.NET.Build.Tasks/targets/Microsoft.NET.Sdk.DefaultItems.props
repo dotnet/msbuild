@@ -46,7 +46,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       Publish="true" />
   </ItemGroup>
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(_TargetFrameworkVersionWithoutV)' >= '2.1'">
-    <FrameworkReference Include="NETStandard.Library" IsImplicitlyDefined="true" />
+    <FrameworkReference Include="NETStandard.Library" IsImplicitlyDefined="true" Pack="false"/>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
@@ -65,6 +65,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       Publish="true" />
 
     <FrameworkReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true"
+                        Pack="false"
                     Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
 
   </ItemGroup>
