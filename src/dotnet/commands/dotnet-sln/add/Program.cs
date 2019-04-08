@@ -18,7 +18,9 @@ namespace Microsoft.DotNet.Tools.Sln.Add
     {
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
-        private readonly Func<SlnFile, string, IList<string>> _determineSolutionFolder;
+        private readonly bool _inRoot;
+        private readonly string _relativeRoot;
+        private IList<string> _relativeRootSolutionFolders;
 
         private const string InRootOption = "in-root";
         private const string SolutionFolderOption = "solution-folder";
@@ -36,36 +38,13 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
             _fileOrDirectory = fileOrDirectory;
 
-            var inRoot = appliedCommand.ValueOrDefault<bool>(InRootOption);
-            var relativeRoot = _appliedCommand.ValueOrDefault<string>(SolutionFolderOption);
+            _inRoot = appliedCommand.ValueOrDefault<bool>(InRootOption);
+            _relativeRoot = _appliedCommand.ValueOrDefault<string>(SolutionFolderOption);
 
-            if (inRoot && !string.IsNullOrEmpty(relativeRoot))
+            if (_inRoot && !string.IsNullOrEmpty(_relativeRoot))
             {
                 // These two options are mutually exclusive
                 throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
-            }
-
-            if (inRoot)
-            {
-                // The user requested all projects go to the root folder
-                _determineSolutionFolder = (_, __) => null;
-            }
-            else if (!string.IsNullOrEmpty(relativeRoot))
-            {
-                // The user has specified an explicit root
-                var solutionFolder = relativeRoot.Split(Path.DirectorySeparatorChar);
-                _determineSolutionFolder = (_, __) => solutionFolder;
-            }
-            else
-            {
-                // We determine the root for each individual project
-                _determineSolutionFolder = (slnFile, fullProjectPath) => {
-                    var relativeProjectPath = Path.GetRelativePath(
-                        PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
-                        fullProjectPath);
-
-                    return GetSolutionFoldersFromProjectPath(relativeProjectPath);
-                };
             }
         }
 
@@ -93,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             foreach (var fullProjectPath in fullProjectPaths)
             {
                 // Identify the intended solution folders
-                var solutionFolders = _determineSolutionFolder(slnFile, fullProjectPath);
+                var solutionFolders = DetermineSolutionFolder(slnFile, fullProjectPath);
 
                 slnFile.AddProject(fullProjectPath, solutionFolders);
             }
@@ -130,6 +109,31 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             }
 
             return solutionFolders;
+        }
+
+        private IList<string> DetermineSolutionFolder(SlnFile slnFile, string fullProjectPath)
+        {
+            if (_inRoot)
+            {
+                // The user requested all projects go to the root folder
+                return null;
+            }
+
+            if (!string.IsNullOrEmpty(_relativeRoot))
+            {
+                // The user has specified an explicit root
+                if (_relativeRootSolutionFolders == null)
+                    _relativeRootSolutionFolders = _relativeRoot.Split(Path.DirectorySeparatorChar);
+
+                return _relativeRootSolutionFolders;
+            }
+
+            // We determine the root for each individual project
+            var relativeProjectPath = Path.GetRelativePath(
+                PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
+                fullProjectPath);
+
+            return GetSolutionFoldersFromProjectPath(relativeProjectPath);
         }
 
         private static bool IsPathInTreeRootedAtSolutionDirectory(string path)
