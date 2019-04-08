@@ -289,10 +289,10 @@ namespace Microsoft.NET.Build.Tasks
                 if (oldJson != newJson)
                 {
                     string message = "Internal error: new deps file generation logic did not produce the same result as the old logic." + Environment.NewLine +
-                        "    Please file an issue for this at https://github.com/dotnet/sdk" + Environment.NewLine +
-                        "    You can work around this by setting the DepsFileGenerationMode MSBuild property to 'old'" + Environment.NewLine +
+                        "    Please file an issue for this at https://github.com/dotnet/sdk and include the following two files: " + Environment.NewLine +                        
                         "    Deps file from old logic: " + DepsFilePath + Environment.NewLine +
-                        "    Deps file from new logic: " + newDepsFilePath + Environment.NewLine;
+                        "    Deps file from new logic: " + newDepsFilePath + Environment.NewLine +
+                        "    You can work around this by setting the DepsFileGenerationMode MSBuild property to 'old'";
 
                     //  This is a temporary error message that we won't localize or assign an SDK
                     //  error code to.  So use the Task classes Log property instead of our wrapper
