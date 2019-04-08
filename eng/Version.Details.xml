@@ -48,9 +48,9 @@
       <Sha>
       </Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Build.Bundle" Version="3.0.0-preview4-27605-12">
+    <Dependency Name="Microsoft.NET.Build.Bundle" Version="3.0.0-preview4-27608-05">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>d43d3cc50e7d8bad436b675be4a0910163f2790e</Sha>
+      <Sha>7915480c140ecb536831ea8556659ffc7b099cf8</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
