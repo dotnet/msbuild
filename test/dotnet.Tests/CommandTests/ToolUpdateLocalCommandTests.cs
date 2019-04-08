@@ -244,8 +244,13 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _fileSystem.File.ReadAllText(_manifestFilePath).Should().Be(_entryUpdatedJsonContent);
         }
 
-
         // TODO throw on version lower
+
+        // TODO only deal with the closest manifest
+
+        // TODO throw on cannot find manifest file
+
+        // TODO message on version lower
 
         // TODO Support version range
 

@@ -173,16 +173,29 @@ namespace Microsoft.DotNet.ToolManifest
         public IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId)
         {
             var result = new List<FilePath>();
+            bool findAnyManifest = false;
             foreach ((FilePath possibleManifest,
                     DirectoryPath correspondingDirectory)
                 in EnumerateDefaultAllPossibleManifests())
             {
-                if (_fileSystem.File.Exists(possibleManifest.Value) &&
-                    _toolManifestEditor.Read(possibleManifest, correspondingDirectory).content
-                        .Any(t => t.PackageId.Equals(packageId)))
+                if (_fileSystem.File.Exists(possibleManifest.Value))
                 {
-                    result.Add(possibleManifest);
+                    findAnyManifest = true;
+                    if (_toolManifestEditor.Read(possibleManifest, correspondingDirectory).content
+                        .Any(t => t.PackageId.Equals(packageId)))
+                    {
+                        result.Add(possibleManifest);
+                    }
                 }
+            }
+
+            if (!findAnyManifest)
+            {
+                throw new ToolManifestCannotBeFoundException(
+                    LocalizableStrings.CannotFindAManifestFile,
+                    string.Format(LocalizableStrings.ListOfSearched,
+                        string.Join(Environment.NewLine,
+                            EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
             }
 
             return result;

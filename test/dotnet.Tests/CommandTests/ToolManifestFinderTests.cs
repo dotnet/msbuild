@@ -302,6 +302,30 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             {
                 new FilePath(manifestFileInSubDirectory)
             });
+
+            var manifests3 = toolManifest.FindContainPackageId(new PackageId("non-exist"));
+
+            manifests3.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenNoManifestFileWhenFindContainPackageIdItThrows()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(subdirectoryOfTestRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            Action a = () => toolManifest.FindContainPackageId(new PackageId("t-rex"));
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
+                .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]
