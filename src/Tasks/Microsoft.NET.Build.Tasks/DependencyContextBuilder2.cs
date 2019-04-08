@@ -349,6 +349,15 @@ namespace Microsoft.NET.Build.Tasks
             RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, _mainProjectInfo.OutputName) };
 
             var dependencies = GetProjectDependencies();
+            
+            //  Runtime pack assets only get added as dependencies to the runtime (not the compile) project
+            if (_runtimePackAssets != null)
+            {
+                foreach (var runtimePackName in _runtimePackAssets.Keys)
+                {
+                    dependencies.Add(_dependencyLibraries[runtimePackName].Dependency);
+                }
+            }
 
             return new RuntimeLibrary(
                 type: "project",
@@ -403,13 +412,6 @@ namespace Microsoft.NET.Build.Tasks
                         new Dependency(
                             GetReferenceLibraryName(directReference),
                             directReference.Version));
-                }
-            }
-            if (_runtimePackAssets != null)
-            {
-                foreach (var runtimePackName in _runtimePackAssets.Keys)
-                {
-                    dependencies.Add(_dependencyLibraries[runtimePackName].Dependency);
                 }
             }
 
