@@ -255,6 +255,16 @@ namespace Microsoft.NET.Build.Tasks
             _filesWritten.Add(new TaskItem(depsFilePath));
         }
 
+        bool _loggedLocalError = false;
+
+        public override bool Execute()
+        {
+            if (!base.Execute() || _loggedLocalError)
+            {
+                return false;
+            }
+            return true;
+        }
         protected override void ExecuteCore()
         {
             if (DepsFileGenerationMode.Equals("old", StringComparison.InvariantCultureIgnoreCase))
@@ -288,6 +298,8 @@ namespace Microsoft.NET.Build.Tasks
                     //  error code to.  So use the Task classes Log property instead of our wrapper
                     //  around it (which would force it to have an error code)
                     ((Task) this).Log.LogError(message);
+
+                    _loggedLocalError = true;
                 }
                 else
                 {
