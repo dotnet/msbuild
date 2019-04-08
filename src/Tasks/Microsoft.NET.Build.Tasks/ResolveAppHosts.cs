@@ -29,6 +29,12 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
 
+        /// <summary>
+        /// The file name of comhost asset.
+        /// </summary>
+        [Required]
+        public string DotNetComHostLibraryNameWithoutExtension { get; set; }
+
         [Required]
         public string RuntimeGraphPath { get; set; }
 
@@ -42,6 +48,9 @@ namespace Microsoft.NET.Build.Tasks
         //  we can resolve the full path later)
         [Output]
         public ITaskItem[] AppHost { get; set; }
+
+        [Output]
+        public ITaskItem[] ComHost { get; set; }
 
         [Output]
         public ITaskItem[] PackAsToolShimAppHostPacks { get; set; }
@@ -73,10 +82,30 @@ namespace Microsoft.NET.Build.Tasks
 
             if (!string.IsNullOrEmpty(AppHostRuntimeIdentifier))
             {
-                var appHostItem = GetAppHostItem(AppHostRuntimeIdentifier, knownAppHostPacksForTargetFramework, packagesToDownload);
+                var appHostItem = GetHostItem(
+                    AppHostRuntimeIdentifier,
+                    knownAppHostPacksForTargetFramework,
+                    packagesToDownload,
+                    DotNetAppHostExecutableNameWithoutExtension,
+                    "AppHost",
+                    isExecutable: true);
+
                 if (appHostItem != null)
                 {
                     AppHost = new ITaskItem[] { appHostItem };
+                }
+
+                var comHostItem = GetHostItem(
+                    AppHostRuntimeIdentifier,
+                    knownAppHostPacksForTargetFramework,
+                    packagesToDownload,
+                    DotNetComHostLibraryNameWithoutExtension,
+                    "ComHost",
+                    isExecutable: false);
+
+                if (comHostItem != null)
+                {
+                    ComHost = new ITaskItem[] { comHostItem };
                 }
             }
 
@@ -85,7 +114,14 @@ namespace Microsoft.NET.Build.Tasks
                 var packAsToolShimAppHostPacks = new List<ITaskItem>();
                 foreach (var runtimeIdentifier in PackAsToolShimRuntimeIdentifiers)
                 {
-                    var appHostItem = GetAppHostItem(runtimeIdentifier.ItemSpec, knownAppHostPacksForTargetFramework, packagesToDownload);
+                    var appHostItem = GetHostItem(
+                        runtimeIdentifier.ItemSpec,
+                        knownAppHostPacksForTargetFramework,
+                        packagesToDownload,
+                        DotNetAppHostExecutableNameWithoutExtension,
+                        "AppHost",
+                        isExecutable: true);
+
                     if (appHostItem != null)
                     {
                         packAsToolShimAppHostPacks.Add(appHostItem);
@@ -100,8 +136,12 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private ITaskItem GetAppHostItem(string runtimeIdentifier, List<ITaskItem> knownAppHostPacksForTargetFramework,
-                                         List<ITaskItem> packagesToDownload)
+        private ITaskItem GetHostItem(string runtimeIdentifier,
+                                         List<ITaskItem> knownAppHostPacksForTargetFramework,
+                                         List<ITaskItem> packagesToDownload,
+                                         string hostNameWithoutExtension,
+                                         string itemName,
+                                         bool isExecutable)
         {
             var selectedAppHostPack = knownAppHostPacksForTargetFramework.Single();
 
@@ -136,37 +176,38 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                string appHostPackName = appHostPackPattern.Replace("**RID**", bestAppHostRuntimeIdentifier);
+                string hostPackName = appHostPackPattern.Replace("**RID**", bestAppHostRuntimeIdentifier);
 
-                string appHostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
-                    DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier));
+                string hostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
+                    hostNameWithoutExtension + (isExecutable ? ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier) : ".dll"));
 
 
-                TaskItem appHostItem = new TaskItem("AppHost");
+                TaskItem appHostItem = new TaskItem(itemName);
                 string appHostPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
                 {
-                    appHostPackPath = Path.Combine(TargetingPackRoot, appHostPackName, appHostPackVersion);
+                    appHostPackPath = Path.Combine(TargetingPackRoot, hostPackName, appHostPackVersion);
                 }
                 if (appHostPackPath != null && Directory.Exists(appHostPackPath))
                 {
                     //  Use AppHost from packs folder
                     appHostItem.SetMetadata(MetadataKeys.PackageDirectory, appHostPackPath);
-                    appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, appHostRelativePathInPackage));
+                    appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, hostRelativePathInPackage));
                 }
                 else
                 {
                     //  Download apphost pack
-                    TaskItem packageToDownload = new TaskItem(appHostPackName);
+                    TaskItem packageToDownload = new TaskItem(hostPackName);
                     packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);
 
                     packagesToDownload.Add(packageToDownload);
 
-                    appHostItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
-                    appHostItem.SetMetadata(MetadataKeys.PackageName, appHostPackName);
+                    appHostItem.SetMetadata(MetadataKeys.PackageName, hostPackName);
                     appHostItem.SetMetadata(MetadataKeys.PackageVersion, appHostPackVersion);
-                    appHostItem.SetMetadata(MetadataKeys.RelativePath, appHostRelativePathInPackage);
                 }
+
+                appHostItem.SetMetadata(MetadataKeys.RelativePath, hostRelativePathInPackage);
+                appHostItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
 
                 return appHostItem;
             }

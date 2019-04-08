@@ -113,8 +113,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Only use the default apphost if building without a RID and without a deps file path (used by GenerateDeps.proj for CLI tools). -->
   <PropertyGroup Condition="'$(DefaultAppHostRuntimeIdentifier)' == '' and
                             '$(RuntimeIdentifier)' == '' and
-                            '$(UseAppHost)' == 'true' and
-                            '$(ProjectDepsFilePath)' == ''">
+                            (('$(UseAppHost)' == 'true' and '$(ProjectDepsFilePath)' == '') or
+                            ('$(UseComHost)' == 'true' and '$(_IsExecutable)' != 'true'))">
     <DefaultAppHostRuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x64'">win-x64</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x86'">win-x86</DefaultAppHostRuntimeIdentifier>

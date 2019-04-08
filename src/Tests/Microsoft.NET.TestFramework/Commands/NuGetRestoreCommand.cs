@@ -70,6 +70,12 @@ namespace Microsoft.NET.TestFramework.Commands
             {
                 throw new InvalidOperationException("Path to nuget.exe not set");
             }
+            else if (!File.Exists(TestContext.Current.NuGetExePath))
+            {
+                //  https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+                var client = new System.Net.WebClient();
+                client.DownloadFile("https://dist.nuget.org/win-x86-commandline/latest/nuget.exe", TestContext.Current.NuGetExePath);
+            }
 
             var ret = new SdkCommandSpec()
             {

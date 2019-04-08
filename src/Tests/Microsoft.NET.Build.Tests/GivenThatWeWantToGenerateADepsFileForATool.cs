@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "TestTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "netcoreapp2.2", // netcoreapp2.2 is the highest possible project tools tfm
                 IsExe = true
             };
 
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DependencyContextTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "netcoreapp2.2", // netcoreapp2.2 is the highest possible project tools tfm
                 IsExe = true
             };
 

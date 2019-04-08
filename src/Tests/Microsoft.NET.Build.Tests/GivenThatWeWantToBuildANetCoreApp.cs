@@ -638,6 +638,41 @@ public static class Program
                 .BeEquivalentTo("netcoreapp1.1");
         }
 
+        [Fact]
+        public void BuildWithTransitiveReferenceToNetCoreAppPackage()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NetCoreAppPackageReference",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var referencedProject = new TestProject()
+            {
+                Name = "NetStandardProject",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true,
+                IsExe = false
+            };
+
+            //  The SharpDX package depends on the Microsoft.NETCore.App package
+            referencedProject.PackageReferences.Add(new TestPackageReference("SharpDX", "4.0.1"));
+
+            testProject.ReferencedProjects.Add(referencedProject);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         private static bool IsPE32(string path)
         {
             using (var reader = new PEReader(File.OpenRead(path)))

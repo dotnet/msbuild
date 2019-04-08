@@ -440,10 +440,6 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</value>
     <comment>{StrBegin="NETSDK1081: "}</comment>
   </data>
-  <data name="NoAppHostAvailable" xml:space="preserve">
-    <value>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</value>
-    <comment>{StrBegin="NETSDK1084: "}</comment>
-  </data>
   <data name="NoRuntimePackAvailable" xml:space="preserve">
     <value>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</value>
     <comment>{StrBegin="NETSDK1082: "}</comment>
@@ -452,12 +448,61 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</value>
     <comment>{StrBegin="NETSDK1083: "}</comment>
   </data>
+  <data name="NoAppHostAvailable" xml:space="preserve">
+    <value>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</value>
+    <comment>{StrBegin="NETSDK1084: "}</comment>
+  </data>
+  <data name="NoBuildRequested" xml:space="preserve">
+    <value>NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</value>
+    <comment>{StrBegin="NETSDK1085: "}</comment>
+  </data>
   <data name="FrameworkReferenceOverrideWarning" xml:space="preserve">
     <value>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</value>
     <comment>{StrBegin="NETSDK1086: "}</comment>
   </data>
   <data name="FrameworkReferenceDuplicateError" xml:space="preserve">
-    <value>NETSDK1085: Multiple FrameworkReference items for '{0}' were included in the project.</value>
-    <comment>{StrBegin="NETSDK1085: "}</comment>
+    <value>NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</value>
+    <comment>{StrBegin="NETSDK1087: "}</comment>
+  </data>
+  <data name="ClsidMapExportedTypesRequireExplicitGuid" xml:space="preserve">
+    <value>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</value>
+    <comment>{StrBegin="NETSDK1088: "}
+{0} - The ComVisible class that doesn't have a GuidAttribute on it.</comment>
+  </data>
+  <data name="ClsidMapConflictingGuids" xml:space="preserve">
+    <value>NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</value>
+    <comment>{StrBegin="NETSDK1089: "}
+{0} - The first type with the conflicting guid.
+{1} - The second type with the conflicting guid.
+{2} - The guid the two types have.</comment>
+  </data>
+  <data name="ClsidMapInvalidAssembly" xml:space="preserve">
+    <value>NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</value>
+    <comment>{StrBegin="NETSDK1090: "}
+{0} - The path to the invalid assembly.</comment>
+  </data>
+  <data name="CannotFindComhost" xml:space="preserve">
+    <value>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</value>
+    <comment>{StrBegin="NETSDK1091: "}</comment>
+  </data>
+  <data name="CannotEmbedClsidMapIntoComhost" xml:space="preserve">
+    <value>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</value>
+    <comment>{StrBegin="NETSDK1092: "}</comment>
+  </data>
+  <data name="ProjectToolOnlySupportTFMLowerThanNetcoreapp22" xml:space="preserve">
+    <value>NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</value>
+    <comment>{StrBegin="NETSDK1093: "}</comment>
+  </data>
+  <data name="ReadyToRunNoValidRuntimePackageError" xml:space="preserve">
+    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the ReadyToRun property to false, or use a supported runtime identifier when publishing.</value>
+    <comment>{StrBegin="NETSDK1094: "}</comment>
+  </data>
+  <data name="ReadyToRunTargetNotSuppotedError" xml:space="preserve">
+    <value>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Either set the ReadyToRun property to false, or use a supported runtime identifier when publishing.</value>
+    <comment>{StrBegin="NETSDK1095: "}</comment>
+  </data>
+  <data name="ReadyToRunCompilationFailed" xml:space="preserve">
+    <value>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the ReadyToRun property to false.</value>
+    <comment>{StrBegin="NETSDK1096: "}</comment>
   </data>
 </root>

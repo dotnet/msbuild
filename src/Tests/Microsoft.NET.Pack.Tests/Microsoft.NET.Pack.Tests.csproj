@@ -33,6 +33,9 @@
 
   <ItemGroup>
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
+
+    <!-- Use string resources from tasks in order to validate test output. -->
+    <EmbeddedResource Include="..\..\Tasks\Common\Resources\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Build.Tasks" />
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

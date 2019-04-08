@@ -463,5 +463,81 @@ public static class Program
                 .And
                 .NotHaveStdOutContaining("Copying");
         }
+
+        [Fact]
+        public void It_fails_if_nobuild_was_requested_but_build_was_invoked()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "InvokeBuildOnPublish",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.0",
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    project.Root.Add(XElement.Parse(@"<Target Name=""InvokeBuild"" DependsOnTargets=""Build"" BeforeTargets=""Publish"" />"));
+                })
+                .Restore(Log, testProject.Name);
+
+            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+
+            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute("/p:NoBuild=true")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1085");
+        }
+
+        [Fact]
+        public void It_contains_no_duplicates_in_resolved_publish_assets()
+        {
+            // Use a specific RID to guarantee a consistent set of assets
+            var testProject = new TestProject()
+            {
+                Name = "NoDuplicatesInResolvedPublishAssets",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.0",
+                RuntimeIdentifier = "win-x64",
+                IsExe = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "9.0.1"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    project.Root.Add(XElement.Parse(@"
+<Target Name=""VerifyNoDuplicatesInPublishAssets"" AfterTargets=""Publish"">
+    <RemoveDuplicates Inputs=""@(_ResolvedCopyLocalPublishAssets)"">
+        <Output TaskParameter=""Filtered"" ItemName=""FilteredAssets""/>
+    </RemoveDuplicates>
+    <Message Condition=""'@(_ResolvedCopyLocalPublishAssets)' != '@(FilteredAssets)'"" Importance=""High"" Text=""Duplicate items are present in: @(_ResolvedCopyLocalPublishAssets)!"" />
+    <ItemGroup>
+        <AssetFilenames Include=""@(_ResolvedCopyLocalPublishAssets->'%(Filename)%(Extension)')"" />
+    </ItemGroup>
+    <RemoveDuplicates Inputs=""@(AssetFilenames)"">
+        <Output TaskParameter=""Filtered"" ItemName=""FilteredAssetFilenames""/>
+    </RemoveDuplicates>
+    <Message Condition=""'@(AssetFilenames)' != '@(FilteredAssetFilenames)'"" Importance=""High"" Text=""Duplicate filenames are present in: @(_ResolvedCopyLocalPublishAssets)!"" />
+</Target>"));
+                })
+                .Restore(Log, testProject.Name);
+
+            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("Duplicate items are present")
+                .And
+                .NotHaveStdOutContaining("Duplicate filenames are present");
+        }
     }
 }

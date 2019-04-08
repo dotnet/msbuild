@@ -121,4 +121,5 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />
 </Project>
