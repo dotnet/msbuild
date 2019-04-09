@@ -51,12 +51,34 @@ namespace Microsoft.Build.Shared
 
         internal static bool IsUncPattern(string pattern)
         {
-            if(!DoesStartWithUncPattern(pattern))
+            if(!MeetsUncPatternMinimumRequirements(pattern))
             {
                 return false;
             }
 
-            return false;
+            bool searchingForSlash = false;
+            for (int i = 2; i < pattern.Length; i++)
+            {
+                if (pattern[i] == Path.DirectorySeparatorChar ||
+                    pattern[i] == Path.AltDirectorySeparatorChar)
+                {
+                    if (!searchingForSlash)
+                    {
+                        //We get here in the case of an extra slash somewhere.
+                        return false;
+                    }
+
+                    searchingForSlash = false;
+                }
+                else
+                {
+                    searchingForSlash = true;
+                }
+            }
+
+            //Searching for slash indicates whether the string ended with a slash
+            //  which would be an invalid unc pattern.
+            return searchingForSlash;
         }
 
         /// <summary>
@@ -82,7 +104,7 @@ namespace Microsoft.Build.Shared
             }
 
             bool searchingForSlash = false;
-            int slashesFound = 0;
+            bool foundSlash = false;
 
             for (int i = 2; i < pattern.Length; i++)
             {
@@ -91,16 +113,16 @@ namespace Microsoft.Build.Shared
                 {
                     if (!searchingForSlash)
                     {
-                        //We get here in the case of an extra slash somewhere. Ex: "\\a\b\\c...", "\\\a\\b\c"
+                        //We get here in the case of an extra slash somewhere.
                         return false;
                     }
 
-                    slashesFound++;
+                    foundSlash = true;
                     searchingForSlash = false;
                 }
                 else
                 {
-                    if (slashesFound >= 1)
+                    if (foundASlash >= 1)
                     {
                         //Found a char after slash, therefore beginning of unc pattern
                         return true;
