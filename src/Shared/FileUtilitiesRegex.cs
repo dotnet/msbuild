@@ -56,29 +56,32 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            bool searchingForSlash = false;
+            //starting after first two slashes
+            //assume no subfolder
+            bool prevCharWasSlash = true;
+            bool hasSubfolder = false;
             for (int i = 2; i < pattern.Length; i++)
             {
                 if (pattern[i] == Path.DirectorySeparatorChar ||
                     pattern[i] == Path.AltDirectorySeparatorChar)
                 {
-                    if (!searchingForSlash)
+                    if (prevCharWasSlash)
                     {
                         //We get here in the case of an extra slash somewhere.
                         return false;
                     }
 
-                    searchingForSlash = false;
+                    hasSubfolder = true;
+                    prevCharWasSlash = true;
                 }
                 else
                 {
-                    searchingForSlash = true;
+                    prevCharWasSlash = false;
                 }
             }
 
-            //Searching for slash indicates whether the string ended with a slash
-            //  which would be an invalid unc pattern.
-            return searchingForSlash;
+            //Valid unc patterns don't end with slashes & have at least 1 subfolder
+            return !prevCharWasSlash && hasSubfolder;
         }
 
         /// <summary>
@@ -103,32 +106,35 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            bool searchingForSlash = false;
-            bool foundSlash = false;
+            //starting after first two slashes
+            //assume no subfolder
+            bool prevCharWasSlash = true;
+            bool hasSubfolder = false;
 
             for (int i = 2; i < pattern.Length; i++)
             {
                 if (pattern[i] == Path.DirectorySeparatorChar ||
                     pattern[i] == Path.AltDirectorySeparatorChar)
                 {
-                    if (!searchingForSlash)
+                    if (prevCharWasSlash)
                     {
                         //We get here in the case of an extra slash somewhere.
                         return false;
                     }
 
-                    foundSlash = true;
-                    searchingForSlash = false;
+                    hasSubfolder = true;
+                    prevCharWasSlash = true;
                 }
                 else
                 {
-                    if (foundASlash)
+                    if (hasSubfolder)
                     {
-                        //Found a char after slash, therefore beginning of unc pattern
+                        //As soon as a character is seen after verifying subfolder exists,
+                        //  this is beginning of a unc pattern.
                         return true;
                     }
 
-                    searchingForSlash = true;
+                    prevCharWasSlash = false;
                 }
             }
 
