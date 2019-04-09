@@ -88,8 +88,8 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void UncPatternMinimumDirectory()
         {
-            string winDirectory = string.Format("{0}{0}a\\b", Path.DirectorySeparatorChar);
-            string unixDirectory = string.Format("{0}{0}a\\b", Path.AltDirectorySeparatorChar);
+            string winDirectory = string.Format("{0}a\\b", directoryStart);
+            string unixDirectory = string.Format("{0}a/b", altDirectoryStart);
 
             FileUtilitiesRegex.UncPattern.IsMatch(winDirectory).ShouldBe(true);
             FileUtilitiesRegex.UncPattern.IsMatch(unixDirectory).ShouldBe(true);
@@ -104,11 +104,14 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void UncPatternMixedSlashes()
         {
-            FileUtilitiesRegex.UncPattern.IsMatch(directoryStart + "abc/def").ShouldBe(true);
-            FileUtilitiesRegex.UncPattern.IsMatch(altDirectoryStart + "abc\\def").ShouldBe(true);
+            string winDirectory = string.Format("{0}abc/def", directoryStart);
+            string unixDirectory = string.Format("{0}abc\\def", altDirectoryStart);
 
-            FileUtilitiesRegex.DoesStartWithUncPattern(directoryStart + "abc/def").ShouldBe(true);
-            FileUtilitiesRegex.DoesStartWithUncPattern(altDirectoryStart + "abc\\def").ShouldBe(true);
+            FileUtilitiesRegex.UncPattern.IsMatch(winDirectory).ShouldBe(true);
+            FileUtilitiesRegex.UncPattern.IsMatch(unixDirectory).ShouldBe(true);
+
+            FileUtilitiesRegex.DoesStartWithUncPattern(winDirectory).ShouldBe(true);
+            FileUtilitiesRegex.DoesStartWithUncPattern(unixDirectory).ShouldBe(true);
         }
 
         [Fact]

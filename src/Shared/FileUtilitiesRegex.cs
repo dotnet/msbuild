@@ -40,43 +40,43 @@ namespace Microsoft.Build.Shared
         /// Indicates whether the specified string follows the pattern "<drive letter>:".
         /// Using this function over regex results in improved memory performance.
         /// </summary>
-        /// <param name="drivePattern"></param>
+        /// <param name="pattern"></param>
         /// <returns></returns>
-        internal static bool IsDrivePattern(string drivePattern)
+        internal static bool IsDrivePattern(string pattern)
         {
             // Format must be two characters long: "<drive letter>:"
-            return drivePattern.Length == 2 &&
-                DoesStartWithDrivePattern(drivePattern);
+            return pattern.Length == 2 &&
+                DoesStartWithDrivePattern(pattern);
+        }
+
+        internal static bool IsUncPattern(string pattern)
+        {
+            if(!DoesStartWithUncPattern(pattern))
+            {
+                return false;
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Indicates whether the specified string begins with "<drive letter>:".
         /// </summary>
-        /// <param name="drivePattern"></param>
+        /// <param name="pattern"></param>
         /// <returns></returns>
-        internal static bool DoesStartWithDrivePattern(string drivePattern)
+        internal static bool DoesStartWithDrivePattern(string pattern)
         {
             // Format dictates a length of at least 2
             // First character must be a letter
             // Second character must be a ":"
-            return drivePattern.Length >= 2 &&
-                (drivePattern[0] >= 'A' && drivePattern[0] <= 'Z') || (drivePattern[0] >= 'a' && drivePattern[0] <= 'z') &&
-                drivePattern[1] == ':';
+            return pattern.Length >= 2 &&
+                ((pattern[0] >= 'A' && pattern[0] <= 'Z') || (pattern[0] >= 'a' && pattern[0] <= 'z')) &&
+                pattern[1] == ':';
         }
 
-        internal static bool DoesStartWithUncPattern(string drivePattern)
+        internal static bool DoesStartWithUncPattern(string pattern)
         {
-            //Format dictates a minimum length of 5: "\\a\b"
-            if (drivePattern.Length < 5)
-            {
-                return false;
-            }
-
-            //Enforce unix/windows slashes &
-            //  first two characters matching
-            if ((drivePattern[0] != Path.DirectorySeparatorChar &&
-                drivePattern[0] != Path.AltDirectorySeparatorChar) ||
-                drivePattern[0] != drivePattern[1])
+            if (!MeetsUncPatternMinimumRequirements(pattern))
             {
                 return false;
             }
@@ -84,15 +84,14 @@ namespace Microsoft.Build.Shared
             bool searchingForSlash = false;
             int slashesFound = 0;
 
-            for (int i = 2; i < drivePattern.Length; i++)
+            for (int i = 2; i < pattern.Length; i++)
             {
-                if (drivePattern[i] == Path.DirectorySeparatorChar ||
-                    drivePattern[i] == Path.AltDirectorySeparatorChar)
+                if (pattern[i] == Path.DirectorySeparatorChar ||
+                    pattern[i] == Path.AltDirectorySeparatorChar)
                 {
                     if (!searchingForSlash)
                     {
-                        //We get here in the case of an extra slash somewhere
-                        //Ex: "\\a\b\\c...", "\\\a\\b\c
+                        //We get here in the case of an extra slash somewhere. Ex: "\\a\b\\c...", "\\\a\\b\c"
                         return false;
                     }
 
@@ -101,10 +100,9 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    if(slashesFound >= 1)
+                    if (slashesFound >= 1)
                     {
-                        //Finding a character after a slash verifies the beginning of a unc pattern
-                        //Ex: "\\a\b..."
+                        //Found a char after slash, therefore beginning of unc pattern
                         return true;
                     }
 
@@ -114,6 +112,17 @@ namespace Microsoft.Build.Shared
 
             return false;
         }
+
+        internal static bool MeetsUncPatternMinimumRequirements(string pattern)
+        {
+            //Format dictates a minimum length of 5: "\\a\b" &
+            //  first two characters must be unix/windows slash
+            return pattern.Length >= 5 &&
+                (pattern[0] == Path.DirectorySeparatorChar ||
+                pattern[0] == Path.AltDirectorySeparatorChar) &&
+                (pattern[1] == Path.DirectorySeparatorChar ||
+                pattern[1] == Path.AltDirectorySeparatorChar);
+       }
 
     }
 }
