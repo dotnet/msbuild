@@ -329,12 +329,22 @@ namespace Microsoft.Build.Experimental.Graph
             {
                 _outerBuildTargets = outerBuildTargets;
 
-                // This is used as the list of entry targets for both inner builds and non-multitargeting projects
+                // This is used as the list of entry targets for both inner builds and non-multitargeting projects.
                 // It represents the concatenation of outer build targets and non outer build targets, in this order.
                 // Non-multitargeting projects use these targets because they act as both outer and inner builds.
                 _allTargets = outerBuildTargets.AddRange(nonOuterBuildTargets);
             }
 
+            /// <summary>
+            /// Given a project and a set of entry targets the project would get called with,
+            /// parse the project's project reference target specification and compute how the target would call its references.
+            ///
+            /// The calling code should then call <see cref="GetApplicableTargetsForReference"/> for each of the project's references
+            /// to get the concrete targets for each reference.
+            /// </summary>
+            /// <param name="project">Project containing the PRT protocol</param>
+            /// <param name="entryTargets">Targets with which <paramref name="project"/> will get called</param>
+            /// <returns></returns>
             public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, ImmutableList<string> entryTargets)
             {
                 var targetsForOuterBuild = ImmutableList.CreateBuilder<string>();
@@ -369,9 +379,9 @@ namespace Microsoft.Build.Experimental.Graph
                 return new TargetsToPropagate(targetsForOuterBuild.ToImmutable(), targetsForInnerBuild.ToImmutable());
             }
 
-            public ImmutableList<string> GetApplicableTargets(ProjectInstance project)
+            public ImmutableList<string> GetApplicableTargetsForReference(ProjectInstance reference)
             {
-                switch (GetProjectType(project))
+                switch (GetProjectType(reference))
                 {
                     case ProjectType.InnerBuild:
                         return _allTargets;

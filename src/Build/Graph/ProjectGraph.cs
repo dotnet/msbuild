@@ -511,7 +511,7 @@ namespace Microsoft.Build.Experimental.Graph
                 // Queue the project references for visitation, if the edge hasn't already been traversed.
                 foreach (var projectReference in node.ProjectReferences)
                 {
-                    var applicableTargets = targetsToPropagate.GetApplicableTargets(projectReference.ProjectInstance);
+                    var applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(projectReference.ProjectInstance);
 
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
                         projectReference,
