@@ -4,6 +4,8 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Build.Execution
 {
@@ -14,25 +16,28 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// See https://docs.microsoft.com/en-us/windows/desktop/api/objidl/nn-objidl-irunningobjecttable.
     /// </remarks>
-    internal class RunningObjectTable : IDisposable, IRunningObjectTableWrapper
+    internal class RunningObjectTable : IRunningObjectTableWrapper
     {
-        private readonly IRunningObjectTable rot;
-        private bool isDisposed = false;
+        private readonly Task<IRunningObjectTable> _rotTask;
 
         public RunningObjectTable()
         {
-            Ole32.GetRunningObjectTable(0, out this.rot);
-        }
-
-        public void Dispose()
-        {
-            if (this.isDisposed)
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
-                return;
+                Ole32.GetRunningObjectTable(0, out var rot);
+                _rotTask = Task.FromResult(rot);
             }
-
-            Marshal.ReleaseComObject(this.rot);
-            this.isDisposed = true;
+            else
+            {
+                // To avoid deadlock, create ROT in a threadpool threads which guarantees to be MTA. And the
+                // object will be MTA
+                _rotTask =
+                Task.Run(() =>
+                    {
+                        Ole32.GetRunningObjectTable(0, out var rot);
+                        return rot;
+                    });
+            }
         }
 
         /// <summary>
@@ -40,8 +45,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public object GetObject(string itemName)
         {
-            IMoniker mk = CreateMoniker(itemName);
-            int hr = this.rot.GetObject(mk, out object obj);
+            Task<IMoniker> mkTask = CreateMoniker(itemName);
+            Task.WaitAll(_rotTask, mkTask);
+            var rot = _rotTask.Result;
+
+            int hr = rot.GetObject(mkTask.Result, out object obj);
             if (hr != 0)
             {
                 Marshal.ThrowExceptionForHR(hr);
@@ -50,10 +58,25 @@ namespace Microsoft.Build.Execution
             return obj;
         }
 
-        private IMoniker CreateMoniker(string itemName)
+        private Task<IMoniker> CreateMoniker(string itemName)
         {
-            Ole32.CreateItemMoniker("!", itemName, out IMoniker mk);
-            return mk;
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
+            {
+                Ole32.CreateItemMoniker("!", itemName, out var moniker);
+                return Task.FromResult(moniker);
+            }
+            else
+            {
+                // To avoid deadlock, create Moniker in a threadpool threads which guarantees to be MTA. And the
+                // object will be MTA
+                var task = Task.Run(() =>
+                {
+                    Ole32.CreateItemMoniker("!", itemName, out var mk);
+                    return mk;
+                });
+
+                return task;
+            }
         }
 
         private static class Ole32
