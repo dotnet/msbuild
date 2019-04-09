@@ -122,7 +122,7 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    if (foundASlash >= 1)
+                    if (foundASlash)
                     {
                         //Found a char after slash, therefore beginning of unc pattern
                         return true;
