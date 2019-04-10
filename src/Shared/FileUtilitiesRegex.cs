@@ -75,30 +75,30 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            bool prevCharSlash = true;
+            bool prevCharWasSlash = true;
             bool hasSubfolder = false;
             for (int i = 2; i < pattern.Length; i++)
             {
                 if (pattern[i] == Path.DirectorySeparatorChar ||
                     pattern[i] == Path.AltDirectorySeparatorChar)
                 {
-                    if (prevCharSlash)
+                    if (prevCharWasSlash)
                     {
                         //We get here in the case of an extra slash somewhere.
                         return false;
                     }
 
                     hasSubfolder = true;
-                    prevCharSlash = true;
+                    prevCharWasSlash = true;
                 }
                 else
                 {
-                    prevCharSlash = false;
+                    prevCharWasSlash = false;
                 }
             }
 
             //Valid unc patterns don't end with slashes & have at least 1 subfolder
-            return !prevCharSlash && hasSubfolder;
+            return !prevCharWasSlash && hasSubfolder;
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            bool prevCharSlash = true;
+            bool prevCharWasSlash = true;
             bool hasSubfolder = false;
 
             for (int i = 2; i < pattern.Length; i++)
@@ -121,14 +121,14 @@ namespace Microsoft.Build.Shared
                 if (pattern[i] == Path.DirectorySeparatorChar ||
                     pattern[i] == Path.AltDirectorySeparatorChar)
                 {
-                    if (prevCharSlash)
+                    if (prevCharWasSlash)
                     {
                         //We get here in the case of an extra slash.
                         return false;
                     }
 
                     hasSubfolder = true;
-                    prevCharSlash = true;
+                    prevCharWasSlash = true;
                 }
                 else
                 {
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Shared
                         return true;
                     }
 
-                    prevCharSlash = false;
+                    prevCharWasSlash = false;
                 }
             }
 

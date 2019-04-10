@@ -357,5 +357,45 @@ namespace Microsoft.Build.Engine.UnitTests
             FileUtilitiesRegex.DoesStartWithUncPattern(winDirectory).ShouldBe(false);
             FileUtilitiesRegex.DoesStartWithUncPattern(unixDirectory).ShouldBe(false);
         }
+
+        [Fact]
+        public void UncPatternIsMatchEmptyString()
+        {
+            string winDirectory = string.Format("", _directoryStart);
+            string unixDirectory = string.Format("", _altDirectoryStart);
+
+            FileUtilitiesRegex.UncPattern.IsMatch(winDirectory).ShouldBe(false);
+            FileUtilitiesRegex.UncPattern.IsMatch(unixDirectory).ShouldBe(false);
+        }
+
+        [Fact]
+        public void IsUncPatternEmptyString()
+        {
+            string winDirectory = string.Format("", _directoryStart);
+            string unixDirectory = string.Format("", _altDirectoryStart);
+
+            FileUtilitiesRegex.IsUncPattern(winDirectory).ShouldBe(false);
+            FileUtilitiesRegex.IsUncPattern(unixDirectory).ShouldBe(false);
+        }
+
+        [Fact]
+        public void StartsWithUncEmptyString()
+        {
+            string winDirectory = string.Format("", _directoryStart);
+            string unixDirectory = string.Format("", _altDirectoryStart);
+
+            FileUtilitiesRegex.StartsWithUncPattern.IsMatch(winDirectory).ShouldBe(false);
+            FileUtilitiesRegex.StartsWithUncPattern.IsMatch(unixDirectory).ShouldBe(false);
+        }
+
+        [Fact]
+        public void DoesStartWithUncPatternEmptyString()
+        {
+            string winDirectory = string.Format("", _directoryStart);
+            string unixDirectory = string.Format("", _altDirectoryStart);
+
+            FileUtilitiesRegex.DoesStartWithUncPattern(winDirectory).ShouldBe(false);
+            FileUtilitiesRegex.DoesStartWithUncPattern(unixDirectory).ShouldBe(false);
+        }
     }
 }
