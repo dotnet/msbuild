@@ -44,7 +44,7 @@
           Condition="'$(DesignTimeBuild)' != 'true'">
     <PropertyGroup>
       <PerformanceTestsRepoURL>https://github.com/dotnet/BuildPerformanceTestAssets</PerformanceTestsRepoURL>
-      <PerformanceTestsCommit>bc392f6</PerformanceTestsCommit>
+      <PerformanceTestsCommit>439f3075a48406371e693f11675ea276df87c3bd</PerformanceTestsCommit>
       <PerformanceTestsLocalDirectory>$(RepoRoot).perftestsource</PerformanceTestsLocalDirectory>
     </PropertyGroup>
 
