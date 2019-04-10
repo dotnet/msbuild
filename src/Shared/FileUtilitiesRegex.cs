@@ -37,8 +37,7 @@ namespace Microsoft.Build.Shared
 
 
         /// <summary>
-        /// Indicates whether the specified string follows the pattern "<drive letter>:".
-        /// Using this function over regex results in improved memory performance.
+        /// Indicates whether the specified string follows the pattern "<drive letter>:"
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
@@ -49,6 +48,26 @@ namespace Microsoft.Build.Shared
                 DoesStartWithDrivePattern(pattern);
         }
 
+        /// <summary>
+        /// Indicates whether the specified string starts with "<drive letter>:".
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        internal static bool DoesStartWithDrivePattern(string pattern)
+        {
+            // Format dictates a length of at least 2,
+            // first character must be a letter,
+            // second character must be a ":"
+            return pattern.Length >= 2 &&
+                ((pattern[0] >= 'A' && pattern[0] <= 'Z') || (pattern[0] >= 'a' && pattern[0] <= 'z')) &&
+                pattern[1] == ':';
+        }
+
+        /// <summary>
+        /// Indicates whether the specified string follows the pattern "\\server\path".
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
         internal static bool IsUncPattern(string pattern)
         {
             if(!MeetsUncPatternMinimumRequirements(pattern))
@@ -56,49 +75,37 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            //starting after first two slashes
-            //assume no subfolder
-            bool prevCharWasSlash = true;
+            bool prevCharSlash = true;
             bool hasSubfolder = false;
             for (int i = 2; i < pattern.Length; i++)
             {
                 if (pattern[i] == Path.DirectorySeparatorChar ||
                     pattern[i] == Path.AltDirectorySeparatorChar)
                 {
-                    if (prevCharWasSlash)
+                    if (prevCharSlash)
                     {
                         //We get here in the case of an extra slash somewhere.
                         return false;
                     }
 
                     hasSubfolder = true;
-                    prevCharWasSlash = true;
+                    prevCharSlash = true;
                 }
                 else
                 {
-                    prevCharWasSlash = false;
+                    prevCharSlash = false;
                 }
             }
 
             //Valid unc patterns don't end with slashes & have at least 1 subfolder
-            return !prevCharWasSlash && hasSubfolder;
+            return !prevCharSlash && hasSubfolder;
         }
 
         /// <summary>
-        /// Indicates whether the specified string begins with "<drive letter>:".
+        /// Indicates whether the specified string starts with "\\server\path".
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
-        internal static bool DoesStartWithDrivePattern(string pattern)
-        {
-            // Format dictates a length of at least 2
-            // First character must be a letter
-            // Second character must be a ":"
-            return pattern.Length >= 2 &&
-                ((pattern[0] >= 'A' && pattern[0] <= 'Z') || (pattern[0] >= 'a' && pattern[0] <= 'z')) &&
-                pattern[1] == ':';
-        }
-
         internal static bool DoesStartWithUncPattern(string pattern)
         {
             if (!MeetsUncPatternMinimumRequirements(pattern))
@@ -106,9 +113,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            //starting after first two slashes
-            //assume no subfolder
-            bool prevCharWasSlash = true;
+            bool prevCharSlash = true;
             bool hasSubfolder = false;
 
             for (int i = 2; i < pattern.Length; i++)
@@ -116,14 +121,14 @@ namespace Microsoft.Build.Shared
                 if (pattern[i] == Path.DirectorySeparatorChar ||
                     pattern[i] == Path.AltDirectorySeparatorChar)
                 {
-                    if (prevCharWasSlash)
+                    if (prevCharSlash)
                     {
-                        //We get here in the case of an extra slash somewhere.
+                        //We get here in the case of an extra slash.
                         return false;
                     }
 
                     hasSubfolder = true;
-                    prevCharWasSlash = true;
+                    prevCharSlash = true;
                 }
                 else
                 {
@@ -134,7 +139,7 @@ namespace Microsoft.Build.Shared
                         return true;
                     }
 
-                    prevCharWasSlash = false;
+                    prevCharSlash = false;
                 }
             }
 
