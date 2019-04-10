@@ -12,8 +12,8 @@ namespace Microsoft.Build.Experimental.Graph
     /// </summary>
     public sealed class ProjectGraphNode
     {
-        private readonly List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
-        private readonly List<ProjectGraphNode> _referencingProjects = new List<ProjectGraphNode>();
+        private readonly HashSet<ProjectGraphNode> _projectReferences = new HashSet<ProjectGraphNode>();
+        private readonly HashSet<ProjectGraphNode> _referencingProjects = new HashSet<ProjectGraphNode>();
 
         // No public creation.
         internal ProjectGraphNode(ProjectInstance projectInstance)

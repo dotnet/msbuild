@@ -25,6 +25,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         private static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}}.ToImmutableDictionary();
 
         private static readonly string InnerBuildPropertyName = "InnerBuild";
+
         private static readonly string MultitargetingSpecification = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>InnerBuildProperties</InnerBuildPropertyValues>
@@ -1198,14 +1199,14 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             Regex.Matches(dot,"label").Count.ShouldBe(graph.ProjectNodes.Count);
         }
 
-        private static void AssertOuterBuildAsRoot(ProjectGraphNode outerBuild, Dictionary<string, string> additionalGlobalProperties = null)
+        private static void AssertOuterBuildAsRoot(ProjectGraphNode outerBuild, Dictionary<string, string> additionalGlobalProperties = null, int expectedInnerBuildCount = 2)
         {
             additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
 
             AssertOuterBuildEvaluation(outerBuild, additionalGlobalProperties);
 
             outerBuild.ReferencingProjects.ShouldBeEmpty();
-            outerBuild.ProjectReferences.Count.ShouldBe(2);
+            outerBuild.ProjectReferences.Count.ShouldBe(expectedInnerBuildCount);
 
             foreach (var innerBuild in outerBuild.ProjectReferences)
             {
@@ -1213,7 +1214,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             }
         }
 
-        private static void AssertOuterBuildAsNonRoot(ProjectGraphNode outerBuild, Dictionary<string, string> additionalGlobalProperties = null)
+        private static void AssertOuterBuildAsNonRoot(ProjectGraphNode outerBuild, Dictionary<string, string> additionalGlobalProperties = null, int expectedInnerBuildCount = 2)
         {
             additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
 
@@ -1230,7 +1231,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                             IsInnerBuild(p) 
                             && p.ProjectInstance.FullPath == outerBuild.ProjectInstance.FullPath).ToArray();
 
-                innerBuilds.Length.ShouldBe(2);
+                innerBuilds.Length.ShouldBe(expectedInnerBuildCount);
 
                 foreach (var innerBuild in innerBuilds)
                 {
@@ -1314,6 +1315,31 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             var outerBuild = graph.GraphRoots.First();
 
             AssertOuterBuildAsRoot(outerBuild);
+        }
+
+        [Fact]
+        public void DuplicatedInnerBuildMonikersShouldGetDeduplicated()
+        {
+            // multitarget to duplicate monikers
+            var multitargetingSpecification = MultitargetingSpecification +
+                                              @"<PropertyGroup>
+                                                    <InnerBuildProperties>a;a</InnerBuildProperties>
+                                                </PropertyGroup>";
+
+            var root = CreateProjectFile(_env, 1, new[] {2}, null, null, multitargetingSpecification).Path;
+            CreateProjectFile(_env, 2, null, null, null, multitargetingSpecification);
+
+            var graph = new ProjectGraph(root);
+
+            var dot = graph.ToDot();
+
+            graph.ProjectNodes.Count.ShouldBe(4);
+
+            var rootOuterBuild = GetNodesWithProjectNumber(graph, 1).First(IsOuterBuild);
+            var nonRootOuterBuild = GetNodesWithProjectNumber(graph, 2).First(IsOuterBuild);
+
+            AssertOuterBuildAsRoot(rootOuterBuild, null, 1);
+            AssertOuterBuildAsNonRoot(nonRootOuterBuild, null, 1);
         }
 
         [Fact]
