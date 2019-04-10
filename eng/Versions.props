@@ -70,7 +70,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETBuildBundlePackageVersion>3.0.0-preview4-27609-16</MicrosoftNETBuildBundlePackageVersion>
+    <MicrosoftNETBuildBundlePackageVersion>3.0.0-preview4-27610-06</MicrosoftNETBuildBundlePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
