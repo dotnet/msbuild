@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Cli
                                "--in-root",
                                LocalizableStrings.InRoot,
                                Accept.NoArguments()),
+                           Create.Option("-s|--solution-folder", LocalizableStrings.AddProjectSolutionFolderArgumentDescription, Accept.ExactlyOneArgument()),
                            CommonOptions.HelpOption());
     }
 }
