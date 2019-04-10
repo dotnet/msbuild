@@ -1,53 +1,55 @@
 parameters:
+  # Agent OS identifier and used as job name
   agentOs: ''
-  queue: {}
+
+  # Agent pool
+  pool: {}
+
+  # Additional variables
   variables: {}
 
-phases:
-- template: /eng/common/templates/phases/base.yml
+  # Build strategy - matrix
+  strategy: ''
+
+  # Job timeout
+  timeoutInMinutes: 120
+
+jobs:
+- template: /eng/common/templates/job/job.yml
   parameters:
     name: ${{ parameters.agentOs }}
-    enableTelemetry: true
     enableMicrobuild: true
-    queue: ${{ parameters.queue }}
+    enablePublishBuildArtifacts: true
+    enablePublishBuildAssets: true
+    enablePublishTestResults: true
+    enableTelemetry: true
+    helixRepo: dotnet/sdk
+    pool: ${{ parameters.pool }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+    ${{ if ne(parameters.strategy, '') }}:
+      strategy: ${{ parameters.strategy }}
     variables: 
-      ${{ insert }}: ${{ parameters.variables }}
-      _AgentOSName: ${{ parameters.agentOs }}
-      _HelixType: build/product
-      _HelixBuildConfig: $(_BuildConfig)
-      _TeamName: DotNetCore
-      _PerformanceArgs: /p:PerfIterations=4
-      ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
-        _OfficialBuildIdArgs: ''
-        _PublishArgs: ''
-        _SignArgs: ''
-      ${{ if ne(variables['System.TeamProject'], 'public') }}:
-        _HelixSource: official/dotnet/sdk/$(Build.SourceBranch)
-        _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-        _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
-                  /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
-                  /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
-                  /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
-                  /p:PB_PublishType=$(_PublishType)
-        _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
+      - ${{ insert }}: ${{ parameters.variables }}
+      - _AgentOSName: ${{ parameters.agentOs }}
+      - _TeamName: DotNetCore
+      - _PerformanceArgs: /p:PerfIterations=4
+      - _OfficialBuildIdArgs: ''
+      - _PublishArgs: ''
+      - _SignArgs: ''
+      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        - group: DotNet-Symbol-Server-PATs
+        - group: DotNet-HelixApi-Access
+        - group: DotNet-Blob-Feed
+        - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+        - _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                    /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
+                    /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+                    /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                    /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                    /p:PB_PublishType=$(_PublishType)
+        - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
 
     steps:
-    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      - task: AzureKeyVault@1
-        inputs:
-          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
-          KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnetfeed-storage-access-key-1,microsoft-symbol-server-pat,symweb-symbol-server-pat'
-        condition: succeeded()
-      - task: AzureKeyVault@1
-        inputs:
-          azureSubscription: 'HelixProd_KeyVault'
-          KeyVaultName: HelixProdKV
-          SecretsFilter: 'HelixApiAccessToken'
-        condition: always()
-
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: eng\common\CIBuild.cmd
                   -configuration $(_BuildConfig)
@@ -116,33 +118,3 @@ phases:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
-
-    - task: PublishTestResults@1
-      displayName: Publish Test Results
-      inputs:
-        testRunner: XUnit
-        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'
-        testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'
-        platform: '$(BuildPlatform)'
-        configuration: '$(_BuildConfig)'
-      condition: not(succeeded())
-
-    - task: CopyFiles@2
-      displayName: Gather Logs
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)'
-        Contents: |
-         artifacts/log/$(_BuildConfig)/**/*
-         artifacts/TestResults/$(_BuildConfig)/**/*
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      continueOnError: true
-      condition: not(succeeded())
-
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Logs to VSTS
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'
-        publishLocation: Container
-      continueOnError: true
-      condition: not(succeeded())
