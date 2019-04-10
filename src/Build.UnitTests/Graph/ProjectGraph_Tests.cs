@@ -95,6 +95,48 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
+        public void ProjectGraphNodeConstructorNoNullArguments()
+        {
+            _env.DoNotLaunchDebugger();
+            Assert.Throws<InternalErrorException>(() => new ProjectGraphNode(null));
+        }
+
+        [Fact]
+        public void UpdatingReferencesIsBidirectional()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var projectInstance = new Project().CreateProjectInstance();
+                var node = new ProjectGraphNode(projectInstance);
+                var reference1 = new ProjectGraphNode(projectInstance);
+                var reference2 = new ProjectGraphNode(projectInstance);
+
+                node.AddProjectReference(reference1);
+                node.AddProjectReference(reference2);
+
+                node.ProjectReferences.ShouldBeEquivalentTo(new []{reference1, reference2});
+                node.ReferencingProjects.ShouldBeEmpty();
+
+                reference1.ReferencingProjects.ShouldBeEquivalentTo(new[] {node});
+                reference1.ProjectReferences.ShouldBeEmpty();
+
+                reference2.ReferencingProjects.ShouldBeEquivalentTo(new[] {node});
+                reference2.ProjectReferences.ShouldBeEmpty();
+
+                node.RemoveReferences();
+
+                node.ProjectReferences.ShouldBeEmpty();
+                node.ReferencingProjects.ShouldBeEmpty();
+
+                reference1.ProjectReferences.ShouldBeEmpty();
+                reference1.ReferencingProjects.ShouldBeEmpty();
+
+                reference2.ProjectReferences.ShouldBeEmpty();
+                reference2.ReferencingProjects.ShouldBeEmpty();
+            }
+        }
+
+        [Fact]
         public void ConstructWithProjectInstanceFactory_FactoryReturnsNull_Throws()
         {
             using (var env = TestEnvironment.Create())
@@ -1193,6 +1235,9 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 foreach (var innerBuild in innerBuilds)
                 {
                     AssertInnerBuildEvaluation(innerBuild, true, additionalGlobalProperties);
+
+                    innerBuild.ReferencingProjects.ShouldContain(outerBuildReferencer);
+                    innerBuild.ReferencingProjects.ShouldNotContain(outerBuild);
                 }
             }
         }

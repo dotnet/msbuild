@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.Graph
 {
@@ -17,6 +18,7 @@ namespace Microsoft.Build.Experimental.Graph
         // No public creation.
         internal ProjectGraphNode(ProjectInstance projectInstance)
         {
+            ErrorUtilities.VerifyThrowInternalNull(projectInstance, nameof(projectInstance));
             ProjectInstance = projectInstance;
         }
 
@@ -35,12 +37,21 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
 
-        internal void AddProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Add(projectGraphNode);
+        internal void AddProjectReference(ProjectGraphNode reference)
+        {
+            _projectReferences.Add(reference);
+            reference._referencingProjects.Add(this);
+        }
 
-        internal void RemoveReferences() => _projectReferences.Clear();
+        internal void RemoveReferences()
+        {
+            foreach (var reference in _projectReferences)
+            {
+                ErrorUtilities.VerifyThrow(reference._referencingProjects.Contains(this), "references should point the nodes referencing them");
+                reference._referencingProjects.Remove(this);
+            }
 
-        internal void RemoveProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Remove(projectGraphNode);
-
-        internal void AddReferencingProject(ProjectGraphNode projectGraphNode) => _referencingProjects.Add(projectGraphNode);
+            _projectReferences.Clear();
+        }
     }
 }

@@ -361,7 +361,6 @@ namespace Microsoft.Build.Experimental.Graph
 
                     var parsedProjectReference = allParsedProjects[referenceConfig];
                     node.AddProjectReference(parsedProjectReference);
-                    parsedProjectReference.AddReferencingProject(node);
                 }
 
                 nodeState[node] = NodeVisitationState.Processed;
