@@ -19,8 +19,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
         private readonly bool _inRoot;
-        private readonly string _relativeRoot;
-        private IList<string> _relativeRootSolutionFolders;
+        private readonly IList<string> _relativeRootSolutionFolders;
 
         private const string InRootOption = "in-root";
         private const string SolutionFolderOption = "solution-folder";
@@ -39,13 +38,15 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             _fileOrDirectory = fileOrDirectory;
 
             _inRoot = appliedCommand.ValueOrDefault<bool>(InRootOption);
-            _relativeRoot = _appliedCommand.ValueOrDefault<string>(SolutionFolderOption);
+            string relativeRoot = _appliedCommand.ValueOrDefault<string>(SolutionFolderOption);
 
-            if (_inRoot && !string.IsNullOrEmpty(_relativeRoot))
+            if (_inRoot && !string.IsNullOrEmpty(relativeRoot))
             {
                 // These two options are mutually exclusive
                 throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             }
+
+            _relativeRootSolutionFolders = relativeRoot?.Split(Path.DirectorySeparatorChar);
         }
 
         public override int Execute()
@@ -119,12 +120,9 @@ namespace Microsoft.DotNet.Tools.Sln.Add
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(_relativeRoot))
+            if (_relativeRootSolutionFolders != null)
             {
                 // The user has specified an explicit root
-                if (_relativeRootSolutionFolders == null)
-                    _relativeRootSolutionFolders = _relativeRoot.Split(Path.DirectorySeparatorChar);
-
                 return _relativeRootSolutionFolders;
             }
 
