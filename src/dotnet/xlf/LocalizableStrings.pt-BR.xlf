@@ -10,8 +10,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.
-</target>
+        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">

@@ -62,10 +62,10 @@
       <trans-unit id="CmdLoggerDescription">
         <source>The logger to use for test results.
                                         Examples:
-                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">O agente a ser usado para os resultados de teste.
+        <target state="needs-review-translation">O agente a ser usado para os resultados de teste.
                                         Exemplos:
                                         Registrar no formato trx usando um nome de arquivo exclusivo: --logger trx
                                         Registrar no formato trx usando um nome de arquivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
@@ -158,6 +158,11 @@ Emite um arquivo 'Sequence.xml' no diretório atual que captura a ordem de execu
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
         <target state="translated">A configuração a ser usada para executar testes. O padrão para a maioria dos projetos é 'Debug'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
         <note />
       </trans-unit>
     </body>

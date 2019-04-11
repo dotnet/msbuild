@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Tools
         private ProjectCollection _projects;
         private List<NuGetFramework> _cachedTfms = null;
         private IEnumerable<string> cachedRuntimeIdentifiers;
+        private IEnumerable<string> cachedConfigurations;
 
         private MsbuildProject(ProjectCollection projects, ProjectRootElement project)
         {
@@ -166,6 +167,12 @@ namespace Microsoft.DotNet.Tools
             var project = GetEvaluatedProject();
             _cachedTfms = project.GetTargetFrameworks().ToList();
             return _cachedTfms;
+        }
+
+        public IEnumerable<string> GetConfigurations()
+        {
+            return cachedConfigurations ??
+                   (cachedConfigurations = GetEvaluatedProject().GetConfigurations());
         }
 
         public bool CanWorkOnFramework(NuGetFramework framework)
