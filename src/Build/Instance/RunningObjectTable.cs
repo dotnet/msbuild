@@ -45,25 +45,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public object GetObject(string itemName)
         {
-            Task<IMoniker> mkTask = CreateMoniker(itemName);
-            Task.WaitAll(_rotTask, mkTask);
-            var rot = _rotTask.Result;
+            var rot = _rotTask.GetAwaiter().GetResult();
 
-            int hr = rot.GetObject(mkTask.Result, out object obj);
-            if (hr != 0)
-            {
-                Marshal.ThrowExceptionForHR(hr);
-            }
-
-            return obj;
-        }
-
-        private Task<IMoniker> CreateMoniker(string itemName)
-        {
+            IMoniker moniker;
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
-                Ole32.CreateItemMoniker("!", itemName, out var moniker);
-                return Task.FromResult(moniker);
+                Ole32.CreateItemMoniker("!", itemName, out moniker);
             }
             else
             {
@@ -75,8 +62,16 @@ namespace Microsoft.Build.Execution
                     return mk;
                 });
 
-                return task;
+                moniker = task.GetAwaiter().GetResult();
             }
+
+            int hr = rot.GetObject(moniker, out object obj);
+            if (hr != 0)
+            {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+
+            return obj;
         }
 
         private static class Ole32
