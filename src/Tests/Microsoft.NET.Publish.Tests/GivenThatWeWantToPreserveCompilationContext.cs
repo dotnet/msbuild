@@ -373,19 +373,16 @@ System.Runtime.InteropServices.dll
 System.Runtime.InteropServices.RuntimeInformation.dll
 System.Runtime.Numerics.dll
 System.Runtime.Serialization.Primitives.dll
-System.Security.Claims.dll
 System.Security.Cryptography.Algorithms.dll
 System.Security.Cryptography.Encoding.dll
 System.Security.Cryptography.OpenSsl.dll
 System.Security.Cryptography.Primitives.dll
 System.Security.Cryptography.X509Certificates.dll
 System.Security.Principal.dll
-System.Security.Principal.Windows.dll
 System.Text.Encoding.dll
 System.Text.Encoding.Extensions.dll
 System.Text.RegularExpressions.dll
 System.Threading.dll
-System.Threading.Overlapped.dll
 System.Threading.Tasks.dll
 System.Threading.Tasks.Dataflow.dll
 System.Threading.Tasks.Extensions.dll
@@ -574,6 +571,7 @@ System.Console.dll
 System.Core.dll
 System.Data.Common.dll
 System.Data.dll
+System.Data.DataSetExtensions.dll
 System.Data.SqlClient.dll
 System.Diagnostics.Contracts.dll
 System.Diagnostics.Debug.dll

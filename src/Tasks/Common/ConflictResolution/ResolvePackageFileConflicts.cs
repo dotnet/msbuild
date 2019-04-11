@@ -202,6 +202,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             if (conflict.PackageId != null)
             {
                 item.SetMetadata(nameof(ConflictItemType), conflict.ItemType.ToString());
+                item.SetMetadata(MetadataKeys.NuGetPackageId, conflict.PackageId);
             }
 
             return item;

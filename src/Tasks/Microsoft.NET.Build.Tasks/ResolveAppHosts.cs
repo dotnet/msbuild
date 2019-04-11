@@ -206,7 +206,7 @@ namespace Microsoft.NET.Build.Tasks
                     appHostItem.SetMetadata(MetadataKeys.PackageVersion, appHostPackVersion);
                 }
 
-                appHostItem.SetMetadata(MetadataKeys.RelativePath, hostRelativePathInPackage);
+                appHostItem.SetMetadata(MetadataKeys.PathInPackage, hostRelativePathInPackage);
                 appHostItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
 
                 return appHostItem;
