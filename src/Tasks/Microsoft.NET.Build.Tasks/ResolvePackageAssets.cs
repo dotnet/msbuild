@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Common;
@@ -1129,8 +1130,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 FlushMetadata();
                 _itemCount++;
-                _writer.Write(itemSpec);
-
+                _writer.Write(ProjectCollection.Escape(itemSpec));
             }
 
             private void WriteItem(string itemSpec, LockFileTargetLibrary package)
