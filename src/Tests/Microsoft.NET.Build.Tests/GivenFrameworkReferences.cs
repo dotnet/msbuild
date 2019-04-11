@@ -22,7 +22,9 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [WindowsOnlyFact]
+        //  Tests in this class are currently Core MSBuild only, as they check for PackageDownload items,
+        //  which are currently only used in Core MSBuild
+        [CoreMSBuildAndWindowsOnlyFact]
         public void Multiple_frameworks_are_written_to_runtimeconfig_when_there_are_multiple_FrameworkReferences()
         {
             var testProject = new TestProject()
@@ -84,7 +86,7 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void The_build_fails_when_there_is_an_unknown_FrameworkReference()
         {
             var testProject = new TestProject()
@@ -123,7 +125,7 @@ namespace FrameworkReferenceTest
                 ;
         }
 
-        [Theory]
+        [CoreMSBuildOnlyTheory]
         [InlineData("netcoreapp2.1", false)]
         [InlineData("netcoreapp3.0", true)]
         public void KnownFrameworkReferencesOnlyApplyToCorrectTargetFramework(string targetFramework, bool shouldPass)
@@ -166,7 +168,7 @@ namespace FrameworkReferenceTest
                     .And.HaveStdOutContaining("Microsoft.AspNetCore.App");
             }
         }
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void TargetingPackDownloadCanBeDisabled()
         {
             var testProject = new TestProject()
@@ -203,7 +205,7 @@ namespace FrameworkReferenceTest
                 .HaveStdOutContaining("NETSDK1073");
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void BuildFailsIfRuntimePackIsNotAvailableForRuntimeIdentifier()
         {
             var testProject = new TestProject()
@@ -242,7 +244,7 @@ namespace FrameworkReferenceTest
                 .HaveStdOutContaining("1 Error(s)");
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void BuildFailsIfInvalidRuntimeIdentifierIsSpecified()
         {
             var testProject = new TestProject()
@@ -269,7 +271,7 @@ namespace FrameworkReferenceTest
                 .HaveStdOutContaining("1 Error(s)");
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void BuildFailsIfRuntimePackHasNotBeenRestored()
         {
             var testProject = new TestProject()
@@ -310,7 +312,7 @@ namespace FrameworkReferenceTest
 
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void RuntimeFrameworkVersionCanBeSpecifiedOnFrameworkReference()
         {
             var testProject = new TestProject();
@@ -342,7 +344,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be("3.0.0-runtimeframeworkversion-property");
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void RuntimeFrameworkVersionCanBeSpecifiedViaProperty()
         {
             var testProject = new TestProject();
@@ -365,7 +367,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be(runtimeFrameworkVersion);
         }
 
-        [Theory]
+        [CoreMSBuildOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
         public void TargetLatestPatchCanBeSpecifiedOnFrameworkReference(bool attributeValue)
@@ -401,7 +403,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be("3.0.0-apphostversion");
         }
 
-        [Theory]
+        [CoreMSBuildOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
         public void TargetLatestPatchCanBeSpecifiedViaProperty(bool propertyValue)
@@ -427,7 +429,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be("3.0.0-apphostversion");
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void TargetingPackVersionCanBeSpecifiedOnFrameworkReference()
         {
             var testProject = new TestProject();
@@ -499,7 +501,7 @@ namespace FrameworkReferenceTest
 <Target Name=`WriteResolvedVersions` DependsOnTargets=`PrepareForBuild;ResolveFrameworkReferences`>
     <ItemGroup>
       <LinesToWrite Include=`RuntimeFramework%09%(RuntimeFramework.Identity)%09%(RuntimeFramework.Version)`/>
-      <LinesToWrite Include=`PackageDownload%09%(_PackageReferenceToAdd.Identity)%09%(_PackageReferenceToAdd.Version)`/>
+      <LinesToWrite Include=`PackageDownload%09%(PackageDownload.Identity)%09%(PackageDownload.Version)`/>
       <LinesToWrite Include=`TargetingPack%09%(TargetingPack.Identity)%09%(TargetingPack.PackageVersion)`/>
       <LinesToWrite Include=`RuntimePack%09%(RuntimePack.Identity)%09%(RuntimePack.PackageVersion)`/>
       <LinesToWrite Include=`AppHostPack%09%(AppHostPack.Identity)%09%(AppHostPack.PackageVersion)`/>
@@ -558,7 +560,9 @@ namespace FrameworkReferenceTest
                                 dict = versionInfo.RuntimeFramework;
                                 break;
                             case "PackageDownload":
+                                //  PackageDownload versions are enclosed in [brackets]
                                 dict = versionInfo.PackageDownload;
+                                version = version.Substring(1, version.Length - 2);
                                 break;
                             case "TargetingPack":
                                 dict = versionInfo.TargetingPack;
