@@ -115,7 +115,7 @@
       </trans-unit>
       <trans-unit id="Application">
         <source>Application</source>
-        <target state="translated">응용 프로그램</target>
+        <target state="translated">애플리케이션</target>
         <note />
       </trans-unit>
       <trans-unit id="Add">
