@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             toolManifestFileEditor.Add(new FilePath(manifestFile),
                 new PackageId("new-tool"),
                 NuGetVersion.Parse("3.0.0"),
-                new[] { new ToolCommandName("newtool") });
+                new[] {new ToolCommandName("newtool")});
 
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(
                 @"{
@@ -112,7 +112,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 packageId,
                 nuGetVersion,
                 new[] {new ToolCommandName("dotnetsay")});
-
 
             var expectedString = string.Format(
                 LocalizableStrings.ManifestPackageIdCollision,
@@ -179,7 +178,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
-            Action a = () => toolManifestFileEditor.Read(new FilePath(manifestFile), new DirectoryPath(_testDirectoryRoot));
+            Action a = () =>
+                toolManifestFileEditor.Read(new FilePath(manifestFile), new DirectoryPath(_testDirectoryRoot));
 
             a.ShouldNotThrow<ToolManifestException>();
         }
@@ -261,9 +261,10 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             Action a = () => toolManifestFileEditor.Edit(new FilePath(manifestFile),
                 new PackageId("non-exist"),
                 NuGetVersion.Parse("3.0.0"),
-                new[] { new ToolCommandName("t-rex3") });
+                new[] {new ToolCommandName("t-rex3")});
 
-            a.ShouldThrow<ArgumentException>().And.Message.Should().Contain($"Manifest {manifestFile} does not contain package id 'non-exist'.");
+            a.ShouldThrow<ArgumentException>().And.Message.Should()
+                .Contain($"Manifest {manifestFile} does not contain package id 'non-exist'.");
         }
 
 
@@ -341,7 +342,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 }";
 
         private string _jsonContentMissingVersion =
-@"{
+            @"{
    ""isRoot"":true,
    ""tools"":{
       ""t-rex"":{

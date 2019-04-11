@@ -23,7 +23,9 @@
     </Content>
   </ItemGroup>
   
-  <Target Name="WriteExpectedVersion" BeforeTargets="BeforeBuild" DependsOnTargets="PrepareForBuild">
+  <Target Name="WriteExpectedVersion"
+          BeforeTargets="BeforeBuild"
+          DependsOnTargets="PrepareForBuild">
 
     <PropertyGroup>
       <ExpectedVersionFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedSdkVersion.txt</ExpectedVersionFileInIntermediateFolder>
@@ -34,10 +36,14 @@
       </ExistingVersionFileContent>
 
       <ShouldOverwriteVersionFile>false</ShouldOverwriteVersionFile>
-      <ShouldOverwriteVersionFile Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
+      <ShouldOverwriteVersionFile
+        Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
     </PropertyGroup>
     
-    <WriteLinesToFile File="$(ExpectedVersionFileInIntermediateFolder)" Lines="$(VersionFileContent)" Condition=" '$(ShouldOverwriteVersionFile)' == 'true' " Overwrite="true" />
+    <WriteLinesToFile File="$(ExpectedVersionFileInIntermediateFolder)"
+                      Lines="$(VersionFileContent)"
+                      Condition=" '$(ShouldOverwriteVersionFile)' == 'true' "
+                      Overwrite="true" />
 
     <ItemGroup>
       <Content Include="$(ExpectedVersionFileInIntermediateFolder)" CopyToOutputDirectory="PreserveNewest" />

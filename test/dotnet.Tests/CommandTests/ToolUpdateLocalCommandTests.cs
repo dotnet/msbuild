@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private readonly BufferedReporter _reporter;
         private readonly string _temporaryDirectory;
         private readonly string _manifestFilePath;
+        private readonly MockFeed _mockFeed;
         private readonly ToolManifestFinder _toolManifestFinder;
         private readonly ToolManifestEditor _toolManifestEditor;
         private readonly ToolUpdateLocalCommand _defaultToolUpdateLocalCommand;
@@ -47,9 +48,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private readonly ToolCommandName _toolCommandNameA = new ToolCommandName("a");
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
         private readonly ToolRestoreCommand _toolRestoreCommand;
-
-        private readonly MockFeed _mockFeed;
-
 
         public ToolUpdateLocalCommandTests()
         {
@@ -143,11 +141,11 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
 
             var toolUpdateCommand = new ToolUpdateCommand(
-               _appliedCommand,
-               _parseResult,
-               _reporter,
-               new ToolUpdateGlobalOrToolPathCommand(_appliedCommand, _parseResult),
-               _defaultToolUpdateLocalCommand);
+                _appliedCommand,
+                _parseResult,
+                _reporter,
+                new ToolUpdateGlobalOrToolPathCommand(_appliedCommand, _parseResult),
+                _defaultToolUpdateLocalCommand);
 
             toolUpdateCommand.Execute().Should().Be(0);
 
@@ -362,6 +360,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
     }
   }
 }";
+
         private readonly string _jsonEmptyContent =
             @"{
   ""version"": 1,

@@ -17,19 +17,19 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
     {
         private readonly BufferedReporter _reporter;
         private const string PackageId = "global.tool.console.demo";
-        
+
 
         public ToolUpdateCommandTests()
         {
             _reporter = new BufferedReporter();
         }
-        
+
         [Fact]
         public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
         {
             var result = Parser.Instance.Parse($"dotnet tool update -g --tool-path /tmp/folder {PackageId}");
             var appliedCommand = result["dotnet"]["tool"]["update"];
-            
+
             var toolUpdateCommand = new ToolUpdateCommand(
                 appliedCommand,
                 result);
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                     string.Format(LocalizableStrings.UpdateToolCommandInvalidGlobalAndLocalAndToolPath,
                         "local tool-path"));
         }
-        
+
         [Fact]
         public void WhenRunWithGlobalAndToolManifestShowErrorMessage()
         {
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var toolUpdateCommand = new ToolUpdateCommand(
                 appliedCommand,
                 result);
-            
+
             Action a = () => toolUpdateCommand.Execute();
 
             a.ShouldThrow<GracefulException>().And.Message

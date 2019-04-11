@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             appliedOptions.SingleArgumentOrDefault("version").Should().Be("1.2");
         }
-        
+
         [Fact]
         public void UninstallToolParserCanParseLocalOption()
         {
@@ -169,7 +169,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["update"];
             appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
         }
-        
+
         [Fact]
         public void UninstallToolParserCanParseToolManifestOption()
         {

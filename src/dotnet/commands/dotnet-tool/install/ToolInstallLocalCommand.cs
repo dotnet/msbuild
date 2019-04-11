@@ -73,12 +73,12 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 _toolLocalPackageInstaller.TargetFrameworkToInstall);
 
             _reporter.WriteLine(
-                    string.Format(
-                        LocalizableStrings.LocalToolInstallationSucceeded,
-                        string.Join(", ", toolDownloadedPackage.Commands.Select(c => c.Name)),
-                        toolDownloadedPackage.Id,
-                        toolDownloadedPackage.Version.ToNormalizedString(),
-                        manifestFile.Value).Green());
+                string.Format(
+                    LocalizableStrings.LocalToolInstallationSucceeded,
+                    string.Join(", ", toolDownloadedPackage.Commands.Select(c => c.Name)),
+                    toolDownloadedPackage.Id,
+                    toolDownloadedPackage.Version.ToNormalizedString(),
+                    manifestFile.Value).Green());
 
             return 0;
         }
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         e.Message,
                         LocalizableStrings.NoManifestGuide
                     },
-                    verboseMessages: new[] { e.VerboseMessage },
+                    verboseMessages: new[] {e.VerboseMessage},
                     isUserError: false);
             }
         }

@@ -3,17 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools.Tool.Common;
-using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;
-using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
@@ -36,7 +28,8 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
             if (string.IsNullOrWhiteSpace(targetFrameworkToInstall))
             {
-                throw new ArgumentException("targetFrameworkToInstall cannot be null or whitespace", nameof(targetFrameworkToInstall));
+                throw new ArgumentException("targetFrameworkToInstall cannot be null or whitespace",
+                    nameof(targetFrameworkToInstall));
             }
 
             foreach (var restoredCommand in toolDownloadedPackage.Commands)
