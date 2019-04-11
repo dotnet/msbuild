@@ -84,7 +84,7 @@ namespace Microsoft.Build.Shared
                 {
                     if (prevCharWasSlash)
                     {
-                        //We get here in the case of an extra slash somewhere.
+                        //We get here in the case of an extra slash.
                         return false;
                     }
 
@@ -134,8 +134,7 @@ namespace Microsoft.Build.Shared
                 {
                     if (hasSubfolder)
                     {
-                        //As soon as a character is seen after verifying subfolder exists,
-                        //  this is beginning of a unc pattern.
+                        //A character after a subfolder confirms the beginning of a unc pattern
                         return true;
                     }
 
