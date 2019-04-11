@@ -37,7 +37,7 @@ namespace Microsoft.Build.Shared
 
 
         /// <summary>
-        /// Indicates whether the specified string follows the pattern "<drive letter>:"
+        /// Indicates whether the specified string follows the pattern drive pattern: "<drive letter>:"
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified string starts with "<drive letter>:".
+        /// Indicates whether the specified string starts with the drive pattern: "<drive letter>:".
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified string follows the pattern "\\server\path".
+        /// Indicates whether the specified string follows the unc pattern exactly: "\\<server>\<path>".
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
@@ -82,9 +82,10 @@ namespace Microsoft.Build.Shared
                 if (pattern[i] == Path.DirectorySeparatorChar ||
                     pattern[i] == Path.AltDirectorySeparatorChar)
                 {
-                    if (prevCharWasSlash)
+                    if (prevCharWasSlash || hasSubfolder)
                     {
-                        //We get here in the case of an extra slash.
+                        //We get here in the case of an extra slash or multiple subfolders
+                        //  Note this function is meant to mimic the UncPattern regex.
                         return false;
                     }
 
@@ -102,7 +103,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified string starts with "\\server\path".
+        /// Indicates whether the specified string starts with the unc pattern: "\\<server>\<path>".
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>

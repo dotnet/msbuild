@@ -479,7 +479,7 @@ namespace Microsoft.Build.Tasks
                 : Directory.GetCurrentDirectory();
 
             // check if the working directory we're going to use for the exec command is a UNC path
-            workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern.IsMatch(_workingDirectory);
+            workingDirectoryIsUNC = FileUtilitiesRegex.DoesStartWithUncPattern(_workingDirectory);
 
             // if the working directory is a UNC path, and all drive letters are mapped, bail out, because the pushd command
             // will not be able to auto-map to the UNC path
