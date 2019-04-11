@@ -14,6 +14,7 @@ $restore = $true
 
 . $PSScriptRoot\common\tools.ps1
 
+. $PSScriptRoot\configure-toolset.ps1
 
 function Print-Usage() {
   Write-Host "Common settings:"

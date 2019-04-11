@@ -574,6 +574,7 @@ System.Console.dll
 System.Core.dll
 System.Data.Common.dll
 System.Data.dll
+System.Data.DataSetExtensions.dll
 System.Data.SqlClient.dll
 System.Diagnostics.Contracts.dll
 System.Diagnostics.Debug.dll
