@@ -9,6 +9,7 @@ done
 scriptroot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 . "$scriptroot/common/tools.sh"
+. "$scriptroot/configure-toolset.sh"
 InitializeToolset
 . "$scriptroot/restore-toolset.sh"
 
