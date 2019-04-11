@@ -48,6 +48,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <ProjectReferenceTargetsForRebuildInOuterBuild>$(ProjectReferenceTargetsForCleanInOuterBuild);$(ProjectReferenceTargetsForBuildInOuterBuild);$(ProjectReferenceTargetsForRebuildInOuterBuild)</ProjectReferenceTargetsForRebuildInOuterBuild>
     <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
+
+    <ProjectReferenceTargetsForPublish>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
+    <ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)</ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -59,6 +62,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForRebuildInOuterBuild)' != '' " />
       <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+
+      <ProjectReferenceTargets Include="Publish" Targets="$(ProjectReferenceTargetsForPublish)" Condition=" '$(ProjectReferenceTargetsForPublish)' != '' " />
+      <ProjectReferenceTargets Include="GetCopyToPublishDirectoryItems" Targets="$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)" Condition=" '$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)' != '' " />
+
   </ItemGroup>
 
 </Project>
