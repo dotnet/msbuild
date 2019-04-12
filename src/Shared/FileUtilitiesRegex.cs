@@ -85,7 +85,7 @@ namespace Microsoft.Build.Shared
                     if (prevCharWasSlash || hasSubfolder)
                     {
                         //We get here in the case of an extra slash or multiple subfolders
-                        //  Note this function is meant to mimic the UncPattern regex.
+                        //  Note this function is meant to mimic the UncPattern regex above.
                         return false;
                     }
 
@@ -202,8 +202,6 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool MeetsUncPatternMinimumRequirements(string pattern)
         {
-            //Format dictates a minimum length of 5: "\\a\b" &
-            //  first two characters must be unix/windows slash
             return pattern.Length >= 5 &&
                 (pattern[0] == Path.DirectorySeparatorChar ||
                 pattern[0] == Path.AltDirectorySeparatorChar) &&
