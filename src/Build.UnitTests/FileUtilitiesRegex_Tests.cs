@@ -533,7 +533,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void MatchLengthStartsWithUncPatternLessNoSubfolder()
+        public void MatchLengthStartsWithUncPatternNoSubfolder()
         {
             string winDirectory = string.Format("{0}server", _directoryStart);
             string unixDirectory = string.Format("{0}server", _altDirectoryStart);
@@ -596,7 +596,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void MatchLengthStartsWithUncPatternLessEmptyString()
+        public void MatchLengthStartsWithUncPatternEmptyString()
         {
             string winDirectory = string.Format("", _directoryStart);
             string unixDirectory = string.Format("", _altDirectoryStart);
