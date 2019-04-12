@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19210.1">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19211.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>0ea905c56ab0c8a8d17b1781486dad2e754afca3</Sha>
+      <Sha>df99030c70eb20df18f953a62f3cf9d56ea20d6b</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
