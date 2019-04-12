@@ -64,7 +64,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified string follows the unc pattern exactly: "\\<server>\<path>".
+        /// Indicates whether the specified file-spec comprises exactly "\\<server>\<path>" (with no trailing characters).
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified string starts with the unc pattern: "\\<server>\<path>".
+        /// Indicates whether the specified file-spec begins with "\\<server>\<path>".
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
@@ -147,8 +147,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Calculates the length of the match for the beginning of a unc pattern.
-        /// -1 indicates no match.
+        /// Indicates whether the file-spec begins with a UNC pattern and how long the match is. -1 indicates no match.
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
@@ -188,13 +187,19 @@ namespace Microsoft.Build.Shared
 
             if(!hasSubfolder)
             {
-                //no subfolder means no unc pattern. string is something like "\\abc"
+                //no subfolder means no unc pattern. string is something like "\\abc" in this case
                 return -1;
             }
 
             return pattern.Length;
         }
 
+        /// <summary>
+        /// Indicates whether or not the file-spec meets the minimum requirements of a UNC pattern.
+        /// UNC pattern requires a minimum length of 5 and first two characters must be a slash.
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
         internal static bool MeetsUncPatternMinimumRequirements(string pattern)
         {
             //Format dictates a minimum length of 5: "\\a\b" &
