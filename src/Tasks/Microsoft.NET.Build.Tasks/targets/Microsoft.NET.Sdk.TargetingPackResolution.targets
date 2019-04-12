@@ -107,6 +107,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                      TargetingPackRoot="$(NetCoreTargetingPackRoot)"
                      AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
+                     OtherRuntimeIdentifiers="$(RuntimeIdentifiers)"
                      RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                      PackAsToolShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
                      DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"

@@ -19,6 +19,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string AppHostRuntimeIdentifier { get; set; }
 
+        public string [] OtherRuntimeIdentifiers { get; set; }
+
         public string RuntimeFrameworkVersion { get; set; }
 
         public ITaskItem[] PackAsToolShimRuntimeIdentifiers { get; set; } = Array.Empty<ITaskItem>();
@@ -128,6 +130,25 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
                 PackAsToolShimAppHostPacks = packAsToolShimAppHostPacks.ToArray();
+            }
+
+            if (OtherRuntimeIdentifiers != null)
+            {
+                foreach (var otherRuntimeIdentifier in OtherRuntimeIdentifiers)
+                {
+                    //  Download any apphost packages for other runtime identifiers.
+                    //  This allows you to specify the list of RIDs in RuntimeIdentifiers and only restore once,
+                    //  and then build for each RuntimeIdentifier without restoring separately.
+
+                    //  We discard the return value, and pass in some bogus data that won't be used, because
+                    //  we won't use the assets from the apphost pack in this build.
+                    GetHostItem(otherRuntimeIdentifier,
+                            knownAppHostPacksForTargetFramework,
+                            packagesToDownload,
+                            hostNameWithoutExtension: "unused",
+                            itemName: "unused",
+                            isExecutable: true);
+                }
             }
 
             if (packagesToDownload.Any())
