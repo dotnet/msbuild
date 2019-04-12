@@ -146,6 +146,55 @@ namespace Microsoft.Build.Shared
             return false;
         }
 
+        /// <summary>
+        /// Calculates the length of the match for the beginning of a unc pattern.
+        /// -1 indicates no match.
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        internal static int DoesStartWithUncPatternMatchLength(string pattern)
+        {
+            if (!MeetsUncPatternMinimumRequirements(pattern))
+            {
+                return -1;
+            }
+
+            bool prevCharWasSlash = true;
+            bool hasSubfolder = false;
+
+            for (int i = 2; i < pattern.Length; i++)
+            {
+                if (pattern[i] == Path.DirectorySeparatorChar ||
+                    pattern[i] == Path.AltDirectorySeparatorChar)
+                {
+                    if (prevCharWasSlash)
+                    {
+                        //We get here in the case of an extra slash.
+                        return -1;
+                    }
+                    else if(hasSubfolder)
+                    {
+                        return i;
+                    }
+
+                    hasSubfolder = true;
+                    prevCharWasSlash = true;
+                }
+                else
+                {
+                    prevCharWasSlash = false;
+                }
+            }
+
+            if(!hasSubfolder)
+            {
+                //no subfolder means no unc pattern. string is something like "\\abc"
+                return -1;
+            }
+
+            return pattern.Length;
+        }
+
         internal static bool MeetsUncPatternMinimumRequirements(string pattern)
         {
             //Format dictates a minimum length of 5: "\\a\b" &
