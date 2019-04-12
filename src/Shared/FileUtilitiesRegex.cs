@@ -15,6 +15,9 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class FileUtilitiesRegex
     {
+        private static readonly char _backSlash = '\\';
+        private static readonly char _forwardSlash = '/';
+
         // regular expression used to match file-specs comprising exactly "<drive letter>:" (with no trailing characters)
         internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:$", RegexOptions.Compiled);
 
@@ -79,8 +82,8 @@ namespace Microsoft.Build.Shared
             bool hasSubfolder = false;
             for (int i = 2; i < pattern.Length; i++)
             {
-                if (pattern[i] == Path.DirectorySeparatorChar ||
-                    pattern[i] == Path.AltDirectorySeparatorChar)
+                if (pattern[i] == _backSlash ||
+                    pattern[i] == _forwardSlash)
                 {
                     if (prevCharWasSlash || hasSubfolder)
                     {
@@ -119,8 +122,8 @@ namespace Microsoft.Build.Shared
 
             for (int i = 2; i < pattern.Length; i++)
             {
-                if (pattern[i] == Path.DirectorySeparatorChar ||
-                    pattern[i] == Path.AltDirectorySeparatorChar)
+                if (pattern[i] == _backSlash ||
+                    pattern[i] == _forwardSlash)
                 {
                     if (prevCharWasSlash)
                     {
@@ -163,8 +166,8 @@ namespace Microsoft.Build.Shared
 
             for (int i = 2; i < pattern.Length; i++)
             {
-                if (pattern[i] == Path.DirectorySeparatorChar ||
-                    pattern[i] == Path.AltDirectorySeparatorChar)
+                if (pattern[i] == _backSlash ||
+                    pattern[i] == _forwardSlash)
                 {
                     if (prevCharWasSlash)
                     {
@@ -203,10 +206,10 @@ namespace Microsoft.Build.Shared
         internal static bool MeetsUncPatternMinimumRequirements(string pattern)
         {
             return pattern.Length >= 5 &&
-                (pattern[0] == Path.DirectorySeparatorChar ||
-                pattern[0] == Path.AltDirectorySeparatorChar) &&
-                (pattern[1] == Path.DirectorySeparatorChar ||
-                pattern[1] == Path.AltDirectorySeparatorChar);
+                (pattern[0] == _backSlash ||
+                pattern[0] == _forwardSlash) &&
+                (pattern[1] == _backSlash ||
+                pattern[1] == _forwardSlash);
        }
 
     }

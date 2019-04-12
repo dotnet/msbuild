@@ -12,8 +12,8 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     public class FileUtilitiesRegex_Tests
     {
-        private string _directoryStart = new string(Path.DirectorySeparatorChar, 2);
-        private string _altDirectoryStart = new string(Path.AltDirectorySeparatorChar, 2);
+        private string _directoryStart = new string(MSBuildConstants.BackslashChar[0], 2);
+        private string _altDirectoryStart = new string(MSBuildConstants.ForwardSlash[0], 2);
 
         [Fact]
         public void DrivePatternIsMatchAllProperFormats()
