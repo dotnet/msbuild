@@ -170,7 +170,10 @@ namespace Microsoft.DotNet.ToolManifest
                         EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
         }
 
-        public IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId)
+        /// <summary>
+        /// Return manifest file path in the order of the closest probe path first.
+        /// </summary>
+        public IReadOnlyList<FilePath> FindByPackageId(PackageId packageId)
         {
             var result = new List<FilePath>();
             bool findAnyManifest = false;

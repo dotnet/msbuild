@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         }
 
         [Fact]
-        public void UninstallToolParserCanParseLocalOption()
+        public void UpdateToolParserCanParseLocalOption()
         {
             var result =
                 Parser.Instance.Parse(@"dotnet tool update --local console.test.app");
@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         }
 
         [Fact]
-        public void UninstallToolParserCanParseToolManifestOption()
+        public void UpdateToolParserCanParseToolManifestOption()
         {
             var result =
                 Parser.Instance.Parse(@"dotnet tool update --tool-manifest folder/my-manifest.format console.test.app");

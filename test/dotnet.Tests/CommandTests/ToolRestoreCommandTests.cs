@@ -435,7 +435,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 throw new NotImplementedException();
             }
 
-            public IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId)
+            public IReadOnlyList<FilePath> FindByPackageId(PackageId packageId)
             {
                 throw new NotImplementedException();
             }
@@ -453,7 +453,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 throw new NotImplementedException();
             }
 
-            public IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId)
+            public IReadOnlyList<FilePath> FindByPackageId(PackageId packageId)
             {
                 throw new NotImplementedException();
             }

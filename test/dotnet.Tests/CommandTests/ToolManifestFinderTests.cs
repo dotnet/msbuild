@@ -288,7 +288,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                     _fileSystem,
                     new FakeDangerousFileDetector());
 
-            var manifests = toolManifest.FindContainPackageId(new PackageId("t-rex"));
+            var manifests = toolManifest.FindByPackageId(new PackageId("t-rex"));
 
             manifests.Should().ContainInOrder(new List<FilePath>
             {
@@ -296,14 +296,14 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 new FilePath(manifestFileInParentDirectory)
             }, "Order matters, the closest to probe start first.");
 
-            var manifests2 = toolManifest.FindContainPackageId(new PackageId("dotnetsay"));
+            var manifests2 = toolManifest.FindByPackageId(new PackageId("dotnetsay"));
 
             manifests2.Should().ContainInOrder(new List<FilePath>
             {
                 new FilePath(manifestFileInSubDirectory)
             });
 
-            var manifests3 = toolManifest.FindContainPackageId(new PackageId("non-exist"));
+            var manifests3 = toolManifest.FindByPackageId(new PackageId("non-exist"));
 
             manifests3.Should().BeEmpty();
         }
@@ -319,7 +319,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                     _fileSystem,
                     new FakeDangerousFileDetector());
 
-            Action a = () => toolManifest.FindContainPackageId(new PackageId("t-rex"));
+            Action a = () => toolManifest.FindByPackageId(new PackageId("t-rex"));
 
             a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
                 .Contain(LocalizableStrings.CannotFindAManifestFile);

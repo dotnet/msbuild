@@ -167,6 +167,6 @@ For a list of locations searched, specify the "-d" option before the tool name.<
     <value>Expected a {0} for property '{1}'.</value>
   </data>
   <data name="MultipleSamePackageId" xml:space="preserve">
-    <value>There are more than one entry for package(s): {0}</value>
+    <value>More than one entry exists for package(s): {0}.</value>
   </data>
 </root>

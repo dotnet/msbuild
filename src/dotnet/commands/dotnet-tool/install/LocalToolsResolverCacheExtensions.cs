@@ -12,13 +12,13 @@ namespace Microsoft.DotNet.Tools.Tool.Install
     internal static class LocalToolsResolverCacheExtensions
     {
         public static void SaveToolPackage(
-            this ILocalToolsResolverCache _localToolsResolverCache,
+            this ILocalToolsResolverCache localToolsResolverCache,
             IToolPackage toolDownloadedPackage,
             string targetFrameworkToInstall)
         {
-            if (_localToolsResolverCache == null)
+            if (localToolsResolverCache == null)
             {
-                throw new ArgumentNullException(nameof(_localToolsResolverCache));
+                throw new ArgumentNullException(nameof(localToolsResolverCache));
             }
 
             if (toolDownloadedPackage == null)
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
             foreach (var restoredCommand in toolDownloadedPackage.Commands)
             {
-                _localToolsResolverCache.Save(
+                localToolsResolverCache.Save(
                     new Dictionary<RestoredCommandIdentifier, RestoredCommand>
                     {
                         [new RestoredCommandIdentifier(

@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="new">Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</target>
+        <source>Specifying the tool manifest option (--tool-manifest) is only valid with the local option (--local or the default).</source>
+        <target state="new">Specifying the tool manifest option (--tool-manifest) is only valid with the local option (--local or the default).</target>
         <note />
       </trans-unit>
     </body>

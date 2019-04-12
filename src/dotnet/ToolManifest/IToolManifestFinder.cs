@@ -11,6 +11,6 @@ namespace Microsoft.DotNet.ToolManifest
     {
         IReadOnlyCollection<ToolManifestPackage> Find(FilePath? filePath = null);
         FilePath FindFirst();
-        IReadOnlyList<FilePath> FindContainPackageId(PackageId packageId);
+        IReadOnlyList<FilePath> FindByPackageId(PackageId packageId);
     }
 }

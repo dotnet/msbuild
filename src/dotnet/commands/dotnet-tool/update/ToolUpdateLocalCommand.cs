@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             }
 
             var manifestFilesContainPackageId
-                = _toolManifestFinder.FindContainPackageId(_packageId);
+                = _toolManifestFinder.FindByPackageId(_packageId);
 
             if (manifestFilesContainPackageId.Any())
             {

@@ -196,10 +196,10 @@
     <value>The requested version {0} is lower than existing version {1}.</value>
   </data>
   <data name="UpdateToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
-    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
+    <value>The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</value>
   </data>
   <data name="NoManifestGuide" xml:space="preserve">
-    <value>If you intended to update a global tool, add `--global` to the command.</value>
+    <value>If you intended to update a global tool, use the `--global` option for the command.</value>
   </data>
   <data name="LocalOptionDescription" xml:space="preserve">
     <value>Update the tool and update from the local tool manifest.</value>
@@ -220,7 +220,7 @@
     <value>Tool '{0}' is up to date (version '{1}' manifest file {2}) .</value>
   </data>
   <data name="SamePackageIdInOtherManifestFile" xml:space="preserve">
-    <value>Warning: There are other manifest files could affect local tools in current directory. They are not changed:
+    <value>Warning: there are other manifest files in the current directory that could affect local tools. The following files are not changed:
 {0}</value>
   </data>
 </root>

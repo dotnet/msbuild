@@ -32,8 +32,8 @@ For a list of locations searched, specify the "-d" option before the tool name.<
         <note />
       </trans-unit>
       <trans-unit id="MultipleSamePackageId">
-        <source>There are more than one entry for package(s): {0}</source>
-        <target state="new">There are more than one entry for package(s): {0}</target>
+        <source>More than one entry exists for package(s): {0}.</source>
+        <target state="new">More than one entry exists for package(s): {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTypeInJson">

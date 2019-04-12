@@ -118,6 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
-    <value>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</value>
+    <value>Specifying the tool manifest option (--tool-manifest) is only valid with the local option (--local or the default).</value>
   </data>
 </root>

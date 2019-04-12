@@ -37,16 +37,16 @@ namespace Microsoft.DotNet.ToolManifest
         }
 
         public void Add(
-            FilePath to,
+            FilePath manifest,
             PackageId packageId,
             NuGetVersion nuGetVersion,
             ToolCommandName[] toolCommandNames)
         {
             SerializableLocalToolsManifest deserializedManifest =
-                DeserializeLocalToolsManifest(to);
+                DeserializeLocalToolsManifest(manifest);
 
             List<ToolManifestPackage> toolManifestPackages =
-                GetToolManifestPackageFromOneManifestFile(deserializedManifest, to, to.GetDirectoryPath());
+                GetToolManifestPackageFromOneManifestFile(deserializedManifest, manifest, manifest.GetDirectoryPath());
 
             var existing = toolManifestPackages.Where(t => t.PackageId.Equals(packageId)).ToArray();
             if (existing.Any())
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.ToolManifest
                     LocalizableStrings.ManifestPackageIdCollision,
                     existingPackage.Version.ToNormalizedString(),
                     existingPackage.PackageId.ToString(),
-                    to.Value,
+                    manifest.Value,
                     nuGetVersion.ToNormalizedString()));
             }
 
@@ -80,20 +80,20 @@ namespace Microsoft.DotNet.ToolManifest
                     Commands = toolCommandNames.Select(c => c.Value).ToArray()
                 });
 
-            _fileSystem.File.WriteAllText(to.Value, deserializedManifest.ToJson());
+            _fileSystem.File.WriteAllText(manifest.Value, deserializedManifest.ToJson());
         }
 
         public void Edit(
-            FilePath to,
+            FilePath manifest,
             PackageId packageId,
             NuGetVersion newNuGetVersion,
             ToolCommandName[] newToolCommandNames)
         {
             SerializableLocalToolsManifest deserializedManifest =
-                DeserializeLocalToolsManifest(to);
+                DeserializeLocalToolsManifest(manifest);
 
             List<ToolManifestPackage> toolManifestPackages =
-                GetToolManifestPackageFromOneManifestFile(deserializedManifest, to, to.GetDirectoryPath());
+                GetToolManifestPackageFromOneManifestFile(deserializedManifest, manifest, manifest.GetDirectoryPath());
 
             var existing = toolManifestPackages.Where(t => t.PackageId.Equals(packageId)).ToArray();
             if (existing.Any())
@@ -110,10 +110,10 @@ namespace Microsoft.DotNet.ToolManifest
             }
             else
             {
-                throw new ArgumentException($"Manifest {to.Value} does not contain package id '{packageId}'.");
+                throw new ArgumentException($"Manifest {manifest.Value} does not contain package id '{packageId}'.");
             }
 
-            _fileSystem.File.WriteAllText(to.Value, deserializedManifest.ToJson());
+            _fileSystem.File.WriteAllText(manifest.Value, deserializedManifest.ToJson());
         }
 
         public (List<ToolManifestPackage> content, bool isRoot)
@@ -401,16 +401,16 @@ namespace Microsoft.DotNet.ToolManifest
             }
         }
 
-        public void Remove(FilePath fromFilePath, PackageId packageId)
+        public void Remove(FilePath manifest, PackageId packageId)
         {
             SerializableLocalToolsManifest serializableLocalToolsManifest =
-                DeserializeLocalToolsManifest(fromFilePath);
+                DeserializeLocalToolsManifest(manifest);
 
             List<ToolManifestPackage> toolManifestPackages =
                 GetToolManifestPackageFromOneManifestFile(
                     serializableLocalToolsManifest,
-                    fromFilePath,
-                    fromFilePath.GetDirectoryPath());
+                    manifest,
+                    manifest.GetDirectoryPath());
 
             if (!toolManifestPackages.Any(t => t.PackageId.Equals(packageId)))
             {
@@ -431,7 +431,7 @@ namespace Microsoft.DotNet.ToolManifest
                 .ToList();
 
             _fileSystem.File.WriteAllText(
-                           fromFilePath.Value,
+                           manifest.Value,
                            serializableLocalToolsManifest.ToJson());
         }
     }
