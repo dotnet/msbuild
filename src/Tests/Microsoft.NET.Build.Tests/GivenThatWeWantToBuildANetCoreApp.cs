@@ -673,6 +673,57 @@ public static class Program
                 .Pass();
         }
 
+        [WindowsOnlyFact]
+        public void It_escapes_resolved_package_assets_paths()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ProjectWithPackageThatNeedsEscapes",
+                TargetFrameworks = "net462",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            testProject.SourceFiles["ExampleReader.cs"] = @"
+using System;
+using System.Threading.Tasks;
+
+namespace ContentFilesExample
+{
+    internal static class ExampleInternals
+    {
+        internal static Task<string> GetFileText(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine(""Hello World!"");
+    }
+}";
+
+            // ContentFilesExample is an existing package that demonstrates the problem.
+            // It contains assets with paths that have '%2B', which MSBuild will unescape to '+'.
+            // Without the change to escape the asset paths, the asset will not be found inside the package.
+            testProject.PackageReferences.Add(new TestPackageReference("ContentFilesExample", "1.0.2"));
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         private static bool IsPE32(string path)
         {
             using (var reader = new PEReader(File.OpenRead(path)))
