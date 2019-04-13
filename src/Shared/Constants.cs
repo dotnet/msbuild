@@ -83,6 +83,12 @@ namespace Microsoft.Build.Shared
         /// Symbol used in ProjectReferenceTarget items to represent default targets
         /// </summary>
         internal const string DefaultTargetsMarker = ".default";
+
+        /// <summary>
+        /// Symbol used in ProjectReferenceTarget items to represent targets specified on the ProjectReference item
+        /// with fallback to default targets if the ProjectReference item has no targets specified.
+        /// </summary>
+        internal const string ProjectReferenceTargetsOrDefaultTargetsMarker = ".projectReferenceTargetsOrDefaultTargets";
 		
 		// One-time allocations to avoid implicit allocations for Split(), Trim().
         internal static readonly char[] SemicolonChar = { ';' };

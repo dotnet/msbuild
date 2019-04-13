@@ -18,7 +18,7 @@ namespace Microsoft.Build.Experimental.Graph
 {
     internal class GraphBuilder
     {
-        private readonly ProjectInterpretation _projectInterpretation;
+        private ProjectInterpretation ProjectInterpretation { get; }
 
         public IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; private set; }
 
@@ -26,9 +26,11 @@ namespace Microsoft.Build.Experimental.Graph
 
         public IReadOnlyCollection<ProjectGraphNode> EntryPointNodes { get; private set; }
 
+        public GraphEdges Edges { get; private set; }
+
         public GraphBuilder(ProjectInterpretation projectInterpretation)
         {
-            _projectInterpretation = projectInterpretation;
+            ProjectInterpretation = projectInterpretation;
         }
 
         public void BuildGraph(
@@ -53,13 +55,15 @@ namespace Microsoft.Build.Experimental.Graph
                 projectCollection,
                 tasksInProgress,
                 projectInstanceFactory,
-                _projectInterpretation,
+                ProjectInterpretation,
                 allParsedProjects,
                 out var exceptions))
             {
-                CreateEdgesAndDetectCycles(entryPointConfigurationMetadata, _projectInterpretation, allParsedProjects);
+                Edges = new GraphEdges();
 
-                _projectInterpretation.PostProcess(allParsedProjects);
+                CreateEdgesAndDetectCycles(entryPointConfigurationMetadata, ProjectInterpretation, allParsedProjects, Edges);
+
+                ProjectInterpretation.PostProcess(allParsedProjects, this);
 
                 EntryPointNodes = entryPointConfigurationMetadata.Select(e => allParsedProjects[e]).ToList();
                 RootNodes = GetGraphRoots(EntryPointNodes);
@@ -120,7 +124,8 @@ namespace Microsoft.Build.Experimental.Graph
         private void CreateEdgesAndDetectCycles(
             List<ConfigurationMetadata> entryPointConfigurationMetadata,
             ProjectInterpretation sdkInfo,
-            ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allParsedProjects)
+            ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allParsedProjects,
+            GraphEdges edges)
         {
             var nodeStates = new Dictionary<ProjectGraphNode, NodeVisitationState>();
 
@@ -149,7 +154,7 @@ namespace Microsoft.Build.Experimental.Graph
             {
                 nodeState[node] = NodeVisitationState.InProcess;
 
-                foreach (var referenceConfig in sdkInfo.GetReferences(node.ProjectInstance))
+                foreach (var (referenceConfig, projectReferenceItem) in sdkInfo.GetReferences(node.ProjectInstance))
                 {
                     var referenceNode = allParsedProjects[referenceConfig];
 
@@ -199,8 +204,7 @@ namespace Microsoft.Build.Experimental.Graph
                         }
                     }
 
-                    var parsedProjectReference = allParsedProjects[referenceConfig];
-                    node.AddProjectReference(parsedProjectReference);
+                    node.AddProjectReference(referenceNode, projectReferenceItem, edges);
                 }
 
                 nodeState[node] = NodeVisitationState.Processed;
@@ -260,7 +264,7 @@ namespace Microsoft.Build.Experimental.Graph
                         {
                             var parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory, allParsedProjects);
 
-                            foreach (var referenceConfig in projectInterpretation.GetReferences(parsedProject.ProjectInstance))
+                            foreach (var (referenceConfig, _) in projectInterpretation.GetReferences(parsedProject.ProjectInstance))
                             {
                                 /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
                              meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
@@ -351,6 +355,35 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             return propertyDictionary;
+        }
+
+        internal class GraphEdges
+        {
+            private ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance> ReferenceItems =
+                new ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance>();
+
+            internal int Count => ReferenceItems.Count;
+
+            public ProjectItemInstance this[(ProjectGraphNode node, ProjectGraphNode reference) key]
+            {
+                get
+                {
+                    ErrorUtilities.VerifyThrow(ReferenceItems.ContainsKey(key), "All requested keys should exist");
+                    return ReferenceItems[key];
+                }
+
+                // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
+                set => ReferenceItems.TryAdd(key, value);
+            }
+
+            public void RemoveEdge((ProjectGraphNode node, ProjectGraphNode reference) key)
+            {
+                ErrorUtilities.VerifyThrow(ReferenceItems.ContainsKey(key), "All requested keys should exist");
+
+                ReferenceItems.TryRemove(key, out _);
+            }
+
+            internal bool TestOnly_HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
         }
 
         private enum NodeVisitationState

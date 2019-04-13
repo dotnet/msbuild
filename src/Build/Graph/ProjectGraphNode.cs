@@ -37,18 +37,23 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
 
-        internal void AddProjectReference(ProjectGraphNode reference)
+        internal void AddProjectReference(ProjectGraphNode reference, ProjectItemInstance projectReferenceItem, GraphBuilder.GraphEdges edges)
         {
             _projectReferences.Add(reference);
             reference._referencingProjects.Add(this);
+
+            // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
+            edges[(this, reference)] = projectReferenceItem;
         }
 
-        internal void RemoveReferences()
+        internal void RemoveReferences(GraphBuilder.GraphEdges edges)
         {
             foreach (var reference in _projectReferences)
             {
                 ErrorUtilities.VerifyThrow(reference._referencingProjects.Contains(this), "references should point the nodes referencing them");
                 reference._referencingProjects.Remove(this);
+
+                edges.RemoveEdge((this, reference));
             }
 
             _projectReferences.Clear();

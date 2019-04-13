@@ -41,48 +41,48 @@ namespace Microsoft.Build.Experimental.Graph
             OuterBuild, InnerBuild, NonMultitargeting
         }
 
-        public IEnumerable<ConfigurationMetadata> GetReferences(ProjectInstance requesterInstance)
+        public IEnumerable<(ConfigurationMetadata referenceConfiguration, ProjectItemInstance projectReferenceItem)> GetReferences(ProjectInstance requesterInstance)
         {
-            IEnumerable<ProjectItemInstance> references;
+            IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
 
             switch (GetProjectType(requesterInstance))
             {
                 case ProjectType.OuterBuild:
-                    references = GetInnerBuildReferences(requesterInstance);
+                    projectReferenceItems = GetInnerBuildReferences(requesterInstance);
                     break;
                 case ProjectType.InnerBuild:
                     globalPropertiesModifiers = ModifierForNonMultitargetingNodes.Add((parts, reference) => parts.AddPropertyToUndefine(GetInnerBuildPropertyName(requesterInstance)));
-                    references = requesterInstance.GetItems(ItemTypeNames.ProjectReference);
+                    projectReferenceItems = requesterInstance.GetItems(ItemTypeNames.ProjectReference);
                     break;
                 case ProjectType.NonMultitargeting:
                     globalPropertiesModifiers = ModifierForNonMultitargetingNodes;
-                    references = requesterInstance.GetItems(ItemTypeNames.ProjectReference);
+                    projectReferenceItems = requesterInstance.GetItems(ItemTypeNames.ProjectReference);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            foreach (var projectReference in references)
+            foreach (var projectReferenceItem in projectReferenceItems)
             {
-                if (!String.IsNullOrEmpty(projectReference.GetMetadataValue(ToolsVersionMetadataName)))
+                if (!String.IsNullOrEmpty(projectReferenceItem.GetMetadataValue(ToolsVersionMetadataName)))
                 {
                     throw new InvalidOperationException(
                         String.Format(
                             CultureInfo.InvariantCulture,
                             ResourceUtilities.GetResourceString(
                                 "ProjectGraphDoesNotSupportProjectReferenceWithToolset"),
-                            projectReference.EvaluatedInclude,
+                            projectReferenceItem.EvaluatedInclude,
                             requesterInstance.FullPath));
                 }
 
-                var projectReferenceFullPath = projectReference.GetMetadataValue(FullPathMetadataName);
+                var projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
 
-                var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReference, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
+                var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
 
-                yield return referenceConfig;
+                yield return (referenceConfig, projectReferenceItem);
             }
         }
 
@@ -115,7 +115,12 @@ namespace Microsoft.Build.Experimental.Graph
                     : ProjectType.NonMultitargeting;
         }
 
-        public void PostProcess(ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allNodes)
+        /// <summary>
+        /// To avoid calling nuget at graph construction time, the graph is initially constructed with outer build nodes referencing inner build nodes.
+        /// However, at build time, for non root outer builds, the inner builds are NOT referenced by the outer build, but by the nodes referencing the
+        /// outer build. Change the graph to mimic this behaviour.
+        /// </summary>
+        public void PostProcess(ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allNodes, GraphBuilder graphBuilder)
         {
             foreach (var nodeKvp in allNodes)
             {
@@ -125,13 +130,19 @@ namespace Microsoft.Build.Experimental.Graph
                 {
                     foreach (var innerBuild in outerBuild.ProjectReferences)
                     {
-                        foreach (var referencingProject in outerBuild.ReferencingProjects)
+                        foreach (var outerBuildReferencingProject in outerBuild.ReferencingProjects)
                         {
-                            referencingProject.AddProjectReference(innerBuild);
+                            // Which edge should be used to connect the outerBuildReferencingProject to the inner builds?
+                            // Decided to use the outerBuildBuildReferencingProject -> outerBuild edge in order to preserve any extra metadata
+                            // information that may be present on the edge, like the "Targets" metadata which specifies what
+                            // targets to call on the references.
+                            var newInnerBuildEdge = graphBuilder.Edges[(outerBuildReferencingProject, outerBuild)];
+
+                            outerBuildReferencingProject.AddProjectReference(innerBuild, newInnerBuildEdge, graphBuilder.Edges);
                         }
                     }
 
-                    outerBuild.RemoveReferences();
+                    outerBuild.RemoveReferences(graphBuilder.Edges);
                 }
             }
         }

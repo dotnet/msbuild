@@ -51,6 +51,10 @@ namespace Microsoft.Build.Experimental.Graph
 
         private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
 
+        private GraphBuilder.GraphEdges Edges { get; }
+
+        internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
+
         /// <summary>
         ///     Gets the project nodes representing the entry points.
         /// </summary>
@@ -323,6 +327,7 @@ namespace Microsoft.Build.Experimental.Graph
             EntryPointNodes = graphBuilder.EntryPointNodes;
             GraphRoots = graphBuilder.RootNodes;
             ProjectNodes = graphBuilder.ProjectNodes;
+            Edges = graphBuilder.Edges;
 
             _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes));
         }
@@ -455,13 +460,18 @@ namespace Microsoft.Build.Experimental.Graph
                 var targetsToPropagate = ProjectInterpretation.TargetsToPropagate.FromProjectAndEntryTargets(node.ProjectInstance, requestedTargets);
 
                 // Queue the project references for visitation, if the edge hasn't already been traversed.
-                foreach (var projectReference in node.ProjectReferences)
+                foreach (var referenceNode in node.ProjectReferences)
                 {
-                    var applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(projectReference.ProjectInstance);
+                    var applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(referenceNode.ProjectInstance);
+
+                    var expandedTargets = ExpandDefaultTargets(
+                        applicableTargets,
+                        referenceNode.ProjectInstance.DefaultTargets,
+                        Edges[(node, referenceNode)]);
 
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
-                        projectReference,
-                        ExpandDefaultTargets(applicableTargets, projectReference.ProjectInstance.DefaultTargets));
+                        referenceNode,
+                        expandedTargets);
 
                     if (encounteredEdges.Add(projectReferenceEdge))
                     {
@@ -506,7 +516,7 @@ namespace Microsoft.Build.Experimental.Graph
             return targetLists;
         }
 
-        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets)
+        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets, ProjectItemInstance graphEdge)
         {
             var i = 0;
             while (i < targets.Count)
@@ -516,6 +526,20 @@ namespace Microsoft.Build.Experimental.Graph
                     targets = targets
                         .RemoveAt(i)
                         .InsertRange(i, defaultTargets);
+                    i += defaultTargets.Count;
+                }
+                else if (targets[i].Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
+                {
+                    var targetsString = graphEdge.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+
+                    var expandedTargets = string.IsNullOrEmpty(targetsString)
+                        ? defaultTargets
+                        : ExpressionShredder.SplitSemiColonSeparatedList(targetsString).ToList();
+
+                    targets = targets
+                        .RemoveAt(i)
+                        .InsertRange(i, expandedTargets);
+
                     i += defaultTargets.Count;
                 }
                 else

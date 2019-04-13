@@ -41,7 +41,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <PropertyGroup>
     <ProjectReferenceTargetsForBuildInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForBuildInOuterBuild)</ProjectReferenceTargetsForBuildInOuterBuild>
-    <ProjectReferenceTargetsForBuild>.default;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForBuild>.projectReferenceTargetsOrDefaultTargets;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
 
     <ProjectReferenceTargetsForCleanInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForCleanInOuterBuild)</ProjectReferenceTargetsForCleanInOuterBuild>
     <ProjectReferenceTargetsForClean>Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
