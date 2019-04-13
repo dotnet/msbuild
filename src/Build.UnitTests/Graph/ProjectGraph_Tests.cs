@@ -243,7 +243,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 var proj2 = CreateProjectFile(env, 2, new[] { 3 });
                 var proj3 = CreateProjectFile(env, 3, new[] { 1 });
                 var projectsInCycle = new List<string>() {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
-                string expectedErrorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
+                string expectedErrorMessage = GraphBuilder.FormatCircularDependencyError(projectsInCycle);
                 Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage.ToString());
             }
         }
@@ -277,7 +277,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 CreateProjectFile(env, 9);
                 CreateProjectFile(env, 10);
                 var projectsInCycle = new List<string>(){proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
-                var errorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
+                var errorMessage = GraphBuilder.FormatCircularDependencyError(projectsInCycle);
                 Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage.ToString());
             }
         }

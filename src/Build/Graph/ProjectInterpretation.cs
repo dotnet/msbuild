@@ -115,7 +115,7 @@ namespace Microsoft.Build.Experimental.Graph
                     : ProjectType.NonMultitargeting;
         }
 
-        public static void PostProcess(ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allNodes)
+        public void PostProcess(ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allNodes)
         {
             foreach (var nodeKvp in allNodes)
             {
