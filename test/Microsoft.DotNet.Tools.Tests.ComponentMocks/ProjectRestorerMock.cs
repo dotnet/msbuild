@@ -32,14 +32,14 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         public ProjectRestorerMock(
             IFileSystem fileSystem,
             IReporter reporter = null,
-            IEnumerable<MockFeed> feeds = null)
+            List<MockFeed> feeds = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _reporter = reporter;
 
-            _feeds = new List<MockFeed>();
             if (feeds == null)
             {
+                _feeds = new List<MockFeed>();
                 _feeds.Add(new MockFeed
                     {
                         Type = MockFeedType.FeedFromGlobalNugetConfig,
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             }
             else
             {
-                _feeds.AddRange(feeds);
+                _feeds = feeds;
             }
         }
 

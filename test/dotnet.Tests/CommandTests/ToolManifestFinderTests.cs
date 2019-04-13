@@ -17,7 +17,7 @@ using Xunit;
 using LocalizableStrings = Microsoft.DotNet.ToolManifest.LocalizableStrings;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolManifestFinderTests
     {
@@ -108,8 +108,8 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolManifest.Find();
 
             a.ShouldThrow<ToolManifestException>().And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.JsonParsingError,
-                Path.Combine(_testDirectoryRoot, _manifestFilename), ""));
+                .Contain(string.Format(string.Format(LocalizableStrings.MultipleSamePackageId,
+                    string.Join(", ", "t-rex")), ""));
         }
 
         [Fact]
@@ -269,6 +269,63 @@ namespace Microsoft.DotNet.Tests.Commands
                          new[] { new ToolCommandName("dotnetsay") },
                          new DirectoryPath(subdirectoryOfTestRoot)),
                 because: "combine both content in different manifests");
+        }
+
+        [Fact]
+        public void GivenManifestFileInDifferentDirectoriesWhenFindContainPackageIdItCanGetResultInOrder()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            string manifestFileInParentDirectory = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFileInParentDirectory,
+                _jsonContentInParentDirectory);
+            string manifestFileInSubDirectory = Path.Combine(subdirectoryOfTestRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFileInSubDirectory,
+                _jsonContentInCurrentDirectory);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(subdirectoryOfTestRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            var manifests = toolManifest.FindByPackageId(new PackageId("t-rex"));
+
+            manifests.Should().ContainInOrder(new List<FilePath>
+            {
+                new FilePath(manifestFileInSubDirectory),
+                new FilePath(manifestFileInParentDirectory)
+            }, "Order matters, the closest to probe start first.");
+
+            var manifests2 = toolManifest.FindByPackageId(new PackageId("dotnetsay"));
+
+            manifests2.Should().ContainInOrder(new List<FilePath>
+            {
+                new FilePath(manifestFileInSubDirectory)
+            });
+
+            var manifests3 = toolManifest.FindByPackageId(new PackageId("non-exist"));
+
+            manifests3.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenNoManifestFileWhenFindContainPackageIdItThrows()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(subdirectoryOfTestRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            Action a = () => toolManifest.FindByPackageId(new PackageId("t-rex"));
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
+                .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]

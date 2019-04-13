@@ -22,11 +22,6 @@
         <target state="new">If you intended to uninstall a global tool, add `--global` to the command.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="translated">指定工具清单(--tool-manifest)的操作仅在使用本地选项(--loca 或默认)时有效。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
         <target state="translated">要卸载的工具的 NuGet 包 ID。</target>

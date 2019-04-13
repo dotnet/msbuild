@@ -55,9 +55,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             return tempProjectPath;
         }
 
-        private static IEnumerable<MockFeed> GetMockFeedsForSource(string source)
+        private static List<MockFeed> GetMockFeedsForSource(string source)
         {
-            return new[]
+            return new List<MockFeed>
             {
                 new MockFeed
                 {
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         private static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
             ) Setup(
                 bool useMock,
-                IEnumerable<MockFeed> feeds = null,
+                List<MockFeed> feeds = null,
                 FilePath? tempProject = null,
                 DirectoryPath? offlineFeed = null)
         {

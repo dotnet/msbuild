@@ -10,7 +10,7 @@ using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolListCommandTests
     {
