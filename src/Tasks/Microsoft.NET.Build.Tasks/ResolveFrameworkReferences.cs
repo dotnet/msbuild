@@ -112,7 +112,7 @@ namespace Microsoft.NET.Build.Tasks
                 string targetingPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
                 {
-                    targetingPackPath = Path.Combine(TargetingPackRoot, knownFrameworkReference.TargetingPackName, knownFrameworkReference.TargetingPackVersion);
+                    targetingPackPath = Path.Combine(TargetingPackRoot, knownFrameworkReference.TargetingPackName, targetingPackVersion);
                 }
                 if (targetingPackPath != null && Directory.Exists(targetingPackPath))
                 {
