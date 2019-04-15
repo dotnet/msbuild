@@ -120,19 +120,20 @@ namespace Microsoft.Build.Internal
                     // them, so just check COMPLUS_InstallRoot.
                     string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
 
-#if THISASSEMBLY
-                    var fileIdentity = ThisAssembly.AssemblyInformationalVersion;
-#else
-                    var fileIdentity = string.Empty;
-
-                    using (var sha1 = SHA1.Create())
+                    // This is easier in .NET 4+:
+                    //  var fileIdentity = typeof(CommunicationsUtilities).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+                    // but we need to be 3.5 compatible here to work in MSBuildTaskHost
+                    string fileIdentity = null;
+                    foreach (var attribute in typeof(CommunicationsUtilities).GetTypeInfo().Assembly.GetCustomAttributes(false))
                     {
-                        var hashBytes = sha1.ComputeHash(File.ReadAllBytes(AssemblyUtilities.GetAssemblyLocation(typeof(CommunicationsUtilities).Assembly)));
-                        fileIdentity = Encoding.UTF8.GetString(hashBytes);
+                        if (attribute is AssemblyInformationalVersionAttribute informationalVersionAttribute)
+                        {
+                            fileIdentity = informationalVersionAttribute.InformationalVersion;
+                            break;
+                        }
                     }
 
-                    ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(fileIdentity), "file hashing failed");
-#endif
+                    ErrorUtilities.VerifyThrow(fileIdentity != null, "Did not successfully retrieve InformationalVersion.");
 
                     s_fileVersionHash = GetHandshakeHashCode(complusInstallRoot ?? fileIdentity);
                     s_fileVersionChecked = true;
