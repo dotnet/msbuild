@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public string AppHostRuntimeIdentifier { get; set; }
 
-        public string [] OtherRuntimeIdentifiers { get; set; }
+        public string[] OtherRuntimeIdentifiers { get; set; }
 
         public string RuntimeFrameworkVersion { get; set; }
 
