@@ -478,7 +478,7 @@ namespace Microsoft.Build.Shared
                             }
                             else
                             {
-                                int matchLength = FileUtilitiesRegex.DoesStartWithUncPatternMatchLength(modifiedItemSpec);
+                                length = FileUtilitiesRegex.DoesStartWithUncPatternMatchLength(modifiedItemSpec);
                             }
 
                             if (length != -1)

@@ -27,7 +27,7 @@ namespace Microsoft.Build.Shared
         private static readonly string s_baseUncPattern = string.Format(
             CultureInfo.InvariantCulture,
             @"^[\{0}\{1}][\{0}\{1}][^\{0}\{1}]+[\{0}\{1}][^\{0}\{1}]+",
-            Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            _backSlash, _forwardSlash);
 
         // regular expression used to match UNC paths beginning with "\\<server>\<share>"
         internal static readonly Regex StartsWithUncPattern = new Regex(s_baseUncPattern, RegexOptions.Compiled);
