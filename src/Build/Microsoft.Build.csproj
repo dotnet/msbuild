@@ -18,7 +18,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
 
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
-    <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
+    <CreateTlb>true</CreateTlb>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
