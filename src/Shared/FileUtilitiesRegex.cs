@@ -68,51 +68,27 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified file-spec comprises exactly "\\<server>\<path>" (with no trailing characters).
+        /// Indicates whether the specified file-spec comprises exactly "\\<server>\<share>" (with no trailing characters).
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
         internal static bool IsUncPattern(string pattern)
         {
-            if(!MeetsUncPatternMinimumRequirements(pattern))
-            {
-                return false;
-            }
-
-            bool prevCharWasSlash = true;
-            bool hasSubfolder = false;
-            for (int i = 2; i < pattern.Length; i++)
-            {
-                if (pattern[i] == _backSlash ||
-                    pattern[i] == _forwardSlash)
-                {
-                    if (prevCharWasSlash || hasSubfolder)
-                    {
-                        //We get here in the case of an extra slash or multiple subfolders
-                        //  Note this function is meant to mimic the UncPattern regex above.
-                        return false;
-                    }
-
-                    hasSubfolder = true;
-                    prevCharWasSlash = true;
-                }
-                else
-                {
-                    prevCharWasSlash = false;
-                }
-            }
-
-            //Valid unc patterns don't end with slashes & have at least 1 subfolder
-            return !prevCharWasSlash && hasSubfolder;
+            //Return value == pattern.length means:
+            //  meets minimum unc requirements
+            //  pattern does not end in a '/' or '\'
+            //  if a subfolder were found the value returned would be length up to that subfolder, therefore no subfolder exists
+            return DoesStartWithUncPatternMatchLength(pattern) == pattern.Length;
         }
 
         /// <summary>
-        /// Indicates whether the specified file-spec begins with "\\<server>\<path>".
+        /// Indicates whether the specified file-spec begins with "\\<server>\<share>".
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
         internal static bool DoesStartWithUncPattern(string pattern)
         {
+            //Any non -1 value returned means there was a match, therefore is begins with the pattern.
             return DoesStartWithUncPatternMatchLength(pattern) != -1;
         }
 
@@ -129,7 +105,7 @@ namespace Microsoft.Build.Shared
             }
 
             bool prevCharWasSlash = true;
-            bool hasSubfolder = false;
+            bool hasShare = false;
 
             for (int i = 2; i < pattern.Length; i++)
             {
@@ -141,12 +117,12 @@ namespace Microsoft.Build.Shared
                         //We get here in the case of an extra slash.
                         return -1;
                     }
-                    else if(hasSubfolder)
+                    else if(hasShare)
                     {
                         return i;
                     }
 
-                    hasSubfolder = true;
+                    hasShare = true;
                     prevCharWasSlash = true;
                 }
                 else
@@ -155,7 +131,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if(!hasSubfolder)
+            if(!hasShare)
             {
                 //no subfolder means no unc pattern. string is something like "\\abc" in this case
                 return -1;
@@ -170,7 +146,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
+#if !NET35
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static bool MeetsUncPatternMinimumRequirements(string pattern)
         {
             return pattern.Length >= 5 &&

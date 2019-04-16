@@ -19,15 +19,15 @@ namespace Microsoft.Build.Engine.UnitTests
         public void DrivePatternIsMatchAllProperFormats()
         {
             string s;
-            for(char i = 'A'; i <= 'Z'; i++)
+            for (char i = 'A'; i <= 'Z'; i++)
             {
                 s = i + ":";
                 FileUtilitiesRegex.DrivePattern.IsMatch(s).ShouldBeTrue();
-                s = (char)(i + ('a'-'A')) + ":";
+                s = (char)(i + ('a' - 'A')) + ":";
                 FileUtilitiesRegex.DrivePattern.IsMatch(s).ShouldBeTrue();
             }
         }
-        
+
         [Fact]
         public void IsDrivePatternAllProperFormats()
         {
@@ -67,90 +67,99 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        public void DrivePatternIsMatchInvalidFormat()
+        /// <summary>
+        /// Tests DrivePattern regex using various invalid drive patterns.
+        /// </summary>
+        [Theory]
+        [InlineData("C: ")]
+        [InlineData(" C:")]
+        [InlineData(" :")]
+        [InlineData("CC:")]
+        [InlineData("::")]
+        [InlineData("C:/")]
+        [InlineData("C:\\")]
+        [InlineData("C\\")]
+        [InlineData(":/")]
+        [InlineData("  ")]
+        [InlineData("")]
+        public void DrivePatternIsMatchInvalidFormat(string value)
         {
-            FileUtilitiesRegex.DrivePattern.IsMatch("C: ").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch(" C:").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch(" :").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch("CC:").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch("::").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch("C:/").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch("C:\\").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch("C\\").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch(":/").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch("  ").ShouldBe(false);
-            FileUtilitiesRegex.DrivePattern.IsMatch("").ShouldBe(false);
+            FileUtilitiesRegex.DrivePattern.IsMatch(value).ShouldBe(false);
         }
 
 
         /// <summary>
-        /// Tests DrivePattern regex using varopis invalid drive patterns.
+        /// Tests DrivePattern without regex using various invalid drive patterns.
         /// </summary>
-        [Fact]
-        public void IsDrivePatternInvalidFormat()
+        [Theory]
+        [InlineData("C: ")]
+        [InlineData(" C:")]
+        [InlineData(" :")]
+        [InlineData("CC:")]
+        [InlineData("::")]
+        [InlineData("C:/")]
+        [InlineData("C:\\")]
+        [InlineData("C\\")]
+        [InlineData(":/")]
+        [InlineData("  ")]
+        [InlineData("")]
+        public void IsDrivePatternInvalidFormat(string value)
         {
-            FileUtilitiesRegex.IsDrivePattern("C: ").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern(" C:").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern(" :").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern("CC:").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern("::").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern("C:/").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern("C:\\").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern("C\\").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern(":/").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern("  ").ShouldBe(false);
-            FileUtilitiesRegex.IsDrivePattern("").ShouldBe(false);
+            FileUtilitiesRegex.IsDrivePattern(value).ShouldBe(false);
         }
 
         /// <summary>
         /// Tests DrivePattern regex using varopis invalid drive patterns.
         /// </summary>
-        [Fact]
-        public void StartWithDriveIsMatchPatternInvalidFormat()
+        [Theory]
+        [InlineData(" C:")]
+        [InlineData(" :")]
+        [InlineData("CC:")]
+        [InlineData("::")]
+        [InlineData("x\\")]
+        [InlineData(":/")]
+        [InlineData("  ")]
+        [InlineData("")]
+        public void StartWithDriveIsMatchPatternInvalidFormat(string value)
         {
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch(" C:").ShouldBe(false);
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch(" :").ShouldBe(false);
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("CC:").ShouldBe(false);
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("::").ShouldBe(false);
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("x\\").ShouldBe(false);
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch(":/").ShouldBe(false);
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("  ").ShouldBe(false);
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("").ShouldBe(false);
+            FileUtilitiesRegex.StartWithDrivePattern.IsMatch(value).ShouldBe(false);
         }
 
         /// <summary>
         /// Tests DrivePattern regex using various invalid drive patterns.
         /// </summary>
-        [Fact]
-        public void DoesStartWithDrivePatternInvalidFormat()
+        [Theory]
+        [InlineData(" C:")]
+        [InlineData(" :")]
+        [InlineData("CC:")]
+        [InlineData("::")]
+        [InlineData("x\\")]
+        [InlineData(":/")]
+        [InlineData("  ")]
+        [InlineData("")]
+        public void DoesStartWithDrivePatternInvalidFormat(string value)
         {
-            FileUtilitiesRegex.DoesStartWithDrivePattern(" C:").ShouldBe(false);
-            FileUtilitiesRegex.DoesStartWithDrivePattern(" :").ShouldBe(false);
-            FileUtilitiesRegex.DoesStartWithDrivePattern("CC:").ShouldBe(false);
-            FileUtilitiesRegex.DoesStartWithDrivePattern("::").ShouldBe(false);
-            FileUtilitiesRegex.DoesStartWithDrivePattern("x\\").ShouldBe(false);
-            FileUtilitiesRegex.DoesStartWithDrivePattern(":/").ShouldBe(false);
-            FileUtilitiesRegex.DoesStartWithDrivePattern("  ").ShouldBe(false);
-            FileUtilitiesRegex.DoesStartWithDrivePattern("").ShouldBe(false);
+            FileUtilitiesRegex.DoesStartWithDrivePattern(value).ShouldBe(false);
         }
 
-        [Fact]
-        public void StartWithDrivePatternIsMatchInvalidPatternValidStart()
+        [Theory]
+        [InlineData("C: ")]
+        [InlineData("C:/")]
+        [InlineData("Z:\\")]
+        [InlineData("b:a\\q/")]
+        public void StartWithDrivePatternIsMatchInvalidPatternValidStart(string value)
         {
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("C: ").ShouldBeTrue();
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("C:/").ShouldBeTrue();
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("Z:\\").ShouldBeTrue();
-            FileUtilitiesRegex.StartWithDrivePattern.IsMatch("b:a\\q/").ShouldBeTrue();
+            FileUtilitiesRegex.StartWithDrivePattern.IsMatch(value).ShouldBeTrue();
         }
 
-        [Fact]
-        public void DoesStartWithDrivePatternInvalidPatternValidStart()
+        [Theory]
+        [InlineData("C: ")]
+        [InlineData("C:/")]
+        [InlineData("Z:\\")]
+        [InlineData("b:a\\q/")]
+        public void DoesStartWithDrivePatternInvalidPatternValidStart(string value)
         {
-            FileUtilitiesRegex.DoesStartWithDrivePattern("C: ").ShouldBeTrue();
-            FileUtilitiesRegex.DoesStartWithDrivePattern("C:/").ShouldBeTrue();
-            FileUtilitiesRegex.DoesStartWithDrivePattern("Z:\\").ShouldBeTrue();
-            FileUtilitiesRegex.DoesStartWithDrivePattern("b:a\\q/").ShouldBeTrue();
+            FileUtilitiesRegex.DoesStartWithDrivePattern(value).ShouldBeTrue();
         }
 
         [Fact]
