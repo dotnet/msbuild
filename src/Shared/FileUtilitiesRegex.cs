@@ -203,6 +203,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool MeetsUncPatternMinimumRequirements(string pattern)
         {
             return pattern.Length >= 5 &&
