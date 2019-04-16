@@ -120,7 +120,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// Tests DrivePattern regex using varopis invalid drive patterns.
+        /// Tests DrivePattern regex using various invalid drive patterns.
         /// </summary>
         [Fact]
         public void DoesStartWithDrivePatternInvalidFormat()
