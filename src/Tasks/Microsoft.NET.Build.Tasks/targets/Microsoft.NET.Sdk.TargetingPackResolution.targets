@@ -95,7 +95,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
 
-      <Output TaskParameter="PackagesToDownload" ItemName="_PackageReferenceToAdd" />
+      <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
@@ -107,6 +107,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                      TargetingPackRoot="$(NetCoreTargetingPackRoot)"
                      AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
+                     OtherRuntimeIdentifiers="$(RuntimeIdentifiers)"
                      RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                      PackAsToolShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
                      DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
@@ -114,15 +115,26 @@ Copyright (c) .NET Foundation. All rights reserved.
                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                      KnownAppHostPacks="@(KnownAppHostPack)">
 
-      <Output TaskParameter="PackagesToDownload" ItemName="_PackageReferenceToAdd" />
+      <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
       <Output TaskParameter="AppHost" ItemName="AppHostPack" />
       <Output TaskParameter="ComHost" ItemName="ComHostPack" />
       <Output TaskParameter="PackAsToolShimAppHostPacks" ItemName="PackAsToolShimAppHostPack" />
       
     </ResolveAppHosts>
 
-    <ItemGroup>
-      <PackageReference Include="@(_PackageReferenceToAdd)"
+    <PropertyGroup Condition="'$(UsePackageDownload)' == ''">
+      <UsePackageDownload Condition=" '$(MSBuildRuntimeType)' == 'Core'">true</UsePackageDownload>
+      <UsePackageDownload Condition=" '$(MSBuildRuntimeType)' != 'Core'">false</UsePackageDownload>
+    </PropertyGroup>
+    
+    <ItemGroup Condition="'$(UsePackageDownload)' == 'true'">
+      <PackageDownload Include="@(_PackageToDownload)">
+        <Version>[%(_PackageToDownload.Version)]</Version>
+      </PackageDownload>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(UsePackageDownload)' != 'true'">
+      <PackageReference Include="@(_PackageToDownload)"
                         IsImplicitlyDefined="true"
                         PrivateAssets="all"
                         ExcludeAssets="all" />
