@@ -4,6 +4,7 @@
 using System.IO;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Shared
 {
@@ -112,41 +113,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool DoesStartWithUncPattern(string pattern)
         {
-            if (!MeetsUncPatternMinimumRequirements(pattern))
-            {
-                return false;
-            }
-
-            bool prevCharWasSlash = true;
-            bool hasSubfolder = false;
-
-            for (int i = 2; i < pattern.Length; i++)
-            {
-                if (pattern[i] == _backSlash ||
-                    pattern[i] == _forwardSlash)
-                {
-                    if (prevCharWasSlash)
-                    {
-                        //We get here in the case of an extra slash.
-                        return false;
-                    }
-
-                    hasSubfolder = true;
-                    prevCharWasSlash = true;
-                }
-                else
-                {
-                    if (hasSubfolder)
-                    {
-                        //A character after a subfolder confirms the beginning of a unc pattern
-                        return true;
-                    }
-
-                    prevCharWasSlash = false;
-                }
-            }
-
-            return false;
+            return DoesStartWithUncPatternMatchLength(pattern) != -1;
         }
 
         /// <summary>
@@ -203,6 +170,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool MeetsUncPatternMinimumRequirements(string pattern)
         {
             return pattern.Length >= 5 &&
