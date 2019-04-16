@@ -76,6 +76,9 @@ if [ $host_type = "mono" ] ; then
 
   configuration="$configuration-MONO"
   extn_path="$mono_msbuild_dir/Extensions"
+  nuget_tasks_version=`grep NuGet.Build.Tasks= $RepoRoot/mono/build/SdkVersions.txt | sed -e 's,.*=,,' -e 's,;,,'`
+
+  properties="$properties /p:NuGetPackageVersion=$nuget_tasks_version"
 
   extra_properties=" /p:MSBuildExtensionsPath=$extn_path /p:MSBuildExtensionsPath32=$extn_path /p:MSBuildExtensionsPath64=$extn_path /p:DeterministicSourcePaths=false"
 fi
