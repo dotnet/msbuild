@@ -22,11 +22,6 @@
         <target state="new">PATH</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoManifestGuide">
-        <source>If you intended to update a global tool, use the `--global` option for the command.</source>
-        <target state="new">If you intended to update a global tool, use the `--global` option for the command.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
         <target state="translated">PACKAGE_ID</target>
@@ -35,13 +30,6 @@
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to update.</source>
         <target state="translated">El id. del paquete de NuGet que se actualizará.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SamePackageIdInOtherManifestFile">
-        <source>Warning: there are other manifest files in the current directory that could affect local tools. The following files are not changed:
-{0}</source>
-        <target state="new">Warning: there are other manifest files in the current directory that could affect local tools. The following files are not changed:
-{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">

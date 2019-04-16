@@ -81,7 +81,10 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
         public override int Execute()
         {
-            (FilePath manifestFile, string warningMessage) = FindManifestFile();
+            (FilePath? manifestFileOptional, string warningMessage) = 
+                _toolManifestFinder.ExplicitManifestOrFindManifestContainPackageId(_explicitManifestFile, _packageId);
+
+            var manifestFile = manifestFileOptional ?? _toolManifestFinder.FindFirst();
 
             var toolDownloadedPackage = _toolLocalPackageInstaller.Install(manifestFile);
             var existingPackageWithPackageId =
@@ -147,35 +150,6 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             }
 
             return 0;
-        }
-
-        private (FilePath filePath, string warningMessage) FindManifestFile()
-        {
-            if (!string.IsNullOrWhiteSpace(_explicitManifestFile))
-            {
-                return (new FilePath(_explicitManifestFile), null);
-            }
-
-            var manifestFilesContainPackageId
-                = _toolManifestFinder.FindByPackageId(_packageId);
-
-            if (manifestFilesContainPackageId.Any())
-            {
-                string warning = null;
-                if (manifestFilesContainPackageId.Count > 1)
-                {
-                    warning =
-                        string.Format(
-                            LocalizableStrings.SamePackageIdInOtherManifestFile,
-                            string.Join(
-                                Environment.NewLine,
-                                manifestFilesContainPackageId.Skip(1).Select(m => $"\t{m}")));
-                }
-
-                return (manifestFilesContainPackageId.First(), warning);
-            }
-
-            return (_toolManifestFinder.FindFirst(), null);
         }
     }
 }
