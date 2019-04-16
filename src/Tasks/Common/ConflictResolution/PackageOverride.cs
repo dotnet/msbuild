@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             if (!string.IsNullOrEmpty(overriddenPackagesString))
             {
                 overriddenPackagesString = overriddenPackagesString.Trim();
-                string[] overriddenPackagesAndVersions = overriddenPackagesString.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] overriddenPackagesAndVersions = overriddenPackagesString.Split(new char[] { ';', '\r', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string overriddenPackagesAndVersion in overriddenPackagesAndVersions)
                 {
                     string trimmedOverriddenPackagesAndVersion = overriddenPackagesAndVersion.Trim();
