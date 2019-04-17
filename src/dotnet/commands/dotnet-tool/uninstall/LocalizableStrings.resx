@@ -169,6 +169,6 @@
     <value>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</value>
   </data>
   <data name="NoManifestFileContainPackageId" xml:space="preserve">
-    <value>Cannot find a manifest file contain the package id '{0}'.</value>
+    <value>Cannot find a manifest file that contains package id '{0}'.</value>
   </data>
 </root>
