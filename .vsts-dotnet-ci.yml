@@ -91,7 +91,7 @@ jobs:
     displayName: cibuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: '-hostType core'
+      arguments: '-msbuildEngine dotnet'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -162,52 +162,6 @@ jobs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows Release test logs'
     condition: succeededOrFailed()
-
-# Disabling the hostType CI for now: https://github.com/Microsoft/msbuild/issues/4001
-# - job: CoreOnWindows
-#   displayName: "Build and test on Windows using .NET Core MSBuild"
-#   pool: 'Hosted VS2017'
-#   steps:
-#   - task: BatchScript@1
-#     displayName: VsDevCmd
-#     inputs:
-#       filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-#       modifyEnvironment: true
-#   - task: BatchScript@1
-#     displayName: cibuild.cmd
-#     inputs:
-#       filename: 'eng/common/cibuild.cmd'
-#       arguments: '-hostType Core'
-#   - task: PublishTestResults@2
-#     displayName: Publish .NET Framework Test Results
-#     inputs:
-#       testRunTitle: 'Windows-on-core Full Framework'
-#       testRunner: XUnit
-#       testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
-#       publishRunAttachments: true
-#       mergeTestResults: true
-#     condition: always()
-#   - task: PublishTestResults@2
-#     displayName: Publish .NET Core 2.1 Test Results
-#     inputs:
-#       testRunTitle: 'Windows-on-core .NET Core 2.1'
-#       testRunner: XUnit
-#       testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
-#       publishRunAttachments: true
-#       mergeTestResults: true
-#     condition: always()
-#   - task: PublishBuildArtifacts@1
-#     displayName: 'Publish Artifact: logs'
-#     inputs:
-#       PathtoPublish: 'artifacts/log/Debug'
-#       ArtifactName: 'CoreOnWindows build logs'
-#     condition: succeededOrFailed()
-#   - task: PublishBuildArtifacts@1
-#     displayName: 'Publish Artifact: logs/TestResults'
-#     inputs:
-#       PathtoPublish: 'artifacts/log/Debug/TestResults'
-#       ArtifactName: 'CoreOnWindows test logs'
-#     condition: succeededOrFailed()
 
 - job: CoreBootstrappedOnLinux
   displayName: "Build and test on Linux using bootstrapped .NET Core MSBuild"
