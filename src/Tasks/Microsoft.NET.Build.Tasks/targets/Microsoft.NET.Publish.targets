@@ -225,8 +225,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <MakeDir Directories="$(_ReadyToRunOutputPath)" />
 
-    <PrepareForReadyToRunCompilation TargetFramework="$(TargetFramework)"
-                                     RuntimePacks="@(ResolvedRuntimePack)"
+    <PrepareForReadyToRunCompilation RuntimePacks="@(ResolvedRuntimePack)"
                                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                                      KnownFrameworkReferences="@(KnownFrameworkReference)"
                                      NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
@@ -263,7 +262,9 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ReadyToRunCompileListPreserveNewest)"
           Outputs="%(_ReadyToRunCompileListPreserveNewest.OutputR2RImage)">
 
+    <!-- TODO: BUG - FIX ImplementationAssemblies to take managed implementation assemblies to use as crossgen references -->
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
+                           ImplementationAssemblies="@(ResolvedFileToPublish)"
                            CompilationEntry="@(_ReadyToRunCompileListPreserveNewest)"
                            ContinueOnError="ErrorAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
@@ -286,7 +287,9 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ReadyToRunSymbolsCompileListPreserveNewest)"
           Outputs="%(_ReadyToRunSymbolsCompileListPreserveNewest.OutputPDBImage)">
 
+    <!-- TODO: BUG - FIX ImplementationAssemblies to take managed implementation assemblies to use as crossgen references -->
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
+                           ImplementationAssemblies="@(ResolvedFileToPublish)"
                            CompilationEntry="@(_ReadyToRunSymbolsCompileListPreserveNewest)"
                            ContinueOnError="ErrorAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
@@ -309,7 +312,9 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ReadyToRunCompileListPublishAlways)"
           Outputs="%(_ReadyToRunCompileListPublishAlways.OutputR2RImage)">
 
+    <!-- TODO: BUG - FIX ImplementationAssemblies to take managed implementation assemblies to use as crossgen references -->
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
+                           ImplementationAssemblies="@(ResolvedFileToPublish)"
                            CompilationEntry="@(_ReadyToRunCompileListPublishAlways)"
                            ContinueOnError="ErrorAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
@@ -332,7 +337,9 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ReadyToRunSymbolsCompileListPublishAlways)"
           Outputs="%(_ReadyToRunSymbolsCompileListPublishAlways.OutputPDBImage)">
 
+    <!-- TODO: BUG - FIX ImplementationAssemblies to take managed implementation assemblies to use as crossgen references -->
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
+                           ImplementationAssemblies="@(ResolvedFileToPublish)"
                            CompilationEntry="@(_ReadyToRunSymbolsCompileListPublishAlways)"
                            ContinueOnError="ErrorAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />

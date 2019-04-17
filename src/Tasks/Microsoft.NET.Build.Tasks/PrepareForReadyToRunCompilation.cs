@@ -25,8 +25,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string OutputPath { get; set; }
         [Required]
-        public string TargetFramework { get; set; }
-        [Required]
         public ITaskItem[] RuntimePacks { get; set; }
         [Required]
         public ITaskItem[] KnownFrameworkReferences { get; set; }
@@ -69,9 +67,7 @@ namespace Microsoft.NET.Build.Tasks
         private string _packagePath;
         private string _crossgenPath;
         private string _clrjitPath;
-        private string _platformAssembliesPath;
         private string _diasymreaderPath;
-        private string _pathSeparatorCharacter = ";";
 
         private Architecture _targetArchitecture;
 
@@ -146,7 +142,6 @@ namespace Microsoft.NET.Build.Tasks
                 // an input to the ReadyToRunCompiler task
                 TaskItem r2rCompilationEntry = new TaskItem(file);
                 r2rCompilationEntry.SetMetadata("OutputR2RImage", outputR2RImage);
-                r2rCompilationEntry.SetMetadata("PlatformAssembliesPaths", $"{_platformAssembliesPath}{_pathSeparatorCharacter}{Path.GetDirectoryName(file.ItemSpec)}");
                 r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                 imageCompilationList.Add(r2rCompilationEntry);
 
@@ -193,7 +188,6 @@ namespace Microsoft.NET.Build.Tasks
                         pdbCompilationEntry.ItemSpec = outputR2RImage;
                         pdbCompilationEntry.SetMetadata("OutputPDBImage", outputPDBImage);
                         pdbCompilationEntry.SetMetadata("CreatePDBCommand", createPDBCommand);
-                        pdbCompilationEntry.SetMetadata("PlatformAssembliesPaths", $"{_platformAssembliesPath}{_pathSeparatorCharacter}{Path.GetDirectoryName(file.ItemSpec)}");
                         symbolsCompilationList.Add(pdbCompilationEntry);
 
                         // This TaskItem corresponds to the output PDB image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
@@ -386,8 +380,6 @@ namespace Microsoft.NET.Build.Tasks
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                _pathSeparatorCharacter = ":";
-
                 if (_targetArchitecture == Architecture.Arm || _targetArchitecture == Architecture.Arm64)
                 {
                     // We only have x64 hosted crossgen for both ARM target architectures
@@ -406,8 +398,6 @@ namespace Microsoft.NET.Build.Tasks
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                _pathSeparatorCharacter = ":";
-
                 // Only x64 supported for OSX
                 if (_targetArchitecture != Architecture.X64 || RuntimeInformation.OSArchitecture != Architecture.X64)
                     return false;
@@ -420,10 +410,6 @@ namespace Microsoft.NET.Build.Tasks
                 // Unknown platform
                 return false;
             }
-
-            _platformAssembliesPath =
-                Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native") + _pathSeparatorCharacter +
-                Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "lib", TargetFramework);
 
             return true;
         }
