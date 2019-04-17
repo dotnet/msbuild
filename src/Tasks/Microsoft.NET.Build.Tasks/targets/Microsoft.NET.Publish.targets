@@ -183,7 +183,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="CreateReadyToRunImages"
-          Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(ReadyToRun)' == 'true' And '$(RuntimeIdentifier)' != '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+          Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(ReadyToRun)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
           DependsOnTargets="_ComputeResolvedFilesToPublishTypes;
                             _PrepareForReadyToRunCompilation;
                             _CreateR2RImagePreserveNewest;
@@ -222,6 +222,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <_ReadyToRunOutputPath>$(IntermediateOutputPath)R2R</_ReadyToRunOutputPath>
     </PropertyGroup>
+
+    <!-- TODO: Temp error to limit R2R compilation to self-contained mode only. Delete this when fixing #3109 and #3110 -->
+    <NETSdkError Condition="'$(SelfContained)' != 'true'" ResourceName="ReadyToRunTargetNotSuppotedError" />
 
     <MakeDir Directories="$(_ReadyToRunOutputPath)" />
 
