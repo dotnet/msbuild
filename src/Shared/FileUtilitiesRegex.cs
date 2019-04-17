@@ -19,27 +19,6 @@ namespace Microsoft.Build.Shared
         private static readonly char _backSlash = '\\';
         private static readonly char _forwardSlash = '/';
 
-        // regular expression used to match file-specs comprising exactly "<drive letter>:" (with no trailing characters)
-        internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:$", RegexOptions.Compiled);
-
-        // regular expression used to match file-specs beginning with "<drive letter>:"
-        internal static readonly Regex StartWithDrivePattern = new Regex(@"^[A-Za-z]:", RegexOptions.Compiled);
-
-        private static readonly string s_baseUncPattern = string.Format(
-            CultureInfo.InvariantCulture,
-            @"^[\{0}\{1}][\{0}\{1}][^\{0}\{1}]+[\{0}\{1}][^\{0}\{1}]+",
-            _backSlash, _forwardSlash);
-
-        // regular expression used to match UNC paths beginning with "\\<server>\<share>"
-        internal static readonly Regex StartsWithUncPattern = new Regex(s_baseUncPattern, RegexOptions.Compiled);
-
-        // regular expression used to match UNC paths comprising exactly "\\<server>\<share>"
-        internal static readonly Regex UncPattern =
-            new Regex(
-                string.Format(CultureInfo.InvariantCulture, @"{0}$", s_baseUncPattern),
-                RegexOptions.Compiled);
-
-
         /// <summary>
         /// Indicates whether the specified string follows the pattern drive pattern: "<drive letter>:"
         /// </summary>
@@ -49,7 +28,7 @@ namespace Microsoft.Build.Shared
         {
             // Format must be two characters long: "<drive letter>:"
             return pattern.Length == 2 &&
-                DoesStartWithDrivePattern(pattern);
+                StartsWithDrivePattern(pattern);
         }
 
         /// <summary>
@@ -57,7 +36,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
-        internal static bool DoesStartWithDrivePattern(string pattern)
+        internal static bool StartsWithDrivePattern(string pattern)
         {
             // Format dictates a length of at least 2,
             // first character must be a letter,
@@ -78,7 +57,7 @@ namespace Microsoft.Build.Shared
             //  meets minimum unc requirements
             //  pattern does not end in a '/' or '\'
             //  if a subfolder were found the value returned would be length up to that subfolder, therefore no subfolder exists
-            return DoesStartWithUncPatternMatchLength(pattern) == pattern.Length;
+            return StartsWithUncPatternMatchLength(pattern) == pattern.Length;
         }
 
         /// <summary>
@@ -86,10 +65,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
-        internal static bool DoesStartWithUncPattern(string pattern)
+        internal static bool StartsWithUncPattern(string pattern)
         {
             //Any non -1 value returned means there was a match, therefore is begins with the pattern.
-            return DoesStartWithUncPatternMatchLength(pattern) != -1;
+            return StartsWithUncPatternMatchLength(pattern) != -1;
         }
 
         /// <summary>
@@ -97,7 +76,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
-        internal static int DoesStartWithUncPatternMatchLength(string pattern)
+        internal static int StartsWithUncPatternMatchLength(string pattern)
         {
             if (!MeetsUncPatternMinimumRequirements(pattern))
             {
