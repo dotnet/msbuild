@@ -68,11 +68,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </ItemGroup>
 
-    <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == ''">
-      <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
-      <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
-    </PropertyGroup>
-
     <PropertyGroup Condition="'$(EnableTargetingPackDownload)' == ''">
       <EnableTargetingPackDownload>true</EnableTargetingPackDownload>
     </PropertyGroup>
@@ -102,6 +97,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="UnavailableRuntimePacks" ItemName="UnavailableRuntimePack" />
 
     </ResolveFrameworkReferences>
+
+    <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == '' And
+                              ('$(UseAppHost)' == 'true' Or '$(UseComHost)' == 'true')">
+      <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
+      <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
+    </PropertyGroup>
 
     <ResolveAppHosts TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
                      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
