@@ -79,6 +79,7 @@ namespace Microsoft.NET.Build.Tests
                 if (targetFramework == "net46")
                 {
                     outputFiles.Add("AllResourcesInSatellite.exe");
+                    outputFiles.Add("AllResourcesInSatellite.exe.config");
                     command = Command.Create(Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.exe"), Array.Empty<string>());
                 }
                 else

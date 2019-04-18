@@ -143,7 +143,7 @@ namespace Microsoft.NET.Pack.Tests
         }
 
         [Fact]
-        public void Packing_a_netcoreapp_2_0_app_includes_the_implicit_dependency()
+        public void Packing_a_netcoreapp_2_0_app_does_not_include_the_implicit_dependency()
         {
             TestProject testProject = new TestProject()
             {
@@ -152,6 +152,45 @@ namespace Microsoft.NET.Pack.Tests
                 TargetFrameworks = "netcoreapp2.0",
                 IsExe = true
             };
+
+            var dependencies = PackAndGetDependencies(testProject);
+
+            dependencies.Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData("Microsoft.AspNetCore.App")]
+        [InlineData("Microsoft.AspNetCore.All")]
+        public void Package_an_aspnetcore_2_1_app_does_not_include_the_implicit_dependency(string packageId)
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "PackAspNetCoreApp21App",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.1",
+                IsExe = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference(packageId, ""));
+
+            var dependencies = PackAndGetDependencies(testProject);
+
+            dependencies.Should().BeEmpty();
+
+        }
+
+        [Fact]
+        public void Packing_a_netcoreapp_2_0_DotnetCliTool_app_includes_the_implicit_dependency()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "PackNetCoreApp20App",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.0",
+                IsExe = true
+            };
+
+            testProject.AdditionalProperties.Add("PackageType", "DotnetCliTool");
 
             var dependencies = PackAndGetDependencies(testProject);
 
