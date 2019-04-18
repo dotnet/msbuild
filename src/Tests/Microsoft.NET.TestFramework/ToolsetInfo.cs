@@ -11,13 +11,12 @@ using System.Xml.Linq;
 using System.Reflection;
 using Xunit.Abstractions;
 using Microsoft.Build.Utilities;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.TestFramework
 {
     public class ToolsetInfo
     {
-        public string CliVersionForBundledVersions { get; set; }
-
         public string DotNetHostPath { get; set; }
 
         public string SdksPath { get; set; }
@@ -66,8 +65,6 @@ namespace Microsoft.NET.TestFramework
         }
         public void AddTestEnvironmentVariables(SdkCommandSpec command)
         {
-            string dotnetRoot = Path.GetDirectoryName(DotNetHostPath);
-
             if (SdksPath != null)
             {
                 command.Environment["MSBuildSDKsPath"] = SdksPath;
@@ -84,21 +81,29 @@ namespace Microsoft.NET.TestFramework
                         "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
                 }
 
-                if (Environment.Is64BitProcess)
-                {
-                    command.Environment.Add("DOTNET_ROOT", dotnetRoot);
-                }
-                else
-                {
-                    command.Environment.Add("DOTNET_ROOT(x86)", dotnetRoot);
-                }
             }
 
-            if (!string.IsNullOrEmpty(CliVersionForBundledVersions))
+            string dotnetRoot = Path.GetDirectoryName(DotNetHostPath);
+            if (Environment.Is64BitProcess)
             {
-                string stage0SdkPath = Path.Combine(dotnetRoot, "sdk", CliVersionForBundledVersions); ;
-                command.Environment["NETCoreSdkBundledVersionsProps"] = Path.Combine(stage0SdkPath, "Microsoft.NETCoreSdk.BundledVersions.props");
+                command.Environment.Add("DOTNET_ROOT", dotnetRoot);
             }
+            else
+            {
+                command.Environment.Add("DOTNET_ROOT(x86)", dotnetRoot);
+            }
+
+            DirectoryInfo latestSdk = GetLatestSdk(dotnetRoot);
+            command.Environment["NETCoreSdkBundledVersionsProps"] = Path.Combine(latestSdk.FullName, "Microsoft.NETCoreSdk.BundledVersions.props");
+        }
+
+        private static DirectoryInfo GetLatestSdk(string dotnetRoot)
+        {
+            return new DirectoryInfo(Path.Combine(dotnetRoot, "sdk"))
+                .EnumerateDirectories()
+                .Where(d => NuGetVersion.TryParse(d.Name, out _))
+                .OrderByDescending(d => NuGetVersion.Parse(d.Name))
+                .First();
         }
 
         public SdkCommandSpec CreateCommandForTarget(string target, params string[] args)
@@ -161,8 +166,7 @@ namespace Microsoft.NET.TestFramework
 
             if (repoRoot != null)
             {
-                ret.CliVersionForBundledVersions = GetDotNetCliVersion();
-                ret.SdksPath = Path.Combine(repoArtifactsDir, configuration, "bin", "Sdks");
+                ret.SdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
             }
 
             if (!string.IsNullOrEmpty(commandLine.FullFrameworkMSBuildPath))
@@ -176,9 +180,6 @@ namespace Microsoft.NET.TestFramework
 
             return ret;
         }
-
-        private static string GetDotNetCliVersion()
-            => typeof(ToolsetInfo).Assembly.GetCustomAttribute<DotNetSdkVersionAttribute>().Version;
 
         private static string ResolveCommand(string command)
         {

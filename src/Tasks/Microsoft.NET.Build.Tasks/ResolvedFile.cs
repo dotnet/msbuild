@@ -4,6 +4,8 @@
 using System.IO;
 using System;
 using NuGet.Packaging.Core;
+using Microsoft.Build.Framework;
+
 namespace Microsoft.NET.Build.Tasks
 {
     internal enum AssetType
@@ -17,9 +19,14 @@ namespace Microsoft.NET.Build.Tasks
     internal class ResolvedFile
     {
         public string SourcePath { get; }
-        public PackageIdentity Package { get; }
+        public string PackageName { get; }
+        public string PackageVersion { get; }
+        public string PathInPackage { get; }
         public string DestinationSubDirectory { get; }
         public AssetType Asset{ get; }
+        public bool IsRuntimeTarget { get; }
+        public string RuntimeIdentifier { get; }
+        public string Culture { get; }
         public string FileName
         {
             get { return Path.GetFileName(SourcePath); }
@@ -40,7 +47,51 @@ namespace Microsoft.NET.Build.Tasks
             SourcePath = Path.GetFullPath(sourcePath);
             DestinationSubDirectory = destinationSubDirectory;
             Asset = assetType;
-            Package = package;
+            PackageName = package.Id;
+            PackageVersion = package.Version.ToString();
+
+        }
+
+        public ResolvedFile(ITaskItem item, bool isRuntimeTarget)
+        {
+            SourcePath = item.ItemSpec;
+            DestinationSubDirectory = item.GetMetadata(MetadataKeys.DestinationSubDirectory);
+            string assetType = item.GetMetadata(MetadataKeys.AssetType);
+            if (assetType.Equals("runtime", StringComparison.OrdinalIgnoreCase))
+            {
+                Asset = AssetType.Runtime;
+            }
+            else if (assetType.Equals("native", StringComparison.OrdinalIgnoreCase))
+            {
+                Asset = AssetType.Native;
+            }
+            else if (assetType.Equals("resources", StringComparison.OrdinalIgnoreCase))
+            {
+                Asset = AssetType.Resources;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unrecognized AssetType '{assetType}' for {SourcePath}");
+            }
+
+            PackageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
+            if (string.IsNullOrEmpty(PackageName))
+            {
+                PackageName = item.GetMetadata(MetadataKeys.PackageName);
+            }
+
+            PackageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
+            if (string.IsNullOrEmpty(PackageVersion))
+            {
+                PackageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
+            }
+
+            PathInPackage = item.GetMetadata(MetadataKeys.PathInPackage);
+
+            RuntimeIdentifier = item.GetMetadata(MetadataKeys.RuntimeIdentifier);
+            Culture = item.GetMetadata(MetadataKeys.Culture);
+
+            IsRuntimeTarget = isRuntimeTarget;
 
         }
 

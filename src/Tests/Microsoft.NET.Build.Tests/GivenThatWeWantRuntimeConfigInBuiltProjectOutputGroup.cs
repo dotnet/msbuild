@@ -18,14 +18,15 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
-        public void It_has_target_path_and_final_outputput_path_metadata()
+        [Theory]
+        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp3.0")]
+        public void It_has_target_path_and_final_outputput_path_metadata(string targetFramework)
         {
-            const string targetFramework = "netcoreapp1.1";
-
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .Restore(Log);
 
             var command = new GetValuesCommand(

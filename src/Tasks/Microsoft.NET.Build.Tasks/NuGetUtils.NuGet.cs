@@ -9,6 +9,7 @@ using System.Linq;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.RuntimeModel;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -77,6 +78,24 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return IsAnalyzer() && FileMatchesProjectLanguage();
+        }
+
+        public static string GetBestMatchingRid(RuntimeGraph runtimeGraph, string runtimeIdentifier,
+            IEnumerable<string> availableRuntimeIdentifiers, out bool wasInGraph)
+        {
+            wasInGraph = runtimeGraph.Runtimes.ContainsKey(runtimeIdentifier);
+
+            HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers);
+            foreach (var candidateRuntimeIdentifier in runtimeGraph.ExpandRuntime(runtimeIdentifier))
+            {
+                if (availableRids.Contains(candidateRuntimeIdentifier))
+                {
+                    return candidateRuntimeIdentifier;
+                }
+            }
+
+            //  No compatible RID found in availableRuntimeIdentifiers
+            return null;
         }
     }
 }

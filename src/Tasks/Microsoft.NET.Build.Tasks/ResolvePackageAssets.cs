@@ -55,6 +55,26 @@ namespace Microsoft.NET.Build.Tasks
         public string RuntimeIdentifier { get; set; }
 
         /// <summary>
+        /// The platform library name for resolving copy local assets.
+        /// </summary>
+        public string PlatformLibraryName { get; set; }
+
+        /// <summary>
+        /// The runtime frameworks for resolving copy local assets.
+        /// </summary>
+        public ITaskItem[] RuntimeFrameworks { get; set; }
+
+        /// <summary>
+        /// Whether or not the the copy local is for a self-contained application.
+        /// </summary>
+        public bool IsSelfContained { get; set; }
+
+        /// <summary>
+        /// The languages to filter the resource assmblies for.
+        /// </summary>
+        public ITaskItem[] SatelliteResourceLanguages { get; set; }
+
+        /// <summary>
         /// Do not write package assets cache to disk nor attempt to read previous cache from disk.
         /// </summary>
         public bool DisablePackageAssetsCache { get; set; }
@@ -68,6 +88,11 @@ namespace Microsoft.NET.Build.Tasks
         /// Do not add references to framework assemblies as specified by packages.
         /// </summary>
         public bool DisableFrameworkAssemblies { get; set; }
+
+        /// <summary>
+        /// Do not resolve runtime targets.
+        /// </summary>
+        public bool DisableRuntimeTargets { get; set; }
 
         /// <summary>
         /// Log messages from assets log to build error/warning/message.
@@ -146,6 +171,12 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem[] NativeLibraries { get; private set; }
+
+        /// <summary>
+        /// The package folders from the assets file (ie the paths under which package assets may be found)
+        /// </summary>
+        [Output]
+        public ITaskItem[] PackageFolders { get; set; }
 
         /// <summary>
         /// Full paths to satellite assemblies from packages.
@@ -230,7 +261,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 2;
+        private const int CacheFormatVersion = 7;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -259,6 +290,7 @@ namespace Microsoft.NET.Build.Tasks
                 ContentFilesToPreprocess = reader.ReadItemGroup();
                 FrameworkAssemblies = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
+                PackageFolders = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
                 RuntimeAssemblies = reader.ReadItemGroup();
                 RuntimeTargets = reader.ReadItemGroup();
@@ -331,6 +363,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     writer.Write(DisablePackageAssetsCache);
                     writer.Write(DisableFrameworkAssemblies);
+                    writer.Write(DisableRuntimeTargets);
                     writer.Write(DisableTransitiveProjectReferences);
                     writer.Write(DotNetAppHostExecutableNameWithoutExtension);
                     writer.Write(EmitAssetsLogMessages);
@@ -346,6 +379,22 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     writer.Write(ProjectAssetsCacheFile);
                     writer.Write(ProjectAssetsFile ?? "");
+                    writer.Write(PlatformLibraryName ?? "");
+                    if (RuntimeFrameworks != null)
+                    {
+                        foreach (var framework in RuntimeFrameworks)
+                        {
+                            writer.Write(framework.ItemSpec ?? "");
+                        }
+                    }
+                    writer.Write(IsSelfContained);
+                    if (SatelliteResourceLanguages != null)
+                    {
+                        foreach (var language in SatelliteResourceLanguages)
+                        {
+                            writer.Write(language.ItemSpec ?? "");
+                        }
+                    }
                     writer.Write(ProjectLanguage ?? "");
                     writer.Write(ProjectPath);
                     writer.Write(RuntimeIdentifier ?? "");
@@ -548,21 +597,24 @@ namespace Microsoft.NET.Build.Tasks
             private Dictionary<string, int> _stringTable;
             private List<string> _metadataStrings;
             private List<int> _bufferedMetadata;
+            private HashSet<string> _platformPackageExclusions;
             private Placeholder _metadataStringTablePosition;
+            private NuGetFramework _targetFramework;
             private int _itemCount;
 
             public CacheWriter(ResolvePackageAssets task, Stream stream = null)
             {
-                var targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
+                _targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
 
                 _task = task;
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
-                _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile, _task.ProjectPath);
-                _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, runtime: null);
-                _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, _task.RuntimeIdentifier);
+                _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile);
+                _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtime: null);
+                _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier);
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
                 _bufferedMetadata = new List<int>();
+                _platformPackageExclusions = GetPlatformPackageExclusions();
 
                 if (stream == null)
                 {
@@ -633,6 +685,7 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteContentFilesToPreprocess);
                 WriteItemGroup(WriteFrameworkAssemblies);
                 WriteItemGroup(WriteNativeLibraries);
+                WriteItemGroup(WritePackageFolders);
                 WriteItemGroup(WriteResourceAssemblies);
                 WriteItemGroup(WriteRuntimeAssemblies);
                 WriteItemGroup(WriteRuntimeTargets);
@@ -733,12 +786,11 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteContentFilesToPreprocess()
             {
-
                 WriteItems(
                     _runtimeTarget,
                     p => p.ContentFiles,
                     filter: asset => !string.IsNullOrEmpty(asset.PPOutputPath),
-                    writeMetadata: asset =>
+                    writeMetadata: (package, asset) =>
                     {
                         WriteMetadata(MetadataKeys.BuildAction, asset.BuildAction.ToString());
                         WriteMetadata(MetadataKeys.CopyToOutput, asset.CopyToOutput.ToString());
@@ -872,7 +924,7 @@ namespace Microsoft.NET.Build.Tasks
                             if (!hasTwoPeriods(expectedVersion))
                             {
                                 expectedVersion += ".0";
-                            }                        
+                            }
 
                             if (restoredVersion != expectedVersion)
                             {
@@ -891,11 +943,24 @@ namespace Microsoft.NET.Build.Tasks
             {
                 WriteItems(
                     _runtimeTarget,
-                    package => package.NativeLibraries);
+                    package => package.NativeLibraries,
+                    writeMetadata: (package, asset) =>
+                    {
+                        WriteMetadata(MetadataKeys.AssetType, "native");
+                        if (ShouldCopyLocalPackageAssets(package))
+                        {
+                            WriteCopyLocalMetadata(package, Path.GetFileName(asset.Path), "native");
+                        }
+                    });
             }
 
             private void WriteApphostsForShimRuntimeIdentifiers()
             {
+                if (!CanResolveApphostFromFrameworkReference())
+                {
+                    return;
+                }
+
                 if (_task.ShimRuntimeIdentifiers == null || _task.ShimRuntimeIdentifiers.Length == 0)
                 {
                     return;
@@ -903,8 +968,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var runtimeIdentifier in _task.ShimRuntimeIdentifiers.Select(r => r.ItemSpec))
                 {
-                    NuGetFramework targetFramework = NuGetUtils.ParseFrameworkName(_task.TargetFrameworkMoniker);
-                    LockFileTarget runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, runtimeIdentifier);
+                    LockFileTarget runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier);
 
                     var apphostName = _task.DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(runtimeIdentifier);
 
@@ -915,16 +979,53 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            /// <summary>
+            /// After netcoreapp3.0 apphost is resolved during ResolveFrameworkReferences. It should return nothing here
+            /// </summary>
+            private bool CanResolveApphostFromFrameworkReference()
+            {
+                if (_targetFramework.Version.Major >= 3
+                    && _targetFramework.Framework.Equals(".NETCoreApp", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            private void WritePackageFolders()
+            {
+                foreach (var packageFolder in _lockFile.PackageFolders)
+                {
+                    WriteItem(packageFolder.Path);
+                }
+            }
+
             private void WriteResourceAssemblies()
             {
                 WriteItems(
                     _runtimeTarget,
-                    package => package.ResourceAssemblies,
-                    writeMetadata: asset =>
+                    package => package.ResourceAssemblies.Where(asset =>
+                        _task.SatelliteResourceLanguages == null ||
+                        _task.SatelliteResourceLanguages.Any(lang =>
+                            string.Equals(asset.Properties["locale"], lang.ItemSpec, StringComparison.OrdinalIgnoreCase))),
+                    writeMetadata: (package, asset) =>
                     {
+                        WriteMetadata(MetadataKeys.AssetType, "resources");
                         string locale = asset.Properties["locale"];
+                        if (ShouldCopyLocalPackageAssets(package))
+                        {
+                            WriteCopyLocalMetadata(
+                                package,
+                                Path.GetFileName(asset.Path),
+                                "resources",
+                                destinationSubDirectory: locale + Path.DirectorySeparatorChar);
+                        }
+                        else
+                        {
+                            WriteMetadata(MetadataKeys.DestinationSubDirectory, locale + Path.DirectorySeparatorChar);
+                        }
                         WriteMetadata(MetadataKeys.Culture, locale);
-                        WriteMetadata(MetadataKeys.DestinationSubDirectory, locale + Path.DirectorySeparatorChar);
                     });
             }
 
@@ -932,18 +1033,43 @@ namespace Microsoft.NET.Build.Tasks
             {
                 WriteItems(
                     _runtimeTarget,
-                    package => package.RuntimeAssemblies);
+                    package => package.RuntimeAssemblies,
+                    writeMetadata: (package, asset) =>
+                    {
+                        WriteMetadata(MetadataKeys.AssetType, "runtime");
+                        if (ShouldCopyLocalPackageAssets(package))
+                        {
+                            WriteCopyLocalMetadata(package, Path.GetFileName(asset.Path), "runtime");
+                        }
+                    });
             }
 
             private void WriteRuntimeTargets()
             {
+                if (_task.DisableRuntimeTargets)
+                {
+                    return;
+                }
+
                 WriteItems(
                     _runtimeTarget,
                     package => package.RuntimeTargets,
-                    writeMetadata: asset =>
+                    writeMetadata: (package, asset) =>
                     {
-                        string directory = Path.GetDirectoryName(asset.Path);
-                        WriteMetadata(MetadataKeys.DestinationSubDirectory, directory + Path.DirectorySeparatorChar);
+                        WriteMetadata(MetadataKeys.AssetType, asset.AssetType.ToLowerInvariant());
+                        if (ShouldCopyLocalPackageAssets(package))
+                        {
+                            WriteCopyLocalMetadata(
+                                package,
+                                Path.GetFileName(asset.Path),
+                                asset.AssetType.ToLowerInvariant(),
+                                destinationSubDirectory: Path.GetDirectoryName(asset.Path) + Path.DirectorySeparatorChar);
+                        }
+                        else
+                        {
+                            WriteMetadata(MetadataKeys.DestinationSubDirectory, Path.GetDirectoryName(asset.Path) + Path.DirectorySeparatorChar);
+                        }
+                        WriteMetadata(MetadataKeys.RuntimeIdentifier, asset.Runtime);
                     });
             }
 
@@ -978,9 +1104,9 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteItems<T>(
                 LockFileTarget target,
-                Func<LockFileTargetLibrary, IList<T>> getAssets,
+                Func<LockFileTargetLibrary, IEnumerable<T>> getAssets,
                 Func<T, bool> filter = null,
-                Action<T> writeMetadata = null)
+                Action<LockFileTargetLibrary, T> writeMetadata = null)
                 where T : LockFileItem
             {
                 foreach (var library in target.Libraries)
@@ -999,7 +1125,11 @@ namespace Microsoft.NET.Build.Tasks
 
                         string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
                         WriteItem(itemSpec, library);
-                        writeMetadata?.Invoke(asset);
+                        WriteMetadata(MetadataKeys.PathInPackage, asset.Path);
+                        WriteMetadata(MetadataKeys.PackageName, library.Name);
+                        WriteMetadata(MetadataKeys.PackageVersion, library.Version.ToString().ToLowerInvariant());
+
+                        writeMetadata?.Invoke(library, asset);
                     }
                 }
             }
@@ -1028,6 +1158,20 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            private void WriteCopyLocalMetadata(LockFileTargetLibrary package, string assetsFileName, string assetType, string destinationSubDirectory = null)
+            {
+                WriteMetadata(MetadataKeys.CopyLocal, "true");
+                WriteMetadata(
+                    MetadataKeys.DestinationSubPath,
+                    string.IsNullOrEmpty(destinationSubDirectory) ?
+                        assetsFileName :
+                        Path.Combine(destinationSubDirectory, assetsFileName));
+                if (!string.IsNullOrEmpty(destinationSubDirectory))
+                {
+                    WriteMetadata(MetadataKeys.DestinationSubDirectory, destinationSubDirectory);
+                }
+            }
+
             private int GetMetadataIndex(string value)
             {
                 if (!_stringTable.TryGetValue(value, out int index))
@@ -1038,6 +1182,35 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 return index;
+            }
+
+            private bool ShouldCopyLocalPackageAssets(LockFileTargetLibrary package)
+            {
+                return _platformPackageExclusions == null || !_platformPackageExclusions.Contains(package.Name);
+            }
+
+            private HashSet<string> GetPlatformPackageExclusions()
+            {
+                // Only exclude packages for framework-dependent applications
+                if (_task.IsSelfContained && !string.IsNullOrEmpty(_runtimeTarget.RuntimeIdentifier))
+                {
+                    return null;
+                }
+
+                var packageExclusions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var libraryLookup = _runtimeTarget.Libraries.ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+
+                // Exclude the platform library
+                if (_task.PlatformLibraryName != null)
+                {
+                    var platformLibrary = _runtimeTarget.GetLibrary(_task.PlatformLibraryName);
+                    if (platformLibrary != null)
+                    {
+                        packageExclusions.UnionWith(_runtimeTarget.GetPlatformExclusionList(platformLibrary, libraryLookup));
+                    }
+                }
+
+                return packageExclusions;
             }
 
             private static Dictionary<string, string> GetProjectReferencePaths(LockFile lockFile)

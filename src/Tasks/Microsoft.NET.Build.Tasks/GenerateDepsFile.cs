@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
@@ -35,6 +36,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string PlatformLibraryName { get; set; }
 
+        public ITaskItem[] RuntimeFrameworks { get; set; }
+
         [Required]
         public string AssemblyName { get; set; }
 
@@ -44,26 +47,24 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string AssemblyVersion { get; set; }
 
-        [Required]
-        public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
+        public ITaskItem[] AssemblySatelliteAssemblies { get; set; } = Array.Empty<ITaskItem>();
 
         [Required]
         public bool IncludeMainProject { get; set; }
 
-        [Required]
-        public ITaskItem[] ReferencePaths { get; set; }
 
-        [Required]
-        public ITaskItem[] ReferenceDependencyPaths { get; set; }
+        public ITaskItem[] ReferencePaths { get; set; } = Array.Empty<ITaskItem>();
 
-        [Required]
-        public ITaskItem[] ReferenceSatellitePaths { get; set; }
+        public ITaskItem[] ReferenceDependencyPaths { get; set; } = Array.Empty<ITaskItem>();
 
-        [Required]
-        public ITaskItem[] ReferenceAssemblies { get; set; }
+        public ITaskItem[] ReferenceSatellitePaths { get; set; } = Array.Empty<ITaskItem>();
+
+        public ITaskItem[] ReferenceAssemblies { get; set; } = Array.Empty<ITaskItem>();
 
         [Required]
         public ITaskItem[] FilesToSkip { get; set; }
+
+        public ITaskItem[] RuntimePackAssets { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem CompilerOptions { get; set; }
 
@@ -71,9 +72,21 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] RuntimeStorePackages { get; set; }
 
+        [Required]
+        public ITaskItem[] CompileReferences { get; set; }
+
+        //  NativeCopyLocalItems, ResourceCopyLocalItems, RuntimeCopyLocalItems
+        [Required]
+        public ITaskItem[] ResolvedNuGetFiles { get; set; }
+
+        [Required]
+        public ITaskItem[] ResolvedRuntimeTargetsFiles { get; set; }
+
         public bool IsSelfContained { get; set; }
 
         public bool IncludeRuntimeFileVersions { get; set; }
+
+        public string DepsFileGenerationMode { get; set; } = "both";
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
@@ -104,7 +117,7 @@ namespace Microsoft.NET.Build.Tasks
             return filteredPackages;
         }
 
-        protected override void ExecuteCore()
+        private void WriteDepsFileOld(string depsFilePath)
         {
             LoadFilesToSkip();
 
@@ -134,10 +147,14 @@ namespace Microsoft.NET.Build.Tasks
 
             IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
 
+            IEnumerable<RuntimePackAssetInfo> runtimePackAssets = 
+                RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item));
+
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
                 PlatformLibraryName,
+                RuntimeFrameworks,
                 IsSelfContained);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, IncludeRuntimeFileVersions)
@@ -147,6 +164,7 @@ namespace Microsoft.NET.Build.Tasks
                 .WithDependencyReferences(dependencyReferences)
                 .WithReferenceProjectInfos(referenceProjects)
                 .WithExcludeFromPublishAssets(excludeFromPublishAssets)
+                .WithRuntimePackAssets(runtimePackAssets)
                 .WithCompilationOptions(compilationOptions)
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
                 .WithPackagesThatWhereFiltered(GetFilteredPackages())
@@ -158,12 +176,137 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var writer = new DependencyContextWriter();
-            using (var fileStream = File.Create(DepsFilePath))
+            using (var fileStream = File.Create(depsFilePath))
             {
                 writer.Write(dependencyContext, fileStream);
             }
-            _filesWritten.Add(new TaskItem(DepsFilePath));
+            _filesWritten.Add(new TaskItem(depsFilePath));
+        }
 
+        private void WriteDepsFileNew(string depsFilePath)
+        {
+            LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
+            CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
+
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(
+                ProjectPath,
+                AssemblyName,
+                AssemblyExtension,
+                AssemblyVersion,
+                AssemblySatelliteAssemblies);
+
+            IEnumerable<ReferenceInfo> referenceAssemblyInfos =
+                ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
+
+            IEnumerable<ReferenceInfo> directReferences =
+                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths, ReferenceSatellitePaths);
+
+            IEnumerable<ReferenceInfo> dependencyReferences =
+                ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths);
+
+            Dictionary<string, SingleProjectInfo> referenceProjects = SingleProjectInfo.CreateProjectReferenceInfos(
+                ReferencePaths,
+                ReferenceDependencyPaths,
+                ReferenceSatellitePaths);
+
+            IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
+
+            IEnumerable<RuntimePackAssetInfo> runtimePackAssets =
+                RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item));
+
+
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+                NuGetUtils.ParseFrameworkName(TargetFramework),
+                RuntimeIdentifier,
+                PlatformLibraryName,
+                RuntimeFrameworks,
+                IsSelfContained);
+
+            var builder = new DependencyContextBuilder2(mainProject, projectContext, IncludeRuntimeFileVersions);
+
+            builder = builder
+                .WithMainProjectInDepsFile(IncludeMainProject)
+                .WithReferenceAssemblies(referenceAssemblyInfos)
+                .WithDirectReferences(directReferences)
+                .WithDependencyReferences(dependencyReferences)
+                .WithReferenceProjectInfos(referenceProjects)
+                .WithExcludeFromPublishAssets(excludeFromPublishAssets)
+                .WithRuntimePackAssets(runtimePackAssets)
+                .WithCompilationOptions(compilationOptions)
+                .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
+                .WithPackagesThatWereFiltered(GetFilteredPackages());
+
+            if (CompileReferences.Length > 0)
+            {
+                builder = builder.WithCompileReferences(ReferenceInfo.CreateReferenceInfos(CompileReferences));
+            }
+
+            var resolvedNuGetFiles = ResolvedNuGetFiles.Select(f => new ResolvedFile(f, false))
+                                .Concat(ResolvedRuntimeTargetsFiles.Select(f => new ResolvedFile(f, true)));
+            builder = builder.WithResolvedNuGetFiles(resolvedNuGetFiles);
+
+            DependencyContext dependencyContext = builder.Build();
+
+            var writer = new DependencyContextWriter();
+            using (var fileStream = File.Create(depsFilePath))
+            {
+                writer.Write(dependencyContext, fileStream);
+            }
+            _filesWritten.Add(new TaskItem(depsFilePath));
+        }
+
+        bool _loggedLocalError = false;
+
+        public override bool Execute()
+        {
+            if (!base.Execute() || _loggedLocalError)
+            {
+                return false;
+            }
+            return true;
+        }
+        protected override void ExecuteCore()
+        {
+            if (DepsFileGenerationMode.Equals("old", StringComparison.InvariantCultureIgnoreCase))
+            {
+                WriteDepsFileOld(DepsFilePath);
+            }
+            else if (DepsFileGenerationMode.Equals("new", StringComparison.InvariantCultureIgnoreCase))
+            {
+                WriteDepsFileNew(DepsFilePath);
+            }
+            else
+            {
+                var newDepsFilePath = Path.ChangeExtension(DepsFilePath, ".new.json");
+
+                WriteDepsFileOld(DepsFilePath);
+
+                WriteDepsFileNew(newDepsFilePath);
+
+                var oldJson = File.ReadAllText(DepsFilePath);
+                var newJson = File.ReadAllText(newDepsFilePath);
+
+                if (oldJson != newJson)
+                {
+                    string message = "Internal error: new deps file generation logic did not produce the same result as the old logic." + Environment.NewLine +
+                        "    Please file an issue for this at https://github.com/dotnet/sdk and include the following two files: " + Environment.NewLine +                        
+                        "    Deps file from old logic: " + DepsFilePath + Environment.NewLine +
+                        "    Deps file from new logic: " + newDepsFilePath + Environment.NewLine +
+                        "    You can work around this by setting the DepsFileGenerationMode MSBuild property to 'old'";
+
+                    //  This is a temporary error message that we won't localize or assign an SDK
+                    //  error code to.  So use the Task classes Log property instead of our wrapper
+                    //  around it (which would force it to have an error code)
+                    ((Task) this).Log.LogError(message);
+
+                    _loggedLocalError = true;
+                }
+                else
+                {
+                    //  If the files matched, then delete the .new.json file
+                    File.Delete(newDepsFilePath);
+                }
+            }
         }
 
         private void LoadFilesToSkip()
@@ -231,7 +374,11 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var assetGroup in assetGroups)
             {
-                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimRuntimeFiles(assetGroup.RuntimeFiles, filesToTrim));
+                var trimmedFiles = TrimRuntimeFiles(assetGroup.RuntimeFiles, filesToTrim).ToList();
+                if (trimmedFiles.Any())
+                {
+                    yield return new RuntimeAssetGroup(assetGroup.Runtime, trimmedFiles);
+                }
             }
         }
 

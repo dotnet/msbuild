@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
@@ -101,6 +102,45 @@ namespace Microsoft.NET.Build.Tests
             getReferenceCopyLocalPathsCommand.Execute().Should().Pass();
 
             referenceCopyLocalPaths = getReferenceCopyLocalPathsCommand.GetValues();
+        }
+
+        [Fact]
+        public void CompileConflictsAreNotRemovedFromRuntimeDepsAssets()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "NetStandard2Library",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true,
+                //  In deps file, assets are under the ".NETStandard,Version=v2.0/" target (ie with empty RID) for some reason
+                RuntimeIdentifier = string.Empty
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Mvc.Razor", "2.0.1"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, projectFolder);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string outputFolder = buildCommand.GetOutputDirectory(testProject.TargetFrameworks,
+                runtimeIdentifier: testProject.RuntimeIdentifier).FullName;
+
+            string depsJsonPath = Path.Combine(outputFolder, $"{testProject.Name}.deps.json");
+
+            var assets = DepsFileSkipTests.GetDepsJsonAssets(depsJsonPath, testProject, "runtime")
+                .Select(DepsFileSkipTests.GetDepsJsonFilename)
+                .ToList();
+
+            assets.Should().Contain("System.ValueTuple.dll");
+
         }
     }
 }

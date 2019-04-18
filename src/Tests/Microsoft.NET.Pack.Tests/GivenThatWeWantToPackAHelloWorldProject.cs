@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
@@ -54,6 +55,37 @@ namespace Microsoft.NET.Pack.Tests
             }.Select(p => p.Replace('\\', Path.DirectorySeparatorChar));
 
             fileTargets.Should().BeEquivalentTo(expectedFileTargets);
+        }
+
+        [Fact]
+        public void It_fails_if_nobuild_was_requested_but_build_was_invoked()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "InvokeBuildOnPack",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.0",
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    project.Root.Add(XElement.Parse(@"<Target Name=""InvokeBuild"" DependsOnTargets=""Build"" BeforeTargets=""Pack"" />"));
+                })
+                .Restore(Log, testProject.Name);
+
+            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+
+            new PackCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute("/p:NoBuild=true")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1085");
         }
     }
 }

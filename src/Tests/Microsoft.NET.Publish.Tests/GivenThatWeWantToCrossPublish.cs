@@ -37,7 +37,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
 
-            //  Sholdn't have messages like the following:
+            //  Shouldn't have messages like the following:
             //  Encountered conflict between 'CopyLocal:C:\git\dotnet-sdk\artifacts\.nuget\packages\runtime.any.system.runtime\4.3.0\lib\netstandard1.5\System.Runtime.dll'
             //  and 'CopyLocal:C:\git\dotnet-sdk\artifacts\.nuget\packages\runtime.linux-x64.microsoft.netcore.app\2.0.6\runtimes\linux-x64\lib\netcoreapp2.0\System.Runtime.dll'.
             //  Could not determine a winner because 'CopyLocal:C:\git\dotnet-sdk\artifacts\.nuget\packages\runtime.linux-x64.microsoft.netcore.app\2.0.6\runtimes\linux-x64\lib\netcoreapp2.0\System.Runtime.dll'

@@ -70,10 +70,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
             string injectTargetContents =
 $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-  <Target Name=`WriteValuesToFile` " + (ShouldCompile ? $"DependsOnTargets=`{DependsOnTargets}`" : "") + $@">
+  <Target Name=`WriteValuesToFile` {(ShouldCompile ? $"DependsOnTargets=`{DependsOnTargets}`" : "")}>
     <ItemGroup>
       <LinesToWrite Include=`{linesAttribute}`/>
     </ItemGroup>

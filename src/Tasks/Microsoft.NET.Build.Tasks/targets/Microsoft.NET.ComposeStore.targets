@@ -18,10 +18,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     The main store entry point.
     ============================================================
     -->
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-
   <Target Name="ComposeStore"
           DependsOnTargets="PrepareForComposeStore;
                             PrepOptimizer;
@@ -415,7 +411,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="FilterResolvedFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="ComputeFilesToStore"
-          DependsOnTargets="_ComputeNetPublishAssets;
+          DependsOnTargets="_ComputeResolvedCopyLocalPublishAssets;
                             _ComputeCopyToPublishDirectoryItems">
 
     <PropertyGroup>
@@ -424,18 +420,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <FilterResolvedFiles  AssetsFilePath="$(ProjectAssetsFile)"
-                           ResolvedFiles ="@(ResolvedAssembliesToPublish)"
-                           PackagesToPrune="$(PackagesToPrune)"
-                           TargetFramework="$(TargetFrameworkMoniker)"
-                           RuntimeIdentifier="$(RuntimeIdentifier)"
-                           IsSelfContained="$(SelfContained)" >
+                          ResolvedFiles ="@(_ResolvedCopyLocalPublishAssets)"
+                          PackagesToPrune="$(PackagesToPrune)"
+                          TargetFramework="$(TargetFrameworkMoniker)"
+                          RuntimeIdentifier="$(RuntimeIdentifier)"
+                          IsSelfContained="$(SelfContained)" >
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedFileToPublish" />
-      <Output TaskParameter="PublishedPackges" ItemName="PackagesThatWereResolved" />
+      <Output TaskParameter="PublishedPackages" ItemName="PackagesThatWereResolved" />
     </FilterResolvedFiles>
 
     <ItemGroup>
       <ResolvedPackagesPublished Include="@(PackagesThatWereResolved)"
-                                    Condition="$(DoNotTrackPackageAsResolved) !='true'"/>
+                                 Condition="$(DoNotTrackPackageAsResolved) !='true'"/>
     </ItemGroup>
     
   </Target>

@@ -43,6 +43,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
+        public Dictionary<string, string> AdditionalItems { get; } = new Dictionary<string, string>();
+
         private static string GetShortTargetFrameworkIdentifier(string targetFramework)
         {
             int identifierLength = 0;
@@ -171,7 +173,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             {
                 packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"Microsoft.NETFramework.ReferenceAssemblies"),
-                    new XAttribute("Version", $"1.0.0-alpha-004")));
+                    new XAttribute("Version", $"1.0.0-alpha-5")));
+
+                propertyGroup.Add(new XElement(ns + "RestoreAdditionalProjectSources", "$(RestoreAdditionalProjectSources);https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json"));
             }
 
             var targetFrameworks = IsSdkProject ? TargetFrameworks.Split(';') : new[] { "net" };
@@ -215,6 +219,22 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             foreach (var additionalProperty in AdditionalProperties)
             {
                 propertyGroup.Add(new XElement(ns + additionalProperty.Key, additionalProperty.Value));
+            }
+
+            if (AdditionalItems.Any())
+            {
+                foreach (var additionalItem in AdditionalItems)
+                {
+                    var additionalItemGroup = projectXml.Root.Elements(ns + "ItemGroup").FirstOrDefault();
+                    if (additionalItemGroup == null)
+                    {
+                        additionalItemGroup = new XElement(ns + "ItemGroup");
+                        projectXml.Root.Add(packageReferenceItemGroup);
+                    }
+                    additionalItemGroup.Add(new XElement(
+                        ns + additionalItem.Key, 
+                        new XAttribute("Include", additionalItem.Value)));
+                }
             }
 
             if (this.IsExe)

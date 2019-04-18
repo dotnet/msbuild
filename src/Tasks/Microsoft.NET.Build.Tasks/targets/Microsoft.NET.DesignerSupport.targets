@@ -1,0 +1,145 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.DesignerSupport.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Condition="'$(DesignerRuntimeImplementationProjectOutputGroupDependsOn)' == ''">
+    <DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+      $(CommonOutputGroupsDependsOn);
+    </DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+      $(DesignerRuntimeImplementationProjectOutputGroupDependsOn);
+      _GenerateDesignerDepsFile;
+      _GenerateDesignerRuntimeConfigFile;
+      _GatherDesignerShadowCopyFiles;
+    </DesignerRuntimeImplementationProjectOutputGroupDependsOn>
+
+    <_DesignerDepsFileName>$(AssemblyName).designer.deps.json</_DesignerDepsFileName>
+    <_DesignerRuntimeConfigFileName>$(AssemblyName).designer.runtimeconfig.json</_DesignerRuntimeConfigFileName>
+
+    <_DesignerDepsFilePath>$(IntermediateOutputPath)$(_DesignerDepsFileName)</_DesignerDepsFilePath>
+    <_DesignerRuntimeConfigFilePath>$(IntermediateOutputPath)$(_DesignerRuntimeConfigFileName)</_DesignerRuntimeConfigFilePath>
+  </PropertyGroup>
+
+  <Target
+    Name="DesignerRuntimeImplementationProjectOutputGroup"
+    DependsOnTargets="$(DesignerRuntimeImplementationProjectOutputGroupDependsOn)"
+    Returns="@(DesignerRuntimeImplementationProjectOutputGroupOutput)"
+    />
+
+  <Target
+    Name="_GenerateDesignerDepsFile"
+    Inputs="$(MSBuildAllProjectFiles);$(ProjectAssetsFile)"
+    Outputs="$(_DesignerDepsFilePath)"
+    Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+    >
+    <!-- 
+      NOTE: We do not include the main assembly info or non-NuGet dependencies
+      in designer deps file as these files may not be built yet at design time.
+      Instead, we rely on SetAppPaths in runtimeconfig to allow loading of
+      non-NuGet assets from shadow copied app base directory. This further
+      allows loading of designer dll(s) that are not seen by the build. 
+    -->
+    <GenerateDepsFile 
+      AssemblyName="_"
+      AssemblyExtension="_"
+      AssemblyVersion="_"
+      AssetsFilePath="$(ProjectAssetsFile)"
+      DepsFilePath="$(_DesignerDepsFilePath)"
+      FilesToSkip="@(_ConflictPackageFiles)"
+      IncludeMainProject="false"
+      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
+      IsSelfContained="false"
+      PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+      ProjectPath="$(MSBuildProjectFullPath)"
+      RuntimeFrameworks="@(RuntimeFramework)"
+      CompileReferences="@(ResolvedCompileFileDefinitions)"
+      ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
+      ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
+      TargetFramework="$(TargetFrameworkMoniker)"
+      DepsFileGenerationMode="$(DepsFileGenerationMode)"
+      />
+
+    <ItemGroup>
+      <!-- Designer will rename to <surface process name>.deps.json -->
+      <DesignerRuntimeImplementationProjectOutputGroupOutput 
+        Include="$([MSBuild]::NormalizePath($(_DesignerDepsFilePath)))"
+        TargetPath="$(_DesignerDepsFileName)"
+        />
+
+      <FileWrites Include="$(_DesignerDepsFilePath)" />
+    </ItemGroup>
+  </Target>
+
+  <Target
+    Name="_GenerateDesignerRuntimeConfigFile"
+    Inputs="$(MSBuildAllProjectFiles);$(ProjectAssetsFile)"
+    Outputs="$(_DesignerRuntimeConfigFilePath)"
+    Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+    >
+
+    <ItemGroup>
+      <_DesignerHostConfigurationOption
+        Include="Microsoft.NETCore.DotNetHostPolicy.SetAppPaths"
+        Value="true" 
+        />
+    </ItemGroup>
+
+    <GenerateRuntimeConfigurationFiles 
+      AdditionalProbingPaths="@(AdditionalProbingPath)"
+      AssetsFilePath="$(ProjectAssetsFile)"
+      HostConfigurationOptions="@(RuntimeHostConfigurationOption);@(_DesignerHostConfigurationOption)"
+      IsSelfContained="false"
+      PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+      RuntimeConfigPath="$(_DesignerRuntimeConfigFilePath)"
+      RuntimeFrameworks="@(RuntimeFramework)"
+      TargetFramework="$(TargetFramework)"
+      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      UserRuntimeConfig="$(UserRuntimeConfig)"
+      WriteAdditionalProbingPathsToMainConfig="true"
+      />
+
+    <ItemGroup>
+      <!-- Designer will rename to <surface process name>.runtimeconfig.json -->
+      <DesignerRuntimeImplementationProjectOutputGroupOutput 
+        Include="$([MSBuild]::NormalizePath($(_DesignerRuntimeConfigFilePath)))"
+        TargetPath="$(_DesignerRuntimeConfigFileName)"
+        />
+
+      <FileWrites Include="$(_DesignerRuntimeConfigFilePath)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GatherDesignerShadowCopyFiles">
+    <ItemGroup>
+      <_DesignerShadowCopy Include="@(ReferenceCopyLocalPaths)" />
+
+      <!--
+        For .NET Core, we do not include NuGet package assets or runtime pack
+        assets, irrespective of self-contained / copy-local settings. Designer
+        will load these from the NuGet cache or shared framework always.
+      -->
+      <_DesignerShadowCopy
+        Remove="@(_ResolvedCopyLocalBuildAssets);@(RuntimePackAsset)"
+        Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+        />
+
+      <DesignerRuntimeImplementationProjectOutputGroupOutput 
+        Include="@(_DesignerShadowCopy->'%(FullPath)')"
+        TargetPath="%(_DesignerShadowCopy.DestinationSubDirectory)%(_DesignerShadowCopy.Filename)%(_DesignerShadowCopy.Extension)"
+        />
+      </ItemGroup>
+  </Target>
+
+</Project>

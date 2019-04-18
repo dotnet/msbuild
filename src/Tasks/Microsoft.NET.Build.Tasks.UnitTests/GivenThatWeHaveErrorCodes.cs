@@ -20,6 +20,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             // Put deleted numeric error codes here. 
             // For example, if NETSDK1001 is deleted, add 1001 to this list.
+            1066,
         };
 
         [Fact]
@@ -29,7 +30,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             foreach (var (key, message) in GetMessages())
             {
-                // NB: if we ever need strings that don't have error codes (say because they are not sent to MSBuild), 
+                // NB: if we ever need strings that don't have error codes (say because they are not sent to MSBuild),
                 //     we should use a separate .resx file so that we can preserve this enforcement.
                 var match = Regex.Match(message, "^NETSDK([0-9]{4}): ");
                 match.Success
@@ -47,7 +48,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 int code = _firstCode + i;
                 codes.Contains(code)
                      .Should()
-                     .BeTrue(because: $"error codes should not be skipped (NETSDK{code} was not found)");
+                     .BeTrue(because: $"error codes should not be skipped (NETSDK{code} was not found; add to the deleted codes list if intentionally deleted)");
             }
         }
 

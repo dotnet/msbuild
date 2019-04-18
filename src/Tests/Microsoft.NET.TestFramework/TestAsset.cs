@@ -91,6 +91,66 @@ namespace Microsoft.NET.TestFramework
             return this;
         }
 
+        public TestAsset WithTargetFramework(string targetFramework, string projectName = null)
+        {
+            return WithTargetFramework(
+            p =>
+            {
+                var ns = p.Root.Name.Namespace;
+                p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single().SetValue(targetFramework);
+            },
+            targetFramework,
+            projectName);
+        }
+
+        public TestAsset WithTargetFrameworks(string targetFrameworks, string projectName = null)
+        {
+            return WithTargetFramework(
+            p =>
+            {
+                var ns = p.Root.Name.Namespace;
+                var propertyGroup = p.Root.Elements(ns + "PropertyGroup").First();
+                propertyGroup.Elements(ns + "TargetFramework").SingleOrDefault()?.Remove();
+                propertyGroup.Add(new XElement(ns + "TargetFramework", targetFrameworks));
+            },
+            targetFrameworks,
+            projectName);
+        }
+
+        public TestAsset WithTargetFrameworkOrFrameworks(string targetFrameworkOrFrameworks, bool multitarget, string projectName = null)
+        {
+            if (multitarget)
+            {
+                return WithTargetFrameworks(targetFrameworkOrFrameworks, projectName);
+            }
+            else
+            {
+                return WithTargetFramework(targetFrameworkOrFrameworks, projectName);
+            }
+        }
+
+        private TestAsset WithTargetFramework(Action<XDocument> actionOnProject, string targetFramework, string projectName = null)
+        {
+            if (string.IsNullOrEmpty(targetFramework))
+            {
+                return this;
+            }
+
+            return WithProjectChanges((path, project) =>
+            {
+                if (!string.IsNullOrEmpty(projectName))
+                {
+                    if (!projectName.Equals(System.IO.Path.GetFileNameWithoutExtension(path), StringComparison.OrdinalIgnoreCase))
+                    {
+                        return;
+                    }
+                }
+
+                var ns = project.Root.Name.Namespace;
+                actionOnProject(project);
+            });
+        }
+
         public TestAsset WithProjectChanges(Action<XDocument> xmlAction)
         {
             return WithProjectChanges((path, project) => xmlAction(project));
@@ -154,7 +214,7 @@ namespace Microsoft.NET.TestFramework
             var binFolder = $"{System.IO.Path.DirectorySeparatorChar}bin";
             var objFolder = $"{System.IO.Path.DirectorySeparatorChar}obj";
 
-            directory = directory.ToLower();
+            directory = directory.ToLowerInvariant();
             return directory.EndsWith(binFolder)
                   || directory.EndsWith(objFolder)
                   || IsInBinOrObjFolder(directory);
@@ -167,7 +227,7 @@ namespace Microsoft.NET.TestFramework
             var binFolderWithTrailingSlash =
               $"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}";
 
-            path = path.ToLower();
+            path = path.ToLowerInvariant();
             return path.Contains(binFolderWithTrailingSlash)
                   || path.Contains(objFolderWithTrailingSlash);
         }
