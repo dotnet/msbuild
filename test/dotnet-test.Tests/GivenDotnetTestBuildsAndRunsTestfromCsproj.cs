@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("5");
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp2.1", "VSTestCore.dll");
+                                   configuration, "netcoreapp2.2", "VSTestCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test
@@ -331,6 +331,46 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
+        [Fact]
+        public void ItTestsWithTheSpecifiedRuntimeOption()
+        {
+            var testInstance = TestAssets.Get("XunitCore")
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var rootPath = testInstance.Root.FullName;
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+
+            new BuildCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput($"--runtime {rid}")
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
+
+            var result = new DotnetTestCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-build --runtime {rid}");
+
+            result
+                .Should()
+                .NotHaveStdErrContaining("MSB1001")
+                .And
+                .HaveStdOutContaining(rid);
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result
+                    .Should()
+                    .HaveStdOutContaining("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.")
+                    .And
+                    .HaveStdOutContaining("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTest")
+                    .And
+                    .HaveStdOutContaining("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
 
         [WindowsOnlyFact]
         public void ItCreatesCoverageFileWhenCodeCoverageEnabledByRunsettings()

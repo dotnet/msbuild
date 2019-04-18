@@ -651,7 +651,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ターミナルを再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
@@ -722,18 +722,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Tools ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
-Bash を使用している場合、次のコマンドを実行して、このディレクトリをプロファイルに追加できます:
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
+Bash を使用する場合は、次のコマンドを実行してプロファイルに追加できます:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-次のコマンドを実行すると、このディレクトリを現在のセッションに追加できます:
+また、次のコマンドを実行することにより、現在のセッションに追加できます:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -749,18 +748,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Tools ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
-Bash を使用している場合、次のコマンドを実行して、このディレクトリをプロファイルに追加できます:
+        <target state="translated">PATH 環境変数には、ツール ディレクトリ '{0}' が含まれていません。
+Bash を使用する場合は、次のコマンドを実行してプロファイルに追加できます:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-次のコマンドを実行すると、このディレクトリを現在のセッションに追加できます:
+また、現在のセッションに追加する場合は、次のコマンドを実行してください:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -891,6 +889,16 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
         <target state="translated">VERSION_SUFFIX</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentDescription">
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">利用するプロジェクト ファイルまたはソリューション ファイル。指定しない場合、コマンドは現在のディレクトリを検索します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentName">
+        <source>PROJECT | SOLUTION</source>
+        <target state="translated">プロジェクト | ソリューション</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">

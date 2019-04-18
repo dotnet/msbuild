@@ -108,5 +108,35 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["install"];
             appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\Tools");
         }
+
+        [Fact]
+        public void InstallToolParserCanParseNoCacheOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool install -g console.test.app --no-cache");
+
+            var appliedOptions = result["dotnet"]["tool"]["install"];
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--no-cache");
+        }
+
+        [Fact]
+        public void InstallToolParserCanParseIgnoreFailedSourcesOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool install -g console.test.app --ignore-failed-sources");
+
+            var appliedOptions = result["dotnet"]["tool"]["install"];
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--ignore-failed-sources");
+        }
+
+        [Fact]
+        public void InstallToolParserCanParseDisableParallelOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool install -g console.test.app --disable-parallel");
+
+            var appliedOptions = result["dotnet"]["tool"]["install"];
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--disable-parallel");
+        }
     }
 }

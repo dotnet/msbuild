@@ -36,6 +36,26 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
+        public void ItDoesNotFindMSBuildSdkThatIsMissingFromLocatedNETCoreSdk()
+        {
+            var environment = new TestEnvironment();
+            var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.97");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.SdkThatDoesNotExist", null, null),
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
+                new MockFactory());
+
+            result.Success.Should().BeFalse();
+            result.Path.Should().BeNull();
+            result.Version.Should().BeNull();
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().NotBeEmpty();
+        }
+
+        [Fact]
         public void ItFindsTheVersionSpecifiedInGlobalJson()
         {
             var environment = new TestEnvironment();
@@ -75,9 +95,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Path.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
-            result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK is smaller than the minimum version 999.99.99"
-                + " requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version"
-                + " specified in the project, or increase the version specified in global.json.");
+            result.Errors.Should().Contain(string.Format(Strings.NETCoreSDKSmallerThanMinimumRequestedVersion, "99.99.99", "999.99.99"));
         }
 
         [Fact]
@@ -102,9 +120,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Path.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
-            result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK requires at least version 2.0 of MSBuild."
-                + " The current available version of MSBuild is 1.0. Change the .NET Core SDK specified in global.json to an older"
-                + " version that requires the MSBuild version currently available.");
+            result.Errors.Should().Contain(string.Format(Strings.MSBuildSmallerThanMinimumVersion, "99.99.99", "2.0", "1.0"));
         }
 
         [Theory]
@@ -192,9 +208,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Path.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
-            result.Errors.Should().Contain($"Version 1.0.1 of the .NET Core SDK is smaller than the minimum version"
-                            + " 1.0.4 required by Visual Studio. Check that a recent enough"
-                            + " .NET Core SDK is installed or increase the version specified in global.json.");
+            result.Errors.Should().Contain(string.Format(Strings.NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio, "1.0.1", "1.0.4"));
         }
 
         [Fact]
@@ -216,9 +230,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Path.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
-            result.Errors.Should().Contain($"Version 1.0.1 of the .NET Core SDK is smaller than the minimum version"
-                            + " 2.0.0 required by Visual Studio. Check that a recent enough"
-                            + " .NET Core SDK is installed or increase the version specified in global.json.");
+            result.Errors.Should().Contain(string.Format(Strings.NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio, "1.0.1", "2.0.0"));
         }
 
         [Fact]

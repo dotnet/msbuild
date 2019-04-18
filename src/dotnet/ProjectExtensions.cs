@@ -32,6 +32,11 @@ namespace Microsoft.DotNet.Tools.ProjectExtensions
                 .Select((frameworkString) => NuGetFramework.Parse(frameworkString));
         }
 
+        public static IEnumerable<string> GetConfigurations(this Project project)
+        {
+            return project.GetPropertyCommaSeparatedValues("Configurations");
+        }
+
         public static IEnumerable<string> GetPropertyCommaSeparatedValues(this Project project, string propertyName)
         {
             return project.GetPropertyValue(propertyName)
