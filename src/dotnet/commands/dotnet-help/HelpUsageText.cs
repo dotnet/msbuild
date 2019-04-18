@@ -9,10 +9,10 @@ $@"{LocalizableStrings.Usage}: dotnet [runtime-options] [path-to-application] [a
 {LocalizableStrings.ExecutionUsageDescription}
 
 runtime-options:
-  --additionalprobingpath <path>     {LocalizableStrings.AdditionalprobingpathDefinition}
-  --additional-deps <path>           {LocalizableStrings.AdditionalDeps}
-  --fx-version <version>             {LocalizableStrings.FxVersionDefinition}
-  --roll-forward-on-no-candidate-fx  {LocalizableStrings.RollForwardOnNoCandidateFxDefinition}
+  --additionalprobingpath <path>         {LocalizableStrings.AdditionalprobingpathDefinition}
+  --additional-deps <path>               {LocalizableStrings.AdditionalDeps}
+  --fx-version <version>                 {LocalizableStrings.FxVersionDefinition}
+  --roll-forward-on-no-candidate-fx <n>  {LocalizableStrings.RollForwardOnNoCandidateFxDefinition}
 
 path-to-application:
   {LocalizableStrings.PathToApplicationDefinition}

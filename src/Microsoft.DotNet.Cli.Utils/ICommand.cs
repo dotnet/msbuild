@@ -26,8 +26,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         ICommand OnErrorLine(Action<string> handler);
 
-        CommandResolutionStrategy ResolutionStrategy { get; }
-
         string CommandName { get; }
 
         string CommandArgs { get; }

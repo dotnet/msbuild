@@ -14,21 +14,22 @@ using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Update
 {
     internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
 
-    internal delegate (IToolPackageStore, IToolPackageInstaller) CreateToolPackageStoreAndInstaller(
+    internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller) CreateToolPackageStoresAndInstallerAndUninstaller(
         DirectoryPath? nonGlobalLocation = null,
-        IEnumerable<string> additionalRestoreArguments = null);
+		IEnumerable<string> additionalRestoreArguments = null);
 
     internal class ToolUpdateCommand : CommandBase
     {
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private readonly CreateShellShimRepository _createShellShimRepository;
-        private readonly CreateToolPackageStoreAndInstaller _createToolPackageStoreAndInstaller;
+        private readonly CreateToolPackageStoresAndInstallerAndUninstaller _createToolPackageStoreInstallerUninstaller;
 
         private readonly PackageId _packageId;
         private readonly string _configFilePath;
@@ -38,10 +39,11 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private readonly string _verbosity;
         private readonly string _toolPath;
         private readonly IEnumerable<string> _forwardRestoreArguments;
+        private readonly string _packageVersion;
 
         public ToolUpdateCommand(AppliedOption appliedCommand,
             ParseResult parseResult,
-            CreateToolPackageStoreAndInstaller createToolPackageStoreAndInstaller = null,
+            CreateToolPackageStoresAndInstallerAndUninstaller createToolPackageStoreInstallerUninstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
             IReporter reporter = null)
             : base(parseResult)
@@ -55,13 +57,14 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
             _additionalFeeds = appliedCommand.ValueOrDefault<string[]>("add-source");
+            _packageVersion = appliedCommand.SingleArgumentOrDefault("version");
             _global = appliedCommand.ValueOrDefault<bool>("global");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
             _forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
 
-            _createToolPackageStoreAndInstaller = createToolPackageStoreAndInstaller ??
-                                                  ToolPackageFactory.CreateToolPackageStoreAndInstaller;
+            _createToolPackageStoreInstallerUninstaller = createToolPackageStoreInstallerUninstaller ??
+                                                  ToolPackageFactory.CreateToolPackageStoresAndInstallerAndUninstaller;
 
             _createShellShimRepository =
                 createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
@@ -80,79 +83,79 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                 toolPath = new DirectoryPath(_toolPath);
             }
 
-            (IToolPackageStore toolPackageStore, IToolPackageInstaller toolPackageInstaller) =
-                _createToolPackageStoreAndInstaller(toolPath, _forwardRestoreArguments);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
-
-
-            IToolPackage oldPackage;
-            try
-            {
-                oldPackage = toolPackageStore.EnumeratePackageVersions(_packageId).SingleOrDefault();
-                if (oldPackage == null)
-                {
-                    throw new GracefulException(
-                        messages: new[]
-                        {
-                            string.Format(
-                                LocalizableStrings.ToolNotInstalled,
-                                _packageId),
-                        },
-                        isUserError: false);
-                }
-            }
-            catch (InvalidOperationException)
+            VersionRange versionRange = null;
+            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
             {
                 throw new GracefulException(
-                    messages: new[]
-                    {
-                        string.Format(
-                            LocalizableStrings.ToolHasMultipleVersionsInstalled,
-                            _packageId),
-                    },
-                    isUserError: false);
+                    string.Format(
+                        LocalizableStrings.InvalidNuGetVersionRange,
+                        _packageVersion));
             }
 
-            FilePath? configFile = null;
-            if (_configFilePath != null)
-            {
-                configFile = new FilePath(_configFilePath);
-            }
+            (IToolPackageStore toolPackageStore,
+             IToolPackageStoreQuery toolPackageStoreQuery,
+             IToolPackageInstaller toolPackageInstaller,
+             IToolPackageUninstaller toolPackageUninstaller) = _createToolPackageStoreInstallerUninstaller(toolPath, _forwardRestoreArguments);
+
+            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
+
+            IToolPackage oldPackageNullable = GetOldPackage(toolPackageStoreQuery);
 
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
                 TimeSpan.Zero))
             {
-                RunWithHandlingUninstallError(() =>
+                if (oldPackageNullable != null)
                 {
-                    foreach (CommandSettings command in oldPackage.Commands)
+                    RunWithHandlingUninstallError(() =>
                     {
-                        shellShimRepository.RemoveShim(command.Name);
-                    }
+                        foreach (RestoredCommand command in oldPackageNullable.Commands)
+                        {
+                            shellShimRepository.RemoveShim(command.Name);
+                        }
 
-                    oldPackage.Uninstall();
-                });
+                        toolPackageUninstaller.Uninstall(oldPackageNullable.PackageDirectory);
+                    });
+                }
 
                 RunWithHandlingInstallError(() =>
                 {
                     IToolPackage newInstalledPackage = toolPackageInstaller.InstallPackage(
-                        new PackageLocation(nugetConfig: configFile, additionalFeeds: _additionalFeeds),
+                        new PackageLocation(nugetConfig: GetConfigFile(), additionalFeeds: _additionalFeeds),
                         packageId: _packageId,
                         targetFramework: _framework,
+                        versionRange: versionRange,
                         verbosity: _verbosity);
 
-                    foreach (CommandSettings command in newInstalledPackage.Commands)
+                    EnsureVersionIsHigher(oldPackageNullable, newInstalledPackage);
+
+                    foreach (RestoredCommand command in newInstalledPackage.Commands)
                     {
                         shellShimRepository.CreateShim(command.Executable, command.Name);
                     }
 
-                    PrintSuccessMessage(oldPackage, newInstalledPackage);
+                    PrintSuccessMessage(oldPackageNullable, newInstalledPackage);
                 });
 
                 scope.Complete();
             }
 
             return 0;
+        }
+
+        private static void EnsureVersionIsHigher(IToolPackage oldPackageNullable, IToolPackage newInstalledPackage)
+        {
+            if (oldPackageNullable != null && (newInstalledPackage.Version < oldPackageNullable.Version))
+            {
+                throw new GracefulException(
+                    new[]
+                    {
+                        string.Format(LocalizableStrings.UpdateToLowerVersion,
+                            newInstalledPackage.Version.ToNormalizedString(),
+                            oldPackageNullable.Version.ToNormalizedString())
+                    },
+                    isUserError: false);
+            }
         }
 
         private void ValidateArguments()
@@ -225,9 +228,51 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             }
         }
 
+        private FilePath? GetConfigFile()
+        {
+            FilePath? configFile = null;
+            if (_configFilePath != null)
+            {
+                configFile = new FilePath(_configFilePath);
+            }
+
+            return configFile;
+        }
+
+        private IToolPackage GetOldPackage(IToolPackageStoreQuery toolPackageStoreQuery)
+        {
+            IToolPackage oldPackageNullable;
+            try
+            {
+                oldPackageNullable = toolPackageStoreQuery.EnumeratePackageVersions(_packageId).SingleOrDefault();
+            }
+            catch (InvalidOperationException)
+            {
+                throw new GracefulException(
+                    messages: new[]
+                    {
+                        string.Format(
+                            LocalizableStrings.ToolHasMultipleVersionsInstalled,
+                            _packageId),
+                    },
+                    isUserError: false);
+            }
+
+            return oldPackageNullable;
+        }
+
         private void PrintSuccessMessage(IToolPackage oldPackage, IToolPackage newInstalledPackage)
         {
-            if (oldPackage.Version != newInstalledPackage.Version)
+            if (oldPackage == null)
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        Install.LocalizableStrings.InstallationSucceeded,
+                        string.Join(", ", newInstalledPackage.Commands.Select(c => c.Name)),
+                        newInstalledPackage.Id,
+                        newInstalledPackage.Version.ToNormalizedString()).Green());
+            }
+            else if (oldPackage.Version != newInstalledPackage.Version)
             {
                 _reporter.WriteLine(
                     string.Format(

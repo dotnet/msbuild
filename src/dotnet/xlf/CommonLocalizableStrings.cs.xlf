@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Umožňuje, aby se příkaz zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">V {0} se nenašel žádný projekt.</target>
@@ -473,8 +478,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Projekt {1} neobsahuje odkazy na {0}. ;; {0} je typ požadované položky (projekt, balíček, p2p) a {1} je používaný objekt (soubor projektu nebo soubor řešení).</target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="needs-review-translation">Projekt {1} neobsahuje odkazy na {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -899,11 +904,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">PROJEKT | ŘEŠENÍ</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Umožňuje, aby se příkaz zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
         <note />
       </trans-unit>
     </body>

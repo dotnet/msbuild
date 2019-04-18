@@ -52,20 +52,20 @@ namespace Microsoft.DotNet.Cli.Utils
             builder.Append($"{e.Duration.ToString("ss\\.fff\\s").Blue()}]");
         }
 
-        private static void AppendTime(StringBuilder builder, double? percent, double treshold)
+        private static void AppendTime(StringBuilder builder, double? percent, double threshold)
         {
             if (percent != null)
             {
                 var formattedPercent = $"{percent*100:00\\.00%}";
-                if (percent > treshold)
+                if (percent > threshold)
                 {
                     builder.Append(formattedPercent.Red());
                 }
-                else if (percent > treshold / 2)
+                else if (percent > threshold / 2)
                 {
                     builder.Append(formattedPercent.Yellow());
                 }
-                else if (percent > treshold / 5)
+                else if (percent > threshold / 5)
                 {
                     builder.Append(formattedPercent.Green());
                 }

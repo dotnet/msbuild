@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -171,23 +172,6 @@ namespace Microsoft.DotNet.TestFramework
             return this;
         }
 
-        public TestAssetInstance UseCurrentRuntimeFrameworkVersion()
-        {
-            return WithProjectChanges(project =>
-            {
-                var ns = project.Root.Name.Namespace;
-
-                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").LastOrDefault();
-                if (propertyGroup == null)
-                {
-                    propertyGroup = new XElement(ns + "PropertyGroup");
-                    project.Root.Add(propertyGroup);
-                }
-
-                propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", CurrentRuntimeFrameworkVersion));
-            });
-        }
-
         private static string RebasePath(string path, string oldBaseDirectory, string newBaseDirectory)
         {
             path = Path.IsPathRooted(path) ? PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(oldBaseDirectory), path) : path;
@@ -251,7 +235,7 @@ namespace Microsoft.DotNet.TestFramework
 
             Console.WriteLine($"TestAsset Build '{TestAssetInfo.AssetName}'");
 
-            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, args)
+            var commandResult = CreateCommand(TestAssetInfo.DotnetExeFile.FullName, args)
                                     .WorkingDirectory(Root.FullName)
                                     .CaptureStdOut()
                                     .CaptureStdErr()
@@ -280,7 +264,7 @@ namespace Microsoft.DotNet.TestFramework
         {
             var restoreArgs = new string[] { "restore", projectFile.FullName };
 
-            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
+            var commandResult = CreateCommand(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
                                 .CaptureStdOut()
                                 .CaptureStdErr()
                                 .Execute();
@@ -293,7 +277,9 @@ namespace Microsoft.DotNet.TestFramework
 
                 Console.WriteLine(commandResult.StdErr);
 
-                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}");
+                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}" + Environment.NewLine +
+                    commandResult.StdOut + Environment.NewLine +
+                    commandResult.StdErr);
 
                 throw new Exception(message);
             }
@@ -308,5 +294,24 @@ namespace Microsoft.DotNet.TestFramework
                 Restore(projFile);
             }
         }
+
+        private static Command CreateCommand(string path, IEnumerable<string> args)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = path,
+                Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args),
+                UseShellExecute = false
+            };
+
+
+            var _process = new Process
+            {
+                StartInfo = psi
+            };
+
+            return new Command(_process);
+        }
+
     }
 }

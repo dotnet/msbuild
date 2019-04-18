@@ -40,6 +40,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private IUserLevelCacheWriter _userLevelCacheWriter;
         private const string OSVersion = "OS Version";
         private const string OSPlatform = "OS Platform";
+        private const string OutputRedirected = "Output Redirected";
         private const string RuntimeId = "Runtime Id";
         private const string ProductVersion = "Product Version";
         private const string TelemetryProfile = "Telemetry Profile";
@@ -64,6 +65,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 {OSVersion, RuntimeEnvironment.OperatingSystemVersion},
                 {OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString()},
+                {OutputRedirected, Console.IsOutputRedirected.ToString()},
                 {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
                 {ProductVersion, Product.Version},
                 {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},

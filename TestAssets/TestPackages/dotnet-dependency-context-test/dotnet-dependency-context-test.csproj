@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <VersionPrefix>1.0.0-rc</VersionPrefix>
+    <!-- netcoreapp2.2 is the maximum TFM project tools support -->
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>

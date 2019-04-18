@@ -1,8 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
+using System.Xml.Linq;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -70,7 +74,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp2.2")
+                .ExecuteWithCapturedOutput("--framework netcoreapp3.0")
                 .Should().Pass()
                          .And.HaveStdOutContaining("This string came from the test library!");
         }
@@ -150,7 +154,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp2.2")
+                .ExecuteWithCapturedOutput("--framework netcoreapp3.0")
                 .Should().Pass()
                          .And.HaveStdOut("Hello World!");
         }
@@ -362,7 +366,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             cmd.Should().Pass()
                 .And.NotHaveStdOutContaining(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath))
                 .And.HaveStdOutContaining("First");
-                         
+
             cmd.StdErr.Should().BeEmpty();
         }
 
@@ -413,7 +417,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             cmd.Should().Pass()
                 .And.HaveStdOutContaining("http://localhost:12345/");
-                         
+
             cmd.StdErr.Should().BeEmpty();
         }
 
@@ -443,7 +447,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             cmd.Should().Pass()
                 .And.HaveStdOutContaining("http://localhost:54321/");
-                         
+
             cmd.StdErr.Should().BeEmpty();
         }
 
@@ -526,7 +530,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             var cmd = new RunCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput("--no-launch-profile");
-                
+
             cmd.Should().Pass()
                 .And.HaveStdOutContaining("(NO MESSAGE)");
 
@@ -641,6 +645,87 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 result.Should().HaveStdOutContaining("Restore")
                     .And.HaveStdOutContaining("CoreCompile");
             }
+        }
+
+        [Fact]
+        public void ItDoesNotShowImportantLevelMessageByDefault()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeRestoreToProject);
+
+            var result = new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName)
+                .ExecuteWithCapturedOutput();
+
+            result.Should().Pass()
+                .And.NotHaveStdOutContaining("Important text");
+        }
+
+        [Fact]
+        public void ItShowImportantLevelMessageWhenPassInteractive()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeRestoreToProject);
+
+            var result = new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName)
+                .ExecuteWithCapturedOutput("--interactive");
+
+            result.Should().Pass()
+                .And.HaveStdOutContaining("Important text");
+        }
+
+        [Fact]
+        public void ItRunsWithDotnetWithoutApphost()
+        {
+            var testInstance = TestAssets.Get("AppOutputsExecutablePath").CreateInstance().WithSourceFiles();
+
+            var command = new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName);
+
+            command.Environment["UseAppHost"] = "false";
+
+            command.ExecuteWithCapturedOutput()
+                   .Should()
+                   .Pass()
+                   .And
+                   .HaveStdOutContaining($"dotnet{Constants.ExeSuffix}");
+        }
+
+        [Fact]
+        public void ItRunsWithApphost()
+        {
+            var testInstance = TestAssets.Get("AppOutputsExecutablePath").CreateInstance().WithSourceFiles();
+
+            var result = new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName)
+                .ExecuteWithCapturedOutput();
+
+            result.Should().Pass()
+                .And.HaveStdOutContaining($"AppOutputsExecutablePath{Constants.ExeSuffix}");
+        }
+
+        [Fact]
+        public void ItForwardsEmptyArgumentsToTheApp()
+        {
+            var testAppName = "TestAppSimple";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles();
+
+            new RunCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("a \"\" c")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining($"0 = a{Environment.NewLine}1 = {Environment.NewLine}2 = c");
         }
     }
 }

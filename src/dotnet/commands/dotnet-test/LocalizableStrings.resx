@@ -211,4 +211,7 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
   <data name="ConfigurationOptionDescription" xml:space="preserve">
     <value>The configuration to use for running tests. The default for most projects is 'Debug'.</value>
   </data>
+  <data name="CmdNoLogo" xml:space="preserve">
+    <value>Run test(s), without displaying Microsoft Testplatform banner</value>
+  </data>
 </root>

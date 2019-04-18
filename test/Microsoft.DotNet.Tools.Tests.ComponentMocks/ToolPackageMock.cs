@@ -5,9 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -15,8 +18,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
     internal class ToolPackageMock : IToolPackage
     {
         private IFileSystem _fileSystem;
-        private Lazy<IReadOnlyList<CommandSettings>> _commands;
-        private Action _uninstallCallback;
+        private Lazy<IReadOnlyList<RestoredCommand>> _commands;
         private IEnumerable<string> _warnings;
         private readonly IReadOnlyList<FilePath> _packagedShims;
 
@@ -25,7 +27,6 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             PackageId id,
             NuGetVersion version,
             DirectoryPath packageDirectory,
-            Action uninstallCallback = null,
             IEnumerable<string> warnings = null,
             IReadOnlyList<FilePath> packagedShims = null)
         {
@@ -33,8 +34,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             Id = id;
             Version = version ?? throw new ArgumentNullException(nameof(version));
             PackageDirectory = packageDirectory;
-            _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
-            _uninstallCallback = uninstallCallback;
+            _commands = new Lazy<IReadOnlyList<RestoredCommand>>(GetCommands);
             _warnings = warnings ?? new List<string>();
             _packagedShims = packagedShims ?? new List<FilePath>();
         }
@@ -42,10 +42,9 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         public PackageId Id { get; private set; }
 
         public NuGetVersion Version { get; private set; }
-
         public DirectoryPath PackageDirectory { get; private set; }
 
-        public IReadOnlyList<CommandSettings> Commands
+        public IReadOnlyList<RestoredCommand> Commands
         {
             get
             {
@@ -63,69 +62,27 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             }
         }
 
-        public void Uninstall()
-        {
-            var rootDirectory = PackageDirectory.GetParentPath();
-            string tempPackageDirectory = null;
-
-            TransactionalAction.Run(
-                action: () => {
-                    try
-                    {
-                        if (_fileSystem.Directory.Exists(PackageDirectory.Value))
-                        {
-                            var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                            _fileSystem.Directory.Move(PackageDirectory.Value, tempPath);
-                            tempPackageDirectory = tempPath;
-                        }
-
-                        if (_fileSystem.Directory.Exists(rootDirectory.Value) &&
-                            !_fileSystem.Directory.EnumerateFileSystemEntries(rootDirectory.Value).Any())
-                        {
-                            _fileSystem.Directory.Delete(rootDirectory.Value, false);
-                        }
-
-                        if (_uninstallCallback != null)
-                        {
-                            _uninstallCallback();
-                        }
-                    }
-                    catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
-                    {
-                        throw new ToolPackageException(
-                            string.Format(
-                                CommonLocalizableStrings.FailedToUninstallToolPackage,
-                                Id,
-                                ex.Message),
-                            ex);
-                    }
-                },
-                commit: () => {
-                    if (tempPackageDirectory != null)
-                    {
-                        _fileSystem.Directory.Delete(tempPackageDirectory, true);
-                    }
-                },
-                rollback: () => {
-                    if (tempPackageDirectory != null)
-                    {
-                        _fileSystem.Directory.CreateDirectory(rootDirectory.Value);
-                        _fileSystem.Directory.Move(tempPackageDirectory, PackageDirectory.Value);
-                    }
-                });
-        }
-
-        private IReadOnlyList<CommandSettings> GetCommands()
+        private IReadOnlyList<RestoredCommand> GetCommands()
         {
             try
             {
                 // The mock restorer wrote the path to the executable into project.assets.json (not a real assets file)
                 // Currently only "dotnet" commands are supported
                 var executablePath = _fileSystem.File.ReadAllText(Path.Combine(PackageDirectory.Value, "project.assets.json"));
-                return new CommandSettings[]
+
+                var fakeSettingFile = _fileSystem.File.ReadAllText(Path.Combine(PackageDirectory.Value, ProjectRestorerMock.FakeCommandSettingsFileName));
+
+                string name;
+                using (JsonDocument doc = JsonDocument.Parse(fakeSettingFile))
                 {
-                    new CommandSettings(
-                        ProjectRestorerMock.FakeCommandName,
+                    JsonElement root = doc.RootElement;
+                    name = root.GetProperty("Name").GetString();
+                }
+
+                return new RestoredCommand[]
+                {
+                    new RestoredCommand(
+                        new ToolCommandName(name),
                         "dotnet",
                         PackageDirectory.WithFile(executablePath))
                 };

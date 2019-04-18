@@ -75,7 +75,7 @@ The semantics of installing the CLI will be side-by-side by default. This means 
 
 Since this is the case, there is no special "upgrade". When the user needs a new version, the user just installs the new version using any of the installers specified in this document. The installer will just drop a new version at the predefined location. 
 
-This, however, does have one specific constraint: **newer versions must be installed in the same location the previous version was in**. This constraint is due to the fact that the "muxer" uses convention to figure out how to find the actual driver that the user reuqested. 
+This, however, does have one specific constraint: **newer versions must be installed in the same location the previous version was in**. This constraint is due to the fact that the "muxer" uses convention to figure out how to find the actual driver that the user requested. 
 
 ## Layout on disk
 ```
@@ -356,7 +356,7 @@ Operations:
 `NOP` - key already existed, do nothing with it
 `ADD` - add
 `DEL` - delete
-`RF+` - not adding because key already exist (installer will increse ref count on GUID related to this value)
+`RF+` - not adding because key already exist (installer will increase ref count on GUID related to this value)
 `RF-` - not deleting because something else is compatible with this (decrease ref count)
 
 #### Scenario 1

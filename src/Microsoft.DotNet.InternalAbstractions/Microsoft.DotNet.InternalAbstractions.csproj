@@ -2,29 +2,14 @@
 
   <PropertyGroup>
     <Description>Abstractions for making code that uses file system and environment testable.</Description>
-    <Version>$(SdkVersion)</Version>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="1.6.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETStandard' ">
-    <PackageReference Include="System.AppContext" Version="4.1.0" />
-    <PackageReference Include="System.Collections" Version="4.0.11" />
-    <PackageReference Include="System.IO" Version="4.1.0" />
-    <PackageReference Include="System.IO.FileSystem" Version="4.0.1" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
-    <PackageReference Include="System.Runtime.Extensions" Version="4.1.0" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.1.0" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.0.0" />
-  </ItemGroup>
 </Project>

@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Zezwala poleceniu na zatrzymanie działania i zaczekanie na wprowadzenie danych lub wykonanie akcji przez użytkownika (na przykład ukończenie uwierzytelniania).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Nie można odnaleźć żadnego projektu w lokalizacji „{0}”.</target>
@@ -473,8 +478,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Brak odwołań do elementu typu {0} w projekcie {1}. ;; {0} to typ żądanego elementu (projekt, pakiet, odwołanie między projektami), a {1} to obiekt, na którym przeprowadzana jest operacja (plik projektu lub rozwiązania). </target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="needs-review-translation">Brak odwołań do elementu typu {0} w projekcie {1}. </target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -899,11 +904,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">PROJEKT | ROZWIĄZANIE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Zezwala poleceniu na zatrzymanie działania i zaczekanie na wprowadzenie danych lub wykonanie akcji przez użytkownika (na przykład ukończenie uwierzytelniania).</target>
         <note />
       </trans-unit>
     </body>

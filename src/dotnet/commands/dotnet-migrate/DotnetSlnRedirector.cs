@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 throw new GracefulException(
                     $"{nameof(SlnCommand)} " +
-                    "failed to execuate given args " +
+                    "failed to execute given args " +
                     $"{string.Join(" ", newCommandArgs)}");
             }
         }
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 throw new GracefulException(
                     $"{nameof(SlnCommand)} " +
-                    "failed to execuate given args " +
+                    "failed to execute given args " +
                     $"{string.Join(" ", newCommandArgs)}");
             }
         }

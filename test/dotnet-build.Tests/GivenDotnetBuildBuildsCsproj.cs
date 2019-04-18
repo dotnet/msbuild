@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp2.2")
+            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp3.0")
                 .GetFile($"{testAppName}.dll");
 
             var outputRunCommand = new DotnetCommand();
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             new BuildCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework netcoreapp2.2")
+                .Execute("--framework netcoreapp3.0")
                 .Should().Pass();
         }
 
@@ -88,17 +88,13 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         [Fact]
         public void ItRunsWhenRestoringToSpecificPackageDir()
         {
-            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            var testInstance = TestAssets.Get("TestAppSimple")
+                .CreateInstance()
+                .WithSourceFiles();
+            var rootPath = testInstance.Root;
 
             string dir = "pkgs";
             string args = $"--packages {dir}";
-
-            string newArgs = $"console -f netcoreapp2.2 -o \"{rootPath}\" --debug:ephemeral-hive --no-restore";
-            new NewCommandShim()
-                .WithWorkingDirectory(rootPath)
-                .Execute(newArgs)
-                .Should()
-                .Pass();
 
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
@@ -115,7 +111,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputDll = Directory.EnumerateFiles(
-                Path.Combine(rootPath, "bin", configuration, "netcoreapp2.2"), "*.dll", 
+                Path.Combine(rootPath.FullName, "bin", configuration, "netcoreapp3.0"), "*.dll",
                 SearchOption.TopDirectoryOnly)
                 .Single();
 
@@ -144,6 +140,26 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .ExecuteWithCapturedOutput();
             cmd.Should().Pass();
             cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(expectedBuildSummary);
+        }
+
+        [Fact]
+        public void ItDoesNotPrintCopyrightInfo()
+        {
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var cmd = new BuildCommand()
+               .WithWorkingDirectory(testInstance.Root)
+               .ExecuteWithCapturedOutput("--nologo");
+
+            cmd.Should().Pass();
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                cmd.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
+            }
         }
     }
 }

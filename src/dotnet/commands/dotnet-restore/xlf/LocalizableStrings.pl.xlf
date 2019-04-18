@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
@@ -87,11 +87,6 @@
 This is equivalent to deleting project.assets.json.</source>
         <target state="translated">Wymuś rozstrzygnięcie wszystkich zależności nawet w przypadku, gdy ostatnie przywracanie się powiodło.
 Jest to równoważne usunięciu pliku project.assets.json.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdInteractiveRestoreOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Zezwala poleceniu na zatrzymanie działania i zaczekanie na wprowadzenie danych lub wykonanie akcji przez użytkownika (na przykład ukończenie uwierzytelniania).</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockedModeOptionDescription">

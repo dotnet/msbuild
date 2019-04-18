@@ -58,17 +58,7 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            PublishCommand cmd;
-            try
-            {
-                cmd = FromArgs(args);
-            }
-            catch (CommandCreationException e)
-            {
-                return e.ExitCode;
-            }
-
-            return cmd.Execute();
+            return FromArgs(args).Execute();
         }
     }
 }

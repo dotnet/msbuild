@@ -7,11 +7,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <RuntimeIdentifiers Condition="'$(OS)' == 'Windows_NT'">win-x86;win-x64</RuntimeIdentifiers>
     <WarningsAsErrors>true</WarningsAsErrors>
-    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <PublishDir>$(SdkResolverOutputDirectory)</PublishDir>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,18 +24,10 @@
     <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="NETStandard.Library" Version="2.0.0" PrivateAssets="All" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" PrivateAssets="All" ExcludeAssets="Runtime" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" DependsOnTargets="RunResolvePackageDependencies" BeforeTargets="AssignTargetPaths">

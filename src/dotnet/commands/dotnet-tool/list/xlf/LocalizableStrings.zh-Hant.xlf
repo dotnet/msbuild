@@ -3,13 +3,28 @@
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>List tools installed in the current development environment.</source>
-        <target state="translated">列出目前開發環境中所安裝的工具。</target>
+        <source>List tools installed globally or locally.</source>
+        <target state="translated">列出安裝在全域或本機的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>List tools in the current user's tools directory.</source>
-        <target state="translated">列出目前使用者工具目錄中的工具。</target>
+        <source>List tools installed for the current user.</source>
+        <target state="translated">列出為目前使用者安裝的工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="translated">本機選項 (--local)、全域選項 (--global)、工具路徑選項 (--tool-path) 一次只能有一個。請僅指定其中一個選項: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>List the tools installed in the local tool manifest.</source>
+        <target state="translated">列出本機工具資訊清單中安裝的工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestFileColumn">
+        <source>Manifest</source>
+        <target state="translated">資訊清單</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -28,18 +43,10 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="translated">警告: 工具套件 '{0}' 無效: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">請指定全域選項 (--global) 或工具路徑選項 (--tool-path) 兩者之一。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="GlobalAndToolPathConflict">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) 與工具路徑選項 (--tool-path) 衝突。請只指定其中一個選項。</target>
+        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</source>
+        <target state="translated">警告: 工具套件 '{0}' 無效，請連絡工具作者:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

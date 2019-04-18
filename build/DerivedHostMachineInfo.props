@@ -1,8 +1,0 @@
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <IsDebianBaseDistro Condition=" '$(HostOSName)' == 'ubuntu' OR '$(HostOSName)' == 'debian' ">true</IsDebianBaseDistro>
-    <IsRPMBasedDistro Condition=" $(HostRid.StartsWith('rhel')) AND '$(HostRid)' != 'rhel.6-x64' ">true</IsRPMBasedDistro>
-    <PublishNativeInstallers Condition=" '$(IslinuxPortable)' != 'true' AND '$(HostRid)' != 'rhel.6-x64' AND '$(HostRid)' != 'linux-musl-x64'">true</PublishNativeInstallers>
-    <PublishArchives Condition=" '$(IslinuxPortable)' == 'true' OR ('$(IsDebianBaseDistro)' != 'true' AND '$(IsRPMBasedDistro)' != 'true') ">true</PublishArchives>
-  </PropertyGroup>
-</Project>

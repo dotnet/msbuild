@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">'{0}'에서 프로젝트를 찾을 수 없습니다.</target>
@@ -473,8 +478,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">{1} 프로젝트에 {0} 참조가 없습니다. ;; {0}은(는) 요청한 항목의 형식(프로젝트, 패키지, p2p)이고 {1}은(는) 작업 중인 개체(프로젝트 파일 또는 솔루션 파일)입니다. </target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="needs-review-translation">{1} 프로젝트에 {0} 참조가 없습니다. </target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -748,12 +753,12 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">도구 디렉터리 '{0}'이(가) 현재 PATH 환경 변수에 있지 않습니다.
-Bash를 사용하는 경우 다음 명령을 실행하여 프로필에 추가할 수 있습니다.
+        <target state="translated">도구 디렉토리 '{0}'은(는) 현재 PATH 환경 변수에 없습니다.
+bash를 사용하는 경우 다음 명령을 실행하여 bash를 프로파일에 추가할 수 있습니다.
 
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
+cat &lt;&lt; \ EOF &gt; &gt; ~ / .bash_profile
+# .NET Core SDK 도구 추가
+export PATH = "$PATH:{0}"
 EOF
 
 다음 명령을 실행하여 현재 세션에 추가할 수 있습니다.
@@ -899,11 +904,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">프로젝트 | 솔루션</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
         <note />
       </trans-unit>
     </body>

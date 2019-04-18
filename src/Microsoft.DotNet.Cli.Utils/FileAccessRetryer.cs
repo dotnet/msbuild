@@ -10,7 +10,11 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public static class FileAccessRetrier
     {
-        public static async Task<T> RetryOnFileAccessFailure<T>(Func<T> func, int maxRetries = 3000, TimeSpan sleepDuration = default(TimeSpan)) 
+        public static async Task<T> RetryOnFileAccessFailure<T>(
+            Func<T> func,
+            string errorMessage,
+            int maxRetries = 3000,
+            TimeSpan sleepDuration = default(TimeSpan))
         {
             var attemptsLeft = maxRetries;
 
@@ -18,12 +22,12 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 sleepDuration = TimeSpan.FromMilliseconds(10);
             }
-            
+
             while (true)
             {
                 if (attemptsLeft < 1)
                 {
-                    throw new InvalidOperationException(LocalizableStrings.CouldNotAccessAssetsFile);
+                    throw new InvalidOperationException(errorMessage);
                 }
 
                 attemptsLeft--;
@@ -67,6 +71,31 @@ namespace Microsoft.DotNet.Cli.Utils
                     break;
                 }
                 catch (IOException e) when (e.HResult == ERROR_HRESULT_ACCESS_DENIED)
+                {
+                    Thread.Sleep(nextWaitTime);
+                    nextWaitTime *= 2;
+                    remainRetry--;
+                    if (remainRetry == 0)
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
+
+        internal static void RetryOnIOException(Action action)
+        {
+            int nextWaitTime = 10;
+            int remainRetry = 10;
+
+            while (true)
+            {
+                try
+                {
+                    action();
+                    break;
+                }
+                catch (IOException)
                 {
                     Thread.Sleep(nextWaitTime);
                     nextWaitTime *= 2;

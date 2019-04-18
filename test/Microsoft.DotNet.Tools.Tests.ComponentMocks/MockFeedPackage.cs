@@ -7,5 +7,6 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
     {
         public string PackageId;
         public string Version;
+        public string ToolCommandName;
     }
 }

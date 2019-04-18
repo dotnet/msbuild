@@ -7,8 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 
@@ -19,7 +22,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         private const string ProjectFileName = "TempProject.csproj";
 
         private readonly IToolPackageStore _store;
-        private readonly IProjectRestorer _projectRestorer;
+        private readonly ProjectRestorerMock _projectRestorer;
         private readonly IFileSystem _fileSystem;
         private readonly Action _installCallback;
         private readonly Dictionary<PackageId, IEnumerable<string>> _warningsMap;
@@ -28,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         public ToolPackageInstallerMock(
             IFileSystem fileSystem,
             IToolPackageStore store,
-            IProjectRestorer projectRestorer,
+            ProjectRestorerMock projectRestorer,
             Action installCallback = null,
             Dictionary<PackageId, IEnumerable<string>> warningsMap = null,
             Dictionary<PackageId, IReadOnlyList<FilePath>> packagedShimsMap = null)
@@ -50,7 +53,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             string rollbackDirectory = null;
 
             return TransactionalAction.Run<IToolPackage>(
-                action: () => {
+                action: () =>
+                {
                     var stageDirectory = _store.GetRandomStagingDirectory();
                     _fileSystem.Directory.CreateDirectory(stageDirectory.Value);
                     rollbackDirectory = stageDirectory.Value;
@@ -94,9 +98,11 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     IReadOnlyList<FilePath> packedShims = null;
                     _packagedShimsMap.TryGetValue(packageId, out packedShims);
 
-                    return new ToolPackageMock(_fileSystem, packageId, version, packageDirectory, warnings: warnings, packagedShims: packedShims);
+                    return new ToolPackageMock(_fileSystem, packageId, version,
+                        packageDirectory, warnings: warnings, packagedShims: packedShims);
                 },
-                rollback: () => {
+                rollback: () =>
+                {
                     if (rollbackDirectory != null && _fileSystem.Directory.Exists(rollbackDirectory))
                     {
                         _fileSystem.Directory.Delete(rollbackDirectory, true);
@@ -107,6 +113,51 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                         _fileSystem.Directory.Delete(packageRootDirectory.Value, false);
                     }
                 });
+        }
+
+        public IToolPackage InstallPackageToExternalManagedLocation(
+            PackageLocation packageLocation,
+            PackageId packageId,
+            VersionRange versionRange = null,
+            string targetFramework = null,
+            string verbosity = null)
+        {
+            _installCallback?.Invoke();
+
+            var packageDirectory = new DirectoryPath(NuGetGlobalPackagesFolder.GetLocation()).WithSubDirectories(packageId.ToString());
+            _fileSystem.Directory.CreateDirectory(packageDirectory.Value);
+            var executable = packageDirectory.WithFile("exe");
+            _fileSystem.File.CreateEmptyFile(executable.Value);
+
+            MockFeedPackage package = _projectRestorer.GetPackage(
+                packageId.ToString(),
+                versionRange ?? VersionRange.Parse("*"),
+                packageLocation.NugetConfig,
+                packageLocation.RootConfigDirectory);
+
+            return new TestToolPackage
+            {
+                Id = packageId,
+                Version = NuGetVersion.Parse(package.Version),
+                Commands = new List<RestoredCommand> {
+                    new RestoredCommand(new ToolCommandName(package.ToolCommandName), "runner", executable) },
+                Warnings = Array.Empty<string>(),
+                PackagedShims = Array.Empty<FilePath>()
+            };
+        }
+
+        private class TestToolPackage : IToolPackage
+        {
+            public PackageId Id { get; set; }
+
+            public NuGetVersion Version { get; set; }
+            public DirectoryPath PackageDirectory { get; set; }
+
+            public IReadOnlyList<RestoredCommand> Commands { get; set; }
+
+            public IEnumerable<string> Warnings { get; set; }
+
+            public IReadOnlyList<FilePath> PackagedShims { get; set; }
         }
     }
 }

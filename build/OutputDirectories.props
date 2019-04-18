@@ -3,31 +3,25 @@
       <CliBuildStage Condition="'$(CliBuildStage)' == '' And '$(CliOuterBuildStage)' != ''">$([MSBuild]::Add($(CliOuterBuildStage), '1'))</CliBuildStage>
       <CliBuildStage Condition="'$(CliBuildStage)' == ''">2</CliBuildStage>
 
-      <!-- BaseOutputDirectory is the root output path for this stage and RID
-           BaseOutputPath is the project-specific output folder that each project builds into.
-           This is not confusing at all. -->
-      <BaseOutputDirectory>$(RepoRoot)/bin/$(CliBuildStage)/$(Rid)</BaseOutputDirectory>
-      <BaseOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/bin/$(MSBuildProjectName)'))</BaseOutputPath>
+      <OutputDirectory>$([MSBuild]::NormalizePath($(ArtifactsDir)/cli))</OutputDirectory>
 
-      <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/obj/$(MSBuildProjectName)'))</BaseIntermediateOutputPath>
-      <OutputDirectory>$(BaseOutputDirectory)/dotnet</OutputDirectory>
-      <Stage2WithBackwardsCompatibleRuntimesOutputDirectory>$(BaseOutputDirectory)/dotnetWithBackwardsCompatibleRuntimes</Stage2WithBackwardsCompatibleRuntimesOutputDirectory>
-      <SdkOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
-      <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
-      <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
-      <FSharpDirectory>$(SdkOutputDirectory)/FSharp</FSharpDirectory>
-      <CompilationDirectory>$(BaseOutputDirectory)/compilation</CompilationDirectory>
-      <IntermediateDirectory>$(BaseOutputDirectory)/int</IntermediateDirectory>
-      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
-      <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
-      <AspNetCoreSharedFxPublishDirectory>$(IntermediateDirectory)/aspnetSharedFxPublish</AspNetCoreSharedFxPublishDirectory>
-      <BackwardsCompatibleSharedFrameworksPublishDirectory>$(IntermediateDirectory)/backwardsCompatibleSharedFrameworksPublish</BackwardsCompatibleSharedFrameworksPublishDirectory>
-      <TestOutputDir>$(BaseOutputDirectory)/test/</TestOutputDir>
-      <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
-      <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
-      <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>
-      <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
+      <CliOutputDirectory>$([MSBuild]::NormalizePath($(ArtifactsTmpDir)/sdk/$(Version)))</CliOutputDirectory>
+      <SdkOutputDirectory>$([MSBuild]::NormalizePath($(ArtifactsTmpDir)/dotnet))</SdkOutputDirectory>
 
-      <NextStagePropsPath>$(BaseOutputDirectory)/PreviousStage.props</NextStagePropsPath>
+      <SymbolsDirectory>$([MSBuild]::NormalizePath($(ArtifactsDir)/symbols))</SymbolsDirectory>
+      <IntermediateDirectory>$([MSBuild]::NormalizePath($(ArtifactsDir)/int))</IntermediateDirectory>
+      <PackagesDirectory>$([MSBuild]::NormalizePath($(ArtifactsDir)/packages))</PackagesDirectory>
+
+      <TestOutputDir>$([MSBuild]::NormalizeDirectory($(ArtifactsTmpDir)/test))</TestOutputDir>
+
+      <GeneratedMSBuildExtensionsDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/GeneratedMSBuildExtension))</GeneratedMSBuildExtensionsDirectory>
+      <MSBuildExtensionsLayoutDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/MSBuildExtensionsLayout))</MSBuildExtensionsLayoutDirectory>
+      <SdkResolverOutputDirectory>$([MSBuild]::NormalizePath($(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver))</SdkResolverOutputDirectory>
+
+      <_DotNetHiveRoot>$(DOTNET_INSTALL_DIR)</_DotNetHiveRoot>
+      <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet/</_DotNetHiveRoot>
+      <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)/</_DotNetHiveRoot>
+
+      <DotNetExe>$(_DotNetHiveRoot)dotnet$(ExeExtension)</DotNetExe>
   </PropertyGroup>
 </Project>

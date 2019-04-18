@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">No se encuentra ningún proyecto en "{0}".</target>
@@ -473,8 +478,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">No hay referencias de {0} en el proyecto {1}. ;; {0} es el tipo de elemento solicitado (proyecto, paquete, p2p) y {1} es el objeto utilizado (un archivo de proyecto o de solución). </target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="needs-review-translation">No hay referencias de {0} en el proyecto {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -646,17 +651,17 @@
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="translated">Dado que acaba de instalar el SDK de .Net Core, tendrá que cerrar sesión o reiniciarla antes de ejecutar la herramienta instalada.</target>
+        <target state="translated">Dado que acaba de instalar el SDK de .NET Core, tendrá que cerrar sesión o reiniciarla antes de ejecutar la herramienta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">Dado que acaba de instalar el SDK de .Net Core, tendrá que volver a abrir el terminal antes de ejecutar la herramienta instalada.</target>
+        <target state="translated">Dado que acaba de instalar el SDK de .NET Core, tendrá que volver a abrir el terminal antes de ejecutar la herramienta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="translated">Dado que acaba de instalar el SDK de .Net Core, tendrá que volver a abrir la ventana del símbolo del sistema antes de ejecutar la herramienta instalada.</target>
+        <target state="translated">Dado que acaba de instalar el SDK de .NET Core, tendrá que volver a abrir la ventana del símbolo del sistema antes de ejecutar la herramienta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
@@ -899,11 +904,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">PROYECTO | SOLUCIÓN</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
         <note />
       </trans-unit>
     </body>

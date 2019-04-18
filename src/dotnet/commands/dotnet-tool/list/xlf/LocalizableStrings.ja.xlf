@@ -3,13 +3,28 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>List tools installed in the current development environment.</source>
-        <target state="translated">現在の開発環境にインストールされているツールを一覧表示します。</target>
+        <source>List tools installed globally or locally.</source>
+        <target state="translated">グローバルまたはローカルにインストールされているツールを一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>List tools in the current user's tools directory.</source>
-        <target state="translated">現在のユーザーのツール ディレクトリにあるツールを一覧表示します。</target>
+        <source>List tools installed for the current user.</source>
+        <target state="translated">現在のユーザーに対してインストールされたツールを一覧表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="translated">ローカルオプション(--local)、グローバルオプション(--global)、ツールパスオプション (--tool-path)は一度に1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>List the tools installed in the local tool manifest.</source>
+        <target state="translated">ローカル ツール マニフェストにインストールされたツールを一覧表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestFileColumn">
+        <source>Manifest</source>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -28,18 +43,10 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="translated">警告: ツール パッケージ '{0}' が無効です: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">グローバル オプション (--global) またはツール パス オプション (--tool-path) のいずれかを指定してください。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="GlobalAndToolPathConflict">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) とツール パス オプション (--tool-path) は競合します。どちらか片方のオプションのみを指定してください。</target>
+        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</source>
+        <target state="translated">警告: ツール パッケージ '{0}' が無効です。ツール作成者に連絡してください:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

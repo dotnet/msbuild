@@ -71,5 +71,18 @@ namespace Microsoft.DotNet.Cli
                 "--no-restore",
                 CommonLocalizableStrings.NoRestoreDescription,
                 Accept.NoArguments());
+
+        public static Option InteractiveMsBuildForwardOption() =>
+            Create.Option(
+                "--interactive",
+                CommonLocalizableStrings.CommandInteractiveOptionDescription,
+                Accept.NoArguments()
+                    .ForwardAs(Utils.Constants.MsBuildInteractiveOption));
+
+        public static Option InteractiveOption() =>
+            Create.Option(
+                "--interactive",
+                CommonLocalizableStrings.CommandInteractiveOptionDescription,
+                Accept.NoArguments());
     }
 }

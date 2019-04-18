@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Esegue il roll forward nel caso in cui non è abilitata nessuna versione candidata di Shared Framework.</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="translated">Esegue il roll forward se non è presente alcun framework candidato (0=disattivato, 1=esegue il roll forward della versione secondaria, 2= esegue il roll forward delle versioni principale e secondaria).</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

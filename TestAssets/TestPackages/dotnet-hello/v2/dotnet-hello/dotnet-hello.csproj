@@ -5,6 +5,7 @@
     <Version>2.0.0</Version>
     <!--Workaround for https://github.com/NuGet/Home/issues/4583-->
     <VersionSuffix></VersionSuffix>
+    <!-- netcoreapp2.2 is the maximum TFM project tools support -->
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>dotnet-hello</AssemblyName>
     <OutputType>Exe</OutputType>

@@ -51,17 +51,7 @@ namespace Microsoft.DotNet.Tools.Restore
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            RestoreCommand cmd;
-            try
-            {
-                cmd = FromArgs(args);
-            }
-            catch (CommandCreationException e)
-            {
-                return e.ExitCode;
-            }
-            
-            return cmd.Execute();
+            return FromArgs(args).Execute();
         }
     }
 }

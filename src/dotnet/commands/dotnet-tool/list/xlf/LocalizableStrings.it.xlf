@@ -1,15 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>List tools installed in the current development environment.</source>
-        <target state="translated">Elenca gli strumenti installati nell'ambiente di sviluppo corrente.</target>
+        <source>List tools installed globally or locally.</source>
+        <target state="translated">Elenca gli strumenti installati a livello globale o locale.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>List tools in the current user's tools directory.</source>
-        <target state="translated">Elenca gli strumenti presenti nella directory degli strumenti dell'utente corrente.</target>
+        <source>List tools installed for the current user.</source>
+        <target state="translated">Elenca gli strumenti installati per l'utente corrente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="translated">Le opzioni local (--local), global (--global), tool-path (--tool-path) non possono essere specificate contemporaneamente. Specificare una sola di queste opzioni: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>List the tools installed in the local tool manifest.</source>
+        <target state="translated">Elenca gli strumenti installati nel manifesto degli strumenti locale.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestFileColumn">
+        <source>Manifest</source>
+        <target state="translated">MANIFESTO</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -28,18 +43,10 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="translated">Avviso: il pacchetto '{0}' dello strumento non è valido: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Specificare l'opzione globale (--global) o quella relativa al percorso dello strumento (--tool-path).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="GlobalAndToolPathConflict">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) è in conflitto con l'opzione relativa al percorso dello strumento (--tool-path). Specificare solo una delle opzioni.</target>
+        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</source>
+        <target state="translated">Avviso: il pacchetto strumenti '{0}' non è valido. Contattare l'autore dello strumento:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

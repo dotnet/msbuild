@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
-            public IEnumerable<string> EnumerateFiles(string path, string searchPattern)
+            public IEnumerable<string> EnumerateFiles(string path)
             {
                 throw new NotImplementedException();
             }
@@ -159,12 +159,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new UnauthorizedAccessException();
             }
 
-            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern)
-            {
-                throw new UnauthorizedAccessException();
-            }
-
-            public string GetDirectoryFullName(string path)
+            public string GetCurrentDirectory()
             {
                 throw new NotImplementedException();
             }

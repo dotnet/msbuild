@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">允许命令停止和等待用户输入或操作(例如，用以完成身份验证)。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">“{0}”中找不到任何项目。</target>
@@ -473,8 +478,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">项目 {1} 中没有 {0} 引用。;; {0} 是正在请求的项类型(项目、包、p2p)，{1} 是操作的对象(项目文件或解决方案文件)。</target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="needs-review-translation">项目 {1} 中没有 {0} 引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -899,11 +904,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">项目 | 解决方案</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">允许命令停止和等待用户输入或操作(例如，用以完成身份验证)。</target>
         <note />
       </trans-unit>
     </body>

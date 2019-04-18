@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">已啟用在沒有候選共用架構上的向前復原。</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="translated">在無候選架構上向前復原 (0=關閉，1=復原次要，2=復原主要和次要)。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

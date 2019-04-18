@@ -50,6 +50,10 @@ namespace Microsoft.DotNet.Cli
             }
             public bool Enabled => telemetry.Enabled;
 
+            public void Flush()
+            {
+            }
+
             public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
             {
                 telemetry.ThreadBlockingTrackEvent(eventName, properties, measurements);

@@ -276,14 +276,14 @@ Commands:
             var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = GetLibRef(setup);
 
-            string csprojContetntBefore = lib.CsProjContent();
+            string csprojContentBefore = lib.CsProjContent();
             var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, libref.CsProjPath));
-            lib.CsProjContent().Should().BeEquivalentTo(csprojContetntBefore);
+            lib.CsProjContent().Should().BeEquivalentTo(csprojContentBefore);
         }
 
         [Fact]
@@ -293,14 +293,14 @@ Commands:
             var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = GetLibRef(setup);
 
-            string csprojContetntBefore = lib.CsProjContent();
+            string csprojContentBefore = lib.CsProjContent();
             var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{libref.CsProjPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, libref.CsProjPath));
-            lib.CsProjContent().Should().BeEquivalentTo(csprojContetntBefore);
+            lib.CsProjContent().Should().BeEquivalentTo(csprojContentBefore);
         }
 
         [Fact]

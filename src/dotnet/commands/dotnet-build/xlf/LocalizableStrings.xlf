@@ -15,7 +15,7 @@
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
         <note />
       </trans-unit>
-      <trans-unit id="NoIncrementialOptionDescription">
+      <trans-unit id="NoIncrementalOptionDescription">
         <source>Disables incremental build.</source>
         <note />
       </trans-unit>

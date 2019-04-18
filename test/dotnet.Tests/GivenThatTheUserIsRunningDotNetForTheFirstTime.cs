@@ -40,7 +40,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = cliTestFallbackFolder;
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
@@ -73,26 +72,10 @@ namespace Microsoft.DotNet.Tests
         {
             _firstDotnetVerbUseCommandResult.StdOut
                 .Should()
-                .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage)
+                .ContainVisuallySameFragment(string.Format(Configurer.LocalizableStrings.FirstTimeMessageWelcome, Product.Version))
+                .And.ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeMessageMoreInformation)
                 .And.NotContain("Restore completed in");
         }
-
-        [Fact]
-        public void ItShowsTheAspNetCertificateGenerationMessageToTheUser()
-        {
-            _firstDotnetVerbUseCommandResult.StdOut
-                .Should()
-                .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled)
-                .And.NotContain("Restore completed in");
-        }
-
-        [Fact]
-        public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
-        {
-            _nugetFallbackFolder
-                .Should()
-                .HaveFile($"{GetDotnetVersion()}.dotnetSentinel");
-    	}
 
         [Fact]
         public void ItCreatesAFirstUseSentinelFileUnderTheDotDotNetFolder()
@@ -123,19 +106,19 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = emptyHome;
             command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             // Disable to prevent the creation of the .dotnet folder by optimizationdata.
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
+            // Disable telemetry to prevent the creation of the .dotnet folder
+            // for machineid and docker cache files
+            command.Environment["DOTNET_CLI_TELEMETRY_OPTOUT"] = "true";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
             var homeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
-            string[] fileEntries = Directory.GetFiles(homeFolder.ToString());
-            fileEntries.Should().OnlyContain(x => !x.Contains(".dotnetFirstUseSentinel"));
-            fileEntries.Should().OnlyContain(x => !x.Contains(".aspNetCertificateSentinel"));
+            homeFolder.Should().NotExist();
         }
 
         [Fact]
@@ -154,7 +137,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
@@ -163,7 +145,8 @@ namespace Microsoft.DotNet.Tests
 
             result.StdOut
                 .Should()
-                .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage);
+                .ContainVisuallySameFragment(string.Format(Configurer.LocalizableStrings.FirstTimeMessageWelcome, Product.Version))
+                .And.ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeMessageMoreInformation);
         }
 
         [Fact]
@@ -182,22 +165,17 @@ namespace Microsoft.DotNet.Tests
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
-            var result = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
-
-            result.StdOut
-                .Should()
-                .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled);
+            command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
         }
 
         [LinuxOnlyFact]
         public void ItCreatesTheProfileFileOnLinuxWhenInvokedFromNativeInstaller()
         {
-            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var emptyHome = Path.Combine(_testDirectory, "empty_home_for_profile_on_linux");
             var profiled = Path.Combine(_testDirectory, "profile.d");
 
             var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
@@ -205,7 +183,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = emptyHome;
             command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
@@ -219,7 +196,7 @@ namespace Microsoft.DotNet.Tests
         [MacOsOnlyFact]
         public void ItCreatesThePathDFileOnMacOSWhenInvokedFromNativeInstaller()
         {
-            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var emptyHome = Path.Combine(_testDirectory, "empty_home_for_pathd");
             var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
@@ -227,7 +204,6 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = emptyHome;
             command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
@@ -235,35 +211,6 @@ namespace Microsoft.DotNet.Tests
 
             File.Exists(pathsd).Should().BeTrue();
             File.ReadAllText(pathsd).Should().Be(CliFolderPathCalculator.ToolsShimPathInUnix.PathWithTilde);
-        }
-
-        [Fact]
-        public void ItRestoresTheNuGetPackagesToTheNuGetCacheFolder()
-        {
-            List<string> expectedDirectories = new List<string>()
-            {
-                "microsoft.netcore.app",
-                "microsoft.netcore.platforms",
-                "netstandard.library",
-                "microsoft.aspnetcore.diagnostics",
-                "microsoft.aspnetcore.mvc",
-                "microsoft.aspnetcore.routing",
-                "microsoft.aspnetcore.server.iisintegration",
-                "microsoft.aspnetcore.server.kestrel",
-                "microsoft.aspnetcore.staticfiles",
-                "microsoft.extensions.configuration.environmentvariables",
-                "microsoft.extensions.configuration.json",
-                "microsoft.extensions.logging",
-                "microsoft.extensions.logging.console",
-                "microsoft.extensions.logging.debug",
-                "microsoft.extensions.options.configurationextensions",
-                //BrowserLink has been temporarily disabled until https://github.com/dotnet/templating/issues/644 is resolved
-                //"microsoft.visualstudio.web.browserlink",
-            };
-
-            _nugetFallbackFolder
-                .Should()
-                .HaveDirectories(expectedDirectories);
         }
 
         private string GetDotnetVersion()

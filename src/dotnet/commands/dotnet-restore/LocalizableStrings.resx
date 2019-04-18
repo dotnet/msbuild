@@ -169,9 +169,6 @@
     <value>Force all dependencies to be resolved even if the last restore was successful.
 This is equivalent to deleting project.assets.json.</value>
   </data>
-  <data name="CmdInteractiveRestoreOptionDescription" xml:space="preserve">
-    <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
-  </data>
   <data name="CmdLockedModeOptionDescription" xml:space="preserve">
     <value>Don't allow updating project lock file.</value>
   </data>

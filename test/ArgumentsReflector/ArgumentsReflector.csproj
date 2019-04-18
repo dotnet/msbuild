@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
-    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <AssemblyName>ArgumentsReflector</AssemblyName>
     <OutputType>Exe</OutputType>
   </PropertyGroup>

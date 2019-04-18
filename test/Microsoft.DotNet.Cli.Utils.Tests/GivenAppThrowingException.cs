@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             string msg1 = "Unhandled Exception: AppThrowing.MyException: "
                 + "Exception of type 'AppThrowing.MyException' was thrown.";
             string msg2 = "at AppThrowing.MyException.Main(String[] args)";
-            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            new DotnetCommand()
                 .WithWorkingDirectory(appRoot)
                 .ExecuteWithCapturedOutput("run")
                 .Should().Fail()
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             string msg1 = "Unhandled Exception: AppThrowing.MyException: "
                 + "Exception of type 'AppThrowing.MyException' was thrown.";
             string msg2 = "at AppThrowing.MyException.Main(String[] args)";
-            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            new DotnetCommand()
                 .WithWorkingDirectory(appWithToolDepRoot)
                 .ExecuteWithCapturedOutput("throwingtool")
                 .Should().Fail()

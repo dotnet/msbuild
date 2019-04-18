@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
@@ -10,13 +10,6 @@
       <trans-unit id="AppDescription">
         <source>Command to list project to project references</source>
         <target state="translated">Befehl zum Auflisten von Projekt-zu-Projekt-Verweisen</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">In Projekt "{1}" liegen keine {0}-Verweise vor.
-{0} ist der Typ des angeforderten Elements (Projekt, Paket, P2P) und "{1}" das Objekt, an dem der Vorgang ausgeführt wird (eine Projekt- oder Projektmappendatei). </target>
         <note />
       </trans-unit>
     </body>

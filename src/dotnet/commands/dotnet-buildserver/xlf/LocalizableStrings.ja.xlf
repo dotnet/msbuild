@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="BuildServerCommandName">
         <source>.NET Build Server Command</source>
-        <target state="translated">.Net ビルド サーバー コマンド</target>
+        <target state="translated">.NET ビルド サーバー コマンド</target>
         <note />
       </trans-unit>
     </body>

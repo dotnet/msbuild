@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">在 `{0}` 中找不到任何專案。</target>
@@ -473,8 +478,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">專案 {1} 中沒有任何 {0} 參考。;; {0} 是所要求項目的類型 (專案、套件、p2p)，而 {1} 是操作的物件 (專案檔或方案檔)。 </target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="needs-review-translation">專案 {1} 中沒有任何 {0} 參考。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -899,11 +904,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">專案 | 解決方案</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
         <note />
       </trans-unit>
     </body>

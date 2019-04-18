@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli.Utils
     // We should clean this up. Filed #619 to track.
     public static class RuntimeEnvironmentRidExtensions
     {
-        // Gets the identfier that is used for restore by default (this is different from the actual RID, but only on Windows)
+        // Gets the identifier that is used for restore by default (this is different from the actual RID, but only on Windows)
         public static string GetLegacyRestoreRuntimeIdentifier()
         {
             if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)

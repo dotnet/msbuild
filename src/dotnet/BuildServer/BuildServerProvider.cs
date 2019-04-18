@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.BuildServer
                 yield break;
             }
 
-            foreach (var path in _fileSystem.Directory.EnumerateFiles(directory.Value, "*"))
+            foreach (var path in _fileSystem.Directory.EnumerateFiles(directory.Value))
             {
                 if ((flags & ServerEnumerationFlags.Razor) == ServerEnumerationFlags.Razor &&
                     Path.GetFileName(path).StartsWith(RazorPidFile.FilePrefix))

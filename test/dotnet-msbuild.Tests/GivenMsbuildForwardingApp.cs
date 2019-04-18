@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using Microsoft.DotNet.Tools.MSBuild;
 using FluentAssertions;
@@ -71,7 +72,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var envVar = "DOTNET_CLI_TELEMETRY_SESSIONID";
             var startInfo = new MSBuildForwardingApp(new string[0], msbuildPath)
                 .GetProcessStartInfo();
-            (startInfo.Environment[envVar] == null || int.TryParse(startInfo.Environment[envVar], out _))
+            (startInfo.Environment[envVar] == null || Guid.TryParse(startInfo.Environment[envVar], out _))
                 .Should().BeTrue("DOTNET_CLI_TELEMETRY_SESSIONID should be null or current session id");
         }
 

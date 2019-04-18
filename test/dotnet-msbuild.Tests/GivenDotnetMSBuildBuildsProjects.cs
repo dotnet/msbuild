@@ -169,7 +169,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
 
             Telemetry.Telemetry.CurrentSessionId = null; // reset static session id modified by telemetry constructor
-            telemetry = new Telemetry.Telemetry(new MockNuGetCacheSentinel(sentinelExists));
+            telemetry = new Telemetry.Telemetry(new MockFirstTimeUseNoticeSentinel(sentinelExists));
 
             MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());
 
@@ -192,13 +192,13 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
     }
 
-    public sealed class MockNuGetCacheSentinel : IFirstTimeUseNoticeSentinel
+    public sealed class MockFirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
         private readonly Func<bool> _exists;
 
         public bool UnauthorizedAccess => true;
 
-        public MockNuGetCacheSentinel(Func<bool> exists = null)
+        public MockFirstTimeUseNoticeSentinel(Func<bool> exists = null)
         {
             _exists = exists ?? (() => true);
         }

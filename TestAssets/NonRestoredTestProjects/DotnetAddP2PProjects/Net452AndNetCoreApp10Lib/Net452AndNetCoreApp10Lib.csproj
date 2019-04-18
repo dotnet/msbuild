@@ -6,7 +6,4 @@
     <TargetFrameworks>net452;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
   
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-  </ItemGroup>
 </Project>

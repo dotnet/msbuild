@@ -20,7 +20,8 @@ namespace Microsoft.DotNet.Cli
                 Create.Option("-f|--framework", LocalizableStrings.CmdFrameworkDescription,
                               Accept.ExactlyOneArgument()
                                     .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
-                                    .With(name: Tools.Add.PackageReference.LocalizableStrings.CmdFramework)));
+                                    .With(name: Tools.Add.PackageReference.LocalizableStrings.CmdFramework)),
+                CommonOptions.InteractiveOption());
         }
     }
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -10,13 +10,6 @@
       <trans-unit id="AppDescription">
         <source>Command to list project to project references</source>
         <target state="translated">프로젝트 간 참조를 나열하기 위한 명령입니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">{1} 프로젝트에 {0} 참조가 없습니다.
-{0}은(는) 요청한 항목의 형식(프로젝트, 패키지, p2p)이고 {1}은(는) 작업 중인 개체(프로젝트 파일 또는 솔루션 파일)입니다. </target>
         <note />
       </trans-unit>
     </body>

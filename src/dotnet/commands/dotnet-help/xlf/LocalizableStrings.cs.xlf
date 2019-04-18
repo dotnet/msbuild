@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Posune se vpřed, pokud není povolený žádný kandidát sdílené architektury.</target>
+        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
+        <target state="translated">Ovládá posunutí vpřed při absenci kandidátského rozhraní (0 = vypnuto, 1 = posunout podverzi, 2 = posunout hlavní verzi i podverzi).</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">

@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli
 
             ParseResult = parser.ParseFrom($"dotnet {CommandName}", args);
 
-            ParseResult.ShowHelpIfRequested();
+            ShowHelpIfRequested();
 
             var subcommandName = ParseResult.Command().Name;
 
@@ -61,6 +61,15 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 return 1;
+            }
+        }
+
+        private void ShowHelpIfRequested()
+        {
+            // This checks for the help option only on the top-level command
+            if (ParseResult["dotnet"][CommandName].IsHelpRequested())
+            {
+                throw new HelpException(ParseResult.Command().HelpView().TrimEnd());
             }
         }
     }

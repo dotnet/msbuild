@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void WhenPassSeveralCompatibleRuntimeIdentifiersAndDuplicationItOutMostFitRidWithCasingPreservedTheFirstIsFavoriated()
+        public void WhenPassSeveralCompatibleRuntimeIdentifiersAndDuplicationItOutMostFitRidWithCasingPreservedTheFirstIsFavorited()
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
                     currentRuntimeIdentifier: "win7",

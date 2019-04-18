@@ -51,5 +51,25 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["uninstall"];
             appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\Tools");
         }
+        
+        [Fact]
+        public void UninstallToolParserCanParseLocalOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool uninstall --local console.test.app");
+
+            var appliedOptions = result["dotnet"]["tool"]["uninstall"];
+            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
+        }
+        
+        [Fact]
+        public void UninstallToolParserCanParseToolManifestOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool uninstall --tool-manifest folder/my-manifest.format console.test.app");
+
+            var appliedOptions = result["dotnet"]["tool"]["uninstall"];
+            appliedOptions.SingleArgumentOrDefault("tool-manifest").Should().Be(@"folder/my-manifest.format");
+        }
     }
 }
