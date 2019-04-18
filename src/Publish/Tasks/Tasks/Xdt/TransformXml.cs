@@ -1,9 +1,10 @@
-﻿using Microsoft.Build.Framework;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.Sdk.Publish.Tasks.MsDeploy;
 using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 using Microsoft.Web.XmlTransform;
 using System;
+using System.Diagnostics;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 {
@@ -14,6 +15,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
         private string _destinationFile = null;
         private string _sourceRootPath = string.Empty;
         private string _transformRootPath = string.Empty;
+        private bool _ignoreError = false;
         private bool stackTrace = false;
 
         [Required]
@@ -30,6 +32,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
         {
             get { return _sourceRootPath; }
             set { _sourceRootPath = value; }
+        }
+
+        public bool IgnoreError
+        {
+            get { return _ignoreError; }
+            set { _ignoreError = value; }
         }
 
 
@@ -90,14 +98,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 
         public override bool Execute()
         {
-            return RunXmlTrasform();
+            return RunXmlTransform();
         }
 
-        public bool RunXmlTrasform(bool isLoggingEnabled = true)
+        public bool RunXmlTransform(bool isLoggingEnabled = true)
         {
             bool succeeded = true;
             IXmlTransformationLogger logger = null;
-            if (isLoggingEnabled)
+            if (isLoggingEnabled && !IgnoreError)
             {
                 logger = new TaskTransformationLogger(Log, StackTrace);
             }
@@ -121,9 +129,19 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 
                     SaveTransformedFile(document, Destination);
                 }
+
+                if (IgnoreError)
+                {
+                    return true;
+                }
             }
             catch (System.Xml.XmlException ex)
             {
+                if (IgnoreError)
+                {
+                    return true;
+                }
+
                 string localPath = Source;
                 if (!string.IsNullOrEmpty(ex.SourceUri))
                 {
@@ -136,6 +154,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
             }
             catch (Exception ex)
             {
+                if (IgnoreError)
+                {
+                    return true;
+                }
+
                 logger?.LogErrorFromException(ex);
                 succeeded = false;
             }
