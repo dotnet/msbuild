@@ -197,6 +197,32 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        [Fact]
+        public void If_UseAppHost_is_false_it_does_not_try_to_find_an_AppHost()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NoAppHost",
+                TargetFrameworks = "netcoreapp3.0",
+                //  Use "any" as RID so that it will fail to find AppHost
+                RuntimeIdentifier = "any",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+            testProject.AdditionalProperties["SelfContained"] = "false";
+            testProject.AdditionalProperties["UseAppHost"] = "false";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+        }
+
         private static bool IsPE32(string path)
         {
             using (var reader = new PEReader(File.OpenRead(path)))

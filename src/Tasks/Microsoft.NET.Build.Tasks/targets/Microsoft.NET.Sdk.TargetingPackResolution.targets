@@ -68,11 +68,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </ItemGroup>
 
-    <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == ''">
-      <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
-      <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
-    </PropertyGroup>
-
     <PropertyGroup Condition="'$(EnableTargetingPackDownload)' == ''">
       <EnableTargetingPackDownload>true</EnableTargetingPackDownload>
     </PropertyGroup>
@@ -103,11 +98,20 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </ResolveFrameworkReferences>
 
+    <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == '' And '$(UseAppHost)' == 'true'">
+      <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
+      <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(UseAppHost)' == 'true'">
+      <_OtherAppHostRuntimeIdentifiers Include="@(RuntimeIdentifiers)" />
+    </ItemGroup>
+
     <ResolveAppHosts TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
                      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                      TargetingPackRoot="$(NetCoreTargetingPackRoot)"
                      AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
-                     OtherRuntimeIdentifiers="$(RuntimeIdentifiers)"
+                     OtherRuntimeIdentifiers="$(_OtherAppHostRuntimeIdentifiers)"
                      RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                      PackAsToolShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
                      DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
