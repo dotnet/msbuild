@@ -104,15 +104,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(UseAppHost)' == 'true'">
-      <_OtherAppHostRuntimeIdentifiers Include="@(RuntimeIdentifiers)" />
-    </ItemGroup>
-
     <ResolveAppHosts TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
                      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                      TargetingPackRoot="$(NetCoreTargetingPackRoot)"
                      AppHostRuntimeIdentifier="$(AppHostRuntimeIdentifier)"
-                     OtherRuntimeIdentifiers="$(_OtherAppHostRuntimeIdentifiers)"
+                     OtherRuntimeIdentifiers="$(RuntimeIdentifiers)"
                      RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                      PackAsToolShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
                      DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"

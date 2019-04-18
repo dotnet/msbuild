@@ -90,7 +90,8 @@ namespace Microsoft.NET.Build.Tasks
                     packagesToDownload,
                     DotNetAppHostExecutableNameWithoutExtension,
                     "AppHost",
-                    isExecutable: true);
+                    isExecutable: true,
+                    errorIfNotFound: true);
 
                 if (appHostItem != null)
                 {
@@ -103,7 +104,8 @@ namespace Microsoft.NET.Build.Tasks
                     packagesToDownload,
                     DotNetComHostLibraryNameWithoutExtension,
                     "ComHost",
-                    isExecutable: false);
+                    isExecutable: false,
+                    errorIfNotFound: true);
 
                 if (comHostItem != null)
                 {
@@ -122,7 +124,8 @@ namespace Microsoft.NET.Build.Tasks
                         packagesToDownload,
                         DotNetAppHostExecutableNameWithoutExtension,
                         "AppHost",
-                        isExecutable: true);
+                        isExecutable: true,
+                        errorIfNotFound: true);
 
                     if (appHostItem != null)
                     {
@@ -147,7 +150,8 @@ namespace Microsoft.NET.Build.Tasks
                             packagesToDownload,
                             hostNameWithoutExtension: "unused",
                             itemName: "unused",
-                            isExecutable: true);
+                            isExecutable: true,
+                            errorIfNotFound: false);
                 }
             }
 
@@ -162,7 +166,8 @@ namespace Microsoft.NET.Build.Tasks
                                          List<ITaskItem> packagesToDownload,
                                          string hostNameWithoutExtension,
                                          string itemName,
-                                         bool isExecutable)
+                                         bool isExecutable,
+                                         bool errorIfNotFound)
         {
             var selectedAppHostPack = knownAppHostPacksForTargetFramework.Single();
 
@@ -186,12 +191,26 @@ namespace Microsoft.NET.Build.Tasks
                 if (wasInGraph)
                 {
                     //  NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.
-                    Log.LogError(Strings.NoAppHostAvailable, runtimeIdentifier);
+                    if (errorIfNotFound)
+                    {
+                        Log.LogError(Strings.NoAppHostAvailable, runtimeIdentifier);
+                    }
+                    else
+                    {
+                        Log.LogMessage(Strings.NoAppHostAvailable, runtimeIdentifier);
+                    }
                 }
                 else
                 {
                     //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
-                    Log.LogError(Strings.RuntimeIdentifierNotRecognized, runtimeIdentifier);
+                    if (errorIfNotFound)
+                    {
+                        Log.LogError(Strings.RuntimeIdentifierNotRecognized, runtimeIdentifier);
+                    }
+                    else
+                    {
+                        Log.LogMessage(Strings.RuntimeIdentifierNotRecognized, runtimeIdentifier);
+                    }
                 }
                 return null;
             }
