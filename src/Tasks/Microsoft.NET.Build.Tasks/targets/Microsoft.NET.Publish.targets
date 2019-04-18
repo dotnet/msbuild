@@ -710,6 +710,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeExcludeFromPublishPackageReferences;
                             _ParseTargetManifestFiles">
 
+    <PropertyGroup>
+      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
+    </PropertyGroup>
+    
     <!-- If there are no excluded packages or runtime store packages, then we can reuse the deps file from the build, -->
     <PropertyGroup>
       <_UseBuildDependencyFile Condition="'@(_ExcludeFromPublishPackageReference)' == '' and
@@ -733,10 +737,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputeReferenceAssemblies;
                             ResolveRuntimePackAssets"
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
-
-    <PropertyGroup>
-      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
-    </PropertyGroup>
 
     <ItemGroup>
       <ResolvedCompileFileDefinitions Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' == 'Reference'" />
@@ -819,8 +819,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>
-      <PublishItemsOutputGroupOutputs Condition="'$(PublishDepsFilePath)' != ''" Include="$(PublishDepsFilePath)" TargetPath="$(ProjectDepsFileName)" />
-      <PublishItemsOutputGroupOutputs Condition="'$(PublishDepsFilePath)' == ''" Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" />
+      <PublishItemsOutputGroupOutputs Condition="'$(PublishDepsFilePath)' != '' and Exists($(PublishDepsFilePath))" Include="$(PublishDepsFilePath)" TargetPath="$(ProjectDepsFileName)" />
+      <PublishItemsOutputGroupOutputs Condition="'$(PublishDepsFilePath)' == '' or !Exists($(PublishDepsFilePath))" Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" />
       <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')" TargetPath="%(ResolvedFileToPublish.RelativePath)" OutputGroup="PublishItemsOutputGroup" />
     </ItemGroup>
   </Target>
