@@ -73,10 +73,11 @@ namespace Microsoft.DotNet.Tests.Commands
             reporter.Lines.Should().Equal(expected.OrderBy(c => c));
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/cli/issues/9737")]
         public void GivenNewCommandItDisplaysCompletions()
         {
             var expected = new string[] {
+                "--dry-run",
                 "--force",
                 "--help",
                 "--install",

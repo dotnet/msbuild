@@ -14,15 +14,37 @@ namespace EndToEnd
 {
     public partial class GivenSelfContainedAppsRollForward : TestBase
     {
+        public const string NETCorePackageName = "Microsoft.NETCore.App";
+        public const string AspNetCoreAppPackageName = "Microsoft.AspNetCore.App";
+        public const string AspNetCoreAllPackageName = "Microsoft.AspNetCore.All";
 
         [Theory(Skip = "https://github.com/dotnet/cli/issues/10879")]
         //  MemberData is used instead of InlineData here so we can access it in another test to
         //  verify that we are covering the latest release of .NET Core
         [ClassData(typeof(SupportedNetCoreAppVersions))]
-        public void ItRollsForwardToTheLatestVersion(string minorVersion)
+        public void ItRollsForwardToTheLatestNetCoreVersion(string minorVersion)
+        {
+            ItRollsForwardToTheLatestVersion(NETCorePackageName, minorVersion);
+        }
+
+        [Theory(Skip = "https://github.com/dotnet/cli/issues/10879")]
+        [ClassData(typeof(SupportedAspNetCoreVersions))]
+        public void ItRollsForwardToTheLatestAspNetCoreAppVersion(string minorVersion)
+        {
+            ItRollsForwardToTheLatestVersion(AspNetCoreAppPackageName, minorVersion);
+        }
+
+        [Theory(Skip = "https://github.com/dotnet/cli/issues/10879")]
+        [ClassData(typeof(SupportedAspNetCoreVersions))]
+        public void ItRollsForwardToTheLatestAspNetCoreAllVersion(string minorVersion)
+        {
+            ItRollsForwardToTheLatestVersion(AspNetCoreAllPackageName, minorVersion);
+        }
+
+        public void ItRollsForwardToTheLatestVersion(string packageName, string minorVersion)
         {
             var _testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance(identifier: minorVersion)
+                .CreateInstance(identifier: packageName + "_" + minorVersion)
                 .WithSourceFiles();
 
             string projectDirectory = _testInstance.Root.FullName;
@@ -43,6 +65,13 @@ namespace EndToEnd
             project.Root.Element(ns + "PropertyGroup")
                 .Add(new XElement(ns + "RuntimeIdentifier", rid));
 
+            if (packageName != NETCorePackageName)
+            {
+                //  Add implicit ASP.NET reference
+                project.Root.Add(new XElement(ns + "ItemGroup",
+                    new XElement(ns + "PackageReference", new XAttribute("Include", packageName))));
+            }
+
             project.Save(projectPath);
 
             //  Get the version rolled forward to
@@ -54,7 +83,7 @@ namespace EndToEnd
             string assetsFilePath = Path.Combine(projectDirectory, "obj", "project.assets.json");
             var assetsFile = new LockFileFormat().Read(assetsFilePath);
 
-            var rolledForwardVersion = GetNetCoreAppVersion(assetsFile);
+            var rolledForwardVersion = GetPackageVersion(assetsFile, packageName);
             rolledForwardVersion.Should().NotBeNull();
 
             if (rolledForwardVersion.IsPrerelease)
@@ -66,10 +95,21 @@ namespace EndToEnd
                 return;
             }
 
-            //  Float the RuntimeFrameworkVersion to get the latest version of the runtime available from feeds
             Directory.Delete(Path.Combine(projectDirectory, "obj"), true);
-            project.Root.Element(ns + "PropertyGroup")
-                .Add(new XElement(ns + "RuntimeFrameworkVersion", $"{minorVersion}.*"));
+            if (packageName == NETCorePackageName)
+            {
+                //  Float the RuntimeFrameworkVersion to get the latest version of the runtime available from feeds
+                project.Root.Element(ns + "PropertyGroup")
+                    .Add(new XElement(ns + "RuntimeFrameworkVersion", $"{minorVersion}.*"));
+            }
+            else
+            {
+                project.Root.Element(ns + "ItemGroup")
+                    .Element(ns + "PackageReference")
+                    .Add(new XAttribute("Version", $"{minorVersion}.*"),
+                        new XAttribute("AllowExplicitVersion", "true"));
+            }
+
             project.Save(projectPath);
 
             new RestoreCommand()
@@ -79,19 +119,19 @@ namespace EndToEnd
 
             var floatedAssetsFile = new LockFileFormat().Read(assetsFilePath);
 
-            var floatedVersion = GetNetCoreAppVersion(floatedAssetsFile);
+            var floatedVersion = GetPackageVersion(floatedAssetsFile, packageName);
             floatedVersion.Should().NotBeNull();
 
             rolledForwardVersion.ToNormalizedString().Should().BeEquivalentTo(floatedVersion.ToNormalizedString(),
-                "the latest patch version properties in Microsoft.NETCoreSdk.BundledVersions.props need to be updated " + 
-                "(see MSBuildExtensions.targets in this repo)");
+                $"the latest patch version for {packageName} {minorVersion} in Microsoft.NETCoreSdk.BundledVersions.props " +
+                "needs to be updated (see the ImplicitPackageVariable items in MSBuildExtensions.targets in this repo)");
         }
 
-        private NuGetVersion GetNetCoreAppVersion(LockFile lockFile)
+        private static NuGetVersion GetPackageVersion(LockFile lockFile, string packageName)
         {
             return lockFile?.Targets?.SingleOrDefault(t => t.RuntimeIdentifier != null)
                 ?.Libraries?.SingleOrDefault(l =>
-                    string.Compare(l.Name, "Microsoft.NETCore.App", StringComparison.CurrentCultureIgnoreCase) == 0)
+                    string.Compare(l.Name, packageName, StringComparison.CurrentCultureIgnoreCase) == 0)
                 ?.Version;
         }
 
@@ -117,10 +157,39 @@ namespace EndToEnd
                     .Element(ns + "TargetFramework")
                     .Value;
 
-                SupportedNetCoreAppVersions.Versions.Select(v => $"netcoreapp{v[0]}")
+                SupportedNetCoreAppVersions.Versions.Select(v => $"netcoreapp{v}")
                     .Should().Contain(targetFramework, $"the {nameof(SupportedNetCoreAppVersions)}.{nameof(SupportedNetCoreAppVersions.Versions)} property should include the default version " +
                     "of .NET Core created by \"dotnet new\"");
                 
+            }
+        }
+
+        [Fact]
+        public void WeCoverLatestAspNetCoreAppRollForward()
+        {
+            //  Run "dotnet new web", get TargetFramework property, and make sure it's covered in SupportedAspNetCoreAppVersions
+            using (DisposableDirectory directory = Temp.CreateDirectory())
+            {
+                string projectDirectory = directory.Path;
+
+                new NewCommandShim()
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute("web --no-restore")
+                    .Should().Pass();
+
+                string projectPath = Path.Combine(projectDirectory, Path.GetFileName(projectDirectory) + ".csproj");
+
+                var project = XDocument.Load(projectPath);
+                var ns = project.Root.Name.Namespace;
+
+                string targetFramework = project.Root.Element(ns + "PropertyGroup")
+                    .Element(ns + "TargetFramework")
+                    .Value;
+
+                SupportedAspNetCoreVersions.Versions.Select(v => $"netcoreapp{v}")
+                    .Should().Contain(targetFramework, $"the {nameof(SupportedAspNetCoreVersions)} should include the default version " +
+                    "of Microsoft.AspNetCore.App used by the templates created by \"dotnet new web\"");
+
             }
         }
     }
