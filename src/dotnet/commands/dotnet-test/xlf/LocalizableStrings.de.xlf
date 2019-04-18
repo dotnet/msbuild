@@ -65,11 +65,11 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="needs-review-translation">Die für Testergebnisse zu verwendende Protokollierung.
-                                        Beispiele:
-                                        Hiermit werden Ergebnisse im TRX-Format mit eindeutigem Dateinamen protokolliert: --logger trx
-                                        Hiermit werden Ergebnisse im TRX-Format mit dem angegebenem Dateinamen protokolliert: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Weitere Informationen zu den Argumenten der Protokollierung finden Sie unter https://aka.ms/vstest-report.</target>
+        <target state="translated">Die Protokollierung, die für Testergebnisse verwendet werden soll:
+Beispiele:
+Im TRX-Format mit einem eindeutigen Dateinamen protokollieren: --logger trx
+Im TRX-Format mit dem angegebenen Dateinamen protokollieren: --logger "trx;Protokolldateiname=&lt;Testergebnisse.trx&gt;"
+Weitere Informationen zu Protokollierungsargumenten finden Sie unter https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -162,7 +162,7 @@ Im aktuellen Verzeichnis wird eine Datei namens "Sequence.xml" ausgegeben, in de
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to test for.</source>
-        <target state="new">The target runtime to test for.</target>
+        <target state="translated">Die Zielruntime, für die Tests ausgeführt werden sollen.</target>
         <note />
       </trans-unit>
     </body>

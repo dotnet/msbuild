@@ -56,7 +56,7 @@
   <Target Name="PrepareMSBuildExtensionsProps">
     <PropertyGroup>
       <MSBuildExtensionsPackageName>Microsoft.NET.Build.Extensions</MSBuildExtensionsPackageName>
-      <MSBuildExtensionsVersionSubfolder>15.0</MSBuildExtensionsVersionSubfolder>
+      <MSBuildExtensionsVersionSubfolder>Current</MSBuildExtensionsVersionSubfolder>
       <MSBuildExtensionsNuPkgPath>$(NuGetPackagesDir)/$(MSBuildExtensionsPackageName.ToLower())/$(MicrosoftNETBuildExtensionsPackageVersion.ToLower())</MSBuildExtensionsNuPkgPath>
 
       <NETStandardLibraryNETFrameworkPackageName>NETStandard.Library.NETFramework</NETStandardLibraryNETFrameworkPackageName>
@@ -143,15 +143,15 @@
     </GetUseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion>
 
     <PropertyGroup>
-      <MicrosoftNETCoreAppLatestVersion1_0 Condition="'$(MicrosoftNETCoreAppLatestVersion1_0)' == ''">1.0.14</MicrosoftNETCoreAppLatestVersion1_0>
-      <MicrosoftNETCoreAppLatestVersion1_1 Condition="'$(MicrosoftNETCoreAppLatestVersion1_1)' == ''">1.1.11</MicrosoftNETCoreAppLatestVersion1_1>
-      <MicrosoftNETCoreAppLatestVersion2_1 Condition="'$(MicrosoftNETCoreAppLatestVersion2_1)' == ''">2.1.8</MicrosoftNETCoreAppLatestVersion2_1>
+      <MicrosoftNETCoreAppLatestVersion1_0 Condition="'$(MicrosoftNETCoreAppLatestVersion1_0)' == ''">1.0.15</MicrosoftNETCoreAppLatestVersion1_0>
+      <MicrosoftNETCoreAppLatestVersion1_1 Condition="'$(MicrosoftNETCoreAppLatestVersion1_1)' == ''">1.1.12</MicrosoftNETCoreAppLatestVersion1_1>
+      <MicrosoftNETCoreAppLatestVersion2_1 Condition="'$(MicrosoftNETCoreAppLatestVersion2_1)' == ''">2.1.9</MicrosoftNETCoreAppLatestVersion2_1>
       <MicrosoftNETCoreAppLatestVersion2_2 Condition="'$(MicrosoftNETCoreAppLatestVersion2_2)' == ''">$(_NETCoreAppPackageVersion)</MicrosoftNETCoreAppLatestVersion2_2>
 
-      <MicrosoftAspNetCoreAppLatestVersion2_1 Condition="'$(MicrosoftAspNetCoreAppLatestVersion2_1)' == ''">2.1.8</MicrosoftAspNetCoreAppLatestVersion2_1>
+      <MicrosoftAspNetCoreAppLatestVersion2_1 Condition="'$(MicrosoftAspNetCoreAppLatestVersion2_1)' == ''">2.1.9</MicrosoftAspNetCoreAppLatestVersion2_1>
       <MicrosoftAspNetCoreAppLatestVersion2_2 Condition="'$(MicrosoftAspNetCoreAppLatestVersion2_2)' == ''">$(_AspNetCoreAppPackageVersion)</MicrosoftAspNetCoreAppLatestVersion2_2>
 
-      <MicrosoftAspNetCoreAllLatestVersion2_1 Condition="'$(MicrosoftAspNetCoreAllLatestVersion2_1)' == ''">2.1.8</MicrosoftAspNetCoreAllLatestVersion2_1>
+      <MicrosoftAspNetCoreAllLatestVersion2_1 Condition="'$(MicrosoftAspNetCoreAllLatestVersion2_1)' == ''">2.1.9</MicrosoftAspNetCoreAllLatestVersion2_1>
       <MicrosoftAspNetCoreAllLatestVersion2_2 Condition="'$(MicrosoftAspNetCoreAllLatestVersion2_2)' == ''">$(_AspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAllLatestVersion2_2>
     </PropertyGroup>
 
@@ -247,10 +247,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreApp2_1)</DefaultPatchVersionForAspNetCoreApp2_1>
 
     <!-- Latest patch versions for each minor version of .NET Core -->
-    <LatestPatchVersionForNetCore1_0 Condition="'%24(LatestPatchVersionForNetCore1_0)' == ''">1.0.14</LatestPatchVersionForNetCore1_0>
-    <LatestPatchVersionForNetCore1_1 Condition="'%24(LatestPatchVersionForNetCore1_1)' == ''">1.1.11</LatestPatchVersionForNetCore1_1>
+    <LatestPatchVersionForNetCore1_0 Condition="'%24(LatestPatchVersionForNetCore1_0)' == ''">1.0.15</LatestPatchVersionForNetCore1_0>
+    <LatestPatchVersionForNetCore1_1 Condition="'%24(LatestPatchVersionForNetCore1_1)' == ''">1.1.12</LatestPatchVersionForNetCore1_1>
     <LatestPatchVersionForNetCore2_0 Condition="'%24(LatestPatchVersionForNetCore2_0)' == ''">2.0.9</LatestPatchVersionForNetCore2_0>
-    <LatestPatchVersionForNetCore2_1 Condition="'%24(LatestPatchVersionForNetCore2_1)' == ''">2.1.2</LatestPatchVersionForNetCore2_1>
+    <LatestPatchVersionForNetCore2_1 Condition="'%24(LatestPatchVersionForNetCore2_1)' == ''">2.1.9</LatestPatchVersionForNetCore2_1>
   </PropertyGroup>
   <ItemGroup>
     @(ImplicitPackageVariable->'<ImplicitPackageReferenceVersion Include="%(Identity)" TargetFrameworkVersion="%(TargetFrameworkVersion)" DefaultVersion="%(DefaultVersion)" LatestVersion="%(LatestVersion)"/>', '%0A    ')

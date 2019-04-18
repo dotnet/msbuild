@@ -82,7 +82,8 @@
       <!-- NuPkg contents -->
       <FilesToSign Include="$(BaseOutputDirectory)/bin/Microsoft.DotNet.Cli.Utils/**/Microsoft.DotNet.Cli.Utils.dll;
                             $(BaseOutputDirectory)/bin/Microsoft.DotNet.Cli.Utils/**/Microsoft.DotNet.Cli.Utils.resources.dll;
-                            $(BaseOutputDirectory)/bin/Microsoft.DotNet.MSBuildSdkResolver/**/Microsoft.DotNet.MSBuildSdkResolver.dll">
+                            $(BaseOutputDirectory)/bin/Microsoft.DotNet.MSBuildSdkResolver/**/Microsoft.DotNet.MSBuildSdkResolver.dll;
+                            $(BaseOutputDirectory)/bin/Microsoft.DotNet.MSBuildSdkResolver/**/Microsoft.DotNet.MSBuildSdkResolver.resources.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
@@ -94,6 +95,9 @@
   <Target Name="GetSignSdkResolverContentsFiles">
     <ItemGroup>
       <FilesToSign Include="$(SdkResolverOutputDirectory)/Microsoft.DotNet.MSBuildSdkResolver.dll">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(SdkResolverOutputDirectory)/*/Microsoft.DotNet.MSBuildSdkResolver.resources.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
