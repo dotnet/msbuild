@@ -144,4 +144,7 @@
   <data name="ConfigurationOptionDescription" xml:space="preserve">
     <value>The configuration to use for building the project. The default for most projects is 'Debug'.</value>
   </data>
+  <data name="CmdNoLogo" xml:space="preserve">
+    <value>Do not display the startup banner or the copyright message.</value>
+  </data>
 </root>

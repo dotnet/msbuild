@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
@@ -12,7 +13,6 @@ using Microsoft.DotNet.ToolPackage.ToolConfigurationDeserialization;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -32,14 +32,14 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         public ProjectRestorerMock(
             IFileSystem fileSystem,
             IReporter reporter = null,
-            IEnumerable<MockFeed> feeds = null)
+            List<MockFeed> feeds = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _reporter = reporter;
 
-            _feeds = new List<MockFeed>();
             if (feeds == null)
             {
+                _feeds = new List<MockFeed>();
                 _feeds.Add(new MockFeed
                     {
                         Type = MockFeedType.FeedFromGlobalNugetConfig,
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             }
             else
             {
-                _feeds.AddRange(feeds);
+                _feeds = feeds;
             }
         }
 
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 fakeExecutablePath);
             _fileSystem.File.WriteAllText(
                 assetJsonOutput.WithFile(FakeCommandSettingsFileName).Value,
-                JsonConvert.SerializeObject(new { Name = feedPackage.ToolCommandName }));
+                JsonSerializer.ToString(new {Name = feedPackage.ToolCommandName}));
         }
 
         public MockFeedPackage GetPackage(

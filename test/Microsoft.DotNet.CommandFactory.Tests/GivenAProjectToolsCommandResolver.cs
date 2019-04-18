@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tests
     public class GivenAProjectToolsCommandResolver : TestBase
     {
         private static readonly NuGetFramework s_toolPackageFramework =
-            NuGetFrameworks.NetCoreApp30;
+            NuGetFrameworks.NetCoreApp22;
 
         private const string TestProjectName = "AppWithToolDependency";
 
@@ -286,30 +286,6 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void ItAddsFxVersionAsAParamWhenTheToolHasThePrefercliruntimeFile()
-        {
-            var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
-
-            var testInstance = TestAssets.Get("MSBuildTestApp")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
-
-            var commandResolverArguments = new CommandResolverArguments()
-            {
-                CommandName = "dotnet-prefercliruntime",
-                CommandArguments = null,
-                ProjectDirectory = testInstance.Root.FullName
-            };
-
-            var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
-
-            result.Should().NotBeNull();
-
-            result.Args.Should().Contain("--fx-version 3.0.0");
-        }
-
-        [Fact]
         public void ItDoesNotAddFxVersionAsAParamWhenTheToolDoesNotHaveThePrefercliruntimeFile()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
@@ -336,10 +312,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItFindsToolsLocatedInTheNuGetFallbackFolder()
         {
-            var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
-
             var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
-                .CreateInstance()
+                .CreateInstance("NF") // use shorter name since path could be too long
                 .WithSourceFiles()
                 .WithNuGetConfigAndExternalRestoreSources(new RepoDirectoriesProvider().TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
@@ -355,34 +329,16 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .Pass();
 
-            var commandResolverArguments = new CommandResolverArguments()
-            {
-                CommandName = "dotnet-fallbackfoldertool",
-                CommandArguments = null,
-                ProjectDirectory = testProjectDirectory
-            };
-
-            var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
-
-            result.Should().NotBeNull();
-
-            var commandPath = result.Args.Trim('"');
-            commandPath.Should().Contain(Path.Combine(
-                fallbackFolder,
-                "dotnet-fallbackfoldertool",
-                "1.0.0",
-                "lib",
-                "netcoreapp3.0",
-                "dotnet-fallbackfoldertool.dll"));
+            new DotnetCommand()
+            .WithWorkingDirectory(testProjectDirectory)
+            .Execute($"fallbackfoldertool").Should().Pass();
         }
 
         [Fact]
         public void ItShowsAnErrorWhenTheToolDllIsNotFound()
         {
-            var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
-
             var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
-                .CreateInstance()
+                .CreateInstance("DN") // use shorter name since path could be too long
                 .WithSourceFiles()
                 .WithNuGetConfigAndExternalRestoreSources(new RepoDirectoriesProvider().TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
@@ -401,30 +357,17 @@ namespace Microsoft.DotNet.Tests
 
             // We need to run the tool once to generate the deps.json
             // otherwise we end up with a different error message.
-            var commandResolverArguments = new CommandResolverArguments()
-            {
-                CommandName = "dotnet-fallbackfoldertool",
-                CommandArguments = null,
-                ProjectDirectory = testProjectDirectory
-            };
 
-            var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
-
-            result.Should().NotBeNull();
+            new DotnetCommand()
+            .WithWorkingDirectory(testProjectDirectory)
+            .Execute($"fallbackfoldertool /p:RestorePackagesPath={nugetPackages}").Should().Pass();
 
             Directory.Delete(Path.Combine(fallbackFolder, "dotnet-fallbackfoldertool"), true);
 
-            commandResolverArguments = new CommandResolverArguments()
-            {
-                CommandName = "dotnet-fallbackfoldertool",
-                CommandArguments = null,
-                ProjectDirectory = testProjectDirectory
-            };
-
-            Action action = () => projectToolsCommandResolver.Resolve(commandResolverArguments);
-
-            action.ShouldThrow<GracefulException>().WithMessage(
-                string.Format(LocalizableStrings.CommandAssembliesNotFound, "dotnet-fallbackfoldertool"));
+            new DotnetCommand()
+            .WithWorkingDirectory(testProjectDirectory)
+            .Execute($"fallbackfoldertool /p:RestorePackagesPath={nugetPackages}")
+            .Should().Fail().And.NotHaveStdOutContaining(string.Format(LocalizableStrings.CommandAssembliesNotFound, "dotnet-fallbackfoldertool"));
         }
 
         private void PopulateFallbackFolder(string testProjectDirectory, string fallbackFolder)

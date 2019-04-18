@@ -25,9 +25,9 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
-        <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+        <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="translated">次のコマンドを使用してこのディレクトリからツールを実行することができます: dotnet tool run {0}
+        <target state="needs-review-translation">次のコマンドを使用してこのディレクトリからツールを実行することができます: dotnet tool run {0}
 ツール '{1}' (バージョン '{2}') は正常にインストールされました。マニフェスト ファイル {3} にエントリが追加されました。</target>
         <note />
       </trans-unit>
@@ -42,13 +42,9 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
-        <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
-        <target state="translated">グローバル ツールをインストールする場合、'-g' を追加します。ツール マニフェストを使用する場合には、'dotnet new tool-manifest' を使用してマニフェストを最初に作成する必要があります。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="translated">ツール マニフェスト (--tool-manifest) は、ローカル オプション (--local または既定値) と併用する場合にのみ有効です。</target>
+        <source>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
+        <target state="needs-review-translation">グローバル ツールをインストールする場合、'-g' を追加します。ツール マニフェストを使用する場合には、'dotnet new tool-manifest' を使用してマニフェストを最初に作成する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">

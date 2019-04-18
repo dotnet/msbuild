@@ -17,7 +17,6 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System.Runtime.InteropServices;
@@ -27,7 +26,7 @@ using Microsoft.DotNet.ToolManifest;
 using NuGet.Frameworks;
 
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolInstallLocalCommandTests
     {
@@ -64,7 +63,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 new ProjectRestorerMock(
                     _fileSystem,
                     _reporter,
-                    new[]
+                    new List<MockFeed>
                     {
                         new MockFeed
                         {
@@ -123,7 +122,7 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolInstallLocalCommand.Execute();
             a.ShouldThrow<GracefulException>()
                 .And.Message.Should()
-                .Contain(string.Format(ToolManifest.LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
         }
 
         [Fact]
@@ -136,6 +135,13 @@ namespace Microsoft.DotNet.Tests.Commands
             a.ShouldThrow<GracefulException>()
                 .And.Message.Should()
                 .Contain(LocalizableStrings.NoManifestGuide);
+
+            a.ShouldThrow<GracefulException>()
+                .And.Message.Should()
+                .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<GracefulException>()
+                .And.VerboseMessage.Should().Contain(string.Format(ToolManifest.LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]

@@ -10,16 +10,34 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ListCommandParser
     {
-        public static Command List() => Create.Command(
-            "list",
-            LocalizableStrings.NetListCommand,
-            Accept.ZeroOrOneArgument()
-            .With(
-                    name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
-                    description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription)
-            .DefaultToCurrentDirectory(),
-            ListPackageReferencesCommandParser.ListPackageReferences(),
-            ListProjectToProjectReferencesCommandParser.ListProjectToProjectReferences(),
-            CommonOptions.HelpOption());
+        // This type is used to set the protected ArgumentsRule property.
+        // This enables subcommands to change the argument's name and description as needed.
+        internal class ListCommand : Command
+        {
+            public ListCommand()
+                : base(
+                    name: "list",
+                    help: LocalizableStrings.NetListCommand,
+                    options: new Option[]
+                    {
+                        CommonOptions.HelpOption(),
+                        ListPackageReferencesCommandParser.ListPackageReferences(),
+                        ListProjectToProjectReferencesCommandParser.ListProjectToProjectReferences(),
+                    },
+                    arguments: Accept.ZeroOrOneArgument()
+                        .With(
+                            name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
+                            description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription)
+                        .DefaultToCurrentDirectory())
+            {
+            }
+
+            public void SetArgumentsRule(ArgumentsRule rule)
+            {
+                ArgumentsRule = rule;
+            }
+        }
+
+        public static Command List() => new ListCommand();
     }
 }

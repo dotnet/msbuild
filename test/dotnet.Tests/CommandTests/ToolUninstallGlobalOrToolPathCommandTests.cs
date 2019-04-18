@@ -24,7 +24,7 @@ using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStri
 using InstallLocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 using Microsoft.DotNet.ShellShim;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolUninstallGlobalOrToolPathCommandTests
     {

@@ -12,6 +12,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 
@@ -26,11 +27,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly bool _global;
         private readonly string _toolPath;
         private readonly bool _local;
-        private readonly string _toolManifestOption;
         private readonly string _framework;
-        private const string GlobalOption = "global";
-        private const string LocalOption = "local";
-        private const string ToolPathOption = "tool-path";
 
         public ToolInstallCommand(
             AppliedOption appliedCommand,
@@ -49,26 +46,23 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 toolInstallGlobalOrToolPathCommand
                 ?? new ToolInstallGlobalOrToolPathCommand(_appliedCommand, _parseResult);
 
-            _global = appliedCommand.ValueOrDefault<bool>(GlobalOption);
-            _local = appliedCommand.ValueOrDefault<bool>(LocalOption);
-            _toolPath = appliedCommand.SingleArgumentOrDefault(ToolPathOption);
-            _toolManifestOption = appliedCommand.ValueOrDefault<string>("tool-manifest");
+            _global = appliedCommand.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
+            _local = appliedCommand.ValueOrDefault<bool>(ToolAppliedOption.LocalOption);
+            _toolPath = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
             _framework = appliedCommand.ValueOrDefault<string>("framework");
         }
 
         public override int Execute()
         {
-            EnsureNoConflictGlobalLocalToolPathOption();
+            ToolAppliedOption.EnsureNoConflictGlobalLocalToolPathOption(
+                _appliedCommand,
+                LocalizableStrings.InstallToolCommandInvalidGlobalAndLocalAndToolPath);
+
+            ToolAppliedOption.EnsureToolManifestAndOnlyLocalFlagCombination(
+                _appliedCommand);
 
             if (_global || !string.IsNullOrWhiteSpace(_toolPath))
             {
-                if (!string.IsNullOrWhiteSpace(_toolManifestOption))
-                {
-                    throw new GracefulException(
-                        string.Format(
-                            LocalizableStrings.OnlyLocalOptionSupportManifestFileOption));
-                }
-
                 return _toolInstallGlobalOrToolPathCommand.Execute();
             }
             else
@@ -81,33 +75,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 }
 
                 return _toolInstallLocalCommand.Execute();
-            }
-        }
-
-        private void EnsureNoConflictGlobalLocalToolPathOption()
-        {
-            List<string> options = new List<string>();
-            if (_global)
-            {
-                options.Add(GlobalOption);
-            }
-
-            if (_local)
-            {
-                options.Add(LocalOption);
-            }
-
-            if (!string.IsNullOrWhiteSpace(_toolPath))
-            {
-                options.Add(ToolPathOption);
-            }
-
-            if (options.Count > 1)
-            {
-                throw new GracefulException(
-                    string.Format(
-                        LocalizableStrings.InstallToolCommandInvalidGlobalAndLocalAndToolPath,
-                        string.Join(" ", options)));
             }
         }
     }

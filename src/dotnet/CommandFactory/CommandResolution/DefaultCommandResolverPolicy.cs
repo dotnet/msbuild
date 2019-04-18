@@ -46,6 +46,7 @@ namespace Microsoft.DotNet.CommandFactory
 
             compositeCommandResolver.AddCommandResolver(new MuxerCommandResolver());
             compositeCommandResolver.AddCommandResolver(new DotnetToolsCommandResolver());
+            compositeCommandResolver.AddCommandResolver(new LocalToolsCommandResolver());
             compositeCommandResolver.AddCommandResolver(new RootedCommandResolver());
             compositeCommandResolver.AddCommandResolver(
                 new ProjectToolsCommandResolver(packagedCommandSpecFactory, environment));

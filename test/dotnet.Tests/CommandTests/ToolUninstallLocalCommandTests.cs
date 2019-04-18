@@ -2,36 +2,28 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
-using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
-using System.Runtime.InteropServices;
-using NuGet.Versioning;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStrings;
 using Microsoft.DotNet.ToolManifest;
-using NuGet.Frameworks;
 
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolUninstallLocalCommandTests
     {
         private readonly IFileSystem _fileSystem;
+        private readonly string _temporaryDirectoryParent;
         private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
         private readonly BufferedReporter _reporter;
@@ -46,7 +38,9 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             _reporter = new BufferedReporter();
             _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
-            _temporaryDirectory = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
+            _temporaryDirectoryParent = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
+            _temporaryDirectory = Path.Combine(_temporaryDirectoryParent, "sub");
+            _fileSystem.Directory.CreateDirectory(_temporaryDirectory);
 
             _manifestFilePath = Path.Combine(_temporaryDirectory, "dotnet-tools.json");
             _fileSystem.File.WriteAllText(Path.Combine(_temporaryDirectory, _manifestFilePath), _jsonContent);
@@ -76,9 +70,30 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             _fileSystem.File.Delete(_manifestFilePath);
             Action a = () => _defaultToolUninstallLocalCommand.Execute().Should().Be(0);
+
+            a.ShouldThrow<GracefulException>()
+               .And.Message.Should()
+               .Contain(Tools.Tool.Common.LocalizableStrings.NoManifestGuide);
+
             a.ShouldThrow<GracefulException>()
                 .And.Message.Should()
-                .Contain(string.Format(ToolManifest.LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<GracefulException>()
+                .And.VerboseMessage.Should().Contain(string.Format(ToolManifest.LocalizableStrings.ListOfSearched, ""));
+        }
+
+        [Fact]
+        public void GivenNoManifestFileContainPackageIdItShouldThrow()
+        {
+            _fileSystem.File.Delete(_manifestFilePath);
+            _fileSystem.File.WriteAllText(_manifestFilePath, _jsonContentContainNoPackageId);
+
+            Action a = () => _defaultToolUninstallLocalCommand.Execute().Should().Be(0);
+
+            a.ShouldThrow<GracefulException>()
+               .And.Message.Should()
+               .Contain(string.Format(LocalizableStrings.NoManifestFileContainPackageId, _packageIdDotnsay));
         }
 
         [Fact]
@@ -137,10 +152,48 @@ namespace Microsoft.DotNet.Tests.Commands
                         _manifestFilePath).Green());
         }
 
+        [Fact]
+        public void GivenParentDirHasManifestWithSamePackageIdWhenRunWithPackageIdItShouldOnlyChangTheClosestOne()
+        {
+            var parentManifestFilePath = Path.Combine(_temporaryDirectoryParent, "dotnet-tools.json");
+            _fileSystem.File.WriteAllText(parentManifestFilePath, _jsonContent);
+
+            _defaultToolUninstallLocalCommand.Execute();
+
+            _fileSystem.File.ReadAllText(_manifestFilePath).Should().Be(_entryRemovedJsonContent, "Change the closest one");
+            _fileSystem.File.ReadAllText(parentManifestFilePath).Should().Be(_jsonContent, "Do not change the manifest layer above");
+        }
+
+        [Fact]
+        public void GivenParentDirHasManifestWithSamePackageIdWhenRunWithPackageIdItShouldOnlyChangTheClosestOne2()
+        {
+            var parentManifestFilePath = Path.Combine(_temporaryDirectoryParent, "dotnet-tools.json");
+            _fileSystem.File.WriteAllText(parentManifestFilePath, _jsonContent);
+
+            _defaultToolUninstallLocalCommand.Execute();
+            _defaultToolUninstallLocalCommand.Execute();
+
+            _fileSystem.File.ReadAllText(parentManifestFilePath).Should().Be(
+                _entryRemovedJsonContent, 
+                "First invoke remove the one in current dir, the second invoke remove the one in parent dir.");
+        }
+
+        [Fact]
+        public void GivenParentDirHasManifestWithSamePackageIdWhenRunWithPackageIdItShouldWarningTheOtherManifests()
+        {
+            var parentManifestFilePath = Path.Combine(_temporaryDirectoryParent, "dotnet-tools.json");
+            _fileSystem.File.WriteAllText(parentManifestFilePath, _jsonContent);
+
+            _defaultToolUninstallLocalCommand.Execute();
+
+            _reporter.Lines[0].Should().Contain(parentManifestFilePath);
+            _reporter.Lines[0].Should().NotContain(_manifestFilePath);
+        }
+
         private string _jsonContent =
             @"{
    ""version"":1,
-   ""isRoot"":true,
+   ""isRoot"":false,
    ""tools"":{
       ""t-rex"":{
          ""version"":""1.0.53"",
@@ -157,10 +210,17 @@ namespace Microsoft.DotNet.Tests.Commands
    }
 }";
 
+        private string _jsonContentContainNoPackageId =
+            @"{
+   ""version"":1,
+   ""isRoot"":false,
+   ""tools"":{}
+}";
+
         private string _entryRemovedJsonContent =
             @"{
   ""version"": 1,
-  ""isRoot"": true,
+  ""isRoot"": false,
   ""tools"": {
     ""t-rex"": {
       ""version"": ""1.0.53"",

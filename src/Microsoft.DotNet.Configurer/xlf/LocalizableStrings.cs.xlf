@@ -2,64 +2,37 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
-      <trans-unit id="FirstTimeWelcomeMessage">
-        <source>Welcome to .NET Core!
----------------------
-Learn more about .NET Core: https://aka.ms/dotnet-docs
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
-        <target state="translated">Vítejte v .NET Core!
----------------------
-Další informace o .NET Core: https://aka.ms/dotnet-docs
-Pomocí příkazu dotnet --help můžete zobrazit dostupné příkazy nebo navštivte tuto adresu: https://aka.ms/dotnet-cli-docs</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnauthorizedAccessMessage">
-        <source>Permission denied to modify the '{0}' folder.
-
-Here are some options to fix this error:
-----------------------------------------
-1. Re-run this command with elevated access.
-2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
-    </source>
-        <target state="translated">Byla vám odepřena oprávnění k úpravě složky {0}.
-
-Tady jsou některé možnosti, jak tuto chybu vyřešit:
-----------------------------------------
-1. Spusťte tento příkaz znovu se zvýšenými přístupovými oprávněními.
-2. Zakažte prostředí prvního spuštění nastavením proměnné prostředí DOTNET_SKIP_FIRST_TIME_EXPERIENCE na hodnotu true.
-3. Zkopírujte sadu .NET Core SDK do nechráněného umístění a použijte ji odtud.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AspNetCertificateInstalled">
-        <source>ASP.NET Core
-------------
-Successfully installed the ASP.NET Core HTTPS Development Certificate.
-To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
-For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="translated">ASP.NET Core
-------------
-Úspěšně se podařilo nainstalovat certifikát pro vývoj ASP.NET Core HTTPS Development Certificate.
-Pokud chcete certifikátu důvěřovat, spusťte dotnet dev-certs https --trust (platí jenom pro Windows a macOS). Informace o vytvoření vztahu důvěryhodnosti na jiných platformách najdete v dokumentaci k příslušné platformě.
-Další informace o konfiguraci protokolu HTTPS najdete na webu https://go.microsoft.com/fwlink/?linkid=848054.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
         <target state="translated">Nešlo určit domovský adresář uživatele. Nastavte proměnnou prostředí {0}, která určí adresář, který se má použít.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ShortFirstTimeWelcomeMessage">
-        <source>Welcome to .NET Core!
+      <trans-unit id="FirstTimeMessageMoreInformation">
+        <source>----------------
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Find out what's new: https://aka.ms/dotnet-whats-new
+Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
+Write your first app: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</source>
+        <target state="new">----------------
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Find out what's new: https://aka.ms/dotnet-whats-new
+Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
+Write your first app: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageWelcome">
+        <source>Welcome to .NET Core 3.0!
 ---------------------
-GitHub: https://github.com/dotnet/core
-Docs: https://aka.ms/dotnet-docs
-HTTPS: https://aka.ms/aspnet-core-https</source>
-        <target state="translated">Vítejte v .NET Core!
+SDK Version: {0}</source>
+        <target state="new">Welcome to .NET Core 3.0!
 ---------------------
-GitHub: https://github.com/dotnet/core
-Docs: https://aka.ms/dotnet-docs
-HTTPS: https://aka.ms/aspnet-core-https</target>
+SDK Version: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
@@ -73,11 +46,6 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
 Nástroje .NET Core shromažďují data o využití, která nám pomáhají zlepšovat naše produkty. Tato data jsou anonymní. Shromažďuje je Microsoft a sdílí je s komunitou. Výslovný nesouhlas s telemetrií můžete vyjádřit tak, že ve svém oblíbeném nástroji nastavíte proměnnou prostředí DOTNET_CLI_TELEMETRY_OPTOUT na hodnotu 1 nebo true.
 
 Další informace o telemetrii nástrojů příkazového řádku .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShortTelemetryMessage">
-        <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">Telemetrický příkaz: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.CommandFactory
             _fileSystem = fileSystem ?? new FileSystemWrapper();
         }
 
-        public CommandSpec Resolve(CommandResolverArguments arguments)
+        public CommandSpec ResolveStrict(CommandResolverArguments arguments)
         {
             if (arguments == null || string.IsNullOrWhiteSpace(arguments.CommandName))
             {
@@ -48,6 +48,32 @@ namespace Microsoft.DotNet.CommandFactory
                 new ToolCommandName(arguments.CommandName.Substring(LeadingDotnetPrefix.Length)));
 
             return resolveResult;
+        }
+
+        public CommandSpec Resolve(CommandResolverArguments arguments)
+        {
+            if (arguments == null || string.IsNullOrWhiteSpace(arguments.CommandName))
+            {
+                return null;
+            }
+
+            if (!arguments.CommandName.StartsWith(LeadingDotnetPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            // Try resolving without prefix first
+            var result = GetPackageCommandSpecUsingMuxer(
+                arguments,
+                new ToolCommandName(arguments.CommandName.Substring(LeadingDotnetPrefix.Length)));
+
+            if (result != null)
+            {
+                return result;
+            }
+
+            // Fallback to resolving with the prefix
+            return GetPackageCommandSpecUsingMuxer(arguments, new ToolCommandName(arguments.CommandName));
         }
 
         private CommandSpec GetPackageCommandSpecUsingMuxer(CommandResolverArguments arguments,

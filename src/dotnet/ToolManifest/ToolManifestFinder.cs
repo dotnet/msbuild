@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ToolManifest
@@ -41,8 +42,9 @@ namespace Microsoft.DotNet.ToolManifest
             if (!findAnyManifest)
             {
                 throw new ToolManifestCannotBeFoundException(
-                    string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched,
-                        string.Join(Environment.NewLine, allPossibleManifests.Select(f => f.manifestfile.Value))));
+                    LocalizableStrings.CannotFindAManifestFile,
+                    string.Format(LocalizableStrings.ListOfSearched,
+                        string.Join(Environment.NewLine, allPossibleManifests.Select(f => "\t" + f.manifestfile.Value))));
             }
 
             return toolManifestPackageAndSource.Select(t => t.toolManifestPackage).ToArray();
@@ -162,9 +164,44 @@ namespace Microsoft.DotNet.ToolManifest
             }
 
             throw new ToolManifestCannotBeFoundException(
-                string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched,
+                LocalizableStrings.CannotFindAManifestFile,
+                string.Format(LocalizableStrings.ListOfSearched,
                     string.Join(Environment.NewLine,
-                        EnumerateDefaultAllPossibleManifests().Select(f => f.manifestfile.Value))));
+                        EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
+        }
+
+        /// <summary>
+        /// Return manifest file path in the order of the closest probe path first.
+        /// </summary>
+        public IReadOnlyList<FilePath> FindByPackageId(PackageId packageId)
+        {
+            var result = new List<FilePath>();
+            bool findAnyManifest = false;
+            foreach ((FilePath possibleManifest,
+                    DirectoryPath correspondingDirectory)
+                in EnumerateDefaultAllPossibleManifests())
+            {
+                if (_fileSystem.File.Exists(possibleManifest.Value))
+                {
+                    findAnyManifest = true;
+                    if (_toolManifestEditor.Read(possibleManifest, correspondingDirectory).content
+                        .Any(t => t.PackageId.Equals(packageId)))
+                    {
+                        result.Add(possibleManifest);
+                    }
+                }
+            }
+
+            if (!findAnyManifest)
+            {
+                throw new ToolManifestCannotBeFoundException(
+                    LocalizableStrings.CannotFindAManifestFile,
+                    string.Format(LocalizableStrings.ListOfSearched,
+                        string.Join(Environment.NewLine,
+                            EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
+            }
+
+            return result;
         }
     }
 }

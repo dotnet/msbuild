@@ -117,9 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CannotFindAnyManifestsFileSearched" xml:space="preserve">
-    <value>Cannot find any manifests file. Searched:
-{0}</value>
+  <data name="CannotFindAManifestFile" xml:space="preserve">
+    <value>Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</value>
   </data>
   <data name="FieldCommandsIsMissing" xml:space="preserve">
     <value>Missing 'commands' entry.</value>
@@ -158,5 +158,15 @@
   </data>
   <data name="ManifestHasMarkOfTheWeb" xml:space="preserve">
     <value>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</value>
+  </data>
+  <data name="ListOfSearched" xml:space="preserve">
+    <value>The list of searched paths:
+{0}</value>
+  </data>
+  <data name="UnexpectedTypeInJson" xml:space="preserve">
+    <value>Expected a {0} for property '{1}'.</value>
+  </data>
+  <data name="MultipleSamePackageId" xml:space="preserve">
+    <value>More than one entry exists for package(s): {0}.</value>
   </data>
 </root>

@@ -17,7 +17,7 @@ using Xunit;
 using LocalizableStrings = Microsoft.DotNet.ToolManifest.LocalizableStrings;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolManifestFinderTests
     {
@@ -95,8 +95,6 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        // https://github.com/JamesNK/Newtonsoft.Json/issues/931#issuecomment-224104005
-        // Due to a limitation of newtonsoft json
         public void GivenManifestWithDuplicatedPackageIdItReturnsTheLastValue()
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename),
@@ -107,15 +105,11 @@ namespace Microsoft.DotNet.Tests.Commands
                     _fileSystem,
                     new FakeDangerousFileDetector());
 
-            var manifestResult = toolManifest.Find();
+            Action a = () => toolManifest.Find();
 
-            manifestResult.Should()
-                .Contain(
-                    new ToolManifestPackage(
-                        new PackageId("t-rex"),
-                        NuGetVersion.Parse("2.1.4"),
-                        new[] { new ToolCommandName("t-rex") },
-                        new DirectoryPath(_testDirectoryRoot)));
+            a.ShouldThrow<ToolManifestException>().And.Message.Should()
+                .Contain(string.Format(string.Format(LocalizableStrings.MultipleSamePackageId,
+                    string.Join(", ", "t-rex")), ""));
         }
 
         [Fact]
@@ -157,7 +151,13 @@ namespace Microsoft.DotNet.Tests.Commands
 
             Action a = () => toolManifest.Find(new FilePath(Path.Combine(_testDirectoryRoot, "non-exists")));
             a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""))
+                .And.Contain(
+                    Path.Combine(_testDirectoryRoot, "non-exists"),
+                    "the specificied manifest file name is in the 'searched list'");
         }
 
         [Fact]
@@ -171,11 +171,14 @@ namespace Microsoft.DotNet.Tests.Commands
 
             Action a = () => toolManifest.Find();
             a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                 .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]
-        public void GivenMissingFieldManifestFileItReturnError()
+        public void GivenMissingFieldManifestFileItThrows()
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonWithMissingField);
             var toolManifest =
@@ -195,7 +198,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenInvalidFieldsManifestFileItReturnError()
+        public void GivenInvalidFieldsManifestFileItThrows()
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonWithInvalidField);
             var toolManifest =
@@ -208,6 +211,23 @@ namespace Microsoft.DotNet.Tests.Commands
 
             a.ShouldThrow<ToolManifestException>().And.Message.Should()
                 .Contain(string.Format(LocalizableStrings.VersionIsInvalid, "1.*"));
+        }
+
+        [Fact]
+        public void GivenInvalidTypeManifestFileItThrows()
+        {
+            _fileSystem.File.WriteAllText(
+                Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonWithInvalidType);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(_testDirectoryRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            Action a = () => toolManifest.Find();
+
+            a.ShouldThrow<ToolManifestException>()
+                .And.Message.Should().Contain(string.Format(LocalizableStrings.UnexpectedTypeInJson, "True|False" ,"isRoot"));
         }
 
         [Fact]
@@ -249,6 +269,63 @@ namespace Microsoft.DotNet.Tests.Commands
                          new[] { new ToolCommandName("dotnetsay") },
                          new DirectoryPath(subdirectoryOfTestRoot)),
                 because: "combine both content in different manifests");
+        }
+
+        [Fact]
+        public void GivenManifestFileInDifferentDirectoriesWhenFindContainPackageIdItCanGetResultInOrder()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            string manifestFileInParentDirectory = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFileInParentDirectory,
+                _jsonContentInParentDirectory);
+            string manifestFileInSubDirectory = Path.Combine(subdirectoryOfTestRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFileInSubDirectory,
+                _jsonContentInCurrentDirectory);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(subdirectoryOfTestRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            var manifests = toolManifest.FindByPackageId(new PackageId("t-rex"));
+
+            manifests.Should().ContainInOrder(new List<FilePath>
+            {
+                new FilePath(manifestFileInSubDirectory),
+                new FilePath(manifestFileInParentDirectory)
+            }, "Order matters, the closest to probe start first.");
+
+            var manifests2 = toolManifest.FindByPackageId(new PackageId("dotnetsay"));
+
+            manifests2.Should().ContainInOrder(new List<FilePath>
+            {
+                new FilePath(manifestFileInSubDirectory)
+            });
+
+            var manifests3 = toolManifest.FindByPackageId(new PackageId("non-exist"));
+
+            manifests3.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenNoManifestFileWhenFindContainPackageIdItThrows()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(subdirectoryOfTestRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            Action a = () => toolManifest.FindByPackageId(new PackageId("t-rex"));
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
+                .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]
@@ -537,7 +614,10 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolManifest.FindFirst();
 
             a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
+                .Contain(LocalizableStrings.CannotFindAManifestFile);
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.VerboseMessage.Should()
+                .Contain(string.Format(LocalizableStrings.ListOfSearched, ""));
         }
 
         [Fact]
@@ -636,6 +716,20 @@ namespace Microsoft.DotNet.Tests.Commands
    }
 }";
 
+        private string _jsonWithInvalidType =
+            @"{
+   ""version"":1,
+   ""isRoot"":""true"",
+   ""tools"":{
+      ""t-rex"":{
+         ""version"":""1.0.53"",
+         ""commands"":[
+            ""t-rex""
+         ]
+      }
+   }
+}";
+
         private string _jsonContentInCurrentDirectory =
             @"{
    ""version"":1,
@@ -715,6 +809,7 @@ namespace Microsoft.DotNet.Tests.Commands
       }
    }
 }";
+
         private string _jsonContentIsRootMissing =
     @"{
    ""version"":1,

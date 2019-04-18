@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.Cli
                 "build",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments()
-                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
-                            description: CommonLocalizableStrings.ProjectArgumentDescription),
+                      .With(name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
+                            description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
@@ -37,6 +37,11 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.NoDependenciesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("-property:BuildProjectReferences=false")),
+                Create.Option(
+                    "--nologo|/nologo",
+                    LocalizableStrings.CmdNoLogo,
+                    Accept.NoArguments()
+                          .ForwardAs("-nologo")),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.VerbosityOption());

@@ -12,7 +12,6 @@ title CLI Test (%CLI_REPO_ROOT%)
 REM Add Stage 2 CLI to path
 set PATH=%CLI_REPO_ROOT%artifacts\tmp\Debug\dotnet;%PATH%
 
-set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 set DOTNET_MULTILEVEL_LOOKUP=0
 set NUGET_PACKAGES=%CLI_REPO_ROOT%.nuget\packages
 set PreviousStageProps=%CLI_REPO_ROOT%bin\2\PreviousStage.props

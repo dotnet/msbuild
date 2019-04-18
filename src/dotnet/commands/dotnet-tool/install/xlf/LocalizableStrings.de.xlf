@@ -25,9 +25,9 @@ Das Tool "{1}" (Version {2}) wurde erfolgreich installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
-        <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+        <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="translated">Sie können das Tool aus diesem Verzeichnis mit dem folgenden Befehl aufrufen: dotnet tool run {0}
+        <target state="needs-review-translation">Sie können das Tool aus diesem Verzeichnis mit dem folgenden Befehl aufrufen: dotnet tool run {0}
 Das Tool "{1}" (Version "{2}") wurde erfolgreich installiert. Der Eintrag wird zur Manifestdatei {3} hinzugefügt.</target>
         <note />
       </trans-unit>
@@ -42,13 +42,9 @@ Das Tool "{1}" (Version "{2}") wurde erfolgreich installiert. Der Eintrag wird z
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
-        <source>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</source>
-        <target state="translated">Wenn Sie ein globales Tool installieren möchten, fügen Sie "-g" hinzu. Wenn Sie ein Toolmanifest verwenden möchten, müssen Sie es zunächst mit "dotnet new tool-manifest" erstellen.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="translated">Das Angeben des Toolmanifests (--tool-manifest) ist nur mit der lokalen Option (--local oder Standardeinstellung) gültig.</target>
+        <source>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
+        <target state="needs-review-translation">Wenn Sie ein globales Tool installieren möchten, fügen Sie "-g" hinzu. Wenn Sie ein Toolmanifest verwenden möchten, müssen Sie es zunächst mit "dotnet new tool-manifest" erstellen.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">

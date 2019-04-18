@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using System.Xml.Linq;
 using FluentAssertions;
@@ -708,6 +709,23 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             result.Should().Pass()
                 .And.HaveStdOutContaining($"AppOutputsExecutablePath{Constants.ExeSuffix}");
+        }
+
+        [Fact]
+        public void ItForwardsEmptyArgumentsToTheApp()
+        {
+            var testAppName = "TestAppSimple";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles();
+
+            new RunCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("a \"\" c")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining($"0 = a{Environment.NewLine}1 = {Environment.NewLine}2 = c");
         }
     }
 }

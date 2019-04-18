@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             args.AddRange(_appliedCommand
                 .OptionValuesToBeForwarded()
-                .SelectMany(a => a.Split(' ')));
+                .SelectMany(a => a.Split(' ', 2)));
 
             if (_appliedCommand.HasOption("no-restore"))
             {

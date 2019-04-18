@@ -17,13 +17,12 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System.Runtime.InteropServices;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolInstallCommandTests
     {
@@ -91,7 +90,7 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolInstallCommand.Execute();
 
             a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
+                .Should().Contain(Tools.Tool.Common.LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
 
         [Fact]
@@ -116,7 +115,7 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolInstallCommand.Execute();
 
             a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
+                .Should().Contain(Tools.Tool.Common.LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
 
         [Fact]

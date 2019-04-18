@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.List
@@ -39,8 +40,7 @@ namespace Microsoft.DotNet.Tools.Tool.List
 
         public override int Execute()
         {
-            var global = _options.ValueOrDefault<bool>("global");
-            var toolPathOption = _options.ValueOrDefault<string>("tool-path");
+            var toolPathOption = _options.ValueOrDefault<string>(ToolAppliedOption.ToolPathOption);
 
             DirectoryPath? toolPath = null;
             if (!string.IsNullOrWhiteSpace(toolPathOption))

@@ -8,7 +8,8 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.ToolPackage
 
                     _fileSystem.File.WriteAllText(
                         packageCacheFile,
-                        JsonConvert.SerializeObject(existingCacheTable.Concat(diffedRow)));
+                        JsonSerializer.ToString(existingCacheTable.Concat(diffedRow)));
                 }
                 else
                 {
@@ -64,7 +65,7 @@ namespace Microsoft.DotNet.ToolPackage
 
                     _fileSystem.File.WriteAllText(
                         packageCacheFile,
-                        JsonConvert.SerializeObject(rowsToAdd));
+                        JsonSerializer.ToString(rowsToAdd));
                 }
             }
         }
@@ -96,7 +97,7 @@ namespace Microsoft.DotNet.ToolPackage
             try
             {
                 cacheTable =
-                    JsonConvert.DeserializeObject<CacheRow[]>(_fileSystem.File.ReadAllText(packageCacheFile));
+                    JsonSerializer.Parse<CacheRow[]>(_fileSystem.File.ReadAllText(packageCacheFile));
             }
             catch (JsonReaderException)
             {

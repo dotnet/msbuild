@@ -162,4 +162,13 @@
   <data name="ProjectsHeader" xml:space="preserve">
     <value>Project(s)</value>
   </data>
+  <data name="InRoot" xml:space="preserve">
+    <value>Place project in root of the solution, rather than creating a solution folder.</value>
+  </data>
+  <data name="AddProjectSolutionFolderArgumentDescription" xml:space="preserve">
+    <value>The destination solution folder path to add the projects to.</value>
+  </data>
+  <data name="SolutionFolderAndInRootMutuallyExclusive" xml:space="preserve">
+    <value>The --solution-folder and --in-root options cannot be used together; use only one of the options.</value>
+  </data>
 </root>

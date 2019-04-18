@@ -161,7 +161,7 @@
 Tool '{1}' (version '{2}') was successfully installed.</value>
   </data>
   <data name="LocalToolInstallationSucceeded" xml:space="preserve">
-    <value>You can invoke the tool from this directory using the following command: dotnet tool run {0}
+    <value>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</value>
   </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
@@ -217,13 +217,11 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
   <data name="ManifestPathOptionName" xml:space="preserve">
     <value>PATH</value>
   </data>
-  <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
-    <value>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</value>
-  </data>
   <data name="LocalOptionDoesNotSupportFrameworkOption" xml:space="preserve">
     <value>The local option(--local) does not support the framework option (--framework).</value>
   </data>
   <data name="NoManifestGuide" xml:space="preserve">
-    <value>If you want to install a global tool, add '-g'. If you want to use a tool manifest, you must first create it with 'dotnet new tool-manifest'.</value>
+    <value>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</value>
   </data>
 </root>

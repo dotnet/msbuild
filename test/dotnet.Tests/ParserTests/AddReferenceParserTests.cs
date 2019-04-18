@@ -1,15 +1,13 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Common;
-using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -79,5 +77,38 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 .Should()
                 .BeEquivalentTo(string.Format(LocalizableStrings.RequiredArgumentMissingForCommand, "reference"));
         }
+
+        [Fact]
+        public void EnumerablePackageIdFromQueryResponseResultsPackageIds()
+        {
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream))
+            {
+                writer.Write(_nugetResponseSample);
+                writer.Flush();
+                stream.Position = 0;
+
+                AddPackageParser.EnumerablePackageIdFromQueryResponse(stream)
+                    .Should()
+                    .Contain(
+                        new List<string>
+                        { "System.Text.Json",
+                            "System.Text.Json.Mobile" });
+            }
+        }
+
+        private string _nugetResponseSample =
+    @"{
+    ""@context"": {
+        ""@vocab"": ""http://schema.nuget.org/schema#""
+    },
+    ""totalHits"": 2,
+    ""lastReopen"": ""2019-03-17T22:25:28.9238936Z"",
+    ""index"": ""v3-lucene2-v2v3-20171018"",
+    ""data"": [
+        ""System.Text.Json"",
+        ""System.Text.Json.Mobile""
+    ]
+}";
     }
 }

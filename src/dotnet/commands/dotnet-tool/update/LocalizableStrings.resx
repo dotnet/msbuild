@@ -195,4 +195,25 @@
   <data name="UpdateToLowerVersion" xml:space="preserve">
     <value>The requested version {0} is lower than existing version {1}.</value>
   </data>
+  <data name="UpdateToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
+    <value>The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</value>
+  </data>
+  <data name="LocalOptionDescription" xml:space="preserve">
+    <value>Update the tool and update from the local tool manifest.</value>
+  </data>
+  <data name="ManifestPathOptionDescription" xml:space="preserve">
+    <value>Path to the manifest file.</value>
+  </data>
+  <data name="ManifestPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="UpdateLocalToolSucceeded" xml:space="preserve">
+    <value>Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</value>
+  </data>
+  <data name="UpdateLocaToolToLowerVersion" xml:space="preserve">
+    <value>The requested version {0} is lower than existing version {1} (manifest file {2}).</value>
+  </data>
+  <data name="UpdateLocaToolSucceededVersionNoChange" xml:space="preserve">
+    <value>Tool '{0}' is up to date (version '{1}' manifest file {2}) .</value>
+  </data>
 </root>
