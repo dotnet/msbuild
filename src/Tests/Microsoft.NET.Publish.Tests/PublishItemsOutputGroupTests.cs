@@ -48,6 +48,7 @@ namespace Microsoft.NET.Publish.Tests
             // Check for the existence of a few specific files that should be in the directory where the 
             // contents of PublishItemsOutputGroup were dumped to make sure it's getting populated.
             testOutputDir.Should().HaveFile($"{testProject.Name}.exe");
+            testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
             testOutputDir.Should().HaveFiles(FrameworkAssemblies);
         }
 
@@ -74,6 +75,7 @@ namespace Microsoft.NET.Publish.Tests
 
             // Since no RID was specified the output group should only contain framework dependent output
             testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
+            testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
             testOutputDir.Should().NotHaveFiles(FrameworkAssemblies);
         }
 
