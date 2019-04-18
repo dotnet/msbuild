@@ -56,8 +56,8 @@ namespace Microsoft.NET.Publish.Tests
                 projectName, 
                 "ClassLib");
 
-            testProject.AdditionalProperties["ReadyToRun"] = "True";
-            testProject.AdditionalItems["ReadyToRunExclude"] = "Classlib.dll";
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
+            testProject.AdditionalItems["PublishReadyToRunExclude"] = "Classlib.dll";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
@@ -96,8 +96,8 @@ namespace Microsoft.NET.Publish.Tests
                 projectName, 
                 "ClassLib");
 
-            testProject.AdditionalProperties["ReadyToRun"] = "True";
-            testProject.AdditionalProperties["ReadyToRunEmitSymbols"] = "True";
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
+            testProject.AdditionalProperties["PublishReadyToRunEmitSymbols"] = "True";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
@@ -136,7 +136,7 @@ namespace Microsoft.NET.Publish.Tests
                 projectName,
                 "ClassLib");
 
-            testProject.AdditionalProperties["ReadyToRun"] = "True";
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
@@ -194,7 +194,7 @@ namespace Microsoft.NET.Publish.Tests
                 return;
             }
 
-            testProject.AdditionalProperties["ReadyToRun"] = "True";
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
