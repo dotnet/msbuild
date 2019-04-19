@@ -107,6 +107,21 @@
         <target state="translated">NETSDK1031: Sestavení nebo publikování nezávislé aplikace bez zadání parametru RuntimeIdentifier není podporované. Zadejte prosím buď parametr RuntimeIdentifier, nebo nastavte parametr SelfContained na hodnotu False.</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
+      <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
+        <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
+        <target state="new">NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</target>
+        <note>{StrBegin="NETSDK1097: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotHaveSingleFileWithoutAppHost">
+        <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
+        <target state="new">NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</target>
+        <note>{StrBegin="NETSDK1098: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotHaveSingleFileWithoutExecutable">
+        <source>NETSDK1099: Publishing to a single-file is only supported for executable applications.</source>
+        <target state="new">NETSDK1099: Publishing to a single-file is only supported for executable applications.</target>
+        <note>{StrBegin="NETSDK1099: "}</note>
+      </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: Hodnota TargetFramework {0} nebyla rozpoznána. Je možné, že obsahuje překlepy. Pokud tomu tak není, musíte vlastnosti TargetFrameworkIdentifier a TargetFrameworkVersion zadat explicitně.</target>

@@ -48,6 +48,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       PrepareForPublish;
       ComputeAndCopyFilesToPublishDirectory;
       GeneratePublishDependencyFile;
+      BundlePublishDirectory;
     </_CorePublishTargets>
   </PropertyGroup>
 
@@ -85,6 +86,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="PrepareForPublish">
 
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And '$(_IsExecutable)' != 'true'"
+                 ResourceName="CannotHaveSingleFileWithoutExecutable" />
+
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
@@ -111,6 +115,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                         CopyFilesToPublishDirectory
 
     Copy all build outputs, satellites and other necessary files to the publish directory.
+    When publishing to a single file, only those files that are not bundled are copied.
+    The remaining files are directly written to the bundle file.
     ============================================================
     -->
   <Target Name="CopyFilesToPublishDirectory"
@@ -121,7 +127,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         _CopyResolvedFilesToPublishPreserveNewest
 
-    Copy _ResolvedFileToPublishPreserveNewest items to the publish directory.
+    Copy _ResolvedFileToPublishPreserveNewest items to the publish directory 
+    (except files that will be bundled, during PublishSingleFile).
     ============================================================
     -->
   <Target Name="_CopyResolvedFilesToPublishPreserveNewest"
@@ -129,12 +136,19 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ResolvedFileToPublishPreserveNewest)"
           Outputs="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')">
 
+    <ItemGroup>
+      <_ResolvedUnbundledFileToPublishPreserveNewest 
+                    Include="@(_ResolvedFileToPublishPreserveNewest)" 
+                    Condition="'$(PublishSingleFile)' != 'true' or 
+                               '%(_ResolvedFileToPublishPreserveNewest.ExcludeFromSingleFile)'=='true'" />
+    </ItemGroup>
+
     <!--
         Not using SkipUnchangedFiles="true" because the application may want to change
         one of these files and not have an incremental build replace it.
         -->
-    <Copy SourceFiles = "@(_ResolvedFileToPublishPreserveNewest)"
-          DestinationFiles="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')"
+    <Copy SourceFiles = "@(_ResolvedUnbundledFileToPublishPreserveNewest)"
+          DestinationFiles="@(_ResolvedUnbundledFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
@@ -151,18 +165,26 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         _CopyResolvedFilesToPublishAlways
 
-    Copy _ResolvedFileToPublishAlways items to the publish directory.
+    Copy _ResolvedFileToPublishAlways items to the publish directory
+    (except files that will be bundled, during PublishSingleFile).    
     ============================================================
     -->
   <Target Name="_CopyResolvedFilesToPublishAlways"
           DependsOnTargets="_ComputeResolvedFilesToPublishTypes">
 
+    <ItemGroup>
+      <_ResolvedUnbundledFileToPublishAlways
+                    Include="@(_ResolvedFileToPublishAlways)"
+                    Condition="'$(PublishSingleFile)' != 'true' or 
+                               '%(_ResolvedFileToPublishAlways.ExcludeFromSingleFile)'=='true'" />
+    </ItemGroup>
+
     <!--
         Not using SkipUnchangedFiles="true" because the application may want to change
         one of these files and not have an incremental build replace it.
         -->
-    <Copy SourceFiles = "@(_ResolvedFileToPublishAlways)"
-          DestinationFiles="@(_ResolvedFileToPublishAlways->'$(PublishDir)%(RelativePath)')"
+    <Copy SourceFiles = "@(_ResolvedUnbundledFileToPublishAlways)"
+          DestinationFiles="@(_ResolvedUnbundledFileToPublishAlways->'$(PublishDir)%(RelativePath)')"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
@@ -172,7 +194,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
     </Copy>
-
   </Target>
 
   <!--
@@ -302,14 +323,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="_ComputeResolvedFilesToPublishTypes">
     <ItemGroup>
+
       <_ResolvedFileToPublishPreserveNewest Include="@(ResolvedFileToPublish)"
-                                             Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='PreserveNewest'" />
+                                            Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='PreserveNewest'" />
 
       <_ResolvedFileToPublishAlways Include="@(ResolvedFileToPublish)"
-                                     Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='Always'" />
+                                    Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='Always'" />
     </ItemGroup>
   </Target>
-
 
   <!--
     ============================================================
@@ -361,6 +382,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                              Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
         <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile Condition="'$(IncludeSymbolsInSingleFile)'!='true'">true</ExcludeFromSingleFile>
       </ResolvedFileToPublish>
 
       <!-- Copy satellite assemblies. -->
@@ -574,7 +596,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          a non-empty value and the original behavior will be restored. -->
     <PropertyGroup Condition=" '$(MSBuildDisableGetCopyToPublishDirectoryItemsOptimization)' == '' ">
       <_GCTPDIKeepDuplicates>false</_GCTPDIKeepDuplicates>
-      <_GCTPDIKeepMetadata>CopyToPublishDirectory;TargetPath</_GCTPDIKeepMetadata>
+      <_GCTPDIKeepMetadata>CopyToPublishDirectory;ExcludeFromSingleFile;TargetPath</_GCTPDIKeepMetadata>
     </PropertyGroup>
 
     <!-- Get items from child projects first. -->
@@ -721,6 +743,45 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
+                                        BundlePublishDirectory
+
+    Bundle the _ResolvedFileToPublish* items one file in PublishDir
+    (except those marked ExcludeFromSingleFile)
+    ============================================================
+    -->
+  <Target Name="_ComputeFilesToBundle"
+        Condition="'$(PublishSingleFile)' == 'true'">
+
+    <ItemGroup>
+      <_FilesToBundle Include="@(_ResolvedFileToPublishPreserveNewest)" 
+                      Condition="'%(_ResolvedFileToPublishPreserveNewest.ExcludeFromSingleFile)' != 'true'"/>
+      <_FilesToBundle Include="@(_ResolvedFileToPublishAlways)" 
+                      Condition="'%(_ResolvedFileToPublishPreserveNewest.ExcludeFromSingleFile)' != 'true'"/>
+    </ItemGroup>
+
+  </Target>
+
+  <UsingTask TaskName="GenerateBundle" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="BundlePublishDirectory" 
+          Condition="'$(PublishSingleFile)' == 'true'"
+          DependsOnTargets="_ComputeFilesToBundle" 
+          Inputs="@(_FilesToBundle)"
+          Outputs="$(PublishDir)$(AssemblyName)$(_NativeExecutableExtension)">
+
+    <PropertyGroup>
+      <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
+    </PropertyGroup>
+
+    <GenerateBundle FilesToBundle="@(_FilesToBundle)"
+                    AppHostName="$(AssemblyName)$(_NativeExecutableExtension)"
+                    IncludeSymbols="$(IncludeSymbolsInSingleFile)"
+                    OutputDir="$(PublishDir)"
+                    ShowDiagnosticOutput="false"/>
+    
+  </Target>
+
+  <!--
+    ============================================================
     _GeneratePublishDependencyFile
     Generates the $(project).deps.json file for a published app
     ============================================================
@@ -735,7 +796,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
 
     <PropertyGroup>
-      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
+      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' And '$(PublishSingleFile)' != 'true'">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
+      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' And '$(PublishSingleFile)' == 'true'">$(IntermediateOutputPath)$(ProjectDepsFileName)</PublishDepsFilePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -775,6 +837,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
                       DepsFileGenerationMode="$(DepsFileGenerationMode)"/>
 
+    <ItemGroup>
+      <_FilesToBundle Include="$(PublishDepsFilePath)" Condition="'$(PublishSingleFile)' == 'true'">
+        <RelativePath>$(ProjectDepsFileName)</RelativePath>
+      </_FilesToBundle>
+    </ItemGroup>
+    
   </Target>
 
   <!--
