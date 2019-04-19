@@ -86,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IncludeRuntimeFileVersions { get; set; }
 
-        public string DepsFileGenerationMode { get; set; } = "both";
+        public string DepsFileGenerationMode { get; set; } = "new";
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
