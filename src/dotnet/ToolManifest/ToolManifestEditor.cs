@@ -15,6 +15,7 @@ using NuGet.Frameworks;
 using NuGet.Versioning;
 using System.Text.Json;
 using System.Text;
+using System.Buffers;
 
 namespace Microsoft.DotNet.ToolManifest
 {
@@ -75,7 +76,8 @@ namespace Microsoft.DotNet.ToolManifest
 
             deserializedManifest.Tools.Add(
                 new SerializableLocalToolSinglePackage
-                {   PackageId = packageId.ToString(),
+                {
+                    PackageId = packageId.ToString(),
                     Version = nuGetVersion.ToNormalizedString(),
                     Commands = toolCommandNames.Select(c => c.Value).ToArray()
                 });
@@ -359,10 +361,9 @@ namespace Microsoft.DotNet.ToolManifest
 
             public string ToJson()
             {
-                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = true });
-                using (var arrayBufferWriter = new ArrayBufferWriter<byte>())
+                var arrayBufferWriter = new ArrayBufferWriter<byte>();
+                using (var writer = new Utf8JsonWriter(arrayBufferWriter, new JsonWriterOptions { Indented = true }))
                 {
-                    var writer = new Utf8JsonWriter(arrayBufferWriter, state);
 
                     writer.WriteStartObject();
 
@@ -394,7 +395,7 @@ namespace Microsoft.DotNet.ToolManifest
 
                     writer.WriteEndObject();
                     writer.WriteEndObject();
-                    writer.Flush(true);
+                    writer.Flush();
 
                     return Encoding.UTF8.GetString(arrayBufferWriter.WrittenMemory.ToArray());
                 }
