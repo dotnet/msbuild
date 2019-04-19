@@ -34,11 +34,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp2.1")
+                .Execute("--framework netcoreapp2.2")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp2.1", "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp2.2", "publish", $"{testAppName}.dll");
 
             new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll)
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp2.1")
+                .Execute("--framework netcoreapp2.2")
                 .Should().Pass();
         }
 
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework netcoreapp2.1")
+                .Execute("--framework netcoreapp2.2")
                 .Should().Pass();
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp2.1 --no-restore")
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.2 --no-restore")
                 .Should().Fail()
                 .And.HaveStdOutContaining("project.assets.json");
         }
@@ -123,6 +123,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var outputDirectory = PublishApp(testAppName, rid, args);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{testAppName}{Constants.ExeSuffix}",
                 $"{testAppName}.dll",
                 $"{testAppName}.pdb",
                 $"{testAppName}.deps.json",
@@ -131,10 +132,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
-            new DotnetCommand()
-                .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
-                .Should().Pass()
-                     .And.HaveStdOutContaining("Hello World");
+            var command = new TestCommand(outputProgram);
+            command.Environment[Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)"] =
+                new RepoDirectoriesProvider().DotnetRoot;
+            command.ExecuteWithCapturedOutput()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
         }
 
         [Theory]
@@ -175,7 +180,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             return testProjectDirectory
-                    .GetDirectory("bin", configuration, "netcoreapp2.1", rid ?? "", "publish");
+                    .GetDirectory("bin", configuration, "netcoreapp2.2", rid ?? "", "publish");
         }
 
         [Fact]
@@ -208,7 +213,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputProgram = rootDir
-                .GetDirectory("bin", configuration, "netcoreapp2.1", "publish", $"{rootDir.Name}.dll")
+                .GetDirectory("bin", configuration, "netcoreapp2.2", "publish", $"{rootDir.Name}.dll")
                 .FullName;
 
             new TestCommand(outputProgram)
@@ -270,7 +275,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputProgram = rootDir
-                .GetDirectory("bin", configuration, "netcoreapp2.1", rid, "publish", $"{rootDir.Name}.dll")
+                .GetDirectory("bin", configuration, "netcoreapp2.2", rid, "publish", $"{rootDir.Name}.dll")
                 .FullName;
 
             new TestCommand(outputProgram)

@@ -10,14 +10,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 {
     internal static partial class Interop
     {
-        internal static readonly bool RunningOnWindows =
-#if NET46
-            // Not using RuntimeInformation on NET46 to avoid non-in-box framework API, 
-            // which create deployment problems for the resolver.
-            Path.DirectorySeparatorChar == '\\';
-#else
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-#endif
+        internal static readonly bool RunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         static Interop()
         {
