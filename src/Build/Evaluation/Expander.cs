@@ -3980,6 +3980,25 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+                    else if (_receiverType == typeof(ToolLocationHelper))
+                    {
+                        if (string.Equals(_methodMethodName, nameof(ToolLocationHelper.GetPlatformSDKLocation), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out string arg1))
+                            {
+                                returnVal = ToolLocationHelper.GetPlatformSDKLocation(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(ToolLocationHelper.GetPlatformSDKDisplayName), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out string arg1))
+                            {
+                                returnVal = ToolLocationHelper.GetPlatformSDKDisplayName(arg0, arg1);
+                                return true;
+                            }
+                        }
+                    }
                 }
 
                 if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
