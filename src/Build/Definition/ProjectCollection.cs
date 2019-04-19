@@ -83,7 +83,7 @@ namespace Microsoft.Build.Evaluation
         // all need lock protection, but there are a lot of read cases as well, and calls to create Projects
         // call back to the ProjectCollection under locks. Use a RW lock, but default to always using
         // upgradable read locks to avoid adding reentrancy bugs.
-        private struct DisposableReaderWriterLockSlim
+        private class DisposableReaderWriterLockSlim
         {
             private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
             public bool IsWriteLockHeld => _lock.IsWriteLockHeld;
