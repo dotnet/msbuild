@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NET.Sdk.Publish.TransformFiles.targets
 
@@ -17,7 +17,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="TransformAppSettings" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="GenerateEFSQLScripts" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="GenerateRunCommandFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
-    <UsingTask TaskName="TransformXml" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="TransformXml" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="GenerateEnvTransform" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
 
   <PropertyGroup>
     <_DotNetPublishTransformFiles>
@@ -119,7 +120,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 
     <!-- Run the custom transform file e.g: MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml-->
-    <TransformXml Condition=" $(CustomTransformFileName) != '' And Exists('$(MSBuildProjectDirectory)\$(CustomTransformFileName)')
+    <TransformXml Condition=" '$(CustomTransformFileName)' != ''
+                  And Exists('$(MSBuildProjectDirectory)\$(CustomTransformFileName)')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
                   Source="$(PublishIntermediateOutputPath)web.config"
@@ -128,6 +130,42 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                   StackTrace="$(TransformXmlStackTraceEnabled)"
                   SourceRootPath="$(PublishIntermediateOutputPath)"
                   TransformRootPath="$(MSBuildProjectDirectory)"/>
+
+    <!-- Run the custom transform file from any location e.g: c:\temp\MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml
+    and $(CustomTransformFilePath) passed to msbuild is c:\temp\-->
+    <TransformXml Condition=" '$(CustomTransformFileName)' != ''
+                  And Exists('$(CustomTransformFilePath)\$(CustomTransformFileName)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="$(CustomTransformFilePath)\$(CustomTransformFileName)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(CustomTransformFilePath)"/>
+
+    <!-- Transform the environment variables in the web.config with the $(WebConfigEnvironmentVariables) from publish profiles -->
+    <ItemGroup>
+      <AllEnvTransformFiles Include="$(MSBuildThisFileDirectory)Transforms\EnvironmentNoLocation.transform;$(MSBuildThisFileDirectory)Transforms\EnvironmentWithLocation.transform;" />
+    </ItemGroup>
+    <GenerateEnvTransform Condition=" '$(WebConfigEnvironmentVariables)' != '' "
+                          WebConfigEnvironmentVariables = "$(WebConfigEnvironmentVariables)"
+                          EnvTransformTemplatePaths="@(AllEnvTransformFiles)"
+                          PublishTempDirectory="$(PublishIntermediateTempPath)">
+                          <Output TaskParameter="GeneratedTransformFullPaths" ItemName="_EnvTransformFiles" />
+    </GenerateEnvTransform>
+
+    <TransformXml Condition=" '%(_EnvTransformFiles.Identity)' != ''
+                  And Exists('%(_EnvTransformFiles.Identity)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+              Source="$(PublishIntermediateOutputPath)web.config"
+              Transform="%(_EnvTransformFiles.Identity)"
+              Destination="$(PublishIntermediateOutputPath)web.config"
+              StackTrace="false"
+              SourceRootPath="$(PublishIntermediateOutputPath)"
+              TransformRootPath="$(PublishIntermediateTempPath)"
+              IgnoreError="true"/>
   </Target>
 
   <!--
