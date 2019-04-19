@@ -3679,6 +3679,18 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionToolLocationHelperGetPlatformSDKLocation()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('Windows', '10.0'))", "X", "_", EscapingUtilities.Escape(ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0")));
+        }
+
+        [Fact]
+        public void PropertyFunctionToolLocationHelperGetPlatformSDKDisplayName()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('Windows', '10.0'))", "X", "_", EscapingUtilities.Escape(ToolLocationHelper.GetPlatformSDKDisplayName("Windows", "10.0")));
+        }
+
+        [Fact]
         public void PropertyFunctionStringIndexOfAny()
         {
             TestPropertyFunction("$(prop.IndexOfAny('y'))", "prop", "x-y-z", "2");
