@@ -3709,6 +3709,62 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionGuidNewGuid()
+        {
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
+
+            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Guid]::NewGuid())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.True(Guid.TryParse(result, out Guid guid));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetCurrentToolsDirectory()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetCurrentToolsDirectory())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetCurrentToolsDirectory()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetToolsDirectory32()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetToolsDirectory32())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetToolsDirectory32()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetToolsDirectory64()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetToolsDirectory64())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetToolsDirectory64()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetMSBuildSDKsPath()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetMSBuildSDKsPath())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetMSBuildSDKsPath()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetVsInstallRoot()
+        {
+            string vsInstallRoot = EscapingUtilities.Escape(IntrinsicFunctions.GetVsInstallRoot());
+
+            vsInstallRoot = (vsInstallRoot == null) ? "" : vsInstallRoot;
+
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetVsInstallRoot())", "X", "_", vsInstallRoot);
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetMSBuildExtensionsPath()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetMSBuildExtensionsPath())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetMSBuildExtensionsPath()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetProgramFiles32()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetProgramFiles32())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetProgramFiles32()));
+        }
+
+        [Fact]
         public void PropertyFunctionStringArrayIndexerGetter()
         {
             TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");
