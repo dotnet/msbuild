@@ -819,8 +819,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>
-      <PublishItemsOutputGroupOutputs Condition="'$(PublishDepsFilePath)' != ''" Include="$(PublishDepsFilePath)" TargetPath="$(ProjectDepsFileName)" />
-      <PublishItemsOutputGroupOutputs Condition="'$(PublishDepsFilePath)' == ''" Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" />
+      <PublishItemsOutputGroupOutputs Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" />
       <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')" TargetPath="%(ResolvedFileToPublish.RelativePath)" OutputGroup="PublishItemsOutputGroup" />
     </ItemGroup>
   </Target>
