@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <PublishRoot Condition="'$(PublishRoot)' == ''">$(RepoRoot)\src\Publish\</PublishRoot>
+    <!-- The transform file is used by the publish process -->
+    <NoWarn>NU5108</NoWarn>
   </PropertyGroup>
 
   <Import Project="$(RepositoryEngineeringDir)\Package.props" />
@@ -53,3 +55,4 @@
   </ItemGroup>
 
 </Project>
+

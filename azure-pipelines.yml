@@ -13,6 +13,10 @@ variables:
   # Cannot use key:value syntax in root defined variables
   - name: _TeamName
     value: DotNetCore
+  - name: _PublishUsingPipelines
+    value: true
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
 
 resources:
   containers:
@@ -26,6 +30,7 @@ jobs:
     enablePublishBuildArtifacts: true
     enablePublishTestResults: true
     enablePublishBuildAssets: true
+    enablePublishUsingPipelines: $(_PublishUsingPipelines)
     enableTelemetry: true
     helixRepo: aspnet/websdk
     jobs:
@@ -57,6 +62,8 @@ jobs:
             /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
             /p:DotNetPublishBlobFeedUrl=$(_PublishBlobFeedUrl)
             /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+            /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
+            /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
             /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
             /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
             /p:OfficialBuildId=$(BUILD.BUILDNUMBER)

@@ -75,7 +75,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
                     StackTrace = true
                 };
 
-                bool success = transformTask.RunXmlTrasform(isLoggingEnabled: false);
+                bool success = transformTask.RunXmlTransform(isLoggingEnabled: false);
 
 
                 // Assert
@@ -120,7 +120,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
                     StackTrace = true
                 };
 
-                bool success = transformTask.RunXmlTrasform(isLoggingEnabled: false);
+                bool success = transformTask.RunXmlTransform(isLoggingEnabled: false);
 
 
                 // Assert
