@@ -20,10 +20,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_LinkSemaphore>$(IntermediateOutputPath)Link.semaphore</_LinkSemaphore>
   </PropertyGroup>
 
-  <ItemGroup>
-    <TrimmerRootDescriptors Include="$(TrimmerRootDescriptors)" />
-  </ItemGroup>
-
   <!--
     ============================================================
                      _ILLink
@@ -74,14 +70,14 @@ Copyright (c) .NET Foundation. All rights reserved.
    <UsingTask TaskName="ILLink" AssemblyFile="$(ILLinkTasksAssembly)" />
    <Target Name="_RunILLink"
            DependsOnTargets="_ComputeManagedAssembliesToLink"
-           Inputs="$(MSBuildAllProjects);@(_ManagedAssembliesToLink);@(TrimmerRootDescriptors);@(ReferencePath)"
+           Inputs="$(MSBuildAllProjects);@(_ManagedAssembliesToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
            Outputs="$(_LinkSemaphore)">
 
      <Delete Files="@(_LinkedResolvedFileToPublishCandidates)" />
      <ILLink AssemblyPaths="@(_ManagedAssembliesToLink)"
              ReferenceAssemblyPaths="@(ReferencePath)"
              RootAssemblyNames="@(IntermediateAssembly->'%(Filename)')"
-             RootDescriptorFiles="@(TrimmerRootDescriptors)"
+             RootDescriptorFiles="@(TrimmerRootDescriptor)"
              OutputDirectory="$(IntermediateLinkDir)"
              ExtraArgs="$(_ExtraTrimmerArgs) --skip-unresolved true" />
 

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using FluentAssertions;
@@ -103,11 +104,11 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"))
                 .Restore(Log, testProject.Name, args: $"/p:RuntimeIdentifier={rid}");
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
-                                   $"/p:TrimmerRootDescriptors={referenceProjectName}.xml").Should().Pass();
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
             var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
@@ -161,6 +162,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"))
                 .Restore(Log, testProject.Name, args: $"/p:RuntimeIdentifier={rid}");
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -172,8 +174,9 @@ namespace Microsoft.NET.Publish.Tests
             var linkSemaphore = Path.Combine(intermediateDirectory, "Link.semaphore");
 
             // Link, keeping classlib
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
-                                   $"/p:TrimmerRootDescriptors={referenceProjectName}.xml").Should().Pass();
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+            DateTime semaphoreFirstModifiedTime = File.GetLastWriteTimeUtc(linkSemaphore);
+
             var publishedDllKeptFirstTimeOnly = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
             var linkedDllKeptFirstTimeOnly = Path.Combine(linkedDirectory, $"{referenceProjectName}.dll");
             File.Exists(linkedDllKeptFirstTimeOnly).Should().BeTrue();
@@ -182,12 +185,18 @@ namespace Microsoft.NET.Publish.Tests
             // Delete kept dll from publish output (works around lack of incremental publish)
             File.Delete(publishedDllKeptFirstTimeOnly);
 
-            // Modify input timestamp to force a re-build and re-link
+            // Remove root descriptor to change the linker behavior.
             WaitForUtcNowToAdvance();
-            File.SetLastWriteTimeUtc(Path.Combine(testAsset.TestRoot, testProject.Name, $"{projectName}.cs"), DateTime.UtcNow);
+            // File.SetLastWriteTimeUtc(Path.Combine(testAsset.TestRoot, testProject.Name, $"{projectName}.cs"), DateTime.UtcNow);
+            testAsset = testAsset.WithProjectChanges(project => RemoveRootDescriptor(project));
 
             // Link, discarding classlib
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+            DateTime semaphoreSecondModifiedTime = File.GetLastWriteTimeUtc(linkSemaphore);
+
+            // Check that the linker actually ran again
+            semaphoreFirstModifiedTime.Should().NotBe(semaphoreSecondModifiedTime);
+
             File.Exists(linkedDllKeptFirstTimeOnly).Should().BeFalse();
             File.Exists(publishedDllKeptFirstTimeOnly).Should().BeFalse();
 
@@ -268,6 +277,25 @@ namespace Microsoft.NET.Publish.Tests
             pack.Execute().Should().Pass();
 
             return new TestPackageReference(project.Name, "1.0.0", pack.GetNuGetPackage(project.Name));
+        }
+
+        private void AddRootDescriptor(XDocument project, string rootDescriptorFileName)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            var itemGroup = new XElement(ns + "ItemGroup");
+            project.Root.Add(itemGroup);
+            itemGroup.Add(new XElement(ns + "TrimmerRootDescriptor",
+                                       new XAttribute("Include", rootDescriptorFileName)));
+        }
+
+        private void RemoveRootDescriptor(XDocument project)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            project.Root.Elements(ns + "ItemGroup")
+                .Where(ig => ig.Elements(ns + "TrimmerRootDescriptor").Any())
+                .First().Remove();
         }
 
         private TestProject CreateTestProjectForILLinkTesting(string targetFramework, string mainProjectName, string referenceProjectName)
