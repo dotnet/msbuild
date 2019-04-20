@@ -108,7 +108,15 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore(Log, testProject.Name, args: $"/p:RuntimeIdentifier={rid}");
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+            // Inject extra arguments to prevent the linker from
+            // keeping the entire referenceProject assembly. The
+            // linker by default runs in a conservative mode that
+            // keeps all used assemblies, but in this case we want to
+            // check whether the root descriptor actually roots only
+            // the specified method.
+            var extraArgs = $"-p link {referenceProjectName}";
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
+                                   $"/p:_ExtraTrimmerArgs={extraArgs}", "/v:n").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
             var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
