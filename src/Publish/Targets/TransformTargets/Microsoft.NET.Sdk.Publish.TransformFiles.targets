@@ -83,89 +83,99 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     
   <PropertyGroup Condition="'$(WebPublishProfileFile)' !=''">
     <PublishProfileName>$([System.IO.Path]::GetFileNameWithoutExtension($(WebPublishProfileFile)))</PublishProfileName>
+    <PublishProfileDirectory>$([System.IO.Path]::GetDirectoryName($(WebPublishProfileFile)))</PublishProfileDirectory>
   </PropertyGroup>
+
+<!-- PROJECT LEVEL TRANSFORMS -->
     
-    <!-- Run the transform at the config level e.g: web.Release.config if the configuration is Release-->
-    <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(Configuration).config')
-                  And Exists('$(PublishIntermediateOutputPath)web.config')
-                  And '$(RunXdt)' == 'true'"
-                  Source="$(PublishIntermediateOutputPath)web.config"
-                  Transform="$(MSBuildProjectDirectory)\web.$(Configuration).config"
-                  Destination="$(PublishIntermediateOutputPath)web.config"
-                  StackTrace="$(TransformXmlStackTraceEnabled)"
-                  SourceRootPath="$(PublishIntermediateOutputPath)"
-                  TransformRootPath="$(MSBuildProjectDirectory)"/>
-  
-      <!-- Run the transform at the profile level e.g: web.FolderProfile.config if the profile name is FolderProfile -->
-    <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(PublishProfileName).config')
-                  And Exists('$(PublishIntermediateOutputPath)web.config')
-                  And '$(RunXdt)' == 'true'"
-                  Source="$(PublishIntermediateOutputPath)web.config"
-                  Transform="$(MSBuildProjectDirectory)\web.$(PublishProfileName).config"
-                  Destination="$(PublishIntermediateOutputPath)web.config"
-                  StackTrace="$(TransformXmlStackTraceEnabled)"
-                  SourceRootPath="$(PublishIntermediateOutputPath)"
-                  TransformRootPath="$(MSBuildProjectDirectory)"/>
-  
-    <!-- Run the transform at the environment level e.g: web.staging.config if the $(EnvironmentName) passed to msbuild is staging-->
-    <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(EnvironmentName).config')
-                  And Exists('$(PublishIntermediateOutputPath)web.config')
-                  And '$(RunXdt)' == 'true'"
-                  Source="$(PublishIntermediateOutputPath)web.config"
-                  Transform="$(MSBuildProjectDirectory)\web.$(EnvironmentName).config"
-                  Destination="$(PublishIntermediateOutputPath)web.config"
-                  StackTrace="$(TransformXmlStackTraceEnabled)"
-                  SourceRootPath="$(PublishIntermediateOutputPath)"
-                  TransformRootPath="$(MSBuildProjectDirectory)"/>
-
-
-    <!-- Run the custom transform file e.g: MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml-->
-    <TransformXml Condition=" '$(CustomTransformFileName)' != ''
-                  And Exists('$(MSBuildProjectDirectory)\$(CustomTransformFileName)')
-                  And Exists('$(PublishIntermediateOutputPath)web.config')
-                  And '$(RunXdt)' == 'true'"
-                  Source="$(PublishIntermediateOutputPath)web.config"
-                  Transform="$(MSBuildProjectDirectory)\$(CustomTransformFileName)"
-                  Destination="$(PublishIntermediateOutputPath)web.config"
-                  StackTrace="$(TransformXmlStackTraceEnabled)"
-                  SourceRootPath="$(PublishIntermediateOutputPath)"
-                  TransformRootPath="$(MSBuildProjectDirectory)"/>
-
-    <!-- Run the custom transform file from any location e.g: c:\temp\MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml
-    and $(CustomTransformFilePath) passed to msbuild is c:\temp\-->
-    <TransformXml Condition=" '$(CustomTransformFileName)' != ''
-                  And Exists('$(CustomTransformFilePath)\$(CustomTransformFileName)')
-                  And Exists('$(PublishIntermediateOutputPath)web.config')
-                  And '$(RunXdt)' == 'true'"
-                  Source="$(PublishIntermediateOutputPath)web.config"
-                  Transform="$(CustomTransformFilePath)\$(CustomTransformFileName)"
-                  Destination="$(PublishIntermediateOutputPath)web.config"
-                  StackTrace="$(TransformXmlStackTraceEnabled)"
-                  SourceRootPath="$(PublishIntermediateOutputPath)"
-                  TransformRootPath="$(CustomTransformFilePath)"/>
-
-    <!-- Transform the environment variables in the web.config with the $(WebConfigEnvironmentVariables) from publish profiles -->
+    <!-- Run the Project transforms first i.e $(MSBuildProjectDirectory)\web.<transform>.config -->
     <ItemGroup>
-      <AllEnvTransformFiles Include="$(MSBuildThisFileDirectory)Transforms\EnvironmentNoLocation.transform;$(MSBuildThisFileDirectory)Transforms\EnvironmentWithLocation.transform;" />
+      <!-- Run the transform at the config level e.g: web.Release.config if the configuration is Release-->
+      <ProjectTransforms Condition=" '$(Configuration)' != '' " Include="$(MSBuildProjectDirectory)\web.$(Configuration).config" />
+      <!-- Run the transform at the profile level e.g: web.FolderProfile.config if the profile name is FolderProfile -->
+      <ProjectTransforms Condition=" '$(PublishProfileName)' != '' " Include="$(MSBuildProjectDirectory)\web.$(PublishProfileName).config" />
+      <!-- Run the transform at the environment level e.g: web.staging.config if the $(EnvironmentName) passed to msbuild is staging-->
+      <ProjectTransforms Condition=" '$(EnvironmentName)' != '' " Include="$(MSBuildProjectDirectory)\web.$(EnvironmentName).config" />
     </ItemGroup>
+
+    <TransformXml Condition=" '%(ProjectTransforms.Identity)' != ''
+                  And Exists('%(ProjectTransforms.Identity)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="%(ProjectTransforms.Identity)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
+
+    <!-- PROFILE LEVEL TRANSFORMS -->
+    
+    <!-- Run the Profile transforms next i.e $(PublishProfileDirectory)\$(PublishProfileName).transform -->
+    <ItemGroup>
+      <!-- Run the transform at the profile level e.g: Properties\PublishProfiles\FolderProfile.transform when the profile name is FolderProfile -->
+      <ProfileTransforms Condition=" '$(PublishProfileName)' != '' " Include="$(PublishProfileDirectory)\$(PublishProfileName).transform" />
+    </ItemGroup>
+
+    <TransformXml Condition=" '%(ProfileTransforms.Identity)' != ''
+                  And Exists('%(ProfileTransforms.Identity)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="%(ProfileTransforms.Identity)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
+
+    <!-- CUSTOM TRANSFORMS -->
+    
+    <!-- Run the Custom transforms next i.e $(CustomTransformFileName) in the project directory first and then run $(CustomTransformFilePath)\$(CustomTransformFileName) -->
+    <ItemGroup>
+      <!-- Run the custom transform file e.g: MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml-->
+      <CustomTransforms Condition=" '$(CustomTransformFileName)' != '' " Include="$(MSBuildProjectDirectory)\$(CustomTransformFileName)" />
+      <!-- Run the custom transform file from any location e.g: c:\temp\MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml
+           and $(CustomTransformDirectory) passed to msbuild is c:\temp\-->
+      <CustomTransforms Condition=" '$(CustomTransformDirectory)' != '' And '$(CustomTransformFileName)' != '' " Include="$(CustomTransformDirectory)\$(CustomTransformFileName)" />
+
+    </ItemGroup>
+
+    <TransformXml Condition=" '%(CustomTransforms.Identity)' != ''
+                  And Exists('%(CustomTransforms.Identity)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="%(CustomTransforms.Identity)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
+
+    <!-- ENVIRONMENT TRANSFORMS -->
+
+    <!-- Transform the environment variables in the web.config with the $(WebConfigEnvironmentVariables) from publish profile or Project -->
+    <ItemGroup>
+      <EnvironmentTransforms Include="$(MSBuildThisFileDirectory)Transforms\EnvironmentWithLocation.transform;$(MSBuildThisFileDirectory)Transforms\EnvironmentNoLocation.transform" />
+    </ItemGroup>
+    
     <GenerateEnvTransform Condition=" '$(WebConfigEnvironmentVariables)' != '' "
                           WebConfigEnvironmentVariables = "$(WebConfigEnvironmentVariables)"
-                          EnvTransformTemplatePaths="@(AllEnvTransformFiles)"
+                          EnvTransformTemplatePaths="@(EnvironmentTransforms)"
                           PublishTempDirectory="$(PublishIntermediateTempPath)">
-                          <Output TaskParameter="GeneratedTransformFullPaths" ItemName="_EnvTransformFiles" />
+                          <Output TaskParameter="GeneratedTransformFullPaths" ItemName="_GeneratedEnvironmentTransforms" />
     </GenerateEnvTransform>
 
-    <TransformXml Condition=" '%(_EnvTransformFiles.Identity)' != ''
-                  And Exists('%(_EnvTransformFiles.Identity)')
+    <TransformXml Condition=" '%(_GeneratedEnvironmentTransforms.Identity)' != ''
+                  And Exists('%(_GeneratedEnvironmentTransforms.Identity)')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
-              Source="$(PublishIntermediateOutputPath)web.config"
-              Transform="%(_EnvTransformFiles.Identity)"
-              Destination="$(PublishIntermediateOutputPath)web.config"
-              StackTrace="false"
-              SourceRootPath="$(PublishIntermediateOutputPath)"
-              TransformRootPath="$(PublishIntermediateTempPath)"
-              IgnoreError="true"/>
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="%(_GeneratedEnvironmentTransforms.Identity)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="false"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(PublishIntermediateTempPath)"
+                  IgnoreError="true"/>
   </Target>
 
   <!--
