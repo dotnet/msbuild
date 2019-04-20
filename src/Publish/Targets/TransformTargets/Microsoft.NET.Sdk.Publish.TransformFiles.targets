@@ -98,7 +98,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ProjectTransforms Condition=" '$(EnvironmentName)' != '' " Include="$(MSBuildProjectDirectory)\web.$(EnvironmentName).config" />
     </ItemGroup>
 
-    <TransformXml Condition="Exists('%(ProjectTransforms.Identity)')
+    <TransformXml Condition=" '%(ProjectTransforms.Identity)' != ''
+                  And Exists('%(ProjectTransforms.Identity)')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
                   Source="$(PublishIntermediateOutputPath)web.config"
@@ -116,7 +117,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ProfileTransforms Condition=" '$(PublishProfileName)' != '' " Include="$(PublishProfileDirectory)\$(PublishProfileName).transform" />
     </ItemGroup>
 
-    <TransformXml Condition="Exists('%(ProfileTransforms.Identity)')
+    <TransformXml Condition=" '%(ProfileTransforms.Identity)' != ''
+                  And Exists('%(ProfileTransforms.Identity)')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
                   Source="$(PublishIntermediateOutputPath)web.config"
@@ -138,7 +140,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </ItemGroup>
 
-    <TransformXml Condition="Exists('%(CustomTransforms.Identity)')
+    <TransformXml Condition=" '%(CustomTransforms.Identity)' != ''
+                  And Exists('%(CustomTransforms.Identity)')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
                   Source="$(PublishIntermediateOutputPath)web.config"
@@ -150,10 +153,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- ENVIRONMENT TRANSFORMS -->
 
-    <!-- Transform the environment variables in the web.config with the $(WebConfigEnvironmentVariables) from publish profiles -->
+    <!-- Transform the environment variables in the web.config with the $(WebConfigEnvironmentVariables) from publish profile or Project -->
     <ItemGroup>
       <EnvironmentTransforms Include="$(MSBuildThisFileDirectory)Transforms\EnvironmentWithLocation.transform;$(MSBuildThisFileDirectory)Transforms\EnvironmentNoLocation.transform" />
     </ItemGroup>
+    
     <GenerateEnvTransform Condition=" '$(WebConfigEnvironmentVariables)' != '' "
                           WebConfigEnvironmentVariables = "$(WebConfigEnvironmentVariables)"
                           EnvTransformTemplatePaths="@(EnvironmentTransforms)"
