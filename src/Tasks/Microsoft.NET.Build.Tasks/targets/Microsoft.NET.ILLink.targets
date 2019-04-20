@@ -79,7 +79,7 @@ Copyright (c) .NET Foundation. All rights reserved.
              RootAssemblyNames="@(IntermediateAssembly->'%(Filename)')"
              RootDescriptorFiles="@(TrimmerRootDescriptor)"
              OutputDirectory="$(IntermediateLinkDir)"
-             ExtraArgs="$(_ExtraTrimmerArgs) --skip-unresolved true" />
+             ExtraArgs="-u copyused -c copyused -l none --skip-unresolved true $(_ExtraTrimmerArgs)" />
 
      <Touch Files="$(_LinkSemaphore)" AlwaysCreate="true" />
 
