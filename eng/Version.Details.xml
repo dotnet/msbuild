@@ -29,10 +29,10 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>71d36bacfd89c53e240f1ae542ab1c67bcdce780</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.0.0-preview1.5663">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.1.0-rtm.5921">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>
-      </Sha>
+      <Sha>27af96bdb7ba8d6d7ea9ad53fc76cd1d1aa80703</Sha>
+    </Dependency>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="15.9.0">
       <Uri>https://github.com/microsoft/vstest</Uri>
