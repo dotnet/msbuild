@@ -154,7 +154,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                typeLibAttr = (TYPELIBATTR)Marshal.PtrToStructure(pAttrs, typeof(TYPELIBATTR));
+                typeLibAttr = Marshal.PtrToStructure<TYPELIBATTR>(pAttrs);
             }
             finally
             {
