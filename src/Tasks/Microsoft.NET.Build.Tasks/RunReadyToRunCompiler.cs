@@ -2,7 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -14,6 +18,8 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem CrossgenTool { get; set; }
         [Required]
         public ITaskItem CompilationEntry { get; set; }
+        [Required]
+        public ITaskItem[] ImplementationAssemblies { get; set; }
 
         private string _crossgenPath;
         private string _clrjitPath;
@@ -22,7 +28,6 @@ namespace Microsoft.NET.Build.Tasks
         private string _inputAssembly;
         private string _outputR2RImage;
         private string _outputPDBImage;
-        private string _platformAssembliesPaths;
         private string _createPDBCommand;
 
         private bool IsPdbCompilation => !String.IsNullOrEmpty(_createPDBCommand);
@@ -48,7 +53,6 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             _createPDBCommand = CompilationEntry.GetMetadata("CreatePDBCommand");
-            _platformAssembliesPaths = CompilationEntry.GetMetadata("PlatformAssembliesPaths");
 
             if (IsPdbCompilation)
             {
@@ -80,18 +84,132 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        protected override string GenerateCommandLineCommands()
+        // TEMP LOGIC - SDK Should provide correct list - When fixing https://github.com/dotnet/sdk/issues/3110, delete
+        // both IsManagedAssemblyToUseAsCrossgenReference and IsReferenceAssembly
+        bool IsManagedAssemblyToUseAsCrossgenReference(ITaskItem file)
         {
+            // Reference only managed assemblies that will be published to the root directory.
+            string relativeOutputPath = file.GetMetadata(MetadataKeys.RelativePath);
+            if (!String.IsNullOrEmpty(Path.GetDirectoryName(relativeOutputPath)))
+            {
+                return false;
+            }
+
+            using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
+            {
+                try
+                {
+                    using (var pereader = new PEReader(fs))
+                    {
+                        if (!pereader.HasMetadata)
+                            return false;
+
+                        MetadataReader mdReader = pereader.GetMetadataReader();
+                        if (!mdReader.IsAssembly)
+                            return false;
+
+                        // Reference assemblies should never be given to crossgen
+                        if (IsReferenceAssembly(mdReader))
+                            return false;
+                    }
+                }
+                catch (BadImageFormatException)
+                {
+                    // Not a valid assembly file
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsReferenceAssembly(MetadataReader mdReader)
+        {
+            foreach (var attributeHandle in mdReader.GetAssemblyDefinition().GetCustomAttributes())
+            {
+                StringHandle attributeTypeName = default;
+                StringHandle attributeTypeNamespace = default;
+                EntityHandle attributeCtor = mdReader.GetCustomAttribute(attributeHandle).Constructor;
+
+                if (attributeCtor.Kind == HandleKind.MemberReference)
+                {
+                    EntityHandle attributeMemberParent = mdReader.GetMemberReference((MemberReferenceHandle)attributeCtor).Parent;
+                    if (attributeMemberParent.Kind == HandleKind.TypeReference)
+                    {
+                        TypeReference attributeTypeRef = mdReader.GetTypeReference((TypeReferenceHandle)attributeMemberParent);
+                        attributeTypeName = attributeTypeRef.Name;
+                        attributeTypeNamespace = attributeTypeRef.Namespace;
+                    }
+                }
+                else if (attributeCtor.Kind == HandleKind.MethodDefinition)
+                {
+                    TypeDefinitionHandle attributeTypeDefHandle = mdReader.GetMethodDefinition((MethodDefinitionHandle)attributeCtor).GetDeclaringType();
+                    TypeDefinition attributeTypeDef = mdReader.GetTypeDefinition(attributeTypeDefHandle);
+                    attributeTypeName = attributeTypeDef.Name;
+                    attributeTypeNamespace = attributeTypeDef.Namespace;
+                }
+
+                if (!attributeTypeName.IsNil &&
+                    !attributeTypeNamespace.IsNil &&
+                    mdReader.StringComparer.Equals(attributeTypeName, "ReferenceAssemblyAttribute") &&
+                    mdReader.StringComparer.Equals(attributeTypeNamespace, "System.Runtime.CompilerServices"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private string GetAssemblyReferencesCommands()
+        {
+            StringBuilder result = new StringBuilder();
+
+            // Add all runtime libraries to the list of references passed to crossgen
+            foreach (var runtimeAssembly in ImplementationAssemblies)
+            {
+                // When generating PDBs, we must not add a reference to the IL version of the R2R image for which we're trying to generate a PDB
+                if (IsPdbCompilation && String.Equals(Path.GetFileName(runtimeAssembly.ItemSpec), Path.GetFileName(_outputR2RImage), StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // TODO: Delete check when fixing https://github.com/dotnet/sdk/issues/3110
+                if (!IsManagedAssemblyToUseAsCrossgenReference(runtimeAssembly))
+                    continue;
+
+                result.AppendLine($"/r \"{runtimeAssembly}\"");
+            }
+
+            return result.ToString();
+        }
+
+        protected override string GenerateResponseFileCommands()
+        {
+            StringBuilder result = new StringBuilder();
+
+            result.AppendLine("/nologo");
+
             if (IsPdbCompilation)
             {
-                return String.IsNullOrEmpty(_diasymreaderPath) ?
-                    $"/nologo /Platform_Assemblies_Paths \"{_platformAssembliesPaths}\" {_createPDBCommand} \"{_outputR2RImage}\"" :
-                    $"/nologo /Platform_Assemblies_Paths \"{_platformAssembliesPaths}\" /DiasymreaderPath \"{_diasymreaderPath}\" {_createPDBCommand} \"{_outputR2RImage}\"";
+                result.Append(GetAssemblyReferencesCommands());
+
+                if (!String.IsNullOrEmpty(_diasymreaderPath))
+                {
+                    result.AppendLine($"/DiasymreaderPath \"{_diasymreaderPath}\"");
+                }
+
+                result.AppendLine(_createPDBCommand);
+                result.AppendLine($"\"{_outputR2RImage}\"");
             }
             else
             {
-                return $"/nologo /MissingDependenciesOK /JITPath \"{_clrjitPath}\" /Platform_Assemblies_Paths \"{_platformAssembliesPaths}\" /out \"{_outputR2RImage}\" \"{_inputAssembly}\"";
+                result.AppendLine("/MissingDependenciesOK");
+                result.AppendLine($"/JITPath \"{_clrjitPath}\"");
+                result.Append(GetAssemblyReferencesCommands());
+                result.AppendLine($"/out \"{_outputR2RImage}\"");
+                result.AppendLine($"\"{_inputAssembly}\"");
             }
+
+            return result.ToString();
         }
 
         protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)

@@ -1,0 +1,120 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.ILLink.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="Sdk.props" Sdk="ILLink.Tasks" />
+
+  <PropertyGroup>
+    <IntermediateLinkDir Condition=" '$(IntermediateLinkDir)' == '' ">$(IntermediateOutputPath)linked\</IntermediateLinkDir>
+    <IntermediateLinkDir Condition=" !HasTrailingSlash('$(IntermediateLinkDir)') ">$(IntermediateLinkDir)\</IntermediateLinkDir>
+    <!-- Used to enable incremental build for the linker target. -->
+    <_LinkSemaphore>$(IntermediateOutputPath)Link.semaphore</_LinkSemaphore>
+    <!-- Disable old deps file generation logic until
+         https://github.com/dotnet/sdk/issues/3098 is fixed. -->
+    <DepsFileGenerationMode>new</DepsFileGenerationMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TrimmerRootDescriptors Include="$(TrimmerRootDescriptors)" />
+  </ItemGroup>
+
+  <!--
+    ============================================================
+                     _ILLink
+
+    Replace the files to be published with versions that have been
+    passed through the linker. Also prevent removed files from being
+    included in the generated deps.json.
+    ============================================================
+    -->
+  <Target Name="_ILLink"
+          Condition=" '$(PublishTrimmed)' == 'true' And
+                      '$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' "
+          DependsOnTargets="_RunILLink">
+
+    <!-- For now, use ResolvedFileToPublish as input/output. This
+         should go away in favor of a well-defined set of runtime
+         assemblies with https://github.com/dotnet/sdk/issues/3109. -->
+    <ItemGroup>
+      <_LinkedResolvedFileToPublish Include="@(_LinkedResolvedFileToPublishCandidates)" Condition="Exists('%(Identity)')" />
+      <ResolvedFileToPublish Remove="@(_ManagedAssembliesToLink)" />
+      <ResolvedFileToPublish Include="@(_LinkedResolvedFileToPublish)" />
+    </ItemGroup>
+
+    <!-- Remove assemblies from inputs to GenerateDepsFile. See
+         https://github.com/dotnet/sdk/pull/3086. -->
+    <ItemGroup>
+      <_RemovedManagedAssemblies Include="@(_ManagedAssembliesToLink)" Condition="!Exists('$(IntermediateLinkDir)%(Filename)%(Extension)')" />
+
+      <ResolvedCompileFileDefinitions Remove="@(_RemovedManagedAssemblies)" />
+      <NativeCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
+      <ResourceCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
+      <RuntimeCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
+      <RuntimeTargetsCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
+      <RuntimePackAsset Remove="@(_RemovedManagedAssemblies)" />
+    </ItemGroup>
+
+  </Target>
+
+
+  <!--
+    ============================================================
+                     _RunILLink
+
+    Execute the linker. This target runs incrementally, only executing
+    if the output semaphore file is out of date with respect to the inputs.
+    ============================================================
+    -->
+   <UsingTask TaskName="ILLink" AssemblyFile="$(ILLinkTasksAssembly)" />
+   <Target Name="_RunILLink"
+           DependsOnTargets="_ComputeManagedAssembliesToLink"
+           Inputs="$(MSBuildAllProjects);@(_ManagedAssembliesToLink);@(TrimmerRootDescriptors);@(ReferencePath)"
+           Outputs="$(_LinkSemaphore)">
+
+     <Delete Files="@(_LinkedResolvedFileToPublishCandidates)" />
+     <ILLink AssemblyPaths="@(_ManagedAssembliesToLink)"
+             ReferenceAssemblyPaths="@(ReferencePath)"
+             RootAssemblyNames="@(IntermediateAssembly->'%(Filename)')"
+             RootDescriptorFiles="@(TrimmerRootDescriptors)"
+             OutputDirectory="$(IntermediateLinkDir)"
+             ExtraArgs="$(_ExtraTrimmerArgs) --skip-unresolved true" />
+
+     <Touch Files="$(_LinkSemaphore)" AlwaysCreate="true" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                     _ComputeManagedAssembliesToLink
+
+    Compute the set of inputs to the linker. Currently this uses a
+    heuristic to get the relevant input from ResolvedFileToPublish,
+    but with https://github.com/dotnet/sdk/issues/3109, this should be
+    replaced with the exact set of runtime assemblies that will be in
+    the deps file.
+    ============================================================
+    -->
+  <UsingTask TaskName="ComputeManagedAssemblies" AssemblyFile="$(ILLinkTasksAssembly)" />
+  <Target Name="_ComputeManagedAssembliesToLink">
+    <ComputeManagedAssemblies Assemblies="@(ResolvedFileToPublish)">
+      <Output TaskParameter="ManagedAssemblies" ItemName="_ManagedAssembliesToLink" />
+    </ComputeManagedAssemblies>
+
+    <ItemGroup>
+      <_ManagedAssembliesToLink Remove="@(_ManagedResolvedFileToPublish->WithMetadataValue('AssetType', 'resources'))" />
+      <_LinkedResolvedFileToPublishCandidates Include="@(_ManagedAssembliesToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+
+  </Target>
+
+
+</Project>

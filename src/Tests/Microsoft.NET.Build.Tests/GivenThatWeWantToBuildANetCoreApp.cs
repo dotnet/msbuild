@@ -254,113 +254,6 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
-        public void It_builds_a_runnable_apphost_by_default(string targetFramework)
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: targetFramework)
-                .WithSource()
-                .WithTargetFramework(targetFramework);
-
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
-            buildCommand
-                .Execute(new string[] {
-                    "/restore",
-                })
-                .Should()
-                .Pass();
-
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
-            var hostExecutable = $"HelloWorld{Constants.ExeSuffix}";
-
-            outputDirectory.Should().OnlyHaveFiles(new[] {
-                hostExecutable,
-                "HelloWorld.dll",
-                "HelloWorld.pdb",
-                "HelloWorld.deps.json",
-                "HelloWorld.runtimeconfig.dev.json",
-                "HelloWorld.runtimeconfig.json",
-            });
-
-            Command.Create(Path.Combine(outputDirectory.FullName, hostExecutable), new string[] {})
-                .EnvironmentVariable(
-                    Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)",
-                    Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath))
-                .CaptureStdOut()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World!");
-        }
-
-        [Theory]
-        [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp2.2")]
-        public void It_does_not_build_with_an_apphost_by_default_before_netcoreapp_3(string targetFramework)
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: targetFramework)
-                .WithSource()
-                .WithTargetFramework(targetFramework);
-
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
-            buildCommand
-                .Execute(new string[] { "/restore" })
-                .Should()
-                .Pass();
-
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
-
-            outputDirectory.Should().OnlyHaveFiles(new[] {
-                "HelloWorld.dll",
-                "HelloWorld.pdb",
-                "HelloWorld.deps.json",
-                "HelloWorld.runtimeconfig.dev.json",
-                "HelloWorld.runtimeconfig.json",
-            });
-        }
-
-        [WindowsOnlyTheory]
-        [InlineData("x86")]
-        [InlineData("x64")]
-        [InlineData("AnyCPU")]
-        [InlineData("")]
-        public void It_uses_an_apphost_based_on_platform_target(string target)
-        {
-            var targetFramework = "netcoreapp3.0";
-
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
-                .WithSource();
-
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
-            buildCommand
-                .Execute(new string[] {
-                    "/restore",
-                    $"/p:TargetFramework={targetFramework}",
-                    $"/p:PlatformTarget={target}",
-                    $"/p:NETCoreSdkRuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(targetFramework)}"
-                })
-                .Should()
-                .Pass();
-
-            var apphostPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, "HelloWorld.exe");
-            if (target == "x86")
-            {
-                IsPE32(apphostPath).Should().BeTrue();
-            }
-            else if (target == "x64")
-            {
-                IsPE32(apphostPath).Should().BeFalse();
-            }
-            else
-            {
-                IsPE32(apphostPath).Should().Be(!Environment.Is64BitProcess);
-            }
-        }
-
-        [Theory]
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp2.1")]
         [InlineData("netcoreapp3.0")]
@@ -673,12 +566,55 @@ public static class Program
                 .Pass();
         }
 
-        private static bool IsPE32(string path)
+        [WindowsOnlyFact]
+        public void It_escapes_resolved_package_assets_paths()
         {
-            using (var reader = new PEReader(File.OpenRead(path)))
+            var testProject = new TestProject()
             {
-                return reader.PEHeaders.PEHeader.Magic == PEMagic.PE32;
-            }
+                Name = "ProjectWithPackageThatNeedsEscapes",
+                TargetFrameworks = "net462",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            testProject.SourceFiles["ExampleReader.cs"] = @"
+using System;
+using System.Threading.Tasks;
+
+namespace ContentFilesExample
+{
+    internal static class ExampleInternals
+    {
+        internal static Task<string> GetFileText(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine(""Hello World!"");
+    }
+}";
+
+            // ContentFilesExample is an existing package that demonstrates the problem.
+            // It contains assets with paths that have '%2B', which MSBuild will unescape to '+'.
+            // Without the change to escape the asset paths, the asset will not be found inside the package.
+            testProject.PackageReferences.Add(new TestPackageReference("ContentFilesExample", "1.0.2"));
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

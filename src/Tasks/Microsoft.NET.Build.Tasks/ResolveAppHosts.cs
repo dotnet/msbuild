@@ -19,6 +19,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string AppHostRuntimeIdentifier { get; set; }
 
+        public string[] OtherRuntimeIdentifiers { get; set; }
+
         public string RuntimeFrameworkVersion { get; set; }
 
         public ITaskItem[] PackAsToolShimRuntimeIdentifiers { get; set; } = Array.Empty<ITaskItem>();
@@ -88,7 +90,8 @@ namespace Microsoft.NET.Build.Tasks
                     packagesToDownload,
                     DotNetAppHostExecutableNameWithoutExtension,
                     "AppHost",
-                    isExecutable: true);
+                    isExecutable: true,
+                    errorIfNotFound: true);
 
                 if (appHostItem != null)
                 {
@@ -101,7 +104,8 @@ namespace Microsoft.NET.Build.Tasks
                     packagesToDownload,
                     DotNetComHostLibraryNameWithoutExtension,
                     "ComHost",
-                    isExecutable: false);
+                    isExecutable: false,
+                    errorIfNotFound: true);
 
                 if (comHostItem != null)
                 {
@@ -120,7 +124,8 @@ namespace Microsoft.NET.Build.Tasks
                         packagesToDownload,
                         DotNetAppHostExecutableNameWithoutExtension,
                         "AppHost",
-                        isExecutable: true);
+                        isExecutable: true,
+                        errorIfNotFound: true);
 
                     if (appHostItem != null)
                     {
@@ -128,6 +133,26 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
                 PackAsToolShimAppHostPacks = packAsToolShimAppHostPacks.ToArray();
+            }
+
+            if (OtherRuntimeIdentifiers != null)
+            {
+                foreach (var otherRuntimeIdentifier in OtherRuntimeIdentifiers)
+                {
+                    //  Download any apphost packages for other runtime identifiers.
+                    //  This allows you to specify the list of RIDs in RuntimeIdentifiers and only restore once,
+                    //  and then build for each RuntimeIdentifier without restoring separately.
+
+                    //  We discard the return value, and pass in some bogus data that won't be used, because
+                    //  we won't use the assets from the apphost pack in this build.
+                    GetHostItem(otherRuntimeIdentifier,
+                            knownAppHostPacksForTargetFramework,
+                            packagesToDownload,
+                            hostNameWithoutExtension: "unused",
+                            itemName: "unused",
+                            isExecutable: true,
+                            errorIfNotFound: false);
+                }
             }
 
             if (packagesToDownload.Any())
@@ -141,7 +166,8 @@ namespace Microsoft.NET.Build.Tasks
                                          List<ITaskItem> packagesToDownload,
                                          string hostNameWithoutExtension,
                                          string itemName,
-                                         bool isExecutable)
+                                         bool isExecutable,
+                                         bool errorIfNotFound)
         {
             var selectedAppHostPack = knownAppHostPacksForTargetFramework.Single();
 
@@ -165,12 +191,26 @@ namespace Microsoft.NET.Build.Tasks
                 if (wasInGraph)
                 {
                     //  NETSDK1084: There was no app host for available for the specified RuntimeIdentifier '{0}'.
-                    Log.LogError(Strings.NoAppHostAvailable, runtimeIdentifier);
+                    if (errorIfNotFound)
+                    {
+                        Log.LogError(Strings.NoAppHostAvailable, runtimeIdentifier);
+                    }
+                    else
+                    {
+                        Log.LogMessage(Strings.NoAppHostAvailable, runtimeIdentifier);
+                    }
                 }
                 else
                 {
                     //  NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.
-                    Log.LogError(Strings.RuntimeIdentifierNotRecognized, runtimeIdentifier);
+                    if (errorIfNotFound)
+                    {
+                        Log.LogError(Strings.RuntimeIdentifierNotRecognized, runtimeIdentifier);
+                    }
+                    else
+                    {
+                        Log.LogMessage(Strings.RuntimeIdentifierNotRecognized, runtimeIdentifier);
+                    }
                 }
                 return null;
             }

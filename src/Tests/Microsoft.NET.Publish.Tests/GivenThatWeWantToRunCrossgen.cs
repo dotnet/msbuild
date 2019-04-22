@@ -56,8 +56,8 @@ namespace Microsoft.NET.Publish.Tests
                 projectName, 
                 "ClassLib");
 
-            testProject.AdditionalProperties["ReadyToRun"] = "True";
-            testProject.AdditionalItems["ReadyToRunExclude"] = "Classlib.dll";
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
+            testProject.AdditionalItems["PublishReadyToRunExclude"] = "Classlib.dll";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
@@ -96,8 +96,8 @@ namespace Microsoft.NET.Publish.Tests
                 projectName, 
                 "ClassLib");
 
-            testProject.AdditionalProperties["ReadyToRun"] = "True";
-            testProject.AdditionalProperties["ReadyToRunEmitSymbols"] = "True";
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
+            testProject.AdditionalProperties["PublishReadyToRunEmitSymbols"] = "True";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
@@ -123,6 +123,32 @@ namespace Microsoft.NET.Publish.Tests
 
             DoesImageHaveR2RInfo(mainProjectDll).ToString().Should().Be(true.ToString());
             DoesImageHaveR2RInfo(classLibDll).ToString().Should().Be(true.ToString());
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void It_does_not_support_framework_dependent_publishing(string targetFramework)
+        {
+            var projectName = "FrameworkDependent";
+
+            var testProject = CreateTestProjectForR2RTesting(
+                EnvironmentInfo.GetCompatibleRid(targetFramework),
+                projectName,
+                "ClassLib");
+
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            // TODO: This test should be changed to expect publishing to succeed when fixing #3109 and #3110.
+            // When fixing the issues, change the function name to reflect what we're testing, and change the test's expected 
+            // behavior (check that the output assemblies exist and are R2R images).
+            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            publishCommand.Execute("/p:SelfContained=false", "/v:n")
+                .Should()
+                .Fail()
+                .And.HaveStdOutContainingIgnoreCase("NETSDK1095");
         }
 
         [Theory]
@@ -168,7 +194,7 @@ namespace Microsoft.NET.Publish.Tests
                 return;
             }
 
-            testProject.AdditionalProperties["ReadyToRun"] = "True";
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);

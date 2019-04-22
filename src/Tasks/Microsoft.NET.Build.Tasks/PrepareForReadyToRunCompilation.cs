@@ -17,15 +17,12 @@ namespace Microsoft.NET.Build.Tasks
 {
     public class PrepareForReadyToRunCompilation : TaskBase
     {
-        public ITaskItem[] FilesToPublishAlways { get; set; }
-        public ITaskItem[] FilesToPublishPreserveNewest { get; set; }
-        public string[] ReadyToRunExcludeList { get; set; }
-        public bool ReadyToRunEmitSymbols { get; set; }
+        public ITaskItem[] FilesToPublish { get; set; }
+        public string[] ExcludeList { get; set; }
+        public bool EmitSymbols { get; set; }
 
         [Required]
         public string OutputPath { get; set; }
-        [Required]
-        public string TargetFramework { get; set; }
         [Required]
         public ITaskItem[] RuntimePacks { get; set; }
         [Required]
@@ -41,37 +38,25 @@ namespace Microsoft.NET.Build.Tasks
         // Output lists of files to compile. Currently crossgen has to run in two steps, the first to generate the R2R image
         // and the second to create native PDBs for the compiled images (the output of the first step is an input to the second step)
         [Output]
-        public ITaskItem[] ReadyToRunCompileListPublishAlways => _compileListPublishAlways.ToArray();
+        public ITaskItem[] ReadyToRunCompileList => _compileList.ToArray();
         [Output]
-        public ITaskItem[] ReadyToRunSymbolsCompileListPublishAlways => _symbolsCompileListPublishAlways.ToArray();
-        [Output]
-        public ITaskItem[] ReadyToRunCompileListPreserveNewest => _compileListPreserveNewest.ToArray();
-        [Output]
-        public ITaskItem[] ReadyToRunSymbolsCompileListPreserveNewest => _symbolsCompileListPreserveNewest.ToArray();
+        public ITaskItem[] ReadyToRunSymbolsCompileList => _symbolsCompileList.ToArray();
 
-        // Output files to publish after compilation. These lists are equivalent to the input lists, but contain the new
+        // Output files to publish after compilation. These lists are equivalent to the input list, but contain the new
         // paths to the compiled R2R images and native PDBs.
         [Output]
-        public ITaskItem[] ReadyToRunFilesToPublishAlways => _r2rFilesPublishAlways.ToArray();
-        [Output]
-        public ITaskItem[] ReadyToRunFilesToPreserveNewest => _r2rFilesPreserveNewest.ToArray();
+        public ITaskItem[] ReadyToRunFilesToPublish => _r2rFiles.ToArray();
 
-        private List<ITaskItem> _compileListPublishAlways = new List<ITaskItem>();
-        private List<ITaskItem> _compileListPreserveNewest = new List<ITaskItem>();
+        private List<ITaskItem> _compileList = new List<ITaskItem>();
+        private List<ITaskItem> _symbolsCompileList = new List<ITaskItem>();
 
-        private List<ITaskItem> _symbolsCompileListPublishAlways = new List<ITaskItem>();
-        private List<ITaskItem> _symbolsCompileListPreserveNewest = new List<ITaskItem>();
-
-        private List<ITaskItem> _r2rFilesPublishAlways = new List<ITaskItem>();
-        private List<ITaskItem> _r2rFilesPreserveNewest = new List<ITaskItem>();
+        private List<ITaskItem> _r2rFiles = new List<ITaskItem>();
 
         private string _runtimeIdentifier;
         private string _packagePath;
         private string _crossgenPath;
         private string _clrjitPath;
-        private string _platformAssembliesPath;
         private string _diasymreaderPath;
-        private string _pathSeparatorCharacter = ";";
 
         private Architecture _targetArchitecture;
 
@@ -123,8 +108,7 @@ namespace Microsoft.NET.Build.Tasks
                 CrossgenTool.SetMetadata("DiaSymReader", _diasymreaderPath);
 
             // Process input lists of files
-            ProcessInputFileList(FilesToPublishPreserveNewest, _compileListPreserveNewest, _symbolsCompileListPreserveNewest, _r2rFilesPreserveNewest);
-            ProcessInputFileList(FilesToPublishAlways, _compileListPublishAlways, _symbolsCompileListPublishAlways, _r2rFilesPublishAlways);
+            ProcessInputFileList(FilesToPublish, _compileList, _symbolsCompileList, _r2rFiles);
         }
 
         void ProcessInputFileList(ITaskItem[] inputFiles, List<ITaskItem> imageCompilationList, List<ITaskItem> symbolsCompilationList, List<ITaskItem> r2rFilesPublishList)
@@ -146,7 +130,6 @@ namespace Microsoft.NET.Build.Tasks
                 // an input to the ReadyToRunCompiler task
                 TaskItem r2rCompilationEntry = new TaskItem(file);
                 r2rCompilationEntry.SetMetadata("OutputR2RImage", outputR2RImage);
-                r2rCompilationEntry.SetMetadata("PlatformAssembliesPaths", $"{_platformAssembliesPath}{_pathSeparatorCharacter}{Path.GetDirectoryName(file.ItemSpec)}");
                 r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                 imageCompilationList.Add(r2rCompilationEntry);
 
@@ -158,10 +141,10 @@ namespace Microsoft.NET.Build.Tasks
                 r2rFilesPublishList.Add(r2rFileToPublish);
 
                 // Note: ReadyToRun PDB/Map files are not needed for debugging. They are only used for profiling, therefore the default behavior is to not generate them
-                // unless an explicit ReadyToRunEmitSymbols flag is enabled by the app developer. There is also another way to profile that the runtime supports, which does
+                // unless an explicit PublishReadyToRunEmitSymbols flag is enabled by the app developer. There is also another way to profile that the runtime supports, which does
                 // not rely on the native PDBs/Map files, so creating them is really an opt-in option, typically used by advanced users.
                 // For debugging, only the IL PDBs are required.
-                if (ReadyToRunEmitSymbols)
+                if (EmitSymbols)
                 {
                     string outputPDBImageRelativePath = null, outputPDBImage = null, createPDBCommand = null;
 
@@ -193,7 +176,6 @@ namespace Microsoft.NET.Build.Tasks
                         pdbCompilationEntry.ItemSpec = outputR2RImage;
                         pdbCompilationEntry.SetMetadata("OutputPDBImage", outputPDBImage);
                         pdbCompilationEntry.SetMetadata("CreatePDBCommand", createPDBCommand);
-                        pdbCompilationEntry.SetMetadata("PlatformAssembliesPaths", $"{_platformAssembliesPath}{_pathSeparatorCharacter}{Path.GetDirectoryName(file.ItemSpec)}");
                         symbolsCompilationList.Add(pdbCompilationEntry);
 
                         // This TaskItem corresponds to the output PDB image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
@@ -211,11 +193,15 @@ namespace Microsoft.NET.Build.Tasks
         bool InputFileEligibleForCompilation(ITaskItem file)
         {
             // Check if the file is explicitly excluded from being compiled
-            if (ReadyToRunExcludeList != null)
+            if (ExcludeList != null)
             {
-                foreach (var item in ReadyToRunExcludeList)
+                foreach (var item in ExcludeList)
+                {
                     if (String.Compare(Path.GetFileName(file.ItemSpec), item, true) == 0)
+                    {
                         return false;
+                    }
+                }
             }
 
             // Check to see if this is a valid ILOnly image that we can compile
@@ -238,7 +224,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
 
                         // Skip reference assemblies and assemblies that reference winmds
-                        if (ReferencesWinMD(mdReader) || IsReferenceAssembly(mdReader))
+                        if (ReferencesWinMD(mdReader) || IsReferenceAssembly(mdReader) || !HasILCode(pereader, mdReader))
                         {
                             return false;
                         }
@@ -300,6 +286,20 @@ namespace Microsoft.NET.Build.Tasks
                 AssemblyReference assemblyRef = mdReader.GetAssemblyReference(assemblyRefHandle);
                 if ((assemblyRef.Flags & AssemblyFlags.WindowsRuntime) == AssemblyFlags.WindowsRuntime)
                     return true;
+            }
+
+            return false;
+        }
+
+        private bool HasILCode(PEReader peReader, MetadataReader mdReader)
+        {
+            foreach (var methoddefHandle in mdReader.MethodDefinitions)
+            {
+                MethodDefinition methodDef = mdReader.GetMethodDefinition(methoddefHandle);
+                if (methodDef.RelativeVirtualAddress > 0)
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -372,8 +372,6 @@ namespace Microsoft.NET.Build.Tasks
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                _pathSeparatorCharacter = ":";
-
                 if (_targetArchitecture == Architecture.Arm || _targetArchitecture == Architecture.Arm64)
                 {
                     // We only have x64 hosted crossgen for both ARM target architectures
@@ -392,8 +390,6 @@ namespace Microsoft.NET.Build.Tasks
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                _pathSeparatorCharacter = ":";
-
                 // Only x64 supported for OSX
                 if (_targetArchitecture != Architecture.X64 || RuntimeInformation.OSArchitecture != Architecture.X64)
                     return false;
@@ -406,10 +402,6 @@ namespace Microsoft.NET.Build.Tasks
                 // Unknown platform
                 return false;
             }
-
-            _platformAssembliesPath =
-                Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native") + _pathSeparatorCharacter +
-                Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "lib", TargetFramework);
 
             return true;
         }
