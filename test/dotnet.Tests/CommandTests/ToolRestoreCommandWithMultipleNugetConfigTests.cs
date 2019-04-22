@@ -21,7 +21,7 @@ using NuGet.Versioning;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolRestoreCommandWithMultipleNugetConfigTests
     {
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 new ProjectRestorerMock(
                     _fileSystem,
                     _reporter,
-                    new[]
+                    new List<MockFeed>
                     {
                         new MockFeed
                         {
@@ -183,6 +183,11 @@ namespace Microsoft.DotNet.Tests.Commands
             }
 
             public FilePath FindFirst()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IReadOnlyList<FilePath> FindByPackageId(PackageId packageId)
             {
                 throw new NotImplementedException();
             }

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19208.4">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19219.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>0fd9a865045026041f2ea4942eb8c91782193078</Sha>
+      <Sha>c01de3fd223affb9f861260f41ebcc12e473a9ad</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19205.6">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19218.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4217db4a23ffd15abb3771d635b66162994fb9e4</Sha>
+      <Sha>5e7ce5b394f3477bb0a485a4b761b7742e95be37</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview4.19210.3">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview5.19220.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>814b7898f9908a88f62706331cf56f1ecc9745eb</Sha>
+      <Sha>413e8d1ac55ad355429ebf772b6f3b54802be5a3</Sha>
     </Dependency>
     <!-- We don't want migrate being updated by DARC just yet due to the NuGet
     discrepancy between it and the CLI. We will fix that for P3 -->

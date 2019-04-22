@@ -23,7 +23,7 @@ using Parser = Microsoft.DotNet.Cli.Parser;
 using System.Runtime.InteropServices;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolInstallGlobalOrToolPathCommandTests
     {
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
 
             var toolToolPackageInstaller = CreateToolPackageInstaller(
-            feeds: new[] {
+            feeds: new List<MockFeed> {
                     new MockFeed
                     {
                         Type = MockFeedType.ImplicitAdditionalFeed,
@@ -485,7 +485,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         private IToolPackageInstaller CreateToolPackageInstaller(
-            IEnumerable<MockFeed> feeds = null,
+            List<MockFeed> feeds = null,
             Action installCallback = null)
         {
             return new ToolPackageInstallerMock(

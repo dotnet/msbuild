@@ -17,7 +17,7 @@ using Xunit;
 using LocalizableStrings = Microsoft.DotNet.ToolManifest.LocalizableStrings;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolManifestEditorTests
     {
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Tests.Commands
             toolManifestFileEditor.Add(new FilePath(manifestFile),
                 new PackageId("new-tool"),
                 NuGetVersion.Parse("3.0.0"),
-                new[] { new ToolCommandName("newtool") });
+                new[] {new ToolCommandName("newtool")});
 
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(
                 @"{
@@ -112,7 +112,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 packageId,
                 nuGetVersion,
                 new[] {new ToolCommandName("dotnetsay")});
-
 
             var expectedString = string.Format(
                 LocalizableStrings.ManifestPackageIdCollision,
@@ -179,7 +178,8 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
-            Action a = () => toolManifestFileEditor.Read(new FilePath(manifestFile), new DirectoryPath(_testDirectoryRoot));
+            Action a = () =>
+                toolManifestFileEditor.Read(new FilePath(manifestFile), new DirectoryPath(_testDirectoryRoot));
 
             a.ShouldNotThrow<ToolManifestException>();
         }
@@ -250,6 +250,58 @@ namespace Microsoft.DotNet.Tests.Commands
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(_jsonWithInvalidField);
         }
 
+        [Fact]
+        public void GivenManifestFileWhenEditNonExistPackageIdItThrows()
+        {
+            string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
+
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
+
+            Action a = () => toolManifestFileEditor.Edit(new FilePath(manifestFile),
+                new PackageId("non-exist"),
+                NuGetVersion.Parse("3.0.0"),
+                new[] {new ToolCommandName("t-rex3")});
+
+            a.ShouldThrow<ArgumentException>().And.Message.Should()
+                .Contain($"Manifest {manifestFile} does not contain package id 'non-exist'.");
+        }
+
+
+        [Fact]
+        public void GivenManifestFileItCanEditEntry()
+        {
+            string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
+
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
+
+            toolManifestFileEditor.Edit(new FilePath(manifestFile),
+                new PackageId("t-rex"),
+                NuGetVersion.Parse("3.0.0"),
+                new[] {new ToolCommandName("t-rex3")});
+
+            _fileSystem.File.ReadAllText(manifestFile).Should().Be(
+                @"{
+  ""version"": 1,
+  ""isRoot"": true,
+  ""tools"": {
+    ""t-rex"": {
+      ""version"": ""3.0.0"",
+      ""commands"": [
+        ""t-rex3""
+      ]
+    },
+    ""dotnetsay"": {
+      ""version"": ""2.1.4"",
+      ""commands"": [
+        ""dotnetsay""
+      ]
+    }
+  }
+}", "And original tools entry order is preserved.");
+        }
+
         private string _jsonContent =
             @"{
    ""version"":1,
@@ -290,7 +342,7 @@ namespace Microsoft.DotNet.Tests.Commands
 }";
 
         private string _jsonContentMissingVersion =
-@"{
+            @"{
    ""isRoot"":true,
    ""tools"":{
       ""t-rex"":{

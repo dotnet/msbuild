@@ -4,15 +4,18 @@ trigger:
 
 variables:
   teamName: Roslyn-Project-System
+  _DotNetArtifactsCategory: .NETCore
   ${{ if eq(variables['System.TeamProject'], 'public') }}:
     PB_PublishBlobFeedKey:
     PB_PublishBlobFeedUrl:
     _DotNetPublishToBlobFeed: false
+    _PublishUsingPipelines: false
     _PublishType: none
     _SignType: test
   ${{ if ne(variables['System.TeamProject'], 'public') }}:
     PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     _DotNetPublishToBlobFeed: true
+    _PublishUsingPipelines: true
     _PublishType: blob
     _SignType: real
 
@@ -161,6 +164,7 @@ jobs:
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/phases/publish-build-assets.yml
     parameters:
+      publishUsingPipelines: true
       dependsOn:
         - Windows_NT
       queue:

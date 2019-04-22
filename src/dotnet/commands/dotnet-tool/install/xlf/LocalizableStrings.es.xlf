@@ -47,11 +47,6 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <target state="needs-review-translation">Si desea instalar una herramienta global, agregue "-g". Si desea utilizar un manifiesto de herramientas, primero debe crearlo con "dotnet new tool-manifest".</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="translated">La especificación del manifiesto de herramienta (--tool-manifest) solo es válido con la opción local (--local o el valor predeterminado).</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
         <target state="translated">El id. del paquete de NuGet de la herramienta que se instalará.</target>

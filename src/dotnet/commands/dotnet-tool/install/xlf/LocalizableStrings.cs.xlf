@@ -47,11 +47,6 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <target state="needs-review-translation">Pokud chcete nainstalovat globální nástroj, přidejte přepínač -g. Pokud chcete použít manifest nástroje, musíte ho napřed vytvořit pomocí příkazu dotnet new tool-manifest.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
-        <target state="translated">Zadání manifestu nástroje (--tool-manifest) je platné jenom s parametrem lokálního nástroje (--local nebo výchozí).</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
         <target state="translated">ID balíčku NuGet nástroje, který se má nainstalovat</target>

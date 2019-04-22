@@ -9,7 +9,6 @@
       </trans-unit>
       <trans-unit id="FirstTimeMessageMoreInformation">
         <source>----------------
-More about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
 Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Find out what's new: https://aka.ms/dotnet-whats-new
@@ -18,7 +17,6 @@ Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cl
 Write your first app: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</source>
         <target state="new">----------------
-More about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
 Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Find out what's new: https://aka.ms/dotnet-whats-new

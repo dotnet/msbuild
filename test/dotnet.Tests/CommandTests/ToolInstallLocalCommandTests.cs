@@ -26,7 +26,7 @@ using Microsoft.DotNet.ToolManifest;
 using NuGet.Frameworks;
 
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolInstallLocalCommandTests
     {
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 new ProjectRestorerMock(
                     _fileSystem,
                     _reporter,
-                    new[]
+                    new List<MockFeed>
                     {
                         new MockFeed
                         {

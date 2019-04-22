@@ -134,7 +134,6 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
   </data>
   <data name="FirstTimeMessageMoreInformation" xml:space="preserve">
     <value>----------------
-More about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
 Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Find out what's new: https://aka.ms/dotnet-whats-new
