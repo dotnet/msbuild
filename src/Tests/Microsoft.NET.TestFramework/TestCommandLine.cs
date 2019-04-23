@@ -25,6 +25,8 @@ namespace Microsoft.NET.TestFramework
 
         public string SdkVersion { get; private set; }
 
+        public string TestExecutionDirectory { get; set; }
+
         public bool ShowSdkInfo { get; private set; }
 
         public static TestCommandLine Parse(string[] args)
@@ -63,6 +65,10 @@ namespace Microsoft.NET.TestFramework
                 else if (arg.Equals("-sdkVersion", StringComparison.CurrentCultureIgnoreCase))
                 {
                     ret.SdkVersion = argStack.Pop();
+                }
+                else if (arg.Equals("-testExecutionDirectory", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    ret.TestExecutionDirectory = argStack.Pop();
                 }
                 else if (arg.Equals("-showSdkInfo", StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -123,6 +129,7 @@ Options to control toolset to test:
   -sdkConfig <config>     : Use specified configuration for SDK repo
   -noRepoInference        : Don't automatically find SDK repo to use based on path to test binaries
   -sdkVersion             : Use specified SDK version
+  -testExecutionDirectory : Folder for tests to create and build projects
   -showSdkInfo            : Shows SDK info (dotnet --info) for SDK which will be used
   -help                   : Show help");
         }
