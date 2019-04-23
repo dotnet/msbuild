@@ -53,7 +53,7 @@ if [ ! -d "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat" ]; then
     curl -o "$perfWorkingDirectory/benchview.zip" http://benchviewtestfeed.azurewebsites.net/api/v2/package/microsoft.benchview.jsonformat/0.1.0-pre024
     unzip -q -o "$perfWorkingDirectory/benchview.zip" -d "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat"
 fi
-# nuget install Microsoft.BenchView.JSONFormat -Source http://benchviewtestfeed.azurewebsites.net/nuget -OutputDirectory $perfWorkingDirectory -Prerelease -ExcludeVersion || { echo Failed to install Microsoft.BenchView.JSONFormat NuPkg && exit 1 ; }
+# nuget install Microsoft.BenchView.JSONFormat -Source http://benchviewtestfeed.azurewebsites.net/nuget -OutputDirectory "$perfWorkingDirectory" -Prerelease -ExcludeVersion || { echo Failed to install Microsoft.BenchView.JSONFormat NuPkg && exit 1 ; }
 
 # Do this here to remove the origin but at the front of the branch name as this is a problem for BenchView
 if [[ "$GIT_BRANCH" == "origin/"* ]]

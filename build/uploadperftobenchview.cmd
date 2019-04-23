@@ -55,7 +55,7 @@ echo Creating: "%perfWorkingDirectory%\submission-metadata.json"
 %pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission-metadata.py" --name "%benchViewName%" --user-email "dotnet-bot@microsoft.com" -o "%perfWorkingDirectory%\submission-metadata.json"
 
 echo Creating: "%perfWorkingDirectory%\build.json"
-%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\build.py" git --branch %GIT_BRANCH_WITHOUT_ORIGIN% --type "%runType%" --source-timestamp "%timeStamp%" -o "%perfWorkingDirectory%\build.json"
+%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\build.py" git --branch "%GIT_BRANCH_WITHOUT_ORIGIN%" --type "%runType%" --source-timestamp "%timeStamp%" -o "%perfWorkingDirectory%\build.json"
 
 echo Creating: "%perfWorkingDirectory%\machinedata.json"
 %pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\machinedata.py" -o "%perfWorkingDirectory%\machinedata.json"
