@@ -46,10 +46,6 @@
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>c09c490012b1e11cf6d52a6c6a486d4dc5f401bc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Build.Bundle" Version="3.0.0-preview5-27611-16">
-      <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>64572b598acce31a45dbb44f7ed063a8ef4a3cd9</Sha>
-    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19218.4">
