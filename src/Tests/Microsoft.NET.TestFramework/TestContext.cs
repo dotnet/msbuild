@@ -110,7 +110,11 @@ namespace Microsoft.NET.TestFramework
                 }
             }
 
-            if (runAsTool)
+            if (!string.IsNullOrEmpty(commandLine.TestExecutionDirectory))
+            {
+                testContext.TestExecutionDirectory = commandLine.TestExecutionDirectory;
+            }
+            else if (runAsTool)
             {
                 testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(), "dotnetSdkTests");
             }
