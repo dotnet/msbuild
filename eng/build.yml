@@ -122,7 +122,7 @@ jobs:
 
             WorkItemTimeout: 2:00
             WorkItemDirectory: '$(Build.SourcesDirectory)\build'
-            WorkItemCommand: '%HELIX_CORRELATION_PAYLOAD%\build\RunPerfTestsOnHelix.cmd $(_BuildConfig) $(_PerfIterations) $(Build.SourceBranchName) $(Build.SourceBranch) rolling'
+            WorkItemCommand: '%HELIX_CORRELATION_PAYLOAD%\build\RunPerfTestsOnHelix.cmd $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling'
             CorrelationPayloadDirectory: '$(Build.SourcesDirectory)\helix-package'
 
     - ${{ if eq(parameters.agentOs, 'Linux_Perf_Helix') }}:
