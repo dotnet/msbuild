@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -10,6 +11,7 @@ namespace Microsoft.Build.Experimental.Graph
     /// <summary>
     /// Represents the node for a particular project in a project graph.
     /// </summary>
+    [DebuggerDisplay(@"{ToString()}")]
     public sealed class ProjectGraphNode
     {
         private readonly HashSet<ProjectGraphNode> _projectReferences = new HashSet<ProjectGraphNode>();
@@ -36,6 +38,14 @@ namespace Microsoft.Build.Experimental.Graph
         /// Gets the evaluated project instance represented by this node in the graph.
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
+
+        public override string ToString()
+        {
+            var truncatedProjectFile = FileUtilities.TruncatePathToTrailingSegments(ProjectInstance.FullPath, 2);
+
+            return
+                $"{truncatedProjectFile}, #GlobalProps={ProjectInstance.GlobalProperties.Count}, #Props={ProjectInstance.Properties.Count}, #Items={ProjectInstance.Items.Count}, #in={ReferencingProjects.Count}, #out={ProjectReferences.Count}";
+        }
 
         internal void AddProjectReference(ProjectGraphNode reference, ProjectItemInstance projectReferenceItem, GraphBuilder.GraphEdges edges)
         {
