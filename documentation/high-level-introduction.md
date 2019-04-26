@@ -151,6 +151,11 @@ There are many, but the most common include:
   - If your contents contain a `%` then you will be run like a “for each” for each element in the relevant itemgroup.
   - See the [XA doc](https://github.com/xamarin/xamarin-android/blob/master/Documentation/guides/MSBuildBestPractices.md#item-group-transforms) and [msbuild docs](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-transforms?view=vs-2017) for more details. It’s powerful but complex.
 
+**Property Functions**
+
+  - It is possible to invoke C# properties and functions from msbuild. 
+  - This is useful for a number of use cases, including string and path manipulation and math operations.
+  - See the [documentation](https://docs.microsoft.com/en-us/visualstudio/msbuild/property-functions?view=vs-2019) for more details.
 
 ## MSBuild Tasks
 - These are C# types defined in a library. 
