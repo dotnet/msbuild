@@ -41,7 +41,7 @@
   <PropertyGroup>
     <RestoreSources>
       $(RestoreSources);
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
       https://dotnet.myget.org/F/nuget-build/api/v3/index.json
     </RestoreSources>
   </PropertyGroup>
