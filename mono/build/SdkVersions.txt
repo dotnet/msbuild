@@ -1,5 +1,5 @@
 OldCLICommitHash=4b9d6502f8061db4a56b730d3d4e65262c72ad5c;
-NuGet.Build.Tasks.Pack=5.0.0-rtm.5856;
+NuGet.Build.Tasks.Pack=5.0.2;
 Microsoft.NET.Sdk=2.1.600-preview-63821-02;
 Microsoft.NET.Sdk.Razor=2.1.1;
 Microsoft.NET.Sdk.Web=2.1.500;
@@ -7,7 +7,7 @@ Microsoft.NET.Sdk.Publish=2.1.500;
 Microsoft.NET.Sdk.Web.ProjectSystem=2.1.500;
 FSharp.NET.Sdk=1.0.4-bundled-0100;
 Microsoft.NET.Build.Extensions=2.1.600-preview-63821-02;
-NuGet.Build.Tasks=5.0.0-rtm.5856;
+NuGet.Build.Tasks=5.0.2;
 SdkResolver=2.1.8;
 SdkResolverUrl=https://dotnetcli.azureedge.net/dotnet/Runtime/2.1.8/dotnet-hostfxr-internal-2.1.8-osx-x64.pkg;
 RuntimeDepsInstallerUrl=https://dotnetcli.azureedge.net/dotnet/Runtime/2.1.8/dotnet-runtime-deps-2.1.8-osx-x64.pkg;
