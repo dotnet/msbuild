@@ -326,9 +326,9 @@ namespace Microsoft.Build.Internal
         /// Magic number sent by the host to the client during the handshake.
         /// Derived from the binary timestamp to avoid mixing binary versions.
         /// </summary>
-        internal static long GetTaskHostHostHandshake(TaskHostContext hostContext)
+        internal static long GetHostHandshake(TaskHostContext hostContext)
         {
-            long baseHandshake = GenerateHostHandshakeFromBase(GetBaseHandshakeForContext(hostContext), GetTaskHostClientHandshake(hostContext));
+            long baseHandshake = GenerateHostHandshakeFromBase(GetBaseHandshakeForContext(hostContext), GetClientHandshake(hostContext));
             return baseHandshake;
         }
 
@@ -336,7 +336,7 @@ namespace Microsoft.Build.Internal
         /// Magic number sent by the client to the host during the handshake.
         /// Munged version of the host handshake.
         /// </summary>
-        internal static long GetTaskHostClientHandshake(TaskHostContext hostContext)
+        internal static long GetClientHandshake(TaskHostContext hostContext)
         {
             // Mask out the first byte. That's because old
             // builds used a single, non zero initial byte,
