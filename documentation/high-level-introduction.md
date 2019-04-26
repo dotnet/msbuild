@@ -2,11 +2,7 @@
 
 ## Introduction
 
-Documentation on msbuild is both widespread and yet much of it is difficult to parse for those coming up to speed. There are also no good "high level" docs that paint a picture on how the parts are put together.
-
-The Xamarin.Android folks have written up a best [practices guide](https://github.com/xamarin/xamarin-android/blob/master/Documentation/guides/MSBuildBestPractices.md), which is more of a "graduate level" guide. 
-
-This document aims to sit somewhere in the middle, “101 college level”. It should contain more than 5 minutes of content but for those coming to msbuild with very little background in how it works.
+This document aims to be a “101 college” level introduction into msbuild, useful for those coming to msbuild with very little background in how it works.
 
 ### What is msbuild?
 
@@ -43,8 +39,13 @@ Instead of including every single detail of a build in the user projects, this i
   - These are user provided files describing the files, references, and settings for the build in question. 
   - These tend to contain many Reference items and additions to the Compile and None item group
   - These tend to include one single project specific “target” file that include the rest of the files needed to define the entire build.
+
+Examples:
+
+`<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />`
 `<Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />`
-  - Solution files (sln) just combine one or more projects for editing and building. The project file is main level of build knowledge.
+
+  - Solution files (sln) combine one or more projects for editing and building. They contain some build dependency and configurations information, but project files are main level of build knowledge.
 - Target Files (.targets)
   - These files are generally provided by the SDKs
   - These files generally describe a set of steps (targets) which need to be executed to process the build
@@ -56,7 +57,7 @@ Instead of including every single detail of a build in the user projects, this i
 
 All of these are are [XML Structured](#XML-Structure) text files.
 
-As I noted above, there is nothing truly special with the names and suffixes here. You could rename (targets and props) to (candy and chocolate) and things would still work the same. 
+As I noted above, there is nothing truly special with the names and suffixes, they are just standard conventions you should follow.
 
 ### Libraries 
 
@@ -76,7 +77,7 @@ Many parts of the build involve invoking outside tools or operations that would 
 
 - There is only one data type in msbuild for values. Everything is a string.
 - msbuild distinguished between two types of data, properties and items:
-  - Properties are single named elements elements 
+  - Properties are single named elements 
     - Think of accessing into a Dictionary<string, string> with the name type being the key
     - They are defined in PropertyGroups
 
@@ -160,12 +161,12 @@ There are many, but the most common include:
 - Parameters are passed via public properties defined on the task
 
 ```
-public abstract class CodesignNativeLibraries : Task 
+public abstract class MySpecialTask : Task 
 {
-    public string SessionId { get; set; }
+    public string MyOptionalArg { get; set; }
     
     [Required]
-    public string AppBundleDir { get; set; }
+    public string MyRequiredArg { get; set; }
 }
 ```
 
@@ -175,14 +176,14 @@ public abstract class CodesignNativeLibraries : Task
 - They are later invoked with:
 
 ```
-     <UsingTask TaskName="Xamarin.iOS.Tasks.CodesignNativeLibraries" AssemblyFile="Xamarin.iOS.Tasks.dll" />
+     <UsingTask TaskName="MyTasks.MySpecialTask" AssemblyFile="MyTasks.dll" />
      
-    <Target Name="_CodesignNativeLibraries">
-                    <CodesignNativeLibraries
-                            SessionId="$(BuildSessionId)"
-                            AppBundleDir="$(AppBundleDir)"
+    <Target Name="_MySpecialTask">
+                    <MySpecialTask
+                            MyOptionalArg="$(MyOptionalArg)"
+                            MyRequiredArg="$(MyRequiredArg)"
                             >
-                    </CodesignNativeLibraries>
+                    </MySpecialTask>
     </Target>
 ```
 - You can attach a C# debugger to the task, but that can be tricky on mono since there is no attach to process
@@ -226,7 +227,7 @@ A very inaccurate but useful way of thinking about how msbuild processes is to s
     - If you put them inside ItemGroups or PropertyGroups they will be ignored.
   - There is a new “binary log” hotness which acts as a full diagnostics build but is faster and contains even more information. You can enable it by passing `/bl`  to msbuild. Read more about it [here](https://github.com/Microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md). 
     - The support for loading .binlog files in Visual Studio for Mac is still somewhat new
-  - If you are developing on Windows you can add a `System.Diagnostics.Debugger.Break()` invocation and attach Visual Studio to the process.
+  - If you are developing on Windows you can add a `System.Diagnostics.Debugger.Launch()` invocation and attach Visual Studio to the process.
 
 
 ## Gotchas
