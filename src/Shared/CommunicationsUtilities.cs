@@ -646,14 +646,27 @@ namespace Microsoft.Build.Internal
 
         /// <summary>
         /// Add the task host context to this handshake, to make sure that task hosts with different contexts 
-        /// will have different handshakes.  Shift it into the upper 32-bits to avoid running into the 
-        /// session ID.
+        /// will have different handshakes. Shift it into the upper 32-bits to avoid running into the 
+        /// session ID. The connection may be salted to allow MSBuild to only connect to nodes that come from the same
+        /// test environment.
         /// </summary>
         /// <param name="hostContext">TaskHostContext</param>
         /// <returns>Base Handshake</returns>
-        private static long GetBaseHandshakeForContext(TaskHostContext hostContext)
+        public static long GetBaseHandshakeForContext(TaskHostContext hostContext)
         {
-            long baseHandshake = ((long)hostContext << 40) | ((long)FileVersionHash << 8);
+            string nodeHandShakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+
+            long salt = 0;
+
+            if (!string.IsNullOrEmpty(nodeHandShakeSalt))
+            {
+                salt = GetHandshakeHashCode(nodeHandShakeSalt);
+            }
+
+            //hostContext takes up 4 bits (value ranges from 0-4), shift it until just before the most significant byte
+            //the most significant byte gets zero'd out to avoid connecting to older builds.
+            //salt is shifted to after the fileversionhash (32 bits + 8 bits)
+            long baseHandshake = ((long)hostContext << 52) | (salt << 40) | ((long)FileVersionHash << 8);
             return baseHandshake;
         }
 
