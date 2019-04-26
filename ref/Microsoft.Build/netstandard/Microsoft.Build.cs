@@ -1439,6 +1439,7 @@ namespace Microsoft.Build.Experimental.Graph
         public Microsoft.Build.Execution.ProjectInstance ProjectInstance { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> ProjectReferences { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> ReferencingProjects { get { throw null; } }
+        public override string ToString() { throw null; }
     }
 }
 namespace Microsoft.Build.Globbing
