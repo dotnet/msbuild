@@ -1,6 +1,5 @@
 ﻿using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Shouldly;
 using System;
 using System.IO;
@@ -186,10 +185,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             downloadFile.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain(
-                                NativeMethodsShared.IsMono
-                                    ? @"ERROR : MSB3923: Failed to download file ""http://notfound/foo.txt"".  404 (Not Found)"
-                                    : @"ERROR : MSB3923: Failed to download file ""http://notfound/foo.txt"".  Response status code does not indicate success: 404 (Not Found).");
+            _mockEngine.Log.ShouldContain("Response status code does not indicate success: 404 (Not Found).");
         }
 
         [Fact]
