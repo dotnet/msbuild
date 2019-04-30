@@ -3707,15 +3707,21 @@ namespace Microsoft.Build.Tasks
         {
             Entry entry = new Entry(name, value);
 
-            if (reader.resourcesHashTable.ContainsKey(name))
+            AddResource(reader, entry, inputFileName, lineNumber, linePosition);
+        }
+
+        private void AddResource(ReaderInfo reader, Entry entry, String inputFileName, int lineNumber, int linePosition)
+        {
+            if (reader.resourcesHashTable.ContainsKey(entry.name))
             {
-                _logger.LogWarningWithCodeFromResources(null, inputFileName, lineNumber, linePosition, 0, 0, "GenerateResource.DuplicateResourceName", name);
+                _logger.LogWarningWithCodeFromResources(null, inputFileName, lineNumber, linePosition, 0, 0, "GenerateResource.DuplicateResourceName", entry.name);
                 return;
             }
 
             reader.resources.Add(entry);
-            reader.resourcesHashTable.Add(name, value);
+            reader.resourcesHashTable.Add(entry.name, entry.value);
         }
+
 
         /// <summary>
         /// Add a resource from an XML or binary format file to the internal data structures
