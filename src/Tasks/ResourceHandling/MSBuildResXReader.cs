@@ -23,6 +23,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             // TODO: is it ok to hardcode the "shouldUseSourcePath" behavior?
 
             var resources = new List<IResource>();
+            var aliases = new Dictionary<string, string>();
 
             using (var xmlReader = new XmlTextReader(s))
             {
@@ -34,11 +35,15 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     switch (elem.Name.LocalName)
                     {
                         case "schema":
+                            // TODO: this
+                            break;
                         case "assembly":
+                            ParseAssemblyAlias(aliases, elem);
+                            break;
                         case "resheader":
                             break;
                         case "data":
-                            ParseData(filename, resources, elem);
+                            ParseData(filename, resources, aliases, elem);
                             break;
                         default:
                             throw new NotImplementedException();
@@ -49,7 +54,23 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             Resources = resources;
         }
 
-        private static void ParseData(string resxFilename, List<IResource> resources, XElement elem)
+        private static void ParseAssemblyAlias(Dictionary<string,string> aliases, XElement elem)
+        {
+            string alias = elem.Attribute("alias").Value;
+            string name = elem.Attribute("name").Value;
+
+            aliases.Add(alias, name);
+        }
+
+        private static string GetFullTypeNameFromAlias(string aliasedTypeName, Dictionary<string, string> aliases)
+        {
+            int indexStart = aliasedTypeName.IndexOf(',');
+            string fullAssemblyIdentity = aliases[aliasedTypeName.Substring(indexStart + 2)];
+
+            return aliasedTypeName.Substring(0, indexStart + 2) + fullAssemblyIdentity;
+        }
+
+        private static void ParseData(string resxFilename, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
         {
             string name = elem.Attribute("name").Value;
             string value = elem.Element("value").Value;
@@ -60,13 +81,20 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             if (typename == null && mimetype == null)
             {
                 resources.Add(new StringResource(name, value, resxFilename));
+                return;
             }
-            else if (typename == "System.Resources.ResXFileRef, System.Windows.Forms")
+
+            if (typename != null)
+            {
+                typename = GetFullTypeNameFromAlias(typename, aliases);
+            }
+
+            if (typename == "System.Resources.ResXFileRef, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
             {
                 string[] fileRefInfo = ParseResxFileRefString(value);
 
                 string filename = fileRefInfo[0];
-                string fileReftype = fileRefInfo[1];
+                string fileRefType = fileRefInfo[1];
                 string fileRefEncoding = fileRefInfo[2];
 
                 throw new NotImplementedException();
