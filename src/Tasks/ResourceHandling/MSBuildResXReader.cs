@@ -54,7 +54,13 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             string name = elem.Attribute("name").Value;
             string value = elem.Element("value").Value;
 
-            resources.Add(new StringResource(name, value, filename));
+            string typename = elem.Attribute("type")?.Value;
+            string mimetype = elem.Attribute("mimetype")?.Value;
+
+            if (typename == null && mimetype == null)
+            {
+                resources.Add(new StringResource(name, value, filename));
+            }
         }
 
         public MSBuildResXReader(Stream s) : this(s, null)
