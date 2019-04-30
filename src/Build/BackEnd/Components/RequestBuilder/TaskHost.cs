@@ -336,7 +336,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests to yield the node.
         /// Thread safe, however Yield cannot be called unless the
-        /// last call to Yield or Reaquire was Reaquire.
+        /// last call to Yield or Reacquire was Reacquire.
         /// </summary>
         public void Yield()
         {
@@ -351,8 +351,8 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Requests to reacquire the node.
-        /// Thread safe, however Reaquire cannot be called unless the
-        /// last call to Yield or Reaquire was Yield.
+        /// Thread safe, however Reacquire cannot be called unless the
+        /// last call to Yield or Reacquire was Yield.
         /// </summary>
         public void Reacquire()
         {
