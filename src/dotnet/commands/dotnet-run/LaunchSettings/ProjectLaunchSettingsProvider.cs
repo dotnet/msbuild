@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         public string CommandName => CommandNameValue;
 
-        public LaunchSettingsApplyResult TryApplySettings(JsonElement document, JsonElement model, ref ICommand command)
+        public LaunchSettingsApplyResult TryApplySettings(JsonElement model, ref ICommand command)
         {
             var config = new ProjectLaunchSettingsModel();
             foreach (var property in model.EnumerateObject())
@@ -117,33 +117,20 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             switch (element.Type)
             {
                 case JsonValueType.True:
-                    value = "true";
+                    value = bool.TrueString;
                     return true;
                 case JsonValueType.False:
-                    value = "false";
+                    value = bool.FalseString;
                     return true;
                 case JsonValueType.Null:
-                    value = null;
+                    value = string.Empty;
                     return true;
                 case JsonValueType.Number:
-                    if (element.TryGetDouble(out var doubleValue))
-                    {
-                        value = doubleValue.ToString();
-                        return true;
-                    }
-                    value = null;
+                    value = element.GetRawText();
                     return false;
                 case JsonValueType.String:
-                    try
-                    {
-                        value = element.GetString();
-                        return true;
-                    }
-                    catch(InvalidOperationException)
-                    {
-                        value = null;
-                        return false;
-                    }
+                    value = element.GetString();
+                    return true;
                 default:
                     value = null;
                     return false;

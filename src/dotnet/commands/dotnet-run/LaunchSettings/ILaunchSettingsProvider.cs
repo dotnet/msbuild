@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
     {
         string CommandName { get; }
 
-        LaunchSettingsApplyResult TryApplySettings(JsonElement document, JsonElement model, ref ICommand command);
+        LaunchSettingsApplyResult TryApplySettings(JsonElement model, ref ICommand command);
     }
 
 }

@@ -25,64 +25,67 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
         {
             try
             {
-                var model = JsonDocument.Parse(launchSettingsJsonContents).RootElement;
+                using (var document = JsonDocument.Parse(launchSettingsJsonContents))
+                {
+                    var model = document.RootElement;
 
-                if (model.Type != JsonValueType.Object || !model.TryGetProperty(ProfilesKey, out var profilesObject) || profilesObject.Type != JsonValueType.Object)
-                {
-                    return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfilesCollectionIsNotAJsonObject);
-                }
-
-                JsonElement profileObject;
-                if (profileName == null)
-                {
-                    profileObject = profilesObject
-                        .EnumerateObject()
-                        .FirstOrDefault(IsDefaultProfileType).Value;
-                }
-                else
-                {
-                    if (!profilesObject.TryGetProperty(profileName, out profileObject) || profileObject.Type != JsonValueType.Object)
+                    if (model.Type != JsonValueType.Object || !model.TryGetProperty(ProfilesKey, out var profilesObject) || profilesObject.Type != JsonValueType.Object)
                     {
-                        return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
+                        return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfilesCollectionIsNotAJsonObject);
                     }
-                }
 
-                if (profileObject.Type == default)
-                {
-                    foreach (var prop in profilesObject.EnumerateObject())
+                    JsonElement profileObject;
+                    if (profileName == null)
                     {
-                        if (prop.Value.Type == JsonValueType.Object)
+                        profileObject = profilesObject
+                            .EnumerateObject()
+                            .FirstOrDefault(IsDefaultProfileType).Value;
+                    }
+                    else
+                    {
+                        if (!profilesObject.TryGetProperty(profileName, out profileObject) || profileObject.Type != JsonValueType.Object)
                         {
-                            if (prop.Value.TryGetProperty(CommandNameKey, out var commandNameElement) && commandNameElement.Type == JsonValueType.String)
+                            return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
+                        }
+                    }
+
+                    if (profileObject.Type == default)
+                    {
+                        foreach (var prop in profilesObject.EnumerateObject())
+                        {
+                            if (prop.Value.Type == JsonValueType.Object)
                             {
-                                if (_providers.ContainsKey(commandNameElement.GetString()))
+                                if (prop.Value.TryGetProperty(CommandNameKey, out var commandNameElement) && commandNameElement.Type == JsonValueType.String)
                                 {
-                                    profileObject = prop.Value;
-                                    break;
+                                    if (_providers.ContainsKey(commandNameElement.GetString()))
+                                    {
+                                        profileObject = prop.Value;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if (profileObject.Type == default)
-                {
-                    return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
-                }
+                    if (profileObject.Type == default)
+                    {
+                        return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
+                    }
 
-                if (!profileObject.TryGetProperty(CommandNameKey, out var finalCommandNameElement)
-                    || finalCommandNameElement.Type != JsonValueType.String)
-                {
-                    return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
-                }
+                    if (!profileObject.TryGetProperty(CommandNameKey, out var finalCommandNameElement)
+                        || finalCommandNameElement.Type != JsonValueType.String)
+                    {
+                        return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
+                    }
 
-                string commandName = finalCommandNameElement.GetString();
-                if (!TryLocateHandler(commandName, out ILaunchSettingsProvider provider))
-                {
-                    return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
-                }
+                    string commandName = finalCommandNameElement.GetString();
+                    if (!TryLocateHandler(commandName, out ILaunchSettingsProvider provider))
+                    {
+                        return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
+                    }
 
-                return provider.TryApplySettings(model, profileObject, ref command);
+                    return provider.TryApplySettings(profileObject, ref command);
+                }
             }
             catch (JsonReaderException ex)
             {
