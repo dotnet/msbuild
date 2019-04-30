@@ -43,6 +43,7 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Utilities;
 using System.Xml.Linq;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.ResourceHandling;
 
 namespace Microsoft.Build.Tasks
 {
@@ -3881,7 +3882,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Name value resource pair to go in resources list
         /// </summary>
-        private class Entry
+        private class Entry : IResource
         {
             public Entry(string name, object value)
             {
