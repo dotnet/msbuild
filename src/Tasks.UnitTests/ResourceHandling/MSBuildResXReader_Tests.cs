@@ -70,5 +70,9 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
             loadedResource1.Name.ShouldBe("2StringResource2");
             loadedResource1.Value.ShouldBe("2StringValue2");
         }
+
+        // TODO: invalid resx xml
+
+        // TODO: valid xml, but invalid resx-specific data
     }
 }

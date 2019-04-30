@@ -27,17 +27,34 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             using (var xmlReader = new XmlTextReader(s))
             {
                 xmlReader.WhitespaceHandling = WhitespaceHandling.None;
-                XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
-                foreach (XElement dataElem in doc.Element("root").Elements("data"))
-                {
-                    string name = dataElem.Attribute("name").Value;
-                    string value = dataElem.Element("value").Value;
 
-                    resources.Add(new StringResource(name, value, filename));
+                XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
+                foreach (XElement elem in doc.Element("root").Elements())
+                {
+                    switch (elem.Name.LocalName)
+                    {
+                        case "schema":
+                        case "assembly":
+                        case "resheader":
+                            break;
+                        case "data":
+                            ParseData(filename, resources, elem);
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
                 }
             }
 
             Resources = resources;
+        }
+
+        private static void ParseData(string filename, List<IResource> resources, XElement elem)
+        {
+            string name = elem.Attribute("name").Value;
+            string value = elem.Element("value").Value;
+
+            resources.Add(new StringResource(name, value, filename));
         }
 
         public MSBuildResXReader(Stream s) : this(s, null)
