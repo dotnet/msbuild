@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         }
 
         [Fact]
-        public void StringResourcesAreReadAsStrings()
+        public void ParsesSingleStringAsString()
         {
             var resxWithSingleString = new MSBuildResXReader(
                 ResXHelper.SurroundWithBoilerplate(
@@ -42,6 +42,33 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 
             loadedResource.Name.ShouldBe("StringResource");
             loadedResource.Value.ShouldBe("StringValue");
+        }
+
+        [Fact]
+        public void LoadsMultipleStringsPreservingOrder()
+        {
+            var resxWithTwoStrings = new MSBuildResXReader(
+    ResXHelper.SurroundWithBoilerplate(
+        @"<data name=""StringResource"" xml:space=""preserve"">
+    <value>StringValue</value>
+    <comment>Comment</comment>
+  </data>
+  <data name=""2StringResource2"" xml:space=""preserve"">
+    <value>2StringValue2</value>
+  </data>"));
+
+            resxWithTwoStrings.Resources.Count.ShouldBe(2);
+            resxWithTwoStrings.Resources[0].ShouldBeOfType<StringResource>();
+            resxWithTwoStrings.Resources[1].ShouldBeOfType<StringResource>();
+
+            var loadedResource0 = (StringResource)resxWithTwoStrings.Resources[0];
+            var loadedResource1 = (StringResource)resxWithTwoStrings.Resources[1];
+
+            loadedResource0.Name.ShouldBe("StringResource");
+            loadedResource0.Value.ShouldBe("StringValue");
+
+            loadedResource1.Name.ShouldBe("2StringResource2");
+            loadedResource1.Value.ShouldBe("2StringValue2");
         }
     }
 }
