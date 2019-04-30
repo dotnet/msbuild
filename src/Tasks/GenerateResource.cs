@@ -3636,9 +3636,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (Entry entry in reader.resources)
                 {
-                    string key = entry.name;
-                    object value = entry.value;
-                    writer.AddResource(key, value);
+                    entry.AddTo(writer);
                 }
             }
             catch (Exception e)
@@ -3887,6 +3885,11 @@ namespace Microsoft.Build.Tasks
 
             public string name;
             public object value;
+
+            public void AddTo(IResourceWriter writer)
+            {
+                writer.AddResource(name, value);
+            }
         }
 #endregion // Code from ResGen.EXE
     }
