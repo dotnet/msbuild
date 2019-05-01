@@ -221,6 +221,7 @@ namespace Microsoft.Build.Tasks
                 // Construct the return array
                 var retVal = new List<string>();
 
+#if FEATURE_RESX_RESOURCE_READER
                 using (var resxReader = new ResXResourceReader(filename))
                 {
                     // Tell the reader to return ResXDataNode's instead of the object type
@@ -252,6 +253,7 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
+#endif
 
                 return retVal.ToArray();
             }
