@@ -461,8 +461,7 @@ namespace Microsoft.Build.UnitTests
         /// Moving a locked file will fail
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [PlatformSpecific(TestPlatforms.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
         public void MoveLockedFile()
         {
             string file = null;
