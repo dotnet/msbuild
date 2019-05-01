@@ -461,8 +461,7 @@ namespace Microsoft.Build.UnitTests
         /// Moving a locked file will fail
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [PlatformSpecific(TestPlatforms.Windows)] // "File locking Unix differs significantly from Windows"
         public void MoveLockedFile()
         {
             string file = null;
