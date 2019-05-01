@@ -12,10 +12,10 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if FEATURE_RESGENCACHE
+
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-#endif
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 #if FEATURE_COM_INTEROP
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Tasks
 
         // Write time of newest uncorrelated input
         // DateTime.MinValue indicates "missing" iff _newestUncorrelatedInput != null
-        private DateTime _newestUncorrelatedInputWriteTime; 
+        private DateTime _newestUncorrelatedInputWriteTime;
 
         // The targets may pass in the path to the SDKToolsPath. If so this should be used to generate the commandline 
         // for logging purposes.  Also, when ExecuteAsTool is true, it determines where the system goes looking for resgen.exe
@@ -171,9 +171,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<ITaskItem> _satelliteInputs;
 
-#endregion  // fields
+        #endregion  // fields
 
-#region Properties
+        #region Properties
 
         /// <summary>
         /// The names of the items to be converted. The extension must be one of the
@@ -532,7 +532,7 @@ namespace Microsoft.Build.Tasks
             set;
         }
 
-#endregion // properties
+        #endregion // properties
 
         /// <summary>
         /// Simple public constructor.
@@ -1944,7 +1944,6 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-#if FEATURE_RESGENCACHE
                     catch (SerializationException e)
                     {
                         Log.LogMessageFromResources
@@ -1959,7 +1958,6 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-#endif
                     catch (Exception e)
                     {
                         // DDB#9819
@@ -2010,7 +2008,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool NeedSeparateAppDomainBasedOnSerializedType(XmlReader reader)
         {
-#if FEATURE_RESGENCACHE
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.Element)
@@ -2034,12 +2031,10 @@ namespace Microsoft.Build.Tasks
 
             // We didn't find any element at all -- the .resx is malformed.
             // Return true to err on the side of caution. Error will appear later.
-#endif
             return true;
         }
 #endif
 
-#if FEATURE_RESGENCACHE
         /// <summary>
         /// Deserializes a base64 block from a resx in order to figure out if its type is in the GAC.
         /// Because we're not providing any assembly resolution callback, deserialization
@@ -2094,7 +2089,7 @@ namespace Microsoft.Build.Tasks
                 return Convert.FromBase64String(text);
             }
         }
-#endif // FEATURE_RESGENCACHE
+
 
         /// <summary>
         /// Make sure that OutputResources has 1 file name for each name in Sources.
@@ -2278,7 +2273,7 @@ namespace Microsoft.Build.Tasks
         : MarshalByRefObject
 #endif
     {
-#region fields
+        #region fields
         /// <summary>
         /// List of readers used for input.
         /// </summary>
@@ -2445,7 +2440,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _useSourcePath = false;
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Process all files.
@@ -2596,7 +2591,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-#region Code from ResGen.EXE
+        #region Code from ResGen.EXE
 
         /// <summary>
         /// Read all resources from a file and write to a new file in the chosen format
@@ -2643,7 +2638,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (ae.InnerException is XmlException)
                 {
-                    XmlException xe = (XmlException) ae.InnerException;
+                    XmlException xe = (XmlException)ae.InnerException;
                     _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
                         xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 }
@@ -2668,9 +2663,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             catch (Exception e) when (
-#if FEATURE_RESGENCACHE
                                       e is SerializationException ||
-#endif
                                       e is TargetInvocationException)
             {
                 // DDB #9819
@@ -2791,7 +2784,7 @@ namespace Microsoft.Build.Tasks
                             && GetFormat(inFile) != Format.Assembly
                             // outFileOrDir is a directory when the input file is an assembly
                             && GetFormat(outFileOrDir) != Format.Assembly)
-                            // Never delete an assembly since we don't ever actually write to assemblies.
+                        // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(outFileOrDir);
                         }
@@ -2812,7 +2805,7 @@ namespace Microsoft.Build.Tasks
                     if (FileSystems.Default.FileExists(currentOutputFile))
                     {
                         if (GetFormat(currentOutputFile) != Format.Assembly)
-                            // Never delete an assembly since we don't ever actually write to assemblies.
+                        // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(currentOutputFile);
                         }
@@ -2839,9 +2832,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             catch (Exception e) when (
-#if FEATURE_RESGENCACHE
                                       e is SerializationException ||
-#endif
                                       e is TargetInvocationException)
             {
                 // DDB #9819
@@ -3894,7 +3885,6 @@ namespace Microsoft.Build.Tasks
             private int lineNumber;
             private int column;
 
-#if FEATURE_RESGENCACHE
             /// <summary>
             /// Fxcop want to have the correct basic exception constructors implemented
             /// </summary>
@@ -3902,7 +3892,6 @@ namespace Microsoft.Build.Tasks
                 : base(info, context)
             {
             }
-#endif
 
             internal TextFileException(String message, String fileName, int lineNumber, int linePosition)
                 : base(message)
@@ -3942,7 +3931,7 @@ namespace Microsoft.Build.Tasks
             public string name;
             public object value;
         }
-#endregion // Code from ResGen.EXE
+        #endregion // Code from ResGen.EXE
     }
 
 #if FEATURE_ASSEMBLY_LOADFROM
