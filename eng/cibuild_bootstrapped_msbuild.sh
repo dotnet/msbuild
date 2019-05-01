@@ -85,7 +85,7 @@ fi
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" $run_restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties
+	/bin/bash "$ScriptRoot/common/build.sh" $run_restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties || exit $?
 fi
 
 bootstrapRoot="$artifacts_dir/bin/bootstrap"
