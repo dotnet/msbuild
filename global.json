@@ -2,7 +2,7 @@
   "tools": {
     "dotnet": "2.2.203",
     "vs": {
-      "version": "15.8"
+      "version": "16.0"
     }
   },
   "msbuild-sdks": {
