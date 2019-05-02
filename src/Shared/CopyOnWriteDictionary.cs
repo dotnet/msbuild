@@ -222,7 +222,7 @@ namespace Microsoft.Build.Collections
             {
                 if (!IsDummy)
                 {
-                    WriteOperation.Add(key, value);
+                    backing = WriteOperation.SetItem(key, value);
                 }
             }
         }
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Collections
         {
             if (!IsDummy)
             {
-                WriteOperation.Add(key, value);
+                backing = WriteOperation.SetItem(key, value);
             }
         }
 
@@ -287,7 +287,7 @@ namespace Microsoft.Build.Collections
         {
             if (!IsDummy)
             {
-                backing = backing.Add(item.Key, item.Value);
+                backing = backing.SetItem(item.Key, item.Value);
             }
         }
 

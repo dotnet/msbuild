@@ -93,7 +93,7 @@ namespace System.Collections.Immutable
         // WRITE OPERATIONS
         //
 
-        internal ImmutableDictionary<K, V> Add(K key, V value)
+        internal ImmutableDictionary<K, V> SetItem(K key, V value)
         {
             var clone = new ImmutableDictionary<K, V>(_backing);
             clone._backing.Add(key, value);
