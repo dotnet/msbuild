@@ -616,5 +616,68 @@ class Program
                 .Should()
                 .Pass();
         }
+
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/3044")]
+        public void ReferenceLegacyContracts()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ReferencesLegacyContracts",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true,
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")
+            };
+
+            //  Dependencies on contracts from different 1.x "bands" can cause downgrades when building
+            //  with a RuntimeIdentifier.
+            testProject.PackageReferences.Add(new TestPackageReference("System.IO.FileSystem", "4.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("System.Reflection", "4.3.0"));
+
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void ItHasNoPackageReferences()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NoPackageReferences",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            string testDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            var getPackageReferences = new GetValuesCommand(
+               Log,
+               testDirectory,
+               testProject.TargetFrameworks,
+               "PackageReference",
+               GetValuesCommand.ValueType.Item);
+
+            getPackageReferences.Execute().Should().Pass();
+
+            List<string> packageReferences = getPackageReferences.GetValues();
+
+            packageReferences
+                .Should()
+                .BeEmpty();
+
+
+        }
     }
 }

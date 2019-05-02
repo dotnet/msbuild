@@ -49,6 +49,9 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] PackagesToDownload { get; set; }
 
         [Output]
+        public ITaskItem[] PackagesToReference { get; set; }
+
+        [Output]
         public ITaskItem[] RuntimeFrameworks { get; set; }
 
         [Output]
@@ -80,6 +83,7 @@ namespace Microsoft.NET.Build.Tasks
             var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
+            List<ITaskItem> packagesToReference = new List<ITaskItem>();
             List<ITaskItem> runtimeFrameworks = new List<ITaskItem>();
             List<ITaskItem> targetingPacks = new List<ITaskItem>();
             List<ITaskItem> runtimePacks = new List<ITaskItem>();
@@ -90,6 +94,21 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var knownFrameworkReference in knownFrameworkReferencesForTargetFramework)
             {
                 frameworkReferenceMap.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
+
+                if (frameworkReference != null)
+                {
+                    if (!string.IsNullOrEmpty(knownFrameworkReference.PackagesToReference))
+                    {
+                        foreach (var packageAndVersion in knownFrameworkReference.PackagesToReference.Split(';'))
+                        {
+                            var items = packageAndVersion.Split('/');
+                            TaskItem packageToReference = new TaskItem(items[0]);
+                            packageToReference.SetMetadata(MetadataKeys.Version, items[1]);
+
+                            packagesToReference.Add(packageToReference);
+                        }
+                    }
+                }
 
                 //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                 TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
@@ -180,6 +199,11 @@ namespace Microsoft.NET.Build.Tasks
             if (packagesToDownload.Any())
             {
                 PackagesToDownload = packagesToDownload.ToArray();
+            }
+
+            if (packagesToReference.Any())
+            {
+                PackagesToReference = packagesToReference.ToArray();
             }
 
             if (runtimeFrameworks.Any())
@@ -351,6 +375,8 @@ namespace Microsoft.NET.Build.Tasks
             public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
 
             public string RuntimePackRuntimeIdentifiers => _item.GetMetadata("RuntimePackRuntimeIdentifiers");
+
+            public string PackagesToReference => _item.GetMetadata("PackagesToReference");
 
             public NuGetFramework TargetFramework { get; }
         }
