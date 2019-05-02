@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
@@ -36,23 +37,11 @@ namespace Microsoft.Build.Collections
     [Serializable]
     internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary where V : class
     {
-#if DEBUG
-        /// <summary>
-        /// When set forces immediate copy
-        /// </summary>
-        private static readonly bool s_forceWrite = (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDFORCECOWCOPY")));
-#endif
-
-        /// <summary>
-        /// The default capacity.
-        /// </summary>
-        private readonly int capacity;
-
         /// <summary>
         /// The backing dictionary.
         /// Lazily created.
         /// </summary>
-        private CopyOnWriteBackingDictionary<K, V> backing;
+        private ImmutableDictionary<K, V> backing;
 
         /// <summary>
         /// Constructor. Consider supplying a comparer instead.
@@ -82,7 +71,6 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal CopyOnWriteDictionary(int capacity, IEqualityComparer<K> keyComparer)
         {
-            this.capacity = capacity;
             Comparer = keyComparer;
         }
 
@@ -102,32 +90,22 @@ namespace Microsoft.Build.Collections
         {
             Comparer = that.Comparer;
             backing = that.backing;
-            if (backing != null)
-            {
-                lock (((ICollection)backing).SyncRoot)
-                {
-                    backing.AddRef();
-                }
-            }
         }
 
         public CopyOnWriteDictionary(IDictionary<K, V> dictionary)
         {
-            foreach (KeyValuePair<K, V> pair in dictionary)
-            {
-                this[pair.Key] = pair.Value;
-            }
+            backing = dictionary.ToImmutableDictionary();
         }
 
         /// <summary>
         /// Returns the collection of keys in the dictionary.
         /// </summary>
-        public ICollection<K> Keys => ReadOperation.Keys;
+        public ICollection<K> Keys => (ICollection<K>)ReadOperation.Keys;
 
         /// <summary>
         /// Returns the collection of values in the dictionary.
         /// </summary>
-        public ICollection<V> Values => ReadOperation.Values;
+        public ICollection<V> Values => (ICollection<V>)ReadOperation.Values;
 
         /// <summary>
         /// Returns the number of items in the collection.
@@ -205,33 +183,20 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Gets the backing dictionary for reading.
         /// </summary>
-        private CopyOnWriteBackingDictionary<K, V> ReadOperation
+        private ImmutableDictionary<K, V> ReadOperation
         {
             get
             {
                 ErrorUtilities.VerifyThrow(!IsDummy || backing == null || backing.Count == 0, "count"); // check count without recursion
-#if DEBUG
-                if (s_forceWrite)
-                {
-                    if (!IsDummy)
-                    {
-                        return WriteOperation;
-                    }
-                }
-#endif
-                if (backing == null)
-                {
-                    return CopyOnWriteBackingDictionary<K, V>.ReadOnlyEmptyInstance;
-                }
 
-                return backing;
+                return backing ?? ImmutableDictionary<K,V>.Empty;
             }
         }
 
         /// <summary>
         /// Gets the backing dictionary for writing.
         /// </summary>
-        private CopyOnWriteBackingDictionary<K, V> WriteOperation
+        private ImmutableDictionary<K, V> WriteOperation
         {
             get
             {
@@ -239,14 +204,7 @@ namespace Microsoft.Build.Collections
 
                 if (backing == null)
                 {
-                    backing = new CopyOnWriteBackingDictionary<K, V>(capacity, Comparer);
-                }
-                else
-                {
-                    lock (((ICollection)backing).SyncRoot)
-                    {
-                        backing = backing.CloneForWriteIfNecessary();
-                    }
+                    backing = ImmutableDictionary.Create<K,V>(Comparer);
                 }
 
                 return backing;
@@ -264,18 +222,7 @@ namespace Microsoft.Build.Collections
             {
                 if (!IsDummy)
                 {
-                    if (ReadOperation.HasNoClones)
-                    {
-                        WriteOperation[key] = value;
-                    }
-                    else
-                    {
-                        // Try to avoid a clone if it already is present with the same value
-                        if (!ReadOperation.TryGetValue(key, out V existingValue) || !EqualityComparer<V>.Default.Equals(existingValue, value))
-                        {
-                            WriteOperation[key] = value;
-                        }
-                    }
+                    WriteOperation.Add(key, value);
                 }
             }
         }
@@ -318,16 +265,11 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(K key)
         {
-            // Avoid a clone if it's not present
-            if (ReadOperation.HasNoClones || ReadOperation.ContainsKey(key))
-            {
-                if (!IsDummy)
-                {
-                    return WriteOperation.Remove(key);
-                }
-            }
+            ImmutableDictionary<K, V> initial = backing;
 
-            return false;
+            backing = backing.Remove(key);
+
+            return initial != backing; // if the removal occured, the 
         }
 
         /// <summary>
@@ -345,7 +287,7 @@ namespace Microsoft.Build.Collections
         {
             if (!IsDummy)
             {
-                ((IDictionary<K, V>)WriteOperation).Add(item);
+                backing = backing.Add(item.Key, item.Value);
             }
         }
 
@@ -354,12 +296,9 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            if (ReadOperation.Count > 0)
+            if (!IsDummy)
             {
-                if (!IsDummy)
-                {
-                    WriteOperation.Clear();
-                }
+                backing = backing.Clear();
             }
         }
 
@@ -368,7 +307,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Contains(KeyValuePair<K, V> item)
         {
-            return ((IDictionary<K, V>)ReadOperation).Contains(item);
+            return ReadOperation.Contains(item);
         }
 
         /// <summary>
@@ -384,16 +323,11 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(KeyValuePair<K, V> item)
         {
-            // If it doesn't already contain the key, avoid copying the dictionary.
-            if (ReadOperation.HasNoClones || ReadOperation.ContainsKey(item.Key))
-            {
-                if (!IsDummy)
-                {
-                    return ((IDictionary<K, V>)WriteOperation).Remove(item);
-                }
-            }
+            ImmutableDictionary<K, V> initial = backing;
 
-            return false;
+            backing = backing.Remove(item.Key);
+
+            return initial != backing; // if the removal occured, the 
         }
 
         /// <summary>
@@ -479,112 +413,6 @@ namespace Microsoft.Build.Collections
         internal bool HasSameBacking(CopyOnWriteDictionary<K, V> other)
         {
             return ReferenceEquals(other.backing, backing);
-        }
-
-        /// <summary>
-        /// A dictionary which is reference counted to allow several references for read operations, but knows when to clone for
-        /// write operations.
-        /// </summary>
-        /// <typeparam name="K1">The key type.</typeparam>
-        /// <typeparam name="V1">The value type.</typeparam>
-        [Serializable]
-        private class CopyOnWriteBackingDictionary<K1, V1> : Dictionary<K1, V1> where V1 : class
-        {
-            /// <summary>
-            /// An empty dictionary 
-            /// </summary>
-            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields", Justification = "Error in code analysis.")]
-            private static readonly CopyOnWriteBackingDictionary<K1, V1> s_readOnlyEmptyDictionary = new CopyOnWriteBackingDictionary<K1, V1>();
-
-            /// <summary>
-            /// The reference count. 
-            /// </summary>
-            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields", Justification = "Error in code analysis.")]
-            [NonSerialized]
-            private int _refCount = 1;
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public CopyOnWriteBackingDictionary(int capacity, IEqualityComparer<K1> comparer)
-                : base(capacity, comparer)
-            {
-                // Tracing.Record("New COWBD");
-            }
-
-            /// <summary>
-            /// Serialization constructor, for crossing appdomain boundaries
-            /// </summary>
-            protected CopyOnWriteBackingDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-            }
-
-            /// <summary>
-            /// Empty constructor.
-            /// </summary>
-            private CopyOnWriteBackingDictionary()
-            {
-            }
-
-            /// <summary>
-            /// Cloning constructor.
-            /// </summary>
-            private CopyOnWriteBackingDictionary(CopyOnWriteBackingDictionary<K1, V1> that)
-                : base(that, that.Comparer)
-            {
-                // Tracing.Record("New COWBD-clone");
-            }
-
-            /// <summary>
-            /// Returns a read-only empty instance.
-            /// </summary>
-            public static CopyOnWriteBackingDictionary<K1, V1> ReadOnlyEmptyInstance => s_readOnlyEmptyDictionary;
-
-            /// <summary>
-            /// Returns true if this collection has no clones.
-            /// </summary>
-            public bool HasNoClones
-            {
-                get
-                {
-                    ErrorUtilities.VerifyThrow(_refCount >= 1, "refCount should not be less than 1.");
-                    return _refCount == 1;
-                }
-            }
-
-            /// <summary>
-            /// Clones backing dictionary if necessary for a write operation.
-            /// </summary>
-            public CopyOnWriteBackingDictionary<K1, V1> CloneForWriteIfNecessary()
-            {
-                if (!HasNoClones)
-                {
-                    _refCount--;
-                    return new CopyOnWriteBackingDictionary<K1, V1>(this);
-                }
-
-                return this;
-            }
-
-            /// <summary>
-            /// Adds a reader-reference to this backing dictionary.
-            /// </summary>
-            public int AddRef()
-            {
-                return ++_refCount;
-            }
-
-            /// <summary>
-            /// Deserialization does not call any constructors, not even
-            /// the parameterless constructor. Therefore since we do not serialize
-            /// this field, we must populate it here.
-            /// </summary>
-            [OnDeserialized]
-            private void OnDeserialized(StreamingContext context)
-            {
-                _refCount = 1;
-            }
         }
     }
 }
