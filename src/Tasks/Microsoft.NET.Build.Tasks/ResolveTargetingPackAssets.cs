@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -72,7 +73,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
 
                         string targetingPackDataPath = Path.Combine(targetingPackRoot, "data");
-                        string[] possibleDllPaths = new[]
+                        string[] possibleDllFolders = new[]
                         {
                             Path.Combine(targetingPackRoot, "ref", targetingPackTargetFramework),
                             targetingPackDataPath
@@ -87,7 +88,7 @@ namespace Microsoft.NET.Build.Tasks
                                         targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt"),
                         };
 
-                        string targetingPackDllPath = possibleDllPaths.First(path =>
+                        string targetingPackDllFolder = possibleDllFolders.First(path =>
                                     Directory.Exists(path) &&
                                     Directory.GetFiles(path, "*.dll").Any());
 
@@ -95,11 +96,21 @@ namespace Microsoft.NET.Build.Tasks
 
                         string packageOverridesPath = Path.Combine(targetingPackDataPath, "PackageOverrides.txt");
 
-                        foreach (var dll in Directory.GetFiles(targetingPackDllPath, "*.dll"))
-                        {
-                            var reference = CreateReferenceItem(dll, targetingPack);
+                        string frameworkListPath = Path.Combine(targetingPackDataPath, "FrameworkList.xml");
 
-                            referencesToAdd.Add(reference);
+                        if (File.Exists(frameworkListPath))
+                        {
+                            AddReferencesFromFrameworkList(frameworkListPath, targetingPackDllFolder,
+                                                           targetingPack, referencesToAdd);
+                        }
+                        else
+                        {
+                            foreach (var dll in Directory.GetFiles(targetingPackDllFolder, "*.dll"))
+                            {
+                                var reference = CreateReferenceItem(dll, targetingPack);
+
+                                referencesToAdd.Add(reference);
+                            }
                         }
 
                         if (platformManifestPath != null)
@@ -157,6 +168,25 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private void AddReferencesFromFrameworkList(string frameworkListPath, string targetingPackDllFolder,
+            ITaskItem targetingPack, List<TaskItem> referenceItems)
+        {
+            XDocument frameworkListDoc = XDocument.Load(frameworkListPath);
+
+            foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
+            {
+                string assemblyName = fileElement.Attribute("AssemblyName").Value;
+                var dllPath = Path.Combine(targetingPackDllFolder, assemblyName + ".dll");
+                var referenceItem = CreateReferenceItem(dllPath, targetingPack);
+
+                referenceItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion").Value);
+                referenceItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion").Value);
+                referenceItem.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken").Value);
+
+                referenceItems.Add(referenceItem);
+            }
+        }
+
         private TaskItem CreateReferenceItem(string dll, ITaskItem targetingPack)
         {
             var reference = new TaskItem(dll);
@@ -175,6 +205,9 @@ namespace Microsoft.NET.Build.Tasks
             reference.SetMetadata("ReferenceGrouping", targetingPack.ItemSpec);
             reference.SetMetadata("ResolvedFrom", "TargetingPack");
             reference.SetMetadata("IsSystemReference", "true");
+
+            reference.SetMetadata("FrameworkName", targetingPack.ItemSpec);
+            reference.SetMetadata("FrameworkVersion", targetingPack.GetMetadata(MetadataKeys.PackageVersion));
             
             return reference;
         }
