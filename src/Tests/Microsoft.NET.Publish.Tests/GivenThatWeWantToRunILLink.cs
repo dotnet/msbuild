@@ -30,8 +30,9 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name, args: $"/p:RuntimeIdentifier={rid}");
+                .Restore(Log, testProject.Name, restoreArgs);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true").Should().Pass();
@@ -65,8 +66,9 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name, args: $"/p:RuntimeIdentifier={rid}");
+                .Restore(Log, testProject.Name, restoreArgs);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
@@ -103,9 +105,10 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"))
-                .Restore(Log, testProject.Name, args: $"/p:RuntimeIdentifier={rid}");
+                .Restore(Log, testProject.Name, restoreArgs);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             // Inject extra arguments to prevent the linker from
@@ -138,8 +141,9 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name, args: $"/p:RuntimeIdentifier={rid}");
+                .Restore(Log, testProject.Name, restoreArgs);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -169,9 +173,10 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"))
-                .Restore(Log, testProject.Name, args: $"/p:RuntimeIdentifier={rid}");
+                .Restore(Log, testProject.Name, restoreArgs);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -338,7 +343,8 @@ public class ClassLib
                 PackageReferences = { packageReference }
             };
 
-            testProject.AdditionalProperties.Add("RestoreAdditionalProjectSources", Path.GetDirectoryName(packageReference.NupkgPath));
+            testProject.AdditionalProperties.Add("RestoreAdditionalProjectSources", 
+                                                 "$(RestoreAdditionalProjectSources);" + Path.GetDirectoryName(packageReference.NupkgPath));
 
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"
 using System;
