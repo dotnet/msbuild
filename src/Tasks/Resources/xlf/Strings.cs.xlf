@@ -971,22 +971,22 @@
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
         <source>Input file "{0}" does not exist.</source>
-        <target state="new">Input file "{0}" does not exist.</target>
+        <target state="translated">Vstupní soubor {0} neexistuje.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputNewer">
         <source>Input file "{0}" is newer than output file "{1}".</source>
-        <target state="new">Input file "{0}" is newer than output file "{1}".</target>
+        <target state="translated">Vstupní soubor {0} je novější než výstupní soubor {1}.</target>
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.LinkedInputDoesntExist">
         <source>Linked input file "{0}" does not exist.</source>
-        <target state="new">Linked input file "{0}" does not exist.</target>
+        <target state="translated">Propojený vstupní soubor {0} neexistuje.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.LinkedInputNewer">
         <source>Linked input file "{0}" is newer than output file "{1}".</source>
-        <target state="new">Linked input file "{0}" is newer than output file "{1}".</target>
+        <target state="translated">Propojený vstupní soubor {0} je novější než výstupní soubor {1}.</target>
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
@@ -996,7 +996,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
-        <target state="new">Output file "{0}" does not exist.</target>
+        <target state="translated">Výstupní soubor {0} neexistuje.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
@@ -2535,7 +2535,7 @@
       </trans-unit>
       <trans-unit id="Xaml.MissingTaskBody">
         <source>MSB3692: Unable to create Xaml task.  The &lt;UsingTask&gt; does not contain a &lt;Task&gt; definition.</source>
-        <target state="translated">MSB3692: Nelze vytvořit úlohu Xaml.  Element &lt;UsingTask&gt; neobsahuje definici &lt;Task&gt;.</target>
+        <target state="translated">MSB3692: Nelze vytvořit úlohu Xaml. Element &lt;UsingTask&gt; neobsahuje definici &lt;Task&gt;.</target>
         <note>{StrBegin="MSB3692: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.ArgumentOutOfRange">
@@ -2780,7 +2780,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="translated">MSB3757: Je možné určit jenom jeden element &lt;Code&gt;.</target>
+        <target state="translated">MSB3757: Zadat se dá jen jeden element &lt;Code&gt;.</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -2885,7 +2885,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKReferenceIncorrectFormat">
         <source>MSB3776: The SDK Reference "{0}" is incorrectly formatted. It must be in the following format "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;. For example: "MySDK, Version=2.0"</source>
-        <target state="translated">MSB3776: Odkaz {0} sady SDK má nesprávný formát. Musí mít následující formát: &lt;název_SDK&gt;, Version=&lt;verze_SDK&gt;. Příklad: "MojeSDK, Version=2.0".</target>
+        <target state="translated">MSB3776: Odkaz {0} sady SDK má nesprávný formát. Musí mít následující formát: "&lt;NázevSadySDK&gt;, Version=&lt;VerzeSadySDK&gt;". Příklad: "MaSadaSDK, Version=2.0"</target>
         <note>{StrBegin="MSB3776: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoMatchingFrameworkIdentity">
@@ -3110,7 +3110,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
-        <target state="translated">MSB3492: Nešlo přečíst existující soubor {0}, aby se zjistilo, jestli je jeho obsah aktuální. Přepíše se.</target>
+        <target state="new">MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
@@ -3165,12 +3165,12 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="translated">MSB3756: Atribut {0} není platný pro element &lt;Code&gt;. Platnými atributy jsou Language, Source a Type.</target>
+        <target state="translated">MSB3756: Atribut {0} není pro element &lt;Code&gt; platný. Platné atributy jsou Language, Source a Type.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="translated">MSB3752: Atribut {0} elementu &lt;{1}&gt; je nastavený, ale je prázdný. Pokud je atribut {0} nastavený, nesmí být prázdný.</target>
+        <target state="translated">MSB3752: Atribut {0} elementu &lt;{1}&gt; byl nastaven, je však prázdný. Pokud je atribut {0} nastaven, nesmí být prázdný.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.Comment">
