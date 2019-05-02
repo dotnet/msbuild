@@ -91,6 +91,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
+      <Output TaskParameter="LegacyFrameworkPackages" ItemName="_LegacyFrameworkPackage" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
@@ -136,6 +137,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup Condition="'$(UsePackageDownload)' != 'true'">
       <PackageReference Include="@(_PackageToDownload)"
+                        IsImplicitlyDefined="true"
+                        PrivateAssets="all"
+                        ExcludeAssets="all" />
+    </ItemGroup>
+
+    <!-- Only add these "legacy" package references if there are already existing package references,
+         as they are only needed in those scenarios (for example supplying the RID graph to
+         NuGet, or preventing older versions of Framework packages from being used). -->
+    <ItemGroup Condition="'@(PackageReference)' != '' and '$(DisableImplicitFrameworkReferences)' != 'true'">
+      <PackageReference Include="@(_LegacyFrameworkPackage)"
                         IsImplicitlyDefined="true"
                         PrivateAssets="all"
                         ExcludeAssets="all" />
