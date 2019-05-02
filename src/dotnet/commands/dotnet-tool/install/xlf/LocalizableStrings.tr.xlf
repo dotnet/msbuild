@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Yerel seçeneği (--local), genel seçeneği (--global), araç yolu seçeneği (--tool-path), aynı anda yalnızca biri olabilir. Lütfen seçeneklerden yalnızca birini belirtin: {0}.</target>
+        <target state="translated">Yerel seçeneği (--local), genel seçeneği (--global), araç yolu seçeneği (--tool-path) arasından yalnızca biri seçilebilir. Lütfen seçeneklerden yalnızca birini belirtin: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -16,7 +16,7 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
-        <target state="translated">Aracı yükleyin ve yerel araç bildirimine (varsayılan) ekleyin.</target>
+        <target state="translated">Aracı yükle ve yerel araç bildirimine ekle (varsayılan).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
@@ -27,8 +27,8 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       <trans-unit id="LocalToolInstallationSucceeded">
         <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="needs-review-translation">Şu komutu kullanarak aracı bu dizinden çağırabilirsiniz: dotnet tool run {0}
-'{1}' aracı (sürüm '{2}') başarıyla yüklendi. {3} bildirim dosyasına giriş eklendi.</target>
+        <target state="translated">Şu komutları kullanarak aracı bu dizinden çağırabilirsiniz: 'dotnet tool run {0}' veya 'dotnet {0}'.
+'{1}' aracı (sürüm '{2}') başarıyla yüklendi. Giriş {3} bildirim dosyasına eklendi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -44,7 +44,8 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
       <trans-unit id="NoManifestGuide">
         <source>If you intended to install a global tool, add `--global` to the command.
 If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
-        <target state="needs-review-translation">Genel bir araç yüklemek istiyorsanız, '-g' ekleyin. Bir araç bildirimi kullanmak istiyorsanız önce bunu 'dotnet new tool-manifest' içinde oluşturmanız gerekir.</target>
+        <target state="translated">Genel bir aracı yüklemeyi amaçlıyorsanız komuta '--global' ifadesini ekleyin.
+Bir bildirim oluşturmak istiyorsanız 'dotnet new tool-manifest' ifadesini kullanın. Bu ifade genelde depo kök dizinine eklenir.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -54,7 +55,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install global or local tool. Local tools are added to manifest and restored.</source>
-        <target state="translated">Genel veya yerel aracı yükleyin. Yerel araçlar bildirime eklenir ve geri yüklenir.</target>
+        <target state="translated">Genel veya yerel araç yükleyin. Yerel araçlar bildirime eklenir ve geri yüklenir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -84,7 +85,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool for the current user.</source>
-        <target state="translated">Geçerli kullanıcıya yönelik aracı yükleyin.</target>
+        <target state="translated">Aracı geçerli kullanıcı için yükle.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">

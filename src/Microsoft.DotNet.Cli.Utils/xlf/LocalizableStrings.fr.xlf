@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Aucun exécutable ne correspond à la commande "{0}". Consultez https://aka.ms/missing-command pour plus d'informations.</target>
+        <target state="translated">Impossible d'effectuer l'exécution, car la commande ou le fichier spécifié est introuvable.
+Raisons possibles :
+  * Vous avez mal orthographié une commande dotnet intégrée.
+  * Vous aviez l'intention d'exécuter un programme .NET Core, mais {0} n'existe pas.
+  * Vous aviez l'intention d'exécuter un outil global, mais l'exécutable portant le nom indiqué précédé de dotnet est introuvable dans le CHEMIN.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -63,7 +67,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} a quitté avec {1} en {2} ms.</target>
+        <target state="translated">&lt; {0} s'est arrêté avec {1} en {2} ms.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -107,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET Core SDK</source>
-        <target state="translated">SDK .NET Core</target>
+        <target state="translated">Kit SDK .NET Core</target>
         <note />
       </trans-unit>
     </body>

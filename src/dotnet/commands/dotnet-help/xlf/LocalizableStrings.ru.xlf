@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
-        <target state="new">Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <target state="translated">Накат до версии платформы (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">Запустить интерактивную консоль F# / выполнить скрипты F#.</target>
+        <target state="translated">Запуск F# Interactive / выполнение скриптов F#.</target>
         <note />
       </trans-unit>
     </body>

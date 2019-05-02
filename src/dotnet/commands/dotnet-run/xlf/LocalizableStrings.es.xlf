@@ -148,7 +148,7 @@ El actual {1} es "{2}".</target>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">El tiempo de ejecución de destino para el que ejecutar.</target>
+        <target state="translated">El entorno de ejecución de destino en el que se ejecuta.</target>
         <note />
       </trans-unit>
     </body>

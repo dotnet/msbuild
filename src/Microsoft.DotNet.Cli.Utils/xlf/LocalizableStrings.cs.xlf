@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Nenašel se žádný spustitelný soubor odpovídající příkazu {0}. Další informace najdete na https://aka.ms/missing-command.</target>
+        <target state="translated">Spuštění nebylo úspěšné, protože zadaný příkaz nebo soubor se nenašly.
+Mezi možné příčiny patří toto:
+  * V integrovaném příkazu dotnet je překlep.
+  * Chtěli jste spustit program .NET Core, ale {0} neexistuje.
+  * Chtěli jste spustit globální nástroj, ale v proměnné PATH se nepovedlo najít spustitelný soubor s předponou dotnet s tímto názvem.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -63,7 +67,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} se ukončil s: {1} za {2} ms.</target>
+        <target state="translated">&lt; proces {0} se ukončil s kódem {1} za {2} ms.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -107,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET Core SDK</source>
-        <target state="translated">.NET Core SDK</target>
+        <target state="translated">Sada .NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

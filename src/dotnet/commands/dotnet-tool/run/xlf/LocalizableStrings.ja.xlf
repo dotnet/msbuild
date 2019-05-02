@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="CannotFindCommandName">
         <source>Cannot find a tool in the manifest file that has a command named '{0}'.</source>
-        <target state="translated">'{0}' というコマンドが含まれるマニフェスト ファイルにツールが見つかりません。</target>
+        <target state="translated">'{0}' という名前のコマンドを持つマニフェスト ファイルでツールが見つかりません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">

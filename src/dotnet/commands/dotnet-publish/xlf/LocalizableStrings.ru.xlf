@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Do not display the startup banner or the copyright message.</source>
-        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <target state="translated">Не отображать начальный баннер или сообщение об авторских правах.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -50,7 +50,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">Целевая среда для публикации. Используется при создании автономного развертывания. По умолчанию публикация выполняется в приложение, зависимое от платформы.</target>
+        <target state="translated">Целевая среда для публикации. Используется при создании автономного развертывания.
+По умолчанию публикация выполняется в приложение, зависимое от платформы.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">

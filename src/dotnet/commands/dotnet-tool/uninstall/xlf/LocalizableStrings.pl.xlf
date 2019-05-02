@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="NoManifestFileContainPackageId">
         <source>Cannot find a manifest file that contains package id '{0}'.</source>
-        <target state="new">Cannot find a manifest file that contains package id '{0}'.</target>
+        <target state="translated">Nie można odnaleźć pliku manifestu, który zawiera identyfikator pakietu „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Jednocześnie można podać tylko jedną z następujących opcji: opcja lokalna (--local), opcja globalna (--global) lub opcja ścieżki narzędzia (--tool-path). Określ tylko jedną z tych opcji: {0}.</target>
+        <target state="translated">Można określić tylko jedną opcję jednocześnie: opcję lokalną (--local), opcję globalną (--global) lub opcję ścieżki do narzędzia (--tool-path). Podaj tylko jedną z opcji: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

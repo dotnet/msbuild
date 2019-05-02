@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
-        <target state="new">Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <target state="translated">프레임워크 버전(LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable)으로 롤포워드합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -224,12 +224,12 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;애플리케이션&gt;.deps.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;application&gt;.deps.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;애플리케이션&gt;.runtimeconfig.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">F# 대화형 시작/F# 스크립트를 실행합니다.</target>
+        <target state="translated">F# Interactive를 시작하고 F# 스크립트를 실행합니다.</target>
         <note />
       </trans-unit>
     </body>

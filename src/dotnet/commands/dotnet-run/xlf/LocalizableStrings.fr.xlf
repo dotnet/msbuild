@@ -148,7 +148,7 @@ Le {1} actuel est '{2}'.</target>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">Runtime cible pour l'exécution.</target>
+        <target state="translated">Runtime cible à exécuter.</target>
         <note />
       </trans-unit>
     </body>

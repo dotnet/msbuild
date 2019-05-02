@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
-        <target state="new">Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <target state="translated">復原為架構版本 (LatestPatch、Minor、LatestMinor、Major、LatestMajor、Disable)。</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -224,12 +224,12 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;應用程式&gt;.deps.json 檔案的路徑。</target>
+        <target state="translated">&lt;application&gt;.deps.json 檔案的路徑。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;應用程式&gt;.runtimeconfig.json 檔案的路徑。</target>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json 檔案的路徑。</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">啟動 F# 互動/執行 F# 指令碼。</target>
+        <target state="translated">啟動 F# Interactive/執行 F# 指令碼。</target>
         <note />
       </trans-unit>
     </body>

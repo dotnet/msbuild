@@ -16,13 +16,13 @@ Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 Write your first app: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</source>
-        <target state="new">----------------
-Explore documentation: https://aka.ms/dotnet-docs
-Report issues and find source on GitHub: https://github.com/dotnet/core
-Find out what's new: https://aka.ms/dotnet-whats-new
-Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-Write your first app: https://aka.ms/first-net-core-app
+        <target state="translated">----------------
+Belgeleri inceleyin: https://aka.ms/dotnet-docs
+Sorunları bildirin ve kaynağı GitHub'da bulun: https://github.com/dotnet/core
+Yenilikleri öğrenin: https://aka.ms/dotnet-whats-new
+Yüklü HTTPS geliştirici sertifikası hakkında bilgi edinin: https://aka.ms/aspnet-core-https
+Kullanılabilen komutları görmek için 'dotnet --help' komutunu kullanın veya şu sayfayı ziyaret edin: https://aka.ms/dotnet-cli-docs
+İlk uygulamanızı yazın: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>
@@ -30,9 +30,9 @@ Write your first app: https://aka.ms/first-net-core-app
         <source>Welcome to .NET Core 3.0!
 ---------------------
 SDK Version: {0}</source>
-        <target state="new">Welcome to .NET Core 3.0!
+        <target state="translated">.NET Core 3.0'a Hoş Geldiniz!
 ---------------------
-SDK Version: {0}</target>
+SDK Sürümü: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
@@ -42,10 +42,10 @@ The .NET Core tools collect usage data in order to help us improve your experien
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="translated">Telemetri
----------
-.NET Core araçları, deneyiminizi geliştirmemize yardımcı olmak için kullanım verilerini toplar. Veriler anonimdir. Microsoft tarafından toplanır ve toplulukla paylaşılır. Tercih ettiğiniz kabukla DOTNET_CLI_TELEMETRY_OPTOUT ortam değişkenini '1' veya 'true' değerine ayarlayarak telemetriyi geri çevirebilirsiniz.
+----------
+.NET Core araçları, deneyiminizi geliştirmemize yardımcı olmak için kullanım verileri toplar. Veriler anonimdir. Veriler Microsoft tarafından toplanır ve toplulukla paylaşılır. Telemetriden çıkmak için dilediğiniz kabuğu kullanarak DOTNET_CLI_TELEMETRY_OPTOUT ortam değişkenini '1' veya 'true' olarak ayarlayabilirsiniz.
 
-.NET Core CLI Araçları telemetrisi hakkında daha fazla bilgi edinin: https://aka.ms/dotnet-cli-telemetry</target>
+.NET Core CLI Araçları telemetrisi hakkında daha fazla bilgi: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

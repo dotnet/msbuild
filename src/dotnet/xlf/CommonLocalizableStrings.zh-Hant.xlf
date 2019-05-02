@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../CommonLocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../CommonLocalizableStrings.resx">
     <body>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
@@ -479,7 +479,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">專案 {1} 中沒有任何 {0} 參考。</target>
+        <target state="translated">專案 {1} 中沒有任何 {0} 參考。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -727,17 +727,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數上。
-若您使用 Bash，可以透過執行下列命令，將其新增到您的設定檔:
+        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數中。
+若目前使用 bash，可執行下列命令將其新增至您的設定檔:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# 新增 .NET Core SDK 工具
 export PATH="$PATH:{0}"
 EOF
 
-您可透過執行下列命令，將其新增到目前的工作階段:
+您可執行下列命令，將其新增至目前的工作階段:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -753,17 +754,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數上。
-若您使用 Bash，可以執行下列命令將其新增到您的設定檔:
+        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數中。
+若目前使用 bash，可執行下列命令將其新增至您的設定檔:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# 新增 .NET Core SDK 工具
 export PATH="$PATH:{0}"
 EOF
 
-您可執行下列命令將其新增到目前的工作階段:
+您可執行下列命令，將其新增至目前的工作階段:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="translated">매니페스트 파일의 경로입니다.</target>
+        <target state="translated">매니페스트 파일 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="NoManifestFileContainPackageId">
         <source>Cannot find a manifest file that contains package id '{0}'.</source>
-        <target state="new">Cannot find a manifest file that contains package id '{0}'.</target>
+        <target state="translated">패키지 ID '{0}'을(를) 포함하는 매니페스트 파일을 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="UninstallLocalToolSucceeded">
         <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
-        <target state="translated">'{0}' 도구를 제거하고 매니페스트 파일 {1}에서 제거했습니다.</target>
+        <target state="translated">'{0}' 도구가 제거되었으며 매니페스트 파일 {1}에서 제거되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">로컬 옵션(--local), 전역 옵션(--global), 도구 경로 옵션(--tool-path)은 한 번에 하나만 지정할 수 있습니다. 옵션 중 하나만 지정하세요. {0}.</target>
+        <target state="translated">로컬 옵션(--local), 전역 옵션(--global), 도구 경로 옵션(--tool-path)은 한 번에 하나씩만 사용할 수 있습니다. {0} 옵션 중에서 하나만 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

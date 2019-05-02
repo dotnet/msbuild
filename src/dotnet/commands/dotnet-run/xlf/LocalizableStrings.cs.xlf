@@ -148,7 +148,7 @@ Aktuální {1} je {2}.</target>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">Cílový modul runtime pro spuštění</target>
+        <target state="translated">Cílový modul runtime pro běh</target>
         <note />
       </trans-unit>
     </body>
