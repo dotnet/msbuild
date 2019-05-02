@@ -473,6 +473,7 @@
     <Compile Include="RemoveDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ResGenDependencies.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
     <Compile Include="ResolveKeySource.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -610,7 +611,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResGen.cs" />
-    <Compile Include="ResGenDependencies.cs" />
+
     <Compile Include="ResolveComReferenceCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
