@@ -488,7 +488,7 @@
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: "{0}" parametresinin söz dizimi geçerli değil ({1}). Doğru söz dizimi: {0}="&lt;ad&gt;=&lt;değer&gt;".</target>
+        <target state="translated">MSB3100: "{0}" parametresinin sözdizimi geçerli değil ({1}). Doğru sözdizimi: {0}="&lt;ad&gt;=&lt;değer&gt;".</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -971,22 +971,22 @@
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
         <source>Input file "{0}" does not exist.</source>
-        <target state="new">Input file "{0}" does not exist.</target>
+        <target state="translated">"{0}" giriş dosyası yok.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputNewer">
         <source>Input file "{0}" is newer than output file "{1}".</source>
-        <target state="new">Input file "{0}" is newer than output file "{1}".</target>
+        <target state="translated">"{0}" giriş dosyası, "{1}" çıkış dosyasından daha yeni.</target>
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.LinkedInputDoesntExist">
         <source>Linked input file "{0}" does not exist.</source>
-        <target state="new">Linked input file "{0}" does not exist.</target>
+        <target state="translated">"{0}" bağlı giriş dosyası yok.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.LinkedInputNewer">
         <source>Linked input file "{0}" is newer than output file "{1}".</source>
-        <target state="new">Linked input file "{0}" is newer than output file "{1}".</target>
+        <target state="translated">"{0}" bağlı giriş dosyası, "{1}" çıkış dosyasından daha yeni.</target>
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
@@ -996,7 +996,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
-        <target state="new">Output file "{0}" does not exist.</target>
+        <target state="translated">"{0}" çıkış dosyası yok.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.BadAssemblyImage">
         <source>MSB3281: The assembly "{0}" is not a valid assembly file.</source>
-        <target state="translated">MSB3281: MSB3281: "{0}" derlemesi geçerli bir derleme dosyası değil.</target>
+        <target state="translated">MSB3281: "{0}" derlemesi geçerli bir derleme dosyası değil.</target>
         <note>{StrBegin="MSB3281: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotAccessTypeLibName">
@@ -2535,7 +2535,7 @@
       </trans-unit>
       <trans-unit id="Xaml.MissingTaskBody">
         <source>MSB3692: Unable to create Xaml task.  The &lt;UsingTask&gt; does not contain a &lt;Task&gt; definition.</source>
-        <target state="translated">MSB3692: Xaml görevi oluşturulamıyor.  &lt;UsingTask&gt; bir &lt;Task&gt; tanımı içermiyor.</target>
+        <target state="translated">MSB3692: Xaml görevi oluşturulamıyor. &lt;UsingTask&gt; bir &lt;Task&gt; tanımı içermiyor.</target>
         <note>{StrBegin="MSB3692: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.ArgumentOutOfRange">
@@ -2775,7 +2775,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
         <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
-        <target state="translated">MSB3756: &lt;{0}&gt; öğesi, &lt;{1}&gt; öğesinin geçerli bir alt öğesi değil.  Geçerli alt öğeler şunlardır: &lt;Code&gt;, &lt;Reference&gt; ve &lt;Using&gt;.</target>
+        <target state="translated">MSB3756: &lt;{0}&gt;, &lt;{1}&gt; öğesinin bir alt öğesi değil.  Geçerli alt öğeler: &lt;Code&gt;, &lt;Reference&gt; ve &lt;Using&gt;.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
@@ -2885,7 +2885,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKReferenceIncorrectFormat">
         <source>MSB3776: The SDK Reference "{0}" is incorrectly formatted. It must be in the following format "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;. For example: "MySDK, Version=2.0"</source>
-        <target state="translated">MSB3776: "{0}" SDK Başvurusu yanlış biçimlendirilmiş. "&lt;SDKAdı&gt;, Version=&lt;SDKSürümü&gt;” biçiminde olması gerekiyor. Örnek: "BenimSDK, Version=2.0"</target>
+        <target state="translated">MSB3776: SDK Başvurusu "{0}" yanlış biçimlendirilmiş. "&lt;SDKAdı&gt;, Version=&lt;SDKSürümü&gt; biçiminde olması gerekiyor. Örnek: "BenimSDK, Version=2.0"</target>
         <note>{StrBegin="MSB3776: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoMatchingFrameworkIdentity">
@@ -3110,7 +3110,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
-        <target state="translated">MSB3492: İçeriğinin güncel olup olmadığını belirlemek üzere "{0}" adlı mevcut dosya okunamadı. Dosyanın üzerine yazılıyor.</target>
+        <target state="new">MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
@@ -3165,7 +3165,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="translated">MSB3756: &lt;Code&gt; öğesi için "{0}" özniteliği geçersiz.  Geçerli öznitelikler şunlardır: "Language", "Source" ve "Type".</target>
+        <target state="translated">MSB3756: "{0}" özniteliği &lt;Code&gt; öğesi için geçerli değil.  Geçerli öznitelikler: "Dil", "Kaynak" ve "Tür".</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">

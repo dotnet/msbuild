@@ -488,7 +488,7 @@
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: Składnia parametru „{0}” jest nieprawidłowa ({1}). Poprawna składnia to {0}="&lt;nazwa&gt;=&lt;wartość&gt;".</target>
+        <target state="translated">MSB3100: Składnia parametru „{0}” jest nieprawidłowa ({1}). Poprawna składnia to {0}="&lt;name&gt;=&lt;value&gt;".</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -971,22 +971,22 @@
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
         <source>Input file "{0}" does not exist.</source>
-        <target state="new">Input file "{0}" does not exist.</target>
+        <target state="translated">Plik wejściowy „{0}” nie istnieje.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputNewer">
         <source>Input file "{0}" is newer than output file "{1}".</source>
-        <target state="new">Input file "{0}" is newer than output file "{1}".</target>
+        <target state="translated">Plik wejściowy „{0}” jest nowszy niż plik wyjściowy „{1}”.</target>
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.LinkedInputDoesntExist">
         <source>Linked input file "{0}" does not exist.</source>
-        <target state="new">Linked input file "{0}" does not exist.</target>
+        <target state="translated">Połączony plik wejściowy „{0}” nie istnieje.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.LinkedInputNewer">
         <source>Linked input file "{0}" is newer than output file "{1}".</source>
-        <target state="new">Linked input file "{0}" is newer than output file "{1}".</target>
+        <target state="translated">Połączony plik wejściowy „{0}” jest nowszy niż plik wyjściowy „{1}”.</target>
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
@@ -996,7 +996,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
-        <target state="new">Output file "{0}" does not exist.</target>
+        <target state="translated">Plik wyjściowy „{0}” nie istnieje.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
@@ -2535,7 +2535,7 @@
       </trans-unit>
       <trans-unit id="Xaml.MissingTaskBody">
         <source>MSB3692: Unable to create Xaml task.  The &lt;UsingTask&gt; does not contain a &lt;Task&gt; definition.</source>
-        <target state="translated">MSB3692: Nie można utworzyć zadania Xaml.  Parametr &lt;UsingTask&gt; nie zawiera definicji &lt;Task&gt;.</target>
+        <target state="translated">MSB3692: Nie można utworzyć zadania Xaml. Parametr &lt;UsingTask&gt; nie zawiera definicji &lt;Task&gt;.</target>
         <note>{StrBegin="MSB3692: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.ArgumentOutOfRange">
@@ -2750,7 +2750,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CodeElementIsMissing">
         <source>MSB3751: The &lt;Code&gt; element is missing for the "{0}" task. This element is required.</source>
-        <target state="translated">MSB3751: Brak elementu &lt;Code&gt; dla zadania „{0}”. Ten element jest wymagany.</target>
+        <target state="translated">MSB3751: Brakuje elementu &lt;Code&gt; dla zadania {0}. Ten element jest wymagany.</target>
         <note>{StrBegin="MSB3751: "} &lt;Code&gt; should not be localized it is the name of an xml element</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmpty">
@@ -3110,7 +3110,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
-        <target state="translated">MSB3492: nie można odczytać istniejącego pliku „{0}” w celu sprawdzenia, czy jego zawartość jest aktualna. Zostanie on zastąpiony.</target>
+        <target state="new">MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">

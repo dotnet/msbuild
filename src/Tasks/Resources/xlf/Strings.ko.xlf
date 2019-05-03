@@ -488,7 +488,7 @@
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: "{0}" 매개 변수의 구문이 잘못되었습니다({1}). 올바른 구문은 {0}="&lt;name&gt;=&lt;value&gt;"입니다.</target>
+        <target state="translated">MSB3100: "{0}" 매개 변수의 구문이 잘못되었습니다({1}). 올바른 구문은 {0}="&lt;이름&gt;=&lt;값&gt;"입니다.</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -971,22 +971,22 @@
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
         <source>Input file "{0}" does not exist.</source>
-        <target state="new">Input file "{0}" does not exist.</target>
+        <target state="translated">입력 파일 "{0}"이(가) 없습니다.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputNewer">
         <source>Input file "{0}" is newer than output file "{1}".</source>
-        <target state="new">Input file "{0}" is newer than output file "{1}".</target>
+        <target state="translated">입력 파일 "{0}"이(가) 출력 파일 "{1}"보다 최신 파일입니다.</target>
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.LinkedInputDoesntExist">
         <source>Linked input file "{0}" does not exist.</source>
-        <target state="new">Linked input file "{0}" does not exist.</target>
+        <target state="translated">연결된 입력 파일 "{0}"이 (가) 없습니다.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.LinkedInputNewer">
         <source>Linked input file "{0}" is newer than output file "{1}".</source>
-        <target state="new">Linked input file "{0}" is newer than output file "{1}".</target>
+        <target state="translated">연결된 입력 파일 "{0}"이(가) 출력 파일 "{1}"보다 최신 파일입니다.</target>
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
@@ -996,7 +996,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
-        <target state="new">Output file "{0}" does not exist.</target>
+        <target state="translated">출력 파일 "{0}"이(가) 없습니다.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
@@ -1439,7 +1439,7 @@
       </trans-unit>
       <trans-unit id="RegisterAssembly.UnauthorizedAccess">
         <source>MSB3216: Cannot register assembly "{0}" - access denied. Please make sure you're running the application as administrator. {1}</source>
-        <target state="translated">MSB3392: "{0}" 어셈블리를 등록할 수 없습니다. 액세스가 거부되었습니다. 관리자로 애플리케이션을 실행하고 있는지 확인하세요. {1}</target>
+        <target state="translated">MSB3216: "{0}" 어셈블리를 등록할 수 없습니다. 액세스가 거부되었습니다. 관리자로 애플리케이션을 실행하고 있는지 확인하세요. {1}</target>
         <note>{StrBegin="MSB3216: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
@@ -2775,12 +2775,12 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
         <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
-        <target state="translated">MSB3756: &lt;{0}&gt; 요소가 &lt;{1}&gt; 요소의 유효한 자식이 아닙니다. 유효한 자식 요소는 &lt;Code&gt;, &lt;Reference&gt;, &lt;Using&gt;입니다.</target>
+        <target state="translated">MSB3756: &lt;{0}&gt; 요소는 &lt;{1}&gt; 요소의 유효한 자식이 아닙니다. 유효한 자식 요소는 &lt;Code&gt;, &lt;Reference&gt;, 및 &lt;Using&gt;입니다.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="translated">MSB3757: &lt;Code&gt; 요소를 하나만 지정할 수 있습니다.</target>
+        <target state="translated">MSB3757: &lt;Code&gt; 요소는 하나만 지정할 수 있습니다.</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -3110,7 +3110,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
-        <target state="translated">MSB3492: 기존 파일 "{0}"을(를) 읽을 수 없어 콘텐츠가 최신 상태인지 확인할 수 없습니다. 덮어씁니다.</target>
+        <target state="new">MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
@@ -3165,7 +3165,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="translated">MSB3756: &lt;Code&gt; 요소에 대해 "{0}" 특성이 잘못되었습니다. 유효한 특성은 "Language", "Source", "Type"입니다.</target>
+        <target state="translated">MSB3756: "{0}" 특성이 &lt;Code&gt; 요소에 대해 유효하지 않습니다. 유효한 특성은 "Language", "Source" 및 "Type"입니다.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
