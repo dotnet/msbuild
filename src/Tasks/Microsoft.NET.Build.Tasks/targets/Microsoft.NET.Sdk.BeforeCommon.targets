@@ -25,6 +25,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Set default intermediate and output paths -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" />
   
+  <!-- Before any additional SDK targets are imported, import the publish profile.
+       This allows the publish profile to set properties like RuntimeIdentifier and them be
+       respected by the SDK. -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.ImportPublishProfile.targets"
+          Condition="'$(PublishProfileImported)' != 'true'"/>
+
   <!-- 
     Expand TargetFramework to TargetFrameworkIdentifier and TargetFrameworkVersion,
     and adjust intermediate and output paths to include it.
