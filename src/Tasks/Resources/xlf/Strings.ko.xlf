@@ -3110,7 +3110,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
-        <target state="new">MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</target>
+        <target state="translated">MSB3492: 기존 파일 "{0}"을(를) 읽을 수 없어 콘텐츠가 최신 상태인지 확인할 수 없습니다. 덮어씁니다.</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
