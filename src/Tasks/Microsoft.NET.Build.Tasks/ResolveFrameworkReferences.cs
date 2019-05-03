@@ -95,18 +95,15 @@ namespace Microsoft.NET.Build.Tasks
             {
                 frameworkReferenceMap.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
 
-                if (frameworkReference != null)
+                if (frameworkReference != null && !string.IsNullOrEmpty(knownFrameworkReference.LegacyFrameworkPackages))
                 {
-                    if (!string.IsNullOrEmpty(knownFrameworkReference.LegacyFrameworkPackages))
+                    foreach (var packageAndVersion in knownFrameworkReference.LegacyFrameworkPackages.Split(';'))
                     {
-                        foreach (var packageAndVersion in knownFrameworkReference.LegacyFrameworkPackages.Split(';'))
-                        {
-                            var items = packageAndVersion.Split('/');
-                            TaskItem packageToReference = new TaskItem(items[0]);
-                            packageToReference.SetMetadata(MetadataKeys.Version, items[1]);
+                        var items = packageAndVersion.Split('/');
+                        TaskItem packageToReference = new TaskItem(items[0]);
+                        packageToReference.SetMetadata(MetadataKeys.Version, items[1]);
 
-                            legacyFrameworkPackages.Add(packageToReference);
-                        }
+                        legacyFrameworkPackages.Add(packageToReference);
                     }
                 }
 
