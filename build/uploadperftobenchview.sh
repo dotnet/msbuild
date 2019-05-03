@@ -82,7 +82,7 @@ python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/submission
 
 echo Creating: "$perfWorkingDirectory/build.json"
 python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/build.py" git --branch "$GIT_BRANCH_WITHOUT_ORIGIN" --type "$runType" --source-timestamp "$timeStamp" \
-                   -o "$perfWorkingDirectory/build.json" || { echo Failed to create: "$perfWorkingDirectory/build.json" && exit 1 ; }
+                   --repository "https://github.com/dotnet/sdk" -o "$perfWorkingDirectory/build.json" || { echo Failed to create: "$perfWorkingDirectory/build.json" && exit 1 ; }
 
 echo Creating: "$perfWorkingDirectory/machinedata.json"
 python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/machinedata.py" \
