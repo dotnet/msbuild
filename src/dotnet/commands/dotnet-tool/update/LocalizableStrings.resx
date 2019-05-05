@@ -175,7 +175,12 @@
     <value>Tool '{0}' has multiple versions installed and cannot be updated.</value>
   </data>
   <data name="ToolNotInstalled" xml:space="preserve">
-    <value>Tool '{0}' is not currently installed.</value>
+    <value>A tool with the package Id '{0}' could not be found. 
+
+Tools are updated using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</value>
   </data>
   <data name="UpdateSucceededVersionNoChange" xml:space="preserve">
     <value>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</value>
