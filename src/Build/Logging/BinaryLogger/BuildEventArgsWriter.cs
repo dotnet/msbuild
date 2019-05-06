@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Exceptions;
@@ -538,25 +539,36 @@ namespace Microsoft.Build.Logging
 
         private void Write(ITaskItem item)
         {
-            Write(item.ItemSpec);
-            IDictionary customMetadata = item.CloneCustomMetadata();
-            Write(customMetadata.Count);
-
-            foreach (string metadataName in customMetadata.Keys)
+            // Temporarily try catch all to mitigate frequent NullReferenceExceptions in
+            // the logging code until CopyOnWritePropertyDictionary is replaced with
+            // ImmutableDictionary. Calling into Debug.Fail to crash the process in case
+            // the exception occures in Debug builds.
+            try
             {
-                Write(metadataName);
-                string valueOrError;
+                Write(item.ItemSpec);
+                IDictionary customMetadata = item.CloneCustomMetadata();
+                Write(customMetadata.Count);
 
-                try
+                foreach (string metadataName in customMetadata.Keys)
                 {
-                    valueOrError = item.GetMetadata(metadataName);
-                }
-                catch (InvalidProjectFileException e)
-                {
-                    valueOrError = e.Message;
-                }
+                    Write(metadataName);
+                    string valueOrError;
 
-                Write(valueOrError);
+                    try
+                    {
+                        valueOrError = item.GetMetadata(metadataName);
+                    }
+                    catch (InvalidProjectFileException e)
+                    {
+                        valueOrError = e.Message;
+                    }
+
+                    Write(valueOrError);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Fail(ex.ToString());
             }
         }
 
