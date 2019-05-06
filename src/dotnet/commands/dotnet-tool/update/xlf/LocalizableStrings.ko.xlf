@@ -118,8 +118,13 @@
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
-        <source>Tool '{0}' is not currently installed.</source>
-        <target state="translated">도구 '{0}'이(가) 현재 설치되어 있지 않습니다.</target>
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are updated using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="needs-review-translation">도구 '{0}'이(가) 현재 설치되어 있지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">
