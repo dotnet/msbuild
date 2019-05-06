@@ -1,0 +1,110 @@
+trigger:
+- vs15.9
+
+pr:
+- vs15.9
+
+jobs:
+- job: innerloop_OSX1013_CoreCLR
+  displayName: OSX10.13 Build for CoreCLR
+  pool:
+    vmImage: macOS-10.13
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build/cibuild.sh
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/**/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'artifacts/**/log/*.binlog'
+        'artifacts/**/log/*.log'
+        'artifacts/**/TestResults/*'
+        'artifacts/**/MSBuild_*.failure.txt'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: innerloop_OSX1013_CoreCLR
+
+- job: innerloop_Ubuntu1604_CoreCLR
+  displayName: Ubuntu16.04 Build for CoreCLR
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build/cibuild.sh
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/**/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'artifacts/**/log/*.binlog'
+        'artifacts/**/log/*.log'
+        'artifacts/**/TestResults/*'
+        'artifacts/**/MSBuild_*.failure.txt'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: innerloop_Ubuntu1604_CoreCLR
+
+- job: innerloop_Windows_NT_CoreCLR
+  displayName: Windows_NT Build for CoreCLR
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: set VSCMD_START_DIR="%CD%" && call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" && build\cibuild.cmd -hostType Core
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/**/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'artifacts/**/log/*.binlog'
+        'artifacts/**/log/*.log'
+        'artifacts/**/TestResults/*'
+        'artifacts/**/MSBuild_*.failure.txt'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: innerloop_Windows_NT_CoreCLR
+
+- job: innerloop_Windows_NT_Full
+  displayName: Windows_NT Build for Full
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: set VSCMD_START_DIR="%CD%" && call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" && build\cibuild.cmd
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/**/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'artifacts/**/log/*.binlog'
+        'artifacts/**/log/*.log'
+        'artifacts/**/TestResults/*'
+        'artifacts/**/MSBuild_*.failure.txt'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: innerloop_Windows_NT_Full
