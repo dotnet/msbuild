@@ -6,11 +6,16 @@ For more information on MSBuild, see the [MSBuild documentation](https://docs.mi
 
 ### Build Status
 
-The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.1.
+The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.2.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=master)
 
-We have forked for MSBuild 16.0 in the branch [`vs16.0`](https://github.com/Microsoft/msbuild/tree/vs16.0). Changes to that branch need special approval.
+We have forked for MSBuild 16.1 in the branch [`vs16.1`](https://github.com/Microsoft/msbuild/tree/vs16.1). Changes to that branch need special approval.
+
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.1)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.1)
+
+
+MSBuild 16.0 builds from the branch [`vs16.0`](https://github.com/Microsoft/msbuild/tree/vs16.0). Only high-priority bugfixes will be considered for servicing 16.0.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.0)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.0)
 

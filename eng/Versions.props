@@ -13,12 +13,11 @@
     </RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
-  <!-- Repo Version Information (these versions shouldn't actually be used because NerdBank.GitVersioning should
-       override the versions set by Repo Toolset) -->
   <PropertyGroup>
-    <VersionBase>15.1.0</VersionBase>
-    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
-    <UseShippingAssemblyVersion>true</UseShippingAssemblyVersion>
+    <VersionPrefix>16.2.0</VersionPrefix>
+    <AssemblyVersion>15.1.0.0</AssemblyVersion>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
   <PropertyGroup>

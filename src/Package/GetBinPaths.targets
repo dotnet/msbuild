@@ -17,7 +17,7 @@
 
   </ItemGroup>
 
-  <Target Name="SetBinPaths" DependsOnTargets="GetBuildVersion;ResolveProjectReferences">
+  <Target Name="SetBinPaths" DependsOnTargets="ResolveProjectReferences">
     <MSBuild
         Projects="@(X64ProjectReference)"
         BuildInParallel="$(BuildInParallel)"

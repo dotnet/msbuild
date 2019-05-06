@@ -33,7 +33,7 @@
     DependsOnTargets="SetBinPaths"
     Condition="!$(ShouldSkipProject)">
     <ItemGroup>
-      <SwrProperty Include="Version=$(BuildVersion)" />
+      <SwrProperty Include="Version=$(AssemblyVersion)" />
       <SwrProperty Include="X86BinPath=$(X86BinPath)" />
       <SwrProperty Include="X64BinPath=$(X64BinPath)" />
       <SwrProperty Include="TaskHostBinPath=$(MSBuildTaskHostBinPath)" />

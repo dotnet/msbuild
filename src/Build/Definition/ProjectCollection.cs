@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Xml;
 
@@ -132,6 +133,11 @@ namespace Microsoft.Build.Evaluation
         /// If you want the assembly version, use Constants.AssemblyVersion.
         /// </remarks>
         private static Version s_engineVersion;
+
+        /// <summary>
+        /// The display version of the file in which the Engine assembly lies.
+        /// </summary>
+        private static string s_assemblyDisplayVersion;
 
         /// <summary>
         /// The projects loaded into this collection.
@@ -440,6 +446,28 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return s_engineVersion;
+            }
+        }
+
+        /// <summary>
+        /// Gets a version of the Engine suitable for display to a user.
+        /// </summary>
+        /// <remarks>
+        /// This is in the form of a SemVer v2 version, Major.Minor.Patch-prerelease+metadata.
+        /// </remarks>
+        public static string DisplayVersion
+        {
+            get
+            {
+                if (s_assemblyDisplayVersion == null)
+                {
+                    var fullInformationalVersion = typeof(Constants).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
+                    // use a truncated version with only 9 digits of SHA
+                    s_assemblyDisplayVersion = fullInformationalVersion.Substring(startIndex: 0, length: fullInformationalVersion.IndexOf('+') + 10);
+                }
+
+                return s_assemblyDisplayVersion;
             }
         }
 
