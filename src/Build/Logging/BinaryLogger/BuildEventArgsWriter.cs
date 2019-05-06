@@ -539,36 +539,34 @@ namespace Microsoft.Build.Logging
 
         private void Write(ITaskItem item)
         {
-            // Temporarily try catch all to mitigate frequent NullReferenceExceptions in
-            // the logging code until CopyOnWritePropertyDictionary is replaced with
-            // ImmutableDictionary. Calling into Debug.Fail to crash the process in case
-            // the exception occures in Debug builds.
-            try
-            {
-                Write(item.ItemSpec);
-                IDictionary customMetadata = item.CloneCustomMetadata();
-                Write(customMetadata.Count);
+            Write(item.ItemSpec);
+            IDictionary customMetadata = item.CloneCustomMetadata();
+            Write(customMetadata.Count);
 
-                foreach (string metadataName in customMetadata.Keys)
+            foreach (string metadataName in customMetadata.Keys)
+            {
+                Write(metadataName);
+                string valueOrError;
+
+                try
                 {
-                    Write(metadataName);
-                    string valueOrError;
-
-                    try
-                    {
-                        valueOrError = item.GetMetadata(metadataName);
-                    }
-                    catch (InvalidProjectFileException e)
-                    {
-                        valueOrError = e.Message;
-                    }
-
-                    Write(valueOrError);
+                    valueOrError = item.GetMetadata(metadataName);
                 }
-            }
-            catch (Exception ex)
-            {
-                Debug.Fail(ex.ToString());
+                catch (InvalidProjectFileException e)
+                {
+                    valueOrError = e.Message;
+                }
+                // Temporarily try catch all to mitigate frequent NullReferenceExceptions in
+                // the logging code until CopyOnWritePropertyDictionary is replaced with
+                // ImmutableDictionary. Calling into Debug.Fail to crash the process in case
+                // the exception occures in Debug builds.
+                catch (Exception e)
+                {
+                    valueOrError = e.Message;
+                    Debug.Fail(e.ToString());
+                }
+
+                Write(valueOrError);
             }
         }
 
