@@ -1,14 +1,13 @@
-﻿// Learn more about F# at http://fsharp.org
+// Learn more about F# at http://fsharp.org
 
 open System
 
 // Define a function to print a message
-// Functions are defined before they are used in F#
-let printMessage message =
-    printfn "%s" message
+let from who =
+    sprintf "from %s" message
 
 [<EntryPoint>]
 let main argv =
-    // Call the previously-defined function
-    printMessage "Hello world from F#!"
+    let message = from "F#" // Call the function
+    printMessage "Hello world %s" message
     0 // return an integer exit code
