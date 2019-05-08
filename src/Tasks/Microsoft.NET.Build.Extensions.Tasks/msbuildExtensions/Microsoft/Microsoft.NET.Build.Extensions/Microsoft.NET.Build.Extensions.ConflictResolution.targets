@@ -26,18 +26,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="$(_HandlePackageFileConflictsBefore)"
           AfterTargets="$(_HandlePackageFileConflictsAfter)"
           DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths">
-
-    <PropertyGroup Condition="'$(RequirePackageIdMetadata)' == ''">
-      <RequirePackageIdMetadata>false</RequirePackageIdMetadata>
-    </PropertyGroup>
-    
     <ResolvePackageFileConflicts References="@(Reference)"
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
                                  TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
                                  PackageOverrides="@(PackageConflictOverrides)"
-                                 PreferredPackages="$(PackageConflictPreferredPackages)"
-                                 RequirePackageIdMetadata="$(RequirePackageIdMetadata)">
+                                 PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />

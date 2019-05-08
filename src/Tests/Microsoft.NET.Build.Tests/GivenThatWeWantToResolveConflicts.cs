@@ -156,7 +156,6 @@ namespace Microsoft.NET.Build.Tests
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.VisualStudio.Composition", "15.8.112"));
-            testProject.AdditionalProperties["RequirePackageIdMetadata"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(p =>

@@ -16,10 +16,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-  <PropertyGroup Condition="'$(RequirePackageIdMetadata)' == ''">
-    <RequirePackageIdMetadata>true</RequirePackageIdMetadata>
-  </PropertyGroup>
-  
   <!--
     _HandlePackageFileConflicts
     Handles package file conflict resolution for build.
@@ -46,8 +42,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
                                  TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
                                  PackageOverrides="@(PackageConflictOverrides)"
-                                 PreferredPackages="$(PackageConflictPreferredPackages)"
-                                 RequirePackageIdMetadata="$(RequirePackageIdMetadata)">
+                                 PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />
@@ -82,8 +77,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolvePackageFileConflicts ReferenceCopyLocalPaths="@(_ResolvedCopyLocalPublishAssets)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
                                  TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
-                                 PreferredPackages="$(PackageConflictPreferredPackages)"
-                                 RequirePackageIdMetadata="$(RequirePackageIdMetadata)">
+                                 PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ResolvedCopyLocalPublishAssetsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_PublishConflictPackageFiles" />
     </ResolvePackageFileConflicts>
