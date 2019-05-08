@@ -4459,14 +4459,14 @@ namespace Microsoft.Build.Evaluation
                 ReadOnlySpan<char> functionName;
 
                 // What's left of the expression once the function has been constructed
-                string remainder = String.Empty;
+                ReadOnlySpan<char> remainder = ReadOnlySpan<char>.Empty;
 
                 // The binding flags that we will use for this function's execution
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
 
-                ReadOnlySpan<char> expFuncAsSpan = expressionFunction.AsSpan();
+                ReadOnlySpan<char> expressionFuncAsSpan = expressionFunction.AsSpan();
 
-                ReadOnlySpan<char> spanSubstring = expFuncAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex);
+                ReadOnlySpan<char> spanSubstring = expressionFuncAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex);
 
                 // There are arguments that need to be passed to the function
                 if (argumentStartIndex > -1 && !spanSubstring.Contains(".".AsSpan(), StringComparison.OrdinalIgnoreCase))
@@ -4475,7 +4475,6 @@ namespace Microsoft.Build.Evaluation
 
                     // separate the function and the arguments
                     functionName = spanSubstring.Trim();
-                    //functionName = expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Trim();
 
                     // Skip the '('
                     argumentStartIndex++;
@@ -4513,7 +4512,7 @@ namespace Microsoft.Build.Evaluation
                             functionArguments = ExtractFunctionArguments(elementLocation, expressionFunction, argumentsContent);
                         }
 
-                        remainder = expressionFunction.Substring(argumentsEndIndex + 1).Trim();
+                        remainder = expressionFuncAsSpan.Slice(argumentsEndIndex + 1).Trim();
                     }
                 }
                 else
@@ -4533,11 +4532,10 @@ namespace Microsoft.Build.Evaluation
                     if (nextMethodIndex > 0)
                     {
                         methodLength = nextMethodIndex - methodStartIndex;
-                        remainder = expFuncAsSpan.Slice(nextMethodIndex).Trim().ToString();
+                        remainder = expressionFuncAsSpan.Slice(nextMethodIndex).Trim();
                     }
 
-                    ReadOnlySpan<char> netPropertyName = expFuncAsSpan.Slice(methodStartIndex, methodLength).Trim();
-                    //string netPropertyName = expressionFunction.Substring(methodStartIndex, methodLength).Trim();
+                    ReadOnlySpan<char> netPropertyName = expressionFuncAsSpan.Slice(methodStartIndex, methodLength).Trim();
 
                     ProjectErrorUtilities.VerifyThrowInvalidProject(netPropertyName.Length > 0, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
@@ -4548,12 +4546,12 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // either there are no functions left or what we have is another function or an indexer
-                if (String.IsNullOrEmpty(remainder) || remainder[0] == '.' || remainder[0] == '[')
+                if (remainder.IsEmpty || remainder[0] == '.' || remainder[0] == '[')
                 {
                     functionBuilder.Name = functionName.ToString();
                     functionBuilder.Arguments = functionArguments;
                     functionBuilder.BindingFlags = defaultBindingFlags;
-                    functionBuilder.Remainder = remainder;
+                    functionBuilder.Remainder = remainder.ToString();
                 }
                 else
                 {
