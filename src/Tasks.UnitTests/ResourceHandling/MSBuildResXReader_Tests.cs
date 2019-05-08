@@ -61,13 +61,27 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         [Fact]
         public void LoadsStringFromFileRefAsString()
         {
-            throw new NotImplementedException();
+            var resxWithLinkedString = new MSBuildResXReader(
+                ResXHelper.SurroundWithBoilerplate(
+@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
+  <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
+    <value>ResourceHandling\TextFile1.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>"));
+
+            resxWithLinkedString.Resources.ShouldBe(new[] { new StringResource("TextFile1", "Contents of TextFile1", null) });
         }
 
         [Fact]
-        public void LoadsStringFromFileRefAsStringWithExoticEncoding()
+        public void LoadsStringFromFileRefAsStringWithShiftJISEncoding()
         {
-            throw new NotImplementedException();
+            var resxWithLinkedString = new MSBuildResXReader(
+                ResXHelper.SurroundWithBoilerplate(
+@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
+  <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
+    <value>ResourceHandling\TextFileInShiftJIS.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;shift_jis</value>
+  </data>"));
+
+            resxWithLinkedString.Resources.ShouldBe(new[] { new StringResource("TextFile1", "ハローワールド！", null) });
         }
 
         // TODO: invalid resx xml

@@ -140,6 +140,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ResourceHandling\*.txt" CopyToOutputDirectory="PreserveNewest" />
     <None Update="TestResources\lorem.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
