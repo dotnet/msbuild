@@ -4464,13 +4464,19 @@ namespace Microsoft.Build.Evaluation
                 // The binding flags that we will use for this function's execution
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
 
+                ReadOnlySpan<char> expFuncAsSpan = expressionFunction.AsSpan();
+
+                ReadOnlySpan<char> spanSubstring = expFuncAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex);
+
                 // There are arguments that need to be passed to the function
-                if (argumentStartIndex > -1 && !expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Contains("."))
+                if (argumentStartIndex > -1 && !spanSubstring.Contains(".".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     string argumentsContent;
 
                     // separate the function and the arguments
-                    functionName = expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Trim();
+                    functionName = spanSubstring.Trim().ToString();
+                    //functionName = expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Trim();
+
 
                     // Skip the '('
                     argumentStartIndex++;
