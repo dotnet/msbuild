@@ -12,6 +12,7 @@ using Xunit;
 using System.Xml.Linq;
 using Xunit.Abstractions;
 using System.Collections.Generic;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -165,6 +166,38 @@ namespace Microsoft.NET.Publish.Tests
             }
 
             publishDirectory.Should().OnlyHaveFiles(expectedFiles);
+        }
+
+        [Fact]
+        public void TransitiveNetStandardPackageReferenceAndPublishFalse()
+        {
+            var testLibraryProject = new TestProject()
+            {
+                Name = "TestLibrary",
+                IsSdkProject = true,
+                TargetFrameworks = "netstandard2.0"
+            };
+
+            testLibraryProject.PackageReferences.Add(new TestPackageReference("WindowsAzure.Storage", "9.3.3"));
+
+            var testProject = new TestProject()
+            {
+                Name = "TestApp",
+                IsSdkProject = true,
+                IsExe = true,
+                TargetFrameworks = "netcoreapp3.0"
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "all"));
+
+            testProject.ReferencedProjects.Add(testLibraryProject);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute().Should().Pass();
         }
     }
 }
