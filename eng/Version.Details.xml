@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview6.19256.3">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview6.19257.1">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>75de7f0ca043e4eff6abca329f9a2fb255e4b6ce</Sha>
+      <Sha>716f46e04ccdb17e9769784d3d1943a60b3839fc</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview6.19257.2">
       <Uri>https://github.com/dotnet/sdk</Uri>
