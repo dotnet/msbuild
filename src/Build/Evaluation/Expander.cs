@@ -4460,7 +4460,7 @@ namespace Microsoft.Build.Evaluation
                 string[] functionArguments;
 
                 // The name of the function that will be invoked
-                string functionName;
+                ReadOnlySpan<char> functionName;
 
                 // What's left of the expression once the function has been constructed
                 string remainder = String.Empty;
@@ -4478,9 +4478,8 @@ namespace Microsoft.Build.Evaluation
                     string argumentsContent;
 
                     // separate the function and the arguments
-                    functionName = spanSubstring.Trim().ToString();
+                    functionName = spanSubstring.Trim();
                     //functionName = expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Trim();
-
 
                     // Skip the '('
                     argumentStartIndex++;
@@ -4538,10 +4537,11 @@ namespace Microsoft.Build.Evaluation
                     if (nextMethodIndex > 0)
                     {
                         methodLength = nextMethodIndex - methodStartIndex;
-                        remainder = expressionFunction.Substring(nextMethodIndex).Trim();
+                        remainder = expFuncAsSpan.Slice(nextMethodIndex).Trim().ToString();
                     }
 
-                    string netPropertyName = expressionFunction.Substring(methodStartIndex, methodLength).Trim();
+                    ReadOnlySpan<char> netPropertyName = expFuncAsSpan.Slice(methodStartIndex, methodLength).Trim();
+                    //string netPropertyName = expressionFunction.Substring(methodStartIndex, methodLength).Trim();
 
                     ProjectErrorUtilities.VerifyThrowInvalidProject(netPropertyName.Length > 0, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
@@ -4554,7 +4554,7 @@ namespace Microsoft.Build.Evaluation
                 // either there are no functions left or what we have is another function or an indexer
                 if (String.IsNullOrEmpty(remainder) || remainder[0] == '.' || remainder[0] == '[')
                 {
-                    functionBuilder.Name = functionName;
+                    functionBuilder.Name = functionName.ToString();
                     functionBuilder.Arguments = functionArguments;
                     functionBuilder.BindingFlags = defaultBindingFlags;
                     functionBuilder.Remainder = remainder;
