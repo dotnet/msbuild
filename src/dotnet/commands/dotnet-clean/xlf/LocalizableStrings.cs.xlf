@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Do not display the startup banner or the copyright message.</source>
-        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <target state="translated">Nezobrazovat úvodní nápis ani zprávu o autorských právech</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">

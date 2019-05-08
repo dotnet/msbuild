@@ -395,7 +395,7 @@
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsAProject">
         <source>Solution {0} already contains project {1}.</source>
-        <target state="translated">La soluzione {0} contiene già il progetto {\1\}.</target>
+        <target state="translated">La soluzione {0} contiene già il progetto {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReferenceDoesNotExist">
@@ -475,7 +475,7 @@
       </trans-unit>
       <trans-unit id="SolutionAlreadyHasAProject">
         <source>Solution {0} already contains project {1}.</source>
-        <target state="translated">La soluzione {0} contiene già il progetto {\1\}.</target>
+        <target state="translated">La soluzione {0} contiene già il progetto {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReferenceNotFoundInTheProject">

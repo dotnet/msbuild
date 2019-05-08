@@ -16,13 +16,13 @@ Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 Write your first app: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</source>
-        <target state="new">----------------
-Explore documentation: https://aka.ms/dotnet-docs
-Report issues and find source on GitHub: https://github.com/dotnet/core
-Find out what's new: https://aka.ms/dotnet-whats-new
-Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-Write your first app: https://aka.ms/first-net-core-app
+        <target state="translated">----------------
+Dokumentace: https://aka.ms/dotnet-docs
+Hlášení problémů a hledání zdrojů na GitHubu: https://github.com/dotnet/core
+Informace o novinkách: https://aka.ms/dotnet-whats-new
+Informace o instalovaných vývojářských certifikátech protokolu HTTPS: https://aka.ms/aspnet-core-https
+Pokud si chcete zobrazit dostupné příkazy, použijte dotnet --help nebo navštivte tuto stránku: https://aka.ms/dotnet-cli-docs
+Psaní první aplikace: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>
@@ -30,9 +30,9 @@ Write your first app: https://aka.ms/first-net-core-app
         <source>Welcome to .NET Core 3.0!
 ---------------------
 SDK Version: {0}</source>
-        <target state="new">Welcome to .NET Core 3.0!
+        <target state="translated">Vítá vás .NET Core 3.0!
 ---------------------
-SDK Version: {0}</target>
+Verze sady SDK: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
@@ -43,9 +43,9 @@ The .NET Core tools collect usage data in order to help us improve your experien
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="translated">Telemetrie
 ---------
-Nástroje .NET Core shromažďují data o využití, která nám pomáhají zlepšovat naše produkty. Tato data jsou anonymní. Shromažďuje je Microsoft a sdílí je s komunitou. Výslovný nesouhlas s telemetrií můžete vyjádřit tak, že ve svém oblíbeném nástroji nastavíte proměnnou prostředí DOTNET_CLI_TELEMETRY_OPTOUT na hodnotu 1 nebo true.
+Nástroje .NET Core shromažďují data o využití, která nám pomáhají dále vylepšovat prostředí a práci s produktem. Data jsou anonymní. Jsou shromažďována Microsoftem a sdílí se s komunitou. Výslovný nesouhlas s telemetrií můžete vyjádřit tak, že pomocí svého oblíbeného prostředí nastavíte proměnnou prostředí DOTNET_CLI_TELEMETRY_OPTOUT na hodnotu 1 nebo true.
 
-Další informace o telemetrii nástrojů příkazového řádku .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
+Přečtěte si další informace o telemetrii nástrojů .NET Core CLI: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

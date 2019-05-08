@@ -10,13 +10,13 @@
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, please contact tool author:
 {1}</source>
-        <target state="translated">Upozornění: Balíček nástroje {0} není platný. Kontaktujte prosím autora nástroje:
+        <target state="translated">Upozornění: Balíček nástroje {0} je neplatný, obraťte se na autora nástroje:
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NoToolsWereRestored">
         <source>No tools were restored.</source>
-	<target state="new">No tools were restored.</target>
+        <target state="translated">Neobnovily se žádné nástroje.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
@@ -51,7 +51,7 @@
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="translated">Soubor</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -61,22 +61,22 @@
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">Verze</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageFailedToRestore">
         <source>Package "{0}" failed to restore, due to {1}</source>
-        <target state="translated">Balíček {0} se nepovedlo obnovit. Důvod: {1}</target>
+        <target state="translated">Balíček {0} se nepovedlo obnovit. Příčina: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="translated">Obnovení se nezdařilo.</target>
+        <target state="translated">Obnovení nebylo úspěšné.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsMismatch">
         <source>The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</source>
-        <target state="translated">Příkaz {0} zadaný v souboru manifestu nástroje není obsažený v balíčku s ID {1}. Příkazy obsažené v balíčku jsou {2}.</target>
+        <target state="translated">Příkaz {0}, který se zadal v souboru manifestu nástroje, není součástí balíčku s ID {1}. Příkazy obsažené v balíčku jsou {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
@@ -96,13 +96,13 @@
       </trans-unit>
       <trans-unit id="LocalToolsRestoreWasSuccessful">
         <source>Restore was successful.</source>
-        <target state="translated">Obnovení bylo úspěšné.</target>
+        <target state="translated">Obnovení proběhlo úspěšně.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackagesCommandNameCollisionConclusion">
         <source>Command names conflict. Command names are case insensitive.
 {0}</source>
-        <target state="translated">Konflikt názvů příkazů. V názvech příkazů se nerozlišují malá a velká písmena.
+        <target state="translated">Konflikt názvů příkazů. Názvy příkazů nerozlišují velká a malá písmena.
 {0}</target>
         <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
       <trans-unit id="PackagesCommandNameCollisionForOnePackage">
@@ -112,7 +112,7 @@
       </trans-unit>
       <trans-unit id="RestorePartiallyFailed">
         <source>Restore partially failed.</source>
-        <target state="translated">Obnovení se částečně nezdařilo.</target>
+        <target state="translated">Obnovení bylo částečně neúspěšné.</target>
         <note />
       </trans-unit>
     </body>

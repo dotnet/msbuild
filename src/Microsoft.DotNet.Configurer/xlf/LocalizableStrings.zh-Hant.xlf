@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
@@ -16,13 +16,13 @@ Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 Write your first app: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</source>
-        <target state="new">----------------
-Explore documentation: https://aka.ms/dotnet-docs
-Report issues and find source on GitHub: https://github.com/dotnet/core
-Find out what's new: https://aka.ms/dotnet-whats-new
-Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-Write your first app: https://aka.ms/first-net-core-app
+        <target state="translated">----------------
+探索文件: https://aka.ms/dotnet-docs
+回報問題並尋找 GitHub 上的來源: https://github.com/dotnet/core
+了解最新動態: https://aka.ms/dotnet-whats-new
+了解已安裝的 HTTPS 開發人員憑證: https://aka.ms/aspnet-core-https
+使用 'dotnet --help' 查看可用的命令，或是瀏覽: https://aka.ms/dotnet-cli-docs
+撰寫您的第一個應用程式: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>
@@ -30,9 +30,9 @@ Write your first app: https://aka.ms/first-net-core-app
         <source>Welcome to .NET Core 3.0!
 ---------------------
 SDK Version: {0}</source>
-        <target state="new">Welcome to .NET Core 3.0!
+        <target state="translated">歡迎使用 .NET Core 3.0!
 ---------------------
-SDK Version: {0}</target>
+SDK 版本: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
@@ -43,9 +43,9 @@ The .NET Core tools collect usage data in order to help us improve your experien
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="translated">遙測
 ---------
-.NET Core 工具會收集使用方式資料以協助我們改善您的體驗。資料會匿名提供，由 Microsoft 收集並與社群共用。您可以使用偏好的殼層將 DOTNET_CLI_TELEMETRY_OPTOUT 環境變數設為 '1' 或 'true'，來退出遙測。
+.NET Core 工具會收集使用資料，協助我們改善您的體驗。資料全部匿名，且會由 Microsoft 收集，分享給社群使用。您可以選擇退出遙測，只要使用您慣用的殼層，將 DOTNET_CLI_TELEMETRY_OPTOUT 環境變數設定為 '1' 或 'true' 即可。
 
-閱讀關於 .NET Core CLI 工具遙測的更多內容: https://aka.ms/dotnet-cli-telemetry</target>
+深入閱讀 .NET Core CLI 工具遙測: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

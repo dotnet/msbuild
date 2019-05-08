@@ -479,7 +479,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">Brak odwołań do elementu typu {0} w projekcie {1}. </target>
+        <target state="translated">Brak odwołań do elementu {0} w projekcie {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -737,7 +737,8 @@ EOF
 
 Aby dodać go na potrzeby bieżącej sesji, uruchom następujące polecenie:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -763,7 +764,8 @@ EOF
 
 Aby dodać go na potrzeby bieżącej sesji, uruchom następujące polecenie:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">

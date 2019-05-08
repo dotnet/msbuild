@@ -158,7 +158,7 @@ Bieżący element {1}: „{2}”.</target>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">Docelowe środowisko uruchomieniowe na potrzeby uruchamiania.</target>
+        <target state="translated">Docelowe środowisko uruchomieniowe na potrzeby przebiegu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">

@@ -479,7 +479,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">{1} projesinde {0} başvurusu yok. </target>
+        <target state="translated">{1} projesinde hiçbir {0} başvurusu yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -727,17 +727,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">'{0}' araç dizini şu an PATH ortam değişkeninde değil.
-bash kullanıyorsanız aşağıdaki komutu çalıştırarak profilinize ekleyebilirsiniz:
+        <target state="translated">'{0}' araçlar dizini şu anda PATH ortam değişkeni üzerinde değil.
+Bash kullanıyorsanız, şu komutu çalıştırarak profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Aşağıdaki komutu çalıştırarak geçerli oturuma ekleyebilirsiniz:
+Şu komutu çalıştırarak geçerli komuta ekleyebilirsiniz:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -753,17 +754,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">'{0}' araç dizini şu an PATH ortam değişkeninde değil.
-bash kullanıyorsanız aşağıdaki komutu çalıştırarak profilinize ekleyebilirsiniz:
+        <target state="translated">'{0}' araçlar dizini şu anda PATH ortam değişkeni üzerinde değil.
+Bash kullanıyorsanız, şu komutu çalıştırarak profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Aşağıdaki komutu çalıştırarak geçerli dizine ekleyebilirsiniz:
+Şu komutu çalıştırarak geçerli komuta ekleyebilirsiniz:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">

@@ -158,7 +158,7 @@ Geçerli {1}: '{2}'.</target>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">Çalıştırma için hedef çalışma zamanı.</target>
+        <target state="translated">Çalıştırılacağı hedef çalışma zamanı.</target>
         <note />
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">

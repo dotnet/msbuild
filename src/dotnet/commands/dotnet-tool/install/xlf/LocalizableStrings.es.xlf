@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">La opción local (--local), la opción global (--global) y la opción de ruta de acceso a herramientas (--tool-path) solo pueden darse de una en una. Especifique solo una de las opciones: {0}.</target>
+        <target state="translated">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de herramienta (--tool-path), solo pueden estar una cada vez. Especifique solo una de las opciones: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -16,19 +16,19 @@ La herramienta "{1}" (versión '{2}') se instaló correctamente.</target>
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
-        <target state="translated">Instale la herramienta y agréguela al manifiesto de la herramienta local (predeterminado).</target>
+        <target state="translated">Instalar la herramienta y agregar al manifiesto de la herramienta local (predeterminado).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
         <source>The local option(--local) does not support the framework option (--framework).</source>
-        <target state="translated">La opción (--local) local no permite la opción de marco (--framework).</target>
+        <target state="translated">La opción local (--local) no admite la opción de marco de trabajo (--framework).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
         <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="needs-review-translation">Se puede invocar la herramienta de este directorio mediante el comando siguiente: dotnet tool run {0}
-La herramienta "{1}" (versión "{2}") se instaló correctamente. La entrada se ha agregado al archivo del manifiesto {3}.</target>
+        <target state="translated">Puede invocar la herramienta desde este directorio con los comandos siguientes: "dotnet tool run {0}" o "dotnet {0}".
+La herramienta "{1}" (versión "{2}") se instaló correctamente. Se ha agregado la entrada al archivo de manifiesto {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -44,7 +44,8 @@ La herramienta "{1}" (versión "{2}") se instaló correctamente. La entrada se h
       <trans-unit id="NoManifestGuide">
         <source>If you intended to install a global tool, add `--global` to the command.
 If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
-        <target state="needs-review-translation">Si desea instalar una herramienta global, agregue "-g". Si desea utilizar un manifiesto de herramientas, primero debe crearlo con "dotnet new tool-manifest".</target>
+        <target state="translated">Si pretendía instalar una herramienta global, agregue "--global" al comando.
+Si desea crear un manifiesto, utilice "dotnet new tool-manifest", normalmente en el directorio raíz del repositorio.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -54,7 +55,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install global or local tool. Local tools are added to manifest and restored.</source>
-        <target state="translated">Instale la herramienta global o local. Las herramientas locales se agregan al manifiesto y se restauran.</target>
+        <target state="translated">Instalar herramienta global o local. Las herramientas locales se agregan al manifiesto y se restauran.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -84,7 +85,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool for the current user.</source>
-        <target state="translated">Instale la herramienta para el usuario actual.</target>
+        <target state="translated">Instalar la herramienta para el usuario actual.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="MalformedText">
         <source>Malformed command text '{0}'</source>
@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">找不到与命令“{0}”匹配的可执行文件。有关详细信息，请参阅 https://aka.ms/missing-command。</target>
+        <target state="translated">无法执行，因为找不到指定的命令或文件。
+可能的原因包括:
+  *你拼错了内置的 dotnet 命令。
+  *你打算执行 .NET Core 程序，但 {0} 不存在。
+  *你打算运行全局工具，但在路径上找不到名称前缀为 dotnet 的可执行文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -63,7 +67,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} 在 {2} 毫秒内退出并返回 {1}。</target>
+        <target state="translated">&lt; 已在 {2} ms 内退出 {0}，并带有 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">

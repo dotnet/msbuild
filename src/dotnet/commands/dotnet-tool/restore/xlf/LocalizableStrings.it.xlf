@@ -16,7 +16,7 @@
       </trans-unit>
       <trans-unit id="NoToolsWereRestored">
         <source>No tools were restored.</source>
-	<target state="new">No tools were restored.</target>
+        <target state="translated">Non è stato ripristinato alcuno strumento.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">Versione</target>
+        <target state="translated">VERSIONE</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageFailedToRestore">
@@ -71,7 +71,7 @@
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="translated">Il ripristino non è riuscito.</target>
+        <target state="translated">Ripristino non riuscito.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsMismatch">

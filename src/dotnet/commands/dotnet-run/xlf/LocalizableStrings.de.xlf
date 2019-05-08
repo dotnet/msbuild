@@ -158,7 +158,7 @@ Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verw
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">Die Zielruntime für die Ausführung.</target>
+        <target state="translated">Die Zielruntime, für die die Ausführung erfolgt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">

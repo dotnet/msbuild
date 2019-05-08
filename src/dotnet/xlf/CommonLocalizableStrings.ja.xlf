@@ -479,7 +479,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">プロジェクト {1} 内に {0} 参照がありません。</target>
+        <target state="translated">プロジェクト {1} には {0} 参照がありません。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -656,7 +656,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ターミナルを再び開く必要があります。</target>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
@@ -727,17 +727,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
-Bash を使用する場合は、次のコマンドを実行してプロファイルに追加できます:
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+Bash を使用している場合、次のコマンドを実行してプロファイルに追加できます。
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-また、次のコマンドを実行することにより、現在のセッションに追加できます:
+次のコマンドを実行して現在のセッションに追加できます。
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -753,17 +754,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">PATH 環境変数には、ツール ディレクトリ '{0}' が含まれていません。
-Bash を使用する場合は、次のコマンドを実行してプロファイルに追加できます:
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+Bash を使用している場合、次のコマンドを実行してプロファイルに追加できます。
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-また、現在のセッションに追加する場合は、次のコマンドを実行してください:
+次のコマンドを実行して現在のセッションに追加できます。
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
