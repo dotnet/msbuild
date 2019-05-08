@@ -43,6 +43,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         /// </remarks>
         public ITaskItem[] PackageOverrides { get; set; }
 
+        /// <summary>
+        /// Items (such as references) passed to this task should generally have the package ID set in
+        /// the NuGetPackageId metadata.  If this property is true, then the task will throw an error
+        /// if it encounters an item which does not have this metadata but looks like it comes from a
+        /// NuGet package
+        /// </summary>
+        public bool RequirePackageIdMetadata { get; set; }
+
         [Output]
         public ITaskItem[] ReferencesWithoutConflicts { get; set; }
 
@@ -210,7 +218,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
         private IEnumerable<ConflictItem> GetConflictTaskItems(ITaskItem[] items, ConflictItemType itemType)
         {
-            return (items != null) ? items.Select(i => new ConflictItem(i, itemType)) : Enumerable.Empty<ConflictItem>();
+            return (items != null) ? items.Select(i => new ConflictItem(i, itemType, RequirePackageIdMetadata)) : Enumerable.Empty<ConflictItem>();
         }
 
         private void HandleCompileConflict(ConflictItem winner, ConflictItem loser)

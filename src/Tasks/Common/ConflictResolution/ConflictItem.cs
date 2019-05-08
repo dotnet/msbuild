@@ -34,10 +34,13 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
     // Wraps an ITask item and adds lazy evaluated properties used by Conflict resolution.
     internal class ConflictItem : IConflictItem
     {
-        public ConflictItem(ITaskItem originalItem, ConflictItemType itemType)
+        private bool _requirePackageIdMetadata;
+
+        public ConflictItem(ITaskItem originalItem, ConflictItemType itemType, bool requirePackageIdMetadata)
         {
             OriginalItem = originalItem;
             ItemType = itemType;
+            _requirePackageIdMetadata = requirePackageIdMetadata;
         }
 
         public ConflictItem(string fileName, string packageId, Version assemblyVersion, Version fileVersion)
@@ -165,7 +168,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                         _packageId = OriginalItem?.GetMetadata(MetadataKeys.PackageName) ?? string.Empty;
                     }
 
-                    if (_packageId.Length == 0)
+                    if (_packageId.Length == 0 && _requirePackageIdMetadata)
                     {
                         //  We want to move away from using the heuristic of walking up the folder tree until
                         //  we find a .nuspec in order to determine the package ID of a file.  However, we
