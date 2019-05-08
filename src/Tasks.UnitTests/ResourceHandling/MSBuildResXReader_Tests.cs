@@ -35,13 +35,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
     <comment>Comment</comment>
   </data>"));
 
-            resxWithSingleString.Resources.ShouldHaveSingleItem();
-            resxWithSingleString.Resources[0].ShouldBeOfType<StringResource>();
-
-            var loadedResource = (StringResource)resxWithSingleString.Resources[0];
-
-            loadedResource.Name.ShouldBe("StringResource");
-            loadedResource.Value.ShouldBe("StringValue");
+            resxWithSingleString.Resources.ShouldBe(new[] { new StringResource("StringResource", "StringValue", null) });
         }
 
         [Fact]
@@ -57,18 +51,11 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
     <value>2StringValue2</value>
   </data>"));
 
-            resxWithTwoStrings.Resources.Count.ShouldBe(2);
-            resxWithTwoStrings.Resources[0].ShouldBeOfType<StringResource>();
-            resxWithTwoStrings.Resources[1].ShouldBeOfType<StringResource>();
-
-            var loadedResource0 = (StringResource)resxWithTwoStrings.Resources[0];
-            var loadedResource1 = (StringResource)resxWithTwoStrings.Resources[1];
-
-            loadedResource0.Name.ShouldBe("StringResource");
-            loadedResource0.Value.ShouldBe("StringValue");
-
-            loadedResource1.Name.ShouldBe("2StringResource2");
-            loadedResource1.Value.ShouldBe("2StringValue2");
+            resxWithTwoStrings.Resources.ShouldBe(
+                new[] {
+                    new StringResource("StringResource", "StringValue", null),
+                    new StringResource("2StringResource2", "2StringValue2", null),
+                });
         }
 
         [Fact]

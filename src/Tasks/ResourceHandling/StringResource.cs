@@ -29,5 +29,27 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             writer.AddResource(Name, Value);
         }
+
+        public override bool Equals(object that)
+        {
+            if (that is StringResource other)
+            {
+                return Name == other.Name &&
+                    Value == other.Value;
+                // TODO: also OriginatingFile? I don't think I care
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"StringResource(\"{Name}\", \"{Value}\")";
+        }
     }
 }
