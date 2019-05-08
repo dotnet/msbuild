@@ -71,6 +71,18 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
             loadedResource1.Value.ShouldBe("2StringValue2");
         }
 
+        [Fact]
+        public void LoadsStringFromFileRefAsString()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void LoadsStringFromFileRefAsStringWithExoticEncoding()
+        {
+            throw new NotImplementedException();
+        }
+
         // TODO: invalid resx xml
 
         // TODO: valid xml, but invalid resx-specific data
