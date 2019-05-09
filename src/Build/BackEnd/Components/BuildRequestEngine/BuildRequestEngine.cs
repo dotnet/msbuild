@@ -947,15 +947,15 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Raised when the active request needs to build new requests.
         /// </summary>
-        /// <param name="sourceEntry">The request issuing the requests.</param>
+        /// <param name="issuingEntry">The request issuing the requests.</param>
         /// <param name="newRequests">The requests being issued.</param>
         /// <remarks>Called by the RequestBuilder (implicitly through an event).  Non-overlapping with other RequestBuilders.</remarks>
-        private void Builder_OnNewBuildRequests(BuildRequestEntry sourceEntry, FullyQualifiedBuildRequest[] newRequests)
+        private void Builder_OnNewBuildRequests(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest[] newRequests)
         {
             QueueAction(
                 () =>
                 {
-                    _unsubmittedRequests.Enqueue(new PendingUnsubmittedBuildRequests(sourceEntry, newRequests));
+                    _unsubmittedRequests.Enqueue(new PendingUnsubmittedBuildRequests(issuingEntry, newRequests));
                     IssueUnsubmittedRequests();
                     EvaluateRequestStates();
                 },
@@ -967,12 +967,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <remarks>
         /// Called by the RequestBuilder (implicitly through an event).  Non-overlapping with other RequestBuilders.</remarks>
-        private void Builder_OnBlockedRequest(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
+        private void Builder_OnBlockedRequest(BuildRequestEntry issuingEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
         {
             QueueAction(
                 () =>
                 {
-                    _unsubmittedRequests.Enqueue(new PendingUnsubmittedBuildRequests(sourceEntry, blockingGlobalRequestId, blockingTarget, partialBuildResult));
+                    _unsubmittedRequests.Enqueue(new PendingUnsubmittedBuildRequests(issuingEntry, blockingGlobalRequestId, blockingTarget, partialBuildResult));
                     IssueUnsubmittedRequests();
                     EvaluateRequestStates();
                 },
@@ -995,23 +995,23 @@ namespace Microsoft.Build.BackEnd
             {
                 PendingUnsubmittedBuildRequests unsubmittedRequest = _unsubmittedRequests.Dequeue();
 
-                BuildRequestEntry sourceEntry = unsubmittedRequest.SourceEntry;
+                BuildRequestEntry issuingEntry = unsubmittedRequest.IssuingEntry;
 
-                if (unsubmittedRequest.BlockingGlobalRequestId == sourceEntry.Request.GlobalRequestId)
+                if (unsubmittedRequest.BlockingGlobalRequestId == issuingEntry.Request.GlobalRequestId)
                 {
                     if (unsubmittedRequest.BlockingTarget == null)
                     {
                         // We are yielding
-                        IssueBuildRequest(new BuildRequestBlocker(sourceEntry.Request.GlobalRequestId, sourceEntry.GetActiveTargets(), YieldAction.Yield));
-                        lock (sourceEntry.GlobalLock)
+                        IssueBuildRequest(new BuildRequestBlocker(issuingEntry.Request.GlobalRequestId, issuingEntry.GetActiveTargets(), YieldAction.Yield));
+                        lock (issuingEntry.GlobalLock)
                         {
-                            sourceEntry.WaitForBlockingRequest(sourceEntry.Request.GlobalRequestId);
+                            issuingEntry.WaitForBlockingRequest(issuingEntry.Request.GlobalRequestId);
                         }
                     }
                     else
                     {
                         // We are ready to continue
-                        IssueBuildRequest(new BuildRequestBlocker(sourceEntry.Request.GlobalRequestId, sourceEntry.GetActiveTargets(), YieldAction.Reacquire));
+                        IssueBuildRequest(new BuildRequestBlocker(issuingEntry.Request.GlobalRequestId, issuingEntry.GetActiveTargets(), YieldAction.Reacquire));
                     }
                 }
                 else if (unsubmittedRequest.BlockingGlobalRequestId == BuildRequest.InvalidGlobalRequestId)
@@ -1019,28 +1019,28 @@ namespace Microsoft.Build.BackEnd
                     if (unsubmittedRequest.NewRequests != null)
                     {
                         // We aren't blocked on another request, we are blocked on new requests
-                        IssueBuildRequests(sourceEntry, unsubmittedRequest.NewRequests);
+                        IssueBuildRequests(issuingEntry, unsubmittedRequest.NewRequests);
                     }
                     else
                     {
                         // We are blocked waiting for our results to transfer
-                        lock (sourceEntry.GlobalLock)
+                        lock (issuingEntry.GlobalLock)
                         {
-                            sourceEntry.WaitForBlockingRequest(sourceEntry.Request.GlobalRequestId);
+                            issuingEntry.WaitForBlockingRequest(issuingEntry.Request.GlobalRequestId);
                         }
 
-                        IssueBuildRequest(new BuildRequestBlocker(sourceEntry.Request.GlobalRequestId));
+                        IssueBuildRequest(new BuildRequestBlocker(issuingEntry.Request.GlobalRequestId));
                     }
                 }
                 else
                 {
                     // We are blocked on an existing build request.
-                    lock (sourceEntry.GlobalLock)
+                    lock (issuingEntry.GlobalLock)
                     {
-                        sourceEntry.WaitForBlockingRequest(unsubmittedRequest.BlockingGlobalRequestId);
+                        issuingEntry.WaitForBlockingRequest(unsubmittedRequest.BlockingGlobalRequestId);
                     }
 
-                    IssueBuildRequest(new BuildRequestBlocker(sourceEntry.Request.GlobalRequestId, sourceEntry.GetActiveTargets(), unsubmittedRequest.BlockingGlobalRequestId, unsubmittedRequest.BlockingTarget, unsubmittedRequest.PartialBuildResult));
+                    IssueBuildRequest(new BuildRequestBlocker(issuingEntry.Request.GlobalRequestId, issuingEntry.GetActiveTargets(), unsubmittedRequest.BlockingGlobalRequestId, unsubmittedRequest.BlockingTarget, unsubmittedRequest.PartialBuildResult));
                 }
 
                 countToSubmit--;
@@ -1389,7 +1389,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// The issuing request
             /// </summary>
-            public readonly BuildRequestEntry SourceEntry;
+            public readonly BuildRequestEntry IssuingEntry;
 
             /// <summary>
             /// The new requests to issue
@@ -1399,11 +1399,11 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Create a new unsubmitted request entry
             /// </summary>
-            /// <param name="sourceEntry">The build request originating these requests.</param>
+            /// <param name="issuingEntry">The build request originating these requests.</param>
             /// <param name="newRequests">The new requests to be issued.</param>
-            public PendingUnsubmittedBuildRequests(BuildRequestEntry sourceEntry, FullyQualifiedBuildRequest[] newRequests)
+            public PendingUnsubmittedBuildRequests(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest[] newRequests)
             {
-                SourceEntry = sourceEntry;
+                IssuingEntry = issuingEntry;
                 NewRequests = newRequests;
                 BlockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;
                 BlockingTarget = null;
@@ -1413,20 +1413,20 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Create a new unsubmitted request entry
             /// </summary>
-            /// <param name="sourceEntry">The build request originating these requests.</param>
+            /// <param name="issuingEntry">The build request originating these requests.</param>
             /// <param name="blockingGlobalRequestId">The request on which we are blocked.</param>
             /// <param name="blockingTarget">The target on which we are blocked.</param>
-            private PendingUnsubmittedBuildRequests(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget)
+            private PendingUnsubmittedBuildRequests(BuildRequestEntry issuingEntry, int blockingGlobalRequestId, string blockingTarget)
             {
-                SourceEntry = sourceEntry;
+                IssuingEntry = issuingEntry;
                 NewRequests = null;
                 BlockingGlobalRequestId = blockingGlobalRequestId;
                 BlockingTarget = blockingTarget;
                 PartialBuildResult = null;
             }
 
-            public PendingUnsubmittedBuildRequests(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult)
-                : this(sourceEntry, blockingGlobalRequestId, blockingTarget)
+            public PendingUnsubmittedBuildRequests(BuildRequestEntry issuingEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult)
+                : this(issuingEntry, blockingGlobalRequestId, blockingTarget)
             {
                 PartialBuildResult = partialBuildResult;
             }

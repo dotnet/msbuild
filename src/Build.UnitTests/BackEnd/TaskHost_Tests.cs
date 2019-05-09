@@ -1274,7 +1274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Not Implemented
             /// </summary>
-            private void MockIRequestBuilderCallback_OnBuildRequestBlocked(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget, IBuildResults partialBuildResult = null)
+            private void MockIRequestBuilderCallback_OnBuildRequestBlocked(BuildRequestEntry issuingEntry, int blockingGlobalRequestId, string blockingTarget, IBuildResults partialBuildResult = null)
             {
                 throw new NotImplementedException();
             }
@@ -1290,7 +1290,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Not Implemented
             /// </summary>
-            private void MockIRequestBuilderCallback_OnNewBuildRequests(BuildRequestEntry sourceEntry, FullyQualifiedBuildRequest[] requests)
+            private void MockIRequestBuilderCallback_OnNewBuildRequests(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest[] requests)
             {
                 throw new NotImplementedException();
             }
