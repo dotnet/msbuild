@@ -61,6 +61,8 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         [Fact]
         public void LoadsStringFromFileRefAsString()
         {
+            File.Exists(@"ResourceHandling\TextFile1.txt").ShouldBeTrue("Test deployment is missing None files");
+
             var resxWithLinkedString = new MSBuildResXReader(
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
@@ -74,6 +76,8 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         [Fact]
         public void LoadsStringFromFileRefAsStringWithShiftJISEncoding()
         {
+            File.Exists(@"ResourceHandling\TextFileInShiftJIS.txt").ShouldBeTrue("Test deployment is missing None files");
+
             var resxWithLinkedString = new MSBuildResXReader(
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
