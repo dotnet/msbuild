@@ -91,5 +91,8 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         // TODO: invalid resx xml
 
         // TODO: valid xml, but invalid resx-specific data
+
+        // TODO: aliased entry but no defined alias (failure)
+        // TODO: alias but with reversed order (ResXResourceReader fails)
     }
 }
