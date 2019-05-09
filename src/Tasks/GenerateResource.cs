@@ -3013,17 +3013,9 @@ namespace Microsoft.Build.Tasks
                         ReadResources(reader, resXReader, filename);
                         break;
 #else
-
-                        using (var xmlReader = new XmlTextReader(filename))
+                        foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename))
                         {
-                            xmlReader.WhitespaceHandling = WhitespaceHandling.None;
-                            XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
-                            foreach (XElement dataElem in doc.Element("root").Elements("data"))
-                            {
-                                string name = dataElem.Attribute("name").Value;
-                                string value = dataElem.Element("value").Value;
-                                AddResource(reader, name, value, filename);
-                            }
+                            AddResource(reader, resource, filename, 0, 0);
                         }
                         break;
 #endif
