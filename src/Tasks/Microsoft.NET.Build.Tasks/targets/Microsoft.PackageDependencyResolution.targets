@@ -259,6 +259,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiersResolvePackageAssets" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
+      <Output TaskParameter="FrameworkReferences" ItemName="TransitiveFrameworkReferences" />
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
       <Output TaskParameter="ResourceAssemblies" ItemName="ResourceCopyLocalItems" />
       <Output TaskParameter="RuntimeAssemblies" ItemName="RuntimeCopyLocalItems" />

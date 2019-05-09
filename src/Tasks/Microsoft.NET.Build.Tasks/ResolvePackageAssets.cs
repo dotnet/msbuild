@@ -167,6 +167,9 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] FrameworkAssemblies { get; private set; }
 
+        [Output]
+        public ITaskItem[] FrameworkReferences { get; private set; }
+
         /// <summary>
         /// Full paths to native libraries from packages to run against.
         /// </summary>
@@ -262,7 +265,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 7;
+        private const int CacheFormatVersion = 8;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -290,6 +293,7 @@ namespace Microsoft.NET.Build.Tasks
                 CompileTimeAssemblies = reader.ReadItemGroup();
                 ContentFilesToPreprocess = reader.ReadItemGroup();
                 FrameworkAssemblies = reader.ReadItemGroup();
+                FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
@@ -685,6 +689,7 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteCompileTimeAssemblies);
                 WriteItemGroup(WriteContentFilesToPreprocess);
                 WriteItemGroup(WriteFrameworkAssemblies);
+                WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
                 WriteItemGroup(WritePackageFolders);
                 WriteItemGroup(WriteResourceAssemblies);
@@ -1099,6 +1104,17 @@ namespace Microsoft.NET.Build.Tasks
                     if (!directProjectDependencies.Contains(library.Name))
                     {
                         WriteItem(projectReferencePaths[library.Name], library);
+                    }
+                }
+            }
+
+            private void WriteFrameworkReferences()
+            {
+                foreach (var library in _runtimeTarget.Libraries)
+                {
+                    foreach (var frameworkReference in library.FrameworkReferences)
+                    {
+                        WriteItem(frameworkReference, library);
                     }
                 }
             }
