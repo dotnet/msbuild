@@ -1125,30 +1125,56 @@ namespace Microsoft.Build.BackEnd
                         // waiting for results.  It is important that we tell the issuing request to wait for a result
                         // prior to issuing any necessary configuration request so that we don't get into a state where
                         // we receive the configuration response before we enter the wait state.
-                        newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(),
-                            request.Config.ConfigurationId, request.Targets, issuingEntry.Request.HostServices,
-                            issuingEntry.Request.BuildEventContext, issuingEntry.Request,
-                            buildRequestDataFlags);
+                        newRequest = new BuildRequest(
+                            submissionId: issuingEntry.Request.SubmissionId,
+                            nodeRequestId: GetNextBuildRequestId(),
+                            configurationId: request.Config.ConfigurationId,
+                            escapedTargets: request.Targets,
+                            hostServices: issuingEntry.Request.HostServices,
+                            parentBuildEventContext: issuingEntry.Request.BuildEventContext,
+                            parentRequest: issuingEntry.Request,
+                            buildRequestDataFlags: buildRequestDataFlags,
+                            requestedProjectState: null,
+                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints);
 
                         issuingEntry.WaitForResult(newRequest);
 
                         if (matchingConfig == null)
                         {
                             // Issue the config resolution request
-                            TraceEngine("Request {0}({1}) (nr {2}) is waiting on configuration {3} (IBR)", issuingEntry.Request.GlobalRequestId, issuingEntry.Request.ConfigurationId, issuingEntry.Request.NodeRequestId, request.Config.ConfigurationId);
+                            TraceEngine(
+                                "Request {0}({1}) (nr {2}) is waiting on configuration {3} (IBR)",
+                                issuingEntry.Request.GlobalRequestId,
+                                issuingEntry.Request.ConfigurationId,
+                                issuingEntry.Request.NodeRequestId,
+                                request.Config.ConfigurationId);
                             issuingEntry.WaitForConfiguration(request.Config);
                         }
                     }
                     else
                     {
                         // We have a configuration, see if we already have results locally.
-                        newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(),
-                            matchingConfig.ConfigurationId, request.Targets, issuingEntry.Request.HostServices,
-                            issuingEntry.Request.BuildEventContext, issuingEntry.Request,
-                            buildRequestDataFlags);
+                        newRequest = new BuildRequest(
+                            submissionId: issuingEntry.Request.SubmissionId,
+                            nodeRequestId: GetNextBuildRequestId(),
+                            configurationId: matchingConfig.ConfigurationId,
+                            escapedTargets: request.Targets,
+                            hostServices: issuingEntry.Request.HostServices,
+                            parentBuildEventContext: issuingEntry.Request.BuildEventContext,
+                            parentRequest: issuingEntry.Request,
+                            buildRequestDataFlags: buildRequestDataFlags,
+                            requestedProjectState: null,
+                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints);
 
                         IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
-                        ResultsCacheResponse response = resultsCache.SatisfyRequest(newRequest, matchingConfig.ProjectInitialTargets, matchingConfig.ProjectDefaultTargets, matchingConfig.GetAfterTargetsForDefaultTargets(newRequest), skippedResultsAreOK: false);
+
+                        var response = resultsCache.SatisfyRequest(
+                            newRequest,
+                            matchingConfig.ProjectInitialTargets,
+                            matchingConfig.ProjectDefaultTargets,
+                            matchingConfig.GetAfterTargetsForDefaultTargets(newRequest),
+                            skippedResultsAreOK: false);
+
                         if (response.Type == ResultsCacheResponseType.Satisfied)
                         {
                             // We have a result, give it back to this request.

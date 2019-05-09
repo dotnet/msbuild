@@ -136,6 +136,77 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal("InitialProperty3", propertyValue);
         }
 
+        [Fact]
+        public void SimpleP2PBuildInProc()
+        {
+            var newParameters = _parameters.Clone();
+
+            newParameters.DisableInProcNode = false;
+            newParameters.MaxNodeCount = 1;
+
+            SimpleP2PBuild(newParameters);
+        }
+
+        [Fact]
+        public void SimpleP2PBuildOutOfProc()
+        {
+            var newParameters = _parameters.Clone();
+
+            newParameters.DisableInProcNode = true;
+            newParameters.MaxNodeCount = 3;
+
+            SimpleP2PBuild(newParameters);
+        }
+
+        private void SimpleP2PBuild(BuildParameters buildParameters)
+        {
+            var graph = Helpers.CreateProjectGraph(
+                _env,
+                new Dictionary<int, int[]>
+                {
+                    {1, new[] {2, 3}}
+                },
+                createProjectFile:
+                    (env, projectNumber, references, targets, defaultTargets, content) =>
+                    {
+                        return Helpers.CreateProjectFile(
+                            env,
+                            projectNumber,
+                            references,
+                            targets,
+                            "ActualBuild",
+                            @"<Target Name='ActualBuild'>
+                                            <MSBuild Projects='@(ProjectReference)'/>
+                                         </Target>");
+                    });
+
+            var result = _buildManager.Build(
+                buildParameters,
+                new BuildRequestData(
+                    graph.GraphRoots.FirstOrDefault()
+                        .ProjectInstance.FullPath,
+                    new Dictionary<string, string>(),
+                    MSBuildConstants.CurrentToolsVersion,
+                    new string[0],
+                    null));
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            _logger.AllBuildEvents.OfType<ProjectStartedEventArgs>()
+                .Count()
+                .ShouldBe(3);
+            _logger.AllBuildEvents.OfType<ProjectEvaluationFinishedEventArgs>()
+                .Count()
+                .ShouldBe(3);
+
+            _logger.AllBuildEvents.OfType<ProjectEvaluationStartedEventArgs>()
+                .Count()
+                .ShouldBe(3);
+            _logger.AllBuildEvents.OfType<ProjectEvaluationFinishedEventArgs>()
+                .Count()
+                .ShouldBe(3);
+        }
+
         /// <summary>
         /// A simple successful graph build.
         /// </summary>
