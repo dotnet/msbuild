@@ -4463,22 +4463,23 @@ namespace Microsoft.Build.Evaluation
                 ReadOnlySpan<char> functionName;
 
                 // What's left of the expression once the function has been constructed
-                ReadOnlySpan<char> remainder = ReadOnlySpan<char>.Empty;
+                string remainder = String.Empty;
+                ReadOnlySpan<char> remainder2 = ReadOnlySpan<char>.Empty;
 
                 // The binding flags that we will use for this function's execution
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
 
-                ReadOnlySpan<char> expressionFuncAsSpan = expressionFunction.AsSpan();
-
-                ReadOnlySpan<char> spanSubstring = expressionFuncAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex);
+                ReadOnlySpan<char> expressionFunctionAsSpan = expressionFunction.AsSpan();
+                
+                ReadOnlySpan<char> expressionSubstringAsSpan = argumentStartIndex > -1 ? expressionFunctionAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex) : ReadOnlySpan<char>.Empty;
 
                 // There are arguments that need to be passed to the function
-                if (argumentStartIndex > -1 && !spanSubstring.Contains(".".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                if (argumentStartIndex > -1 && !expressionSubstringAsSpan.Contains(".".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     string argumentsContent;
 
                     // separate the function and the arguments
-                    functionName = spanSubstring.Trim();
+                    functionName = expressionSubstringAsSpan.Trim();
 
                     // Skip the '('
                     argumentStartIndex++;
@@ -4516,7 +4517,8 @@ namespace Microsoft.Build.Evaluation
                             functionArguments = ExtractFunctionArguments(elementLocation, expressionFunction, argumentsContent);
                         }
 
-                        remainder = expressionFuncAsSpan.Slice(argumentsEndIndex + 1).Trim();
+                        remainder = expressionFunctionAsSpan.Slice(argumentsEndIndex + 1).Trim().ToString();
+                        remainder2 = expressionFunctionAsSpan.Slice(argumentsEndIndex + 1).Trim();
                     }
                 }
                 else
@@ -4536,10 +4538,12 @@ namespace Microsoft.Build.Evaluation
                     if (nextMethodIndex > 0)
                     {
                         methodLength = nextMethodIndex - methodStartIndex;
-                        remainder = expressionFuncAsSpan.Slice(nextMethodIndex).Trim();
+                        remainder = expressionFunctionAsSpan.Slice(nextMethodIndex).Trim().ToString();
+                        remainder2 = expressionFunctionAsSpan.Slice(nextMethodIndex).Trim();
                     }
 
-                    ReadOnlySpan<char> netPropertyName = expressionFuncAsSpan.Slice(methodStartIndex, methodLength).Trim();
+                    ReadOnlySpan<char> netPropertyName = expressionFunctionAsSpan.Slice(methodStartIndex, methodLength).Trim();
+                    //string netPropertyName = expressionFunction.Substring(methodStartIndex, methodLength).Trim();
 
                     ProjectErrorUtilities.VerifyThrowInvalidProject(netPropertyName.Length > 0, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
@@ -4550,12 +4554,12 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // either there are no functions left or what we have is another function or an indexer
-                if (remainder.IsEmpty || remainder[0] == '.' || remainder[0] == '[')
+                if (String.IsNullOrEmpty(remainder) || remainder[0] == '.' || remainder[0] == '[')
                 {
                     functionBuilder.Name = functionName.ToString();
                     functionBuilder.Arguments = functionArguments;
                     functionBuilder.BindingFlags = defaultBindingFlags;
-                    functionBuilder.Remainder = remainder.ToString();
+                    functionBuilder.Remainder = remainder2.ToString();
                 }
                 else
                 {
