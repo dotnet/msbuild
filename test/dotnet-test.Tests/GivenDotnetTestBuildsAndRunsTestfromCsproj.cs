@@ -29,9 +29,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify
             if (!DotnetUnderTest.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   VSTestFailTest");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("\u221a VSTestPassTest");
+                result.StdOut.Should().Contain("X VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -53,9 +55,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             if (!DotnetUnderTest.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   VSTestFailTest");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("\u221a VSTestPassTest");
+                result.StdOut.Should().Contain("X VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -120,9 +126,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify
             if (!DotnetUnderTest.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTest");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("\u221a TestNamespace.VSTestXunitTests.VSTestXunitPassTest");
+                result.StdOut.Should().Contain("X TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -143,9 +151,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             if (!DotnetUnderTest.IsLocalized())
             {
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+                result.StdOut.Should().Contain("X TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
                 result.StdOut.Should().Contain("Assert.Equal() Failure");
-                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 1");
             }
         }
 
@@ -174,8 +184,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 // We append current date time to trx file name, hence modifying this check
                 Assert.True(Directory.EnumerateFiles(trxLoggerDirectory, trxFileNamePattern).Any());
 
-                result.StdOut.Should().Contain("Passed   VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   VSTestFailTest");
+                result.StdOut.Should().Contain("\u221a VSTestPassTest");
+                result.StdOut.Should().Contain("X VSTestFailTest");
             }
 
             // Cleanup trxLoggerDirectory if it exist
@@ -301,9 +311,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             if (!DotnetUnderTest.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   VSTestFailTest");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("\u221a VSTestPassTest");
+                result.StdOut.Should().Contain("X VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -323,14 +335,15 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify
             if (!DotnetUnderTest.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().NotContain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-                result.StdOut.Should().NotContain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().NotContain("\u221a TestNamespace.VSTestTests.VSTestPassTest");
+                result.StdOut.Should().NotContain("X TestNamespace.VSTestTests.VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
         }
-
 
         [WindowsOnlyFact]
         public void ItCreatesCoverageFileWhenCodeCoverageEnabledByRunsettings()
@@ -357,7 +370,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!DotnetUnderTest.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 1");
             }
 
             // Verify coverage file.
@@ -391,7 +406,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!DotnetUnderTest.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().Contain("Total tests: 2");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 1");
             }
 
             // Verify coverage file.
@@ -418,7 +435,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows.");
-                result.StdOut.Should().Contain("Total tests: 1. Passed: 1. Failed: 0. Skipped: 0.");
+                result.StdOut.Should().Contain("Total tests: 1");
+                result.StdOut.Should().Contain("Passed: 1");
                 result.StdOut.Should().Contain("Test Run Successful.");
             }
 
