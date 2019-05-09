@@ -23,6 +23,11 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         public MSBuildResXReader_Tests(ITestOutputHelper output)
         {
             _output = output;
+
+#if RUNTIME_TYPE_NETCORE
+            // TODO: should this be in the task code itself somewhere?
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
         }
 
         [Fact]
