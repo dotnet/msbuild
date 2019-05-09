@@ -3711,7 +3711,7 @@ namespace Microsoft.Build.Tasks
             AddResource(reader, entry, inputFileName, lineNumber, linePosition);
         }
 
-        private void AddResource(ReaderInfo reader, Entry entry, String inputFileName, int lineNumber, int linePosition)
+        private void AddResource(ReaderInfo reader, IResource entry, String inputFileName, int lineNumber, int linePosition)
         {
             if (reader.resourcesHashTable.ContainsKey(entry.Name))
             {
@@ -3720,7 +3720,7 @@ namespace Microsoft.Build.Tasks
             }
 
             reader.resources.Add(entry);
-            reader.resourcesHashTable.Add(entry.Name, entry.value);
+            reader.resourcesHashTable.Add(entry.Name, entry);
         }
 
 
