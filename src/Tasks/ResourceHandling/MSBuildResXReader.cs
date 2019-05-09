@@ -118,6 +118,17 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         public MSBuildResXReader(Stream s) : this(s, null)
         { }
 
+        /// <summary>
+        /// Extract <see cref="IResource"/>s from a given file on disk.
+        /// </summary>
+        public static IReadOnlyList<IResource> GetResourcesFromFile(string filename)
+        {
+            using (var x = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return new MSBuildResXReader(x, filename).Resources;
+            }
+        }
+
         // From https://github.com/dotnet/winforms/blob/a88c1a73fd7298b0a5c45251771f439262016826/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L187-L220
         internal static string[] ParseResxFileRefString(string stringValue)
         {
