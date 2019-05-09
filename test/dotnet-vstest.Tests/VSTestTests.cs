@@ -41,9 +41,9 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut
-                    .Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.")
-                    .And.Contain("Passed   VSTestPassTest")
-                    .And.Contain("Failed   VSTestFailTest");
+                    .Should().Contain("Total tests: 2\r\n     Passed: 1\r\n     Failed: 1\r\n")
+                    .And.Contain("\u221a VSTestPassTest")
+                    .And.Contain("X VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
