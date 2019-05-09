@@ -402,6 +402,7 @@ namespace Microsoft.Build.UnitTests
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>

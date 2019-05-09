@@ -590,6 +590,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -1056,6 +1057,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "new enough dotnet.exe transparently opts into long paths")]
         public void PathTooLongInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
