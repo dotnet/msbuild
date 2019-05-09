@@ -3675,7 +3675,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (Entry entry in reader.resources)
                 {
-                    String key = entry.name;
+                    String key = entry.Name;
                     Object v = entry.value;
                     String value = v as String;
                     if (value == null)
@@ -3713,14 +3713,14 @@ namespace Microsoft.Build.Tasks
 
         private void AddResource(ReaderInfo reader, Entry entry, String inputFileName, int lineNumber, int linePosition)
         {
-            if (reader.resourcesHashTable.ContainsKey(entry.name))
+            if (reader.resourcesHashTable.ContainsKey(entry.Name))
             {
-                _logger.LogWarningWithCodeFromResources(null, inputFileName, lineNumber, linePosition, 0, 0, "GenerateResource.DuplicateResourceName", entry.name);
+                _logger.LogWarningWithCodeFromResources(null, inputFileName, lineNumber, linePosition, 0, 0, "GenerateResource.DuplicateResourceName", entry.Name);
                 return;
             }
 
             reader.resources.Add(entry);
-            reader.resourcesHashTable.Add(entry.name, entry.value);
+            reader.resourcesHashTable.Add(entry.Name, entry.value);
         }
 
 
@@ -3886,16 +3886,16 @@ namespace Microsoft.Build.Tasks
         {
             public Entry(string name, object value)
             {
-                this.name = name;
+                Name = name;
                 this.value = value;
             }
 
-            public string name;
+            public string Name { get; }
             public object value;
 
             public void AddTo(IResourceWriter writer)
             {
-                writer.AddResource(name, value);
+                writer.AddResource(Name, value);
             }
         }
 #endregion // Code from ResGen.EXE
