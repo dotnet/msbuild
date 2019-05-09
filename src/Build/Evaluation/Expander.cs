@@ -4459,8 +4459,7 @@ namespace Microsoft.Build.Evaluation
                 ReadOnlySpan<char> functionName;
 
                 // What's left of the expression once the function has been constructed
-                string remainder = String.Empty;
-                ReadOnlySpan<char> remainder2 = ReadOnlySpan<char>.Empty;
+                ReadOnlySpan<char> remainder = ReadOnlySpan<char>.Empty;
 
                 // The binding flags that we will use for this function's execution
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
@@ -4512,9 +4511,8 @@ namespace Microsoft.Build.Evaluation
                             // We will keep empty entries so that we can treat them as null
                             functionArguments = ExtractFunctionArguments(elementLocation, expressionFunction, argumentsContent);
                         }
-
-                        remainder = expressionFunctionAsSpan.Slice(argumentsEndIndex + 1).Trim().ToString();
-                        remainder2 = expressionFunctionAsSpan.Slice(argumentsEndIndex + 1).Trim();
+                        
+                        remainder = expressionFunctionAsSpan.Slice(argumentsEndIndex + 1).Trim();
                     }
                 }
                 else
@@ -4534,12 +4532,10 @@ namespace Microsoft.Build.Evaluation
                     if (nextMethodIndex > 0)
                     {
                         methodLength = nextMethodIndex - methodStartIndex;
-                        remainder = expressionFunctionAsSpan.Slice(nextMethodIndex).Trim().ToString();
-                        remainder2 = expressionFunctionAsSpan.Slice(nextMethodIndex).Trim();
+                        remainder = expressionFunctionAsSpan.Slice(nextMethodIndex).Trim();
                     }
 
                     ReadOnlySpan<char> netPropertyName = expressionFunctionAsSpan.Slice(methodStartIndex, methodLength).Trim();
-                    //string netPropertyName = expressionFunction.Substring(methodStartIndex, methodLength).Trim();
 
                     ProjectErrorUtilities.VerifyThrowInvalidProject(netPropertyName.Length > 0, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
@@ -4550,12 +4546,12 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // either there are no functions left or what we have is another function or an indexer
-                if (String.IsNullOrEmpty(remainder) || remainder[0] == '.' || remainder[0] == '[')
+                if (remainder.IsEmpty || remainder[0] == '.' || remainder[0] == '[')
                 {
                     functionBuilder.Name = functionName.ToString();
                     functionBuilder.Arguments = functionArguments;
                     functionBuilder.BindingFlags = defaultBindingFlags;
-                    functionBuilder.Remainder = remainder2.ToString();
+                    functionBuilder.Remainder = remainder.ToString();
                 }
                 else
                 {
