@@ -35,6 +35,9 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
+            testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+            testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
+
             testProject.SourceFiles.Add("Program.cs", @"
 using System;
 
@@ -49,20 +52,6 @@ namespace FrameworkReferenceTest
 }");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-
-                    var itemGroup = new XElement(ns + "ItemGroup");
-                    project.Root.Add(itemGroup);
-
-                    itemGroup.Add(new XElement(ns + "FrameworkReference",
-                                               new XAttribute("Include", "Microsoft.AspNetCore.App")));
-                    itemGroup.Add(new XElement(ns + "FrameworkReference",
-                                               new XAttribute("Include", "Microsoft.WindowsDesktop.App")));
-
-
-                })
                 .Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -75,11 +64,7 @@ namespace FrameworkReferenceTest
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
-            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
-            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
-
-            var runtimeFrameworksList = (JArray)runtimeConfig["runtimeOptions"]["frameworks"];
-            var runtimeFrameworkNames = runtimeFrameworksList.Select(element => ((JValue)element["name"]).Value<string>());
+            var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
 
             //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
             //  Microsoft.NETCore.App will need to be added to this list
@@ -458,6 +443,124 @@ namespace FrameworkReferenceTest
             resolvedVersions.TargetingPack["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
             resolvedVersions.RuntimePack[runtimePackName].Should().Be(expectedRuntimeFrameworkVersion);
             resolvedVersions.AppHostPack["AppHost"].Should().Be("3.0.0-apphostversion");
+        }
+
+        [Fact]
+        public void TransitiveFrameworkReferenceFromProjectReference()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "TransitiveFrameworkReference",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var referencedProject = new TestProject()
+            {
+                Name = "ReferencedProject",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true
+            };
+
+            referencedProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+
+            testProject.ReferencedProjects.Add(referencedProject);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+            var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
+
+            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
+            //  Microsoft.NETCore.App will need to be added to this list
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App");
+        }
+
+        [Fact]
+        public void TransitiveFrameworkReferenceFromPackageReference()
+        {
+            var referencedPackage = new TestProject()
+            {
+                Name = "ReferencedPackage",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true
+            };
+            referencedPackage.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+
+            var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage)
+                .Restore(Log, referencedPackage.Name);
+
+            var packCommand = new PackCommand(Log, packageAsset.TestRoot, referencedPackage.Name);
+
+            packCommand.Execute()
+                .Should()
+                .Pass();
+
+            var nupkgFolder = packCommand.GetOutputDirectory(null);
+                
+            var testProject = new TestProject()
+            {
+                Name = "TransitiveFrameworkReference",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference(referencedPackage.Name, "1.0.0", nupkgFolder.FullName));
+            testProject.AdditionalProperties.Add("RestoreAdditionalProjectSources",
+                                     "$(RestoreAdditionalProjectSources);" + nupkgFolder);
+
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            string nugetPackagesFolder = Path.Combine(testAsset.TestRoot, "packages");
+
+            var buildCommand = (BuildCommand) new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+                .WithEnvironmentVariable("NUGET_PACKAGES", nugetPackagesFolder);
+
+            buildCommand
+                .Execute("/restore")
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+            var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
+
+            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
+            //  Microsoft.NETCore.App will need to be added to this list
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App");
+        }
+
+        private List<string> GetRuntimeFrameworks(string runtimeConfigPath)
+        {
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigPath);
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+
+            var runtimeFrameworksList = (JArray)runtimeConfig["runtimeOptions"]["frameworks"];
+            if (runtimeFrameworksList == null)
+            {
+                var runtimeFrameworkName = runtimeConfig["runtimeOptions"]["framework"]["name"].Value<string>();
+                return new List<string>() { runtimeFrameworkName };
+            }
+            else
+            {
+                var runtimeFrameworkNames = runtimeFrameworksList.Select(element => ((JValue)element["name"]).Value<string>())
+                    .ToList();
+
+                return runtimeFrameworkNames;
+            }
         }
 
         private ResolvedVersionInfo GetResolvedVersions(TestProject testProject,
