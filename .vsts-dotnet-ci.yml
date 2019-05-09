@@ -36,13 +36,13 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
-    condition: succeededOrFailed()
+    condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
-    condition: succeededOrFailed()
+    condition: always()
 
 - job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Build and test on Windows using bootstrapped full MSBuild"
@@ -75,13 +75,13 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
-    condition: succeededOrFailed()
+    condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
-    condition: succeededOrFailed()
+    condition: always()
 
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Build and test on Windows using bootstrapped core MSBuild"
@@ -115,13 +115,13 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
-    condition: succeededOrFailed()
+    condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
-    condition: succeededOrFailed()
+    condition: always()
 
 - job: FullReleaseOnWindows
   displayName: "Build and test Release on Windows using full MSBuild"
@@ -155,13 +155,13 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/Log/Release'
       ArtifactName: 'FullOnWindows Release build logs'
-    condition: succeededOrFailed()
+    condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows Release test logs'
-    condition: succeededOrFailed()
+    condition: always()
 
 - job: CoreBootstrappedOnLinux
   displayName: "Build and test on Linux using bootstrapped .NET Core MSBuild"
@@ -183,13 +183,13 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnLinux build logs'
-    condition: succeededOrFailed()
+    condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
-    condition: succeededOrFailed()
+    condition: always()
 
 - job: CoreOnMac
   displayName: "Build and test on macOS using .NET Core MSBuild"
@@ -211,11 +211,11 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnMac build logs'
-    condition: succeededOrFailed()
+    condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnMac test logs'
-    condition: succeededOrFailed()
+    condition: always()
 
