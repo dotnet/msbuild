@@ -3635,7 +3635,7 @@ namespace Microsoft.Build.Tasks
             Exception capturedException = null;
             try
             {
-                foreach (Entry entry in reader.resources)
+                foreach (IResource entry in reader.resources)
                 {
                     entry.AddTo(writer);
                 }
