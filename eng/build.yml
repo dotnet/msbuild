@@ -19,9 +19,7 @@ jobs:
   parameters:
     name: ${{ parameters.agentOs }}
     enableMicrobuild: true
-    enablePublishBuildArtifacts: true
     enablePublishBuildAssets: true
-    enablePublishTestResults: true
     enableTelemetry: true
     helixRepo: dotnet/sdk
     pool: ${{ parameters.pool }}
@@ -151,3 +149,33 @@ jobs:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
+
+    - task: PublishTestResults@1	
+      displayName: Publish Test Results	
+      inputs:	
+        testRunner: XUnit	
+        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
+        testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
+        platform: '$(BuildPlatform)'	
+        configuration: '$(_BuildConfig)'	
+      condition: not(succeeded())
+
+    - task: CopyFiles@2	
+      displayName: Gather Logs	
+      inputs:	
+        SourceFolder: '$(Build.SourcesDirectory)/artifacts'	
+        Contents: |	
+         log/$(_BuildConfig)/**/*	
+         TestResults/$(_BuildConfig)/**/*	
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'	
+      continueOnError: true	
+      condition: not(succeeded())	
+
+    - task: PublishBuildArtifacts@1	
+      displayName: Publish Logs to VSTS	
+      inputs:	
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'	
+        ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
+        publishLocation: Container	
+      continueOnError: true	
+      condition: not(succeeded())
