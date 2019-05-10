@@ -65,9 +65,15 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         private static string GetFullTypeNameFromAlias(string aliasedTypeName, Dictionary<string, string> aliases)
         {
             int indexStart = aliasedTypeName.IndexOf(',');
-            string fullAssemblyIdentity = aliases[aliasedTypeName.Substring(indexStart + 2)];
+            if (aliases.TryGetValue(aliasedTypeName.Substring(indexStart + 2), out string fullAssemblyIdentity))
+            {
+                return aliasedTypeName.Substring(0, indexStart + 2) + fullAssemblyIdentity;
+            }
 
-            return aliasedTypeName.Substring(0, indexStart + 2) + fullAssemblyIdentity;
+            // No alias found. Hope it's an already-loaded type and try to resolve it:
+            return Type.GetType(aliasedTypeName, throwOnError: false)?.AssemblyQualifiedName // TODO: is this legit? or will it give a Core name, not the standard interop name?
+                // If it's not, just pass it along
+                ?? aliasedTypeName;
         }
 
         private static void ParseData(string resxFilename, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
