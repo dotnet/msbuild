@@ -44,6 +44,19 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         }
 
         [Fact]
+        public void ParsesSingleStringWithPartialTypeName()
+        {
+            var resxWithSingleString = new MSBuildResXReader(
+                ResXHelper.SurroundWithBoilerplate(
+                    @"<data name=""StringResource"" type=""System.String"">
+    <value>StringValue</value>
+  </data>"));
+
+            resxWithSingleString.Resources.ShouldBe(new[] { new StringResource("StringResource", "StringValue", null) });
+        }
+
+
+        [Fact]
         public void LoadsMultipleStringsPreservingOrder()
         {
             var resxWithTwoStrings = new MSBuildResXReader(
@@ -99,5 +112,8 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 
         // TODO: aliased entry but no defined alias (failure)
         // TODO: alias but with reversed order (ResXResourceReader fails)
+
+        // TODO: not-well-qualified types: ResXFileRef with no alias
+        // TODO: not-well-qualified types: System.String with no assembly qualification
     }
 }
