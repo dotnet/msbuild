@@ -21,6 +21,7 @@ namespace Microsoft.NET.ToolPack.Tests
     public class GivenThatWeWantToPackAToolProject : SdkTest
     {
         private string _testRoot;
+        private string _targetFrameworkOrFrameworks = "netcoreapp2.1";
 
         public GivenThatWeWantToPackAToolProject(ITestOutputHelper log) : base(log)
         {
@@ -28,6 +29,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
         private string SetupNuGetPackage(bool multiTarget, [CallerMemberName] string callingMethod = "")
         {
+            
             TestAsset helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("PortableTool", callingMethod + multiTarget)
                 .WithSource()
@@ -36,7 +38,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                 })
-                .WithTargetFrameworkOrFrameworks("netcoreapp2.1", multiTarget)
+                .WithTargetFrameworkOrFrameworks(_targetFrameworkOrFrameworks, multiTarget)
                 .Restore(Log);
 
             _testRoot = helloWorldAsset.TestRoot;
@@ -128,6 +130,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [InlineData(false)]
         public void It_does_not_contain_apphost_exe(bool multiTarget)
         {
+            _targetFrameworkOrFrameworks = "netcoreapp3.0";
+
             var nugetPackage = SetupNuGetPackage(multiTarget);
             using (var nupkgReader = new PackageArchiveReader(nugetPackage))
             {
@@ -141,6 +145,17 @@ namespace Microsoft.NET.ToolPack.Tests
                     allItems.Should().NotContain($"tools/{framework.GetShortFolderName()}/any/consoledemo{extension}");
                 }
             }
+
+            var getValuesCommand = new GetValuesCommand(
+               Log,
+               _testRoot,
+               _targetFrameworkOrFrameworks,
+               "RunCommand",
+               GetValuesCommand.ValueType.Property);
+
+            getValuesCommand.Execute();
+            Path.GetExtension(getValuesCommand.GetValues().Single())
+                .Should().NotBe(".exe", "Repro https://github.com/dotnet/cli/issues/11299");
         }
 
         [Theory]
