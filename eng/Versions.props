@@ -28,6 +28,6 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.1.503</DotNetCliVersion>
+    <DotNetCliVersion>2.2.203</DotNetCliVersion>
   </PropertyGroup>
 </Project>

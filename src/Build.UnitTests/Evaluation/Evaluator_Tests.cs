@@ -3688,7 +3688,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// based on the default sub-toolset version -- base toolset if Dev10 is installed, or lowest (numerically
         /// sorted) toolset if it's not.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/4363")]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
         {
             if (NativeMethodsShared.IsUnixLike)
