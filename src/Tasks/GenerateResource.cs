@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
 #endif
 
 
-        #region Fields
+#region Fields
         
         // This cache helps us track the linked resource files listed inside of a resx resource file
         private ResGenDependencies _cache;
@@ -169,9 +169,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<ITaskItem> _satelliteInputs;
 
-        #endregion  // fields
+#endregion  // fields
 
-        #region Properties
+#region Properties
 
         /// <summary>
         /// The names of the items to be converted. The extension must be one of the
@@ -530,7 +530,7 @@ namespace Microsoft.Build.Tasks
             set;
         }
 
-        #endregion // properties
+#endregion // properties
 
         /// <summary>
         /// Simple public constructor.
@@ -2244,7 +2244,7 @@ namespace Microsoft.Build.Tasks
         : MarshalByRefObject
 #endif
     {
-        #region fields
+#region fields
         /// <summary>
         /// List of readers used for input.
         /// </summary>
@@ -2409,7 +2409,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _useSourcePath = false;
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Process all files.
@@ -2558,7 +2558,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-        #region Code from ResGen.EXE
+#region Code from ResGen.EXE
 
         /// <summary>
         /// Read all resources from a file and write to a new file in the chosen format
@@ -2605,7 +2605,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (ae.InnerException is XmlException)
                 {
-                    XmlException xe = (XmlException)ae.InnerException;
+                    XmlException xe = (XmlException) ae.InnerException;
                     _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
                         xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 }
@@ -3890,7 +3890,7 @@ namespace Microsoft.Build.Tasks
             public string name;
             public object value;
         }
-        #endregion // Code from ResGen.EXE
+#endregion // Code from ResGen.EXE
     }
 
 #if FEATURE_ASSEMBLY_LOADFROM
