@@ -611,7 +611,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResGen.cs" />
-
     <Compile Include="ResolveComReferenceCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

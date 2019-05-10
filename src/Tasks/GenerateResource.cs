@@ -12,7 +12,6 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -2063,7 +2062,6 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-
         /// <summary>
         /// Make sure that OutputResources has 1 file name for each name in Sources.
         /// </summary>
@@ -2743,7 +2741,7 @@ namespace Microsoft.Build.Tasks
                             && GetFormat(inFile) != Format.Assembly
                             // outFileOrDir is a directory when the input file is an assembly
                             && GetFormat(outFileOrDir) != Format.Assembly)
-                        // Never delete an assembly since we don't ever actually write to assemblies.
+                            // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(outFileOrDir);
                         }

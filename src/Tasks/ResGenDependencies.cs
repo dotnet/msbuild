@@ -221,7 +221,7 @@ namespace Microsoft.Build.Tasks
                 // Construct the return array
                 var retVal = new List<string>();
 
-                //TODO: Write a .NET Core version of this implementation.
+                //TODO: .NET Core version of this https://github.com/microsoft/msbuild/issues/1247
 #if FEATURE_RESX_RESOURCE_READER
                 using (var resxReader = new ResXResourceReader(filename))
                 {
