@@ -4511,7 +4511,7 @@ namespace Microsoft.Build.Evaluation
                             // We will keep empty entries so that we can treat them as null
                             functionArguments = ExtractFunctionArguments(elementLocation, expressionFunction, argumentsContent);
                         }
-                        
+
                         remainder = expressionFunctionAsSpan.Slice(argumentsEndIndex + 1).Trim();
                     }
                 }
