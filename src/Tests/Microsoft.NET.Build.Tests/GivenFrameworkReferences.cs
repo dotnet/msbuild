@@ -445,7 +445,10 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be("3.0.0-apphostversion");
         }
 
-        [Fact]
+        //  Transitive framework references require NuGet support, which isn't currently
+        //  in the full Framework MSBuild we use in CI, so only run these tests for
+        //  core MSBuild for now
+        [CoreMSBuildOnlyFact]
         public void TransitiveFrameworkReferenceFromProjectReference()
         {
             var testProject = new TestProject()
@@ -487,7 +490,7 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App");
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void TransitiveFrameworkReferenceFromPackageReference()
         {
             var referencedPackage = new TestProject()

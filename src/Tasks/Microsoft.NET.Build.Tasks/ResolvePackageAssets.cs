@@ -86,6 +86,11 @@ namespace Microsoft.NET.Build.Tasks
         public bool DisableTransitiveProjectReferences { get; set; }
 
         /// <summary>
+        /// Disables FrameworkReferences from referenced projects or packages
+        /// </summary>
+        public bool DisableTransitiveFrameworkReferences { get; set; }
+
+        /// <summary>
         /// Do not add references to framework assemblies as specified by packages.
         /// </summary>
         public bool DisableFrameworkAssemblies { get; set; }
@@ -370,6 +375,7 @@ namespace Microsoft.NET.Build.Tasks
                     writer.Write(DisableFrameworkAssemblies);
                     writer.Write(DisableRuntimeTargets);
                     writer.Write(DisableTransitiveProjectReferences);
+                    writer.Write(DisableTransitiveFrameworkReferences);
                     writer.Write(DotNetAppHostExecutableNameWithoutExtension);
                     writer.Write(EmitAssetsLogMessages);
                     writer.Write(EnsureRuntimePackageDependencies);
@@ -1110,11 +1116,36 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteFrameworkReferences()
             {
+                if (_task.DisableTransitiveFrameworkReferences)
+                {
+                    return;
+                }
+
+                //  Currently there are only 2 different frameworks that we expect to
+                //  show up as framework references, so use a list here instead of a
+                //  HashSet
+                List<string> frameworkReferences = null;
+
                 foreach (var library in _runtimeTarget.Libraries)
                 {
                     foreach (var frameworkReference in library.FrameworkReferences)
                     {
-                        WriteItem(frameworkReference, library);
+                        if (frameworkReferences == null)
+                        {
+                            frameworkReferences = new List<string>();
+                        }
+                        if (!frameworkReferences.Contains(frameworkReference))
+                        {
+                            frameworkReferences.Add(frameworkReference);
+                        }
+                    }
+                }
+
+                if (frameworkReferences != null)
+                {
+                    foreach (var frameworkReference in frameworkReferences)
+                    {
+                        WriteItem(frameworkReference);
                     }
                 }
             }

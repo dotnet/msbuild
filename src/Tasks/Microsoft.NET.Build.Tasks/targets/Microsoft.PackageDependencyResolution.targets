@@ -246,6 +246,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
       DisableRuntimeTargets="$(DisableRuntimeTargets)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
+      DisableTransitiveFrameworkReferences="$(DisableTransitiveFrameworkReferences)"
       DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
@@ -259,7 +260,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiersResolvePackageAssets" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
-      <Output TaskParameter="FrameworkReferences" ItemName="TransitiveFrameworkReferences" />
+      <Output TaskParameter="FrameworkReferences" ItemName="TransitiveFrameworkReference" />
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
       <Output TaskParameter="ResourceAssemblies" ItemName="ResourceCopyLocalItems" />
       <Output TaskParameter="RuntimeAssemblies" ItemName="RuntimeCopyLocalItems" />

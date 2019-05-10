@@ -155,15 +155,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="AddTransitiveFrameworkReferences" AfterTargets="ResolvePackageAssets"
-          Condition="'@(TransitiveFrameworkReferences)' != ''" >
+          Condition="'@(TransitiveFrameworkReference)' != ''" >
 
     <ItemGroup>
-      <!-- Deduplicate transitive framework references, and ignore any that were already directly
-           referenced-->
-      <_TransitiveFrameworkReferenceToResolve Include="@(TransitiveFrameworkReferences->Distinct())"/>
-      <_TransitiveFrameworkReferenceToResolve Remove="@(FrameworkReference)" />
-
-      <FrameworkReference Include="@(_TransitiveFrameworkReferenceToResolve)" />
+      <FrameworkReference Include="@(TransitiveFrameworkReference)" Exclude="@(FrameworkReference)"/>
     </ItemGroup>
     
   </Target>
