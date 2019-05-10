@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+            testProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
 
             testProject.SourceFiles.Add("Program.cs", @"
@@ -132,7 +132,7 @@ namespace FrameworkReferenceTest
                     project.Root.Add(itemGroup);
 
                     itemGroup.Add(new XElement(ns + "FrameworkReference",
-                                               new XAttribute("Include", "Microsoft.AspNetCore.App")));
+                                               new XAttribute("Include", "Microsoft.ASPNETCORE.App")));
                 })
                 .Restore(Log, testProject.Name);
 
@@ -150,7 +150,7 @@ namespace FrameworkReferenceTest
                     .Should()
                     .Fail()
                     .And.HaveStdOutContaining("NETSDK1073")
-                    .And.HaveStdOutContaining("Microsoft.AspNetCore.App");
+                    .And.HaveStdOutContaining("Microsoft.ASPNETCORE.App");
             }
         }
         [CoreMSBuildOnlyFact]
@@ -314,7 +314,7 @@ namespace FrameworkReferenceTest
 
                     project.Root.Elements(ns + "ItemGroup")
                         .Elements(ns + "FrameworkReference")
-                        .Single(fr => fr.Attribute("Include").Value == "Microsoft.NETCore.App")
+                        .Single(fr => fr.Attribute("Include").Value.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
                         .SetAttributeValue("RuntimeFrameworkVersion", runtimeFrameworkVersion);
                 });
 
@@ -370,7 +370,7 @@ namespace FrameworkReferenceTest
 
                 project.Root.Elements(ns + "ItemGroup")
                     .Elements(ns + "FrameworkReference")
-                    .Single(fr => fr.Attribute("Include").Value == "Microsoft.NETCore.App")
+                    .Single(fr => fr.Attribute("Include").Value.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
                     .SetAttributeValue("TargetLatestRuntimePatch", attributeValue.ToString());
                 },
                 identifier: attributeValue.ToString());
@@ -428,7 +428,7 @@ namespace FrameworkReferenceTest
 
                     project.Root.Elements(ns + "ItemGroup")
                         .Elements(ns + "FrameworkReference")
-                        .Single(fr => fr.Attribute("Include").Value == "Microsoft.NETCore.App")
+                        .Single(fr => fr.Attribute("Include").Value.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
                         .SetAttributeValue("TargetingPackVersion", targetingPackVersion);
                 });
 
@@ -466,7 +466,7 @@ namespace FrameworkReferenceTest
                 IsSdkProject = true
             };
 
-            referencedProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+            referencedProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
 
             testProject.ReferencedProjects.Add(referencedProject);
 
@@ -499,7 +499,7 @@ namespace FrameworkReferenceTest
                 TargetFrameworks = "netcoreapp3.0",
                 IsSdkProject = true
             };
-            referencedPackage.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+            referencedPackage.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
 
             var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage)
                 .Restore(Log, referencedPackage.Name);
@@ -587,7 +587,7 @@ namespace FrameworkReferenceTest
                     project.Root.Add(itemGroup);
 
                     var frameworkReference = new XElement(ns + "FrameworkReference",
-                                               new XAttribute("Include", "Microsoft.NETCore.App"));
+                                               new XAttribute("Include", "Microsoft.NETCore.APP"));
                     itemGroup.Add(frameworkReference);
 
                     var knownFrameworkReferenceUpdate = new XElement(ns + "KnownFrameworkReference",

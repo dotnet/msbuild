@@ -80,7 +80,7 @@ namespace Microsoft.NET.Build.Tasks
                               NormalizeVersion(kfr.TargetFramework.Version) == normalizedTargetFrameworkVersion)
                 .ToList();
 
-            var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec);
+            var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec, StringComparer.OrdinalIgnoreCase);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
             List<ITaskItem> legacyFrameworkPackages = new List<ITaskItem>();

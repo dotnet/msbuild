@@ -1121,31 +1121,20 @@ namespace Microsoft.NET.Build.Tasks
                     return;
                 }
 
-                //  Currently there are only 2 different frameworks that we expect to
-                //  show up as framework references, so use a list here instead of a
-                //  HashSet
-                List<string> frameworkReferences = null;
+                HashSet<string> writtenFrameworkReferences = null;
 
                 foreach (var library in _runtimeTarget.Libraries)
                 {
                     foreach (var frameworkReference in library.FrameworkReferences)
                     {
-                        if (frameworkReferences == null)
+                        if (writtenFrameworkReferences == null)
                         {
-                            frameworkReferences = new List<string>();
+                            writtenFrameworkReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                         }
-                        if (!frameworkReferences.Contains(frameworkReference))
+                        if (writtenFrameworkReferences.Add(frameworkReference))
                         {
-                            frameworkReferences.Add(frameworkReference);
+                            WriteItem(frameworkReference);
                         }
-                    }
-                }
-
-                if (frameworkReferences != null)
-                {
-                    foreach (var frameworkReference in frameworkReferences)
-                    {
-                        WriteItem(frameworkReference);
                     }
                 }
             }
