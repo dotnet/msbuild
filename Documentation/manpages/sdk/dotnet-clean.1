@@ -4,6 +4,7 @@
 .hy
 .SH dotnet clean
 .PP
+\f[B]This topic applies to: \[OK]\f[R] .NET Core 1.x SDK and later versions
 .SH NAME
 .PP
 \f[C]dotnet clean\f[R] - Cleans the output of a project.
@@ -11,7 +12,7 @@
 .IP
 .nf
 \f[C]
-dotnet clean [<PROJECT>] [-c|--configuration] [-f|--framework] [-o|--output] [-r|--runtime] [-v|--verbosity]
+dotnet clean [<PROJECT>|<SOLUTION>] [-c|--configuration] [-f|--framework] [--interactive] [-o|--output] [-r|--runtime] [-v|--verbosity]
 dotnet clean [-h|--help]
 \f[R]
 .fi
@@ -23,10 +24,10 @@ Only the outputs created during the build are cleaned.
 Both intermediate (\f[I]obj\f[R]) and final output (\f[I]bin\f[R]) folders are cleaned.
 .SS Arguments
 .PP
-\f[C]PROJECT\f[R]
+\f[C]PROJECT | SOLUTION\f[R]
 .PP
-The MSBuild project to clean.
-If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in \f[I]proj\f[R] and uses that file.
+The MSBuild project or solution to clean.
+If a project or solution file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in \f[I]proj\f[R] or \f[I]sln\f[R], and uses that file.
 .SH OPTIONS
 .IP \[bu] 2
 \f[B]\f[CB]-c|--configuration {Debug|Release}\f[B]\f[R]
@@ -51,10 +52,18 @@ If you specified the framework at build time, you must specify the framework whe
 Prints out a short help for the command.
 .RE
 .IP \[bu] 2
+\f[B]\f[CB]--interactive\f[B]\f[R]
+.RS 2
+.PP
+Allows the command to stop and wait for user input or action.
+For example, to complete authentication.
+Available since .NET Core 3.0 SDK.
+.RE
+.IP \[bu] 2
 \f[B]\f[CB]-o|--output <OUTPUT_DIRECTORY>\f[B]\f[R]
 .RS 2
 .PP
-Directory in which the build outputs are placed.
+The directory that contains the build artifacts to clean.
 Specify the \f[C]-f|--framework <FRAMEWORK>\f[R] switch with the output directory switch if you specified the framework when the project was built.
 .RE
 .IP \[bu] 2
@@ -69,8 +78,9 @@ Option available since .NET Core 2.0 SDK.
 \f[B]\f[CB]-v|--verbosity <LEVEL>\f[B]\f[R]
 .RS 2
 .PP
-Sets the verbosity level of the command.
-Allowed levels are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].
+Sets the MSBuild verbosity level.
+Allowed values are \f[C]q[uiet]\f[R], \f[C]m[inimal]\f[R], \f[C]n[ormal]\f[R], \f[C]d[etailed]\f[R], and \f[C]diag[nostic]\f[R].
+The default is \f[C]normal\f[R].
 .RE
 .SH EXAMPLES
 .IP \[bu] 2

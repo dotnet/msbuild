@@ -4,6 +4,7 @@
 .hy
 .SH dotnet add package
 .PP
+\f[B]This article applies to: \[OK]\f[R] .NET Core 1.x SDK and later versions
 .SH NAME
 .PP
 \f[C]dotnet add package\f[R] - Adds a package reference to a project file.
@@ -85,13 +86,13 @@ Adds a package reference without performing a restore preview and compatibility 
 \f[B]\f[CB]--package-directory <PACKAGE_DIRECTORY>\f[B]\f[R]
 .RS 2
 .PP
-Restores the package to the specified directory.
+The directory where to restore the packages.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-s|--source <SOURCE>\f[B]\f[R]
 .RS 2
 .PP
-Uses a specific NuGet package source during the restore operation.
+The NuGet package source to use during the restore operation.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-v|--version <VERSION>\f[B]\f[R]

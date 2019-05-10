@@ -4,32 +4,20 @@
 .hy
 .SH dotnet build
 .PP
+\f[B]This article applies to: \[OK]\f[R] .NET Core 1.x SDK and later versions
 .SH NAME
 .PP
 \f[C]dotnet build\f[R] - Builds a project and all of its dependencies.
 .SH SYNOPSIS
-.SS .NET Core 2.x
 .IP
 .nf
 \f[C]
-dotnet build [<PROJECT>|<SOLUTION>] [-c|--configuration] [-f|--framework] [--force] [--no-dependencies] [--no-incremental]
-    [--no-restore] [-o|--output] [-r|--runtime] [-v|--verbosity] [--version-suffix]
+dotnet build [<PROJECT>|<SOLUTION>] [-c|--configuration] [-f|--framework] [--force] [--interactive] [--no-dependencies]
+    [--no-incremental] [--nologo] [--no-restore] [-o|--output] [-r|--runtime] [-v|--verbosity] [--version-suffix]
 
 dotnet build [-h|--help]
 \f[R]
 .fi
-.SS .NET Core 1.x
-.IP
-.nf
-\f[C]
-dotnet build [<PROJECT>|<SOLUTION>] [-c|--configuration] [-f|--framework] [--no-dependencies] [--no-incremental] [-o|--output]
-    [-r|--runtime] [-v|--verbosity] [--version-suffix]
-
-dotnet build [-h|--help]
-\f[R]
-.fi
-.PP
-   *   *   *   *   *
 .SH DESCRIPTION
 .PP
 The \f[C]dotnet build\f[R] command builds the project and its dependencies into a set of binaries.
@@ -45,7 +33,7 @@ For more information, see .NET Core Application Deployment.
 .PP
 Building requires the \f[I]project.assets.json\f[R] file, which lists the dependencies of your application.
 The file is created when \f[C]dotnet restore\f[R] is executed.
-Without the assets file in place, the tooling cannot resolve reference assemblies, which results in errors.
+Without the assets file in place, the tooling can\[cq]t resolve reference assemblies, which results in errors.
 With .NET Core 1.x SDK, you needed to explicitly run the \f[C]dotnet restore\f[R] before running \f[C]dotnet build\f[R].
 Starting with .NET Core 2.0 SDK, \f[C]dotnet restore\f[R] runs implicitly when you run \f[C]dotnet build\f[R].
 If you want to disable implicit restore when running the build command, you can pass the \f[C]--no-restore\f[R] option.
@@ -62,7 +50,7 @@ The following example shows a project that produces executable code:
 \f[R]
 .fi
 .PP
-In order to produce a library, omit the \f[C]<OutputType>\f[R] property.
+To produce a library, omit the \f[C]<OutputType>\f[R] property.
 The main difference in built output is that the IL DLL for a library doesn\[cq]t contain entry points and can\[cq]t be executed.
 .SS MSBuild
 .PP
@@ -79,9 +67,8 @@ Running \f[C]dotnet build\f[R] is equivalent to \f[C]dotnet msbuild -restore -ta
 \f[C]PROJECT | SOLUTION\f[R]
 .PP
 The project or solution file to build.
-If a project or solution file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in either \f[I]proj\f[R] or \f[I]sln\f[R] and uses that file.
+If a project or solution file isn\[cq]t specified, MSBuild searches the current working directory for a file that has a file extension that ends in either \f[I]proj\f[R] or \f[I]sln\f[R] and uses that file.
 .SH OPTIONS
-.SS .NET Core 2.x
 .IP \[bu] 2
 \f[B]\f[CB]-c|--configuration {Debug|Release}\f[B]\f[R]
 .RS 2
@@ -102,12 +89,21 @@ The framework must be defined in the project file.
 .PP
 Forces all dependencies to be resolved even if the last restore was successful.
 Specifying this flag is the same as deleting the \f[I]project.assets.json\f[R] file.
+Available since .NET Core 2.0 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-h|--help\f[B]\f[R]
 .RS 2
 .PP
 Prints out a short help for the command.
+.RE
+.IP \[bu] 2
+\f[B]\f[CB]--interactive\f[B]\f[R]
+.RS 2
+.PP
+Allows the command to stop and wait for user input or action.
+For example, to complete authentication.
+Available since .NET Core 3.0 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]--no-dependencies\f[B]\f[R]
@@ -123,10 +119,18 @@ Marks the build as unsafe for incremental build.
 This flag turns off incremental compilation and forces a clean rebuild of the project\[cq]s dependency graph.
 .RE
 .IP \[bu] 2
+\f[B]\f[CB]--no-logo\f[B]\f[R]
+.RS 2
+.PP
+Doesn\[cq]t display the startup banner or the copyright message.
+Available since .NET Core 3.0 SDK.
+.RE
+.IP \[bu] 2
 \f[B]\f[CB]--no-restore\f[B]\f[R]
 .RS 2
 .PP
 Doesn\[cq]t execute an implicit restore during build.
+Available since .NET Core 2.0 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-o|--output <OUTPUT_DIRECTORY>\f[B]\f[R]
@@ -147,80 +151,18 @@ For a list of Runtime Identifiers (RIDs), see the RID catalog.
 \f[B]\f[CB]-v|--verbosity <LEVEL>\f[B]\f[R]
 .RS 2
 .PP
-Sets the verbosity level of the command.
+Sets the MSBuild verbosity level.
 Allowed values are \f[C]q[uiet]\f[R], \f[C]m[inimal]\f[R], \f[C]n[ormal]\f[R], \f[C]d[etailed]\f[R], and \f[C]diag[nostic]\f[R].
+The default is \f[C]minimal\f[R].
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]--version-suffix <VERSION_SUFFIX>\f[B]\f[R]
 .RS 2
 .PP
-Defines the version suffix for an asterisk (\f[C]*\f[R]) in the version field of the project file.
-The format follows NuGet\[cq]s version guidelines.
+Sets the value of the \f[C]$(VersionSuffix)\f[R] property to use when building the project.
+This only works if the \f[C]$(Version)\f[R] property isn\[cq]t set.
+Then, \f[C]$(Version)\f[R] is set to the \f[C]$(VersionPrefix)\f[R] combined with the \f[C]$(VersionSuffix)\f[R], separated by a dash.
 .RE
-.SS .NET Core 1.x
-.IP \[bu] 2
-\f[B]\f[CB]-c|--configuration {Debug|Release}\f[B]\f[R]
-.RS 2
-.PP
-Defines the build configuration.
-The default value is \f[C]Debug\f[R].
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-f|--framework <FRAMEWORK>\f[B]\f[R]
-.RS 2
-.PP
-Compiles for a specific framework.
-The framework must be defined in the project file.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-h|--help\f[B]\f[R]
-.RS 2
-.PP
-Prints out a short help for the command.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--no-dependencies\f[B]\f[R]
-.RS 2
-.PP
-Ignores project-to-project (P2P) references and only builds the specified root project.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--no-incremental\f[B]\f[R]
-.RS 2
-.PP
-Marks the build as unsafe for incremental build.
-This flag turns off incremental compilation and forces a clean rebuild of the project\[cq]s dependency graph.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-o|--output <OUTPUT_DIRECTORY>\f[B]\f[R]
-.RS 2
-.PP
-Directory in which to place the built binaries.
-You also need to define \f[C]--framework\f[R] when you specify this option.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-r|--runtime <RUNTIME_IDENTIFIER>\f[B]\f[R]
-.RS 2
-.PP
-Specifies the target runtime.
-For a list of Runtime Identifiers (RIDs), see the RID catalog.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-v|--verbosity <LEVEL>\f[B]\f[R]
-.RS 2
-.PP
-Sets the verbosity level of the command.
-Allowed values are \f[C]q[uiet]\f[R], \f[C]m[inimal]\f[R], \f[C]n[ormal]\f[R], \f[C]d[etailed]\f[R], and \f[C]diag[nostic]\f[R].
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--version-suffix <VERSION_SUFFIX>\f[B]\f[R]
-.RS 2
-.PP
-Defines the version suffix for an asterisk (\f[C]*\f[R]) in the version field of the project file.
-The format follows NuGet\[cq]s version guidelines.
-.RE
-.PP
-   *   *   *   *   *
 .SH EXAMPLES
 .IP \[bu] 2
 Build a project and its dependencies:
@@ -243,12 +185,12 @@ dotnet build --configuration Release
 .fi
 .RE
 .IP \[bu] 2
-Build a project and its dependencies for a specific runtime (in this example, Ubuntu 16.04):
+Build a project and its dependencies for a specific runtime (in this example, Ubuntu 18.04):
 .RS 2
 .IP
 .nf
 \f[C]
-dotnet build --runtime ubuntu.16.04-x64
+dotnet build --runtime ubuntu.18.04-x64
 \f[R]
 .fi
 .RE
