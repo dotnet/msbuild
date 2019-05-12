@@ -25,9 +25,9 @@
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
       <Sha>2427d404dcb01ae589c84841997cd7d9d0037495</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview6.19260.3">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview6.19261.3">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>18feafed95f0cb80d892eda3b4a7372a47450533</Sha>
+      <Sha>6a8ab2c08d2481c0c63eaea4a54b075bb9a22e43</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.1.0-rtm.5921">
       <Uri>https://github.com/nuget/nuget.client</Uri>
