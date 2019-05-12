@@ -86,6 +86,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (typename == null && mimetype == null)
             {
+                // Simplest case: specify nothing, it's a string
                 resources.Add(new StringResource(name, value, resxFilename));
                 return;
             }
@@ -93,6 +94,12 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             if (typename != null)
             {
                 typename = GetFullTypeNameFromAlias(typename, aliases);
+            }
+
+            if (typename == "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" ||
+                typename == typeof(string).AssemblyQualifiedName) // TODO: if loaded via GetType on core, it won't be in mscorlib. is there a way to get the "serialization safe" type?
+            {
+                resources.Add(new StringResource(name, value, resxFilename));
             }
 
             if (typename.StartsWith("System.Resources.ResXFileRef", StringComparison.Ordinal)) // TODO: is this too general? Should it be OrdinalIgnoreCase?
