@@ -100,6 +100,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 typename == typeof(string).AssemblyQualifiedName) // TODO: if loaded via GetType on core, it won't be in mscorlib. is there a way to get the "serialization safe" type?
             {
                 resources.Add(new StringResource(name, value, resxFilename));
+                return;
             }
 
             if (typename.StartsWith("System.Resources.ResXFileRef", StringComparison.Ordinal)) // TODO: is this too general? Should it be OrdinalIgnoreCase?
@@ -107,6 +108,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 AddLinkedResource(resxFilename, resources, name, value);
                 return;
             }
+
+            throw new NotImplementedException();
         }
 
         private static void AddLinkedResource(string resxFilename, List<IResource> resources, string name, string value)
