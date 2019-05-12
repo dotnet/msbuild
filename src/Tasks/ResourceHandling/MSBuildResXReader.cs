@@ -104,28 +104,34 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (typename.StartsWith("System.Resources.ResXFileRef", StringComparison.Ordinal)) // TODO: is this too general? Should it be OrdinalIgnoreCase?
             {
-                string[] fileRefInfo = ParseResxFileRefString(value);
-
-                string fileName = fileRefInfo[0];
-                string fileRefType = fileRefInfo[1];
-                string fileRefEncoding = fileRefInfo[2];
-
-                if (fileRefType == "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
-                {
-                    // from https://github.com/dotnet/winforms/blob/a88c1a73fd7298b0a5c45251771f439262016826/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L231-L241
-                    Encoding textFileEncoding = fileRefEncoding != null
-                        ? Encoding.GetEncoding(fileRefEncoding)
-                        : Encoding.Default;
-                    using (StreamReader sr = new StreamReader(fileName, textFileEncoding))
-                    {
-                        resources.Add(new StringResource(name, sr.ReadToEnd(), resxFilename));
-
-                        return;
-                    }
-                }
-
-                throw new NotImplementedException();
+                AddLinkedResource(resxFilename, resources, name, value);
+                return;
             }
+        }
+
+        private static void AddLinkedResource(string resxFilename, List<IResource> resources, string name, string value)
+        {
+            string[] fileRefInfo = ParseResxFileRefString(value);
+
+            string fileName = fileRefInfo[0];
+            string fileRefType = fileRefInfo[1];
+            string fileRefEncoding = fileRefInfo[2];
+
+            if (fileRefType == "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
+            {
+                // from https://github.com/dotnet/winforms/blob/a88c1a73fd7298b0a5c45251771f439262016826/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L231-L241
+                Encoding textFileEncoding = fileRefEncoding != null
+                    ? Encoding.GetEncoding(fileRefEncoding)
+                    : Encoding.Default;
+                using (StreamReader sr = new StreamReader(fileName, textFileEncoding))
+                {
+                    resources.Add(new StringResource(name, sr.ReadToEnd(), resxFilename));
+
+                    return;
+                }
+            }
+
+            throw new NotImplementedException();
         }
 
         public MSBuildResXReader(Stream s) : this(s, null)
