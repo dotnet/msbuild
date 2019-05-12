@@ -12,14 +12,9 @@ namespace Microsoft.Build.Tasks.UnitTests.ResourceHandling
 {
     static class ResXHelper
     {
-        public static Stream GetStreamFromString(string input)
+        public static string SurroundWithBoilerplate(string input)
         {
-            return new MemoryStream(Encoding.UTF8.GetBytes(input));
-        }
-
-        public static Stream SurroundWithBoilerplate(string input)
-        {
-            return GetStreamFromString(InitialBoilerplate + input + FinalBoilerplate);
+            return InitialBoilerplate + input + FinalBoilerplate;
         }
 
         private const string InitialBoilerplate = @"<root>

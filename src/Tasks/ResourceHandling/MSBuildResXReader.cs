@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     {
         public IReadOnlyList<IResource> Resources { get; }
 
-        public MSBuildResXReader(Stream s, string filename)
+        public static IReadOnlyList<IResource> ReadResources(Stream s, string filename)
         {
             // TODO: is it ok to hardcode the "shouldUseSourcePath" behavior?
 
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 }
             }
 
-            Resources = resources;
+            return resources;
         }
 
         private static void ParseAssemblyAlias(Dictionary<string,string> aliases, XElement elem)
@@ -148,9 +148,6 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             throw new NotImplementedException();
         }
 
-        public MSBuildResXReader(Stream s) : this(s, null)
-        { }
-
         /// <summary>
         /// Extract <see cref="IResource"/>s from a given file on disk.
         /// </summary>
@@ -158,7 +155,15 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             using (var x = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return new MSBuildResXReader(x, filename).Resources;
+                return ReadResources(x, filename);
+            }
+        }
+
+        public static IReadOnlyList<IResource> GetResourcesFromString(string resxContent)
+        {
+            using (var x = new MemoryStream(Encoding.UTF8.GetBytes(resxContent)))
+            {
+                return ReadResources(x, null);
             }
         }
 

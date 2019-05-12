@@ -33,33 +33,33 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         [Fact]
         public void ParsesSingleStringAsString()
         {
-            var resxWithSingleString = new MSBuildResXReader(
+            var resxWithSingleString = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
                     @"<data name=""StringResource"" xml:space=""preserve"">
     <value>StringValue</value>
     <comment>Comment</comment>
   </data>"));
 
-            resxWithSingleString.Resources.ShouldBe(new[] { new StringResource("StringResource", "StringValue", null) });
+            resxWithSingleString.ShouldBe(new[] { new StringResource("StringResource", "StringValue", null) });
         }
 
         [Fact]
         public void ParsesSingleStringWithPartialTypeName()
         {
-            var resxWithSingleString = new MSBuildResXReader(
+            var resxWithSingleString = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
                     @"<data name=""StringResource"" type=""System.String"">
     <value>StringValue</value>
   </data>"));
 
-            resxWithSingleString.Resources.ShouldBe(new[] { new StringResource("StringResource", "StringValue", null) });
+            resxWithSingleString.ShouldBe(new[] { new StringResource("StringResource", "StringValue", null) });
         }
 
 
         [Fact]
         public void LoadsMultipleStringsPreservingOrder()
         {
-            var resxWithTwoStrings = new MSBuildResXReader(
+            var resxWithTwoStrings = MSBuildResXReader.GetResourcesFromString(
     ResXHelper.SurroundWithBoilerplate(
         @"<data name=""StringResource"" xml:space=""preserve"">
     <value>StringValue</value>
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
     <value>2StringValue2</value>
   </data>"));
 
-            resxWithTwoStrings.Resources.ShouldBe(
+            resxWithTwoStrings.ShouldBe(
                 new[] {
                     new StringResource("StringResource", "StringValue", null),
                     new StringResource("2StringResource2", "2StringValue2", null),
@@ -81,14 +81,14 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         {
             File.Exists(@"ResourceHandling\TextFile1.txt").ShouldBeTrue("Test deployment is missing None files");
 
-            var resxWithLinkedString = new MSBuildResXReader(
+            var resxWithLinkedString = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
     <value>ResourceHandling\TextFile1.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>"));
 
-            resxWithLinkedString.Resources.ShouldBe(new[] { new StringResource("TextFile1", "Contents of TextFile1", null) });
+            resxWithLinkedString.ShouldBe(new[] { new StringResource("TextFile1", "Contents of TextFile1", null) });
         }
 
         [Fact]
@@ -96,20 +96,20 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         {
             File.Exists(@"ResourceHandling\TextFileInShiftJIS.txt").ShouldBeTrue("Test deployment is missing None files");
 
-            var resxWithLinkedString = new MSBuildResXReader(
+            var resxWithLinkedString = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
     <value>ResourceHandling\TextFileInShiftJIS.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;shift_jis</value>
   </data>"));
 
-            resxWithLinkedString.Resources.ShouldBe(new[] { new StringResource("TextFile1", "ハローワールド！", null) });
+            resxWithLinkedString.ShouldBe(new[] { new StringResource("TextFile1", "ハローワールド！", null) });
         }
 
         [Fact]
         public void PassesThroughBitmapInResx()
         {
-            var resxWithEmbeddedBitmap = new MSBuildResXReader(
+            var resxWithEmbeddedBitmap = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly alias=""System.Drawing"" name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
   <data name=""pictureBox1.Image"" type=""System.Drawing.Bitmap, System.Drawing"" mimetype=""application/x-microsoft.net.object.bytearray.base64"">
@@ -126,10 +126,10 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 </value>
   </data>
 "));
-            resxWithEmbeddedBitmap.Resources.ShouldHaveSingleItem();
-            resxWithEmbeddedBitmap.Resources[0].ShouldBeOfType(typeof(TypeConverterByteArrayResource));
+            resxWithEmbeddedBitmap.ShouldHaveSingleItem();
+            resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterByteArrayResource));
 
-            var resource = (TypeConverterByteArrayResource)resxWithEmbeddedBitmap.Resources[0];
+            var resource = (TypeConverterByteArrayResource)resxWithEmbeddedBitmap[0];
             resource.Name.ShouldBe("pictureBox1.Image");
             resource.TypeName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
         }
