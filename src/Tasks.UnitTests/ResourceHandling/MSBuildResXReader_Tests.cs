@@ -106,6 +106,34 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
             resxWithLinkedString.Resources.ShouldBe(new[] { new StringResource("TextFile1", "ハローワールド！", null) });
         }
 
+        [Fact]
+        public void PassesThroughBitmapInResx()
+        {
+            var resxWithEmbeddedBitmap = new MSBuildResXReader(
+                ResXHelper.SurroundWithBoilerplate(
+@"  <assembly alias=""System.Drawing"" name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
+  <data name=""pictureBox1.Image"" type=""System.Drawing.Bitmap, System.Drawing"" mimetype=""application/x-microsoft.net.object.bytearray.base64"">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAACgAAAAeCAIAAADRv8uKAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        wwAADsMBx2+oZAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMS41ZEdYUgAAAZNJREFUSEvtk6GL
+        wmAYxlfMFoNpQWe4Nqt/gIjBJAgiVoMIhomCiElMphUZGtRm1jTErSlcEAwaxei6eCDbPe4dY8g4dnc4
+        y37p+R5e9tu37xtjvIlA7BuB2DcCsW8E4lqt1ul0ut3ubDbTdZ3KarXabDYpHw6HSqVCGUyn01arhabX
+        61mVN57FDMMUi8V2u83zPMuyp9OJSnA+n5E3mw2yOWuUy2VkQRD6/X6pVFoul9R7wUWMR1POZrPYOpUc
+        xzUaDeTtdkvi8XgciUQul8tj9Pf8JC4UCvV6ncrhcBgKha7X6263I3E6nabX+hsuYlmWj8ejKIrI6/Wa
+        yv1+n8lkBoOBLY7FYpPJBCGXy32YrFarxyO84SIGON1UKmWfGRqIF4tFPB63xbgEo9EI4dMEpaIo5rgn
+        XMT2p7ZBCR9CMpnEJSJxPp93Xu9XibEnBPxjyABZVVUESZLu9zvNvFAMotEoicF8Pk8kEliGw2Fc+3+J
+        b7eblRw4yy8Ta2GCpaZp1sIzz2LfCMS+EYh9401iw/gG1gYfvzjQIXcAAAAASUVORK5CYII=
+</value>
+  </data>
+"));
+            resxWithEmbeddedBitmap.Resources.ShouldHaveSingleItem();
+            resxWithEmbeddedBitmap.Resources[0].ShouldBeOfType(typeof(TypeConverterByteArrayResource));
+
+            var resource = (TypeConverterByteArrayResource)resxWithEmbeddedBitmap.Resources[0];
+            resource.Name.ShouldBe("pictureBox1.Image");
+            resource.TypeName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+        }
+
         // TODO: invalid resx xml
 
         // TODO: valid xml, but invalid resx-specific data

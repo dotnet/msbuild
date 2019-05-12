@@ -109,6 +109,17 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 return;
             }
 
+            // TODO: validate typename at this point somehow to make sure it's vaguely right?
+
+            if (mimetype == "application/x-microsoft.net.object.bytearray.base64")
+            {
+                // TypeConverter!
+                byte[] bytes = Convert.FromBase64String(value);
+
+                resources.Add(new TypeConverterByteArrayResource(name, typename, bytes, resxFilename));
+                return;
+            }
+
             throw new NotImplementedException();
         }
 
