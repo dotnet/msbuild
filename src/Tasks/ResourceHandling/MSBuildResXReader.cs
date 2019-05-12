@@ -95,7 +95,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 typename = GetFullTypeNameFromAlias(typename, aliases);
             }
 
-            if (typename == "System.Resources.ResXFileRef, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
+            if (typename.StartsWith("System.Resources.ResXFileRef", StringComparison.Ordinal)) // TODO: is this too general? Should it be OrdinalIgnoreCase?
             {
                 string[] fileRefInfo = ParseResxFileRefString(value);
 
