@@ -26,6 +26,8 @@ jobs:
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     ${{ if ne(parameters.strategy, '') }}:
       strategy: ${{ parameters.strategy }}
+    workspace:
+      clean: all
     variables:
       - ${{ insert }}: ${{ parameters.variables }}
       - _AgentOSName: ${{ parameters.agentOs }}
