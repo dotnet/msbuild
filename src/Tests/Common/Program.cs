@@ -26,6 +26,7 @@ partial class Program
 
         if (!testCommandLine.ShouldShowHelp)
         {
+            newArgs.AddRange(TestCommandLine.GetXunitArgsFromTestConfig(testCommandLine.TestConfigFile));
             BeforeTestRun(newArgs);
         }
 
