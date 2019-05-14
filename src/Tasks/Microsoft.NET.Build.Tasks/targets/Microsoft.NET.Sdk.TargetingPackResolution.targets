@@ -154,6 +154,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <Target Name="AddTransitiveFrameworkReferences" AfterTargets="ResolvePackageAssets"
+          Condition="'@(TransitiveFrameworkReference)' != ''" >
+
+    <ItemGroup>
+      <FrameworkReference Include="@(TransitiveFrameworkReference)" Exclude="@(FrameworkReference)"/>
+    </ItemGroup>
+    
+  </Target>
+
   <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveTargetingPackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   

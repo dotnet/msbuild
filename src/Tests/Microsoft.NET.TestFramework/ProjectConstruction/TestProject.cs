@@ -33,6 +33,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public List<string> References { get; } = new List<string>();
 
+        public List<string> FrameworkReferences { get; } = new List<string>();
+
         public List<TestPackageReference> PackageReferences { get; } = new List<TestPackageReference>();
 
         public List<TestPackageReference> DotNetCliToolReferences { get; } = new List<TestPackageReference>();
@@ -274,6 +276,17 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 {
                     referenceItemGroup.Add(new XElement(ns + "Reference",
                         new XAttribute("Include", reference)));
+                }
+            }
+
+            if (this.FrameworkReferences.Any())
+            {
+                var frameworkReferenceItemGroup = new XElement(ns + "ItemGroup");
+                projectXml.Root.Add(frameworkReferenceItemGroup);
+                foreach (var frameworkReference in FrameworkReferences)
+                {
+                    frameworkReferenceItemGroup.Add(new XElement(ns + "FrameworkReference",
+                        new XAttribute("Include", frameworkReference)));
                 }
             }
             
