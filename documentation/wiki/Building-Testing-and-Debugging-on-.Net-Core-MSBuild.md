@@ -24,7 +24,7 @@ Install the latest .NET Core SDK from http://dot.net/core. That will ensure all 
 
 ## Tests
 
-`./build.sh -test`
+`./build.sh --test`
 
 ## Getting .Net Core MSBuild binaries without building the code
 
@@ -34,7 +34,7 @@ The best way to get .NET Core MSBuild is by installing the [.NET Core SDK](https
 
 ### Wait in Main
 
-Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the process manually.
+Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the process manually after it starts.
 
 ### Using the repository binaries to perform builds
 
