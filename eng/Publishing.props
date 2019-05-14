@@ -12,18 +12,23 @@
   <ItemGroup>
     <ToolsetAssetsToPublish Include="$(ArtifactsNonShippingPackagesDir)*.zip" />
   </ItemGroup>
-  
+
+  <Target Name="ReadToolsetVersion">
+    <ReadLinesFromFile File="$(ArtifactsBinDir)version.txt">
+      <Output TaskParameter="Lines" ItemName="ToolsetVersion"/>
+    </ReadLinesFromFile>
+
+    <CreateProperty Value="@(ToolsetVersion)">
+      <Output TaskParameter="Value" PropertyName="ToolsetVersionValue" />
+    </CreateProperty>
+  </Target>
+
   <!-- We use a separate target to publish this to blob storage so that we can push this to
        a relative path inside the blob storage. -->
-  <Target Name="PublishToolsetAssets" BeforeTargets="Publish" Condition="$(PublishToAzure)">
-    <PropertyGroup>
-      <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
-      <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
-    </PropertyGroup>
-
+  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="$(PublishToAzure)">
     <ItemGroup>
       <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)" IsShipping="false" >
-        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(Version)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(ToolsetVersionValue)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
         <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
       </ToolsetAssetsToPushToBlobFeed>
     </ItemGroup>
