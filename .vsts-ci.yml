@@ -21,10 +21,10 @@ jobs:
     agentOs: Windows_NT
     pool:
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        name: NetCorePublic-Int-Pool
+        name: NetCorePublic-Pool
         queue: buildpool.windows.10.amd64.vs2017.open
       ${{ if ne(variables['System.TeamProject'], 'public') }}:
-        name: NetCoreInternal-Int-Pool
+        name: NetCoreInternal-Pool
         queue: buildpool.windows.10.amd64.vs2017
     strategy:
       matrix:
@@ -74,7 +74,7 @@ jobs:
     parameters:
       agentOs: Windows_NT_FullFramework
       pool:
-        name: NetCorePublic-Int-Pool
+        name: NetCorePublic-Pool
         queue: buildpool.windows.10.amd64.vs2017.open
       strategy:
         matrix:
@@ -91,7 +91,7 @@ jobs:
     parameters:
       agentOs: Windows_NT_TestAsTools
       pool:
-        name: NetCorePublic-Int-Pool
+        name: NetCorePublic-Pool
         queue: buildpool.windows.10.amd64.vs2017.open
       strategy:
         matrix:
@@ -156,7 +156,7 @@ jobs:
     parameters:
       agentOs: Windows_Perf_CI
       pool:
-        name: NetCorePublic-Int-Pool
+        name: NetCorePublic-Pool
         queue: buildpool.windows.10.amd64.vs2017.open
       strategy:
         matrix:
