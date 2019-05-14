@@ -88,6 +88,8 @@ namespace Microsoft.Build.Shared
 
             for (int i = 2; i < pattern.Length; i++)
             {
+                //Real UNC paths should only contain backslashes. However, the previous
+                // regex pattern accepted both so functionality will be retained.
                 if (pattern[i] == _backSlash ||
                     pattern[i] == _forwardSlash)
                 {
