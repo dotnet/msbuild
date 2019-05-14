@@ -332,7 +332,7 @@ namespace Microsoft.Build.Collections
 
             try
             {
-                foreach (T leftProp in this)
+                foreach (T leftProp in _properties.Values)
                 {
                     T rightProp = other[leftProp.Key];
                     if (rightProp == null || !rightProp.Equals(leftProp))
@@ -592,7 +592,7 @@ namespace Microsoft.Build.Collections
             {
                 dictionary = new Dictionary<string, string>(_properties.Count, MSBuildNameIgnoreCaseComparer.Default);
 
-                foreach (T property in this)
+                foreach (T property in _properties.Values)
                 {
                     dictionary[property.Key] = property.EscapedValue;
                 }
