@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
+using System.Threading;
 
 namespace Microsoft.Build.Collections
 {
@@ -41,6 +42,11 @@ namespace Microsoft.Build.Collections
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         private readonly RetrievableEntryHashSet<T> _properties;
+
+        /// <summary>
+        /// Lock object to guard access to backing collection.
+        /// </summary>
+        private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Creates empty dictionary
@@ -113,9 +119,15 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                lock (_properties)
+                _lock.EnterReadLock();
+
+                try
                 {
                     return _properties.Values;
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
                 }
             }
         }
@@ -128,9 +140,15 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                lock (_properties)
+                _lock.EnterReadLock();
+
+                try
                 {
                     return _properties.Count;
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
                 }
             }
         }
@@ -148,9 +166,15 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                lock (_properties)
+                _lock.EnterReadLock();
+
+                try
                 {
                     return _properties.Count;
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
                 }
             }
         }
@@ -186,9 +210,16 @@ namespace Microsoft.Build.Collections
                 // We don't want to check for a zero length name here, since that is a valid name
                 // and should return a null instance which will be interpreted as blank
                 T projectProperty;
-                lock (_properties)
+
+                _lock.EnterReadLock();
+
+                try
                 {
                     _properties.TryGetValue(name, out projectProperty);
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
                 }
 
                 return projectProperty;
@@ -225,9 +256,15 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            lock (_properties)
+            _lock.EnterWriteLock();
+
+            try
             {
                 _properties.Clear();
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
             }
         }
 
@@ -237,9 +274,15 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            lock (_properties)
+            _lock.EnterReadLock();
+
+            try
             {
                 return _properties.Values.GetEnumerator();
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
         }
 
@@ -248,9 +291,15 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            lock (_properties)
+            _lock.EnterReadLock();
+
+            try
             {
                 return ((IEnumerable)_properties.Values).GetEnumerator();
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
         }
 
@@ -279,7 +328,9 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            lock (_properties)
+            _lock.EnterReadLock();
+
+            try
             {
                 foreach (T leftProp in this)
                 {
@@ -289,6 +340,10 @@ namespace Microsoft.Build.Collections
                         return false;
                     }
                 }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
 
             return true;
@@ -311,9 +366,15 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public T GetProperty(string name, int startIndex, int endIndex)
         {
-            lock (_properties)
+            _lock.EnterReadLock();
+
+            try
             {
                 return _properties.Get(name, startIndex, endIndex - startIndex + 1);
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
         }
 
@@ -335,9 +396,15 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool IDictionary<string, T>.ContainsKey(string key)
         {
-            lock (_properties)
+            _lock.EnterReadLock();
+
+            try
             {
                 return _properties.ContainsKey(key);
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
         }
 
@@ -384,12 +451,18 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.Contains(KeyValuePair<string, T> item)
         {
-            lock (_properties)
+            _lock.EnterReadLock();
+
+            try
             {
                 if (_properties.TryGetValue(item.Key, out T value))
                 {
                     return ReferenceEquals(value, item.Value);
                 }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
 
             return false;
@@ -423,12 +496,18 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            lock (_properties)
+            _lock.EnterReadLock();
+
+            try
             {
                 foreach (var entry in _properties)
                 {
                     yield return new KeyValuePair<string, T>(entry.Key, entry);
                 }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
         }
 
@@ -442,10 +521,15 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
-            lock (_properties)
+            _lock.EnterWriteLock();
+            try
             {
                 bool result = _properties.Remove(name);
                 return result;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
             }
         }
 
@@ -458,9 +542,14 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
 
-            lock (_properties)
+            _lock.EnterWriteLock();
+            try
             {
                 _properties[projectProperty.Key] = projectProperty;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
             }
         }
 
@@ -497,7 +586,9 @@ namespace Microsoft.Build.Collections
         {
             Dictionary<string, string> dictionary;
 
-            lock (_properties)
+            _lock.EnterReadLock();
+
+            try
             {
                 dictionary = new Dictionary<string, string>(_properties.Count, MSBuildNameIgnoreCaseComparer.Default);
 
@@ -506,8 +597,20 @@ namespace Microsoft.Build.Collections
                     dictionary[property.Key] = property.EscapedValue;
                 }
             }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
 
             return dictionary;
+        }
+
+        /// <summary>
+        /// Finalizer to clean up the <see cref="ReaderWriterLockSlim" />.
+        /// </summary>
+        ~PropertyDictionary()
+        {
+            _lock?.Dispose();
         }
     }
 }
