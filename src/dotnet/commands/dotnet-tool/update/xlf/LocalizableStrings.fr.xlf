@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
-        <source>Update the tool and update from the local tool manifest.</source>
-        <target state="translated">Met à jour l'outil et met à jour le manifeste d'outils locaux.</target>
+        <source>Update the tool and the local tool manifest.</source>
+        <target state="needs-review-translation">Met à jour l'outil et met à jour le manifeste d'outils locaux.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">

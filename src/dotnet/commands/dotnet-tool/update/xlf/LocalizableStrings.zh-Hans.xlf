@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
-        <source>Update the tool and update from the local tool manifest.</source>
-        <target state="translated">更新工具并从本地工具清单中更新。</target>
+        <source>Update the tool and the local tool manifest.</source>
+        <target state="needs-review-translation">更新工具并从本地工具清单中更新。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">

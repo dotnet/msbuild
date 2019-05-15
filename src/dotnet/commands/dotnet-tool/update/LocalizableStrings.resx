@@ -204,7 +204,7 @@ and the corresponding package Ids for installed tools using the command
     <value>The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</value>
   </data>
   <data name="LocalOptionDescription" xml:space="preserve">
-    <value>Update the tool and update from the local tool manifest.</value>
+    <value>Update the tool and the local tool manifest.</value>
   </data>
   <data name="ManifestPathOptionDescription" xml:space="preserve">
     <value>Path to the manifest file.</value>
