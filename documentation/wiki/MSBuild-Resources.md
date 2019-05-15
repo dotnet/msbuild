@@ -12,6 +12,7 @@
    * find targets [http://referencesource.microsoft.com/#MSBuildTarget=ResolveAssemblyReferences](http://referencesource.microsoft.com/#MSBuildTarget=ResolveAssemblyReferences)
 
 # Tools
+**Note:** These are third party tools
  * [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog)
    * A logger for MSBuild that records a structured representation of executed targets, tasks, property and item values.
  * [MSBuildExtensionPack](http://www.msbuildextensionpack.com)
