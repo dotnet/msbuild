@@ -268,6 +268,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'$(TieredCompilationQuickJit)' != ''"
                                     Value="$(TieredCompilationQuickJit)" />
 
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.QuickJitForLoops"
+                                    Condition="'$(TieredCompilationQuickJitForLoops)' != ''"
+                                    Value="$(TieredCompilationQuickJitForLoops)" />
+
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
                                     Condition="'$(ThreadPoolMinThreads)' != ''"
                                     Value="$(ThreadPoolMinThreads)" />
