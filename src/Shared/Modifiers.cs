@@ -422,7 +422,7 @@ namespace Microsoft.Build.Shared
 
                         if (!EndsWithSlash(modifiedItemSpec))
                         {
-                            ErrorUtilities.VerifyThrow(FileUtilitiesRegex.StartsWithUncPattern.IsMatch(modifiedItemSpec),
+                            ErrorUtilities.VerifyThrow(FileUtilitiesRegex.StartsWithUncPattern(modifiedItemSpec),
                                 "Only UNC shares should be missing trailing slashes.");
 
                             // restore/append trailing slash if Path.GetPathRoot() has either removed it, or failed to add it
@@ -472,17 +472,13 @@ namespace Microsoft.Build.Shared
                         if (NativeMethodsShared.IsWindows)
                         {
                             int length = -1;
-                            if (FileUtilitiesRegex.StartWithDrivePattern.IsMatch(modifiedItemSpec))
+                            if (FileUtilitiesRegex.StartsWithDrivePattern(modifiedItemSpec))
                             {
                                 length = 2;
                             }
                             else
                             {
-                                var match = FileUtilitiesRegex.StartsWithUncPattern.Match(modifiedItemSpec);
-                                if (match.Success)
-                                {
-                                    length = match.Length;
-                                }
+                                length = FileUtilitiesRegex.StartsWithUncPatternMatchLength(modifiedItemSpec);
                             }
 
                             if (length != -1)
