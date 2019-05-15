@@ -15,7 +15,7 @@
  * [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog)
    * A logger for MSBuild that records a structured representation of executed targets, tasks, property and item values.
  * [MSBuildExtensionPack](http://www.msbuildextensionpack.com)
-   * Provides the largest collection of MSBuild Tasks, MSBuild Loggers and MSBuild TaskFactories available.
+   * Provides a large collection of MSBuild Tasks, MSBuild Loggers and MSBuild TaskFactories.
  * [MSBuilder](https://github.com/MobileEssentials/MSBuilder)
    * Reusable blocks of MSBuild helpers; MSBuilder's goal is to provide fine-grained nuget packages that can be installed when only a certain MSBuild extension (task, property, target) is needed.
  * [MSBuildExplorer](http://msbuildexplorer.com) ([GitHub](https://github.com/mikefourie/MSBuildExplorer))

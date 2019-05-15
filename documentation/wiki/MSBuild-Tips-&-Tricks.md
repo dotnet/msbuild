@@ -1,12 +1,12 @@
 # MSBuild Command-Line Switches
-See the [MSBuild Command-Line Reference](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference?view=vs-2017) for more information on switches.
+See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference) for more information on switches.
  * `MSBuild.exe /pp:<FILE>`
-   * MSBuild preprocessor. Pass /pp to the command line to create a single huge XML project file with all project imports inlined in the correct order. This is useful to investigate the ordering of evaluation and execution.
-   * Example usage: `msbuild MyProject.csproj /pp:inlined.proj`
+   * MSBuild preprocessor. Pass /pp to the command line to create a single huge XML project file with all project imports inlined in the correct order. This is useful to investigate the ordering of imports and property and target overrides during evaluation.
+   * Example usage: `msbuild MyProject.csproj /pp:inlined.xml`
  * `MSBuild.exe /m`
    * Sets the maximum number of processes that should be used by msbuild.exe to build the project.
  * `MSBuild.exe /nr:false`
-   * Disable node reuse (/nodeReuse:false). Don't leave MSBuild.exe processes hanging around locking files after the build completes. See more details in MSBuild command line help (/?). See also `MSBUILDDISABLENODEREUSE=1` below.
+   * Disable node reuse (`/nodeReuse:false`). Don't leave MSBuild.exe processes hanging around (and possibly locking files) after the build completes. See more details in MSBuild command line help (/?). See also `MSBUILDDISABLENODEREUSE=1` below. Note that using this when building repeatedly will cause slower builds.
  * `MSBuild.exe /bl`
    * Records all build events to a structured binary log file. The [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) tool can be used to analyze this file.
  * `MSBuild.exe /noconlog`
