@@ -13,8 +13,8 @@
 
 # Tools
 **Note:** These are third party tools
- * [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog)
-   * A logger for MSBuild that records a structured representation of executed targets, tasks, property and item values.
+ * [MSBuildStructuredLog](http://msbuildlog.com/)
+   * A log viewer that displays a structured representation of executed targets, tasks, property and item values.
  * [MSBuildExtensionPack](http://www.msbuildextensionpack.com)
    * Provides a large collection of MSBuild Tasks, MSBuild Loggers and MSBuild TaskFactories.
  * [MSBuilder](https://github.com/MobileEssentials/MSBuilder)
