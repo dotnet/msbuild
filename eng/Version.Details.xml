@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview6.19264.2">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview6-27715-03">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>b0ecbd95b53d3bcda379199b87832ce707623ef2</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview6.19265.1">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>1df8d22ca164e4f1ff5e715b57458c93ccfc8056</Sha>
+      <Sha>792b2f140616dc0f3e263a51421229321e02c2dd</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview6.19264.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
@@ -25,9 +29,10 @@
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
       <Sha>face057d5fe9e48d1b75696843cffb22591c2c87</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview6.19264.3">
+    <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview6.19258.4" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>8cd5ce04b1918b063978b1a6661536bcba8bfb44</Sha>
+      <Sha>7551f19f92c1fd734ea77a689786c53e57ac47b5</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.1.0-rtm.5921">
       <Uri>https://github.com/nuget/nuget.client</Uri>
@@ -42,9 +47,9 @@
       <Uri>https://github.com/aspnet/websdk</Uri>
       <Sha>b02642c023e7e709c48e6c84f5289c372e66a986</Sha>
     </Dependency>
-    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19263.1">
+    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19265.1">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>1b5cf6bcecd9c2f64c00d81fefe625e2a1f3537b</Sha>
+      <Sha>56ec7569e25dfa81b16c7b8c2fca6fe43c4a26b8</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Build.Bundle" Version="3.0.0-preview5-27611-16">
       <Uri>https://github.com/dotnet/core-setup</Uri>
