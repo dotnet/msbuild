@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Resources;
+using System.Resources.Extensions;
 using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -3283,8 +3284,11 @@ namespace Microsoft.Build.Tasks
                     break;
 
                 case Format.Binary:
-
+#if FEATURE_RESX_RESOURCE_READER
                     WriteResources(reader, new ResourceWriter(File.OpenWrite(filename))); // closes writer for us
+#else
+                    WriteResources(reader, new PreserializedResourceWriter(File.OpenWrite(filename))); // closes writer for us
+#endif
                     break;
 
 
