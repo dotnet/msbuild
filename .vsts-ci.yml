@@ -1,0 +1,243 @@
+variables:
+- name:  Build.Repository.Clean
+  value: true
+
+trigger:
+- release/2.1*
+
+pr:
+- release/2.1*
+
+jobs:
+- job: debug_centos71_x64
+  displayName: CentOS7.1 x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_debian82_x64
+  displayName: Debian8.2 x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_fedora27_x64
+  displayName: fedora.27 x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --docker fedora.27 --linux-portable
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_linux_arm
+  displayName: Linux arm Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --linux-portable --architecture arm /p:CLIBUILD_SKIP_TESTS=true
+
+- job: debug_linux_arm64
+  displayName: Linux arm64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --linux-portable --architecture arm64 /p:CLIBUILD_SKIP_TESTS=true
+
+- job: debug_linux_musl_x64
+  displayName: Linux-musl x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --runtime-id linux-musl-x64 --docker alpine.3.6
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_opensuse423_x64
+  displayName: opensuse.42.3 x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --docker opensuse.42.3 --linux-portable
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_rhel6_x64
+  displayName: RHEL6 x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --runtime-id rhel.6-x64 --docker rhel.6
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_ubuntu1604_x64
+  displayName: Ubuntu16.04 x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_ubuntu1804_x64
+  displayName: ubuntu.18.04 x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --docker ubuntu.18.04 --linux-portable
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_windows_nt_es_x64
+  displayName: Windows_NT_ES x64 Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - script: |
+      set DOTNET_CLI_UI_LANGUAGE=es
+      .\build.cmd -Configuration Debug -Architecture x64 -Targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: debug_windows_nt_x86
+  displayName: Windows_NT x86 Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - script: .\build.cmd -Configuration Debug -Architecture x86 -Targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: release_linux_nosuffix_arm
+  displayName: Linux_NoSuffix arm Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: |
+      export DropSuffix=true
+      ./build.sh --skip-prereqs --configuration Release --targets Default --linux-portable --architecture arm /p:CLIBUILD_SKIP_TESTS=true
+
+- job: release_linux_nosuffix_x64
+  displayName: Linux_NoSuffix x64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: |
+      export DropSuffix=true
+      ./build.sh --skip-prereqs --configuration Release --targets Default --linux-portable
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: release_linux_x64
+  displayName: Linux x64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Release --targets Default --linux-portable
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: release_osx_x64
+  displayName: OSX x64 Release Build
+  pool:
+    vmImage: macOS-10.13
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Release --targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: release_rhel72_x64
+  displayName: RHEL7.2 x64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Release --targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: release_ubuntu_x64
+  displayName: Ubuntu x64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: ./build.sh --skip-prereqs --configuration Release --targets Default --docker ubuntu.14.04
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: release_windows_nt_nosuffix_x64
+  displayName: Windows_NT_NoSuffix x64 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - script: |
+      set DropSuffix=true
+      .\build.cmd -Configuration Release -Architecture x64 -Targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
+
+- job: release_windows_nt_x64
+  displayName: Windows_NT x64 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - script: .\build.cmd -Configuration Release -Architecture x64 -Targets Default
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*.trx'
+    condition: always()
