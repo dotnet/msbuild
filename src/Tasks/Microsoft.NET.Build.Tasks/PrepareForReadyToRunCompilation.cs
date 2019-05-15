@@ -162,7 +162,7 @@ namespace Microsoft.NET.Build.Tasks
                             MetadataReader mdReader = pereader.GetMetadataReader();
                             Guid mvid = mdReader.GetGuid(mdReader.GetModuleDefinition().Mvid);
 
-                            outputPDBImage = Path.ChangeExtension(file.ItemSpec, "ni.{" + mvid + "}.map");
+                            outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.{" + mvid + "}.map");
                             outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.{" + mvid + "}.map");
                             createPDBCommand = $"/CreatePerfMap \"{Path.GetDirectoryName(outputPDBImage)}\"";
                         }
@@ -374,13 +374,21 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_targetArchitecture == Architecture.Arm || _targetArchitecture == Architecture.Arm64)
                 {
-                    // We only have x64 hosted crossgen for both ARM target architectures
-                    if (RuntimeInformation.OSArchitecture != Architecture.X64)
+                    if (RuntimeInformation.OSArchitecture == _targetArchitecture)
+                    {
+                        _crossgenPath = Path.Combine(_packagePath, "tools", "crossgen");
+                        _clrjitPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "libclrjit.so");
+                    }
+                    else if (RuntimeInformation.OSArchitecture == Architecture.X64)
+                    {
+                        string xarchPath = (_targetArchitecture == Architecture.Arm ? "x64_arm" : "x64_arm64");
+                        _crossgenPath = Path.Combine(_packagePath, "tools", xarchPath, "crossgen");
+                        _clrjitPath = Path.Combine(_packagePath, "runtimes", xarchPath, "native", "libclrjit.so");
+                    }
+                    else
+                    {
                         return false;
-
-                    string xarchPath = (_targetArchitecture == Architecture.Arm ? "x64_arm" : "x64_arm64");
-                    _crossgenPath = Path.Combine(_packagePath, "tools", xarchPath, "crossgen");
-                    _clrjitPath = Path.Combine(_packagePath, "runtimes", xarchPath, "native", "libclrjit.so");
+                    }
                 }
                 else
                 {
