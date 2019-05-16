@@ -8,12 +8,12 @@ function InitializeCustomSDKToolset {
   if [[ "${DotNetBuildFromSource:-}" == "true" ]]; then
     return
   fi
-  
+
   InitializeDotNetCli true
   InstallDotNetSharedFramework "1.0.5"
   InstallDotNetSharedFramework "1.1.2"
   InstallDotNetSharedFramework "2.1.0"
-  InstallDotNetSharedFramework "2.2.4"
+  InstallDotNetSharedFramework "2.2.5"
 }
 
 # Installs additional shared frameworks for testing purposes
@@ -25,10 +25,10 @@ function InstallDotNetSharedFramework {
   if [[ ! -d "$fx_dir" ]]; then
     GetDotNetInstallScript "$dotnet_root"
     local install_script=$_GetDotNetInstallScript
-    
+
     bash "$install_script" --version $version --install-dir "$dotnet_root" --runtime "dotnet"
     local lastexitcode=$?
-    
+
     if [[ $lastexitcode != 0 ]]; then
       echo "Failed to install Shared Framework $version to '$dotnet_root' (exit code '$lastexitcode')."
       ExitWithExitCode $lastexitcode
