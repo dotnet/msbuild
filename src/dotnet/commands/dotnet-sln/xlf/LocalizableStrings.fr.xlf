@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AddProjectSolutionFolderArgumentDescription">
         <source>The destination solution folder path to add the projects to.</source>
-        <target state="new">The destination solution folder path to add the projects to.</target>
+        <target state="translated">Chemin de dossier solution de destination où les projets doivent être ajoutés.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="InRoot">
         <source>Place project in root of the solution, rather than creating a solution folder.</source>
-        <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
+        <target state="translated">Place le projet à la racine de la solution, au lieu de créer un dossier solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
         <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
-        <target state="new">The --solution-folder and --in-root options cannot be used together; use only one of the options.</target>
+        <target state="translated">N'utilisez pas en même temps les options --solution-folder et --in-root. Utilisez uniquement l'une des deux options.</target>
         <note />
       </trans-unit>
     </body>

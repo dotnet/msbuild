@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AddProjectSolutionFolderArgumentDescription">
         <source>The destination solution folder path to add the projects to.</source>
-        <target state="new">The destination solution folder path to add the projects to.</target>
+        <target state="translated">要新增專案的目標目的地解決方案資料夾路徑。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="InRoot">
         <source>Place project in root of the solution, rather than creating a solution folder.</source>
-        <target state="new">Place project in root of the solution, rather than creating a solution folder.</target>
+        <target state="translated">請將專案放置在解決方案的根目錄中，而非放置於建立解決方案的資料夾中。</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
         <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
-        <target state="new">The --solution-folder and --in-root options cannot be used together; use only one of the options.</target>
+        <target state="translated">不可同時使用 --solution-folder 和 --in-root 選項; 請只使用其中一個選項。</target>
         <note />
       </trans-unit>
     </body>

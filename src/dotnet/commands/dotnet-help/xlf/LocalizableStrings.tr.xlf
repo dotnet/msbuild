@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Şu framework sürümüne ileri sarın: (LatestPatch, İkincil, LatestMinor, Ana, LatestMajor, Devre dışı).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Kullanım</target>
@@ -219,22 +224,17 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;Uygulama&gt;.deps.json dosyasının yolu.</target>
+        <target state="translated">&lt;application&gt;.deps.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;Uygulama&gt;.runtimeconfig.json dosyasının yolu.</target>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
         <target state="translated">Uygulamayı çalıştırmak için kullanılacak olan yüklü Paylaşılan Çerçevenin sürümü</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
-        <target state="translated">Aday olmayan çerçeve durumunda ileri sar (0=kapalı, 1=ikincili sar, 2=ana ve ikincili sar).</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">F# Interactive'i başlatın / F# betiklerini yürütün.</target>
+        <target state="translated">F# Etkileşimli'yi başlatın / F# betiklerini yürütün.</target>
         <note />
       </trans-unit>
     </body>

@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="translated">Löschen</target>
+        <target state="translated">löschen</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">
@@ -479,7 +479,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">Das Projekt "{1}" enthält keine Verweise "{0}".</target>
+        <target state="translated">Im Projekt "{1}" liegen keine {0}-Verweise vor.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -727,17 +727,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Das Toolverzeichnis "{0}" befindet sich derzeit nicht in der PATH-Umgebungsvariable.
-Wenn Sie Bash verwenden, können Sie diese zu Ihrem Profil hinzufügen, indem Sie folgenden Befehl ausführen:
+        <target state="translated">Das Toolverzeichnis "{0}" befindet sich derzeit nicht in der PATH-Umgebungsvariablen.
+Wenn Sie Bash verwenden, können Sie es Ihrem Profil durch Ausführen des folgenden Befehls hinzufügen:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Sie können sie zur aktuellen Sitzung hinzufügen, indem Sie folgenden Befehl ausführen:
+Sie können es der aktuellen Sitzung hinzufügen, indem Sie den folgenden Befehl ausführen:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -753,17 +754,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Das Toolverzeichnis "{0}" befindet sich derzeit nicht in der PATH-Umgebungsvariable.
-Wenn Sie Bash verwenden, können Sie diese zu Ihrem Profil hinzufügen, indem Sie folgenden Befehl ausführen:
+        <target state="translated">Das Toolverzeichnis "{0}" befindet sich derzeit nicht in der PATH-Umgebungsvariablen.
+Wenn Sie Bash verwenden, können Sie es Ihrem Profil durch Ausführen des folgenden Befehls hinzufügen:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Sie können sie zur aktuellen Sitzung hinzufügen, indem Sie folgenden Befehl ausführen:
+Sie können es der aktuellen Sitzung hinzufügen, indem Sie den folgenden Befehl ausführen:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">

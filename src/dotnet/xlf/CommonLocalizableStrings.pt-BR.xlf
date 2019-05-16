@@ -14,8 +14,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.
-</target>
+        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -350,8 +349,7 @@
       </trans-unit>
       <trans-unit id="CouldNotFindSolutionOrDirectory">
         <source>Could not find solution or directory `{0}`.</source>
-        <target state="translated">Não foi possível encontrar a solução ou o diretório ‘{0}’.
-</target>
+        <target state="translated">Não foi possível encontrar a solução ou o diretório ‘{0}’.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionDoesNotExist">
@@ -481,7 +479,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">Não há referências de {0} no projeto {1}.</target>
+        <target state="translated">Não há nenhuma referência {0} no projeto {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -729,8 +727,8 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Atualmente, o diretório de ferramentas '{0}' não está na variável de ambiente PATH.
-Se você estiver usando Bash, poderá adicioná-lo ao seu perfil executando o seguinte comando:
+        <target state="translated">O diretório de ferramentas '{0}' não está na variável de ambiente PATH no momento.
+Se você estiver usando o Bash, adicione-o ao seu perfil executando o seguinte comando
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -739,7 +737,8 @@ EOF
 
 Você pode adicioná-lo à sessão atual executando o seguinte comando:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -755,8 +754,8 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Atualmente, o diretório de ferramentas '{0}' não está na variável de ambiente PATH.
-Se você estiver usando Bash, poderá adicioná-lo ao seu perfil executando o seguinte comando:
+        <target state="translated">O diretório de ferramentas '{0}' não está na variável de ambiente PATH no momento.
+Se você estiver usando o Bash, adicione-o ao seu perfil executando o seguinte comando
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -765,7 +764,8 @@ EOF
 
 Você pode adicioná-lo à sessão atual executando o seguinte comando:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">

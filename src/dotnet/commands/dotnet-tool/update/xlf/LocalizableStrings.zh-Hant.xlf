@@ -1,25 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <target state="translated">指定的版本 '{0}' 不是有效的 NuGet 版本範圍。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
-        <source>Update the tool and update from the local tool manifest.</source>
-        <target state="new">Update the tool and update from the local tool manifest.</target>
+        <source>Update the tool and the local tool manifest.</source>
+        <target state="needs-review-translation">更新該工具，並從本機工具資訊清單更新。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="new">Path to the manifest file.</target>
+        <target state="translated">資訊清單檔的路徑。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -39,32 +39,32 @@
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
         <source>Tool '{0}' is up to date (version '{1}' manifest file {2}) .</source>
-        <target state="new">Tool '{0}' is up to date (version '{1}' manifest file {2}) .</target>
+        <target state="translated">工具 '{0}' 為最新 (版本 '{1}' 資訊清單檔 {2})。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolToLowerVersion">
         <source>The requested version {0} is lower than existing version {1} (manifest file {2}).</source>
-        <target state="new">The requested version {0} is lower than existing version {1} (manifest file {2}).</target>
+        <target state="translated">要求的版本 {0} 低於現有版本 {1} (資訊清單檔 {2})。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocalToolSucceeded">
         <source>Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</source>
-        <target state="new">Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</target>
+        <target state="translated">已成功將工具 '{0}' 從 '{1}' 版更新為 '{2}' 版 (資訊清單檔 {3})。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
-        <target state="new">The requested version {0} is lower than existing version {1}.</target>
+        <target state="translated">要求的版本 {0} 低於現有版本 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</source>
-        <target state="new">The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</target>
+        <target state="translated">不可同時使用本機選項 (--local)、全域選項 (--global) 和工具路徑選項 (--tool-path)。請只指定其中一個選項: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version range of the tool package to update to.</source>
-        <target state="needs-review-translation">NuGet 中的工具套件版本。</target>
+        <target state="translated">工具套件要更新至的版本範圍。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
@@ -118,8 +118,13 @@
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
-        <source>Tool '{0}' is not currently installed.</source>
-        <target state="translated">目前未安裝工具 '{0}'。</target>
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are updated using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="needs-review-translation">目前未安裝工具 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">
@@ -164,7 +169,7 @@
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="new">VERSION</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
     </body>

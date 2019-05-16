@@ -8,7 +8,7 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionPrefix>3.0.100</VersionPrefix>
-    <PreReleaseVersionLabel>preview5</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>preview6</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
@@ -20,10 +20,10 @@
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview5.19222.7</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-preview6.19264.1</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-alpha1-10062</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta5.19223.2</MicrosoftTemplateEngineCliPackageVersion>
+    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta5.19264.1</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>

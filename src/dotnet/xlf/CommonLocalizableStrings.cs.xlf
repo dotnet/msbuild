@@ -479,7 +479,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.</source>
-        <target state="needs-review-translation">Projekt {1} neobsahuje odkazy na {0}.</target>
+        <target state="translated">V projektu {1} nejsou žádné odkazy na {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -594,7 +594,7 @@
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
         <source>Project `{0}` does not target framework `{1}`.</source>
-        <target state="translated">Projekt {0} není určený pro platformu {1}.</target>
+        <target state="translated">Projekt {0} není určený pro architekturu {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCouldNotBeEvaluated">
@@ -727,17 +727,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Adresář nástrojů {0} není aktuálně součástí proměnné prostředí PATH.
-Pokud používáte bash, můžete ho přidat do svého profilu spuštěním následujícího příkazu:
+        <target state="translated">Adresář nástrojů {0} se v tuto chvíli nenachází v proměnné prostředí PATH.
+Pokud používáte bash, můžete ho přidat do profilu tak, že spustíte následující příkaz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Do aktuální relace ho můžete přidat spuštěním následujícího příkazu:
+Pokud ho chcete přidat do aktuální relace, slouží k tomuto tento příkaz:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -753,17 +754,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Adresář nástrojů {0} není aktuálně součástí proměnné prostředí PATH.
-Pokud používáte bash, můžete ho přidat do svého profilu spuštěním následujícího příkazu:
+        <target state="translated">Adresář nástrojů {0} se v tuto chvíli nenachází v proměnné prostředí PATH.
+Pokud používáte bash, můžete ho přidat do profilu tak, že spustíte následující příkaz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Do aktuální relace ho můžete přidat spuštěním následujícího příkazu:
+Pokud ho chcete přidat do aktuální relace, slouží k tomuto tento příkaz:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">

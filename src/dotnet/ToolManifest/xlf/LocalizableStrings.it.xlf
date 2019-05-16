@@ -5,8 +5,8 @@
       <trans-unit id="CannotFindAManifestFile">
         <source>Cannot find a manifest file.
 For a list of locations searched, specify the "-d" option before the tool name.</source>
-        <target state="new">Cannot find a manifest file.
-For a list of locations searched, specify the "-d" option before the tool name.</target>
+        <target state="translated">Non è possibile trovare un file manifesto.
+Per un elenco dei percorso di ricerca, specificare l'opzione "-d" prima del nome dello strumento.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindPackageIdInManifest">
@@ -17,7 +17,7 @@ For a list of locations searched, specify the "-d" option before the tool name.<
       <trans-unit id="ListOfSearched">
         <source>The list of searched paths:
 {0}</source>
-        <target state="new">The list of searched paths:
+        <target state="translated">Elenco dei percorsi di ricerca:
 {0}</target>
         <note />
       </trans-unit>
@@ -33,12 +33,12 @@ For a list of locations searched, specify the "-d" option before the tool name.<
       </trans-unit>
       <trans-unit id="MultipleSamePackageId">
         <source>More than one entry exists for package(s): {0}.</source>
-        <target state="new">More than one entry exists for package(s): {0}.</target>
+        <target state="translated">Sono presenti più voci per i pacchetti: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTypeInJson">
         <source>Expected a {0} for property '{1}'.</source>
-        <target state="new">Expected a {0} for property '{1}'.</target>
+        <target state="translated">È previsto un tipo {0} per la proprietà '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionIsInvalid">
@@ -67,7 +67,7 @@ For a list of locations searched, specify the "-d" option before the tool name.<
       </trans-unit>
       <trans-unit id="ManifestVersionHigherThanSupported">
         <source>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</source>
-        <target state="translated">La versione del manifesto è {0}. Questo manifesto potrebbe non essere supportato in questa versione dell'SDK che supporta manifesti fino alla versione {1}.</target>
+        <target state="translated">La versione del manifesto è {0}. Il manifesto potrebbe non essere supportato in questa versione dell'SDK che supporta manifesti fino alla versione {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestVersion0">

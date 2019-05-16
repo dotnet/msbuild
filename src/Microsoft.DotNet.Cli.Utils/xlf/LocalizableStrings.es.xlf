@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">No se ha encontrado un ejecutable que coincida con el comando "{0}". Consulte https://aka.ms/missing-command para obtener más información.</target>
+        <target state="translated">No se pudo ejecutar porque no se encontró el comando o archivo especificados.
+Algunas de las posibles causas son:
+  * Escribió mal un comando dotnet integrado.
+  * Intentó ejecutar un programa .NET Core, pero {0} no existe.
+  * Tiene planeado ejecutar una herramienta global, pero no se encontró un ejecutable con prefijo dotnet con este nombre en la RUTA DE ACCESO.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -63,7 +67,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} se cerró con {1} en ms {2}.</target>
+        <target state="translated">&lt; {0} se cerró con {1} en {2} ms.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">

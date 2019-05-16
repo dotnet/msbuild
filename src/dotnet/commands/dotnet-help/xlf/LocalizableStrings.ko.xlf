@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">프레임워크 버전(LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable)으로 롤포워드합니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">사용법</target>
@@ -219,22 +224,17 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;애플리케이션&gt;.deps.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;application&gt;.deps.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;애플리케이션&gt;.runtimeconfig.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
         <target state="translated">애플리케이션을 실행하는 데 사용할 설치된 공유 프레임워크의 버전입니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
-        <target state="translated">후보 프레임워크에 롤포워드하지 않습니다(0=끔, 1=부 버전 롤, 2=주 버전 및 부 버전 롤).</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">F# 대화형 시작/F# 스크립트를 실행합니다.</target>
+        <target state="translated">F# Interactive를 시작하고 F# 스크립트를 실행합니다.</target>
         <note />
       </trans-unit>
     </body>

@@ -22,6 +22,16 @@
         <target state="translated">Cesta ke spouštěnému souboru projektu (výchozí je aktuální adresář, pokud existuje jenom jeden projekt)</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Please fix the build errors and run again.</source>
         <target state="translated">Sestavení se nezdařilo. Opravte prosím v sestavení chyby a spusťte ho znovu.</target>
@@ -148,7 +158,12 @@ Aktuální {1} je {2}.</target>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">Cílový modul runtime pro spuštění</target>
+        <target state="translated">Cílový modul runtime pro běh</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="new">The property '{0}' must be an object if it is specified.</target>
         <note />
       </trans-unit>
     </body>

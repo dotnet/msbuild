@@ -22,6 +22,16 @@
         <target state="translated">実行するプロジェクト ファイルへのパス (プロジェクトが 1 つのみの場合、既定は現在のディレクトリです)。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Please fix the build errors and run again.</source>
         <target state="translated">ビルドに失敗しました。ビルド エラーを修正して、もう一度実行してください。</target>
@@ -149,6 +159,11 @@ The current {1} is '{2}'.</source>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
         <target state="translated">実行対象のターゲット ランタイム。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="new">The property '{0}' must be an object if it is specified.</target>
         <note />
       </trans-unit>
     </body>

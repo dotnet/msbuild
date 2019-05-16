@@ -22,6 +22,16 @@
         <target state="translated">Çalıştırılacak proje dosyasının yolu (yalnızca bir proje varsa, geçerli dizin varsayılan olarak kullanılır).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Please fix the build errors and run again.</source>
         <target state="translated">Derleme başarısız oldu. Lütfen derleme hatalarını düzeltip yeniden çalıştırın.</target>
@@ -148,7 +158,12 @@ Geçerli {1}: '{2}'.</target>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">Çalıştırma için hedef çalışma zamanı.</target>
+        <target state="translated">Çalıştırılacağı hedef çalışma zamanı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="new">The property '{0}' must be an object if it is specified.</target>
         <note />
       </trans-unit>
     </body>

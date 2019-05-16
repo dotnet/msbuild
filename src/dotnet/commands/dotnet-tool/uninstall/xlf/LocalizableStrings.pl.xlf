@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="NoManifestFileContainPackageId">
         <source>Cannot find a manifest file that contains package id '{0}'.</source>
-        <target state="new">Cannot find a manifest file that contains package id '{0}'.</target>
+        <target state="translated">Nie można odnaleźć pliku manifestu, który zawiera identyfikator pakietu „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -58,8 +58,13 @@
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
-        <source>Tool '{0}' is not currently installed.</source>
-        <target state="translated">Narzędzie „{0}” nie jest obecnie zainstalowane.</target>
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are uninstalled using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="needs-review-translation">Narzędzie „{0}” nie jest obecnie zainstalowane.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -74,7 +79,7 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Jednocześnie można podać tylko jedną z następujących opcji: opcja lokalna (--local), opcja globalna (--global) lub opcja ścieżki narzędzia (--tool-path). Określ tylko jedną z tych opcji: {0}.</target>
+        <target state="translated">Można określić tylko jedną opcję jednocześnie: opcję lokalną (--local), opcję globalną (--global) lub opcję ścieżki do narzędzia (--tool-path). Podaj tylko jedną z opcji: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

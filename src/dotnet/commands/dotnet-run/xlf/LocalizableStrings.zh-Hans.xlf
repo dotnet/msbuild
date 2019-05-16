@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
         <source>.NET Run Command</source>
@@ -20,6 +20,16 @@
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
         <target state="translated">要运行的项目文件的路径(如果只有一个项目，则默认使用当前目录)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="new">Could not convert the value of property '{0}' to a string.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
@@ -149,6 +159,11 @@ The current {1} is '{2}'.</source>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
         <target state="translated">要为其运行的目标运行时。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="new">The property '{0}' must be an object if it is specified.</target>
         <note />
       </trans-unit>
     </body>

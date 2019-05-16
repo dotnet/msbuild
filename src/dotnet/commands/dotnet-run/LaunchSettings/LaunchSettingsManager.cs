@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.DotNet.Cli.Utils;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
@@ -26,64 +25,69 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
         {
             try
             {
-                var model = JObject.Parse(launchSettingsJsonContents);
-                var profilesObject = model[ProfilesKey] as JObject;
-
-                if (profilesObject == null)
+                using (var document = JsonDocument.Parse(launchSettingsJsonContents))
                 {
-                    return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfilesCollectionIsNotAJsonObject);
-                }
+                    var model = document.RootElement;
 
-                JObject profileObject;
-                if (profileName == null)
-                {
-                    profileObject = profilesObject
-                        .Properties()
-                        .FirstOrDefault(IsDefaultProfileType)?.Value as JObject;
-                }
-                else
-                {
-                    profileObject = profilesObject[profileName] as JObject;
-
-                    if (profileObject == null)
+                    if (model.Type != JsonValueType.Object || !model.TryGetProperty(ProfilesKey, out var profilesObject) || profilesObject.Type != JsonValueType.Object)
                     {
-                        return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
+                        return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfilesCollectionIsNotAJsonObject);
                     }
-                }
 
-                if (profileObject == null)
-                {
-                    foreach (var prop in profilesObject.Properties())
+                    JsonElement profileObject;
+                    if (profileName == null)
                     {
-                        var profile = prop.Value as JObject;
-
-                        if (profile != null)
+                        profileObject = profilesObject
+                            .EnumerateObject()
+                            .FirstOrDefault(IsDefaultProfileType).Value;
+                    }
+                    else
+                    {
+                        if (!profilesObject.TryGetProperty(profileName, out profileObject) || profileObject.Type != JsonValueType.Object)
                         {
-                            var cmdName = profile[CommandNameKey]?.Value<string>();
-                            if (_providers.ContainsKey(cmdName))
+                            return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
+                        }
+                    }
+
+                    if (profileObject.Type == default)
+                    {
+                        foreach (var prop in profilesObject.EnumerateObject())
+                        {
+                            if (prop.Value.Type == JsonValueType.Object)
                             {
-                                profileObject = profile;
-                                break;
+                                if (prop.Value.TryGetProperty(CommandNameKey, out var commandNameElement) && commandNameElement.Type == JsonValueType.String)
+                                {
+                                    if (_providers.ContainsKey(commandNameElement.GetString()))
+                                    {
+                                        profileObject = prop.Value;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
+
+                    if (profileObject.Type == default)
+                    {
+                        return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
+                    }
+
+                    if (!profileObject.TryGetProperty(CommandNameKey, out var finalCommandNameElement)
+                        || finalCommandNameElement.Type != JsonValueType.String)
+                    {
+                        return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
+                    }
+
+                    string commandName = finalCommandNameElement.GetString();
+                    if (!TryLocateHandler(commandName, out ILaunchSettingsProvider provider))
+                    {
+                        return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
+                    }
+
+                    return provider.TryApplySettings(profileObject, ref command);
                 }
-
-                var commandName = profileObject?[CommandNameKey]?.Value<string>();
-
-                if (profileObject == null)
-                {
-                    return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
-                }
-
-                if (!TryLocateHandler(commandName, out ILaunchSettingsProvider provider))
-                {
-                    return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
-                }
-
-                return provider.TryApplySettings(model, profileObject, ref command);
             }
-            catch (JsonException ex)
+            catch (JsonReaderException ex)
             {
                 return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.DeserializationExceptionMessage, ex.Message));
             }
@@ -94,11 +98,16 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             return _providers.TryGetValue(commandName, out provider);
         }
 
-        private static bool IsDefaultProfileType(JProperty profileProperty)
+        private static bool IsDefaultProfileType(JsonProperty profileProperty)
         {
-            JObject profile = profileProperty.Value as JObject;
-            var commandName = profile?[CommandNameKey]?.Value<string>();
-            return string.Equals(commandName, DefaultProfileCommandName, StringComparison.Ordinal);
+            if (profileProperty.Value.Type != JsonValueType.Object
+                || !profileProperty.Value.TryGetProperty(CommandNameKey, out var commandNameElement)
+                || commandNameElement.Type != JsonValueType.String)
+            {
+                return false;
+            }
+
+            return string.Equals(commandNameElement.GetString(), DefaultProfileCommandName, StringComparison.Ordinal);
         }
     }
 }

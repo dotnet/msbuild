@@ -16,13 +16,13 @@ Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 Write your first app: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</source>
-        <target state="new">----------------
-Explore documentation: https://aka.ms/dotnet-docs
-Report issues and find source on GitHub: https://github.com/dotnet/core
-Find out what's new: https://aka.ms/dotnet-whats-new
-Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-Write your first app: https://aka.ms/first-net-core-app
+        <target state="translated">----------------
+Documentazione: https://aka.ms/dotnet-docs
+Segnalazione di problemi e ricerca del codice sorgente in GitHub: https://github.com/dotnet/core
+Novità: https://aka.ms/dotnet-whats-new
+Altre informazioni sul certificato dello sviluppatore HTTPS installato: https://aka.ms/aspnet-core-https
+Usare 'dotnet --help' per visualizzare i comandi disponibili oppure visitare: https://aka.ms/dotnet-cli-docs
+Istruzioni per la creazione della prima app: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>
@@ -30,9 +30,9 @@ Write your first app: https://aka.ms/first-net-core-app
         <source>Welcome to .NET Core 3.0!
 ---------------------
 SDK Version: {0}</source>
-        <target state="new">Welcome to .NET Core 3.0!
+        <target state="translated">Benvenuti a .NET Core 3.0!
 ---------------------
-SDK Version: {0}</target>
+Versione SDK: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
