@@ -666,6 +666,7 @@ System.ServiceModel.Web.dll
 System.ServiceProcess.dll
 System.Text.Encoding.dll
 System.Text.Encoding.Extensions.dll
+System.Text.Encodings.Web.dll
 System.Text.RegularExpressions.dll
 System.Threading.dll
 System.Threading.Overlapped.dll

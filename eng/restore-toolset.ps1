@@ -1,4 +1,4 @@
-function InitializeCustomSDKToolset {    
+function InitializeCustomSDKToolset {
   if ($env:TestFullMSBuild -eq "true") {
      $env:DOTNET_SDK_TEST_MSBUILD_PATH = InitializeVisualStudioMSBuild -install:$false -vsRequirements:$GlobalJson.tools.'vs-opt'
      Write-Host "INFO: Tests will run against full MSBuild in $env:DOTNET_SDK_TEST_MSBUILD_PATH"
@@ -18,7 +18,7 @@ function InitializeCustomSDKToolset {
   InstallDotNetSharedFramework "1.0.5"
   InstallDotNetSharedFramework "1.1.2"
   InstallDotNetSharedFramework "2.1.0"
-  InstallDotNetSharedFramework "2.2.4"
+  InstallDotNetSharedFramework "2.2.5"
 
   CreateBuildEnvScript
   InstallNuget
