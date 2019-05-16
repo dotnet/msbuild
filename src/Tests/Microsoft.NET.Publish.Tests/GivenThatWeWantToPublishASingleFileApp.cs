@@ -26,10 +26,12 @@ namespace Microsoft.NET.Publish.Tests
         private const string ExcludeContent = "/p:ExcludeContent=true";
         private const string DontUseAppHost = "/p:UseAppHost=false";
         private const string ReadyToRun = "/p:PublishReadyToRun=true";
+        private const string ReadyToRunWithSymbols = "/p:PublishReadyToRunEmitSymbols=true";
 
         private readonly string RuntimeIdentifier = $"/p:RuntimeIdentifier={RuntimeEnvironment.GetRuntimeIdentifier()}";
         private readonly string SingleFile = $"{TestProjectName}{Constants.ExeSuffix}";
         private readonly string PdbFile = $"{TestProjectName}.pdb";
+        private readonly string NiPdbFile = $"{TestProjectName}.ni.pdb";
         private const string ContentFile = "Signature.stamp";
 
         public GivenThatWeWantToPublishASingleFileApp(ITestOutputHelper log) : base(log)
@@ -133,6 +135,36 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = GetPublishCommand();
             publishCommand
                 .Execute(PublishSingleFile, RuntimeIdentifier, IncludePdb)
+                .Should()
+                .Pass();
+
+            string[] expectedFiles = { SingleFile };
+            GetPublishDirectory(publishCommand)
+                .Should()
+                .OnlyHaveFiles(expectedFiles);
+        }
+
+        [WindowsOnlyFact]
+        public void It_excludes_ni_pdbs_from_single_file()
+        {
+            var publishCommand = GetPublishCommand();
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier, ReadyToRun, ReadyToRunWithSymbols)
+                .Should()
+                .Pass();
+
+            string[] expectedFiles = { SingleFile, PdbFile, NiPdbFile };
+            GetPublishDirectory(publishCommand)
+                .Should()
+                .OnlyHaveFiles(expectedFiles);
+        }
+
+        [WindowsOnlyFact]
+        public void It_can_include_ni_pdbs_in_single_file()
+        {
+            var publishCommand = GetPublishCommand();
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier, ReadyToRun, ReadyToRunWithSymbols, IncludePdb)
                 .Should()
                 .Pass();
 

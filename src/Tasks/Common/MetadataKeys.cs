@@ -82,6 +82,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string BuildAction = "BuildAction";
         public const string OutputPath = "OutputPath";
         public const string CopyToPublishDirectory = "CopyToPublishDirectory";
+        public const string ExcludeFromSingleFile = "ExcludeFromSingleFile";
 
         // Resource assemblies
         public const string Culture = "Culture";

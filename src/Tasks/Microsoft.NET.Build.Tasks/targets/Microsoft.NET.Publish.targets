@@ -92,6 +92,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
+      <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
     </PropertyGroup>
 
     <MakeDir Directories="$(PublishDir)" />
@@ -251,7 +252,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                      OutputPath="$(_ReadyToRunOutputPath)"
                                      FilesToPublish="@(ResolvedFileToPublish)"
                                      ExcludeList="@(PublishReadyToRunExclude)"
-                                     EmitSymbols="$(PublishReadyToRunEmitSymbols)">
+                                     EmitSymbols="$(PublishReadyToRunEmitSymbols)"
+                                     IncludeSymbolsInSingleFile="$(IncludeSymbolsInSingleFile)">
 
       <Output TaskParameter="CrossgenTool" ItemName="_CrossgenTool" />
 
@@ -769,10 +771,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeFilesToBundle" 
           Inputs="@(_FilesToBundle)"
           Outputs="$(PublishDir)$(AssemblyName)$(_NativeExecutableExtension)">
-
-    <PropertyGroup>
-      <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
-    </PropertyGroup>
 
     <GenerateBundle FilesToBundle="@(_FilesToBundle)"
                     AppHostName="$(AssemblyName)$(_NativeExecutableExtension)"
