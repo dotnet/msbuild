@@ -67,19 +67,29 @@ Copyright (c) .NET Foundation. All rights reserved.
     if the output semaphore file is out of date with respect to the inputs.
     ============================================================
     -->
-   <UsingTask TaskName="ILLink" AssemblyFile="$(ILLinkTasksAssembly)" />
-   <Target Name="_RunILLink"
-           DependsOnTargets="_ComputeManagedAssembliesToLink"
-           Inputs="$(MSBuildAllProjects);@(_ManagedAssembliesToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
-           Outputs="$(_LinkSemaphore)">
+  <UsingTask TaskName="ILLink" AssemblyFile="$(ILLinkTasksAssembly)" />
+  <Target Name="_RunILLink"
+         DependsOnTargets="_ComputeManagedAssembliesToLink"
+          Inputs="$(MSBuildAllProjects);@(_ManagedAssembliesToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
+          Outputs="$(_LinkSemaphore)">
 
-     <Delete Files="@(_LinkedResolvedFileToPublishCandidates)" />
-     <ILLink AssemblyPaths="@(_ManagedAssembliesToLink)"
-             ReferenceAssemblyPaths="@(ReferencePath)"
-             RootAssemblyNames="@(IntermediateAssembly->'%(Filename)')"
-             RootDescriptorFiles="@(TrimmerRootDescriptor)"
-             OutputDirectory="$(IntermediateLinkDir)"
-             ExtraArgs="-u copyused -c copyused -l none --skip-unresolved true $(_ExtraTrimmerArgs)" />
+    <!-- When running from Desktop MSBuild, DOTNET_HOST_PATH is not set.
+         In this case, explicitly specify the path to the dotnet host. -->
+    <PropertyGroup Condition=" '$(DOTNET_HOST_PATH)' == '' ">
+      <_DotNetHostDirectory>$(NetCoreRoot)</_DotNetHostDirectory>
+      <_DotNetHostFileName>dotnet</_DotNetHostFileName>
+      <_DotNetHostFileName Condition=" '$(OS)' == 'Windows_NT' ">dotnet.exe</_DotNetHostFileName>
+    </PropertyGroup>
+
+    <Delete Files="@(_LinkedResolvedFileToPublishCandidates)" />
+    <ILLink AssemblyPaths="@(_ManagedAssembliesToLink)"
+            ReferenceAssemblyPaths="@(ReferencePath)"
+            RootAssemblyNames="@(IntermediateAssembly->'%(Filename)')"
+            RootDescriptorFiles="@(TrimmerRootDescriptor)"
+            OutputDirectory="$(IntermediateLinkDir)"
+            ExtraArgs="-u copyused -c copyused -l none --skip-unresolved true $(_ExtraTrimmerArgs)"
+            ToolExe="$(_DotNetHostFileName)"
+            ToolPath="$(_DotNetHostDirectory)" />
 
      <Touch Files="$(_LinkSemaphore)" AlwaysCreate="true" />
 
