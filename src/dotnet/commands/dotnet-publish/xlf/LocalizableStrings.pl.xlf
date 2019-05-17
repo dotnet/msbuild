@@ -22,6 +22,11 @@
         <target state="translated">Platforma docelowa publikacji. Platforma docelowa musi być określona w pliku projektu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application without the .NET Core runtime.</source>
+        <target state="new">Publish your application without the .NET Core runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">KATALOG_WYJŚCIOWY</target>

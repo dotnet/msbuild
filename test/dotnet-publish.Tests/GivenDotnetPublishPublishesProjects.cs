@@ -116,6 +116,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
         [Theory]
         [InlineData("--self-contained=false")]
+        [InlineData("--no-self-contained")]
+        [InlineData("--no-self-contained=true")]
         public void ItPublishesFrameworkDependentWithRid(string args)
         {
             var testAppName = "MSBuildTestApp";
@@ -145,6 +147,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Theory]
         [InlineData("--self-contained=false")]
         [InlineData(null)]
+        [InlineData("--no-self-contained")]
+        [InlineData("--no-self-contained=true")]
         public void ItPublishesFrameworkDependentWithoutRid(string args)
         {
             var testAppName = "MSBuildTestApp";

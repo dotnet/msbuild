@@ -50,6 +50,23 @@ namespace Microsoft.DotNet.Cli
                             return $"-property:SelfContained={value}";
                         })),
                 Create.Option(
+                    "--no-self-contained",
+                    LocalizableStrings.NoSelfContainedOptionDescription,
+                    Accept.ZeroOrOneArgument()
+                        .WithSuggestionsFrom("true", "false")
+                        .ForwardAsSingle(o =>
+                        {
+                            string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
+                            if (value == "true")
+                            {
+                                value = "false";
+                            } else
+                            {
+                                value = "true";
+                            }
+                            return $"-property:SelfContained={value}";
+                        })),
+                Create.Option(
                     "--nologo|/nologo",
                     LocalizableStrings.CmdNoLogo,
                     Accept.NoArguments()

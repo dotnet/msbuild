@@ -22,6 +22,11 @@
         <target state="translated">La plataforma de destino para la que se publica. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application without the .NET Core runtime.</source>
+        <target state="new">Publish your application without the .NET Core runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">DIRECTORIO_DE_SALIDA</target>

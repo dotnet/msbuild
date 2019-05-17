@@ -22,6 +22,11 @@
         <target state="translated">Yayımlamanın yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application without the .NET Core runtime.</source>
+        <target state="new">Publish your application without the .NET Core runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">ÇIKIŞ_DİZİNİ</target>

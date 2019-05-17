@@ -22,6 +22,11 @@
         <target state="translated">게시할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에서 지정해야 합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application without the .NET Core runtime.</source>
+        <target state="new">Publish your application without the .NET Core runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>

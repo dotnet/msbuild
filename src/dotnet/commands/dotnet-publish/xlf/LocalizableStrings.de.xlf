@@ -22,6 +22,11 @@
         <target state="translated">Das Zielframework für die Veröffentlichung. Das Zielframework muss in der Projektdatei angegeben werden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application without the .NET Core runtime.</source>
+        <target state="new">Publish your application without the .NET Core runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>

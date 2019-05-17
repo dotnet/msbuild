@@ -155,4 +155,7 @@ The default is to publish a framework-dependent application.</value>
   <data name="CmdNoLogo" xml:space="preserve">
     <value>Do not display the startup banner or the copyright message.</value>
   </data>
+  <data name="NoSelfContainedOptionDescription" xml:space="preserve">
+    <value>Publish your application without the .NET Core runtime.</value>
+  </data>
 </root>
