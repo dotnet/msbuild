@@ -41,7 +41,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_WriteAppConfigWithSupportedRuntime"
-          Inputs="$(MSBuildAllProjects);@(AppConfigWithTargetPath);$(ResolveAssemblyReferencesStateFile)"
+          Inputs="$(MSBuildAllProjects);@(AppConfigWithTargetPath)"
           Outputs="$(_GenerateSupportedRuntimeIntermediateAppConfig)"
           DependsOnTargets="PrepareForBuild">
 
