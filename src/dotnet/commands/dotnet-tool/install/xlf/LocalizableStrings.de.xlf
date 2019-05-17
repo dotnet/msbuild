@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nicht zusammen angegeben werden. Geben Sie nur eine der Optionen an: {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nicht zusammen angegeben werden. Geben Sie nur eine der Optionen an: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -79,8 +79,8 @@ Wenn Sie ein Manifest erstellen möchten, verwenden Sie "dotnet new tool-manifes
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to install.</source>
-        <target state="translated">Geben Sie eine Toolpaket-ID für die Installation an.</target>
+        <source>Specify one tool Package Id to install.</source>
+        <target state="needs-review-translation">Geben Sie eine Toolpaket-ID für die Installation an.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -99,8 +99,8 @@ Wenn Sie ein Manifest erstellen möchten, verwenden Sie "dotnet new tool-manifes
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
-        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="translated">Fehler bei der Installation des Tools "{0}". Wenden Sie sich an den Verfasser des Tools, um Unterstützung zu erhalten.</target>
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="needs-review-translation">Fehler bei der Installation des Tools "{0}". Wenden Sie sich an den Verfasser des Tools, um Unterstützung zu erhalten.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">

@@ -124,7 +124,7 @@
     <value>The NuGet Package Id of the tool to update.</value>
   </data>
   <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
-    <value>Please specify one tool Package Id to update.</value>
+    <value>Specify one tool Package Id to update.</value>
   </data>
   <data name="AddSourceOptionDescription" xml:space="preserve">
     <value>Add an additional NuGet package source to use during the update.</value>
@@ -160,10 +160,10 @@
     <value>.NET update Command</value>
   </data>
   <data name="UpdateToolCommandNeedGlobalOrToolPath" xml:space="preserve">
-    <value>Please specify either the global option (--global) or the tool path option (--tool-path).</value>
+    <value>Specify either the global option (--global) or the tool path option (--tool-path).</value>
   </data>
   <data name="UpdateToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
-    <value>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</value>
+    <value>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</value>
   </data>
   <data name="ToolPathOptionName" xml:space="preserve">
     <value>PATH</value>

@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">本機選項 (--local)、全域選項 (--global)、工具路徑選項 (--tool-path) 一次只能有一個。請指定其中一個選項: {0}。</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">本機選項 (--local)、全域選項 (--global)、工具路徑選項 (--tool-path) 一次只能有一個。請指定其中一個選項: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -43,9 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">警告: 工具套件 '{0}' 無效，請洽工具作者:
+        <target state="needs-review-translation">警告: 工具套件 '{0}' 無效，請洽工具作者:
 {1}</target>
         <note />
       </trans-unit>

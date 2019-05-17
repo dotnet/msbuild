@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -43,9 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">警告: ツール パッケージ '{0}' が無効です。ツールの作成者にお問い合わせください。
+        <target state="needs-review-translation">警告: ツール パッケージ '{0}' が無効です。ツールの作成者にお問い合わせください。
 {1}</target>
         <note />
       </trans-unit>

@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to update.</source>
-        <target state="translated">請指定一個要更新的工具套件識別碼。</target>
+        <source>Specify one tool Package Id to update.</source>
+        <target state="needs-review-translation">請指定一個要更新的工具套件識別碼。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -103,13 +103,13 @@
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">請指定全域選項 (--global) 或工具路徑選項 (--tool-path) 兩者之一。</target>
+        <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">請指定全域選項 (--global) 或工具路徑選項 (--tool-path) 兩者之一。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) 與工具路徑選項 (--tool-path) 衝突。請只指定其中一個選項。</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
+        <target state="needs-review-translation">(--global) 與工具路徑選項 (--tool-path) 衝突。請只指定其中一個選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">

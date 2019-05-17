@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
-        <source>The build failed. Please fix the build errors and run again.</source>
-        <target state="translated">Derleme başarısız oldu. Lütfen derleme hatalarını düzeltip yeniden çalıştırın.</target>
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="needs-review-translation">Derleme başarısız oldu. Lütfen derleme hatalarını düzeltip yeniden çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -49,17 +49,17 @@
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
-        <target state="translated">Projeniz çalıştırılamıyor
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="needs-review-translation">Projeniz çalıştırılamıyor
 Projeniz birden fazla çerçeveyi hedefliyor. Lütfen '{0}' kullanılarak hangi çerçevenin çalıştırılacağını belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">Projeniz çalıştırılamıyor.
+        <target state="needs-review-translation">Projeniz çalıştırılamıyor.
 Lütfen çalıştırılabilir bir proje türüne sahip olduğunuzdan ve bu projenin '{0}' tarafından desteklendiğinden emin olun.
 Çalıştırılabilir bir proje, çalıştırılabilir bir TFM’yi hedeflemeli (örneğin, netcoreapp2.0) ve OutputType 'Exe' dosyasına sahip olmalıdır.
 Geçerli {1}: '{2}'.</target>

@@ -124,7 +124,7 @@
     <value>The NuGet Package Id of the tool to uninstall.</value>
   </data>
   <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
-    <value>Please specify one tool Package Id to uninstall.</value>
+    <value>Specify one tool Package Id to uninstall.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
     <value>Uninstall a global tool or local tool.</value>
@@ -168,7 +168,7 @@ and the corresponding package Ids for installed tools using the command
     <value>Uninstall the tool and remove it from the local tool manifest.</value>
   </data>
   <data name="UninstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
-    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</value>
   </data>
   <data name="UninstallLocalToolSucceeded" xml:space="preserve">
     <value>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</value>

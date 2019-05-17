@@ -158,8 +158,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="translated">O comando '{0}' especificado não é um comando do SDK válido. Especifique um comando do SDK válido. Para obter mais informações, execute a ajuda do dotnet.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="needs-review-translation">O comando '{0}' especificado não é um comando do SDK válido. Especifique um comando do SDK válido. Para obter mais informações, execute a ajuda do dotnet.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">

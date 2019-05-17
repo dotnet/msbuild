@@ -38,8 +38,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to uninstall.</source>
-        <target state="translated">Zadejte prosím jedno ID balíčku nástroje, který se má odinstalovat.</target>
+        <source>Specify one tool Package Id to uninstall.</source>
+        <target state="needs-review-translation">Zadejte prosím jedno ID balíčku nástroje, který se má odinstalovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -78,8 +78,8 @@ and the corresponding package Ids for installed tools using the command
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Možnost local (--local), možnost global (--global), možnost tool path (--tool-path), v jednu chvíli je možné mít jen jednu. Zadejte prosím jen jednu z možností: {0}</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">Možnost local (--local), možnost global (--global), možnost tool path (--tool-path), v jednu chvíli je možné mít jen jednu. Zadejte prosím jen jednu z možností: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
-        <source>The build failed. Please fix the build errors and run again.</source>
-        <target state="translated">Ошибка сборки. Устраните ошибки сборки и повторите попытку.</target>
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="needs-review-translation">Ошибка сборки. Устраните ошибки сборки и повторите попытку.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -49,17 +49,17 @@
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
-        <target state="translated">Не удается запустить проект
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="needs-review-translation">Не удается запустить проект
 Проект предназначен для нескольких платформ. Укажите платформу, для которой следует запустить проект, с помощью "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">Не удается запустить проект.
+        <target state="needs-review-translation">Не удается запустить проект.
 Убедитесь в том, что тип проекта поддерживает запуск и что "{0}" поддерживает этот проект.
 Запускаемый проект должен быть предназначен для TFM с поддержкой запуска (например, netcoreapp2.0) и иметь тип выходных данных "Exe".
 Текущий {1} — "{2}".</target>

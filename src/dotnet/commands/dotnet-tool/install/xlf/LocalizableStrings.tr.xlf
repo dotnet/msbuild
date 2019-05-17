@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Yerel seçeneği (--local), genel seçeneği (--global), araç yolu seçeneği (--tool-path) arasından yalnızca biri seçilebilir. Lütfen seçeneklerden yalnızca birini belirtin: {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">Yerel seçeneği (--local), genel seçeneği (--global), araç yolu seçeneği (--tool-path) arasından yalnızca biri seçilebilir. Lütfen seçeneklerden yalnızca birini belirtin: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -79,8 +79,8 @@ Bir bildirim oluşturmak istiyorsanız 'dotnet new tool-manifest' ifadesini kull
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to install.</source>
-        <target state="translated">Lütfen yüklenecek araç Paketi Kimliğini belirtin.</target>
+        <source>Specify one tool Package Id to install.</source>
+        <target state="needs-review-translation">Lütfen yüklenecek araç Paketi Kimliğini belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -99,8 +99,8 @@ Bir bildirim oluşturmak istiyorsanız 'dotnet new tool-manifest' ifadesini kull
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
-        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="translated">'{0}' aracı yüklenemedi. Lütfen yardım için araç sahibiyle iletişime geçin.</target>
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="needs-review-translation">'{0}' aracı yüklenemedi. Lütfen yardım için araç sahibiyle iletişime geçin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">

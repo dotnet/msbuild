@@ -96,10 +96,10 @@ Raisons possibles :
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
-        <source>Cannot find command 'dotnet {0}', please run the following command to install
+        <source>Cannot find command 'dotnet {0}', run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="translated">La commande 'dotnet {0}' est introuvable. Exécutez la commande suivante pour effectuer l'installation.
+        <target state="needs-review-translation">La commande 'dotnet {0}' est introuvable. Exécutez la commande suivante pour effectuer l'installation.
 
 dotnet tool install --global {1}</target>
         <note />

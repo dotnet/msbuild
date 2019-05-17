@@ -255,10 +255,10 @@ check_pre_reqs() {
         local librarypath=${LD_LIBRARY_PATH:-}
         LDCONFIG_COMMAND="$LDCONFIG_COMMAND -NXv ${librarypath//:/ }"
 
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libunwind)" ] && say_warning "Unable to locate libunwind. Probable prerequisite missing; please install libunwind."
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libssl)" ] && say_warning "Unable to locate libssl. Probable prerequisite missing; please install libssl."
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libicu)" ] && say_warning "Unable to locate libicu. Probable prerequisite missing; please install libicu."
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep -F libcurl.so)" ] && say_warning "Unable to locate libcurl. Probable prerequisite missing; please install libcurl."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libunwind)" ] && say_warning "Unable to locate libunwind. Probable prerequisite missing; install libunwind."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libssl)" ] && say_warning "Unable to locate libssl. Probable prerequisite missing; install libssl."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libicu)" ] && say_warning "Unable to locate libicu. Probable prerequisite missing; install libicu."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep -F libcurl.so)" ] && say_warning "Unable to locate libcurl. Probable prerequisite missing; install libcurl."
     fi
 
     return 0
@@ -360,7 +360,7 @@ get_normalized_architecture_from_architecture() {
             ;;
     esac
 
-    say_err "Architecture \`$architecture\` not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues"
+    say_err "Architecture \`$architecture\` not supported. If you think this is a bug, report it at https://github.com/dotnet/cli/issues"
     return 1
 }
 

@@ -8,9 +8,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. 도구 작성자에게 문의하세요.
+        <target state="needs-review-translation">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. 도구 작성자에게 문의하세요.
 {1}</target>
         <note />
       </trans-unit>

@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nicht zusammen angegeben werden. Geben Sie nur eine der Optionen an: {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nicht zusammen angegeben werden. Geben Sie nur eine der Optionen an: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -43,9 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">Warnung: Das Toolpaket "{0}" ist ungültig. Wenden Sie sich an den Autor des Tools:
+        <target state="needs-review-translation">Warnung: Das Toolpaket "{0}" ist ungültig. Wenden Sie sich an den Autor des Tools:
 {1}</target>
         <note />
       </trans-unit>

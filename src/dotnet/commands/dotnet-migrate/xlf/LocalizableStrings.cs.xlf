@@ -77,8 +77,8 @@ Výchozí hodnotou je verze sady SDK v příkazu dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
-        <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="translated">Migrace projektu je hotová. Přejděte prosím na https://aka.ms/coremigration, kde můžete nahlásit jakékoli problémy, nebo požádat o pomoc.</target>
+        <source>The project migration has finished. Visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
+        <target state="needs-review-translation">Migrace projektu je hotová. Přejděte prosím na https://aka.ms/coremigration, kde můžete nahlásit jakékoli problémy, nebo požádat o pomoc.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">

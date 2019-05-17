@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to update.</source>
-        <target state="translated">업데이트할 도구 패키지 ID를 하나 지정하세요.</target>
+        <source>Specify one tool Package Id to update.</source>
+        <target state="needs-review-translation">업데이트할 도구 패키지 ID를 하나 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -103,13 +103,13 @@
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
+        <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(-global)이 도구 경로 옵션(--tool-path)과 충돌합니다. 옵션 중 하나만 지정하세요.</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
+        <target state="needs-review-translation">(-global)이 도구 경로 옵션(--tool-path)과 충돌합니다. 옵션 중 하나만 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">

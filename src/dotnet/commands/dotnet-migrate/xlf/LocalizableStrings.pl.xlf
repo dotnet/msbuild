@@ -77,8 +77,8 @@ Domyślnie jest to wersja pakietu SDK podana w poleceniu dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
-        <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="translated">Zakończono migrację projektu. Aby zgłosić problemy lub poprosić o pomoc, odwiedź stronę https://aka.ms/coremigration.</target>
+        <source>The project migration has finished. Visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
+        <target state="needs-review-translation">Zakończono migrację projektu. Aby zgłosić problemy lub poprosić o pomoc, odwiedź stronę https://aka.ms/coremigration.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">

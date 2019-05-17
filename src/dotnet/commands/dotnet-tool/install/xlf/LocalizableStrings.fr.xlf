@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">L'option locale (--local), l'option globale (--global) et l'option de chemin d'outil (--tool-path) ne peuvent pas être utilisées simultanément. Spécifiez uniquement l'une de ces options : {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">L'option locale (--local), l'option globale (--global) et l'option de chemin d'outil (--tool-path) ne peuvent pas être utilisées simultanément. Spécifiez uniquement l'une de ces options : {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -79,8 +79,8 @@ Si vous souhaitez créer un manifeste, utilisez 'dotnet new tool-manifest', gén
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to install.</source>
-        <target state="translated">Spécifiez un ID de package d'outil à installer.</target>
+        <source>Specify one tool Package Id to install.</source>
+        <target state="needs-review-translation">Spécifiez un ID de package d'outil à installer.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -99,8 +99,8 @@ Si vous souhaitez créer un manifeste, utilisez 'dotnet new tool-manifest', gén
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
-        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="translated">Impossible d'installer l'outil '{0}'. Contactez le créateur de l'outil pour obtenir de l'aide.</target>
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="needs-review-translation">Impossible d'installer l'outil '{0}'. Contactez le créateur de l'outil pour obtenir de l'aide.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">

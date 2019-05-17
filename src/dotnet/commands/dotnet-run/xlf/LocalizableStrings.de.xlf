@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
-        <source>The build failed. Please fix the build errors and run again.</source>
-        <target state="translated">Fehler beim Buildvorgang. Beheben Sie die Buildfehler, und wiederholen Sie anschließend den Vorgang.</target>
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="needs-review-translation">Fehler beim Buildvorgang. Beheben Sie die Buildfehler, und wiederholen Sie anschließend den Vorgang.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -49,17 +49,17 @@
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
-        <target state="translated">Ihr Projekt kann nicht ausgeführt werden.
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="needs-review-translation">Ihr Projekt kann nicht ausgeführt werden.
 Ihr Projekt verwendet mehrere Zielframeworks. Geben Sie an, welches Framework mithilfe von "{0}" ausgeführt werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">Ihr Projekt kann nicht ausgeführt werden.
+        <target state="needs-review-translation">Ihr Projekt kann nicht ausgeführt werden.
 Stellen Sie sicher, dass der Projekttyp ausführbar ist und "{0}" dieses Projekt unterstützt.
 Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verwenden und über den OutputType "Exe" verfügen.
 {1} ist aktuell "{2}".</target>

@@ -200,7 +200,7 @@ function InitializeVisualStudioMSBuild([bool]$install, [object]$vsRequirements =
       }
 
       # Report error - the developer environment is initialized with incompatible VS version.
-      throw "Developer Command Prompt for VS $($env:VisualStudioVersion) is not recent enough. Please upgrade to $vsMinVersionStr or build from a plain CMD window"
+      throw "Developer Command Prompt for VS $($env:VisualStudioVersion) is not recent enough. Upgrade to $vsMinVersionStr or build from a plain CMD window"
     }
   }
 

@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Yerel seçeneği (--local), genel seçeneği (--global), araç yolu seçeneği (--tool-path) arasından yalnızca biri seçilebilir. Lütfen seçeneklerden yalnızca birini belirtin: {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">Yerel seçeneği (--local), genel seçeneği (--global), araç yolu seçeneği (--tool-path) arasından yalnızca biri seçilebilir. Lütfen seçeneklerden yalnızca birini belirtin: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -43,9 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">Uyarı: Araç paketi '{0}' geçersiz, lütfen araç yazarına başvurun:
+        <target state="needs-review-translation">Uyarı: Araç paketi '{0}' geçersiz, lütfen araç yazarına başvurun:
 {1}</target>
         <note />
       </trans-unit>

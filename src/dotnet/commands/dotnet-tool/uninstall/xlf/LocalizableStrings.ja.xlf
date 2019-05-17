@@ -38,8 +38,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to uninstall.</source>
-        <target state="translated">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
+        <source>Specify one tool Package Id to uninstall.</source>
+        <target state="needs-review-translation">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -78,8 +78,8 @@ and the corresponding package Ids for installed tools using the command
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

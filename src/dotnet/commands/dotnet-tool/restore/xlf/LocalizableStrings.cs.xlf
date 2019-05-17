@@ -8,9 +8,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">Upozornění: Balíček nástroje {0} je neplatný, obraťte se na autora nástroje:
+        <target state="needs-review-translation">Upozornění: Balíček nástroje {0} je neplatný, obraťte se na autora nástroje:
 {1}</target>
         <note />
       </trans-unit>

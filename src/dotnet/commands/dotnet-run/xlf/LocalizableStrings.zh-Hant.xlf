@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
-        <source>The build failed. Please fix the build errors and run again.</source>
-        <target state="translated">建置失敗。請修正建置錯誤後再執行一次。</target>
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="needs-review-translation">建置失敗。請修正建置錯誤後再執行一次。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -49,17 +49,17 @@
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
-        <target state="translated">無法執行您的專案
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="needs-review-translation">無法執行您的專案
 您的專案以多重架構為目標。請使用 '{0}' 來指定要執行的架構。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">無法執行您的專案。
+        <target state="needs-review-translation">無法執行您的專案。
 請確定您有可執行的專案類型，同時確定 '{0}' 支援此專案。
 可執行專案應該以可執行的 TFM (例如，netcoreapp2.0) 為目標，且具有 OutputType 'Exe'。
 目前的 {1} 為 '{2}'。</target>

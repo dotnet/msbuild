@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to update.</source>
-        <target state="translated">Zadejte prosím jedno ID balíčku nástroje, který se má aktualizovat.</target>
+        <source>Specify one tool Package Id to update.</source>
+        <target state="needs-review-translation">Zadejte prosím jedno ID balíčku nástroje, který se má aktualizovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -103,13 +103,13 @@
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Zadejte prosím globální parametr (--global) nebo parametr cesty nástroje (--tool-path).</target>
+        <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">Zadejte prosím globální parametr (--global) nebo parametr cesty nástroje (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) je v konfliktu s parametrem cesty nástroje (--tool-path). Zadejte prosím pouze jeden z parametrů.</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
+        <target state="needs-review-translation">(--global) je v konfliktu s parametrem cesty nástroje (--tool-path). Zadejte prosím pouze jeden z parametrů.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">

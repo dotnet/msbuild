@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
-        <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">V {0} se našlo několik projektů. Vyberte prosím, jaký chcete použít.</target>
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
+        <target state="needs-review-translation">V {0} se našlo několik projektů. Vyberte prosím, jaký chcete použít.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -298,8 +298,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
-        <source>Please specify at least one {0}.</source>
-        <target state="translated">Zadejte prosím aspoň jednu položku {0}.</target>
+        <source>Specify at least one {0}.</source>
+        <target state="needs-review-translation">Zadejte prosím aspoň jednu položku {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConnectWithTheServer">
@@ -393,8 +393,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
-        <source>Please specify a version of the package.</source>
-        <target state="translated">Zadejte prosím verzi balíčku.</target>
+        <source>Specify a version of the package.</source>
+        <target state="needs-review-translation">Zadejte prosím verzi balíčku.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotExist">
@@ -488,13 +488,13 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
-        <source>Please specify new version of the package.</source>
-        <target state="translated">Zadejte prosím novou verzi balíčku.</target>
+        <source>Specify new version of the package.</source>
+        <target state="needs-review-translation">Zadejte prosím novou verzi balíčku.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
-        <source>Please specify which package to update.</source>
-        <target state="translated">Zadejte prosím, jaký balíček chcete aktualizovat.</target>
+        <source>Specify which package to update.</source>
+        <target state="needs-review-translation">Zadejte prosím, jaký balíček chcete aktualizovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="NothingToUpdate">
@@ -523,8 +523,8 @@
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
-        <source>The template {0} created successfully. Please run "dotnet restore" to get started!</source>
-        <target state="translated">Šablona {0} byla úspěšně vytvořena. Začněte prosím spuštěním příkazu dotnet restore.</target>
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
+        <target state="needs-review-translation">Šablona {0} byla úspěšně vytvořena. Začněte prosím spuštěním příkazu dotnet restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInstalledSuccesfully">
@@ -543,13 +543,13 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
-        <source>Specified name {0} already exists. Please specify a different name.</source>
-        <target state="translated">Zadaný název {0} už existuje. Zadejte prosím jiný název.</target>
+        <source>Specified name {0} already exists. Specify a different name.</source>
+        <target state="needs-review-translation">Zadaný název {0} už existuje. Zadejte prosím jiný název.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
-        <source>Specified alias {0} already exists. Please specify a different alias.</source>
-        <target state="translated">Zadaný alias {0} už existuje. Zadejte prosím jiný alias.</target>
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
+        <target state="needs-review-translation">Zadaný alias {0} už existuje. Zadejte prosím jiný alias.</target>
         <note />
       </trans-unit>
       <trans-unit id="MandatoryParameterMissing">
@@ -568,8 +568,8 @@
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
-        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">V {0} se našlo několik souborů řešení. Vyberte prosím, jaký chcete použít.</target>
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
+        <target state="needs-review-translation">V {0} se našlo několik souborů řešení. Vyberte prosím, jaký chcete použít.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -588,8 +588,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
-        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">Projekt {0} není možné přidat, protože cílové platformy obou projektů nejsou kompatibilní. Zkontrolujte projekt, který se pokoušíte přidat, a ověřte jeho kompatibilitu s následujícími cíli:</target>
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <target state="needs-review-translation">Projekt {0} není možné přidat, protože cílové platformy obou projektů nejsou kompatibilní. Zkontrolujte projekt, který se pokoušíte přidat, a ověřte jeho kompatibilitu s následujícími cíli:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -605,8 +605,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
-        <target state="translated">Projekt {0} má neznámý typ projektu a nelze ho přidat do souboru řešení. K získání podpory prosím kontaktujte poskytovatele sady SDK.</target>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
+        <target state="needs-review-translation">Projekt {0} má neznámý typ projektu a nelze ho přidat do souboru řešení. K získání podpory prosím kontaktujte poskytovatele sady SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -834,23 +834,23 @@ setx PATH "%PATH%;{0}"
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
-        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
-        <target state="translated">Verze formátu je vyšší, než se podporuje. Tento nástroj možná není v této verzi SDK podporovaný. Aktualizujte sadu SDK.</target>
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
+        <target state="needs-review-translation">Verze formátu je vyšší, než se podporuje. Tento nástroj možná není v této verzi SDK podporovaný. Aktualizujte sadu SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
-        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="translated">Verze formátu je chybně vytvořená. Tento nástroj možná není v této verzi SDK podporovaný. Kontaktujte prosím autora nástroje.</target>
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="needs-review-translation">Verze formátu je chybně vytvořená. Tento nástroj možná není v této verzi SDK podporovaný. Kontaktujte prosím autora nástroje.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
-        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="translated">Verze formátu chybí. Tento nástroj možná není v této verzi SDK podporovaný. Kontaktujte prosím autora nástroje.</target>
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="needs-review-translation">Verze formátu chybí. Tento nástroj možná není v této verzi SDK podporovaný. Kontaktujte prosím autora nástroje.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
-        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="translated">Nepovedlo se přidat adresář {0} do proměnné prostředí PATH. Přidejte prosím tento adresář do proměnné PATH, abyste mohli používat nástroje nainstalované pomocí dotnet tool install.</target>
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="needs-review-translation">Nepovedlo se přidat adresář {0} do proměnné prostředí PATH. Přidejte prosím tento adresář do proměnné PATH, abyste mohli používat nástroje nainstalované pomocí dotnet tool install.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">

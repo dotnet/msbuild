@@ -127,7 +127,7 @@
     <value>The package reference to add.</value>
   </data>
   <data name="SpecifyExactlyOnePackageReference" xml:space="preserve">
-    <value>Please specify one package reference to add.</value>
+    <value>Specify one package reference to add.</value>
   </data>
   <data name="CmdFrameworkDescription" xml:space="preserve">
     <value>Add the reference only when targeting a specific framework.</value>
@@ -163,6 +163,6 @@
     <value>PACKAGE_DIR</value>
   </data>
   <data name="CmdDGFileIOException" xml:space="preserve">
-    <value>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</value>
+    <value>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</value>
   </data>
 </root>

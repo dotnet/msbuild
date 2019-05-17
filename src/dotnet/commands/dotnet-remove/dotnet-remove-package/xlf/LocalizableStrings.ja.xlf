@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
-        <source>Please specify only one package reference to remove.</source>
-        <target state="translated">削除するパッケージ参照を 1 つだけ指定してください。</target>
+        <source>Specify only one package reference to remove.</source>
+        <target state="needs-review-translation">削除するパッケージ参照を 1 つだけ指定してください。</target>
         <note />
       </trans-unit>
     </body>

@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Le opzioni local (--local), global (--global), tool-path (--tool-path) non possono essere specificate contemporaneamente. Specificare una sola di queste opzioni: {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">Le opzioni local (--local), global (--global), tool-path (--tool-path) non possono essere specificate contemporaneamente. Specificare una sola di queste opzioni: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -79,8 +79,8 @@ Se si vuole creare un manifesto, usare `dotnet new tool-manifest`, in genere nel
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to install.</source>
-        <target state="translated">Specificare un ID pacchetto dello strumento da installare.</target>
+        <source>Specify one tool Package Id to install.</source>
+        <target state="needs-review-translation">Specificare un ID pacchetto dello strumento da installare.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -99,8 +99,8 @@ Se si vuole creare un manifesto, usare `dotnet new tool-manifest`, in genere nel
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
-        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="translated">Non è stato possibile installare lo strumento '{0}'. Per assistenza, contattare l'autore dello strumento.</target>
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="needs-review-translation">Non è stato possibile installare lo strumento '{0}'. Per assistenza, contattare l'autore dello strumento.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">

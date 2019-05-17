@@ -37,7 +37,7 @@ remove_all
 
 is_dotnet_host_installed
 [ "$?" -ne 0 ] && \
-    echo "dotnet package removal succeeded but appear to still be installed. Please file an issue at https://github.com/dotnet/cli" >&2 && \
+    echo "dotnet package removal succeeded but appear to still be installed. File an issue at https://github.com/dotnet/cli" >&2 && \
     exit 1
 
 echo "dotnet package removal succeeded." >&2

@@ -142,7 +142,7 @@ The dotnet CLI supports several models for adding new commands:
 
 Developers are generally encouraged to avoid adding commands to `dotnet.dll` or the CLI installer directly. This is appropriate for very general commands such as `restore`, `build`, `publish`, `test`, and `clean`, but is generally too broad of a distribution mechanism for new commands.
 
-Please create an issue and engage the repository maintainers if you feel there is a missing core command that you would like to add.
+Create an issue and engage the repository maintainers if you feel there is a missing core command that you would like to add.
 
 ### .NET Core Global Tools
 

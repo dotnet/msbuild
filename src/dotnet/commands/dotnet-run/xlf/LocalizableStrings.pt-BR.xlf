@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
-        <source>The build failed. Please fix the build errors and run again.</source>
-        <target state="translated">Ocorreu uma falha no build. Corrija os erros de build e execute novamente.</target>
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="needs-review-translation">Ocorreu uma falha no build. Corrija os erros de build e execute novamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -49,17 +49,17 @@
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
-        <target state="translated">Não é possível executar seu projeto
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="needs-review-translation">Não é possível executar seu projeto
 Seu projeto tem diversas estruturas como destino. Especifique que estrutura executar usando '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">Não é possível executar seu projeto.
+        <target state="needs-review-translation">Não é possível executar seu projeto.
 Verifique se você tem um tipo de projeto executável e garanta que '{0}' dê suporte a esse projeto.
 Um projeto executável deve ter como destino um TFM executável (por exemplo, netcoreapp2.0) e ter OutputType 'Exe'.
 O {1} atual é '{2}'.</target>

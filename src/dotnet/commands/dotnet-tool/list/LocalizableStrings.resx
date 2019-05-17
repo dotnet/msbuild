@@ -130,7 +130,7 @@
     <value>The directory containing the tools to list.</value>
   </data>
   <data name="InvalidPackageWarning" xml:space="preserve">
-    <value>Warning: tool package '{0}' is invalid, please contact tool author:
+    <value>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</value>
   </data>
   <data name="PackageIdColumn" xml:space="preserve">
@@ -152,6 +152,6 @@
     <value>List the tools installed in the local tool manifest.</value>
   </data>
   <data name="ListToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
-    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</value>
   </data>
 </root>

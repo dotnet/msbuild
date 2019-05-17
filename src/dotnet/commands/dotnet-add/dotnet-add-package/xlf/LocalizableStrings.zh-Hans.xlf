@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
-        <source>Please specify one package reference to add.</source>
-        <target state="translated">请指定一个要添加的包引用。</target>
+        <source>Specify one package reference to add.</source>
+        <target state="needs-review-translation">请指定一个要添加的包引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -78,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
-        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
-        <target state="translated">未能为项目“{0}”生成临时文件。无法添加包引用。请清除临时目录，再重试。</target>
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
+        <target state="needs-review-translation">未能为项目“{0}”生成临时文件。无法添加包引用。请清除临时目录，再重试。</target>
         <note />
       </trans-unit>
     </body>

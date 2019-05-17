@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -79,8 +79,8 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to install.</source>
-        <target state="translated">インストールするツール パッケージの ID を指定してください。</target>
+        <source>Specify one tool Package Id to install.</source>
+        <target state="needs-review-translation">インストールするツール パッケージの ID を指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -99,8 +99,8 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
-        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="translated">ツール '{0}' をインストールできませんでした。ツールの作成者にお問い合わせください。</target>
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="needs-review-translation">ツール '{0}' をインストールできませんでした。ツールの作成者にお問い合わせください。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">

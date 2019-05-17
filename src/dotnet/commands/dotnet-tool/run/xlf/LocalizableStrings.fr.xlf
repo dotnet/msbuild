@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOneCommandName">
-        <source>Please specify one command name to run.</source>
-        <target state="translated">Spécifiez un nom de commande à exécuter.</target>
+        <source>Specify one command name to run.</source>
+        <target state="needs-review-translation">Spécifiez un nom de commande à exécuter.</target>
         <note />
       </trans-unit>
     </body>

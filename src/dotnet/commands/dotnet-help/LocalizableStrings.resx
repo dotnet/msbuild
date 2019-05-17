@@ -217,7 +217,7 @@
     <value>Modify Visual Studio solution files.</value>
   </data>
   <data name="CommandDoesNotExist" xml:space="preserve">
-    <value>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</value>
+    <value>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</value>
   </data>
   <data name="AppFullName" xml:space="preserve">
     <value>.NET CLI help utility</value>

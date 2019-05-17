@@ -77,8 +77,8 @@ El valor predeterminado es la versión del SDK en dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
-        <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="translated">La migración del proyecto ha finalizado. Visite https://aka.ms/coremigration para notificar los problemas que haya encontrado o solicitar ayuda.</target>
+        <source>The project migration has finished. Visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
+        <target state="needs-review-translation">La migración del proyecto ha finalizado. Visite https://aka.ms/coremigration para notificar los problemas que haya encontrado o solicitar ayuda.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">

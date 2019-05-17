@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Локальный параметр (--local), глобальный параметр (--global), параметр пути к средству (--tool-path) можно использовать только отдельно друг от друга. Укажите только один из этих параметров: {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">Локальный параметр (--local), глобальный параметр (--global), параметр пути к средству (--tool-path) можно использовать только отдельно друг от друга. Укажите только один из этих параметров: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -43,9 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">Предупреждение! Недопустимый пакет средства "{0}", обратитесь к автору средства:
+        <target state="needs-review-translation">Предупреждение! Недопустимый пакет средства "{0}", обратитесь к автору средства:
 {1}</target>
         <note />
       </trans-unit>

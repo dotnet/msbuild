@@ -961,7 +961,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unsupported project type. Please check with your sdk provider.");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unsupported project type. Check with your sdk provider.");
 
             File.ReadAllText(slnFullPath)
                 .Should().BeVisuallyEquivalentTo(contentBefore);
