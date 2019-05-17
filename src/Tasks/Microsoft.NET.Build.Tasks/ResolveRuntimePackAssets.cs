@@ -89,6 +89,7 @@ namespace Microsoft.NET.Build.Tasks
                     assetItem.SetMetadata(MetadataKeys.PackageName, runtimePack.GetMetadata(MetadataKeys.PackageName));
                     assetItem.SetMetadata(MetadataKeys.PackageVersion, runtimePack.GetMetadata(MetadataKeys.PackageVersion));
                     assetItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
+                    assetItem.SetMetadata(MetadataKeys.IsTrimmable, runtimePack.GetMetadata(MetadataKeys.IsTrimmable));
 
                     runtimePackAssets.Add(assetItem);
                 }

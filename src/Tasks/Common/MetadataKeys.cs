@@ -24,6 +24,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
         public const string FrameworkName = "FrameworkName";
         public const string FrameworkVersion = "FrameworkVersion";
+        public const string IsTrimmable = "IsTrimmable";
 
         // SDK Metadata
         public const string SDKPackageItemSpec = "SDKPackageItemSpec";
