@@ -35,6 +35,10 @@ namespace Microsoft.NET.Build.Tasks
             {
                 assetInfo.AssetType = AssetType.Native;
             }
+            else if (assetTypeString.Equals("resources", StringComparison.OrdinalIgnoreCase))
+            {
+                assetInfo.AssetType = AssetType.Resources;
+            }
             else
             {
                 throw new InvalidOperationException("Unexpected asset type: " + item.GetMetadata(MetadataKeys.AssetType));
