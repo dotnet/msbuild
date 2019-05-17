@@ -275,6 +275,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0")]
         public void It_runs_the_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             RunAppFromOutputFolder("RunFromOutputFolderConflicts_" + targetFramework, false, true, targetFramework);
         }
 
@@ -283,6 +288,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0")]
         public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts_" + targetFramework, true, true, targetFramework);
         }
 

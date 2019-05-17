@@ -30,6 +30,11 @@ namespace Microsoft.NET.Build.Tests
             string referencerTarget,
             string dependencyTarget)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(referencerTarget))
+            {
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
 
             TestProject dependencyProject = new TestProject()
@@ -97,6 +102,11 @@ public static class Program
             string referencerTarget,
             string dependencyTarget)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(referencerTarget))
+            {
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
 
             TestProject dependencyProject = new TestProject()
@@ -219,6 +229,11 @@ public static class Program
             string referencerTarget,
             string dllDependencyTarget)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(referencerTarget))
+            {
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProjectDependency = new TestProject()
@@ -304,6 +319,11 @@ public static class Program
             string referencerTarget,
             string dllDependencyTarget)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(referencerTarget))
+            {
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProjectDependency = new TestProject()
@@ -445,6 +465,11 @@ public static class Program
             string dependencyTarget,
             string dllDependencyTarget)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(referencerTarget))
+            {
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
 
             TestProject dllDependencyProject = new TestProject()
@@ -531,6 +556,11 @@ public static class Program
             string dependencyTarget,
             string dllDependencyTarget)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(referencerTarget))
+            {
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
 
             TestProject dllDependencyProject = new TestProject()
@@ -672,6 +702,11 @@ public static class Program
             string dependencyTarget,
             string dllDependencyTarget)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(referencerTarget))
+            {
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
 
             TestProject dllDependencyProjectDependency = new TestProject()
@@ -776,6 +811,11 @@ public static class Program
             string dependencyTarget,
             string dllDependencyTarget)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(referencerTarget))
+            {
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
 
             TestProject dllDependencyProjectDependency = new TestProject()

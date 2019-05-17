@@ -27,6 +27,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0", true)]
         public void It_builds_a_runnable_output(string targetFramework, bool dependenciesIncluded)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
