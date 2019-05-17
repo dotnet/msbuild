@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
                 taskList.Add(task);
             }
 
-            bool completed = TaskEx.WaitAll(taskList.ToArray(), 5000);
+            bool completed = TaskEx.WaitAll(taskList.ToArray(), 50000);
             completed.Should().BeTrue("tasks did not finish. Potential deadlock problem.");
         }
 
