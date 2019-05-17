@@ -1,6 +1,8 @@
 <Project>
 
   <PropertyGroup>
+      <MicrosoftNetCompilersVersion>3.1.0-beta1-19162-08</MicrosoftNetCompilersVersion>
+      <CompilerToolsVersion>3.1.0-beta1-19162-08</CompilerToolsVersion>
       <MicrosoftNETCoreCompilersVersion>2.10.0</MicrosoftNETCoreCompilersVersion>
       <NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-rtm.5362</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
