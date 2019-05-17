@@ -277,7 +277,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <ResolveRuntimePackAssets FrameworkReferences="@(FrameworkReference)"
                               ResolvedRuntimePacks="@(ResolvedRuntimePack)"
-                              UnavailableRuntimePacks="@(UnavailableRuntimePack)">
+                              UnavailableRuntimePacks="@(UnavailableRuntimePack)"
+                              SatelliteResourceLanguages="$(SatelliteResourceLanguages)">
       <Output TaskParameter="RuntimePackAssets" ItemName="RuntimePackAsset" />
     </ResolveRuntimePackAssets>
     

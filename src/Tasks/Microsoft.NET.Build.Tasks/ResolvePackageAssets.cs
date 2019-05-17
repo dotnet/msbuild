@@ -961,7 +961,7 @@ namespace Microsoft.NET.Build.Tasks
                         WriteMetadata(MetadataKeys.AssetType, "native");
                         if (ShouldCopyLocalPackageAssets(package))
                         {
-                            WriteCopyLocalMetadata(package, Path.GetFileName(asset.Path), "native");
+                            WriteCopyLocalMetadata(package, Path.GetFileName(asset.Path));
                         }
                     });
             }
@@ -1030,7 +1030,6 @@ namespace Microsoft.NET.Build.Tasks
                             WriteCopyLocalMetadata(
                                 package,
                                 Path.GetFileName(asset.Path),
-                                "resources",
                                 destinationSubDirectory: locale + Path.DirectorySeparatorChar);
                         }
                         else
@@ -1051,7 +1050,7 @@ namespace Microsoft.NET.Build.Tasks
                         WriteMetadata(MetadataKeys.AssetType, "runtime");
                         if (ShouldCopyLocalPackageAssets(package))
                         {
-                            WriteCopyLocalMetadata(package, Path.GetFileName(asset.Path), "runtime");
+                            WriteCopyLocalMetadata(package, Path.GetFileName(asset.Path));
                         }
                     });
             }
@@ -1074,7 +1073,6 @@ namespace Microsoft.NET.Build.Tasks
                             WriteCopyLocalMetadata(
                                 package,
                                 Path.GetFileName(asset.Path),
-                                asset.AssetType.ToLowerInvariant(),
                                 destinationSubDirectory: Path.GetDirectoryName(asset.Path) + Path.DirectorySeparatorChar);
                         }
                         else
@@ -1194,7 +1192,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            private void WriteCopyLocalMetadata(LockFileTargetLibrary package, string assetsFileName, string assetType, string destinationSubDirectory = null)
+            private void WriteCopyLocalMetadata(LockFileTargetLibrary package, string assetsFileName, string destinationSubDirectory = null)
             {
                 WriteMetadata(MetadataKeys.CopyLocal, "true");
                 WriteMetadata(

@@ -17,6 +17,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public bool IsExe { get; set; }
 
+        public bool IsWinExe { get; set; }
+
         //  Applies to SDK Projects
         public string TargetFrameworks { get; set; }
 
@@ -241,9 +243,13 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 }
             }
 
-            if (this.IsExe)
+            if (this.IsExe && !this.IsWinExe)
             {
                 propertyGroup.Element(ns + "OutputType").SetValue("Exe");
+            }
+            else if (this.IsWinExe)
+            {
+                propertyGroup.Element(ns + "OutputType").SetValue("WinExe");
             }
 
             if (this.ReferencedProjects.Any())
@@ -315,7 +321,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             {
                 string source;
 
-                if (this.IsExe)
+                if (this.IsExe || this.IsWinExe)
                 {
                     source =
     @"using System;
@@ -425,36 +431,6 @@ namespace {this.Name}
             }
             var requestedReferenceAssembliesPath = Path.Combine(new DirectoryInfo(net461referenceAssemblies).Parent.FullName, targetFrameworkVersion);
             return Directory.Exists(requestedReferenceAssembliesPath);
-        }
-
-        public override string ToString()
-        {
-            var ret = new StringBuilder();
-            if (!string.IsNullOrEmpty(Name))
-            {
-                ret.Append(Name);
-            }
-            if (IsSdkProject)
-            {
-                ret.Append("Sdk");
-            }
-            if (IsExe)
-            {
-                ret.Append("Exe");
-            }
-            if (!string.IsNullOrEmpty(TargetFrameworks))
-            {
-                ret.Append(TargetFrameworks);
-            }
-            if (!string.IsNullOrEmpty(TargetFrameworkProfile))
-            {
-                ret.Append(TargetFrameworkProfile);
-            }
-            else if (!string.IsNullOrEmpty(TargetFrameworkVersion))
-            {
-                ret.Append(TargetFrameworkVersion);
-            }
-            return ret.ToString();
         }
     }
 }
