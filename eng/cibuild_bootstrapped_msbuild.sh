@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 configuration="debug"
 host_type="core"
