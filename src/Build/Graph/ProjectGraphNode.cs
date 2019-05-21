@@ -60,7 +60,7 @@ namespace Microsoft.Build.Experimental.Graph
         {
             foreach (var reference in _projectReferences)
             {
-                ErrorUtilities.VerifyThrow(reference._referencingProjects.Contains(this), "references should point the nodes referencing them");
+                ErrorUtilities.VerifyThrow(reference._referencingProjects.Contains(this), "references should point to the nodes referencing them");
                 reference._referencingProjects.Remove(this);
 
                 edges.RemoveEdge((this, reference));
