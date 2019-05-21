@@ -17,7 +17,7 @@
       <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
       <FSharpDirectory>$(SdkOutputDirectory)/FSharp</FSharpDirectory>
       <CompilationDirectory>$(BaseOutputDirectory)/compilation</CompilationDirectory>
-      <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
+      <IntermediateDirectory>$(BaseOutputDirectory)/int</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
       <AspNetCoreSharedFxPublishDirectory>$(IntermediateDirectory)/aspnetSharedFxPublish</AspNetCoreSharedFxPublishDirectory>

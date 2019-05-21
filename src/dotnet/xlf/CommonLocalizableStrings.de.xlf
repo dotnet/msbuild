@@ -114,7 +114,7 @@
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="translated">löschen</target>
+        <target state="translated">Löschen</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">
@@ -722,18 +722,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Das Toolverzeichnis "{0}" ist aktuell nicht in der PATH-Umgebungsvariable angegeben.
-Bei Verwendung von Bash können Sie hierzu den folgenden Befehl ausführen:
+        <target state="translated">Das Toolverzeichnis "{0}" befindet sich derzeit nicht in der PATH-Umgebungsvariable.
+Wenn Sie Bash verwenden, können Sie diese zu Ihrem Profil hinzufügen, indem Sie folgenden Befehl ausführen:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Um das Verzeichnis der aktuellen Sitzung hinzuzufügen, können Sie den folgenden Befehl ausführen:
+Sie können sie zur aktuellen Sitzung hinzufügen, indem Sie folgenden Befehl ausführen:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -749,18 +748,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Das Toolverzeichnis "{0}" ist aktuell nicht in der PATH-Umgebungsvariable angegeben.
-Bei Verwendung von Bash können Sie hierzu den folgenden Befehl ausführen:
+        <target state="translated">Das Toolverzeichnis "{0}" befindet sich derzeit nicht in der PATH-Umgebungsvariable.
+Wenn Sie Bash verwenden, können Sie diese zu Ihrem Profil hinzufügen, indem Sie folgenden Befehl ausführen:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Um das Verzeichnis der aktuellen Sitzung hinzuzufügen, können Sie den folgenden Befehl ausführen:
+Sie können sie zur aktuellen Sitzung hinzufügen, indem Sie folgenden Befehl ausführen:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -891,6 +889,16 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
         <target state="translated">VERSION_SUFFIX</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentDescription">
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">Das Projekt oder die Projektmappendatei, die verwendet werden soll. Wenn keine Datei angegeben ist, durchsucht der Befehl das aktuelle Verzeichnis nach einer Datei.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentName">
+        <source>PROJECT | SOLUTION</source>
+        <target state="translated">PROJEKT | PROJEKTMAPPE</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">

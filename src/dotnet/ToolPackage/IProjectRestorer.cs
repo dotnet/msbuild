@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.ToolPackage
     internal interface IProjectRestorer
     {
         void Restore(FilePath project,
-            FilePath? nugetConfig = null,
+            PackageLocation packageLocation,
             string verbosity = null);
     }
 }

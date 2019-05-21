@@ -20,7 +20,8 @@ namespace Microsoft.DotNet.Tools.Tool.Update
     internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
 
     internal delegate (IToolPackageStore, IToolPackageInstaller) CreateToolPackageStoreAndInstaller(
-        DirectoryPath? nonGlobalLocation = null);
+        DirectoryPath? nonGlobalLocation = null,
+        IEnumerable<string> additionalRestoreArguments = null);
 
     internal class ToolUpdateCommand : CommandBase
     {
@@ -36,6 +37,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private readonly bool _global;
         private readonly string _verbosity;
         private readonly string _toolPath;
+        private readonly IEnumerable<string> _forwardRestoreArguments;
 
         public ToolUpdateCommand(AppliedOption appliedCommand,
             ParseResult parseResult,
@@ -56,6 +58,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             _global = appliedCommand.ValueOrDefault<bool>("global");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
+            _forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
 
             _createToolPackageStoreAndInstaller = createToolPackageStoreAndInstaller ??
                                                   ToolPackageFactory.CreateToolPackageStoreAndInstaller;
@@ -78,7 +81,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             }
 
             (IToolPackageStore toolPackageStore, IToolPackageInstaller toolPackageInstaller) =
-                _createToolPackageStoreAndInstaller(toolPath);
+                _createToolPackageStoreAndInstaller(toolPath, _forwardRestoreArguments);
             IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
 
 
@@ -133,10 +136,9 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                 RunWithHandlingInstallError(() =>
                 {
                     IToolPackage newInstalledPackage = toolPackageInstaller.InstallPackage(
+                        new PackageLocation(nugetConfig: configFile, additionalFeeds: _additionalFeeds),
                         packageId: _packageId,
                         targetFramework: _framework,
-                        nugetConfig: configFile,
-                        additionalFeeds: _additionalFeeds,
                         verbosity: _verbosity);
 
                     foreach (CommandSettings command in newInstalledPackage.Commands)
