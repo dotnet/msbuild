@@ -47,9 +47,9 @@
       <Uri>https://github.com/aspnet/websdk</Uri>
       <Sha>5dc48d721c02c169d3a50a3ac3c22a4732e68288</Sha>
     </Dependency>
-    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19267.1">
+    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19271.1">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>54456b4ad366d20bb117c5bea0a8744cc3804047</Sha>
+      <Sha>126a9a09ec76b594e39a1d8d8a608298487846b2</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Build.Bundle" Version="3.0.0-preview5-27611-16">
       <Uri>https://github.com/dotnet/core-setup</Uri>
