@@ -39,6 +39,12 @@ namespace Microsoft.Build.Utilities
         public const string ARM = nameof(ARM);
 
         /// <summary>
+        /// Represents the ARM64 processor architecture.
+        /// </summary>
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ARM64", Justification = "This is the correct casing for ProcessorArchitecture")]
+        public const string ARM64 = nameof(ARM64);
+
+        /// <summary>
         /// Lazy-initted property for getting the architecture of the currently running process
         /// </summary>
         public static string CurrentProcessArchitecture => GetCurrentProcessArchitecture();
@@ -67,6 +73,10 @@ namespace Microsoft.Build.Utilities
 
                 case NativeMethodsShared.ProcessorArchitectures.ARM:
                     architecture = ARM;
+                    break;
+
+                case NativeMethodsShared.ProcessorArchitectures.ARM64:
+                    architecture = ARM64;
                     break;
 
                 // unknown architecture? return null
