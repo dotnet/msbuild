@@ -104,7 +104,8 @@
 {0}</source>
         <target state="translated">명령 이름이 충돌합니다. 명령 이름은 대/소문자를 구분하지 않습니다.
 {0}</target>
-        <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
+        <note />
+      </trans-unit>
       <trans-unit id="PackagesCommandNameCollisionForOnePackage">
         <source>A command "{0}" in package "{1}"</source>
         <target state="translated">"{1}" 패키지의 "{0}" 명령</target>
