@@ -193,7 +193,7 @@ namespace Microsoft.Build.Framework
         private int projectId;
 
         /// <summary>
-        /// Gets the idenifier of the project.
+        /// Gets the identifier of the project.
         /// </summary>
         public int ProjectId
         {
