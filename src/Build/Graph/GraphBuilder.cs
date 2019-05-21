@@ -81,6 +81,8 @@ namespace Microsoft.Build.Experimental.Graph
                     }
                 }
 
+                graphRoots.TrimExcess();
+
                 return graphRoots;
             }
         }
