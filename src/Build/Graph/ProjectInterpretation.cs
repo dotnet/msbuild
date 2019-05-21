@@ -119,6 +119,9 @@ namespace Microsoft.Build.Experimental.Graph
         /// To avoid calling nuget at graph construction time, the graph is initially constructed with outer build nodes referencing inner build nodes.
         /// However, at build time, for non root outer builds, the inner builds are NOT referenced by the outer build, but by the nodes referencing the
         /// outer build. Change the graph to mimic this behaviour.
+        /// Examples
+        /// OuterAsRoot -> Inner stays the same
+        /// Node -> Outer -> Inner goes to: Node -> Outer; Node->Inner; Outer -> empty
         /// </summary>
         public void PostProcess(ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allNodes, GraphBuilder graphBuilder)
         {
