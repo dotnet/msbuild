@@ -42,13 +42,11 @@ namespace Microsoft.Build.Experimental.Graph
             var entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(entryPoints);
 
             var allParsedProjects = new ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode>();
-            var tasksInProgress = new ConcurrentDictionary<ConfigurationMetadata, object>();
             var projectsToEvaluate = new ConcurrentQueue<ConfigurationMetadata>(entryPointConfigurationMetadata);
 
             if (FindGraphNodes(
                 projectsToEvaluate,
                 projectCollection,
-                tasksInProgress,
                 projectInstanceFactory,
                 ProjectInterpretation,
                 allParsedProjects,
@@ -242,14 +240,14 @@ namespace Microsoft.Build.Experimental.Graph
         private bool FindGraphNodes(
             ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate,
             ProjectCollection projectCollection,
-            ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress,
             ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory,
             ProjectInterpretation projectInterpretation,
             ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allParsedProjects,
             out List<Exception> exceptions)
         {
-            var exceptionsInTasks = new ConcurrentBag<Exception>();
+            var tasksInProgress = new ConcurrentDictionary<ConfigurationMetadata, object>();
             var evaluationWaitHandle = new AutoResetEvent(false);
+            var exceptionsInTasks = new ConcurrentBag<Exception>();
 
             while (projectsToEvaluate.Count != 0 || tasksInProgress.Count != 0)
             {
