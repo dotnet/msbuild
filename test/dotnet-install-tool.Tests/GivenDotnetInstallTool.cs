@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Install.Tests
         public void ItRunsWithTheSpecifiedVerbosity()
         {
             var result = new ToolCommand()
-                .ExecuteWithCapturedOutput("install -g -v:m nonexistent_tool_package");
+                .ExecuteWithCapturedOutput("install -g -v:n nonexistent_tool_package");
 
             result
                 .Should()

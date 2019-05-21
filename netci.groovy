@@ -51,7 +51,7 @@ platformList.each { platform ->
 
     // Calculate the build command
     if (os.startsWith("Windows_NT")) {
-        osUsedForMachineAffinity = 'Windows_NT'
+        osUsedForMachineAffinity = 'windows.10.amd64.clientrs4.devex.15.8.open'
         buildCommand = "${baseBatchBuildCommand}"
         if (os == 'Windows_NT_ES') {
             buildCommand = """
@@ -111,7 +111,7 @@ ${buildCommand}
     def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
         // Set the label.
         steps {
-            if (osUsedForMachineAffinity == 'Windows_NT' || osUsedForMachineAffinity == 'Windows_2016') {
+            if (osUsedForMachineAffinity == 'windows.10.amd64.clientrs4.devex.15.8.open' || osUsedForMachineAffinity == 'Windows_2016') {
                 // Batch
                 batchFile(buildCommand)
             }
@@ -122,7 +122,11 @@ ${buildCommand}
         }
     }
 
-    Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, osVersionUsedForMachineAffinity)
+    if (os.startsWith("Windows_NT")) {
+        Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity)
+    } else {
+        Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, osVersionUsedForMachineAffinity)
+    }
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     // ARM CI runs are build only.
     if ((architecture != 'arm') && (architecture != 'arm64')) {

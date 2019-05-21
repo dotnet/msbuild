@@ -65,7 +65,8 @@
                             CreateTestAssetPackageNuPkgs;">
     <DotNetRestore ToolPath="$(OutputDirectory)"
                    ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
-                   AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)" />
+                   AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
+                   MaxCpuCount="1" />
   </Target>
 
   <Target Name="BuildTests"
