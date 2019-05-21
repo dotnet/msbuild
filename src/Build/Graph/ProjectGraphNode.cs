@@ -11,7 +11,7 @@ namespace Microsoft.Build.Experimental.Graph
     /// <summary>
     /// Represents the node for a particular project in a project graph.
     /// </summary>
-    [DebuggerDisplay(@"{ToString()}")]
+    [DebuggerDisplay(@"{DebugString()}")]
     public sealed class ProjectGraphNode
     {
         private readonly HashSet<ProjectGraphNode> _projectReferences = new HashSet<ProjectGraphNode>();
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
 
-        public override string ToString()
+        private string DebugString()
         {
             var truncatedProjectFile = FileUtilities.TruncatePathToTrailingSegments(ProjectInstance.FullPath, 2);
 
