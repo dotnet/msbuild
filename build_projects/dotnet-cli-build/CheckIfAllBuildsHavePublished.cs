@@ -57,7 +57,8 @@ namespace Microsoft.DotNet.Cli.Build
                 { "linux_musl_x64", false },
                 { "all_linux_distros_native_installer", false },
                 { "linux_arm", false },
-                { "linux_arm64", false }
+                { "linux_arm64", false },
+                { "win_arm", false }
             };
 
             if (!badges.ContainsKey(VersionBadgeMoniker))

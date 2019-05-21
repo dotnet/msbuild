@@ -93,6 +93,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-install-tool.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsertionTests", "InsertionTests\InsertionTests.csproj", "{A9713391-3D44-4664-9C41-75765218FD6C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-list-package.Tests", "dotnet-list-package.Tests\dotnet-list-package.Tests.csproj", "{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -607,6 +609,18 @@ Global
 		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|x64.Build.0 = Release|Any CPU
 		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|x86.ActiveCfg = Release|Any CPU
 		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|x86.Build.0 = Release|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Debug|x64.Build.0 = Debug|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Debug|x86.Build.0 = Debug|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Release|x64.ActiveCfg = Release|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Release|x64.Build.0 = Release|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Release|x86.ActiveCfg = Release|Any CPU
+		{377363FE-0B87-4ACB-AEF3-3FF6454EC8D4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

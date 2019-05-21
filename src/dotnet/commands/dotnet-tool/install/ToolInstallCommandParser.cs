@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli
                     "--configfile",
                     LocalizableStrings.ConfigFileOptionDescription,
                     Accept.ExactlyOneArgument()
-                          .With(name: LocalizableStrings.ConfigFileOptionName)),
+                        .With(name: LocalizableStrings.ConfigFileOptionName)),
                 Create.Option(
                     "--add-source",
                     LocalizableStrings.AddSourceOptionDescription,
@@ -44,6 +44,9 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.FrameworkOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.FrameworkOptionName)),
+                ToolCommandRestorePassThroughOptions.DisableParallelOption(),
+                ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption(),
+                ToolCommandRestorePassThroughOptions.NoCacheOption(),
                 CommonOptions.HelpOption(),
                 CommonOptions.VerbosityOption());
         }
