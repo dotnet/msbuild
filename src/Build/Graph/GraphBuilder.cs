@@ -318,8 +318,8 @@ namespace Microsoft.Build.Experimental.Graph
 
         internal static string FormatCircularDependencyError(List<string> projectsInCycle)
         {
-            const int MAX_PATH = 260;
-            var errorMessage = new StringBuilder(projectsInCycle.Count * MAX_PATH);
+            var errorMessage = new StringBuilder(projectsInCycle.Select(p => p.Length).Sum());
+
             errorMessage.AppendLine();
             for (var i = projectsInCycle.Count - 1; i >= 0; i--)
             {
