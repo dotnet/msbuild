@@ -216,7 +216,7 @@ namespace Microsoft.DotNet.ToolManifest
                 return serializableLocalToolsManifest;
             }
             catch (Exception e) when (
-                e is JsonReaderException)
+                e is JsonException)
             {
                 throw new ToolManifestException(string.Format(LocalizableStrings.JsonParsingError,
                     possibleManifest.Value, e.Message));
