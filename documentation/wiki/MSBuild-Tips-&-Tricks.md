@@ -26,7 +26,7 @@ See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio
  * `MSBUILDLOGCODETASKFACTORYOUTPUT=1`
    * Dump generated code for task to a <GUID>.txt file in the TEMP directory
  * `MSBUILDDISABLENODEREUSE=1`
-   * Set this to not leave MSBuild processes behind (see /nr:false above, but the environment variable is useful to also set this for Visual Studio for example).
+   * Set this to not leave MSBuild processes behind (see `/nr:false` above, but the environment variable is useful to also set this for Visual Studio for example).
  * `MSBUILDLOGASYNC=1`
    * Enable asynchronous logging.
  * `MSBUILDDEBUGONSTART=1`

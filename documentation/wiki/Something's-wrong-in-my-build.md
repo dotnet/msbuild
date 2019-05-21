@@ -17,6 +17,6 @@ To debug a tricky problem with your build, try these tools in order:
 ## Tools
 Many debugging tools listed [here](https://github.com/Microsoft/msbuild/blob/master/documentation/wiki/MSBuild-Resources.md#tools).
 
-[MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) can be used to get a clearer idea of what's going on in your build. MSBuildStructuredLog is a logger for MSBuild that records and visualizes a structured representation of executed targets, tasks, properties, and item values. It can be easier to look though than the diagnostic log.
+[MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) can be used to get a clearer idea of what's going on in your build. MSBuildStructuredLog is graphical interface over MSBuild binary logs that visualizes a structured representation of executed targets, tasks, properties, and item values. It can be easier to look though than the diagnostic log.
 
 ![](https://raw.githubusercontent.com/KirillOsenkov/MSBuildStructuredLog/master/docs/Screenshot1.png)
