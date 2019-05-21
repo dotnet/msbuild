@@ -542,7 +542,7 @@ namespace Microsoft.Build.Experimental.Graph
                         .RemoveAt(i)
                         .InsertRange(i, expandedTargets);
 
-                    i += defaultTargets.Count;
+                    i += expandedTargets.Count;
                 }
                 else
                 {
