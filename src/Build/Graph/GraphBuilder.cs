@@ -43,12 +43,7 @@ namespace Microsoft.Build.Experimental.Graph
 
             var allParsedProjects = new ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode>();
             var tasksInProgress = new ConcurrentDictionary<ConfigurationMetadata, object>();
-            var projectsToEvaluate = new ConcurrentQueue<ConfigurationMetadata>();
-
-            foreach (var entryPoint in entryPointConfigurationMetadata)
-            {
-                projectsToEvaluate.Enqueue(entryPoint);
-            }
+            var projectsToEvaluate = new ConcurrentQueue<ConfigurationMetadata>(entryPointConfigurationMetadata);
 
             if (FindGraphNodes(
                 projectsToEvaluate,
