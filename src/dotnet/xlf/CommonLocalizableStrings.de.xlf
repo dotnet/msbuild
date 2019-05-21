@@ -893,6 +893,11 @@ setx PATH "%PATH%;{0}"
         <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Hiermit wird zugelassen, dass der Befehl anhält und auf eine Benutzereingabe oder Aktion wartet (beispielsweise auf den Abschluss der Authentifizierung).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

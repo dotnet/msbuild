@@ -893,6 +893,11 @@ setx PATH "%PATH%;{0}"
         <target state="translated">SÜRÜM_SONEKİ</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Komutun durup kullanıcı girişini veya eylemini (örneğin, kimlik doğrulamasının tamamlanmasını) beklemesine izin verir .</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

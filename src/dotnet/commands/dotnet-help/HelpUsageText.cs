@@ -54,6 +54,7 @@ sdk-options:
 {LocalizableStrings.AdditionalTools}
   dev-certs         {LocalizableStrings.DevCertsDefinition}
   ef                {LocalizableStrings.EfDefinition}
+  fsi               {LocalizableStrings.FsiDefinition}
   sql-cache         {LocalizableStrings.SqlCacheDefinition}
   user-secrets      {LocalizableStrings.UserSecretsDefinition}
   watch             {LocalizableStrings.WatchDefinition}

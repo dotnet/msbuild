@@ -893,6 +893,11 @@ setx PATH "%PATH%;{0}"
         <target state="translated">SUFIJO_DE_VERSIÓN</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

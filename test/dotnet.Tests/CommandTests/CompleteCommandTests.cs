@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "build",
                 "build-server",
                 "clean",
+                "fsi",
                 "help",
                 "list",
                 "migrate",
@@ -130,9 +131,10 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--no-service-endpoint",
                 "--non-interactive",
                 "--source",
+                "--interactive",
                 "-h",
                 "-k",
-                "-s"
+                "-s",
             };
 
             var reporter = new BufferedReporter();
@@ -154,7 +156,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 "all",
                 "global-packages",
                 "http-cache",
-                "temp"
+                "temp",
+                "plugins-cache"
             };
 
             var reporter = new BufferedReporter();
@@ -165,7 +168,8 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetPushCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new string[]
+            {
                 "--api-key",
                 "--disable-buffering",
                 "--force-english-output",
@@ -176,6 +180,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--symbol-api-key",
                 "--symbol-source",
                 "--timeout",
+                "--interactive",
                 "-d",
                 "-h",
                 "-k",
