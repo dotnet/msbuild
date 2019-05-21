@@ -12,10 +12,9 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if FEATURE_RESGENCACHE
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-#endif
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 #if FEATURE_COM_INTEROP
@@ -61,12 +60,10 @@ namespace Microsoft.Build.Tasks
 #endif
 
 
-        #region Fields
-
-#if FEATURE_RESGENCACHE
+#region Fields
+        
         // This cache helps us track the linked resource files listed inside of a resx resource file
         private ResGenDependencies _cache;
-#endif
 
         // This is where we store the list of input files/sources
         private ITaskItem[] _sources = null;
@@ -123,7 +120,7 @@ namespace Microsoft.Build.Tasks
 
         // Write time of newest uncorrelated input
         // DateTime.MinValue indicates "missing" iff _newestUncorrelatedInput != null
-        private DateTime _newestUncorrelatedInputWriteTime; 
+        private DateTime _newestUncorrelatedInputWriteTime;
 
         // The targets may pass in the path to the SDKToolsPath. If so this should be used to generate the commandline 
         // for logging purposes.  Also, when ExecuteAsTool is true, it determines where the system goes looking for resgen.exe
@@ -862,15 +859,13 @@ namespace Microsoft.Build.Tasks
                                 {
                                     OutputResources = outputResources;
                                 }
-
-#if FEATURE_RESGENCACHE
+                                
                                 // Get portable library cache info (and if needed, marshal it to this AD).
                                 List<ResGenDependencies.PortableLibraryFile> portableLibraryCacheInfo = process.PortableLibraryCacheInfo;
                                 for (int i = 0; i < portableLibraryCacheInfo.Count; i++)
                                 {
                                     _cache.UpdatePortableLibrary(portableLibraryCacheInfo[i]);
                                 }
-#endif
                             }
 
                             process = null;
@@ -906,11 +901,9 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
-
-#if FEATURE_RESGENCACHE
+                
                 // And now we serialize the cache to save our resgen linked file resolution for later use.
                 WriteStateFile();
-#endif
 
                 RemoveUnsuccessfullyCreatedResourcesFromOutputResources();
 
@@ -1370,11 +1363,9 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private void GetResourcesToProcess(out List<ITaskItem> inputsToProcess, out List<ITaskItem> outputsToProcess, out List<ITaskItem> cachedOutputFiles)
         {
-#if FEATURE_RESGENCACHE
             // First we look to see if we have a resgen linked files cache.  If so, then we can use that
             // cache to speed up processing.
             ReadStateFile();
-#endif
 
             bool nothingOutOfDate = true;
             inputsToProcess = new List<ITaskItem>();
@@ -1386,7 +1377,6 @@ namespace Microsoft.Build.Tasks
             {
                 if (ExtractResWFiles)
                 {
-#if FEATURE_RESGENCACHE
                     // We can't cheaply predict the output files, since that would require
                     // loading each assembly.  So don't even try guessing what they will be.
                     // However, our cache will sometimes record all the info we need (for incremental builds).
@@ -1398,11 +1388,8 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-#endif
                         inputsToProcess.Add(Sources[i]);
-#if FEATURE_RESGENCACHE
                     }
-#endif
 
                     continue;
                 }
@@ -1442,8 +1429,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-
-#if FEATURE_RESGENCACHE
+        
         /// <summary>
         /// Given a cached portable library that is up to date, create ITaskItems to represent the output of the task, as if we did real work.
         /// </summary>
@@ -1463,7 +1449,6 @@ namespace Microsoft.Build.Tasks
                 cachedOutputFiles.Add(item);
             }
         }
-#endif
 
         /// <summary>
         /// Checks if this list contain any duplicates.  Do this so we don't have any races where we have two
@@ -1536,8 +1521,7 @@ namespace Microsoft.Build.Tasks
                 // timestamp checking is simple, because there's no linked files to examine, and no references.
                 return NeedToRebuildSourceFile(sourceFilePath, sourceTime, outputFilePath, outputTime);
             }
-
-#if FEATURE_RESGENCACHE
+            
             // OK, we have a .resx file
 
             // PERF: Regardless of whether the outputFile exists, if the source file is a .resx 
@@ -1598,18 +1582,6 @@ namespace Microsoft.Build.Tasks
             }
 
             return false;
-#else
-#if FEATURE_RESX_RESOURCE_READER
-            Compile error: if we get Resx reading before binary serialization
-            it might be interesting to get caching working some other way.
-#endif
-            // On .NET Core, we don't have binary serialization to maintain
-            // the cache, but conveniently .NET Core assemblies (the only
-            // supported target of .NET Core MSBuild) cannot use linked
-            // resources. So the only relevant comparison is input/output.
-            // See https://github.com/Microsoft/msbuild/issues/1197
-            return NeedToRebuildSourceFile(sourceFilePath, sourceTime, outputFilePath, outputTime);
-#endif
         }
 
         /// <summary>
@@ -1944,7 +1916,6 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-#if FEATURE_RESGENCACHE
                     catch (SerializationException e)
                     {
                         Log.LogMessageFromResources
@@ -1959,7 +1930,6 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-#endif
                     catch (Exception e)
                     {
                         // DDB#9819
@@ -2010,7 +1980,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool NeedSeparateAppDomainBasedOnSerializedType(XmlReader reader)
         {
-#if FEATURE_RESGENCACHE
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.Element)
@@ -2034,12 +2003,10 @@ namespace Microsoft.Build.Tasks
 
             // We didn't find any element at all -- the .resx is malformed.
             // Return true to err on the side of caution. Error will appear later.
-#endif
             return true;
         }
 #endif
 
-#if FEATURE_RESGENCACHE
         /// <summary>
         /// Deserializes a base64 block from a resx in order to figure out if its type is in the GAC.
         /// Because we're not providing any assembly resolution callback, deserialization
@@ -2094,7 +2061,6 @@ namespace Microsoft.Build.Tasks
                 return Convert.FromBase64String(text);
             }
         }
-#endif // FEATURE_RESGENCACHE
 
         /// <summary>
         /// Make sure that OutputResources has 1 file name for each name in Sources.
@@ -2238,8 +2204,7 @@ namespace Microsoft.Build.Tasks
             return null;
         }
 #endif
-
-#if FEATURE_RESGENCACHE
+        
         /// <summary>
         /// Read the state file if able.
         /// </summary>
@@ -2265,7 +2230,6 @@ namespace Microsoft.Build.Tasks
                 _cache.SerializeCache((StateFile == null) ? null : StateFile.ItemSpec, Log);
             }
         }
-#endif
     }
 
     /// <summary>
@@ -2398,8 +2362,7 @@ namespace Microsoft.Build.Tasks
             }
         }
         private List<ITaskItem> _extractedResWFiles;
-
-#if FEATURE_RESGENCACHE
+        
         /// <summary>
         /// Record all the information about outputs here to avoid future incremental builds.
         /// </summary>
@@ -2408,7 +2371,6 @@ namespace Microsoft.Build.Tasks
             get { return _portableLibraryCacheInfo; }
         }
         private List<ResGenDependencies.PortableLibraryFile> _portableLibraryCacheInfo;
-#endif
 
         /// <summary>
         /// List of output files that we failed to create due to an error.
@@ -2469,9 +2431,7 @@ namespace Microsoft.Build.Tasks
             _readers = new List<ReaderInfo>();
             _extractResWFiles = extractingResWFiles;
             _resWOutputDirectory = resWOutputDirectory;
-#if FEATURE_RESGENCACHE
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
-#endif
 
 #if FEATURE_ASSEMBLY_LOADFROM
             // If references were passed in, we will have to give the ResxResourceReader an object
@@ -2668,9 +2628,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             catch (Exception e) when (
-#if FEATURE_RESGENCACHE
                                       e is SerializationException ||
-#endif
                                       e is TargetInvocationException)
             {
                 // DDB #9819
@@ -2701,10 +2659,8 @@ namespace Microsoft.Build.Tasks
             {
                 if (GetFormat(inFile) == Format.Assembly)
                 {
-#if FEATURE_RESGENCACHE
                     // Prepare cache data
                     ResGenDependencies.PortableLibraryFile library = new ResGenDependencies.PortableLibraryFile(inFile);
-#endif
                     List<string> resWFilesForThisAssembly = new List<string>();
 
                     foreach (ReaderInfo reader in _readers)
@@ -2745,23 +2701,17 @@ namespace Microsoft.Build.Tasks
                         ITaskItem newOutputFile = new TaskItem(escapedOutputFile);
                         resWFilesForThisAssembly.Add(escapedOutputFile);
                         newOutputFile.SetMetadata("ResourceIndexName", reader.assemblySimpleName);
-#if FEATURE_RESGENCACHE
                         library.AssemblySimpleName = reader.assemblySimpleName;
-#endif
                         if (reader.fromNeutralResources)
                         {
                             newOutputFile.SetMetadata("NeutralResourceLanguage", reader.cultureName);
-#if FEATURE_RESGENCACHE
                             library.NeutralResourceLanguage = reader.cultureName;
-#endif
                         }
                         ExtractedResWFiles.Add(newOutputFile);
                     }
-
-#if FEATURE_RESGENCACHE
+                    
                     library.OutputFiles = resWFilesForThisAssembly.ToArray();
                     _portableLibraryCacheInfo.Add(library);
-#endif
                 }
                 else
                 {
@@ -2812,7 +2762,7 @@ namespace Microsoft.Build.Tasks
                     if (FileSystems.Default.FileExists(currentOutputFile))
                     {
                         if (GetFormat(currentOutputFile) != Format.Assembly)
-                            // Never delete an assembly since we don't ever actually write to assemblies.
+                        // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(currentOutputFile);
                         }
@@ -2839,9 +2789,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             catch (Exception e) when (
-#if FEATURE_RESGENCACHE
                                       e is SerializationException ||
-#endif
                                       e is TargetInvocationException)
             {
                 // DDB #9819
@@ -3894,7 +3842,6 @@ namespace Microsoft.Build.Tasks
             private int lineNumber;
             private int column;
 
-#if FEATURE_RESGENCACHE
             /// <summary>
             /// Fxcop want to have the correct basic exception constructors implemented
             /// </summary>
@@ -3902,7 +3849,6 @@ namespace Microsoft.Build.Tasks
                 : base(info, context)
             {
             }
-#endif
 
             internal TextFileException(String message, String fileName, int lineNumber, int linePosition)
                 : base(message)
