@@ -101,6 +101,7 @@ namespace Microsoft.Build.Experimental.Graph
                     var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
                     entryPointConfigurationMetadata.Add(configurationMetadata);
                 }
+
                 return entryPointConfigurationMetadata;
             }
 
