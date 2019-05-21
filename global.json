@@ -1,6 +1,9 @@
 {
   "tools": {
     "dotnet": "3.0.100-preview5-011568",
+    "runtimes": {
+      "dotnet/x64": [ "2.1.7" ]
+    },
     "vs": {
       "version": "16.0"
     }
