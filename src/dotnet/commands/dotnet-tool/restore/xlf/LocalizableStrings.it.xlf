@@ -104,7 +104,8 @@
 {0}</source>
         <target state="translated">Conflitto di nomi di comando. I nomi dei comandi non fanno distinzione tra maiuscole/minuscole.
 {0}</target>
-        <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
+        <note />
+      </trans-unit>
       <trans-unit id="PackagesCommandNameCollisionForOnePackage">
         <source>A command "{0}" in package "{1}"</source>
         <target state="translated">Comando "{0}" nel pacchetto "{1}"</target>

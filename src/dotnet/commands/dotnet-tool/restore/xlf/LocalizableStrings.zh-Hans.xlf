@@ -104,7 +104,8 @@
 {0}</source>
         <target state="translated">命令名称冲突。命令名称不区分大小写。
 {0}</target>
-        <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
+        <note />
+      </trans-unit>
       <trans-unit id="PackagesCommandNameCollisionForOnePackage">
         <source>A command "{0}" in package "{1}"</source>
         <target state="translated">包“{1}”中的命令“{0}”</target>
