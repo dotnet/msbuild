@@ -12,11 +12,11 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <DotNetCoreSdkLKGVersion>3.0.100-preview5-011462</DotNetCoreSdkLKGVersion>
+    <DotNetCoreSdkLKGVersion>3.0.100-preview6-012021</DotNetCoreSdkLKGVersion>
     <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.2.0</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>2.2.1</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftApplicationInsightsPackageVersion>2.0.0</MicrosoftApplicationInsightsPackageVersion>
-    <MicrosoftBuildPackageVersion>16.1.0-preview.19</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>16.2.0-preview.19261.3</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
@@ -34,7 +34,7 @@
     <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.2-preview.19074.1</MicrosoftDotNetProjectJsonMigrationPackageVersion>
     <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
     <NewtonsoftJsonPackageVersion>10.0.3</NewtonsoftJsonPackageVersion>
-    <NuGetBuildTasksPackageVersion>5.1.0-rtm.5921</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>5.2.0-preview2.6020</NuGetBuildTasksPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
     <NuGetConfigurationPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetConfigurationPackageVersion>
     <NuGetFrameworksPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetFrameworksPackageVersion>
@@ -57,7 +57,8 @@
       https://api.nuget.org/v3/index.json;
       https://dotnet.myget.org/F/msbuild/api/v3/index.json;
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
+      https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore/index.json;
+      https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore-tooling/index.json;
     </RestoreSources>
   </PropertyGroup>
 </Project>

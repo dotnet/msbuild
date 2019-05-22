@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     return provider.TryApplySettings(profileObject, ref command);
                 }
             }
-            catch (JsonReaderException ex)
+            catch (JsonException ex)
             {
                 return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.DeserializationExceptionMessage, ex.Message));
             }

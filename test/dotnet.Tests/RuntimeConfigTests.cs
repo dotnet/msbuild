@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tests
             var tempPath = GetTempPath();
             File.WriteAllText(tempPath, TrailingComma);
             Action a = () => new RuntimeConfig(tempPath);
-            a.ShouldThrow<JsonReaderException>();
+            a.ShouldThrow<JsonException>();
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tests
             var tempPath = GetTempPath();
             File.WriteAllText(tempPath, "");
             Action a = () => new RuntimeConfig(tempPath);
-            a.ShouldThrow<System.Text.Json.JsonReaderException>();
+            a.ShouldThrow<System.Text.Json.JsonException>();
         }
 
         [Fact]
