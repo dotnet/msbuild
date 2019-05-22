@@ -12,8 +12,7 @@
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuildTaskHost\MSBuildTaskHost.csproj"
                       Private="false"
                       ReferenceOutputAssembly="false"
-                      OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" 
-                      Condition="'$(IgnoreMSBuildTaskHost)' != 'true'"/>
+                      OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" />
 
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Deprecated\Conversion\Microsoft.Build.Conversion.csproj"
                       Private="false"
@@ -31,7 +30,7 @@
     <X64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuildTaskHost\MSBuildTaskHost.csproj"
                          SetPlatform="Platform=x64"
                          OutputItemType="MSBuildTaskHostX64ResolvedProjectReferencePath"
-                         Condition="'$(IgnoreMSBuildTaskHost)' != 'true'" />
+                         GlobalPropertiesToRemove="TargetFramework" />
 
   </ItemGroup>
 
