@@ -70,10 +70,16 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 return aliasedTypeName.Substring(0, indexStart + 2) + fullAssemblyIdentity;
             }
 
-            // No alias found. Hope it's an already-loaded type and try to resolve it:
-            return Type.GetType(aliasedTypeName, throwOnError: false)?.AssemblyQualifiedName // TODO: is this legit? or will it give a Core name, not the standard interop name?
-                // If it's not, just pass it along
-                ?? aliasedTypeName;
+            // Allow "System.String" bare or with no registered alias
+            // TODO: is this overzealous? _Hopefully_ no one is putting a System.String type in their
+            // own assembly.
+            if (aliasedTypeName.StartsWith("System.String"))
+            {
+                return "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+            }
+
+            // No alias found. Hope it's sufficiently complete to be resolved at runtime
+            return aliasedTypeName;
         }
 
         private static void ParseData(string resxFilename, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
@@ -96,8 +102,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 typename = GetFullTypeNameFromAlias(typename, aliases);
             }
 
-            if (typename == "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" ||
-                typename == typeof(string).AssemblyQualifiedName) // TODO: if loaded via GetType on core, it won't be in mscorlib. is there a way to get the "serialization safe" type?
+            if (typename == "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
             {
                 resources.Add(new StringResource(name, value, resxFilename));
                 return;
