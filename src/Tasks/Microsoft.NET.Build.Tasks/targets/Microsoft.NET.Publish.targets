@@ -53,11 +53,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Target Name="_PublishBuildAlternative"
-          Condition="'$(NoBuild)' != 'true'"
+          Condition="'$(NoBuild)' != 'true' and '$(GeneratePackageOnBuild)' != 'true'"
           DependsOnTargets="Build;$(_CorePublishTargets)" />
 
   <Target Name="_PublishNoBuildAlternative"
-          Condition="'$(NoBuild)' == 'true'"
+          Condition="'$(NoBuild)' == 'true' or '$(GeneratePackageOnBuild)' == 'true'"
           DependsOnTargets="$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)" />
 
   <Target Name="Publish"
