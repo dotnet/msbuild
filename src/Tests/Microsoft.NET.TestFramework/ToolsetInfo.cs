@@ -124,6 +124,9 @@ namespace Microsoft.NET.TestFramework
             {
                 ret.FileName = FullFrameworkMSBuildPath;
                 ret.Arguments = args.ToList();
+                // Don't propagate DOTNET_HOST_PATH to the msbuild process, to match behavior
+                // when running desktop msbuild outside of the test harness.
+                ret.Environment["DOTNET_HOST_PATH"] = null;
             }
             else
             {
@@ -194,7 +197,7 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                pathSplitChar = ':';                
+                pathSplitChar = ':';
             }
 
             var paths = Environment.GetEnvironmentVariable("PATH").Split(pathSplitChar);

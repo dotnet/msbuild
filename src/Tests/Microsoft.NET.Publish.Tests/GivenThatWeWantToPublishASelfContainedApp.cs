@@ -7,6 +7,7 @@ using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using System;
 using System.IO;
 using Xunit;
@@ -151,6 +152,110 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(args)
                 .Should()
                 .Pass();
+        }
+
+        [WindowsOnlyFact]
+        public void It_publishes_runtime_pack_resources()
+        {
+            const string tfm = "netcoreapp3.0";
+
+            var testProject = new TestProject()
+            {
+                Name = "WpfProjectAllResources",
+                TargetFrameworks = tfm,
+                IsSdkProject = true,
+                IsWinExe = true,
+            };
+
+            testProject.AdditionalProperties.Add("UseWPF", "true");
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(
+                    (filename, project) =>
+                    {
+                        project.Root.Attribute("Sdk").Value = "Microsoft.NET.Sdk.WindowsDesktop";
+                    });
+
+            var rid = EnvironmentInfo.GetCompatibleRid(tfm);
+            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+
+            command
+                .Execute("/restore", $"/p:RuntimeIdentifier={rid}")
+                .Should()
+                .Pass();
+
+            var output = command.GetOutputDirectory(targetFramework: tfm, runtimeIdentifier: rid);
+
+            output.Should().HaveFiles(new[] {
+                "cs/PresentationCore.resources.dll",
+                "de/PresentationCore.resources.dll",
+                "es/PresentationCore.resources.dll",
+                "fr/PresentationCore.resources.dll",
+                "it/PresentationCore.resources.dll",
+                "ja/PresentationCore.resources.dll",
+                "ko/PresentationCore.resources.dll",
+                "pl/PresentationCore.resources.dll",
+                "pt-BR/PresentationCore.resources.dll",
+                "ru/PresentationCore.resources.dll",
+                "tr/PresentationCore.resources.dll",
+                "zh-Hans/PresentationCore.resources.dll",
+                "zh-Hant/PresentationCore.resources.dll",
+            });
+        }
+
+        [WindowsOnlyFact]
+        public void It_publishes_runtime_pack_resources_for_specific_languages()
+        {
+            const string tfm = "netcoreapp3.0";
+
+            var testProject = new TestProject()
+            {
+                Name = "WpfProjectSelectResources",
+                TargetFrameworks = tfm,
+                IsSdkProject = true,
+                IsWinExe = true,
+            };
+
+            testProject.AdditionalProperties.Add("UseWPF", "true");
+            testProject.AdditionalProperties.Add("SatelliteResourceLanguages", "cs;zh-Hant;ko");
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(
+                    (filename, project) =>
+                    {
+                        project.Root.Attribute("Sdk").Value = "Microsoft.NET.Sdk.WindowsDesktop";
+                    });
+
+            var rid = EnvironmentInfo.GetCompatibleRid(tfm);
+            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+
+            command
+                .Execute("/restore", $"/p:RuntimeIdentifier={rid}")
+                .Should()
+                .Pass();
+
+            var output = command.GetOutputDirectory(targetFramework: tfm, runtimeIdentifier: rid);
+
+            output
+                .Should()
+                .HaveFiles(new[] {
+                    "cs/PresentationCore.resources.dll",
+                    "ko/PresentationCore.resources.dll",
+                    "zh-Hant/PresentationCore.resources.dll",
+                })
+                .And
+                .NotHaveSubDirectories(new[] {
+                    "de",
+                    "es",
+                    "fr",
+                    "it",
+                    "ja",
+                    "pl",
+                    "pt-BR",
+                    "ru",
+                    "tr",
+                    "zh-Hans",
+                });
         }
     }
 }

@@ -31,6 +31,8 @@ namespace Microsoft.NET.Build.Tasks
         public string RuntimeGraphPath { get; set; }
         [Required]
         public string NETCoreSdkRuntimeIdentifier { get; set; }
+        [Required]
+        public bool IncludeSymbolsInSingleFile { get; set; }
 
         [Output]
         public ITaskItem CrossgenTool { get; set; }
@@ -184,6 +186,11 @@ namespace Microsoft.NET.Build.Tasks
                         r2rSymbolsFileToPublish.ItemSpec = outputPDBImage;
                         r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, outputPDBImageRelativePath);
                         r2rSymbolsFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+                        if (!IncludeSymbolsInSingleFile)
+                        {
+                            r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.ExcludeFromSingleFile, "true");
+                        }
+
                         r2rFilesPublishList.Add(r2rSymbolsFileToPublish);
                     }
                 }

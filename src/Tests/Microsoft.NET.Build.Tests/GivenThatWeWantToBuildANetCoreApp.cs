@@ -56,10 +56,10 @@ namespace Microsoft.NET.Build.Tests
         //  Test behavior when implicit version differs for framework-dependent and self-contained apps
         [Theory]
         [InlineData("netcoreapp1.0", false, true, "1.0.5")]
-        [InlineData("netcoreapp1.0", true, true, "1.0.15")]
+        [InlineData("netcoreapp1.0", true, true, "1.0.16")]
         [InlineData("netcoreapp1.0", false, false, "1.0.5")]
         [InlineData("netcoreapp1.1", false, true, "1.1.2")]
-        [InlineData("netcoreapp1.1", true, true, "1.1.12")]
+        [InlineData("netcoreapp1.1", true, true, "1.1.13")]
         [InlineData("netcoreapp1.1", false, false, "1.1.2")]
         [InlineData("netcoreapp2.0", false, true, "2.0.0")]
         [InlineData("netcoreapp2.0", true, true, TestContext.LatestRuntimePatchForNetCoreApp2_0)]
@@ -275,6 +275,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0")]
         public void It_runs_the_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             RunAppFromOutputFolder("RunFromOutputFolderConflicts_" + targetFramework, false, true, targetFramework);
         }
 
@@ -283,6 +288,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0")]
         public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts_" + targetFramework, true, true, targetFramework);
         }
 
