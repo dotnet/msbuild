@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -588,6 +590,116 @@ namespace FrameworkReferenceTest
             foreach (var runtimeAsset in runtimeAssetTrimInfo[runtimePackName])
             {
                 runtimeAsset.isTrimmable.Should().Be("false");
+            }
+        }
+
+        //  TODO: convert to Theory with self-contained or not
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WindowsFormsFrameworkReference(bool selfContained)
+        {
+            TestFrameworkReferenceProfiles(
+                frameworkReferences: new [] { "Microsoft.WindowsDesktop.App.WindowsForms" },
+                expectedReferenceNames: new[] { "Microsoft.Win32.Registry", "System.Windows.Forms" },
+                notExpectedReferenceNames: new[] { "System.Windows.Presentation", "WindowsFormsIntegration" },
+                selfContained);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WPFFrameworkReference(bool selfContained)
+        {
+            TestFrameworkReferenceProfiles(
+                frameworkReferences: new[] { "Microsoft.WindowsDesktop.App.WPF" },
+                expectedReferenceNames: new[] { "Microsoft.Win32.Registry", "System.Windows.Presentation" },
+                notExpectedReferenceNames: new[] { "System.Windows.Forms", "WindowsFormsIntegration" },
+                selfContained);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WindowsFormAndWPFFrameworkReference(bool selfContained)
+        {
+            TestFrameworkReferenceProfiles(
+                frameworkReferences: new[] { "Microsoft.WindowsDesktop.App.WindowsForms", "Microsoft.WindowsDesktop.App.WPF" },
+                expectedReferenceNames: new[] { "Microsoft.Win32.Registry", "System.Windows.Forms", "System.Windows.Presentation" },
+                notExpectedReferenceNames: new[] { "WindowsFormsIntegration" },
+                selfContained);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WindowsDesktopFrameworkReference(bool selfContained)
+        {
+            TestFrameworkReferenceProfiles(
+                frameworkReferences: new[] { "Microsoft.WindowsDesktop.App" },
+                expectedReferenceNames: new[] { "Microsoft.Win32.Registry", "System.Windows.Forms",
+                                                "System.Windows.Presentation", "WindowsFormsIntegration" },
+                notExpectedReferenceNames: Enumerable.Empty<string>(),
+                selfContained);
+        }
+
+        private void TestFrameworkReferenceProfiles(
+            IEnumerable<string> frameworkReferences,
+            IEnumerable<string> expectedReferenceNames,
+            IEnumerable<string> notExpectedReferenceNames,
+            bool selfContained,
+            [CallerMemberName] string callingMethod = "")
+        {
+            var testProject = new TestProject()
+            {
+                Name = "WindowsFormsFrameworkReference",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+            testProject.FrameworkReferences.AddRange(frameworkReferences);
+
+            if (selfContained)
+            {
+                testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+            }
+
+            string identifier = selfContained ? "_selfcontained" : string.Empty;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier)
+                .Restore(Log, testProject.Name);
+
+            string projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, projectFolder);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var getValuesCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Reference", GetValuesCommand.ValueType.Item);
+
+            getValuesCommand.Execute().Should().Pass();
+
+            var references = getValuesCommand.GetValues();
+            var referenceNames = references.Select(Path.GetFileNameWithoutExtension);
+
+            referenceNames.Should().Contain(expectedReferenceNames);
+
+            if (notExpectedReferenceNames.Any())
+            {
+                referenceNames.Should().NotContain(notExpectedReferenceNames);
+            }
+
+            if (selfContained)
+            {
+                var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks, runtimeIdentifier: testProject.RuntimeIdentifier);
+
+                //  The output directory should have the DLLs which are not referenced at compile time but are
+                //  still part of the shared framework.
+                outputDirectory.Should().HaveFiles(expectedReferenceNames.Concat(notExpectedReferenceNames)
+                    .Select(n => n + ".dll"));
             }
         }
 
