@@ -128,13 +128,23 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             // TODO: validate typename at this point somehow to make sure it's vaguely right?
 
-            if (mimetype == ByteArraySerializedObjectMimeType)
+            if (mimetype != null)
             {
-                // TypeConverter!
-                byte[] bytes = Convert.FromBase64String(value);
+                switch (mimetype)
+                {
+                    case ByteArraySerializedObjectMimeType:
+                        // TypeConverter from byte array
+                        byte[] typeConverterBytes = Convert.FromBase64String(value);
 
-                resources.Add(new TypeConverterByteArrayResource(name, typename, bytes, resxFilename));
-                return;
+                        resources.Add(new TypeConverterByteArrayResource(name, typename, typeConverterBytes, resxFilename));
+                        return;
+                    case BinSerializedObjectMimeType:
+                    case Beta2CompatSerializedObjectMimeType:
+                    case CompatBinSerializedObjectMimeType:
+                        // TODO: binaryformatter
+                    default:
+                        throw new NotImplementedException();
+                }
             }
 
             throw new NotImplementedException();
