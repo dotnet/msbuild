@@ -107,6 +107,11 @@ namespace Microsoft.NET.Publish.Tests
         private void Versions_are_included(bool build, [CallerMemberName] string callingMethod = "")
         {
             var testProject = GetTestProject();
+            if (!EnvironmentInfo.SupportsTargetFramework(testProject.TargetFrameworks))
+            {
+                return;
+            }
+
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod)

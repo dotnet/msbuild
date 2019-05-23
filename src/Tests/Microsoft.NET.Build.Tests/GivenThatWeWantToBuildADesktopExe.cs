@@ -35,12 +35,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
-                })
+                .WithTargetFramework(targetFramework)
                 .Restore(Log);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);

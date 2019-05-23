@@ -8,6 +8,8 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -48,7 +50,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1", runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp2.1", runtimeIdentifier: runtimeIdentifier);
             var selfContainedExecutable = $"App{Constants.ExeSuffix}";
 
             string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
@@ -71,6 +73,19 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibraryAndRid", "BuildFrameworkDependentRIDSpecific")
                 .WithSource();
 
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+            {
+                //  .NET Core 2.1.0 packages don't support latest versions of OS X, so roll forward to the
+                //  latest patch which does
+                testAsset = testAsset.WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement("TargetLatestRuntimePatch", true));
+                });
+            }
+
             var projectPath = Path.Combine(testAsset.TestRoot, "App");
 
             var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
@@ -85,10 +100,11 @@ namespace Microsoft.NET.Build.Tests
                 .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}", $"/p:TestRuntimeIdentifier={runtimeIdentifier}", "/p:SelfContained=false")
                 .Should().Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1", runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp2.1", runtimeIdentifier: runtimeIdentifier);
 
             outputDirectory.Should().NotHaveSubDirectories();
             outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"App{Constants.ExeSuffix}",
                 "App.dll",
                 "App.pdb",
                 "App.deps.json",

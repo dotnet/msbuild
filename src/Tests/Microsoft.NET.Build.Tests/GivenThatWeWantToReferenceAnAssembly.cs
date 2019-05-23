@@ -68,8 +68,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,
             };
             referencerProject.References.Add(dependencyAssemblyPath);
@@ -194,8 +192,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,
             };
             referencerProject.References.Add(dependencyAssemblyPath);
@@ -285,8 +281,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,
             };
             referencerProject.References.Add(dllDependencyAssemblyPath);
@@ -429,8 +423,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,
             };
             referencerProject.References.Add(dllDependencyAssemblyPath);
@@ -521,8 +513,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,
             };
             referencerProject.ReferencedProjects.Add(dependencyProject);
@@ -666,8 +656,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,
             };
             referencerProject.ReferencedProjects.Add(dependencyProject);
@@ -776,8 +764,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,
             };
             referencerProject.ReferencedProjects.Add(dependencyProject);
@@ -939,8 +925,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,
             };
             referencerProject.ReferencedProjects.Add(dependencyProject);

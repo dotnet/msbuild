@@ -7,7 +7,9 @@ using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -67,6 +69,7 @@ namespace Microsoft.NET.Publish.Tests
 
             publishDirectory.Should().NotHaveSubDirectories();
             publishDirectory.Should().OnlyHaveFiles(new[] {
+                $"App{Constants.ExeSuffix}",
                 "App.dll",
                 "App.pdb",
                 "App.deps.json",
@@ -89,33 +92,40 @@ namespace Microsoft.NET.Publish.Tests
 
         private void PublishAppWithLibraryAndRid(bool selfContained, out DirectoryInfo publishDirectory, out string runtimeIdentifier)
         {
-            runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+            runtimeIdentifier = DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryAndRid", $"PublishAppWithLibraryAndRid{selfContained}")
                 .WithSource();
 
             var projectPath = Path.Combine(testAsset.TestRoot, "App");
 
-            var msbuildArgs = new[]
+            var msbuildArgs = new List<string>()
             {
                 $"/p:RuntimeIdentifier={runtimeIdentifier}",
                 $"/p:TestRuntimeIdentifier={runtimeIdentifier}",
                 $"/p:SelfContained={selfContained}"
             };
 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                //  .NET Core 2.1.0 packages don't support latest versions of OS X, so roll forward to the
+                //  latest patch which does
+                msbuildArgs.Add("/p:TargetLatestRuntimePatch=true");
+            }
+
             var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
             restoreCommand
-                .Execute(msbuildArgs)
+                .Execute(msbuildArgs.ToArray())
                 .Should()
                 .Pass();
 
             var publishCommand = new PublishCommand(Log, projectPath);
 
             publishCommand
-                .Execute(msbuildArgs)
+                .Execute(msbuildArgs.ToArray())
                 .Should().Pass();
 
-            publishDirectory = publishCommand.GetOutputDirectory("netcoreapp1.1", runtimeIdentifier: runtimeIdentifier);
+            publishDirectory = publishCommand.GetOutputDirectory("netcoreapp2.1", runtimeIdentifier: runtimeIdentifier);
         }
     }
 }
