@@ -9,17 +9,19 @@ namespace Microsoft.NET.TestFramework
     /// </summary>
     public class CopyFilesTarget
     {
-        public CopyFilesTarget(string targetName, string targetToRunAfter, string sourceFiles, string destination)
+        public CopyFilesTarget(string targetName, string targetToRunAfter, string sourceFiles, string condition, string destination)
         {
             TargetName = targetName;
             TargetToRunAfter = targetToRunAfter;
             SourceFiles = sourceFiles;
+            Condition = condition;
             Destination = destination;
         }
 
         public string TargetName { get; private set; }
         public string TargetToRunAfter { get; private set; }
         public string SourceFiles { get; private set; }
+        public string Condition { get; private set; }
         public string Destination { get; private set; }
     }
 }

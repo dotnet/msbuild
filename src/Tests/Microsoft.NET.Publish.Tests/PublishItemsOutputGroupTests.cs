@@ -50,6 +50,12 @@ namespace Microsoft.NET.Publish.Tests
             testOutputDir.Should().HaveFile($"{testProject.Name}.exe");
             testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
             testOutputDir.Should().HaveFiles(FrameworkAssemblies);
+
+            var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
+            Log.WriteLine("PublishItemsOutputGroup key items dumped to '{0}'.", testKeyOutputDir.FullName);
+
+            // Verify the only key item is the exe
+            testKeyOutputDir.Should().OnlyHaveFiles(new List<string>() { $"{testProject.Name}.exe" });
         }
 
         [Fact]
@@ -77,6 +83,12 @@ namespace Microsoft.NET.Publish.Tests
             testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
             testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
             testOutputDir.Should().NotHaveFiles(FrameworkAssemblies);
+
+            var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
+            Log.WriteLine("PublishItemsOutputGroup key items dumped to '{0}'.", testKeyOutputDir.FullName);
+
+            // Verify the only key item is the exe
+            testKeyOutputDir.Should().OnlyHaveFiles(new List<string>() { $"{testProject.Name}{Constants.ExeSuffix}" });
         }
 
         private TestProject SetupProject()
@@ -100,7 +112,17 @@ namespace Microsoft.NET.Publish.Tests
                 "CopyPublishItemsOutputGroup",
                 "PublishItemsOutputGroup",
                 "@(PublishItemsOutputGroupOutputs)",
+                null,
                 "$(MSBuildProjectDirectory)\\TestOutput"));
+
+            // Add another target that will dump the members of PublishItemsOutputGroup that
+            // have property IsKeyOutput set to true to a different test directory.
+            testProject.CopyFilesTargets.Add(new CopyFilesTarget(
+                "CopyPublishKeyItemsOutputGroup",
+                "PublishItemsOutputGroup",
+                "@(PublishItemsOutputGroupOutputs)",
+                @"'%(PublishItemsOutputGroupOutputs.IsKeyOutput)' == 'True'",
+                "$(MSBuildProjectDirectory)\\TestOutput_Key"));
 
             return testProject;
         }

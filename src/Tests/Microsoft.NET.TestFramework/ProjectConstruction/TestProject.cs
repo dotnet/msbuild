@@ -304,10 +304,16 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         new XAttribute("Name", copyFilesTarget.TargetName),
                         new XAttribute("AfterTargets", copyFilesTarget.TargetToRunAfter));
 
-                    target.Add(new XElement(ns + "Copy",
+                    var copyElement = new XElement(ns + "Copy",
                         new XAttribute("SourceFiles", copyFilesTarget.SourceFiles),
-                        new XAttribute("DestinationFolder", copyFilesTarget.Destination)));
+                        new XAttribute("DestinationFolder", copyFilesTarget.Destination));
 
+                    if (!string.IsNullOrEmpty(copyFilesTarget.Condition))
+                    {
+                        copyElement.SetAttributeValue("Condition", copyFilesTarget.Condition);
+                    }
+
+                    target.Add(copyElement);
                     projectXml.Root.Add(target);
                 }
             }
