@@ -1,0 +1,240 @@
+trigger:
+- release/2.1*
+- release/2.2*
+
+pr:
+- release/2.1*
+- release/2.2*
+
+jobs:
+- job: debug_osx
+  displayName: OSX Debug
+  pool:
+    vmImage: macOS-10.13
+  variables:
+    DOTNET_RUNTIME_ID: osx.10.12-x64
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build/cibuild.sh --configuration Debug
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/Debug/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Debug/log/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Debug/TestResults/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: debug_osx
+
+- job: debug_ubuntu1604
+  displayName: Ubuntu16.04 Debug
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build/cibuild.sh --configuration Debug
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/Debug/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Debug/log/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Debug/TestResults/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: debug_ubuntu1604
+
+- job: debug_windows_nt
+  displayName: Windows_NT Debug
+  pool:
+    name: NetCorePublic-Pool
+    queue: BuildPool.Windows.10.Amd64.VS2017.Open
+  steps:
+  - checkout: self
+    clean: true
+  - script: .\build\cibuild.cmd -configuration Debug
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/Debug/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Debug/log/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Debug/TestResults/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: debug_windows_nt
+
+- job: debug_windows_nt_fullframework
+  displayName: Windows_NT_FullFramework Debug
+  pool:
+    name: NetCorePublic-Pool
+    queue: BuildPool.Windows.10.Amd64.VS2017.Open
+  steps:
+  - checkout: self
+    clean: true
+  - script: .\build\cibuild.cmd -configuration Debug -fullMSBuild
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/Debug/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Debug/log/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Debug/TestResults/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: debug_windows_nt_fullframework
+
+- job: release_osx
+  displayName: OSX Release
+  pool:
+    vmImage: macOS-10.13
+  variables:
+    DOTNET_RUNTIME_ID: osx.10.12-x64
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build/cibuild.sh --configuration Release
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/Release/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Release/log/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Release/TestResults/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_osx
+
+- job: release_ubuntu1604
+  displayName: Ubuntu16.04 Release
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build/cibuild.sh --configuration Release
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/Release/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Release/log/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Release/TestResults/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_ubuntu1604
+
+- job: release_windows_nt
+  displayName: Windows_NT Release
+  pool:
+    name: NetCorePublic-Pool
+    queue: BuildPool.Windows.10.Amd64.VS2017.Open
+  steps:
+  - checkout: self
+    clean: true
+  - script: .\build\cibuild.cmd -configuration Release
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/Release/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Release/log/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Release/TestResults/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_windows_nt
+
+- job: release_windows_nt_fullframework
+  displayName: Windows_NT_FullFramework Release
+  pool:
+    name: NetCorePublic-Pool
+    queue: BuildPool.Windows.10.Amd64.VS2017.Open
+  steps:
+  - checkout: self
+    clean: true
+  - script: .\build\cibuild.cmd -configuration Release -fullMSBuild
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: xUnit
+      testResultsFiles: 'artifacts/Release/TestResults/*.xml'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Release/log/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: CopyFiles@2
+    inputs:
+      contents: 'artifacts/Release/TestResults/*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+    condition: failed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_windows_nt_fullframework
