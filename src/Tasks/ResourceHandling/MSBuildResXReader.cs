@@ -62,6 +62,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             aliases.Add(alias, name);
         }
 
+        private const string StringTypeName = "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+
         private static string GetFullTypeNameFromAlias(string aliasedTypeName, Dictionary<string, string> aliases)
         {
             int indexStart = aliasedTypeName.IndexOf(',');
@@ -75,7 +77,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             // own assembly.
             if (aliasedTypeName.StartsWith("System.String"))
             {
-                return "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+                return StringTypeName;
             }
 
             // No alias found. Hope it's sufficiently complete to be resolved at runtime
@@ -102,7 +104,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 typename = GetFullTypeNameFromAlias(typename, aliases);
             }
 
-            if (typename == "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
+            if (typename == StringTypeName)
             {
                 resources.Add(new StringResource(name, value, resxFilename));
                 return;
@@ -136,7 +138,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             string fileRefType = fileRefInfo[1];
             string fileRefEncoding = fileRefInfo[2];
 
-            if (fileRefType == "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
+            if (fileRefType == StringTypeName)
             {
                 // from https://github.com/dotnet/winforms/blob/a88c1a73fd7298b0a5c45251771f439262016826/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L231-L241
                 Encoding textFileEncoding = fileRefEncoding != null
