@@ -262,11 +262,6 @@
         <target state="translated">Consente di creare e gestire i certificati di sviluppo.</target>
         <note />
       </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Strumenti da riga di comando di Entity Framework Core.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
         <target state="translated">Strumenti da riga di comando della cache di SQL Server.</target>

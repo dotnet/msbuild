@@ -262,11 +262,6 @@
         <target state="translated">Crie e gerencie certificados de desenvolvimento.</target>
         <note />
       </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Ferramentas de linha de comando do Entity Framework Core.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
         <target state="translated">Ferramentas de linha de comando do cache do SQL Server.</target>
