@@ -140,7 +140,7 @@ jobs:
     parameters:
       agentOs: Darwin
       pool:
-        name: DotNetCore-Mac
+        name: Hosted macOS
       strategy:
         matrix:
           Build_Debug:
