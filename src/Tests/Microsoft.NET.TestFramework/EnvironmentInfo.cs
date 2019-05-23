@@ -25,14 +25,22 @@ namespace Microsoft.NET.TestFramework
 
             if (string.Equals(targetFramework, "netcoreapp1.0", StringComparison.OrdinalIgnoreCase))
             {
-                // netcoreapp1.0 only supports osx.10.10 and osx.10.11
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     Version osVersion;
-                    if (Version.TryParse(DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion, out osVersion) &&
-                        osVersion > new Version(10, 11))
+                    if (Version.TryParse(DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion, out osVersion))
                     {
-                        rid = "osx.10.11-x64";
+
+                        if (osVersion > new Version(10, 11))
+                        {
+                            //  netcoreapp1.0 only supports osx.10.10 and osx.10.11
+                            rid = "osx.10.11-x64";
+                        }
+                        else if (osVersion > new Version(10, 12))
+                        {
+                            //  netcoreapp1.1 only supports up to osx.10.12
+                            rid = "osx.10.12-x64";
+                        }
                     }
                 }
             }
@@ -106,6 +114,41 @@ namespace Microsoft.NET.TestFramework
                     if (rhelVersion == 6)
                     {
                         if (nugetFramework.Version < new Version(2, 0, 0, 0))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else if (ridOS.Equals("osx", StringComparison.OrdinalIgnoreCase))
+            {
+                string restOfRid = currentRid.Substring(ridOS.Length + 1);
+                string osxVersionString = restOfRid.Split('-')[0];
+                //  From a string such as "10.14", get the second part, e.g. "14"
+                string osxVersionString2 = osxVersionString.Split('.')[1];
+                if (int.TryParse(osxVersionString2, out int osxVersion))
+                {
+                    //  .NET Core 1.1 - 10.11, 10.12
+                    //  .NET Core 2.0 - 10.12+
+                    if (osxVersion <= 11)
+                    {
+                        if (nugetFramework.Version >= new Version(2, 0, 0, 0))
+                        {
+                            return false;
+                        }
+                    }
+                    else if (osxVersion == 12)
+                    {
+                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
+                        {
+                            return false;
+                        }
+                    }
+                    else if (osxVersion > 12)
+                    {
+                        //  .NET Core 2.0 is out of support, and doesn't seem to work with OS X 10.14
+                        //  (it finds no assets for the RID), even though the support page says "10.12+"
+                        if (nugetFramework.Version < new Version(2, 1, 0, 0))
                         {
                             return false;
                         }

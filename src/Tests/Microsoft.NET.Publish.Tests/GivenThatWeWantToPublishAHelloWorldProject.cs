@@ -69,6 +69,11 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("netcoreapp3.0")]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var helloWorldAsset = _testAssetsManager
@@ -124,7 +129,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Publish_self_contained_app_with_dot_in_the_name()
         {
-            var targetFramework = "netcoreapp2.0";
+            var targetFramework = "netcoreapp2.1";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             TestProject testProject = new TestProject()
@@ -143,7 +148,7 @@ public static class Program
 {
     public static void Main()
     {
-        Console.WriteLine(""Hello from a netcoreapp2.0.!"");
+        Console.WriteLine(""Hello from a netcoreapp2.1!"");
     }
 }
 ";
@@ -255,6 +260,10 @@ public static class Program
             }
 
             var targetFramework = "netcoreapp2.0";
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
             var rid = ridSpecific ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
 
             TestProject testProject = new TestProject()

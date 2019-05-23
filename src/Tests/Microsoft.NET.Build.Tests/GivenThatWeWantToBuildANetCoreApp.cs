@@ -66,6 +66,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp2.0", false, false, "2.0.0")]
         public void It_targets_the_right_framework_depending_on_output_type(string targetFramework, bool selfContained, bool isExe, string expectedFrameworkVersion)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             string testIdentifier = "Framework_targeting_" + targetFramework + "_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
 
             It_targets_the_right_framework(testIdentifier, targetFramework, null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion);
@@ -193,6 +198,12 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 IsExe = true,
             };
+
+            if (!EnvironmentInfo.SupportsTargetFramework(testProject.TargetFrameworks))
+            {
+                return;
+            }
+
             if (allowMismatch)
             {
                 testProject.AdditionalProperties["VerifyMatchingImplicitPackageVersion"] = "false";
@@ -236,7 +247,7 @@ namespace Microsoft.NET.Build.Tests
                 .Restore(Log);
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
-                "netcoreapp1.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
+                "netcoreapp2.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
             {
                 DependsOnTargets = "RunResolvePackageDependencies",
             };
@@ -250,7 +261,7 @@ namespace Microsoft.NET.Build.Tests
             // should only contain one target with no RIDs
             var targetDefs = getValuesCommand.GetValues();
             targetDefs.Count.Should().Be(1);
-            targetDefs.Should().Contain(".NETCoreApp,Version=v1.1");
+            targetDefs.Should().Contain(".NETCoreApp,Version=v2.1");
         }
 
         [Theory]

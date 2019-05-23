@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("Release.With-A Mix", "RELEASE_WITH_A_MIX")]
         public void Properly_changes_implicit_defines(string configuration, string expected)
         {
-            var targetFramework = "netcoreapp1.0";
+            var targetFramework = "netcoreapp2.1";
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
