@@ -76,6 +76,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
         private static string GetFullTypeNameFromAlias(string aliasedTypeName, Dictionary<string, string> aliases)
         {
+            if (aliasedTypeName == null)
+            {
+                return StringTypeName;
+            }
+
             int indexStart = aliasedTypeName.IndexOf(',');
             if (aliases.TryGetValue(aliasedTypeName.Substring(indexStart + 2), out string fullAssemblyIdentity))
             {
@@ -102,22 +107,20 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             string typename = elem.Attribute("type")?.Value;
             string mimetype = elem.Attribute("mimetype")?.Value;
 
-            if (typename == null && mimetype == null)
-            {
-                // Simplest case: specify nothing, it's a string
-                resources.Add(new StringResource(name, value, resxFilename));
-                return;
-            }
-
-            if (typename != null)
-            {
-                typename = GetFullTypeNameFromAlias(typename, aliases);
-            }
+            typename = GetFullTypeNameFromAlias(typename, aliases);
 
             if (typename == StringTypeName)
             {
-                resources.Add(new StringResource(name, value, resxFilename));
-                return;
+                if (mimetype == null)
+                {
+                    // If nothing is specified, or String is explicitly specified
+                    // with no mimetype: read the string from the resx and return it.
+                    resources.Add(new StringResource(name, value, resxFilename));
+                    return;
+                }
+
+                // It's a string, but it might be represented oddly.
+                // Fall through to see if one of the serializers can handle it.
             }
 
             if (typename.StartsWith("System.Resources.ResXFileRef", StringComparison.Ordinal)) // TODO: is this too general? Should it be OrdinalIgnoreCase?
