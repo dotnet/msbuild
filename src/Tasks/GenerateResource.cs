@@ -3669,7 +3669,7 @@ namespace Microsoft.Build.Tasks
         {
             using (StreamWriter writer = FileUtilities.OpenWrite(fileName, false, Encoding.UTF8))
             {
-                foreach (Entry entry in reader.resources)
+                foreach (LiveObjectResource entry in reader.resources)
                 {
                     String key = entry.Name;
                     Object v = entry.value;
@@ -3702,7 +3702,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="linePosition">Column number for messages</param>
         private void AddResource(ReaderInfo reader, string name, object value, String inputFileName, int lineNumber, int linePosition)
         {
-            Entry entry = new Entry(name, value);
+            LiveObjectResource entry = new LiveObjectResource(name, value);
 
             AddResource(reader, entry, inputFileName, lineNumber, linePosition);
         }
@@ -3872,26 +3872,6 @@ namespace Microsoft.Build.Tasks
             internal int LinePosition
             {
                 get { return column; }
-            }
-        }
-
-        /// <summary>
-        /// Name value resource pair to go in resources list
-        /// </summary>
-        private class Entry : IResource
-        {
-            public Entry(string name, object value)
-            {
-                Name = name;
-                this.value = value;
-            }
-
-            public string Name { get; }
-            public object value;
-
-            public void AddTo(IResourceWriter writer)
-            {
-                writer.AddResource(Name, value);
             }
         }
 #endregion // Code from ResGen.EXE
