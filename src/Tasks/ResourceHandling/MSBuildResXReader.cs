@@ -144,7 +144,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     case BinSerializedObjectMimeType:
                     case Beta2CompatSerializedObjectMimeType:
                     case CompatBinSerializedObjectMimeType:
-                        // TODO: binaryformatter
+                        // BinaryFormatter from byte array
+                        byte[] binaryFormatterBytes = Convert.FromBase64String(value);
+
+                        resources.Add(new BinaryFormatterByteArrayResource(name, typename, binaryFormatterBytes, resxFilename));
+                        return;
                     default:
                         throw new NotImplementedException();
                 }
