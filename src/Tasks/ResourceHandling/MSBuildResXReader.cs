@@ -131,7 +131,22 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             // TODO: validate typename at this point somehow to make sure it's vaguely right?
 
-            if (mimetype != null)
+            if (mimetype == null)
+            {
+                if (typename.IndexOf("System.Byte[]") != -1 && typename.IndexOf("mscorlib") != -1)
+                {
+                    byte[] byteArray = Convert.FromBase64String(value);
+
+                    // Comment and logic from https://github.com/dotnet/winforms/blob/16b192389b377c647ab3d280130781ab1a9d3385/src/System.Windows.Forms/src/System/Resources/ResXDataNode.cs#L411-L416
+                    // Handle byte[]'s, which are stored as base-64 encoded strings.
+                    // We can't hard-code byte[] type name due to version number
+                    // updates & potential whitespace issues with ResX files.
+                    resources.Add(new LiveObjectResource(name, byteArray));
+                    return;
+                }
+                throw new NotImplementedException();
+            }
+            else
             {
                 switch (mimetype)
                 {
@@ -153,8 +168,6 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                         throw new NotImplementedException();
                 }
             }
-
-            throw new NotImplementedException();
         }
 
         private static void AddLinkedResource(string resxFilename, List<IResource> resources, string name, string value)
