@@ -3962,6 +3962,7 @@ $(
                 ICollection<ProjectItemInstance> myDirectories = projectInstance.GetItems("MyDirectories");
 
                 var includes = myDirectories.Select(i => i.EvaluatedInclude);
+                includes.ShouldBeUnique();
                 includes.ShouldContain(root.Path);
                 includes.ShouldContain(alpha.Path);
                 includes.ShouldContain(beta.Path);
@@ -4005,6 +4006,7 @@ $(
                 ICollection<ProjectItemInstance> myDirectories = projectInstance.GetItems("MyDirectories");
 
                 var includes = myDirectories.Select(i => i.EvaluatedInclude);
+                includes.ShouldBeUnique();
                 includes.ShouldContain(root.Path);
                 includes.ShouldContain(alpha.Path);
                 includes.ShouldContain(beta.Path);
