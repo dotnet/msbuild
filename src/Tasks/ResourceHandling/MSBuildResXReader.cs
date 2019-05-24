@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -102,7 +103,22 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         private static void ParseData(string resxFilename, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
         {
             string name = elem.Attribute("name").Value;
-            string value = elem.Element("value").Value;
+            string value;
+
+            XElement valueElement = elem.Element("value");
+            if (valueElement is null)
+            {
+                if (elem.HasElements)
+                {
+                    throw new NotImplementedException("User-facing error for bad resx that has child elements but not `value`");
+                }
+
+                value = elem.Value;
+            }
+            else
+            {
+                value = valueElement.Value;
+            }
 
             string typename = elem.Attribute("type")?.Value;
             string mimetype = elem.Attribute("mimetype")?.Value;

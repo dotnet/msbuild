@@ -135,7 +135,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         }
 
         [Fact]
-        public void TypeConverterString()
+        public void TypeConverterStringWellFormatted()
         {
             var resxWithEmbeddedBitmap = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
@@ -152,6 +152,31 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
             resource.TypeName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             resource.StringRepresentation.ShouldBe("Blue");
         }
+
+        /// <summary>
+        /// Test a string-based TypeConverter resource shaped like the one in the old
+        /// ResXResourceWriter block comment without a "data" element.
+        /// </summary>
+        /// <remarks>
+        /// https://github.com/dotnet/winforms/blob/195f89af79d550c2da1711c45c379efd63519ac1/src/System.Windows.Forms/src/System/Resources/ResXResourceWriter.cs#L141
+        /// </remarks>
+        [Fact]
+        public void TypeConverterStringDirectValue()
+        {
+            var resxWithEmbeddedBitmap = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+@"  <assembly alias=""System.Drawing"" name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
+    <data name=""Color1"" type=""System.Drawing.Color, System.Drawing"">Blue</data>
+"));
+            resxWithEmbeddedBitmap.ShouldHaveSingleItem();
+            resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
+
+            var resource = (TypeConverterStringResource)resxWithEmbeddedBitmap[0];
+            resource.Name.ShouldBe("Color1");
+            resource.TypeName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            resource.StringRepresentation.ShouldBe("Blue");
+        }
+
 
         // TODO: invalid resx xml
 
