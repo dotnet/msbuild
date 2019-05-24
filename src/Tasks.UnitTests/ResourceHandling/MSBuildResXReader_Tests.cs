@@ -177,6 +177,25 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
             resource.StringRepresentation.ShouldBe("Blue");
         }
 
+        [Fact]
+        public void ResXFileRefToBitmap()
+        {
+            string bitmapPath = Build.UnitTests.GenerateResource_Tests.Utilities.CreateWorldsSmallestBitmap();
+
+            var resxWithLinkedBitmap = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+$@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Forms'>
+    <value>{bitmapPath};System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+"));
+            resxWithLinkedBitmap.ShouldHaveSingleItem();
+            resxWithLinkedBitmap[0].ShouldBeOfType(typeof(FileStreamResource));
+
+            var resource = (FileStreamResource)resxWithLinkedBitmap[0];
+            resource.Name.ShouldBe("Image1");
+            resource.TypeName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+        }
+
 
         // TODO: invalid resx xml
 

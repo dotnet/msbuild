@@ -194,10 +194,15 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             string fileName = fileRefInfo[0];
             string fileRefType = fileRefInfo[1];
-            string fileRefEncoding = fileRefInfo[2];
 
             if (fileRefType == StringTypeName)
             {
+                string fileRefEncoding = null;
+                if (fileRefInfo.Length == 3)
+                {
+                    fileRefEncoding = fileRefInfo[2];
+                }
+
                 // from https://github.com/dotnet/winforms/blob/a88c1a73fd7298b0a5c45251771f439262016826/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L231-L241
                 Encoding textFileEncoding = fileRefEncoding != null
                     ? Encoding.GetEncoding(fileRefEncoding)
@@ -210,7 +215,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 }
             }
 
-            throw new NotImplementedException();
+            resources.Add(new FileStreamResource(name, fileRefType, fileName, resxFilename));
         }
 
         /// <summary>
