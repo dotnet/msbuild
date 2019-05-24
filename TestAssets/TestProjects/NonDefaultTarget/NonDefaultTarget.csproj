@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Target Name="PrintMessage">
+    <Message Importance="High" Text="Hello World" />
+  </Target>
+
+</Project>
