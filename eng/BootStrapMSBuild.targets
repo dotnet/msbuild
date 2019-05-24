@@ -15,6 +15,8 @@
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
     <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
 
+    <!-- Needed to ensure that RuntimeTargetsCopyLocalItems is populated for full framework -->
+    <DisableRuntimeTargets>false</DisableRuntimeTargets>
   </PropertyGroup>
 
   <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
@@ -36,7 +38,7 @@
         <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'True'" />
 
         <!-- NuGet.targets will be in the ResolvedRuntimeTargets ItemGroup -->
-        <_NuGetRuntimeDependencies Include="%(ResolvedRuntimeTargets.Identity)" Condition="'@(ResolvedRuntimeTargets->Contains('NuGet.'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'True'" />
     </ItemGroup>
   </Target>
 
