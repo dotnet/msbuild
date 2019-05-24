@@ -397,7 +397,7 @@ namespace Microsoft.Build.Shared
 
                 try
                 {
-                    if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.FullPath, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.FullPath, StringComparison.OrdinalIgnoreCase))
                     {
                         if (fullPath != null)
                         {
@@ -414,7 +414,7 @@ namespace Microsoft.Build.Shared
 
                         ThrowForUrl(modifiedItemSpec, itemSpec, currentDirectory);
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RootDir, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RootDir, StringComparison.OrdinalIgnoreCase))
                     {
                         GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, ItemSpecModifiers.FullPath, ref fullPath);
 
@@ -430,7 +430,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec += Path.DirectorySeparatorChar;
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Filename, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Filename, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no filename
                         if (Path.GetDirectoryName(itemSpec) == null)
@@ -445,7 +445,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = Path.GetFileNameWithoutExtension(FixFilePath(itemSpec));
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no extension
                         if (Path.GetDirectoryName(itemSpec) == null)
@@ -459,11 +459,11 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = Path.GetExtension(itemSpec);
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RelativeDir, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RelativeDir, StringComparison.OrdinalIgnoreCase))
                     {
                         modifiedItemSpec = GetDirectory(itemSpec);
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Directory, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Directory, StringComparison.OrdinalIgnoreCase))
                     {
                         GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, ItemSpecModifiers.FullPath, ref fullPath);
 
@@ -500,16 +500,16 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = modifiedItemSpec.Substring(1);
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
                     {
                         // only the BuildItem class can compute this modifier -- so leave empty
                         modifiedItemSpec = String.Empty;
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Identity, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Identity, StringComparison.OrdinalIgnoreCase))
                     {
                         modifiedItemSpec = itemSpec;
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.ModifiedTime, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.ModifiedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
@@ -527,7 +527,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = String.Empty;
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.CreatedTime, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.CreatedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
@@ -543,7 +543,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = String.Empty;
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.AccessedTime, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.AccessedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
@@ -568,7 +568,7 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
-                            if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase) == 0)
+                            if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase))
                             {
                                 // ItemSpecModifiers.Directory does not contain the root directory
                                 modifiedItemSpec = Path.Combine
@@ -581,15 +581,15 @@ namespace Microsoft.Build.Shared
                             {
                                 string additionalModifier = null;
 
-                                if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase) == 0)
+                                if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase))
                                 {
                                     additionalModifier = ItemSpecModifiers.FullPath;
                                 }
-                                else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectName, StringComparison.OrdinalIgnoreCase) == 0)
+                                else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectName, StringComparison.OrdinalIgnoreCase))
                                 {
                                     additionalModifier = ItemSpecModifiers.Filename;
                                 }
-                                else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectExtension, StringComparison.OrdinalIgnoreCase) == 0)
+                                else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectExtension, StringComparison.OrdinalIgnoreCase))
                                 {
                                     additionalModifier = ItemSpecModifiers.Extension;
                                 }
