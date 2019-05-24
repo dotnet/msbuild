@@ -144,7 +144,9 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     resources.Add(new LiveObjectResource(name, byteArray));
                     return;
                 }
-                throw new NotImplementedException();
+
+                resources.Add(new TypeConverterStringResource(name, typename, value, resxFilename));
+                return;
             }
             else
             {

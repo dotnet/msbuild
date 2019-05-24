@@ -134,6 +134,25 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
             resource.TypeName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
         }
 
+        [Fact]
+        public void TypeConverterString()
+        {
+            var resxWithEmbeddedBitmap = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+@"  <assembly alias=""System.Drawing"" name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
+    <data name=""color"" type=""System.Drawing.Color, System.Drawing"">
+      <value>Blue</value>
+    </data>
+"));
+            resxWithEmbeddedBitmap.ShouldHaveSingleItem();
+            resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
+
+            var resource = (TypeConverterStringResource)resxWithEmbeddedBitmap[0];
+            resource.Name.ShouldBe("color");
+            resource.TypeName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            resource.StringRepresentation.ShouldBe("Blue");
+        }
+
         // TODO: invalid resx xml
 
         // TODO: valid xml, but invalid resx-specific data
