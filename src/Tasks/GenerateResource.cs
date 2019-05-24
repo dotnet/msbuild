@@ -3014,7 +3014,7 @@ namespace Microsoft.Build.Tasks
                         ReadResources(reader, resXReader, filename);
                         break;
 #else
-                        foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename))
+                        foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath))
                         {
                             AddResource(reader, resource, filename, 0, 0);
                         }

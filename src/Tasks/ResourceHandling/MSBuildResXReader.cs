@@ -19,10 +19,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     {
         public IReadOnlyList<IResource> Resources { get; }
 
-        public static IReadOnlyList<IResource> ReadResources(Stream s, string filename)
+        public static IReadOnlyList<IResource> ReadResources(Stream s, string filename, bool pathsRelativeToBasePath)
         {
-            // TODO: is it ok to hardcode the "shouldUseSourcePath" behavior?
-
             var resources = new List<IResource>();
             var aliases = new Dictionary<string, string>();
 
@@ -44,7 +42,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                         case "resheader":
                             break;
                         case "data":
-                            ParseData(filename, resources, aliases, elem);
+                            ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem);
                             break;
                         default:
                             throw new NotImplementedException();
@@ -100,7 +98,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             return aliasedTypeName;
         }
 
-        private static void ParseData(string resxFilename, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
+        private static void ParseData(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
         {
             string name = elem.Attribute("name").Value;
             string value;
@@ -141,7 +139,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (typename.StartsWith("System.Resources.ResXFileRef", StringComparison.Ordinal)) // TODO: is this too general? Should it be OrdinalIgnoreCase?
             {
-                AddLinkedResource(resxFilename, resources, name, value);
+                AddLinkedResource(resxFilename, pathsRelativeToBasePath, resources, name, value);
                 return;
             }
 
@@ -188,12 +186,20 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
         }
 
-        private static void AddLinkedResource(string resxFilename, List<IResource> resources, string name, string value)
+        private static void AddLinkedResource(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, string name, string value)
         {
             string[] fileRefInfo = ParseResxFileRefString(value);
 
             string fileName = fileRefInfo[0];
             string fileRefType = fileRefInfo[1];
+
+            if (pathsRelativeToBasePath)
+            {
+                fileName = Path.Combine(
+                    FileUtilities.GetDirectory(
+                        FileUtilities.NormalizePath(resxFilename)),
+                    fileName);
+            }
 
             if (fileRefType == StringTypeName)
             {
@@ -221,19 +227,19 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         /// <summary>
         /// Extract <see cref="IResource"/>s from a given file on disk.
         /// </summary>
-        public static IReadOnlyList<IResource> GetResourcesFromFile(string filename)
+        public static IReadOnlyList<IResource> GetResourcesFromFile(string filename, bool pathsRelativeToBasePath)
         {
             using (var x = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return ReadResources(x, filename);
+                return ReadResources(x, filename, pathsRelativeToBasePath);
             }
         }
 
-        public static IReadOnlyList<IResource> GetResourcesFromString(string resxContent)
+        public static IReadOnlyList<IResource> GetResourcesFromString(string resxContent, string basePath = null, bool? useRelativePath = null)
         {
             using (var x = new MemoryStream(Encoding.UTF8.GetBytes(resxContent)))
             {
-                return ReadResources(x, null);
+                return ReadResources(x, basePath, useRelativePath.GetValueOrDefault(false));
             }
         }
 
