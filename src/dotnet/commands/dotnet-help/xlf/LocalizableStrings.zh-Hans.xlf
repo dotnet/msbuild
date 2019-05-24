@@ -262,11 +262,6 @@
         <target state="translated">创建和管理开发证书。</target>
         <note />
       </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Entity Framework Core 命令行工具。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
         <target state="translated">SQL Server 缓存命令行工具。</target>

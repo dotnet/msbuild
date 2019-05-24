@@ -262,11 +262,6 @@
         <target state="translated">개발 인증서를 만들고 관리합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Entity Framework Core 명령줄 도구입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
         <target state="translated">SQL Server 캐시 명령줄 도구입니다.</target>

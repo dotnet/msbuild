@@ -282,9 +282,6 @@
   <data name="DevCertsDefinition" xml:space="preserve">
     <value>Create and manage development certificates.</value>
   </data>
-  <data name="EfDefinition" xml:space="preserve">
-    <value>Entity Framework Core command-line tools.</value>
-  </data>
   <data name="SqlCacheDefinition" xml:space="preserve">
     <value>SQL Server cache command-line tools.</value>
   </data>

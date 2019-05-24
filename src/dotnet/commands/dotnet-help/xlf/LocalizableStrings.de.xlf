@@ -262,11 +262,6 @@
         <target state="translated">Hiermit erstellen und verwalten Sie Entwicklungszertifikate.</target>
         <note />
       </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Entity Framework Core-Befehlszeilentools.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
         <target state="translated">SQL Server-Cache-Befehlszeilentools.</target>

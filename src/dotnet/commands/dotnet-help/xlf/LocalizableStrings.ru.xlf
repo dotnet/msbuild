@@ -262,11 +262,6 @@
         <target state="translated">Создание сертификатов разработки и управление ими.</target>
         <note />
       </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Инструменты командной строки Entity Framework Core.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
         <target state="translated">Инструменты командной строки кэша SQL Server.</target>
