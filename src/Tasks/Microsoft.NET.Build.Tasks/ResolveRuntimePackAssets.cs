@@ -38,6 +38,8 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            HashSet<string> processedRuntimePackRoots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             foreach (var runtimePack in ResolvedRuntimePacks)
             {
                 if (!frameworkReferenceNames.Contains(runtimePack.GetMetadata(MetadataKeys.FrameworkName)))
@@ -55,6 +57,13 @@ namespace Microsoft.NET.Build.Tasks
                     //  been downloaded, and that restore should be run with that runtime identifier.
                     Log.LogError(Strings.NoRuntimePackAvailable, runtimePack.ItemSpec,
                         runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+                }
+
+                if (!processedRuntimePackRoots.Add(runtimePackRoot))
+                {
+                    //  We already added assets from this runtime pack (which can happen with FrameworkReferences to different
+                    //  profiles of the same shared framework)
+                    continue;
                 }
 
                 string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);

@@ -125,6 +125,10 @@ namespace Microsoft.NET.Build.Tasks
                 targetingPack.SetMetadata("TargetingPackFormat", knownFrameworkReference.TargetingPackFormat);
                 targetingPack.SetMetadata("TargetFramework", knownFrameworkReference.TargetFramework.GetShortFolderName());
                 targetingPack.SetMetadata("RuntimeFrameworkName", knownFrameworkReference.RuntimeFrameworkName);
+                if (!string.IsNullOrEmpty(knownFrameworkReference.Profile))
+                {
+                    targetingPack.SetMetadata("Profile", knownFrameworkReference.Profile);
+                }
 
                 string targetingPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
@@ -386,6 +390,9 @@ namespace Microsoft.NET.Build.Tasks
             public string RuntimePackRuntimeIdentifiers => _item.GetMetadata("RuntimePackRuntimeIdentifiers");
 
             public string IsTrimmable => _item.GetMetadata(MetadataKeys.IsTrimmable);
+
+            public string Profile => _item.GetMetadata("Profile");
+
             public string LegacyFrameworkPackages
             {
                 get

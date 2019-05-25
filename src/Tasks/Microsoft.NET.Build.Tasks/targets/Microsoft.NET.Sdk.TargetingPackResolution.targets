@@ -69,6 +69,22 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </ItemGroup>
 
+    <!-- We will add Microsoft.WindowsDesktop.App.WPF and Microsoft.WindowsDesktop.App.WindowsForms to the bundled versions.
+         Until we do, add them here. -->
+    <ItemGroup>
+      <_WPFKnownFrameworkReference Include="@(KnownFrameworkReference)"
+                                   Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App.WPF'"/>
+    </ItemGroup>
+    <ItemGroup Condition="'@(_WPFKnownFrameworkReference)' == ''">
+      <_WindowsDesktopKnownFrameworkReference Include="@(KnownFrameworkReference)"
+                                        Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App'"/>
+
+      <KnownFrameworkReference Include="@(_WindowsDesktopKnownFrameworkReference->'Microsoft.WindowsDesktop.App.WindowsForms')"
+                               Profile="WindowsForms"/>
+      <KnownFrameworkReference Include="@(_WindowsDesktopKnownFrameworkReference->'Microsoft.WindowsDesktop.App.WPF')"
+                               Profile="WPF"/>
+    </ItemGroup>
+
     <PropertyGroup Condition="'$(EnableTargetingPackDownload)' == ''">
       <EnableTargetingPackDownload>true</EnableTargetingPackDownload>
     </PropertyGroup>
@@ -199,7 +215,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
       <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
       <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
-      <Output TaskParameter="RuntimeFrameworksToRemove" ItemName="_RuntimeFrameworkToRemove" />
+      <Output TaskParameter="UsedRuntimeFrameworks" ItemName="_UsedRuntimeFramework" />
       
     </ResolveTargetingPackAssets>
     
@@ -208,7 +224,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup>
-      <RuntimeFramework Remove="@(_RuntimeFrameworkToRemove)"/>
+      <RuntimeFramework Remove="@(RuntimeFramework)" />
+      <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
     </ItemGroup>
 
     <GetPackageDirectory
