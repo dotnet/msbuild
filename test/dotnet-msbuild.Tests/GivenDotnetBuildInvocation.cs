@@ -18,22 +18,23 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetBuildInvocation));
 
         [Theory]
-        [InlineData(new string[] { }, "-target:Build")]
-        [InlineData(new string[] { "-o", "foo" }, "-target:Build -property:OutputPath=<cwd>foo")]
-        [InlineData(new string[] { "-property:Verbosity=diag" }, "-target:Build -property:Verbosity=diag")]
-        [InlineData(new string[] { "--output", "foo" }, "-target:Build -property:OutputPath=<cwd>foo")]
-        [InlineData(new string[] { "-o", "foo1 foo2" }, "-target:Build \"-property:OutputPath=<cwd>foo1 foo2\"")]
+        [InlineData(new string[] { }, "")]
+        [InlineData(new string[] { "-o", "foo" }, "-property:OutputPath=<cwd>foo")]
+        [InlineData(new string[] { "-property:Verbosity=diag" }, "-property:Verbosity=diag")]
+        [InlineData(new string[] { "--output", "foo" }, "-property:OutputPath=<cwd>foo")]
+        [InlineData(new string[] { "-o", "foo1 foo2" }, "\"-property:OutputPath=<cwd>foo1 foo2\"")]
         [InlineData(new string[] { "--no-incremental" }, "-target:Rebuild")]
-        [InlineData(new string[] { "-r", "rid" }, "-target:Build -property:RuntimeIdentifier=rid")]
-        [InlineData(new string[] { "--runtime", "rid" }, "-target:Build -property:RuntimeIdentifier=rid")]
-        [InlineData(new string[] { "-c", "config" }, "-target:Build -property:Configuration=config")]
-        [InlineData(new string[] { "--configuration", "config" }, "-target:Build -property:Configuration=config")]
-        [InlineData(new string[] { "--version-suffix", "mysuffix" }, "-target:Build -property:VersionSuffix=mysuffix")]
-        [InlineData(new string[] { "--no-dependencies" }, "-target:Build -property:BuildProjectReferences=false")]
-        [InlineData(new string[] { "-v", "diag" }, "-target:Build -verbosity:diag")]
-        [InlineData(new string[] { "--verbosity", "diag" }, "-target:Build -verbosity:diag")]
+        [InlineData(new string[] { "-r", "rid" }, "-property:RuntimeIdentifier=rid")]
+        [InlineData(new string[] { "--runtime", "rid" }, "-property:RuntimeIdentifier=rid")]
+        [InlineData(new string[] { "-c", "config" }, "-property:Configuration=config")]
+        [InlineData(new string[] { "--configuration", "config" }, "-property:Configuration=config")]
+        [InlineData(new string[] { "--version-suffix", "mysuffix" }, "-property:VersionSuffix=mysuffix")]
+        [InlineData(new string[] { "--no-dependencies" }, "-property:BuildProjectReferences=false")]
+        [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
+        [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--no-incremental", "-o", "myoutput", "-r", "myruntime", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
                                   "-target:Rebuild -property:OutputPath=<cwd>myoutput -property:RuntimeIdentifier=myruntime -verbosity:diag /ArbitrarySwitchForMSBuild")]
+        [InlineData(new string[] { "/t:CustomTarget" }, "/t:CustomTarget")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
@@ -54,10 +55,10 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Theory]
-        [InlineData(new string[] { "-f", "tfm" }, "-target:Restore", "-target:Build -property:TargetFramework=tfm")]
+        [InlineData(new string[] { "-f", "tfm" }, "-target:Restore", "-property:TargetFramework=tfm")]
         [InlineData(new string[] { "-o", "myoutput", "-f", "tfm", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
                                   "-target:Restore -property:OutputPath=<cwd>myoutput -verbosity:diag /ArbitrarySwitchForMSBuild",
-                                  "-target:Build -property:OutputPath=<cwd>myoutput -property:TargetFramework=tfm -verbosity:diag /ArbitrarySwitchForMSBuild")]
+                                  "-property:OutputPath=<cwd>myoutput -property:TargetFramework=tfm -verbosity:diag /ArbitrarySwitchForMSBuild")]
         public void MsbuildInvocationIsCorrectForSeparateRestore(
             string[] args, 
             string expectedAdditionalArgsForRestore, 
