@@ -9,6 +9,9 @@ using System.Text.RegularExpressions;
 using FluentAssertions;
 using Xunit;
 using System.Linq;
+using System.Xml.Linq;
+using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {
@@ -49,6 +52,22 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 codes.Contains(code)
                      .Should()
                      .BeTrue(because: $"error codes should not be skipped (NETSDK{code} was not found; add to the deleted codes list if intentionally deleted)");
+            }
+        }
+
+        [Fact]
+        public void ResxIsCommentedWithCorrectStrBegin()
+        {
+            var doc = XDocument.Load("Strings.resx");
+            var ns = doc.Root.Name.Namespace;
+
+            foreach (var data in doc.Root.Elements(ns + "data"))
+            {
+                var value = data.Element(ns + "value").Value;
+                var comment = data.Element(ns + "comment")?.Value ?? "";
+                var prefix = value.Substring(0, value.IndexOf(' '));
+                
+                comment.Should().StartWith($@"{{StrBegin=""{prefix} ""}}");
             }
         }
 

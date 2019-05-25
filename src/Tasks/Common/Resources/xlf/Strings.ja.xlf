@@ -189,8 +189,8 @@
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>NETSDK1038: Could not determine winner because '{0}' does not exist.</source>
-        <target state="translated">NETSDK1038: '{0}' が存在しないため勝者を判別できませんでした。</target>
-        <note>{StrBegin="NETSDK1001: "}</note>
+        <target state="needs-review-translation">NETSDK1038: '{0}' が存在しないため勝者を判別できませんでした。</target>
+        <note>{StrBegin="NETSDK1038: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
         <source>NETSDK1039: Could not determine a winner because '{0}' has no file version.</source>
@@ -368,8 +368,8 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
-        <target state="translated">NETSDK1053: Pack As ツールは自己完結型をサポートしていません。</target>
-        <note>{StrBegin="NETSDK1001: "}</note>
+        <target state="needs-review-translation">NETSDK1053: Pack As ツールは自己完結型をサポートしていません。</target>
+        <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
       <trans-unit id="PackageInfoLog">
         <source>NETSDK1027: Package Name='{0}', Version='{1}' was parsed</source>
@@ -388,8 +388,8 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="translated">NETSDK1071: '{0}' への PackageReference は '{1}' のバージョンを指定しました。このパッケージのバージョンを指定することは推奨されません。詳細については、https://aka.ms/sdkimplicitrefs を参照してください</target>
-        <note />
+        <target state="needs-review-translation">NETSDK1071: '{0}' への PackageReference は '{1}' のバージョンを指定しました。このパッケージのバージョンを指定することは推奨されません。詳細については、https://aka.ms/sdkimplicitrefs を参照してください</target>
+        <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="ParsingFiles">
         <source>NETSDK1026: Parsing the Files : '{0}'</source>

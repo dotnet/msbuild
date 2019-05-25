@@ -267,7 +267,7 @@
   </data>
   <data name="CouldNotDetermineWinner_DoesntExist" xml:space="preserve">
     <value>NETSDK1038: Could not determine winner because '{0}' does not exist.</value>
-    <comment>{StrBegin="NETSDK1001: "}</comment>
+    <comment>{StrBegin="NETSDK1038: "}</comment>
   </data>
   <data name="CouldNotDetermineWinner_FileVersion" xml:space="preserve">
     <value>NETSDK1039: Could not determine a winner because '{0}' has no file version.</value>
@@ -327,7 +327,7 @@
   </data>
   <data name="PackAsToolCannotSupportSelfContained" xml:space="preserve">
     <value>NETSDK1053: Pack as tool does not support self contained.</value>
-    <comment>{StrBegin="NETSDK1001: "}</comment>
+    <comment>{StrBegin="NETSDK1053: "}</comment>
   </data>
   <data name="DotnetToolOnlySupportNetcoreapp" xml:space="preserve">
     <value>NETSDK1054: only supports .NET Core.</value>
@@ -399,6 +399,7 @@ The following are names of parameters or literal values and should not be transl
   </data>
   <data name="PackageReferenceVersionNotRecommended" xml:space="preserve">
     <value>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</value>
+    <comment>{StrBegin="NETSDK1071: "}</comment>
   </data>
   <data name="AppHostNotWindowsCLI" xml:space="preserve">
     <value>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</value>

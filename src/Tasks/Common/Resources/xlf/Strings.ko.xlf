@@ -189,8 +189,8 @@
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>NETSDK1038: Could not determine winner because '{0}' does not exist.</source>
-        <target state="translated">NETSDK1038: '{0}'이(가) 존재하지 않기 때문에 적용되는 내용을 확인할 수 없습니다.</target>
-        <note>{StrBegin="NETSDK1001: "}</note>
+        <target state="needs-review-translation">NETSDK1038: '{0}'이(가) 존재하지 않기 때문에 적용되는 내용을 확인할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1038: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
         <source>NETSDK1039: Could not determine a winner because '{0}' has no file version.</source>
@@ -368,8 +368,8 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
-        <target state="translated">NETSDK1053: 도구로서 팩은 자체 포함을 지원하지 않습니다.</target>
-        <note>{StrBegin="NETSDK1001: "}</note>
+        <target state="needs-review-translation">NETSDK1053: 도구로서 팩은 자체 포함을 지원하지 않습니다.</target>
+        <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
       <trans-unit id="PackageInfoLog">
         <source>NETSDK1027: Package Name='{0}', Version='{1}' was parsed</source>
@@ -388,8 +388,8 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="translated">NETSDK1071: '{0}'에 대한 PackageReference에서 `{1}`의 버전을 지정했습니다. 이 패키지의 버전을 지정하지 않는 것이 좋습니다. 자세한 내용은 https://aka.ms/sdkimplicitrefs를 참조하세요.</target>
-        <note />
+        <target state="needs-review-translation">NETSDK1071: '{0}'에 대한 PackageReference에서 `{1}`의 버전을 지정했습니다. 이 패키지의 버전을 지정하지 않는 것이 좋습니다. 자세한 내용은 https://aka.ms/sdkimplicitrefs를 참조하세요.</target>
+        <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="ParsingFiles">
         <source>NETSDK1026: Parsing the Files : '{0}'</source>

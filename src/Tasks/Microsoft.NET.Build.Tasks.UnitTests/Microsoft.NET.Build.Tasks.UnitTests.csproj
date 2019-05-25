@@ -34,6 +34,7 @@
   <ItemGroup>
     <None Include="*.deps.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="LockFiles\*.project.lock.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\Common\Resources\Strings.resx" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
