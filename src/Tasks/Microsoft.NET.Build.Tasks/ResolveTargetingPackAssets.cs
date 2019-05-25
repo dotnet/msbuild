@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -231,19 +232,26 @@ namespace Microsoft.NET.Build.Tasks
                                     .ToArray();
 
             //  Filter out duplicate references (which can happen when referencing two different profiles that overlap)
-            HashSet<string> seenReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            List<TaskItem> deduplicatedReferences = new List<TaskItem>(referencesToAdd.Count);
-            foreach (var reference in referencesToAdd)
-            {
-                if (seenReferences.Add(reference.ItemSpec))
-                {
-                    deduplicatedReferences.Add(reference);
-                }
-            }
-
+            List<TaskItem> deduplicatedReferences = DeduplicateItems(referencesToAdd);
             ReferencesToAdd = deduplicatedReferences.Distinct() .ToArray();
+
             PlatformManifests = platformManifests.ToArray();
             PackageConflictOverrides = packageConflictOverrides.ToArray();
+        }
+
+        //  Get distinct items based on case-insensitive ItemSpec comparison
+        private static List<TaskItem> DeduplicateItems(List<TaskItem> items)
+        {
+            HashSet<string> seenItemSpecs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<TaskItem> deduplicatedItems = new List<TaskItem>(items.Count);
+            foreach (var item in items)
+            {
+                if (seenItemSpecs.Add(item.ItemSpec))
+                {
+                    deduplicatedItems.Add(item);
+                }
+            }
+            return deduplicatedItems;
         }
 
         private TaskItem CreatePackageOverride(string runtimeFrameworkName, string packageOverridesPath)
