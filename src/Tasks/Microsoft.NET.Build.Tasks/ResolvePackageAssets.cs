@@ -147,6 +147,8 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
 
+        public bool DesignTimeBuild { get; set; }
+
         /// <summary>
         /// Full paths to assemblies from packages to pass to compiler as analyzers.
         /// </summary>
@@ -371,6 +373,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 using (var writer = new BinaryWriter(stream, TextEncoding, leaveOpen: true))
                 {
+                    writer.Write(DesignTimeBuild);
                     writer.Write(DisablePackageAssetsCache);
                     writer.Write(DisableFrameworkAssemblies);
                     writer.Write(DisableRuntimeTargets);
@@ -617,11 +620,15 @@ namespace Microsoft.NET.Build.Tasks
             {
                 _targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
 
+                bool throwIfAssetsFileTargetNotFound = !task.DesignTimeBuild;
+
                 _task = task;
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
                 _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile);
-                _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtime: null);
-                _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier);
+                _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtime: null,
+                    throwIfNotFound: throwIfAssetsFileTargetNotFound);
+                _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier,
+                    throwIfNotFound: throwIfAssetsFileTargetNotFound);
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
                 _bufferedMetadata = new List<int>();
@@ -980,7 +987,10 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var runtimeIdentifier in _task.ShimRuntimeIdentifiers.Select(r => r.ItemSpec))
                 {
-                    LockFileTarget runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier);
+                    bool throwIfAssetsFileTargetNotFound = !_task.DesignTimeBuild;
+
+                    LockFileTarget runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier,
+                        throwIfNotFound: throwIfAssetsFileTargetNotFound);
 
                     var apphostName = _task.DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(runtimeIdentifier);
 

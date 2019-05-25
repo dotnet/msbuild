@@ -177,7 +177,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CheckForTargetInAssetsFile
       AssetsFilePath="$(ProjectAssetsFile)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
-      RuntimeIdentifier="$(RuntimeIdentifier)" />
+      RuntimeIdentifier="$(RuntimeIdentifier)"
+      Condition=" '$(DesignTimeBuild)' != 'true'"/>
 
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
@@ -252,7 +253,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
       VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
       ExpectedPlatformPackages="@(ExpectedPlatformPackages)"
-      SatelliteResourceLanguages="$(SatelliteResourceLanguages)">
+      SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
+      DesignTimeBuild="$(DesignTimeBuild)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->

@@ -12,28 +12,36 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal static class LockFileExtensions
     {
-        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, NuGetFramework framework, string runtime)
+        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, NuGetFramework framework, string runtime,
+            bool throwIfNotFound = true)
         {
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
 
             if (lockFileTarget == null)
             {
-                string frameworkString = framework.DotNetFrameworkName;
-                string targetMoniker = string.IsNullOrEmpty(runtime) ?
-                    frameworkString :
-                    $"{frameworkString}/{runtime}";
-
-                string message;
-                if (string.IsNullOrEmpty(runtime))
+                if (throwIfNotFound)
                 {
-                    message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName());
+                    string frameworkString = framework.DotNetFrameworkName;
+                    string targetMoniker = string.IsNullOrEmpty(runtime) ?
+                        frameworkString :
+                        $"{frameworkString}/{runtime}";
+
+                    string message;
+                    if (string.IsNullOrEmpty(runtime))
+                    {
+                        message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName());
+                    }
+                    else
+                    {
+                        message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
+                    }
+
+                    throw new BuildErrorException(message);
                 }
                 else
                 {
-                    message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
+                    return new LockFileTarget();
                 }
-
-                throw new BuildErrorException(message);
             }
 
             return lockFileTarget;
