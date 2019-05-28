@@ -433,7 +433,7 @@ namespace Microsoft.Build.Shared
                     else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Filename, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no filename
-                        if (Path.GetDirectoryName(itemSpec) == null)
+                        if (Path.IsPathRooted(itemSpec) && Path.GetDirectoryName(itemSpec) == null)
                         {
                             // NOTE: this is to prevent Path.GetFileNameWithoutExtension() from treating server and share elements
                             // in a UNC file-spec as filenames e.g. \\server, \\server\share
@@ -448,7 +448,7 @@ namespace Microsoft.Build.Shared
                     else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no extension
-                        if (Path.GetDirectoryName(itemSpec) == null)
+                        if (Path.IsPathRooted(itemSpec) && Path.GetDirectoryName(itemSpec) == null)
                         {
                             // NOTE: this is to prevent Path.GetExtension() from treating server and share elements in a UNC
                             // file-spec as filenames e.g. \\server.ext, \\server\share.ext
