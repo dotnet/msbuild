@@ -49,8 +49,8 @@
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="translated">MSB4248: 式 "{0}" の中のメタデータを展開できません。 {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <target state="needs-review-translation">MSB4248: 式 "{0}" の中のメタデータを展開できません。 {1}</target>
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
