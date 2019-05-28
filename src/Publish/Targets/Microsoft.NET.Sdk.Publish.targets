@@ -147,6 +147,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </CorePublishDependsOn>
   </PropertyGroup>
 
+  <!--
+  ***********************************************************************************************
+  NOTE: We have to add WebPublishProfileFile to GlobalPropertiesToRemove to prevent it to flow to
+  other web apps that are referenced by current web app. If we don't do that, their output paths 
+  will be messed up with RuntimeIdentifier we pass in pubxml file.
+  ***********************************************************************************************
+  -->
+  <ItemDefinitionGroup>
+    <ProjectReference>
+      <GlobalPropertiesToRemove>%(GlobalPropertiesToRemove);WebPublishProfileFile</GlobalPropertiesToRemove>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+
   <Target Name="CorePublish" 
           DependsOnTargets="$(CorePublishDependsOn)"/>
   

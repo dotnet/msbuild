@@ -9,11 +9,15 @@
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
       <Sha>5502cf46706a25c39ce78a57b9191714c0eb40c2</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.Web.Xdt" Version="3.0.0" Pinned="true">
+      <Uri>https://github.com/aspnet/xdt</Uri>
+      <Sha>c01a538851a8ab1a1fbeb2e6243f391fff7587b4</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19218.7">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19274.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>5e7ce5b394f3477bb0a485a4b761b7742e95be37</Sha>
+      <Sha>b5016f5688dc8ca9f3e4811ee7e2e86ad8907a40</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
