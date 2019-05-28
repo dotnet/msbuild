@@ -110,7 +110,10 @@ namespace Microsoft.NET.TestFramework
         {
 
             var newArgs = args.ToList();
-            newArgs.Insert(0, $"/t:{target}");
+            if (!string.IsNullOrEmpty(target))
+            {
+                newArgs.Insert(0, $"/t:{target}");
+            }
 
             return CreateCommand(newArgs.ToArray());
         }
