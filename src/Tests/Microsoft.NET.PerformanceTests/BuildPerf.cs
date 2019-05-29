@@ -172,6 +172,64 @@ namespace Microsoft.NET.Perf.Tests
             TestProject(Path.Combine(testDir.Path, "Compilers.sln"), "Roslyn", operation);
         }
 
+        [WindowsOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildNetCoreWPFHelloWorld(ProjectPerfOperation operation)
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory(identifier: operation.ToString());
+
+            NuGetConfigWriter.Write(testDir.Path, NuGetConfigWriter.DotnetCoreBlobFeed);
+
+            var newCommand = new DotnetCommand(Log);
+            newCommand.WorkingDirectory = testDir.Path;
+
+            newCommand.Execute("new", "wpf", "--no-restore").Should().Pass();
+
+            TestProject(testDir.Path, "WPF hello world", operation);
+        }
+
+        [FullMSBuildOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildNetFullFrameworkWPFHelloWorld(ProjectPerfOperation operation)
+        {
+            var testAsset = _testAssetsManager
+               .CopyTestAsset("WpfHelloWorldFullFramework", identifier: operation.ToString())
+               .WithSource();
+
+            TestProject(testAsset.Path, "Full framework WPF hello world", operation);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildNetCoreWindowsFormsHelloWorld(ProjectPerfOperation operation)
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory(identifier: operation.ToString());
+
+            NuGetConfigWriter.Write(testDir.Path, NuGetConfigWriter.DotnetCoreBlobFeed);
+
+            var newCommand = new DotnetCommand(Log);
+            newCommand.WorkingDirectory = testDir.Path;
+
+            newCommand.Execute("new", "winforms", "--no-restore").Should().Pass();
+
+            TestProject(testDir.Path, "Windows Forms hello world", operation);
+        }
+
+        [FullMSBuildOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildNetFullFrameworkWindowsFormsHelloWorld(ProjectPerfOperation operation)
+        {
+            var testAsset = _testAssetsManager
+               .CopyTestAsset("WindowsFormsHelloWorldFullFramework", identifier: operation.ToString())
+               .WithSource();
+
+            TestProject(testAsset.Path, "Full Windows Forms hello world", operation);
+        }
+
         public enum ProjectPerfOperation
         {
             CleanBuild,

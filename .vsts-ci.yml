@@ -56,6 +56,20 @@ jobs:
             _SignType: test
             _DotNetPublishToBlobFeed: false
 
+- ${{ if ne(variables['System.TeamProject'], 'public') }}:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_Perf_Helix_Fullframework
+      pool:
+        name: Hosted VS2017
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test
+            _DotNetPublishToBlobFeed: false
+
   - template: /eng/build.yml
     parameters:
       agentOs: Linux_Perf_Helix
@@ -155,6 +169,19 @@ jobs:
   - template: /eng/build.yml
     parameters:
       agentOs: Windows_Perf_CI
+      pool:
+        name: NetCorePublic-Pool
+        queue: buildpool.windows.10.amd64.vs2017.open
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test
+
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_Perf_CI_FullFramework
       pool:
         name: NetCorePublic-Pool
         queue: buildpool.windows.10.amd64.vs2017.open

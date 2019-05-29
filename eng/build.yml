@@ -97,6 +97,16 @@ jobs:
         env:
           BuildConfig: $(_BuildConfig)
 
+    - ${{ if eq(parameters.agentOs, 'Windows_Perf_CI_FullFramework') }}:
+      - script: build.cmd
+                  -configuration $(_BuildConfig)
+                  -ci
+                  -performanceTest
+        displayName: Build
+        env:
+          BuildConfig: $(_BuildConfig)
+          TestFullMSBuild: 'true'
+
     - ${{ if eq(parameters.agentOs, 'Linux_Perf_CI') }}:
       - script: ./build.sh
                   --configuration $(_BuildConfig)
@@ -122,8 +132,38 @@ jobs:
 
             WorkItemTimeout: 2:00
             WorkItemDirectory: '$(Build.SourcesDirectory)\build'
-            WorkItemCommand: '%HELIX_CORRELATION_PAYLOAD%\build\RunPerfTestsOnHelix.cmd $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling'
+            WorkItemCommand: '%HELIX_CORRELATION_PAYLOAD%\build\RunPerfTestsOnHelix.cmd $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling false'
             CorrelationPayloadDirectory: '$(Build.SourcesDirectory)\helix-package'
+            HelixConfiguration: 'CoreMSBuild'
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathtoPublish: $(Build.SourcesDirectory)\artifacts\log
+            artifactName: logs
+
+    - ${{ if eq(parameters.agentOs, 'Windows_Perf_Helix_Fullframework') }}:
+        - checkout: self
+          clean: true
+        - script: $(Build.SourcesDirectory)\build.cmd -configuration $(_BuildConfig) -ci
+          displayName: Pre-Build
+        - script: (robocopy $(Build.SourcesDirectory) $(Build.SourcesDirectory)\helix-package /NP /E /XD $(Build.SourcesDirectory)\helix-package $(Build.SourcesDirectory)\.dotnet $(Build.SourcesDirectory)\artifacts\bin\Tests $(Build.SourcesDirectory)\artifacts\obj\$(_BuildConfig)\Sdks\Microsoft.NET.Build.Extensions $(Build.SourcesDirectory)\artifacts\bin\$(_BuildConfig)\Sdks\Microsoft.NET.Build.Extensions) ^& IF %ERRORLEVEL% LEQ 1 exit 0
+          displayName: Selection of sources
+        - template: /eng/common/templates/steps/send-to-helix.yml
+          parameters:
+            HelixSource: 'pr/dotnet/sdk/$(Build.SourceBranch)'
+            HelixType: 'test/sdk_$(_BuildConfig)/'
+            HelixAccessToken: $(HelixApiAccessToken)
+            HelixTargetQueues: 'Windows.10.Amd64.ClientRS1.Perf' # using a dedicated private Helix queue (perfsnakes)
+            HelixPreCommands: 'set "BV_UPLOAD_SAS_TOKEN=$(BenchViewUploadToken)"'
+
+            WorkItemTimeout: 2:00
+            WorkItemDirectory: '$(Build.SourcesDirectory)\build'
+            WorkItemCommand: '%HELIX_CORRELATION_PAYLOAD%\build\RunPerfTestsOnHelix.cmd $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling true'
+            CorrelationPayloadDirectory: '$(Build.SourcesDirectory)\helix-package'
+            HelixConfiguration: 'FullMSBuild'
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathtoPublish: $(Build.SourcesDirectory)\artifacts\log
+            artifactName: logs
 
     - ${{ if eq(parameters.agentOs, 'Linux_Perf_Helix') }}:
         - checkout: self
@@ -140,7 +180,7 @@ jobs:
             WorkItemDirectory: '$(Build.SourcesDirectory)'
             WorkItemCommand: './build/RunPerfTestsOnHelix.sh $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling x64 Ubuntu_16.04'
 
-    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools', 'Windows_Perf_CI', 'Linux_Perf_CI', 'Windows_Perf_Helix', 'Linux_Perf_Helix') }}:
+    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools', 'Windows_Perf_CI', 'Linux_Perf_CI', 'Windows_Perf_Helix', 'Windows_Perf_CI_FullFramework', 'Windows_Perf_Helix_Fullframework', 'Linux_Perf_Helix') }}:
       - script: eng/common/cibuild.sh 
                   --configuration $(_BuildConfig)
                   $(_PublishArgs)
