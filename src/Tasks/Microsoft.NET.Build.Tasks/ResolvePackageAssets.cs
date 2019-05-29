@@ -472,13 +472,12 @@ namespace Microsoft.NET.Build.Tasks
                     task.Log.LogMessage(MessageImportance.High, Strings.UnableToUsePackageAssetsCache);
                 }
 
-                var stream = new MemoryStream();
-                using (var writer = new CacheWriter(task, stream))
+                Stream stream;
+                using (var writer = new CacheWriter(task))
                 {
-                    writer.Write();
+                    stream = writer.WriteToMemoryStream();
                 }
 
-                stream.Position = 0;
                 return OpenCacheStream(stream, settingsHash);
             }
 
@@ -502,10 +501,17 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     using (var writer = new CacheWriter(task))
                     {
-                        writer.Write();
+                        if (writer.CanWriteToCacheFile)
+                        {
+                            writer.WriteToCacheFile();
+                            reader = OpenCacheFile(task.ProjectAssetsCacheFile, settingsHash);
+                        }
+                        else
+                        {
+                            var stream = writer.WriteToMemoryStream();
+                            reader = OpenCacheStream(stream, settingsHash);
+                        }
                     }
-
-                    reader = OpenCacheFile(task.ProjectAssetsCacheFile, settingsHash);
                 }
 
                 return reader;
@@ -616,34 +622,69 @@ namespace Microsoft.NET.Build.Tasks
             private NuGetFramework _targetFramework;
             private int _itemCount;
 
-            public CacheWriter(ResolvePackageAssets task, Stream stream = null)
+            public bool CanWriteToCacheFile { get; set; }
+
+            public CacheWriter(ResolvePackageAssets task)
             {
                 _targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
-
-                bool throwIfAssetsFileTargetNotFound = !task.DesignTimeBuild;
 
                 _task = task;
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
                 _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile);
-                _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtime: null,
-                    throwIfNotFound: throwIfAssetsFileTargetNotFound);
-                _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier,
-                    throwIfNotFound: throwIfAssetsFileTargetNotFound);
+
+
+                //  If we are doing a design-time build, we do not want to fail the build if we can't find the
+                //  target framework and/or runtime identifier in the assets file.  This is because the design-time
+                //  build needs to succeed in order to get the right information in order to run a restore in order
+                //  to write the assets file with the correct information.
+
+                //  So if we can't find the right target in the lock file and are doing a design-time build, we use
+                //  an empty lock file target instead of throwing an error, and we don't save the results to the
+                //  cache file.
+                CanWriteToCacheFile = true;
+                if (task.DesignTimeBuild)
+                {
+                    _compileTimeTarget = _lockFile.GetTarget(_targetFramework, runtimeIdentifier: null);
+                    _runtimeTarget = _lockFile.GetTarget(_targetFramework, _task.RuntimeIdentifier);
+                    if (_compileTimeTarget == null)
+                    {
+                        _compileTimeTarget = new LockFileTarget();
+                        CanWriteToCacheFile = false;
+                    }
+                    if (_runtimeTarget == null)
+                    {
+                        _runtimeTarget = new LockFileTarget();
+                        CanWriteToCacheFile = false;
+                    }
+                }
+                else
+                {
+                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtime: null);
+                    _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier);
+                }
+                
+
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
                 _bufferedMetadata = new List<int>();
                 _platformPackageExclusions = GetPlatformPackageExclusions();
+            }
 
-                if (stream == null)
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(task.ProjectAssetsCacheFile));
-                    stream = File.Open(task.ProjectAssetsCacheFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                    _writer = new BinaryWriter(stream, TextEncoding, leaveOpen: false);
-                }
-                else
-                {
-                    _writer = new BinaryWriter(stream, TextEncoding, leaveOpen: true);
-                }
+            public void WriteToCacheFile()
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(_task.ProjectAssetsCacheFile));
+                var stream = File.Open(_task.ProjectAssetsCacheFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                _writer = new BinaryWriter(stream, TextEncoding, leaveOpen: false);
+                Write();
+            }
+
+            public Stream WriteToMemoryStream()
+            {
+                var stream = new MemoryStream();
+                _writer = new BinaryWriter(stream, TextEncoding, leaveOpen: true);
+                Write();
+                stream.Position = 0;
+                return stream;
             }
 
             public void Dispose()
@@ -670,7 +711,7 @@ namespace Microsoft.NET.Build.Tasks
                 _bufferedMetadata.Clear();
             }
 
-            public void Write()
+            private void Write()
             {
                 WriteHeader();
                 WriteItemGroups();
@@ -989,8 +1030,15 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     bool throwIfAssetsFileTargetNotFound = !_task.DesignTimeBuild;
 
-                    LockFileTarget runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier,
-                        throwIfNotFound: throwIfAssetsFileTargetNotFound);
+                    LockFileTarget runtimeTarget;
+                    if (_task.DesignTimeBuild)
+                    {
+                        runtimeTarget = _lockFile.GetTarget(_targetFramework, runtimeIdentifier) ?? new LockFileTarget();
+                    }
+                    else
+                    {
+                        runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier);
+                    }
 
                     var apphostName = _task.DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(runtimeIdentifier);
 
