@@ -561,11 +561,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectoryAlways)">
         <RelativePath>%(_SourceItemsToCopyToPublishDirectoryAlways.TargetPath)</RelativePath>
         <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        <IsKeyOutput Condition="'%(_SourceItemsToCopyToPublishDirectoryAlways.FullPath)' == '$(AppHostIntermediatePath)'">True</IsKeyOutput>
       </ResolvedFileToPublish>
 
       <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectory)">
         <RelativePath>%(_SourceItemsToCopyToPublishDirectory.TargetPath)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <IsKeyOutput Condition="'%(_SourceItemsToCopyToPublishDirectory.FullPath)' == '$(AppHostIntermediatePath)'">True</IsKeyOutput>
       </ResolvedFileToPublish>
     </ItemGroup>
 
@@ -887,8 +889,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>
-      <PublishItemsOutputGroupOutputs Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'" Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" />
-      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')" TargetPath="%(ResolvedFileToPublish.RelativePath)" OutputGroup="PublishItemsOutputGroup" />
+      <PublishItemsOutputGroupOutputs Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'"
+                                      Include="$(ProjectDepsFilePath)"
+                                      TargetPath="$(ProjectDepsFileName)" />
+      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')"
+                                      TargetPath="%(ResolvedFileToPublish.RelativePath)"
+                                      IsKeyOutput="%(ResolvedFileToPublish.IsKeyOutput)"
+                                      OutputGroup="PublishItemsOutputGroup" />
     </ItemGroup>
   </Target>
 
