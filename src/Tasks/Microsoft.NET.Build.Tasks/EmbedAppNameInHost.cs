@@ -31,10 +31,13 @@ namespace Microsoft.NET.Build.Tasks
             var destinationDirectory = Path.GetFullPath(AppHostDestinationDirectoryPath);
             ModifiedAppHostPath = Path.Combine(destinationDirectory, $"{appbaseName}{hostExtension}");
 
-            AppHost.Create(
-                AppHostSourcePath,
-                ModifiedAppHostPath,
-                AppBinaryName);
+            if (!File.Exists(ModifiedAppHostPath))
+            {
+                AppHost.Create(
+                    AppHostSourcePath,
+                    ModifiedAppHostPath,
+                    AppBinaryName);
+            }
         }
     }
 }

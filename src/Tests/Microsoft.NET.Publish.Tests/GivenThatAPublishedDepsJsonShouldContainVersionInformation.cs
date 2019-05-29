@@ -15,6 +15,9 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Newtonsoft.Json.Linq;
+using NuGet.Common;
+using NuGet.Frameworks;
+using NuGet.ProjectModel;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -214,7 +217,7 @@ static class Program
 
             var exePath = Path.Combine(publishDirectory.FullName, testProject.Name + ".dll");
 
-            //  We want to test a .NET Core 2.0 app rolling forward to .NET Core 2.1.
+            //  We want to test a .NET Core 2.0 app rolling forward to .NET Core 2.2.
             //  This wouldn't happen in our test environment as we also have the .NET Core 2.0 shared
             //  framework installed.  So we get the RuntimeFrameworkVersion of an app
             //  that targets .NET Core 2.1, and then use the --fx-version parameter to the host
@@ -248,7 +251,7 @@ static class Program
             var testProject = new TestProject()
             {
                 Name = nameof(GetRollForwardNetCoreAppVersion),
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = "netcoreapp2.2",
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -256,15 +259,14 @@ static class Program
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
-            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name),
-                        testProject.TargetFrameworks, "RuntimeFrameworkVersion")
-            {
-                ShouldCompile = false
-            };
 
-            getValuesCommand.Execute().Should().Pass();
+            LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(testAsset.TestRoot, testProject.Name,
+                                            "obj", "project.assets.json"), NullLogger.Instance);
 
-            return getValuesCommand.GetValues().Single();
+            var target = lockFile.GetTarget(NuGetFramework.Parse(testProject.TargetFrameworks), null);
+            var netCoreAppLibrary = target.Libraries.Single(l => l.Name == "Microsoft.NETCore.App");
+
+            return netCoreAppLibrary.Version.ToString();
         }
     }
 }

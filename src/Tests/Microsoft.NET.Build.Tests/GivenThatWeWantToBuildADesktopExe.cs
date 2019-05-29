@@ -18,6 +18,7 @@ using Xunit;
 
 using Xunit.Abstractions;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -53,6 +54,7 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "HelloWorld.exe",
                 "HelloWorld.pdb",
+                "HelloWorld.exe.config"
             });
         }
 
@@ -571,6 +573,133 @@ class Program
                 "DesktopNeedsBindingRedirects.exe",
                 "DesktopNeedsBindingRedirects.exe.config"
             });
+
+            XElement root = XElement.Load(outputDirectory.GetFiles("DesktopNeedsBindingRedirects.exe.config").Single().FullName);
+            root.Elements("runtime").Single().Elements().Should().Contain(e => e.Name.LocalName == "assemblyBinding");
+        }
+
+        [WindowsOnlyFact]
+        public void It_generates_supportedRuntime_when_no_appconfig_in_source_require_binding_redirect()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopNeedsBindingRedirects")
+                .WithSource()
+                .Restore(Log);
+
+            XElement root = BuildTestAssetGetAppConfig(testAsset);
+            root.Elements("startup").Single().Elements().Should().Contain(e => e.Name.LocalName == "supportedRuntime");
+        }
+
+        [WindowsOnlyFact]
+        public void It_generates_appconfig_incrementally()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopNeedsBindingRedirects")
+                .WithSource()
+                .Restore(Log);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            FileInfo outputfile = buildCommand
+                .GetIntermediateDirectory("net452", runtimeIdentifier: "win7-x86")
+                .GetFiles("DesktopNeedsBindingRedirects.exe.withSupportedRuntime.config").Single();
+
+            DateTime firstBuildWriteTime = File.GetLastWriteTimeUtc(outputfile.FullName);
+
+            buildCommand
+               .Execute()
+               .Should()
+               .Pass();
+
+            DateTime secondBuildBuildWriteTime = File.GetLastWriteTimeUtc(outputfile.FullName);
+
+            secondBuildBuildWriteTime.Should().Be(firstBuildWriteTime);
+        }
+
+        [WindowsOnlyFact]
+        public void It_generates_supportedRuntime_when_no_appconfig_in_source_does_not_require_binding_redirect()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopNeedsBindingRedirects")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "ItemGroup").First();
+
+                    propertyGroup.Elements(ns + "PackageReference").Remove();
+                })
+                .Restore(Log);
+
+            XElement root = BuildTestAssetGetAppConfig(testAsset);
+            root.Elements("startup").Single()
+                .Elements().Should()
+                .Contain(e => e.Name.LocalName == "supportedRuntime");
+        }
+
+        [WindowsOnlyFact]
+        public void It_generates_supportedRuntime_when_there_is_appconfig_with_supportedRuntime_in_source_require_binding_redirect()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopNeedsBindingRedirects")
+                .WithSource()
+                .Restore(Log);
+
+            var appconfigWithoutSupportedRuntime = new XDocument(
+                    new XDeclaration("1.0", "utf-8", "true"),
+                    new XElement("configuration",
+                        new XElement("startup",
+                             new XElement("supportedRuntime",
+                           new XAttribute("version", "v999")))));
+
+            appconfigWithoutSupportedRuntime.Save(
+                Path.Combine(testAsset.TestRoot, "App.Config"));
+
+            XElement root = BuildTestAssetGetAppConfig(testAsset);
+            root.Elements("startup").Single()
+                .Elements("supportedRuntime").Single()
+                .Should().HaveAttribute("version", "v999", "It should keep existing supportedRuntime");
+        }
+
+        [WindowsOnlyFact]
+        public void It_generates_supportedRuntime_when_there_is_appconfig_without_supportedRuntime_in_source_require_binding_redirect()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopNeedsBindingRedirects")
+                .WithSource()
+                .Restore(Log);
+
+            var appconfigWithoutSupportedRuntime = new XDocument(
+                    new XDeclaration("1.0", "utf-8", "true"),
+                        new XElement("configuration",
+                            new XElement("appSettings")));
+
+            appconfigWithoutSupportedRuntime.Save(
+                Path.Combine(testAsset.TestRoot, "App.Config"));
+
+            XElement root = BuildTestAssetGetAppConfig(testAsset);
+            root.Elements("startup").Single().Elements().Should().Contain(e => e.Name.LocalName == "supportedRuntime");
+            root.Should().HaveElement("appSettings",
+                "It should keep existing appconfig's setting");
+        }
+
+        private XElement BuildTestAssetGetAppConfig(TestAsset testAsset)
+        {
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: "win7-x86");
+
+            return XElement.Load(outputDirectory.GetFiles("DesktopNeedsBindingRedirects.exe.config").Single().FullName);
         }
 
         [WindowsOnlyTheory]

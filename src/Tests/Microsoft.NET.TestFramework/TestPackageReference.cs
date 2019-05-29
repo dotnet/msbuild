@@ -11,22 +11,18 @@ namespace Microsoft.NET.TestFramework
 {
     public class TestPackageReference
     {
-        public TestPackageReference(string id, string version)
-            : this(id, version, null)
-        {
-        }
-
-        public TestPackageReference(string id, string version, string nupkgPath)
+        public TestPackageReference(string id, string version = null, string nupkgPath = null, string privateAssets = null)
         {
             ID = id;
             Version = version;
             NupkgPath = nupkgPath;
+            PrivateAssets = privateAssets;
         }
 
         public string ID { get; private set; }
         public string Version { get; private set; }
         public string NupkgPath { get; private set; }
-
+        public string PrivateAssets { get; private set; }
 
         public bool NuGetPackageExists()
         {

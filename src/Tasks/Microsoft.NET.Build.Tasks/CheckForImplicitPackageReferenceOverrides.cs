@@ -9,8 +9,6 @@ namespace Microsoft.NET.Build.Tasks
 {
     public class CheckForImplicitPackageReferenceOverrides : TaskBase
     {
-        const string MetadataKeyForItemsToRemove = "IsImplicitlyDefined";
-
         [Required]
         public ITaskItem [] PackageReferenceItems { get; set; }
 
@@ -20,21 +18,41 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] ItemsToRemove { get; set; }
 
+        [Output]
+        public ITaskItem[] ItemsToAdd { get; set; }
+
         protected override void ExecuteCore()
         {
             var duplicateItems = PackageReferenceItems.GroupBy(i => i.ItemSpec, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1);
-            var duplicateItemsToRemove = duplicateItems.SelectMany(g => g.Where(
-                item => item.GetMetadata(MetadataKeyForItemsToRemove).Equals("true", StringComparison.OrdinalIgnoreCase)));
 
-            ItemsToRemove = duplicateItemsToRemove.ToArray();
-
-            foreach (var itemToRemove in ItemsToRemove)
+            if (duplicateItems.Any())
             {
-                string message = string.Format(CultureInfo.CurrentCulture, Strings.PackageReferenceOverrideWarning,
-                    itemToRemove.ItemSpec,
-                    MoreInformationLink);
+                List<ITaskItem> itemsToRemove = new List<ITaskItem>();
+                List<ITaskItem> itemsToAdd = new List<ITaskItem>();
+                foreach (var duplicateItemGroup in duplicateItems)
+                {
+                    foreach (var item in duplicateItemGroup)
+                    {
+                        if (item.GetMetadata(MetadataKeys.IsImplicitlyDefined).Equals("true", StringComparison.OrdinalIgnoreCase))
+                        {
+                            itemsToRemove.Add(item);
+  
+                            Log.LogWarning(Strings.PackageReferenceOverrideWarning, item.ItemSpec, MoreInformationLink);
+                        }
+                        else
+                        {
+                            //  For the explicit items, we want to add metadata to them so that the ApplyImplicitVersions task
+                            //  won't generate another error.  The easiest way to do this is to add them both to a list of
+                            //  items to remove, and then a list of items which gets added back.
+                            itemsToRemove.Add(item);
+                            item.SetMetadata(MetadataKeys.AllowExplicitVersion, "true");
+                            itemsToAdd.Add(item);
+                        }
+                    }
+                }
 
-                Log.LogWarning(message);
+                ItemsToRemove = itemsToRemove.ToArray();
+                ItemsToAdd = itemsToAdd.ToArray();
             }
         }
     }
