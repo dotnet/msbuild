@@ -22,7 +22,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveAppHosts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-  <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
+  <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads">
     
     <CheckForDuplicateFrameworkReferences
         FrameworkReferences="@(FrameworkReference)"
@@ -142,8 +142,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveAppHosts>
 
     <PropertyGroup Condition="'$(UsePackageDownload)' == ''">
-      <UsePackageDownload Condition=" '$(MSBuildRuntimeType)' == 'Core'">true</UsePackageDownload>
-      <UsePackageDownload Condition=" '$(MSBuildRuntimeType)' != 'Core'">false</UsePackageDownload>
+      <UsePackageDownload Condition="'$(MSBuildRuntimeType)' == 'Core'">true</UsePackageDownload>
+      <UsePackageDownload Condition="'$(PackageDownloadSupported)' == 'true'">true</UsePackageDownload>
+      <UsePackageDownload Condition="'$(UsePackageDownload)' == ''">false</UsePackageDownload>
     </PropertyGroup>
     
     <ItemGroup Condition="'$(UsePackageDownload)' == 'true'">
@@ -283,7 +284,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="ResolveRuntimePackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <Target Name="ResolveRuntimePackAssets" DependsOnTargets="ResolvePackageAssets"
-          Condition="'@(RuntimePack)' != ''">
+          Condition="'@(RuntimePack)' != '' And '$(DesignTimeBuild)' != 'true'">
     
       <GetPackageDirectory
         Items="@(RuntimePack)"
