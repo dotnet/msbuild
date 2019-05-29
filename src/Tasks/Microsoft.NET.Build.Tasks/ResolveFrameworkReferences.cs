@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
@@ -91,9 +92,23 @@ namespace Microsoft.NET.Build.Tasks
 
             HashSet<string> unrecognizedRuntimeIdentifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+            bool windowsOnlyErrorLogged = false;
             foreach (var knownFrameworkReference in knownFrameworkReferencesForTargetFramework)
             {
                 frameworkReferenceMap.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
+
+                // Handle Windows-only frameworks on non-Windows platforms
+                if (knownFrameworkReference.IsWindowsOnly &&
+                    !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // It is an error to reference the framework from non-Windows
+                    if (!windowsOnlyErrorLogged && frameworkReference != null)
+                    {
+                        Log.LogError(Strings.WindowsDesktopFrameworkRequiresWindows);
+                        windowsOnlyErrorLogged = true;
+                    }
+                    continue;
+                }
 
                 if (frameworkReference != null && !string.IsNullOrEmpty(knownFrameworkReference.LegacyFrameworkPackages))
                 {
@@ -390,6 +405,8 @@ namespace Microsoft.NET.Build.Tasks
             public string RuntimePackRuntimeIdentifiers => _item.GetMetadata("RuntimePackRuntimeIdentifiers");
 
             public string IsTrimmable => _item.GetMetadata(MetadataKeys.IsTrimmable);
+
+            public bool IsWindowsOnly => _item.HasMetadataValue("IsWindowsOnly", "true");
 
             public string Profile => _item.GetMetadata("Profile");
 

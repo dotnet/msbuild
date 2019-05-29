@@ -70,6 +70,7 @@ class Class1
             {
                 Name = "ReferencedProjectWithMVC",
                 IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.Web",
                 TargetFrameworks = "net461",
                 IsExe = false
             };
@@ -79,14 +80,9 @@ class Class1
             testProject.ReferencedProjects.Add(referencedProjectWithPart);
             testProject.ReferencedProjects.Add(referencedProjectWithMvc);
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetVersion)
-                                    .WithProjectChanges((filename, project) =>
-                                    {
-                                        var ns = project.Root.Name.Namespace;
-
-                                        project.Root.Attribute("Sdk").Value = "Microsoft.NET.Sdk.Web";
-                                    })
-                                    .Restore(Log, testProject.Name);
+            var testProjectInstance = _testAssetsManager
+                .CreateTestProject(testProject, identifier: aspnetVersion)
+                .Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, testProject.Name);
 

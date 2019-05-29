@@ -19,6 +19,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public bool IsWinExe { get; set; }
 
+        public string ProjectSdk { get; set; }
+
         //  Applies to SDK Projects
         public string TargetFrameworks { get; set; }
 
@@ -135,6 +137,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             var projectXml = XDocument.Load(sourceProject);
 
             var ns = projectXml.Root.Name.Namespace;
+
+            if (ProjectSdk != null)
+            {
+                projectXml.Root.Attribute("Sdk").Value = ProjectSdk;
+            }
 
             var propertyGroup = projectXml.Root.Elements(ns + "PropertyGroup").First();
 

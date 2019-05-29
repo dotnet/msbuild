@@ -501,6 +501,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1057: プレビュー版の .NET Core を使用しています。https://aka.ms/dotnet-core-preview をご覧ください</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
+      <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
+        <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
+        <target state="new">NETSDK1100: Windows is required to build Windows desktop applications.</target>
+        <note>{StrBegin="NETSDK1100: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

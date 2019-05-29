@@ -204,21 +204,15 @@ namespace Microsoft.NET.Build.Tests
                 Name = "AspNetCoreAll_On3_0",
                 TargetFrameworks = "netcoreapp3.0",
                 IsSdkProject = true,
+                ProjectSdk = useWebSdk ? "Microsoft.NET.Sdk.Web" : null,
                 IsExe = true
             };
 
             //  Add PackageReference
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.All", packageVersion));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{useWebSdk}_{packageVersion}")
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    if (useWebSdk)
-                    {
-                        project.Root.Attribute("Sdk").Value = "Microsoft.NET.Sdk.Web";
-                    }
-                });
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{useWebSdk}_{packageVersion}");
+
             var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             restoreCommand.Execute()
                 .Should()
@@ -246,21 +240,15 @@ namespace Microsoft.NET.Build.Tests
                 Name = "AspNetCoreApp_On3_0",
                 TargetFrameworks = "netcoreapp3.0",
                 IsSdkProject = true,
+                ProjectSdk = useWebSdk ? "Microsoft.NET.Sdk.Web" : null,
                 IsExe = true
             };
 
             //  Add PackageReference
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.App", packageVersion));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{useWebSdk}_{packageVersion}")
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    if (useWebSdk)
-                    {
-                        project.Root.Attribute("Sdk").Value = "Microsoft.NET.Sdk.Web";
-                    }
-                });
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{useWebSdk}_{packageVersion}");
+
             var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             restoreCommand.Execute()
                 .Should()

@@ -192,7 +192,7 @@ namespace FrameworkReferenceTest
                 .HaveStdOutContaining("NETSDK1073");
         }
 
-        [CoreMSBuildOnlyFact]
+        [CoreMSBuildAndWindowsOnlyFact]
         public void BuildFailsIfRuntimePackIsNotAvailableForRuntimeIdentifier()
         {
             var testProject = new TestProject()
