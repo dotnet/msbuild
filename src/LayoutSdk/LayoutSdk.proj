@@ -1,13 +1,13 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project Sdk="Microsoft.NET.Sdk">
   <Target Name="LayoutSdk">
-    <Exec Command="$(_DotNetRoot)/dotnet --version" ConsoleToMsBuild="true">
+    <Exec Command="$(DotNetRoot)/dotnet --version" ConsoleToMsBuild="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="Stage0SdkVersion"/>
     </Exec>
 
     <ItemGroup>
-      <Stage0FilesToCopy Include="$(_DotNetRoot)/**/*.*"
-                          Exclude="$(_DotNetRoot)/sdk/$(Stage0SdkVersion)/Sdks/**/*.*)"/>
+      <Stage0FilesToCopy Include="$(DotNetRoot)/**/*.*"
+                          Exclude="$(DotNetRoot)/sdk/$(Stage0SdkVersion)/Sdks/**/*.*)"/>
       <LayoutFilesToCopy Include="$(ArtifactsBinDir)$(Configuration)/Sdks/**/*.*" />
     </ItemGroup>
 
