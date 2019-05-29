@@ -512,7 +512,13 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     // If we have results already in the cache for this request, give them to the
                                     // entry now.
-                                    ResultsCacheResponse cacheResponse = resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, config.GetAfterTargetsForDefaultTargets(request), skippedResultsAreOK: false);
+                                    var cacheResponse = resultsCache.SatisfyRequest(
+                                        request: request,
+                                        configInitialTargets: config.ProjectInitialTargets,
+                                        configDefaultTargets: config.ProjectDefaultTargets,
+                                        additionalTargetsToCheckForOverallResult: config.GetAfterTargetsForDefaultTargets(request),
+                                        skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+
                                     if (cacheResponse.Type == ResultsCacheResponseType.Satisfied)
                                     {
                                         // We have a result, give it back to this request.
@@ -1169,11 +1175,11 @@ namespace Microsoft.Build.BackEnd
                         IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
 
                         var response = resultsCache.SatisfyRequest(
-                            newRequest,
-                            matchingConfig.ProjectInitialTargets,
-                            matchingConfig.ProjectDefaultTargets,
-                            matchingConfig.GetAfterTargetsForDefaultTargets(newRequest),
-                            skippedResultsAreOK: false);
+                            request: newRequest,
+                            configInitialTargets: matchingConfig.ProjectInitialTargets,
+                            configDefaultTargets: matchingConfig.ProjectDefaultTargets,
+                            additionalTargetsToCheckForOverallResult: matchingConfig.GetAfterTargetsForDefaultTargets(newRequest),
+                            skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
 
                         if (response.Type == ResultsCacheResponseType.Satisfied)
                         {

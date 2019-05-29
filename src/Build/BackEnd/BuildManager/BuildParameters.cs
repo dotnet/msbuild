@@ -787,6 +787,8 @@ namespace Microsoft.Build.Execution
 
         internal bool UsesInputCaches() => InputResultsCacheFiles != null;
 
+        internal bool SkippedResultsDoNotCauseCacheMiss() => IsolateProjects;
+
         /// <summary>
         /// Implementation of the serialization mechanism.
         /// </summary>
