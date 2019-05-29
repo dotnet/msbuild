@@ -245,6 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Test which ensures that setting an Any affinity for a project with a remote host object does not throws.
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "disable com tests on mono")]
         public void TestNoContradictoryRemoteHostObjectAffinity()
         {
             HostServices hostServices = new HostServices();
@@ -301,6 +302,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Test which ensures the remote host object cannot affect a project which has the Any affinity specifically set.
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "disable com tests on mono")]
         public void TestRegisterRemoteHostObjectNoAffect_Any2()
         {
             HostServices hostServices = new HostServices();
@@ -340,6 +342,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Test which ensures the affinity for a project can be changed once the in process host object is registered
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "disable com tests on mono")]
         public void TestAffinityChangeAfterRegisterInprocessHostObject()
         {
             HostServices hostServices = new HostServices();
@@ -450,6 +453,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Tests that register overrides existing reigsted remote host object.
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "disable com tests on mono")]
         public void TestRegisterOverrideExistingRegisted()
         {
             var hostServices = new HostServices();
