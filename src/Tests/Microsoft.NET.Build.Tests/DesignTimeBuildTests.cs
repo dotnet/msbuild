@@ -36,7 +36,16 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", identifier: relativeProjectPath + "_" + targetFramework ?? string.Empty)
                 .WithSource()
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+                    //  Add dummy target called by design-time build which may not yet be defined in the version
+                    //  of Visual Studio we are testing with.
+                    p.Root.Add(new XElement(ns + "Target",
+                                    new XAttribute("Name", "CollectFrameworkReferences")));
+                })
                 .WithTargetFramework(targetFramework, relativeProjectPath);
+
 
             var projectDirectory = Path.Combine(testAsset.TestRoot, relativeProjectPath);
 
@@ -87,6 +96,14 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+                    //  Add dummy target called by design-time build which may not yet be defined in the version
+                    //  of Visual Studio we are testing with.
+                    p.Root.Add(new XElement(ns + "Target",
+                                    new XAttribute("Name", "CollectFrameworkReferences")));
+                })
                 .Restore(Log, testProject.Name);
 
             string projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
