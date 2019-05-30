@@ -96,6 +96,33 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
+
+        [PlatformSpecificFact(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
+        public void It_does_not_download_desktop_targeting_packs_on_unix()
+        {
+            const string ProjectName = "NoDownloadTest";
+
+            var testProject = new TestProject()
+            {
+                Name = ProjectName,
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+            };
+
+            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
+
+            var asset = _testAssetsManager.CreateTestProject(testProject);
+
+            var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
+
+            command
+                .Execute("/restore")
+                .Should()
+                .Pass();
+
+            Directory.Exists(Path.Combine(asset.Path, "packages")).Should().BeFalse();
+        }
+
         private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty)
         {
             const string tfm = "netcoreapp3.0";
