@@ -8,11 +8,11 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public class ShimCommand : TestCommand
+    public class RunExeCommand : TestCommand
     {
         private readonly string _commandPath;
 
-        public ShimCommand(ITestOutputHelper log, string commandPath, params string[] args) : base(log)
+        public RunExeCommand(ITestOutputHelper log, string commandPath, params string[] args) : base(log)
         {
             if (!File.Exists(commandPath))
             {
