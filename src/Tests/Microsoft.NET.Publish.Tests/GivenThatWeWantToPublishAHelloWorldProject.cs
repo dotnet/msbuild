@@ -54,8 +54,7 @@ namespace Microsoft.NET.Publish.Tests
             outputDirectory.Should().HaveFiles(filesPublished);
             publishDirectory.Should().HaveFiles(filesPublished);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "HelloWorld.dll") })
-                .CaptureStdOut()
+            new DotnetCommand(Log, Path.Combine(publishDirectory.FullName, "HelloWorld.dll"))
                 .Execute()
                 .Should()
                 .Pass()
@@ -117,8 +116,7 @@ namespace Microsoft.NET.Publish.Tests
             publishDirectory.Should().NotHaveFiles(filesNotPublished);
 
             string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
-            Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .CaptureStdOut()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()
                 .Should()
                 .Pass()
@@ -341,7 +339,7 @@ public static class Program
                 .And
                 .OnlyHavePackagesWithPathProperties();
 
-            ICommand runCommand;
+            TestCommand runCommand;
 
             if (selfContained)
             {
@@ -372,7 +370,7 @@ public static class Program
                     .And
                     .OnlyHaveNativeAssembliesWhichAreInFolder(rid, publishDirectory.FullName, testProject.Name);
 
-                runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { });
+                runCommand = new RunExeCommand(Log, selfContainedExecutableFullPath);
             }
             else
             {
@@ -389,11 +387,10 @@ public static class Program
                 dependencyContext.Should()
                     .OnlyHaveRuntimeAssemblies(rid ?? "", testProject.Name);
 
-                runCommand = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, $"{testProject.Name}.dll") });
+                runCommand = new DotnetCommand(Log, Path.Combine(publishDirectory.FullName, $"{testProject.Name}.dll"));
             }
 
             runCommand
-                    .CaptureStdOut()
                     .Execute()
                     .Should()
                     .Pass()

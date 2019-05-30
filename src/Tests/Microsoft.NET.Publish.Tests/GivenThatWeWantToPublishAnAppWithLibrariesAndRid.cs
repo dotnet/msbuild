@@ -53,8 +53,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"apphost{Constants.ExeSuffix}",
             });
 
-            Command.Create(Path.Combine(publishDirectory.FullName, selfContainedExecutable), new string[] { })
-                .CaptureStdOut()
+            new RunExeCommand(Log, Path.Combine(publishDirectory.FullName, selfContainedExecutable))
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining($"3.13.0 '{runtimeIdentifier}' 3.13.0 '{runtimeIdentifier}' Hello World");
@@ -83,8 +82,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}",
             });
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "App.dll") })
-                .CaptureStdOut()
+            new DotnetCommand(Log, Path.Combine(publishDirectory.FullName, "App.dll"))
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining($"3.13.0 '{runtimeIdentifier}' 3.13.0 '{runtimeIdentifier}' Hello World");

@@ -69,8 +69,7 @@ namespace Microsoft.NET.Publish.Tests
                     var selfContainedExecutable = $"{testProject.Name}{Constants.ExeSuffix}";
                     string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-                    Command.Create(selfContainedExecutableFullPath, new string[] { })
-                        .CaptureStdOut()
+                    new RunExeCommand(Log, selfContainedExecutableFullPath)
                         .Execute()
                         .Should()
                         .Pass()
@@ -140,8 +139,7 @@ namespace Microsoft.NET.Publish.Tests
                     var selfContainedExecutable = $"{testProject.Name}{Constants.ExeSuffix}";
                     string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-                    Command.Create(selfContainedExecutableFullPath, new string[] { })
-                        .CaptureStdOut()
+                    new RunExeCommand(Log, selfContainedExecutableFullPath)
                         .Execute()
                         .Should()
                         .Pass()

@@ -52,9 +52,7 @@ namespace Microsoft.NET.Publish.Tests
 
             string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies");
 
-            Command runAppCommand = Command.Create(
-                TestContext.Current.ToolsetUnderTest.DotNetHostPath,
-                new[] { appPath, "one", "two" });
+            TestCommand runAppCommand = new DotnetCommand(Log,  appPath, "one", "two" );
 
             string expectedOutput =
 @"{
@@ -63,7 +61,6 @@ namespace Microsoft.NET.Publish.Tests
 }";
 
             runAppCommand
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass()
