@@ -151,6 +151,50 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Indicates whether the given path is a UNC or drive pattern root.
+        /// <para>Note: This function mimics the behavior of checking if Path.GetDirectoryName(path) == null.</para>
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        internal static bool IsRootPath(string path)
+        {
+            // Eliminate all non-rooted paths
+            if (!Path.IsPathRooted(path))
+            {
+                return false;
+            }
+
+            int uncMatchLength = FileUtilitiesRegex.StartsWithUncPatternMatchLength(path);
+
+            // Determine if the given path is a standard drive/unc pattern root
+            if (FileUtilitiesRegex.IsDrivePattern(path) ||
+                FileUtilitiesRegex.IsDrivePatternWithSlash(path) ||
+                uncMatchLength == path.Length)
+            {
+                return true;
+            }
+
+            // Eliminate all non-root unc paths.
+            if (uncMatchLength != -1)
+            {
+                return false;
+            }
+
+            // Eliminate any drive patterns that don't have a slash after the colon or where the 4th character is a non-slash
+            // A non-slash at [3] is specifically checked here because Path.GetDirectoryName considers "C:///" a valid root.
+            if (FileUtilitiesRegex.StartsWithDrivePattern(path) &&
+                ((path.Length >= 3 && path[2] != _backSlash && path[2] != _forwardSlash) ||
+                (path.Length >= 4 && path[3] != _backSlash && path[3] != _forwardSlash)))
+            {
+                return false;
+            }
+
+            // There are some edge cases that can get to this point.
+            // After eliminating valid / invalid roots, fall back on original behavior.
+            return Path.GetDirectoryName(path) == null;
+        }
+
+        /// <summary>
         /// Indicates whether or not the file-spec meets the minimum requirements of a UNC pattern.
         /// UNC pattern requires a minimum length of 5 and first two characters must be a slash.
         /// </summary>
