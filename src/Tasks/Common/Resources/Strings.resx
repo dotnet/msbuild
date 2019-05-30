@@ -495,15 +495,15 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1093: "}</comment>
   </data>
   <data name="ReadyToRunNoValidRuntimePackageError" xml:space="preserve">
-    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the ReadyToRun property to false, or use a supported runtime identifier when publishing.</value>
+    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</value>
     <comment>{StrBegin="NETSDK1094: "}</comment>
   </data>
   <data name="ReadyToRunTargetNotSuppotedError" xml:space="preserve">
-    <value>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the ReadyToRun property to false.</value>
+    <value>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</value>
     <comment>{StrBegin="NETSDK1095: "}</comment>
   </data>
   <data name="ReadyToRunCompilationFailed" xml:space="preserve">
-    <value>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the ReadyToRun property to false.</value>
+    <value>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</value>
     <comment>{StrBegin="NETSDK1096: "}</comment>
   </data>
   <data name="CannotHaveSingleFileWithoutRuntimeIdentifier" xml:space="preserve">
