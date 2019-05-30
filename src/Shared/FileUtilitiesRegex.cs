@@ -32,6 +32,18 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Indicates whether the specified string follows the pattern drive pattern: "<drive letter>:/" or "<drive letter>:\"
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        internal static bool IsDrivePatternWithSlash(string pattern)
+        {
+            return pattern.Length == 3 &&
+                    StartsWithDrivePattern(pattern) &&
+                    pattern[2] == _forwardSlash || pattern[2] == _backSlash;
+        }
+
+        /// <summary>
         /// Indicates whether the specified string starts with the drive pattern: "<drive letter>:".
         /// </summary>
         /// <param name="pattern"></param>
