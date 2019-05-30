@@ -13,7 +13,6 @@
 
     <ItemGroup>
         <PackageReference Include="System.Diagnostics.Process" />
-        <PackageReference Include="Microsoft.Extensions.CommandLineUtils" />
         <PackageReference Include="Newtonsoft.Json" />
     </ItemGroup>
 
