@@ -40,7 +40,7 @@ namespace Microsoft.Build.Shared
         {
             return pattern.Length == 3 &&
                     StartsWithDrivePattern(pattern) &&
-                    pattern[2] == _forwardSlash || pattern[2] == _backSlash;
+                    (pattern[2] == _forwardSlash || pattern[2] == _backSlash);
         }
 
         /// <summary>
@@ -56,6 +56,23 @@ namespace Microsoft.Build.Shared
             return pattern.Length >= 2 &&
                 ((pattern[0] >= 'A' && pattern[0] <= 'Z') || (pattern[0] >= 'a' && pattern[0] <= 'z')) &&
                 pattern[1] == ':';
+        }
+
+        /// <summary>
+        /// Indicates whether the specified string starts with the drive pattern: "<drive letter>:/" or "<drive letter>:\".
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        internal static bool StartsWithDrivePatternWithSlash(string pattern)
+        {
+            // Format dictates a length of at least 3,
+            // first character must be a letter,
+            // second character must be a ":"
+            // third character must be a slash.
+            return pattern.Length >= 3 &&
+                ((pattern[0] >= 'A' && pattern[0] <= 'Z') || (pattern[0] >= 'a' && pattern[0] <= 'z')) &&
+                pattern[1] == ':' &&
+                (pattern[2] == '\\' || pattern[2] == '/');
         }
 
         /// <summary>
