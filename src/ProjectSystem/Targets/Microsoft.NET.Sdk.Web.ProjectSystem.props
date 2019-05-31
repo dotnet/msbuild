@@ -12,11 +12,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <DisableWebSdkContent Condition=" '$(DisableWebSdkContent)' == ''">false</DisableWebSdkContent>
-    <DefaultItemExcludes  Condition=" '$(DisableWebSdkContent)' != 'true' ">$(DefaultItemExcludes);**\node_modules\**;node_modules\**</DefaultItemExcludes>
-    <DefaultItemExcludes  Condition=" '$(DisableWebSdkContent)' != 'true' ">$(DefaultItemExcludes);**\jspm_packages\**;jspm_packages\**</DefaultItemExcludes>
-    <DefaultItemExcludes  Condition=" '$(DisableWebSdkContent)' != 'true' ">$(DefaultItemExcludes);**\bower_components\**;bower_components\**</DefaultItemExcludes>
-    <DefaultWebContentItemExcludes Condition=" '$(DisableWebSdkContent)' != 'true' ">$(DefaultWebContentItemExcludes);wwwroot\**</DefaultWebContentItemExcludes>
 
     <OutputType>Exe</OutputType>
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -26,25 +21,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IsPackable Condition="'$(IsPackable)' == ''">false</IsPackable>
     <WarnOnPackingNonPackableProject Condition="'$(WarnOnPackingNonPackableProject)' == '' and '$(IsPackable)' == 'false'">true</WarnOnPackingNonPackableProject>
   </PropertyGroup>
-
-  <ItemGroup Condition=" '$(DisableWebSdkContent)' != 'true' And '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
-    <!-- Publish everything under wwwroot, all JSON files, all config files and all Razor files -->
-    <Content Include="wwwroot\**" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-    <Content Include="**\*.config" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);$(DefaultWebContentItemExcludes)" />
-    <Content Include="**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);$(DefaultWebContentItemExcludes)" />
-
-    <!-- Set CopyToPublishDirectory to Never for items under AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
-    <Content Update="$(AppDesignerFolder)\**" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
-
-    <!-- Remove Content items from other item types (in a way that CPS understands) -->
-    <None Remove="wwwroot\**;**\*.json;**\*.config" />
-    <Compile Remove="wwwroot\**" />
-    <EmbeddedResource Remove="wwwroot\**" />
-
-    <!-- Keep track of the default content items for later to distinguish them from newly generated content items -->
-    <_ContentIncludedByDefault Include="@(Content)" />
-
-  </ItemGroup>
 
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props"
       Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')"/>
