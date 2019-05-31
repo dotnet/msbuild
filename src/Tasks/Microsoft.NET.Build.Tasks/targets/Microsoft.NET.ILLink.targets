@@ -13,7 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="Sdk.props" Sdk="ILLink.Tasks" />
 
-  <PropertyGroup>
+  <PropertyGroup Condition=" '$(PublishTrimmed)' == 'true' ">
     <IntermediateLinkDir Condition=" '$(IntermediateLinkDir)' == '' ">$(IntermediateOutputPath)linked\</IntermediateLinkDir>
     <IntermediateLinkDir Condition=" !HasTrailingSlash('$(IntermediateLinkDir)') ">$(IntermediateLinkDir)\</IntermediateLinkDir>
     <!-- Used to enable incremental build for the linker target. -->
@@ -22,17 +22,19 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                     _ILLink
+                     ILLink
 
     Replace the files to be published with versions that have been
     passed through the linker. Also prevent removed files from being
     included in the generated deps.json.
     ============================================================
     -->
-  <Target Name="_ILLink"
+  <Target Name="ILLink"
           Condition=" '$(PublishTrimmed)' == 'true' And
                       '$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' "
           DependsOnTargets="_RunILLink">
+
+    <NETSdkInformation ResourceName="ILLinkInformation" />
 
     <!-- For now, use ResolvedFileToPublish as input/output. This
          should go away in favor of a well-defined set of runtime
@@ -69,7 +71,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="ILLink" AssemblyFile="$(ILLinkTasksAssembly)" />
   <Target Name="_RunILLink"
-         DependsOnTargets="_ComputeManagedAssembliesToLink"
+          DependsOnTargets="_ComputeManagedAssembliesToLink;_SetILLinkDefaults"
           Inputs="$(MSBuildAllProjects);@(_ManagedAssembliesToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
           Outputs="$(_LinkSemaphore)">
 
@@ -84,16 +86,44 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Delete Files="@(_LinkedResolvedFileToPublishCandidates)" />
     <ILLink AssemblyPaths="@(_ManagedAssembliesToLink)"
             ReferenceAssemblyPaths="@(ReferencePath)"
-            RootAssemblyNames="@(IntermediateAssembly->'%(Filename)')"
+            RootAssemblyNames="@(TrimmerRootAssembly)"
             RootDescriptorFiles="@(TrimmerRootDescriptor)"
             OutputDirectory="$(IntermediateLinkDir)"
-            ExtraArgs="-u copyused -c copyused -l none --skip-unresolved true $(_ExtraTrimmerArgs)"
+            ExtraArgs="$(_ExtraTrimmerArgs)"
             ToolExe="$(_DotNetHostFileName)"
             ToolPath="$(_DotNetHostDirectory)" />
 
      <Touch Files="$(_LinkSemaphore)" AlwaysCreate="true" />
 
   </Target>
+
+  <!--
+    ============================================================
+                     _SetILLinkDefaults
+
+    Set up the default options and inputs to ILLink.
+   -->
+   <Target Name="_SetILLinkDefaults"
+           DependsOnTargets="_ComputeManagedAssembliesToLink">
+
+    <!-- The defaults currently root non-framework assemblies, which
+         is a no-op for portable apps. If we later support more ways
+         to customize the behavior we can allow linking portable apps
+         in some cases. -->
+    <NETSdkError Condition="'$(SelfContained)' != 'true'" ResourceName="ILLinkNotSupportedError" />
+
+    <PropertyGroup>
+      <_ExtraTrimmerArgs>-l none --skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
+      <_ExtraTrimmerArgs>-c copyused -u copyused $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
+    </PropertyGroup>
+    <ItemGroup>
+      <TrimmerRootAssembly Include="@(_ManagedAssembliesToLink)" Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' " />
+      <_ManagedAssembliesToLink Update="@(_ManagedAssembliesToLink)" Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' ">
+        <action>copy</action>
+      </_ManagedAssembliesToLink>
+    </ItemGroup>
+
+   </Target>
 
   <!--
     ============================================================
@@ -108,6 +138,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="ComputeManagedAssemblies" AssemblyFile="$(ILLinkTasksAssembly)" />
   <Target Name="_ComputeManagedAssembliesToLink">
+
     <ComputeManagedAssemblies Assemblies="@(ResolvedFileToPublish)">
       <Output TaskParameter="ManagedAssemblies" ItemName="_ManagedAssembliesToLink" />
     </ComputeManagedAssemblies>

@@ -509,7 +509,7 @@ The following are names of parameters or literal values and should not be transl
   <data name="CannotHaveSingleFileWithoutRuntimeIdentifier" xml:space="preserve">
     <value>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</value>
     <comment>{StrBegin="NETSDK1097: "}</comment>
-  </data>  
+  </data>
   <data name="CannotHaveSingleFileWithoutAppHost" xml:space="preserve">
     <value>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</value>
     <comment>{StrBegin="NETSDK1098: "}</comment>
@@ -521,5 +521,13 @@ The following are names of parameters or literal values and should not be transl
   <data name="WindowsDesktopFrameworkRequiresWindows" xml:space="preserve">
     <value>NETSDK1100: Windows is required to build Windows desktop applications.</value>
     <comment>{StrBegin="NETSDK1100: "}</comment>
+  </data>
+  <data name="ILLinkInformation" xml:space="preserve">
+    <value>NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/illink</value>
+    <comment>{StrBegin="NETSDK1101: "}</comment>
+  </data>
+  <data name="ILLinkNotSupportedError" xml:space="preserve">
+    <value>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</value>
+    <comment>{StrBegin="NETSDK1102: "}</comment>"
   </data>
 </root>

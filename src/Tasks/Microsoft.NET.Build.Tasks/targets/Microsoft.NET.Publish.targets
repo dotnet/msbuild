@@ -341,7 +341,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="ComputeFilesToPublish"
           DependsOnTargets="ComputeResolvedFilesToPublishList;
-                            _ILLink;
+                            ILLink;
                             CreateReadyToRunImages">
   </Target>
 
