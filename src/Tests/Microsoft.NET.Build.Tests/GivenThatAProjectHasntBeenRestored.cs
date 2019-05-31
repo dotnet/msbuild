@@ -7,6 +7,7 @@ using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -49,6 +50,31 @@ namespace Microsoft.NET.Build.Tests
                 .And.HaveStdOutContaining(assetsFile)
                 //  We should only get one error
                 .And.HaveStdOutContaining("1 Error(s)");
+        }
+
+        [Fact]
+        public void ReadingCacheDoesNotFail()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "App",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            var result = buildCommand
+                .Execute("/restore");
+
+            result
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1062");
         }
     }
 }
