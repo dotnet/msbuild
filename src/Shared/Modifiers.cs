@@ -433,7 +433,7 @@ namespace Microsoft.Build.Shared
                     else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Filename, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no filename
-                        if (Path.IsPathRooted(itemSpec) && Path.GetDirectoryName(itemSpec) == null)
+                        if (IsRootDirectory(itemSpec))
                         {
                             // NOTE: this is to prevent Path.GetFileNameWithoutExtension() from treating server and share elements
                             // in a UNC file-spec as filenames e.g. \\server, \\server\share
@@ -448,7 +448,7 @@ namespace Microsoft.Build.Shared
                     else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no extension
-                        if (Path.IsPathRooted(itemSpec) && Path.GetDirectoryName(itemSpec) == null)
+                        if (IsRootDirectory(itemSpec))
                         {
                             // NOTE: this is to prevent Path.GetExtension() from treating server and share elements in a UNC
                             // file-spec as filenames e.g. \\server.ext, \\server\share.ext
@@ -613,6 +613,51 @@ namespace Microsoft.Build.Shared
                 }
 
                 return modifiedItemSpec;
+            }
+
+            /// <summary>
+            /// Indicates whether the given path is a UNC or drive pattern root directory.
+            /// <para>Note: This function mimics the behavior of checking if Path.GetDirectoryName(path) == null.</para>
+            /// </summary>
+            /// <param name="path"></param>
+            /// <returns></returns>
+            private static bool IsRootDirectory(string path)
+            {
+                // Eliminate all non-rooted paths
+                if (!Path.IsPathRooted(path))
+                {
+                    return false;
+                }
+
+                int uncMatchLength = FileUtilitiesRegex.StartsWithUncPatternMatchLength(path);
+
+                // Determine if the given path is a standard drive/unc pattern root
+                if (FileUtilitiesRegex.IsDrivePattern(path) ||
+                    FileUtilitiesRegex.IsDrivePatternWithSlash(path) ||
+                    uncMatchLength == path.Length)
+                {
+                    return true;
+                }
+
+                // Eliminate all non-root unc paths.
+                if (uncMatchLength != -1)
+                {
+                    return false;
+                }
+
+                // Eliminate any drive patterns that don't have a slash after the colon or where the 4th character is a non-slash
+                // A non-slash at [3] is specifically checked here because Path.GetDirectoryName
+                // considers "C:///" a valid root.
+                if (FileUtilitiesRegex.StartsWithDrivePattern(path) &&
+                    ((path.Length >= 3 && path[2] != '\\' && path[2] != '/') ||
+                    (path.Length >= 4 && path[3] != '\\' && path[3] != '/')))
+                {
+                    return false;
+                }
+
+                // There are some edge cases that can get to this point.
+                // After eliminating valid / invalid roots, fall back on original behavior.
+                return Path.GetDirectoryName(path) == null;
             }
 
             /// <summary>
