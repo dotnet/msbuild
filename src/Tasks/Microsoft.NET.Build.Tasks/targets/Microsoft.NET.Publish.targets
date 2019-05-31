@@ -92,7 +92,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
-      <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
     </PropertyGroup>
 
     <MakeDir Directories="$(PublishDir)" />
@@ -108,8 +107,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="ComputeAndCopyFilesToPublishDirectory"
           DependsOnTargets="ComputeFilesToPublish;
-                            _ILLink;
-                            CreateReadyToRunImages;
                             CopyFilesToPublishDirectory" />
 
   <!--
@@ -339,16 +336,30 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         ComputeFilesToPublish
 
-    Gathers all the files that need to be copied to the publish directory.
+    Gathers all the files that need to be copied to the publish directory, including R2R and ILLinker transformations
     ============================================================
     -->
   <Target Name="ComputeFilesToPublish"
+          DependsOnTargets="ComputeResolvedFilesToPublishList;
+                            _ILLink;
+                            CreateReadyToRunImages">
+  </Target>
+
+  <!--
+    ============================================================
+                                        ComputeResolvedFilesToPublishList
+
+    Gathers all the files that need to be copied to the publish directory.
+    ============================================================
+    -->
+  <Target Name="ComputeResolvedFilesToPublishList"
           DependsOnTargets="_ComputeResolvedCopyLocalPublishAssets;
                             _ComputeCopyToPublishDirectoryItems">
 
     <PropertyGroup>
       <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
       <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
+      <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
     </PropertyGroup>
 
     <ItemGroup>
