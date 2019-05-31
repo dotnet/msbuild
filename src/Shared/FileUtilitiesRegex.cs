@@ -70,7 +70,7 @@ namespace Microsoft.Build.Shared
             // third character must be a slash.
             return pattern.Length >= 3 &&
                 StartsWithDrivePattern(pattern) &&
-                (pattern[2] == '\\' || pattern[2] == '/');
+                (pattern[2] == _backSlash || pattern[2] == _forwardSlash);
         }
 
         /// <summary>
