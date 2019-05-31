@@ -107,6 +107,8 @@ namespace Microsoft.NET.Build.Tasks
                         Log.LogError(Strings.WindowsDesktopFrameworkRequiresWindows);
                         windowsOnlyErrorLogged = true;
                     }
+
+                    // Ignore (and don't download) this known framework reference as it requires Windows
                     continue;
                 }
 
