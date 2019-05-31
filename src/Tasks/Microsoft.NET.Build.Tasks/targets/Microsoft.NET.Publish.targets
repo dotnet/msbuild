@@ -522,7 +522,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="JoinResult" ItemName="_FilteredPublishSatelliteResources" />
     </JoinItems>
 
-    <ItemGroup Condition="'@(_OutputSatelliteResources)' != ''">
+    <ItemGroup Condition="'@(_PublishSatelliteResources)' != ''">
       <_ResolvedCopyLocalPublishAssets Remove="@(_PublishSatelliteResources)" />
       <_ResolvedCopyLocalPublishAssets Include="@(_FilteredPublishSatelliteResources)" />
     </ItemGroup>
