@@ -17,6 +17,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
 
+  <!-- Mark the WindowsDesktop frameworks as being windows only.
+       TODO: remove this once the metadata exists on the items in the SDK props file. -->
+  <ItemGroup>
+    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App" IsWindowsOnly="True" />
+    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WindowsForms" IsWindowsOnly="True" />
+    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WPF" IsWindowsOnly="True" />
+  </ItemGroup>
 
   <UsingTask TaskName="CheckForDuplicateFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -34,39 +41,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <FrameworkReference Remove="@(_FrameworkReferenceToRemove)" />
       <FrameworkReference Include="@(_FrameworkReferenceToAdd)" />
-    </ItemGroup>
-      
-    <ItemGroup>
-      <!-- The KnownFrameworkReference items that this target expects will be defined in the bundled
-           versions .props file. They should look something like this:
-           
-    <KnownFrameworkReference Include="Microsoft.NETCore.App"
-                              TargetFramework="netcoreapp3.0"
-                              RuntimeFrameworkName="Microsoft.NETCore.App"
-                              DefaultRuntimeFrameworkVersion="3.0.0-preview-27214-02"
-                              LatestRuntimeFrameworkVersion="3.0.0-preview-27214-02"
-                              TargetingPackName="Microsoft.NETCore.App"
-                              TargetingPackVersion="3.0.0-preview-27122-01"
-                              AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
-                              AppHostRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
-                              RuntimePackNamePatterns="runtime.**RID**.Microsoft.NETCore.App;runtime.**RID**.Microsoft.NETCore.DotNetHostResolver;runtime.**RID**.Microsoft.NETCore.DotNetHostPolicy"
-                              RuntimePackRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
-                              IsTrimmable="true"
-                              />
-      -->
-
-
-      <!-- KnownAppHost items will look something like this:
-      
-      <KnownAppHostPack Condition="'@(KnownAppHostPack)' == ''"
-                        Include="Microsoft.NETCore.App"
-                        TargetFramework="netcoreapp3.0"
-                        AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
-                        AppHostPackVersion="3.0.0-preview-27218-01"
-                        AppHostRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
-                        />
-      -->
-
     </ItemGroup>
 
     <!-- We will add Microsoft.WindowsDesktop.App.WPF and Microsoft.WindowsDesktop.App.WindowsForms to the bundled versions.

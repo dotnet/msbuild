@@ -566,15 +566,11 @@ public static class Program
                 Name = "ConsoleWithPublishProfile",
                 TargetFrameworks = tfm,
                 IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish",
                 IsExe = true,
             };
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
-                .WithProjectChanges(
-                    (filename, project) =>
-                    {
-                        project.Root.Attribute("Sdk").Value = "Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish";
-                    });
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
             var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");

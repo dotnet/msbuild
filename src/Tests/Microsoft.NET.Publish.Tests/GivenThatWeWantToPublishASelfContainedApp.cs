@@ -164,17 +164,13 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "WpfProjectAllResources",
                 TargetFrameworks = tfm,
                 IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
 
             testProject.AdditionalProperties.Add("UseWPF", "true");
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
-                .WithProjectChanges(
-                    (filename, project) =>
-                    {
-                        project.Root.Attribute("Sdk").Value = "Microsoft.NET.Sdk.WindowsDesktop";
-                    });
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
             var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
@@ -213,18 +209,14 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "WpfProjectSelectResources",
                 TargetFrameworks = tfm,
                 IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
 
             testProject.AdditionalProperties.Add("UseWPF", "true");
             testProject.AdditionalProperties.Add("SatelliteResourceLanguages", "cs;zh-Hant;ko");
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
-                .WithProjectChanges(
-                    (filename, project) =>
-                    {
-                        project.Root.Attribute("Sdk").Value = "Microsoft.NET.Sdk.WindowsDesktop";
-                    });
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
             var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));

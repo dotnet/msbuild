@@ -518,4 +518,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1099: Publishing to a single-file is only supported for executable applications.</value>
     <comment>{StrBegin="NETSDK1099: "}</comment>
   </data>
+  <data name="WindowsDesktopFrameworkRequiresWindows" xml:space="preserve">
+    <value>NETSDK1100: Windows is required to build Windows desktop applications.</value>
+    <comment>{StrBegin="NETSDK1100: "}</comment>
+  </data>
 </root>
