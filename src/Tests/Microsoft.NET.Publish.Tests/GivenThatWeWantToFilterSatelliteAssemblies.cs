@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
@@ -21,13 +22,16 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [Fact]
-        public void It_only_publishes_selected_ResourceLanguages()
+        [Theory]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp3.0")]
+
+        public void It_only_publishes_selected_ResourceLanguages(string tfm)
         {
             var testProject = new TestProject()
             {
                 Name = "PublishFilteredSatelliteAssemblies",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = tfm,
                 IsExe = true,
                 IsSdkProject = true
             };
@@ -45,7 +49,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: testProject.TargetFrameworks);
 
-            publishDirectory.Should().OnlyHaveFiles(new[] {
+            var files = new List<string>() {
                 "it/System.Spatial.resources.dll",
                 "fr/System.Spatial.resources.dll",
                 "System.Spatial.dll",
@@ -53,7 +57,14 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.pdb",
                 $"{testProject.Name}.deps.json",
                 $"{testProject.Name}.runtimeconfig.json"
-            });
+            };
+
+            if (tfm == "netcoreapp3.0")
+            {
+                files.Add($"{testProject.Name}{Constants.ExeSuffix}");
+            }
+
+            publishDirectory.Should().OnlyHaveFiles(files);
         }
         [Fact]
         public void It_publishes_all_satellites_when_not_filtered()
