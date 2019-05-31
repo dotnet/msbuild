@@ -81,8 +81,7 @@ namespace Microsoft.NET.Build.Tests
                 $"apphost{Constants.ExeSuffix}",
             });
 
-            Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .CaptureStdOut()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()
                 .Should()
                 .Pass()
@@ -149,8 +148,7 @@ namespace Microsoft.NET.Build.Tests
 
 			string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-			Command.Create(selfContainedExecutableFullPath, new string[] { })
-				.CaptureStdOut()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
 				.Execute()
 				.Should()
 				.Pass()

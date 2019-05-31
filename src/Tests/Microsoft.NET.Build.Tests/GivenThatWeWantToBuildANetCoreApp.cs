@@ -366,8 +366,7 @@ public static class Program
 
             string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier ?? "").FullName;
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputFolder, project.Name + ".dll") })
-                .CaptureStdOut()
+            new DotnetCommand(Log, Path.Combine(outputFolder, project.Name + ".dll"))
                 .Execute()
                 .Should()
                 .Pass()

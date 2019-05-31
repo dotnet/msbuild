@@ -55,9 +55,7 @@ namespace Microsoft.NET.Build.Tests
 
             string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-            Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .CaptureStdOut()
-                .CaptureStdErr()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()
                 .Should()
                 .Pass()
@@ -118,8 +116,7 @@ namespace Microsoft.NET.Build.Tests
                 "LibraryWithRids.pdb",
             });
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "App.dll") })
-                .CaptureStdOut()
+            new DotnetCommand(Log, Path.Combine(outputDirectory.FullName, "App.dll"))
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining($"3.13.0 '{runtimeIdentifier}' 3.13.0 '{runtimeIdentifier}' Hello World");

@@ -108,9 +108,8 @@ namespace Microsoft.NET.Build.Tests
                     .Pass();
 
                 var exe = Path.Combine(buildCommand.GetOutputDirectory("net46").FullName, "DesktopMinusRid.exe");
-                var runCommand = Command.Create(exe, Array.Empty<string>());
+                var runCommand = new RunExeCommand(Log, exe);
                 runCommand
-                    .CaptureStdOut()
                     .Execute()
                     .Should()
                     .Pass()
@@ -189,9 +188,8 @@ namespace Microsoft.NET.Build.Tests
                 {
                     var exe = Path.Combine(directory.FullName, "DesktopMinusRid.exe");
 
-                    var runCommand = Command.Create(exe, Array.Empty<string>());
+                    var runCommand = new RunExeCommand(Log, exe);
                     runCommand
-                        .CaptureStdOut()
                         .Execute()
                         .Should()
                         .Pass()

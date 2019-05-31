@@ -52,11 +52,11 @@ namespace Microsoft.NET.Build.Tests
                 "HelloWorld.runtimeconfig.json",
             });
 
-            Command.Create(Path.Combine(outputDirectory.FullName, hostExecutable), new string[] { })
-                .EnvironmentVariable(
+
+            new RunExeCommand(Log, Path.Combine(outputDirectory.FullName, hostExecutable))
+                .WithEnvironmentVariable(
                     Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)",
                     Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath))
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass()

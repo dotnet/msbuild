@@ -86,8 +86,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
-                .CaptureStdOut()
+            new DotnetCommand(Log, applicationPath)
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello from a direct reference.");
@@ -210,8 +209,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
-                .CaptureStdOut()
+            new DotnetCommand(Log, applicationPath)
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World from en satellite assembly for a direct reference.");
@@ -299,8 +297,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
-                .CaptureStdOut()
+            new DotnetCommand(Log, applicationPath)
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello from a reference of an indirect reference.");
@@ -441,8 +438,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
-                .CaptureStdOut()
+            new DotnetCommand(Log, applicationPath)
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World from en satellite assembly for a reference of an indirect reference.");
@@ -531,8 +527,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
-                .CaptureStdOut()
+            new DotnetCommand(Log, applicationPath)
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello from an indirect reference.");
@@ -674,8 +669,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
-                .CaptureStdOut()
+            new DotnetCommand(Log, applicationPath)
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World from en satellite assembly for an indirect reference.");
@@ -782,8 +776,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
-                .CaptureStdOut()
+            new DotnetCommand(Log, applicationPath)
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello from a reference of an indirect reference.");
@@ -943,9 +936,8 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
-                .CaptureStdOut()
-                .Execute()
+            new DotnetCommand(Log, applicationPath)
+                            .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World from en satellite assembly for a reference of an indirect reference.");
         }

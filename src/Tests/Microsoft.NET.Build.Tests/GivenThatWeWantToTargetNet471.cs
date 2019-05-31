@@ -454,8 +454,7 @@ public static class NS16LibClass
 
             var exePath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".exe");
 
-            Command.Create(exePath, Array.Empty<string>())
-                .CaptureStdOut()
+            new RunExeCommand(Log, exePath)
                 .Execute()
                 .Should()
                 .Pass();

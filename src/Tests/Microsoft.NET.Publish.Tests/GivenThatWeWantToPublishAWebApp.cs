@@ -111,8 +111,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"apphost{Constants.ExeSuffix}",
             });
 
-            Command.Create(Path.Combine(output.FullName, $"{testProject.Name}{Constants.ExeSuffix}"), new string[] {})
-                .CaptureStdOut()
+            new RunExeCommand(Log, Path.Combine(output.FullName, $"{testProject.Name}{Constants.ExeSuffix}"))
                 .Execute()
                 .Should()
                 .Pass()
