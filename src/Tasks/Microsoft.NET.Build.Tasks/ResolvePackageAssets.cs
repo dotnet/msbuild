@@ -674,8 +674,10 @@ namespace Microsoft.NET.Build.Tasks
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(_task.ProjectAssetsCacheFile));
                 var stream = File.Open(_task.ProjectAssetsCacheFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                _writer = new BinaryWriter(stream, TextEncoding, leaveOpen: false);
-                Write();
+                using (_writer = new BinaryWriter(stream, TextEncoding, leaveOpen: false))
+                {
+                    Write();
+                }
             }
 
             public Stream WriteToMemoryStream()
