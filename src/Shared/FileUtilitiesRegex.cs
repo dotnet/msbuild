@@ -39,8 +39,7 @@ namespace Microsoft.Build.Shared
         internal static bool IsDrivePatternWithSlash(string pattern)
         {
             return pattern.Length == 3 &&
-                    StartsWithDrivePattern(pattern) &&
-                    (pattern[2] == _forwardSlash || pattern[2] == _backSlash);
+                    StartsWithDrivePatternWithSlash(pattern);
         }
 
         /// <summary>
@@ -70,8 +69,7 @@ namespace Microsoft.Build.Shared
             // second character must be a ":"
             // third character must be a slash.
             return pattern.Length >= 3 &&
-                ((pattern[0] >= 'A' && pattern[0] <= 'Z') || (pattern[0] >= 'a' && pattern[0] <= 'z')) &&
-                pattern[1] == ':' &&
+                StartsWithDrivePattern(pattern) &&
                 (pattern[2] == '\\' || pattern[2] == '/');
         }
 
