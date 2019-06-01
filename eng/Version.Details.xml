@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="3.0.0-preview5-19227-01">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="3.0.0-preview6-19279-08">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>5502cf46706a25c39ce78a57b9191714c0eb40c2</Sha>
+      <Sha>0b54783877cca229e2fc3f772ce7257cf0b3814f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="3.0.0-preview5-19227-01">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="3.0.0-preview6-19279-08">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>5502cf46706a25c39ce78a57b9191714c0eb40c2</Sha>
+      <Sha>0b54783877cca229e2fc3f772ce7257cf0b3814f</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Web.Xdt" Version="3.0.0" Pinned="true">
       <Uri>https://github.com/aspnet/xdt</Uri>
@@ -15,9 +15,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19274.6">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19280.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>b5016f5688dc8ca9f3e4811ee7e2e86ad8907a40</Sha>
+      <Sha>7c50d548001a83a18449ad4dda370122ede5fbf6</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

@@ -18,7 +18,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.DotNetCore.targets') AND '$(EnableTypeScriptNuGetTarget)' != 'true'"/>
 
   <PropertyGroup>
-    <EnableDefaultContentItems Condition=" '$(DisableWebSdkContent)' != 'true' And '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
     <RunWorkingDirectory Condition=" '$(RunWorkingDirectory)' == '' and '$(EnableDefaultRunWorkingDirectory)' != 'false' ">$(MSBuildProjectDirectory)</RunWorkingDirectory>
     <MSBuildWebTargetsPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebTargetsPath>
     <AspNetCoreHostingModel Condition="'$(AspNetCoreHostingModel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' != '' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0' ">inprocess</AspNetCoreHostingModel>
