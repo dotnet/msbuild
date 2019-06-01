@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Microsoft.Build.Shared;
 
@@ -53,7 +54,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!string.IsNullOrEmpty(hintPath))
             {
-                if (ResolveAsFile(hintPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
+                if (ResolveAsFile(Path.GetFullPath(hintPath), assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
                 {
                     userRequestedSpecificFile = true;
                     foundPath = hintPath;
