@@ -52,20 +52,7 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "--no-self-contained",
                     LocalizableStrings.NoSelfContainedOptionDescription,
-                    Accept.ZeroOrOneArgument()
-                        .WithSuggestionsFrom("true", "false")
-                        .ForwardAsSingle(o =>
-                        {
-                            string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
-                            if (value == "true")
-                            {
-                                value = "false";
-                            } else
-                            {
-                                value = "true";
-                            }
-                            return $"-property:SelfContained={value}";
-                        })),
+                    Accept.NoArguments().ForwardAs("-property:SelfContained=false")),
                 Create.Option(
                     "--nologo|/nologo",
                     LocalizableStrings.CmdNoLogo,
