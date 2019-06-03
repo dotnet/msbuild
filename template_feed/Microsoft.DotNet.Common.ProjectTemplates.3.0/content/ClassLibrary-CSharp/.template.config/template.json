@@ -61,7 +61,7 @@
     "langVersion": {
       "type": "parameter",
       "datatype": "text",
-      "description": "Sets langVersion in the created project file",
+      "description": "Sets the LangVersion property in the created project file",
       "defaultValue": "",
       "replaces": "$(ProjectLanguageVersion)"
     },

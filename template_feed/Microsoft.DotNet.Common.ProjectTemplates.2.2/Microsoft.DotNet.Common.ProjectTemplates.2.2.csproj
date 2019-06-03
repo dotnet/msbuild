@@ -20,7 +20,7 @@
         <PackageReference Remove="Microsoft.NETCore.App" />
         <Compile Remove="$(GitInfoFile)" />
         <Compile Remove="$(SrcDir)GitInfo.cs" />
-        <Content Include="Content\**" >
+        <Content Include="content\**" >
             <PackagePath>content</PackagePath>
         </Content>
     </ItemGroup>
