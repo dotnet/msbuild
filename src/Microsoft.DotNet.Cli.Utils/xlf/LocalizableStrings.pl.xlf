@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Nie znaleziono pliku wykonywalnego zgodnego z poleceniem „{0}”. Aby uzyskać więcej informacji, zobacz https://aka.ms/missing-command.</target>
+        <target state="translated">Nie można wykonać, ponieważ nie odnaleziono określonego polecenia lub pliku.
+Możliwe przyczyny:
+  * Błąd pisowni wbudowanego polecenia dotnet .
+  * Planowano wykonanie programu .NET Core, ale element {0} nie istnieje.
+  * Planowano uruchomienie narzędzia globalnego, ale nie można odnaleźć pliku wykonywalnego z prefiksem dotnet o tej nazwie w zmiennej PATH.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -92,10 +96,10 @@ Possible reasons for this include:
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
-        <source>Cannot find command 'dotnet {0}', please run the following command to install
+        <source>Cannot find command 'dotnet {0}', run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="translated">Nie można znaleźć polecenia „dotnet {0}”; uruchom następujące polecenie, aby zainstalować
+        <target state="needs-review-translation">Nie można znaleźć polecenia „dotnet {0}”; uruchom następujące polecenie, aby zainstalować
 
 dotnet tool install --global {1}</target>
         <note />
@@ -107,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET Core SDK</source>
-        <target state="translated">.NET Core SDK</target>
+        <target state="translated">Zestaw .NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

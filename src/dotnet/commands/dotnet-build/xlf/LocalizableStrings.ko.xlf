@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Do not display the startup banner or the copyright message.</source>
-        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <target state="translated">시작 배너 또는 저작권 메시지를 표시하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
         <source>Restore tools defined in the local tool manifest.</source>
@@ -8,9 +8,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">警告: 工具包“{0}”无效, 请联系工具作者:
+        <target state="needs-review-translation">警告: 工具包“{0}”无效。请联系工具作者:
 {1}</target>
         <note />
       </trans-unit>
@@ -51,7 +51,7 @@
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="translated">文件</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -61,12 +61,12 @@
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">版本</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageFailedToRestore">
         <source>Package "{0}" failed to restore, due to {1}</source>
-        <target state="translated">由于 {1}，包“{0}”未能还原</target>
+        <target state="translated">包“{0}”无法还原，因为 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
@@ -76,7 +76,7 @@
       </trans-unit>
       <trans-unit id="CommandsMismatch">
         <source>The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</source>
-        <target state="translated">工具清单文件中指定的命令 {0} 未包含在包 ID 为 {1} 的包中。包中所含的命令为 {2}。</target>
+        <target state="translated">包 ID 为 {1} 的包中不包含工具清单文件中指定的命令 {0}。包中包含的命令为 {2}。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
@@ -91,7 +91,7 @@
       </trans-unit>
       <trans-unit id="RestoreSuccessful">
         <source>Tool '{0}' (version '{1}') was restored. Available commands: {2}</source>
-        <target state="translated">工具“{0}”(版本“{1}”)已还原。可用命令: {2}</target>
+        <target state="translated">工具“{0}”(版本“{1}”)已还原。可用的命令: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolsRestoreWasSuccessful">
@@ -104,7 +104,8 @@
 {0}</source>
         <target state="translated">命令名称冲突。命令名称不区分大小写。
 {0}</target>
-        <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
+        <note />
+      </trans-unit>
       <trans-unit id="PackagesCommandNameCollisionForOnePackage">
         <source>A command "{0}" in package "{1}"</source>
         <target state="translated">包“{1}”中的命令“{0}”</target>
@@ -112,7 +113,7 @@
       </trans-unit>
       <trans-unit id="RestorePartiallyFailed">
         <source>Restore partially failed.</source>
-        <target state="translated">部分还原失败。</target>
+        <target state="translated">还原部分失败。</target>
         <note />
       </trans-unit>
     </body>

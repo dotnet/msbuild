@@ -1,7 +1,7 @@
 ## Getting help on migration issues
 You're using the new .NET Core tools that are MSBuild-based. You took your project.json project and ran `dotnet migrate` or migrated from Visual Studio 2017...and you maybe ran into problems. 
 
-The best way to get help is to [file an issue](https://github.com/dotnet/cli/issues/new) on this repo and we will investigate and provide help and/or fixes as part of new CLI builds. Please make sure to read the instructions below and to **add the [MIGRATION] prefix to the issue title**.
+The best way to get help is to [file an issue](https://github.com/dotnet/cli/issues/new) on this repo and we will investigate and provide help and/or fixes as part of new CLI builds. Make sure to read the instructions below and to **add the [MIGRATION] prefix to the issue title**.
 
 ### Filing an migration issue 
 CLI is a very high-traffic repository in terms of issues. In order to be able to respond fast to migration issues, we need the issue to be formatted in a certain way:

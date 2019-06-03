@@ -161,7 +161,7 @@ The default is the version of the SDK in dotnet new.</value>
     <value>Migration failed.</value>
   </data>
   <data name="MigrationAdditionalHelp" xml:space="preserve">
-    <value>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</value>
+    <value>The project migration has finished. Visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</value>
   </data>
   <data name="MigrationReportSummary" xml:space="preserve">
     <value>Summary</value>

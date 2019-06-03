@@ -130,6 +130,6 @@
     <value>COMMAND_NAME</value>
   </data>
   <data name="SpecifyExactlyOneCommandName" xml:space="preserve">
-    <value>Please specify one command name to run.</value>
+    <value>Specify one command name to run.</value>
   </data>
 </root>

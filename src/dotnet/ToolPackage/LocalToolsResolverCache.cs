@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.ToolPackage
                 cacheTable =
                     JsonSerializer.Parse<CacheRow[]>(_fileSystem.File.ReadAllText(packageCacheFile));
             }
-            catch (JsonReaderException)
+            catch (JsonException)
             {
                 // if file is corrupted, treat it as empty since it is not the source of truth
             }

@@ -121,7 +121,7 @@
     <value>Restore tools defined in the local tool manifest.</value>
   </data>
   <data name="InvalidPackageWarning" xml:space="preserve">
-    <value>Warning: tool package '{0}' is invalid, please contact tool author:
+    <value>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</value>
   </data>
   <data name="PackageIdColumn" xml:space="preserve">

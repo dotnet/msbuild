@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Do not display the startup banner or the copyright message.</source>
-        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <target state="translated">不显示启动版权标志或版权消息。</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -50,7 +50,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">要发布的目标运行时。在创建自包含部署时使用。默认情况下发布依赖于框架的应用程序。</target>
+        <target state="translated">要发布的目标运行时。在创建自包含部署时使用。
+默认情况下发布依赖于框架的应用程序。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -61,7 +62,8 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">随应用程序一起发布.NET Core 运行时，这样就不需要在目标计算机上安装运行时。如果指定了运行时标识符，则默认值为 "true"。</target>
+        <target state="translated">随应用程序一起发布.NET Core 运行时，这样就不需要在目标计算机上安装运行时。
+如果指定了运行时标识符，则默认值为 "true"。</target>
         <note />
       </trans-unit>
     </body>

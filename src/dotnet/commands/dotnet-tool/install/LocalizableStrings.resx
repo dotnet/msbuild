@@ -124,7 +124,7 @@
     <value>The NuGet Package Id of the tool to install.</value>
   </data>
   <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
-    <value>Please specify one tool Package Id to install.</value>
+    <value>Specify one tool Package Id to install.</value>
   </data>
   <data name="VersionOptionName" xml:space="preserve">
     <value>VERSION</value>
@@ -188,7 +188,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
 * You mistyped the name of the tool.</value>
   </data>
   <data name="ToolInstallationFailedContactAuthor" xml:space="preserve">
-    <value>Tool '{0}' failed to install. Please contact the tool author for assistance.</value>
+    <value>Tool '{0}' failed to install. Contact the tool author for assistance.</value>
   </data>
   <data name="ToolInstallationRestoreFailed" xml:space="preserve">
     <value>The tool package could not be restored.</value>
@@ -203,7 +203,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
     <value>Specified version '{0}' is not a valid NuGet version range.</value>
   </data>
   <data name="InstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
-    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</value>
   </data>
   <data name="ToolPathOptionName" xml:space="preserve">
     <value>PATH</value>

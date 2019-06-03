@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Do not display the startup banner or the copyright message.</source>
-        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <target state="translated">No mostrar la pancarta de inicio ni el mensaje de copyright.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -50,7 +50,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">El tiempo de ejecución objetivo para publicar. Esto se utiliza al crear una implementación independiente. El valor predeterminado es publicar una aplicación dependiente del marco.</target>
+        <target state="translated">El tiempo de ejecución objetivo para publicar. Esto se utiliza al crear una implementación independiente.
+El valor predeterminado es publicar una aplicación dependiente del marco.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -61,7 +62,8 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publique el tiempo de ejecución de .NET Core con la aplicación para que no sea necesario instalar el tiempo de ejecución en el equipo de destino. El valor predeterminado es "true" si se especifica un identificador de tiempo de ejecución.</target>
+        <target state="translated">Publique el tiempo de ejecución de .NET Core con la aplicación para que no sea necesario instalar el tiempo de ejecución en el equipo de destino.
+El valor predeterminado es "true" si se especifica un identificador de tiempo de ejecución.</target>
         <note />
       </trans-unit>
     </body>

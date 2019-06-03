@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">"{0}" komutuyla eşleşen yürütülebilir dosya bulunamadı. Daha fazla bilgi edinmek için bkz. https://aka.ms/missing-command.</target>
+        <target state="translated">Belirtilen komut veya dosya bulunamadığından yürütülemedi.
+Bunun nedeni şunlardan biri olabilir:
+  * Yerleşik bir dotnet komutunu yanlış yazdınız.
+  * Bir .NET Core programını yürütmeyi amaçladınız, ancak {0} mevcut değil.
+  * Genel bir aracı çalıştırmayı amaçladınız, ancak adı bu olan dotnet ön ekli yürütülebilir dosya PATH üzerinde bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -63,7 +67,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0}, {2} ms içinde {1} ile çıktı.</target>
+        <target state="translated">&lt; {0}, {1} ile {2} ms'de çıktı.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -92,10 +96,10 @@ Possible reasons for this include:
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
-        <source>Cannot find command 'dotnet {0}', please run the following command to install
+        <source>Cannot find command 'dotnet {0}', run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="translated">'dotnet {0}' komutu bulunamıyor, yüklemek için lütfen aşağıdaki komutu çalıştırın
+        <target state="needs-review-translation">'dotnet {0}' komutu bulunamıyor, yüklemek için lütfen aşağıdaki komutu çalıştırın
 
 dotnet tool install --global {1}</target>
         <note />
@@ -107,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET Core SDK</source>
-        <target state="translated">.NET Core SDK</target>
+        <target state="translated">.NET Core SDK'sı</target>
         <note />
       </trans-unit>
     </body>

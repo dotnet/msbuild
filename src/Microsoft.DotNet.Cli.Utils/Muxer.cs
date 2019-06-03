@@ -2,17 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     public class Muxer
     {
         public static readonly string MuxerName = "dotnet";
-        private static readonly string s_muxerFileName = MuxerName + Constants.ExeSuffix;
 
-        private string _muxerPath;
+        private readonly string _muxerPath;
 
         internal string SharedFxVersion
         {
@@ -37,54 +36,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public Muxer()
         {
-            if (!TryResolveMuxerFromParentDirectories())
-            {
-                TryResolverMuxerFromPath();
-            }
+            _muxerPath = Process.GetCurrentProcess().MainModule.FileName;
         }
 
         public static string GetDataFromAppDomain(string propertyName)
         {
             return AppContext.GetData(propertyName) as string;
-        }
-
-        private bool TryResolveMuxerFromParentDirectories()
-        {
-            var fxDepsFile = GetDataFromAppDomain("FX_DEPS_FILE");
-            if (string.IsNullOrEmpty(fxDepsFile))
-            {
-                return false;
-            }
-
-            var muxerDir = new FileInfo(fxDepsFile).Directory?.Parent?.Parent?.Parent;
-            if (muxerDir == null)
-            {
-                return false;
-            }
-
-            var muxerCandidate = Path.Combine(muxerDir.FullName, s_muxerFileName);
-
-            if (!File.Exists(muxerCandidate))
-            {
-                return false;
-            }
-
-            _muxerPath = muxerCandidate;
-            return true;
-        }
-
-        private bool TryResolverMuxerFromPath()
-        {
-            var muxerPath = Env.GetCommandPath(MuxerName, Constants.ExeSuffix);
-
-            if (muxerPath == null || !File.Exists(muxerPath))
-            {
-                return false;
-            }
-
-            _muxerPath = muxerPath;
-
-            return true;
         }
     }
 }

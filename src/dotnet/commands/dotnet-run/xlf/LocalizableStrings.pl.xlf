@@ -22,9 +22,19 @@
         <target state="translated">Ścieżka do pliku projektu, który ma zostać uruchomiony (w przypadku tylko jednego projektu wartością domyślną jest bieżący katalog).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
-        <source>The build failed. Please fix the build errors and run again.</source>
-        <target state="translated">Kompilacja nie powiodła się. Napraw błędy kompilacji i uruchom ją ponownie.</target>
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="needs-review-translation">Kompilacja nie powiodła się. Napraw błędy kompilacji i uruchom ją ponownie.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -39,17 +49,17 @@
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
-        <target state="translated">Nie można uruchomić projektu
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="needs-review-translation">Nie można uruchomić projektu
 Projekt ma wiele platform docelowych. Określ platformę do uruchomienia przy użyciu elementu „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">Nie można uruchomić projektu.
+        <target state="needs-review-translation">Nie można uruchomić projektu.
 Upewnij się, że używany typ projektu umożliwia uruchamianie oraz że element „{0}” obsługuje ten projekt.
 Projekt z możliwością uruchamiania musi mieć moniker TFM z możliwością uruchomienia (np. netcoreapp2.0) i typ OutputType „Exe”.
 Bieżący element {1}: „{2}”.</target>
@@ -148,7 +158,12 @@ Bieżący element {1}: „{2}”.</target>
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to run for.</source>
-        <target state="translated">Docelowe środowisko uruchomieniowe na potrzeby uruchamiania.</target>
+        <target state="translated">Docelowe środowisko uruchomieniowe na potrzeby przebiegu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="new">The property '{0}' must be an object if it is specified.</target>
         <note />
       </trans-unit>
     </body>

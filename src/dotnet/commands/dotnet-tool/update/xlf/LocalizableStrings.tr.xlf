@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <target state="translated">Belirtilen '{0}' sürümü geçerli bir NuGet sürüm aralığı değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
-        <source>Update the tool and update from the local tool manifest.</source>
-        <target state="new">Update the tool and update from the local tool manifest.</target>
+        <source>Update the tool and the local tool manifest.</source>
+        <target state="needs-review-translation">Aracı güncelleştirin ve yerel araç bildiriminden güncelleştirin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="new">Path to the manifest file.</target>
+        <target state="translated">Bildirim dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -33,38 +33,38 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to update.</source>
-        <target state="translated">Lütfen güncelleştirilecek bir araç Paketi Kimliğini belirtin.</target>
+        <source>Specify one tool Package Id to update.</source>
+        <target state="needs-review-translation">Lütfen güncelleştirilecek bir araç Paketi Kimliğini belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
         <source>Tool '{0}' is up to date (version '{1}' manifest file {2}) .</source>
-        <target state="new">Tool '{0}' is up to date (version '{1}' manifest file {2}) .</target>
+        <target state="translated">'{0}' aracı güncel (sürüm '{1}' bildirim dosyası {2}).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolToLowerVersion">
         <source>The requested version {0} is lower than existing version {1} (manifest file {2}).</source>
-        <target state="new">The requested version {0} is lower than existing version {1} (manifest file {2}).</target>
+        <target state="translated">İstenen sürüm ({0}) mevcut sürümünden ({1}) (bildirim dosyası {2}) düşük.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocalToolSucceeded">
         <source>Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</source>
-        <target state="new">Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</target>
+        <target state="translated">'{0}' aracı, '{1}' sürümünden '{2}' (bildirim dosyası {3}) sürümüne başarıyla güncelleştirildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
-        <target state="new">The requested version {0} is lower than existing version {1}.</target>
+        <target state="translated">İstenen sürümü ({0}) mevcut sürümünden ({1}) düşük.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</source>
-        <target state="new">The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</target>
+        <target state="translated">Yerel seçenek (--local), genel seçenek (--global) ve aracı yolu seçeneği (--tool-path) birlikte kullanılamaz. Seçeneklerden yalnızca birini belirtin: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version range of the tool package to update to.</source>
-        <target state="needs-review-translation">NuGet’teki araç paketinin sürümü.</target>
+        <target state="translated">Araç paketinin güncelleştirileceği sürüm aralığı.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
@@ -103,13 +103,13 @@
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Lütfen genel seçeneğini (--global) veya araç yolu seçeneğini (--tool-path) belirtin.</target>
+        <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">Lütfen genel seçeneğini (--global) veya araç yolu seçeneğini (--tool-path) belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global), araç yolu seçeneği (--tool-path) ile çakışıyor. Lütfen seçeneklerden yalnızca birini belirtin.</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
+        <target state="needs-review-translation">(--global), araç yolu seçeneği (--tool-path) ile çakışıyor. Lütfen seçeneklerden yalnızca birini belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -118,8 +118,13 @@
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
-        <source>Tool '{0}' is not currently installed.</source>
-        <target state="translated">'{0}' aracı şu anda yüklü değil.</target>
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are updated using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="needs-review-translation">'{0}' aracı şu anda yüklü değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">
@@ -164,7 +169,7 @@
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="new">VERSION</target>
+        <target state="translated">SÜRÜM</target>
         <note />
       </trans-unit>
     </body>

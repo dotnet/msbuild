@@ -8,15 +8,15 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. 도구 작성자에게 문의하세요.
+        <target state="needs-review-translation">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. 도구 작성자에게 문의하세요.
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NoToolsWereRestored">
         <source>No tools were restored.</source>
-	<target state="new">No tools were restored.</target>
+        <target state="translated">복원된 도구가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
@@ -41,7 +41,7 @@
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="translated">소스</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -51,7 +51,7 @@
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="translated">파일</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -61,12 +61,12 @@
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">버전</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageFailedToRestore">
         <source>Package "{0}" failed to restore, due to {1}</source>
-        <target state="translated">{1} 때문에 "{0}" 패키지를 복원하지 못했습니다.</target>
+        <target state="translated">{1}(으)로 인해 "{0}" 패키지를 복원하지 못했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
@@ -76,7 +76,7 @@
       </trans-unit>
       <trans-unit id="CommandsMismatch">
         <source>The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</source>
-        <target state="translated">도구 매니페스트 파일에 지정된 {0} 명령이 패키지 ID가 {1}인 패키지에 포함되어 있지 않습니다. 패키지에 포함된 명령은 {2}입니다.</target>
+        <target state="translated">도구 매니페스트 파일에 지정된 {0} 명령이 패키지 ID가 {1}인 패키지에 포함되지 않았습니다. 패키지에 포함된 명령은 {2}입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
@@ -86,7 +86,7 @@
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="translated">매니페스트 파일의 경로입니다.</target>
+        <target state="translated">매니페스트 파일 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreSuccessful">
@@ -104,7 +104,8 @@
 {0}</source>
         <target state="translated">명령 이름이 충돌합니다. 명령 이름은 대/소문자를 구분하지 않습니다.
 {0}</target>
-        <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
+        <note />
+      </trans-unit>
       <trans-unit id="PackagesCommandNameCollisionForOnePackage">
         <source>A command "{0}" in package "{1}"</source>
         <target state="translated">"{1}" 패키지의 "{0}" 명령</target>

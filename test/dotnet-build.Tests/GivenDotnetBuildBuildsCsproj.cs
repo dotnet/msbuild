@@ -40,6 +40,23 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         }
 
         [Fact]
+        public void ItBuildsOnlyTheSpecifiedTarget()
+        {
+            var testAppName = "NonDefaultTarget";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance(testAppName)
+                .WithSourceFiles();
+
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute("--no-restore --nologo /t:PrintMessage")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
+        }
+
+        [Fact]
         public void ItImplicitlyRestoresAProjectWhenBuilding()
         {
             var testAppName = "MSBuildTestApp";

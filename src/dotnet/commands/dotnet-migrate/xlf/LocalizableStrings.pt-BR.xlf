@@ -77,8 +77,8 @@ O padrão é a versão do SDK em dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
-        <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="translated">A migração do projeto foi concluída. Acesse https://aka.ms/coremigration para relatar qualquer problema encontrado ou pedir ajuda.</target>
+        <source>The project migration has finished. Visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
+        <target state="needs-review-translation">A migração do projeto foi concluída. Acesse https://aka.ms/coremigration para relatar qualquer problema encontrado ou pedir ajuda.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">

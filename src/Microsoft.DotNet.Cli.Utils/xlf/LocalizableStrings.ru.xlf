@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Не найден исполняемый файл, соответствующий команде "{0}". Дополнительные сведения см. на странице https://aka.ms/missing-command.</target>
+        <target state="translated">Не удалось выполнить, так как не найдены указанная команда или указанный файл.
+Возможные причины:
+  * Вы неправильно набрали встроенную команду dotnet.
+  * Вы планировали выполнить программу .NET Core, однако {0} не существует.
+  * Вы хотели запустить глобальное средство, но по указанному в PATH пути не удалось найти исполняемый файл с префиксом dotnet, имеющий такое имя.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -63,7 +67,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} завершила работу с результатом {1} за {2} мс.</target>
+        <target state="translated">&lt; {0} завершил работу с {1} за {2} мс.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -92,10 +96,10 @@ Possible reasons for this include:
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
-        <source>Cannot find command 'dotnet {0}', please run the following command to install
+        <source>Cannot find command 'dotnet {0}', run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="translated">Не удается найти команду "dotnet {0}". Выполните следующую команду для установки:
+        <target state="needs-review-translation">Не удается найти команду "dotnet {0}". Выполните следующую команду для установки:
 
 dotnet tool install --global {1}</target>
         <note />

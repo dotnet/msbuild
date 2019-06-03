@@ -77,8 +77,8 @@ Standardmäßig wird die Version des SDK in "dotnet new" verwendet.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
-        <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="translated">Die Projektmigration ist abgeschlossen. Unter https://aka.ms/coremigration können Sie aufgetretene Probleme melden oder Hilfe erhalten.</target>
+        <source>The project migration has finished. Visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
+        <target state="needs-review-translation">Die Projektmigration ist abgeschlossen. Unter https://aka.ms/coremigration können Sie aufgetretene Probleme melden oder Hilfe erhalten.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">

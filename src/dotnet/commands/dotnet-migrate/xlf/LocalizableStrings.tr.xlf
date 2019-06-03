@@ -77,8 +77,8 @@ Yeni dotnet’teki SDK sürümü, varsayılan değerdir.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
-        <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="translated">Proje geçirme işlemi tamamlandı. Karşılaştığınız sorunları bildirmek veya yardım istemek için lütfen https://aka.ms/coremigration sayfasını ziyaret edin.</target>
+        <source>The project migration has finished. Visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
+        <target state="needs-review-translation">Proje geçirme işlemi tamamlandı. Karşılaştığınız sorunları bildirmek veya yardım istemek için lütfen https://aka.ms/coremigration sayfasını ziyaret edin.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">

@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">ローカル オプション (--local) 、グローバル オプション (--global) 、ツールのパスを指定するオプション (--tool-path) は、一度に１つつしか指定できません。これらのオプションのうち1つのみを指定してください: {0} 。</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -16,24 +16,24 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
-        <target state="translated">ツールをインストールし、ローカル ツール マニフェスト (規定値) に追加します。</target>
+        <target state="translated">ツールをインストールし、ローカル ツール マニフェスト (既定値) に追加します。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
         <source>The local option(--local) does not support the framework option (--framework).</source>
-        <target state="translated">ローカル オプション (--local) は、フレームワーク オプション (--framework) をサポートしません。</target>
+        <target state="translated">ローカル オプション (--local) は、フレームワーク オプション (--framework) をサポートしていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
         <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="needs-review-translation">次のコマンドを使用してこのディレクトリからツールを実行することができます: dotnet tool run {0}
-ツール '{1}' (バージョン '{2}') は正常にインストールされました。マニフェスト ファイル {3} にエントリが追加されました。</target>
+        <target state="translated">次のコマンドを使用してこのディレクトリからツールを呼び出すことができます: 'dotnet tool run {0}' または 'dotnet {0}'。
+ツール '{1}' (バージョン '{2}') が正常にインストールされました。マニフェスト ファイル {3} にエントリが追加されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="translated">マニフェスト ファイルのパス。</target>
+        <target state="translated">マニフェスト ファイルへのパス。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
@@ -44,7 +44,8 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
       <trans-unit id="NoManifestGuide">
         <source>If you intended to install a global tool, add `--global` to the command.
 If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
-        <target state="needs-review-translation">グローバル ツールをインストールする場合、'-g' を追加します。ツール マニフェストを使用する場合には、'dotnet new tool-manifest' を使用してマニフェストを最初に作成する必要があります。</target>
+        <target state="translated">グローバル ツールをインストールする場合、コマンドに `--global` を追加します。
+マニフェストを作成する場合、通常はリポジトリのルート ディレクトリで `dotnet new tool-manifest` を使用します。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -54,7 +55,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install global or local tool. Local tools are added to manifest and restored.</source>
-        <target state="translated">グローバル ツールまたはローカル ツールをインストールします。ローカル ツールはマニフェストに追加され、復元されます。</target>
+        <target state="translated">グローバルまたはローカルのツールをインストールします。ローカル ツールはマニフェストに追加され、復元されます。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -78,13 +79,13 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to install.</source>
-        <target state="translated">インストールするツール パッケージの ID を指定してください。</target>
+        <source>Specify one tool Package Id to install.</source>
+        <target state="needs-review-translation">インストールするツール パッケージの ID を指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool for the current user.</source>
-        <target state="translated">現在のユーザー用にツールをインストールします。</target>
+        <target state="translated">現在のユーザーに対してツールをインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -98,8 +99,8 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
-        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="translated">ツール '{0}' をインストールできませんでした。ツールの作成者にお問い合わせください。</target>
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="needs-review-translation">ツール '{0}' をインストールできませんでした。ツールの作成者にお問い合わせください。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
