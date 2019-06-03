@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
@@ -49,6 +50,9 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] PackagesToDownload { get; set; }
 
         [Output]
+        public ITaskItem[] LegacyFrameworkPackages { get; set; }
+
+        [Output]
         public ITaskItem[] RuntimeFrameworks { get; set; }
 
         [Output]
@@ -77,9 +81,10 @@ namespace Microsoft.NET.Build.Tasks
                               NormalizeVersion(kfr.TargetFramework.Version) == normalizedTargetFrameworkVersion)
                 .ToList();
 
-            var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec);
+            var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec, StringComparer.OrdinalIgnoreCase);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
+            List<ITaskItem> legacyFrameworkPackages = new List<ITaskItem>();
             List<ITaskItem> runtimeFrameworks = new List<ITaskItem>();
             List<ITaskItem> targetingPacks = new List<ITaskItem>();
             List<ITaskItem> runtimePacks = new List<ITaskItem>();
@@ -87,9 +92,37 @@ namespace Microsoft.NET.Build.Tasks
 
             HashSet<string> unrecognizedRuntimeIdentifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+            bool windowsOnlyErrorLogged = false;
             foreach (var knownFrameworkReference in knownFrameworkReferencesForTargetFramework)
             {
                 frameworkReferenceMap.TryGetValue(knownFrameworkReference.Name, out ITaskItem frameworkReference);
+
+                // Handle Windows-only frameworks on non-Windows platforms
+                if (knownFrameworkReference.IsWindowsOnly &&
+                    !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // It is an error to reference the framework from non-Windows
+                    if (!windowsOnlyErrorLogged && frameworkReference != null)
+                    {
+                        Log.LogError(Strings.WindowsDesktopFrameworkRequiresWindows);
+                        windowsOnlyErrorLogged = true;
+                    }
+
+                    // Ignore (and don't download) this known framework reference as it requires Windows
+                    continue;
+                }
+
+                if (frameworkReference != null && !string.IsNullOrEmpty(knownFrameworkReference.LegacyFrameworkPackages))
+                {
+                    foreach (var packageAndVersion in knownFrameworkReference.LegacyFrameworkPackages.Split(';'))
+                    {
+                        var items = packageAndVersion.Split('/');
+                        TaskItem packageToReference = new TaskItem(items[0]);
+                        packageToReference.SetMetadata(MetadataKeys.Version, items[1]);
+
+                        legacyFrameworkPackages.Add(packageToReference);
+                    }
+                }
 
                 //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                 TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
@@ -109,6 +142,10 @@ namespace Microsoft.NET.Build.Tasks
                 targetingPack.SetMetadata("TargetingPackFormat", knownFrameworkReference.TargetingPackFormat);
                 targetingPack.SetMetadata("TargetFramework", knownFrameworkReference.TargetFramework.GetShortFolderName());
                 targetingPack.SetMetadata("RuntimeFrameworkName", knownFrameworkReference.RuntimeFrameworkName);
+                if (!string.IsNullOrEmpty(knownFrameworkReference.Profile))
+                {
+                    targetingPack.SetMetadata("Profile", knownFrameworkReference.Profile);
+                }
 
                 string targetingPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
@@ -137,6 +174,17 @@ namespace Microsoft.NET.Build.Tasks
 
                 var runtimeFrameworkVersion = GetRuntimeFrameworkVersion(frameworkReference, knownFrameworkReference);
 
+                string isTrimmable = null;
+                if (frameworkReference != null)
+                {
+                    // Allow IsTrimmable to be overridden via metadata on FrameworkReference
+                    isTrimmable = frameworkReference.GetMetadata(MetadataKeys.IsTrimmable);
+                }
+                if (string.IsNullOrEmpty(isTrimmable))
+                {
+                    isTrimmable = knownFrameworkReference.IsTrimmable;
+                }
+
                 bool processedPrimaryRuntimeIdentifier = false;
 
                 if ((SelfContained || ReadyToRunEnabled) &&
@@ -144,7 +192,7 @@ namespace Microsoft.NET.Build.Tasks
                     !string.IsNullOrEmpty(knownFrameworkReference.RuntimePackNamePatterns))
                 {
                     ProcessRuntimeIdentifier(RuntimeIdentifier, knownFrameworkReference, runtimeFrameworkVersion,
-                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload);
+                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable);
 
                     processedPrimaryRuntimeIdentifier = true;
                 }
@@ -162,7 +210,7 @@ namespace Microsoft.NET.Build.Tasks
                         //  Pass in null for the runtimePacks list, as for these runtime identifiers we only want to
                         //  download the runtime packs, but not use the assets from them
                         ProcessRuntimeIdentifier(runtimeIdentifier, knownFrameworkReference, runtimeFrameworkVersion,
-                            unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks: null, packagesToDownload);
+                            unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks: null, packagesToDownload, isTrimmable);
                     }
                 }
 
@@ -176,10 +224,15 @@ namespace Microsoft.NET.Build.Tasks
                     runtimeFrameworks.Add(runtimeFramework);
                 }
             }
-                                                      
+
             if (packagesToDownload.Any())
             {
                 PackagesToDownload = packagesToDownload.ToArray();
+            }
+
+            if (legacyFrameworkPackages.Any())
+            {
+                LegacyFrameworkPackages = legacyFrameworkPackages.ToArray();
             }
 
             if (runtimeFrameworks.Any())
@@ -205,7 +258,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private void ProcessRuntimeIdentifier(string runtimeIdentifier, KnownFrameworkReference knownFrameworkReference,
             string runtimeFrameworkVersion, HashSet<string> unrecognizedRuntimeIdentifiers,
-            List<ITaskItem> unavailableRuntimePacks, List<ITaskItem> runtimePacks, List<ITaskItem> packagesToDownload)
+            List<ITaskItem> unavailableRuntimePacks, List<ITaskItem> runtimePacks, List<ITaskItem> packagesToDownload, string isTrimmable)
         {
             var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
             var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';');
@@ -249,6 +302,7 @@ namespace Microsoft.NET.Build.Tasks
                         runtimePackItem.SetMetadata(MetadataKeys.PackageVersion, runtimeFrameworkVersion);
                         runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
                         runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
+                        runtimePackItem.SetMetadata(MetadataKeys.IsTrimmable, isTrimmable);
 
                         runtimePacks.Add(runtimePackItem);
                     }
@@ -351,6 +405,25 @@ namespace Microsoft.NET.Build.Tasks
             public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
 
             public string RuntimePackRuntimeIdentifiers => _item.GetMetadata("RuntimePackRuntimeIdentifiers");
+
+            public string IsTrimmable => _item.GetMetadata(MetadataKeys.IsTrimmable);
+
+            public bool IsWindowsOnly => _item.HasMetadataValue("IsWindowsOnly", "true");
+
+            public string Profile => _item.GetMetadata("Profile");
+
+            public string LegacyFrameworkPackages
+            {
+                get
+                {
+                    var packages = _item.GetMetadata("LegacyFrameworkPackages");
+                    if (string.IsNullOrEmpty(packages))
+                    {
+                        packages = _item.GetMetadata("PackagesToReference");
+                    }
+                    return packages;
+                }
+            }
 
             public NuGetFramework TargetFramework { get; }
         }

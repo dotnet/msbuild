@@ -267,7 +267,7 @@
   </data>
   <data name="CouldNotDetermineWinner_DoesntExist" xml:space="preserve">
     <value>NETSDK1038: Could not determine winner because '{0}' does not exist.</value>
-    <comment>{StrBegin="NETSDK1001: "}</comment>
+    <comment>{StrBegin="NETSDK1038: "}</comment>
   </data>
   <data name="CouldNotDetermineWinner_FileVersion" xml:space="preserve">
     <value>NETSDK1039: Could not determine a winner because '{0}' has no file version.</value>
@@ -327,7 +327,7 @@
   </data>
   <data name="PackAsToolCannotSupportSelfContained" xml:space="preserve">
     <value>NETSDK1053: Pack as tool does not support self contained.</value>
-    <comment>{StrBegin="NETSDK1001: "}</comment>
+    <comment>{StrBegin="NETSDK1053: "}</comment>
   </data>
   <data name="DotnetToolOnlySupportNetcoreapp" xml:space="preserve">
     <value>NETSDK1054: only supports .NET Core.</value>
@@ -399,6 +399,7 @@ The following are names of parameters or literal values and should not be transl
   </data>
   <data name="PackageReferenceVersionNotRecommended" xml:space="preserve">
     <value>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</value>
+    <comment>{StrBegin="NETSDK1071: "}</comment>
   </data>
   <data name="AppHostNotWindowsCLI" xml:space="preserve">
     <value>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</value>
@@ -494,21 +495,21 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1093: "}</comment>
   </data>
   <data name="ReadyToRunNoValidRuntimePackageError" xml:space="preserve">
-    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the ReadyToRun property to false, or use a supported runtime identifier when publishing.</value>
+    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</value>
     <comment>{StrBegin="NETSDK1094: "}</comment>
   </data>
   <data name="ReadyToRunTargetNotSuppotedError" xml:space="preserve">
-    <value>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the ReadyToRun property to false.</value>
+    <value>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</value>
     <comment>{StrBegin="NETSDK1095: "}</comment>
   </data>
   <data name="ReadyToRunCompilationFailed" xml:space="preserve">
-    <value>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the ReadyToRun property to false.</value>
+    <value>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</value>
     <comment>{StrBegin="NETSDK1096: "}</comment>
   </data>
   <data name="CannotHaveSingleFileWithoutRuntimeIdentifier" xml:space="preserve">
     <value>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</value>
     <comment>{StrBegin="NETSDK1097: "}</comment>
-  </data>  
+  </data>
   <data name="CannotHaveSingleFileWithoutAppHost" xml:space="preserve">
     <value>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</value>
     <comment>{StrBegin="NETSDK1098: "}</comment>
@@ -516,5 +517,17 @@ The following are names of parameters or literal values and should not be transl
   <data name="CannotHaveSingleFileWithoutExecutable" xml:space="preserve">
     <value>NETSDK1099: Publishing to a single-file is only supported for executable applications.</value>
     <comment>{StrBegin="NETSDK1099: "}</comment>
+  </data>
+  <data name="WindowsDesktopFrameworkRequiresWindows" xml:space="preserve">
+    <value>NETSDK1100: Windows is required to build Windows desktop applications.</value>
+    <comment>{StrBegin="NETSDK1100: "}</comment>
+  </data>
+  <data name="ILLinkInformation" xml:space="preserve">
+    <value>NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/illink</value>
+    <comment>{StrBegin="NETSDK1101: "}</comment>
+  </data>
+  <data name="ILLinkNotSupportedError" xml:space="preserve">
+    <value>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</value>
+    <comment>{StrBegin="NETSDK1102: "}</comment>"
   </data>
 </root>

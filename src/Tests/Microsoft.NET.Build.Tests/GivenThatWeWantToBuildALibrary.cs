@@ -38,14 +38,13 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", identifier: targetFramework)
                 .WithSource()
-                .WithTargetFramework(targetFramework, "TestLibrary")
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithTargetFramework(targetFramework, "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
-                .Execute()
+                .Execute("/restore", "/bl:" + Path.Combine(libraryProjectDirectory, "build.binlog"))
                 .Should()
                 .Pass();
 

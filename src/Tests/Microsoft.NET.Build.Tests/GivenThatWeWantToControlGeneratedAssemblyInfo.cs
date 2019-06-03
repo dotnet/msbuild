@@ -83,9 +83,9 @@ namespace Microsoft.NET.Build.Tests
                 expectedInfo.Remove(attributeToOptOut);
             }
 
-            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v1.1");
+            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v2.1");
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp1.1", "Release").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp2.1", "Release").FullName, "HelloWorld.dll");
             var actualInfo = AssemblyInfo.Get(assemblyPath);
 
             actualInfo.Should().Equal(expectedInfo);
@@ -260,7 +260,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp2.1")]
         [InlineData("net45")]
         public void It_respects_version_prefix(string targetFramework)
         {
@@ -289,7 +289,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp2.1")]
         [InlineData("net45")]
         public void It_respects_version_changes_on_incremental_build(string targetFramework)
         {

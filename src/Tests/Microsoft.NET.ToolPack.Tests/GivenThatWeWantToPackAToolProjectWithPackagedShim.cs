@@ -419,7 +419,7 @@ namespace Microsoft.NET.ToolPack.Tests
                         shimPath,
                         null);
 
-                    var command = new ShimCommand(Log, shimPath)
+                    var command = new RunExeCommand(Log, shimPath)
                     {
                         WorkingDirectory = simulateToolPathRoot
                     };

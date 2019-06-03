@@ -52,9 +52,7 @@ namespace Microsoft.NET.Publish.Tests
 
             string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies");
 
-            Command runAppCommand = Command.Create(
-                TestContext.Current.ToolsetUnderTest.DotNetHostPath,
-                new[] { appPath, "one", "two" });
+            TestCommand runAppCommand = new DotnetCommand(Log,  appPath, "one", "two" );
 
             string expectedOutput =
 @"{
@@ -63,7 +61,6 @@ namespace Microsoft.NET.Publish.Tests
 }";
 
             runAppCommand
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass()
@@ -168,7 +165,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_projects_with_filter_and_rid()
         {
             string project = "SimpleDependencies";
-            string targetFramework = "netcoreapp2.0";
+            string targetFramework = "netcoreapp2.1";
             var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)

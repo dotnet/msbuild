@@ -47,8 +47,7 @@ namespace Microsoft.NET.Build.Tests
                 "5.pdb",
             });
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] {Path.Combine(outputDirectory.FullName, "1.dll")})
-                .CaptureStdOut()
+            new DotnetCommand(Log, Path.Combine(outputDirectory.FullName, "1.dll"))
                 .Execute()
                 .Should()
                 .Pass()
@@ -91,8 +90,7 @@ namespace Microsoft.NET.Build.Tests
                 "2.pdb",
             });
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] {Path.Combine(outputDirectory.FullName, "1.dll")})
-                .CaptureStdOut()
+            new DotnetCommand(Log, Path.Combine(outputDirectory.FullName, "1.dll"))
                 .Execute()
                 .Should()
                 .Pass()

@@ -177,7 +177,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CheckForTargetInAssetsFile
       AssetsFilePath="$(ProjectAssetsFile)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
-      RuntimeIdentifier="$(RuntimeIdentifier)" />
+      RuntimeIdentifier="$(RuntimeIdentifier)"
+      Condition=" '$(DesignTimeBuild)' != 'true'"/>
 
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
@@ -246,12 +247,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
       DisableRuntimeTargets="$(DisableRuntimeTargets)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
+      DisableTransitiveFrameworkReferences="$(DisableTransitiveFrameworkReferences)"
       DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
       VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
       ExpectedPlatformPackages="@(ExpectedPlatformPackages)"
-      SatelliteResourceLanguages="$(SatelliteResourceLanguages)">
+      SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
+      DesignTimeBuild="$(DesignTimeBuild)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->
@@ -259,6 +262,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiersResolvePackageAssets" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
+      <Output TaskParameter="FrameworkReferences" ItemName="TransitiveFrameworkReference" />
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
       <Output TaskParameter="ResourceAssemblies" ItemName="ResourceCopyLocalItems" />
       <Output TaskParameter="RuntimeAssemblies" ItemName="RuntimeCopyLocalItems" />

@@ -16,6 +16,9 @@ if "%architecture%" == "" (
 if "%OS%" == "" (
     echo EnvVar OS should be set; exiting...
     exit /b 1)
+if "%TestFullMSBuild%" == "" (
+    set TestFullMSBuild=false
+    )
 if /I not "%runType%" == "private" if /I not "%runType%" == "rolling" (
     echo EnvVar runType should be set; exiting...
     exit /b 1)
@@ -46,7 +49,7 @@ if "%GIT_BRANCH:~0,7%" == "origin/" (set GIT_BRANCH_WITHOUT_ORIGIN=%GIT_BRANCH:o
 
 for /f %%x in ('powershell -NoProfile -NoLogo -Command "Get-Date -Date (Get-Date).ToUniversalTime() -UFormat '%%Y-%%m-%%dT%%H:%%M:%%SZ'"') do (set timeStamp=%%x)
 
-set benchViewName=SDK perf %OS% %architecture% %configuration% %runType% %GIT_BRANCH_WITHOUT_ORIGIN%
+set benchViewName=SDK perf %OS% %architecture% %configuration% TestFullMSBuild-%TestFullMSBuild% %runType% %GIT_BRANCH_WITHOUT_ORIGIN%
 if /I "%runType%" == "private" (set benchViewName=%benchViewName% %BenchviewCommitName%)
 if /I "%runType%" == "rolling" (set benchViewName=%benchViewName% %GIT_COMMIT%)
 echo BenchViewName: "%benchViewName%"
@@ -55,7 +58,7 @@ echo Creating: "%perfWorkingDirectory%\submission-metadata.json"
 %pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission-metadata.py" --name "%benchViewName%" --user-email "dotnet-bot@microsoft.com" -o "%perfWorkingDirectory%\submission-metadata.json"
 
 echo Creating: "%perfWorkingDirectory%\build.json"
-%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\build.py" git --branch %GIT_BRANCH_WITHOUT_ORIGIN% --type "%runType%" --source-timestamp "%timeStamp%" -o "%perfWorkingDirectory%\build.json"
+%pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\build.py" git --branch "%GIT_BRANCH_WITHOUT_ORIGIN%" --type "%runType%" --repository "https://github.com/dotnet/sdk" --source-timestamp "%timeStamp%" -o "%perfWorkingDirectory%\build.json"
 
 echo Creating: "%perfWorkingDirectory%\machinedata.json"
 %pythonCmd% "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\machinedata.py" -o "%perfWorkingDirectory%\machinedata.json"
@@ -77,6 +80,7 @@ echo Creating: "%perfWorkingDirectory%\submission.json"
                     --type "%runType%" ^
                     --config-name "%configuration%" ^
                     --config Configuration "%configuration%" ^
+                    --config TestFullMSBuild "%TestFullMSBuild%" ^
                     --config OS "%OS%" ^
                     --architecture "%architecture%" ^
                     --machinepool "perfsnake" ^

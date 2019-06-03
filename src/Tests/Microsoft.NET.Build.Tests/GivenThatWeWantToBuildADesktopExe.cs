@@ -35,12 +35,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
-                })
+                .WithTargetFramework(targetFramework)
                 .Restore(Log);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
@@ -113,9 +108,8 @@ namespace Microsoft.NET.Build.Tests
                     .Pass();
 
                 var exe = Path.Combine(buildCommand.GetOutputDirectory("net46").FullName, "DesktopMinusRid.exe");
-                var runCommand = Command.Create(exe, Array.Empty<string>());
+                var runCommand = new RunExeCommand(Log, exe);
                 runCommand
-                    .CaptureStdOut()
                     .Execute()
                     .Should()
                     .Pass()
@@ -194,9 +188,8 @@ namespace Microsoft.NET.Build.Tests
                 {
                     var exe = Path.Combine(directory.FullName, "DesktopMinusRid.exe");
 
-                    var runCommand = Command.Create(exe, Array.Empty<string>());
+                    var runCommand = new RunExeCommand(Log, exe);
                     runCommand
-                        .CaptureStdOut()
                         .Execute()
                         .Should()
                         .Pass()

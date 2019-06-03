@@ -17,6 +17,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public bool IsExe { get; set; }
 
+        public bool IsWinExe { get; set; }
+
+        public string ProjectSdk { get; set; }
+
         //  Applies to SDK Projects
         public string TargetFrameworks { get; set; }
 
@@ -32,6 +36,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 
         public List<string> References { get; } = new List<string>();
+
+        public List<string> FrameworkReferences { get; } = new List<string>();
 
         public List<TestPackageReference> PackageReferences { get; } = new List<TestPackageReference>();
 
@@ -131,6 +137,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             var projectXml = XDocument.Load(sourceProject);
 
             var ns = projectXml.Root.Name.Namespace;
+
+            if (ProjectSdk != null)
+            {
+                projectXml.Root.Attribute("Sdk").Value = ProjectSdk;
+            }
 
             var propertyGroup = projectXml.Root.Elements(ns + "PropertyGroup").First();
 
@@ -239,9 +250,13 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 }
             }
 
-            if (this.IsExe)
+            if (this.IsExe && !this.IsWinExe)
             {
                 propertyGroup.Element(ns + "OutputType").SetValue("Exe");
+            }
+            else if (this.IsWinExe)
+            {
+                propertyGroup.Element(ns + "OutputType").SetValue("WinExe");
             }
 
             if (this.ReferencedProjects.Any())
@@ -276,6 +291,17 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         new XAttribute("Include", reference)));
                 }
             }
+
+            if (this.FrameworkReferences.Any())
+            {
+                var frameworkReferenceItemGroup = new XElement(ns + "ItemGroup");
+                projectXml.Root.Add(frameworkReferenceItemGroup);
+                foreach (var frameworkReference in FrameworkReferences)
+                {
+                    frameworkReferenceItemGroup.Add(new XElement(ns + "FrameworkReference",
+                        new XAttribute("Include", frameworkReference)));
+                }
+            }
             
             if (this.CopyFilesTargets.Any())
             {
@@ -285,10 +311,16 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         new XAttribute("Name", copyFilesTarget.TargetName),
                         new XAttribute("AfterTargets", copyFilesTarget.TargetToRunAfter));
 
-                    target.Add(new XElement(ns + "Copy",
+                    var copyElement = new XElement(ns + "Copy",
                         new XAttribute("SourceFiles", copyFilesTarget.SourceFiles),
-                        new XAttribute("DestinationFolder", copyFilesTarget.Destination)));
+                        new XAttribute("DestinationFolder", copyFilesTarget.Destination));
 
+                    if (!string.IsNullOrEmpty(copyFilesTarget.Condition))
+                    {
+                        copyElement.SetAttributeValue("Condition", copyFilesTarget.Condition);
+                    }
+
+                    target.Add(copyElement);
                     projectXml.Root.Add(target);
                 }
             }
@@ -302,7 +334,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             {
                 string source;
 
-                if (this.IsExe)
+                if (this.IsExe || this.IsWinExe)
                 {
                     source =
     @"using System;
@@ -412,36 +444,6 @@ namespace {this.Name}
             }
             var requestedReferenceAssembliesPath = Path.Combine(new DirectoryInfo(net461referenceAssemblies).Parent.FullName, targetFrameworkVersion);
             return Directory.Exists(requestedReferenceAssembliesPath);
-        }
-
-        public override string ToString()
-        {
-            var ret = new StringBuilder();
-            if (!string.IsNullOrEmpty(Name))
-            {
-                ret.Append(Name);
-            }
-            if (IsSdkProject)
-            {
-                ret.Append("Sdk");
-            }
-            if (IsExe)
-            {
-                ret.Append("Exe");
-            }
-            if (!string.IsNullOrEmpty(TargetFrameworks))
-            {
-                ret.Append(TargetFrameworks);
-            }
-            if (!string.IsNullOrEmpty(TargetFrameworkProfile))
-            {
-                ret.Append(TargetFrameworkProfile);
-            }
-            else if (!string.IsNullOrEmpty(TargetFrameworkVersion))
-            {
-                ret.Append(TargetFrameworkVersion);
-            }
-            return ret.ToString();
         }
     }
 }

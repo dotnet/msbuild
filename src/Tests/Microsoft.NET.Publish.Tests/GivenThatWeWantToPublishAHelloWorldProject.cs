@@ -54,8 +54,7 @@ namespace Microsoft.NET.Publish.Tests
             outputDirectory.Should().HaveFiles(filesPublished);
             publishDirectory.Should().HaveFiles(filesPublished);
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "HelloWorld.dll") })
-                .CaptureStdOut()
+            new DotnetCommand(Log, Path.Combine(publishDirectory.FullName, "HelloWorld.dll"))
                 .Execute()
                 .Should()
                 .Pass()
@@ -69,6 +68,11 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("netcoreapp3.0")]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var helloWorldAsset = _testAssetsManager
@@ -112,8 +116,7 @@ namespace Microsoft.NET.Publish.Tests
             publishDirectory.Should().NotHaveFiles(filesNotPublished);
 
             string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
-            Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .CaptureStdOut()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()
                 .Should()
                 .Pass()
@@ -124,7 +127,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Publish_self_contained_app_with_dot_in_the_name()
         {
-            var targetFramework = "netcoreapp2.0";
+            var targetFramework = "netcoreapp2.1";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             TestProject testProject = new TestProject()
@@ -143,7 +146,7 @@ public static class Program
 {
     public static void Main()
     {
-        Console.WriteLine(""Hello from a netcoreapp2.0.!"");
+        Console.WriteLine(""Hello from a netcoreapp2.1!"");
     }
 }
 ";
@@ -255,6 +258,10 @@ public static class Program
             }
 
             var targetFramework = "netcoreapp2.0";
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
             var rid = ridSpecific ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
 
             TestProject testProject = new TestProject()
@@ -332,7 +339,7 @@ public static class Program
                 .And
                 .OnlyHavePackagesWithPathProperties();
 
-            ICommand runCommand;
+            TestCommand runCommand;
 
             if (selfContained)
             {
@@ -363,7 +370,7 @@ public static class Program
                     .And
                     .OnlyHaveNativeAssembliesWhichAreInFolder(rid, publishDirectory.FullName, testProject.Name);
 
-                runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { });
+                runCommand = new RunExeCommand(Log, selfContainedExecutableFullPath);
             }
             else
             {
@@ -380,11 +387,10 @@ public static class Program
                 dependencyContext.Should()
                     .OnlyHaveRuntimeAssemblies(rid ?? "", testProject.Name);
 
-                runCommand = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, $"{testProject.Name}.dll") });
+                runCommand = new DotnetCommand(Log, Path.Combine(publishDirectory.FullName, $"{testProject.Name}.dll"));
             }
 
             runCommand
-                    .CaptureStdOut()
                     .Execute()
                     .Should()
                     .Pass()
@@ -538,6 +544,86 @@ public static class Program
                 .NotHaveStdOutContaining("Duplicate items are present")
                 .And
                 .NotHaveStdOutContaining("Duplicate filenames are present");
+        }
+
+        [Theory]
+        [InlineData(null, null)]
+        [InlineData(false, null)]
+        [InlineData(true, null)]
+        [InlineData(null, false)]
+        [InlineData(null, true)]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(true, true)]
+        public void It_publishes_with_a_publish_profile(bool? selfContained, bool? useAppHost)
+        {
+            var tfm = "netcoreapp2.2";
+            var rid = EnvironmentInfo.GetCompatibleRid(tfm);
+
+            var testProject = new TestProject()
+            {
+                Name = "ConsoleWithPublishProfile",
+                TargetFrameworks = tfm,
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish",
+                IsExe = true,
+            };
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
+            var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
+            Directory.CreateDirectory(publishProfilesDirectory);
+
+            File.WriteAllText(Path.Combine(publishProfilesDirectory, "test.pubxml"), $@"
+<Project>
+  <PropertyGroup>
+    <RuntimeIdentifier>{rid}</RuntimeIdentifier>
+    {(selfContained.HasValue ? $"<SelfContained>{selfContained}</SelfContained>" : "")}
+    {((!(selfContained ?? true) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
+  </PropertyGroup>
+</Project>
+");
+
+            var command = new PublishCommand(Log, projectDirectory);
+            command
+                .Execute("/restore", "/p:PublishProfile=test")
+                .Should()
+                .Pass();
+
+            var output = command.GetOutputDirectory(targetFramework: tfm, runtimeIdentifier: rid);
+
+            output.Should().HaveFiles(new[] {
+                $"{testProject.Name}.dll",
+                $"{testProject.Name}.pdb",
+                $"{testProject.Name}.deps.json",
+                $"{testProject.Name}.runtimeconfig.json",
+            });
+
+            if (selfContained ?? true)
+            {
+                output.Should().HaveFiles(new[] {
+                    $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
+                    $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
+                });
+            }
+            else
+            {
+                output.Should().NotHaveFiles(new[] {
+                    $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
+                    $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
+                });
+            }
+
+            if ((selfContained ?? true) || (useAppHost ?? true))
+            {
+                output.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
+            }
+            else
+            {
+                output.Should().NotHaveFile($"{testProject.Name}{Constants.ExeSuffix}");
+            }
         }
     }
 }

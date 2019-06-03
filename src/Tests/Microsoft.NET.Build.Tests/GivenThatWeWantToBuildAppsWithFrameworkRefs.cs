@@ -63,8 +63,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Log, appProjectDirectory);
             var outputDirectory = buildCommand.GetOutputDirectory("net451", runtimeIdentifier: "win7-x86");
 
-            Command.Create(Path.Combine(outputDirectory.FullName, "EntityFrameworkApp.exe"), Enumerable.Empty<string>())
-                .CaptureStdOut()
+            new RunExeCommand(Log, Path.Combine(outputDirectory.FullName, "EntityFrameworkApp.exe"))
                 .Execute()
                 .Should()
                 .Pass()

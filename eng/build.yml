@@ -19,26 +19,26 @@ jobs:
   parameters:
     name: ${{ parameters.agentOs }}
     enableMicrobuild: true
-    enablePublishBuildArtifacts: true
     enablePublishBuildAssets: true
-    enablePublishTestResults: true
     enableTelemetry: true
     helixRepo: dotnet/sdk
     pool: ${{ parameters.pool }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     ${{ if ne(parameters.strategy, '') }}:
       strategy: ${{ parameters.strategy }}
-    variables: 
+    workspace:
+      clean: all
+    variables:
       - ${{ insert }}: ${{ parameters.variables }}
       - _AgentOSName: ${{ parameters.agentOs }}
       - _TeamName: DotNetCore
-      - _PerformanceArgs: /p:PerfIterations=4
       - _OfficialBuildIdArgs: ''
       - _PublishArgs: ''
       - _SignArgs: ''
       - ${{ if ne(variables['System.TeamProject'], 'public') }}:
         - group: DotNet-Symbol-Server-PATs
         - group: DotNet-HelixApi-Access
+        - group: dotnet-benchview
         - group: DotNet-Blob-Feed
         - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
         - _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
@@ -48,7 +48,7 @@ jobs:
                     /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                     /p:PB_PublishType=$(_PublishType)
         - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
-
+        - _PerfIterations: 25
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: eng\common\CIBuild.cmd
@@ -63,7 +63,7 @@ jobs:
           PublishType: $(_PublishType)
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
-      - script: eng\common\CIBuild.cmd 
+      - script: eng\common\CIBuild.cmd
                   -configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
@@ -76,7 +76,7 @@ jobs:
           TestFullMSBuild: 'true'
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
-      - script: eng\common\CIBuild.cmd 
+      - script: eng\common\CIBuild.cmd
                   -configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
@@ -88,26 +88,99 @@ jobs:
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
 
-    - ${{ if eq(parameters.agentOs, 'Windows_Performance') }}:
-      - script: eng\common\CIBuild.cmd 
+    - ${{ if eq(parameters.agentOs, 'Windows_Perf_CI') }}:
+      - script: build.cmd
                   -configuration $(_BuildConfig)
+                  -ci -msbuildEngine dotnet
                   -performanceTest
-                  -msbuildEngine dotnet 
-                  $(_PerformanceArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
 
-    - ${{ if eq(parameters.agentOs, 'Linux_Performance') }}:
-      - script: eng/common/cibuild.sh 
+    - ${{ if eq(parameters.agentOs, 'Windows_Perf_CI_FullFramework') }}:
+      - script: build.cmd
+                  -configuration $(_BuildConfig)
+                  -ci
+                  -performanceTest
+        displayName: Build
+        env:
+          BuildConfig: $(_BuildConfig)
+          TestFullMSBuild: 'true'
+
+    - ${{ if eq(parameters.agentOs, 'Linux_Perf_CI') }}:
+      - script: ./build.sh
                   --configuration $(_BuildConfig)
-                  --performancetest
-                  $(_PerformanceArgs)
+                  --ci --performancetest
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
 
-    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools', 'Windows_Performance', 'Linux_Performance') }}:
+    - ${{ if eq(parameters.agentOs, 'Windows_Perf_Helix') }}:
+        - checkout: self
+          clean: true
+        - script: $(Build.SourcesDirectory)\build.cmd -configuration $(_BuildConfig) -ci -msbuildEngine dotnet
+          displayName: Pre-Build
+        - script: (robocopy $(Build.SourcesDirectory) $(Build.SourcesDirectory)\helix-package /NP /E /XD $(Build.SourcesDirectory)\helix-package $(Build.SourcesDirectory)\.dotnet $(Build.SourcesDirectory)\artifacts\bin\Tests $(Build.SourcesDirectory)\artifacts\obj\$(_BuildConfig)\Sdks\Microsoft.NET.Build.Extensions $(Build.SourcesDirectory)\artifacts\bin\$(_BuildConfig)\Sdks\Microsoft.NET.Build.Extensions) ^& IF %ERRORLEVEL% LEQ 1 exit 0
+          displayName: Selection of sources
+        - template: /eng/common/templates/steps/send-to-helix.yml
+          parameters:
+            HelixSource: 'pr/dotnet/sdk/$(Build.SourceBranch)'
+            HelixType: 'test/sdk_$(_BuildConfig)/'
+            HelixAccessToken: $(HelixApiAccessToken)
+            HelixTargetQueues: 'Windows.10.Amd64.ClientRS1.Perf' # using a dedicated private Helix queue (perfsnakes)
+            HelixPreCommands: 'set "BV_UPLOAD_SAS_TOKEN=$(BenchViewUploadToken)"'
+
+            WorkItemTimeout: 2:00
+            WorkItemDirectory: '$(Build.SourcesDirectory)\build'
+            WorkItemCommand: '%HELIX_CORRELATION_PAYLOAD%\build\RunPerfTestsOnHelix.cmd $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling false'
+            CorrelationPayloadDirectory: '$(Build.SourcesDirectory)\helix-package'
+            HelixConfiguration: 'CoreMSBuild'
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathtoPublish: $(Build.SourcesDirectory)\artifacts\log
+            artifactName: logs
+
+    - ${{ if eq(parameters.agentOs, 'Windows_Perf_Helix_Fullframework') }}:
+        - checkout: self
+          clean: true
+        - script: $(Build.SourcesDirectory)\build.cmd -configuration $(_BuildConfig) -ci
+          displayName: Pre-Build
+        - script: (robocopy $(Build.SourcesDirectory) $(Build.SourcesDirectory)\helix-package /NP /E /XD $(Build.SourcesDirectory)\helix-package $(Build.SourcesDirectory)\.dotnet $(Build.SourcesDirectory)\artifacts\bin\Tests $(Build.SourcesDirectory)\artifacts\obj\$(_BuildConfig)\Sdks\Microsoft.NET.Build.Extensions $(Build.SourcesDirectory)\artifacts\bin\$(_BuildConfig)\Sdks\Microsoft.NET.Build.Extensions) ^& IF %ERRORLEVEL% LEQ 1 exit 0
+          displayName: Selection of sources
+        - template: /eng/common/templates/steps/send-to-helix.yml
+          parameters:
+            HelixSource: 'pr/dotnet/sdk/$(Build.SourceBranch)'
+            HelixType: 'test/sdk_$(_BuildConfig)/'
+            HelixAccessToken: $(HelixApiAccessToken)
+            HelixTargetQueues: 'Windows.10.Amd64.ClientRS1.Perf' # using a dedicated private Helix queue (perfsnakes)
+            HelixPreCommands: 'set "BV_UPLOAD_SAS_TOKEN=$(BenchViewUploadToken)"'
+
+            WorkItemTimeout: 2:00
+            WorkItemDirectory: '$(Build.SourcesDirectory)\build'
+            WorkItemCommand: '%HELIX_CORRELATION_PAYLOAD%\build\RunPerfTestsOnHelix.cmd $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling true'
+            CorrelationPayloadDirectory: '$(Build.SourcesDirectory)\helix-package'
+            HelixConfiguration: 'FullMSBuild'
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathtoPublish: $(Build.SourcesDirectory)\artifacts\log
+            artifactName: logs
+
+    - ${{ if eq(parameters.agentOs, 'Linux_Perf_Helix') }}:
+        - checkout: self
+          clean: true
+        - template: /eng/common/templates/steps/send-to-helix.yml
+          parameters:
+            HelixSource: 'pr/dotnet/sdk/$(Build.SourceBranch)'
+            HelixType: 'test/sdk_$(_BuildConfig)/'
+            HelixAccessToken: $(HelixApiAccessToken)
+            HelixTargetQueues: 'Ubuntu.1604.Amd64.Perf' # using a dedicated private Helix queue (perfsnakes)
+            HelixPreCommands: 'chmod +x build/RunPerfTestsOnHelix.sh && export BV_UPLOAD_SAS_TOKEN="$(BenchViewUploadTokenLinux)"'
+
+            WorkItemTimeout: 2:00
+            WorkItemDirectory: '$(Build.SourcesDirectory)'
+            WorkItemCommand: './build/RunPerfTestsOnHelix.sh $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling x64 Ubuntu_16.04'
+
+    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools', 'Windows_Perf_CI', 'Linux_Perf_CI', 'Windows_Perf_Helix', 'Windows_Perf_CI_FullFramework', 'Windows_Perf_Helix_Fullframework', 'Linux_Perf_Helix') }}:
       - script: eng/common/cibuild.sh 
                   --configuration $(_BuildConfig)
                   $(_PublishArgs)
@@ -118,3 +191,33 @@ jobs:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
+
+    - task: PublishTestResults@1	
+      displayName: Publish Test Results	
+      inputs:	
+        testRunner: XUnit	
+        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
+        testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
+        platform: '$(BuildPlatform)'	
+        configuration: '$(_BuildConfig)'	
+      condition: not(succeeded())
+
+    - task: CopyFiles@2	
+      displayName: Gather Logs	
+      inputs:	
+        SourceFolder: '$(Build.SourcesDirectory)/artifacts'	
+        Contents: |	
+         log/$(_BuildConfig)/**/*	
+         TestResults/$(_BuildConfig)/**/*	
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'	
+      continueOnError: true	
+      condition: not(succeeded())	
+
+    - task: PublishBuildArtifacts@1	
+      displayName: Publish Logs to VSTS	
+      inputs:	
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'	
+        ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
+        publishLocation: Container	
+      continueOnError: true	
+      condition: not(succeeded())

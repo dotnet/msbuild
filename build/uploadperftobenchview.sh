@@ -53,7 +53,7 @@ if [ ! -d "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat" ]; then
     curl -o "$perfWorkingDirectory/benchview.zip" http://benchviewtestfeed.azurewebsites.net/api/v2/package/microsoft.benchview.jsonformat/0.1.0-pre024
     unzip -q -o "$perfWorkingDirectory/benchview.zip" -d "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat"
 fi
-# nuget install Microsoft.BenchView.JSONFormat -Source http://benchviewtestfeed.azurewebsites.net/nuget -OutputDirectory $perfWorkingDirectory -Prerelease -ExcludeVersion || { echo Failed to install Microsoft.BenchView.JSONFormat NuPkg && exit 1 ; }
+# nuget install Microsoft.BenchView.JSONFormat -Source http://benchviewtestfeed.azurewebsites.net/nuget -OutputDirectory "$perfWorkingDirectory" -Prerelease -ExcludeVersion || { echo Failed to install Microsoft.BenchView.JSONFormat NuPkg && exit 1 ; }
 
 # Do this here to remove the origin but at the front of the branch name as this is a problem for BenchView
 if [[ "$GIT_BRANCH" == "origin/"* ]]
@@ -82,7 +82,7 @@ python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/submission
 
 echo Creating: "$perfWorkingDirectory/build.json"
 python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/build.py" git --branch "$GIT_BRANCH_WITHOUT_ORIGIN" --type "$runType" --source-timestamp "$timeStamp" \
-                   -o "$perfWorkingDirectory/build.json" || { echo Failed to create: "$perfWorkingDirectory/build.json" && exit 1 ; }
+                   --repository "https://github.com/dotnet/sdk" -o "$perfWorkingDirectory/build.json" || { echo Failed to create: "$perfWorkingDirectory/build.json" && exit 1 ; }
 
 echo Creating: "$perfWorkingDirectory/machinedata.json"
 python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/machinedata.py" \

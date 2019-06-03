@@ -17,12 +17,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
 
+  <!-- Mark the WindowsDesktop frameworks as being windows only.
+       TODO: remove this once the metadata exists on the items in the SDK props file. -->
+  <ItemGroup>
+    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App" IsWindowsOnly="True" />
+    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WindowsForms" IsWindowsOnly="True" />
+    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WPF" IsWindowsOnly="True" />
+  </ItemGroup>
 
   <UsingTask TaskName="CheckForDuplicateFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveAppHosts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-  <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
+  <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads">
     
     <CheckForDuplicateFrameworkReferences
         FrameworkReferences="@(FrameworkReference)"
@@ -35,37 +42,21 @@ Copyright (c) .NET Foundation. All rights reserved.
       <FrameworkReference Remove="@(_FrameworkReferenceToRemove)" />
       <FrameworkReference Include="@(_FrameworkReferenceToAdd)" />
     </ItemGroup>
-      
+
+    <!-- We will add Microsoft.WindowsDesktop.App.WPF and Microsoft.WindowsDesktop.App.WindowsForms to the bundled versions.
+         Until we do, add them here. -->
     <ItemGroup>
-      <!-- The KnownFrameworkReference items that this target expects will be defined in the bundled
-           versions .props file. They should look something like this:
-           
-    <KnownFrameworkReference Include="Microsoft.NETCore.App"
-                              TargetFramework="netcoreapp3.0"
-                              RuntimeFrameworkName="Microsoft.NETCore.App"
-                              DefaultRuntimeFrameworkVersion="3.0.0-preview-27214-02"
-                              LatestRuntimeFrameworkVersion="3.0.0-preview-27214-02"
-                              TargetingPackName="Microsoft.NETCore.App"
-                              TargetingPackVersion="3.0.0-preview-27122-01"
-                              AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
-                              AppHostRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
-                              RuntimePackNamePatterns="runtime.**RID**.Microsoft.NETCore.App;runtime.**RID**.Microsoft.NETCore.DotNetHostResolver;runtime.**RID**.Microsoft.NETCore.DotNetHostPolicy"
-                              RuntimePackRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
-                              />
-      -->
+      <_WPFKnownFrameworkReference Include="@(KnownFrameworkReference)"
+                                   Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App.WPF'"/>
+    </ItemGroup>
+    <ItemGroup Condition="'@(_WPFKnownFrameworkReference)' == ''">
+      <_WindowsDesktopKnownFrameworkReference Include="@(KnownFrameworkReference)"
+                                        Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App'"/>
 
-
-      <!-- KnownAppHost items will look something like this:
-      
-      <KnownAppHostPack Condition="'@(KnownAppHostPack)' == ''"
-                        Include="Microsoft.NETCore.App"
-                        TargetFramework="netcoreapp3.0"
-                        AppHostPackNamePattern="runtime.**RID**.Microsoft.NETCore.DotNetAppHost"
-                        AppHostPackVersion="3.0.0-preview-27218-01"
-                        AppHostRuntimeIdentifiers="freebsd-x64;linux-arm;linux-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86"
-                        />
-      -->
-
+      <KnownFrameworkReference Include="@(_WindowsDesktopKnownFrameworkReference->'Microsoft.WindowsDesktop.App.WindowsForms')"
+                               Profile="WindowsForms"/>
+      <KnownFrameworkReference Include="@(_WindowsDesktopKnownFrameworkReference->'Microsoft.WindowsDesktop.App.WPF')"
+                               Profile="WPF"/>
     </ItemGroup>
 
     <PropertyGroup Condition="'$(EnableTargetingPackDownload)' == ''">
@@ -91,6 +82,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
+      <Output TaskParameter="LegacyFrameworkPackages" ItemName="_LegacyFrameworkPackage" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
@@ -124,8 +116,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveAppHosts>
 
     <PropertyGroup Condition="'$(UsePackageDownload)' == ''">
-      <UsePackageDownload Condition=" '$(MSBuildRuntimeType)' == 'Core'">true</UsePackageDownload>
-      <UsePackageDownload Condition=" '$(MSBuildRuntimeType)' != 'Core'">false</UsePackageDownload>
+      <UsePackageDownload Condition="'$(MSBuildRuntimeType)' == 'Core'">true</UsePackageDownload>
+      <UsePackageDownload Condition="'$(PackageDownloadSupported)' == 'true'">true</UsePackageDownload>
+      <UsePackageDownload Condition="'$(UsePackageDownload)' == ''">false</UsePackageDownload>
     </PropertyGroup>
     
     <ItemGroup Condition="'$(UsePackageDownload)' == 'true'">
@@ -141,6 +134,25 @@ Copyright (c) .NET Foundation. All rights reserved.
                         ExcludeAssets="all" />
     </ItemGroup>
 
+    <!-- Only add these "legacy" package references if there are already existing package references,
+         as they are only needed in those scenarios (for example supplying the RID graph to
+         NuGet, or preventing older versions of Framework packages from being used). -->
+    <ItemGroup Condition="'@(PackageReference)' != '' and '$(DisableImplicitFrameworkReferences)' != 'true'">
+      <PackageReference Include="@(_LegacyFrameworkPackage)"
+                        IsImplicitlyDefined="true"
+                        PrivateAssets="all"
+                        ExcludeAssets="all" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="AddTransitiveFrameworkReferences" AfterTargets="ResolvePackageAssets"
+          Condition="'@(TransitiveFrameworkReference)' != ''" >
+
+    <ItemGroup>
+      <FrameworkReference Include="@(TransitiveFrameworkReference)" Exclude="@(FrameworkReference)"/>
+    </ItemGroup>
+    
   </Target>
 
   <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -178,7 +190,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
       <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
       <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
-      <Output TaskParameter="RuntimeFrameworksToRemove" ItemName="_RuntimeFrameworkToRemove" />
+      <Output TaskParameter="UsedRuntimeFrameworks" ItemName="_UsedRuntimeFramework" />
       
     </ResolveTargetingPackAssets>
     
@@ -187,7 +199,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup>
-      <RuntimeFramework Remove="@(_RuntimeFrameworkToRemove)"/>
+      <RuntimeFramework Remove="@(RuntimeFramework)" />
+      <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
     </ItemGroup>
 
     <GetPackageDirectory
@@ -245,7 +258,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="ResolveRuntimePackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <Target Name="ResolveRuntimePackAssets" DependsOnTargets="ResolvePackageAssets"
-          Condition="'@(RuntimePack)' != ''">
+          Condition="'@(RuntimePack)' != '' And '$(DesignTimeBuild)' != 'true'">
     
       <GetPackageDirectory
         Items="@(RuntimePack)"
@@ -257,7 +270,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <ResolveRuntimePackAssets FrameworkReferences="@(FrameworkReference)"
                               ResolvedRuntimePacks="@(ResolvedRuntimePack)"
-                              UnavailableRuntimePacks="@(UnavailableRuntimePack)">
+                              UnavailableRuntimePacks="@(UnavailableRuntimePack)"
+                              SatelliteResourceLanguages="$(SatelliteResourceLanguages)">
       <Output TaskParameter="RuntimePackAssets" ItemName="RuntimePackAsset" />
     </ResolveRuntimePackAssets>
     

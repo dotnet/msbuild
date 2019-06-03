@@ -56,16 +56,21 @@ namespace Microsoft.NET.Build.Tests
         //  Test behavior when implicit version differs for framework-dependent and self-contained apps
         [Theory]
         [InlineData("netcoreapp1.0", false, true, "1.0.5")]
-        [InlineData("netcoreapp1.0", true, true, "1.0.15")]
+        [InlineData("netcoreapp1.0", true, true, "1.0.16")]
         [InlineData("netcoreapp1.0", false, false, "1.0.5")]
         [InlineData("netcoreapp1.1", false, true, "1.1.2")]
-        [InlineData("netcoreapp1.1", true, true, "1.1.12")]
+        [InlineData("netcoreapp1.1", true, true, "1.1.13")]
         [InlineData("netcoreapp1.1", false, false, "1.1.2")]
         [InlineData("netcoreapp2.0", false, true, "2.0.0")]
         [InlineData("netcoreapp2.0", true, true, TestContext.LatestRuntimePatchForNetCoreApp2_0)]
         [InlineData("netcoreapp2.0", false, false, "2.0.0")]
         public void It_targets_the_right_framework_depending_on_output_type(string targetFramework, bool selfContained, bool isExe, string expectedFrameworkVersion)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             string testIdentifier = "Framework_targeting_" + targetFramework + "_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
 
             It_targets_the_right_framework(testIdentifier, targetFramework, null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion);
@@ -193,6 +198,12 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 IsExe = true,
             };
+
+            if (!EnvironmentInfo.SupportsTargetFramework(testProject.TargetFrameworks))
+            {
+                return;
+            }
+
             if (allowMismatch)
             {
                 testProject.AdditionalProperties["VerifyMatchingImplicitPackageVersion"] = "false";
@@ -236,7 +247,7 @@ namespace Microsoft.NET.Build.Tests
                 .Restore(Log);
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
-                "netcoreapp1.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
+                "netcoreapp2.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
             {
                 DependsOnTargets = "RunResolvePackageDependencies",
             };
@@ -250,7 +261,7 @@ namespace Microsoft.NET.Build.Tests
             // should only contain one target with no RIDs
             var targetDefs = getValuesCommand.GetValues();
             targetDefs.Count.Should().Be(1);
-            targetDefs.Should().Contain(".NETCoreApp,Version=v1.1");
+            targetDefs.Should().Contain(".NETCoreApp,Version=v2.1");
         }
 
         [Theory]
@@ -275,6 +286,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0")]
         public void It_runs_the_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             RunAppFromOutputFolder("RunFromOutputFolderConflicts_" + targetFramework, false, true, targetFramework);
         }
 
@@ -283,6 +299,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0")]
         public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts_" + targetFramework, true, true, targetFramework);
         }
 
@@ -345,8 +366,7 @@ public static class Program
 
             string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier ?? "").FullName;
 
-            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputFolder, project.Name + ".dll") })
-                .CaptureStdOut()
+            new DotnetCommand(Log, Path.Combine(outputFolder, project.Name + ".dll"))
                 .Execute()
                 .Should()
                 .Pass()
@@ -615,6 +635,69 @@ class Program
                 .Execute()
                 .Should()
                 .Pass();
+        }
+
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/3044")]
+        public void ReferenceLegacyContracts()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ReferencesLegacyContracts",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true,
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")
+            };
+
+            //  Dependencies on contracts from different 1.x "bands" can cause downgrades when building
+            //  with a RuntimeIdentifier.
+            testProject.PackageReferences.Add(new TestPackageReference("System.IO.FileSystem", "4.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("System.Reflection", "4.3.0"));
+
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void ItHasNoPackageReferences()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NoPackageReferences",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            string testDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            var getPackageReferences = new GetValuesCommand(
+               Log,
+               testDirectory,
+               testProject.TargetFrameworks,
+               "PackageReference",
+               GetValuesCommand.ValueType.Item);
+
+            getPackageReferences.Execute().Should().Pass();
+
+            List<string> packageReferences = getPackageReferences.GetValues();
+
+            packageReferences
+                .Should()
+                .BeEmpty();
+
+
         }
     }
 }

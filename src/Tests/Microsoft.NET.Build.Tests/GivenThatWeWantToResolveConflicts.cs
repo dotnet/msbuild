@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -141,6 +142,41 @@ namespace Microsoft.NET.Build.Tests
 
             assets.Should().Contain("System.ValueTuple.dll");
 
+        }
+
+        [Fact]
+        public void AProjectCanReferenceADllInAPackageDirectly()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "ReferencePackageDllDirectly",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.VisualStudio.Composition", "15.8.112"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+
+                    var itemGroup = p.Root.Element(ns + "ItemGroup");
+                    itemGroup.Add(new XElement(ns + "Reference",
+                        new XAttribute("Include", @"$(NuGetPackageRoot)/microsoft.visualstudio.composition/15.8.112/lib/net45/Microsoft.VisualStudio.Composition.dll"),
+                        new XAttribute("Private", "true")));
+                })
+                .Restore(Log, testProject.Name);
+
+            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, projectFolder);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

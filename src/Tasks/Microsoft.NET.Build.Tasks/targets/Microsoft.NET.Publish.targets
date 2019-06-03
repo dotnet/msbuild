@@ -53,11 +53,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Target Name="_PublishBuildAlternative"
-          Condition="'$(NoBuild)' != 'true'"
+          Condition="'$(NoBuild)' != 'true' and '$(GeneratePackageOnBuild)' != 'true'"
           DependsOnTargets="Build;$(_CorePublishTargets)" />
 
   <Target Name="_PublishNoBuildAlternative"
-          Condition="'$(NoBuild)' == 'true'"
+          Condition="'$(NoBuild)' == 'true' or '$(GeneratePackageOnBuild)' == 'true'"
           DependsOnTargets="$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)" />
 
   <Target Name="Publish"
@@ -107,8 +107,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="ComputeAndCopyFilesToPublishDirectory"
           DependsOnTargets="ComputeFilesToPublish;
-                            _ILLink;
-                            CreateReadyToRunImages;
                             CopyFilesToPublishDirectory" />
 
   <!--
@@ -251,7 +249,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                      OutputPath="$(_ReadyToRunOutputPath)"
                                      FilesToPublish="@(ResolvedFileToPublish)"
                                      ExcludeList="@(PublishReadyToRunExclude)"
-                                     EmitSymbols="$(PublishReadyToRunEmitSymbols)">
+                                     EmitSymbols="$(PublishReadyToRunEmitSymbols)"
+                                     IncludeSymbolsInSingleFile="$(IncludeSymbolsInSingleFile)">
 
       <Output TaskParameter="CrossgenTool" ItemName="_CrossgenTool" />
 
@@ -337,16 +336,30 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         ComputeFilesToPublish
 
-    Gathers all the files that need to be copied to the publish directory.
+    Gathers all the files that need to be copied to the publish directory, including R2R and ILLinker transformations
     ============================================================
     -->
   <Target Name="ComputeFilesToPublish"
+          DependsOnTargets="ComputeResolvedFilesToPublishList;
+                            ILLink;
+                            CreateReadyToRunImages">
+  </Target>
+
+  <!--
+    ============================================================
+                                        ComputeResolvedFilesToPublishList
+
+    Gathers all the files that need to be copied to the publish directory.
+    ============================================================
+    -->
+  <Target Name="ComputeResolvedFilesToPublishList"
           DependsOnTargets="_ComputeResolvedCopyLocalPublishAssets;
                             _ComputeCopyToPublishDirectoryItems">
 
     <PropertyGroup>
       <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
       <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
+      <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -520,7 +533,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="JoinResult" ItemName="_FilteredPublishSatelliteResources" />
     </JoinItems>
 
-    <ItemGroup Condition="'@(_OutputSatelliteResources)' != ''">
+    <ItemGroup Condition="'@(_PublishSatelliteResources)' != ''">
       <_ResolvedCopyLocalPublishAssets Remove="@(_PublishSatelliteResources)" />
       <_ResolvedCopyLocalPublishAssets Include="@(_FilteredPublishSatelliteResources)" />
     </ItemGroup>
@@ -559,11 +572,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectoryAlways)">
         <RelativePath>%(_SourceItemsToCopyToPublishDirectoryAlways.TargetPath)</RelativePath>
         <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        <IsKeyOutput Condition="'%(_SourceItemsToCopyToPublishDirectoryAlways.FullPath)' == '$(AppHostIntermediatePath)'">True</IsKeyOutput>
       </ResolvedFileToPublish>
 
       <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectory)">
         <RelativePath>%(_SourceItemsToCopyToPublishDirectory.TargetPath)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <IsKeyOutput Condition="'%(_SourceItemsToCopyToPublishDirectory.FullPath)' == '$(AppHostIntermediatePath)'">True</IsKeyOutput>
       </ResolvedFileToPublish>
     </ItemGroup>
 
@@ -770,10 +785,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_FilesToBundle)"
           Outputs="$(PublishDir)$(AssemblyName)$(_NativeExecutableExtension)">
 
-    <PropertyGroup>
-      <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
-    </PropertyGroup>
-
     <GenerateBundle FilesToBundle="@(_FilesToBundle)"
                     AppHostName="$(AssemblyName)$(_NativeExecutableExtension)"
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
@@ -889,7 +900,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>
-      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')" TargetPath="%(ResolvedFileToPublish.RelativePath)" OutputGroup="PublishItemsOutputGroup" />
+      <PublishItemsOutputGroupOutputs Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'"
+                                      Include="$(ProjectDepsFilePath)"
+                                      TargetPath="$(ProjectDepsFileName)" />
+      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')"
+                                      TargetPath="%(ResolvedFileToPublish.RelativePath)"
+                                      IsKeyOutput="%(ResolvedFileToPublish.IsKeyOutput)"
+                                      OutputGroup="PublishItemsOutputGroup" />
     </ItemGroup>
   </Target>
 

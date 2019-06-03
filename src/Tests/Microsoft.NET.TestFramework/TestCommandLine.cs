@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -24,6 +25,10 @@ namespace Microsoft.NET.TestFramework
         public bool ShouldShowHelp { get; private set; }
 
         public string SdkVersion { get; private set; }
+
+        public string TestExecutionDirectory { get; set; }
+
+        public string TestConfigFile { get; private set; }
 
         public bool ShowSdkInfo { get; private set; }
 
@@ -64,6 +69,14 @@ namespace Microsoft.NET.TestFramework
                 {
                     ret.SdkVersion = argStack.Pop();
                 }
+                else if (arg.Equals("-testExecutionDirectory", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    ret.TestExecutionDirectory = argStack.Pop();
+                }
+                else if (arg.Equals("-testConfigFile", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    ret.TestConfigFile = argStack.Pop();
+                }
                 else if (arg.Equals("-showSdkInfo", StringComparison.CurrentCultureIgnoreCase))
                 {
                     ret.ShowSdkInfo = true;
@@ -90,6 +103,32 @@ namespace Microsoft.NET.TestFramework
                 if (!string.IsNullOrEmpty(msbuildPath))
                 {
                     ret.FullFrameworkMSBuildPath = msbuildPath;
+                }
+            }
+
+            return ret;
+        }
+
+        public static List<string> GetXunitArgsFromTestConfig(string testConfigFile)
+        {
+            List<string> ret = new List<string>();
+            if (!string.IsNullOrEmpty(testConfigFile))
+            {
+                var testConfig = XDocument.Load(testConfigFile);
+                foreach (var item in testConfig.Root.Elements())
+                {
+                    if (item.Name.LocalName.Equals("Method", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var methodToSkip = item.Attribute("Name")?.Value;
+                        
+                        if (!string.IsNullOrEmpty(methodToSkip) &&
+                            bool.TryParse(item.Attribute("Skip").Value, out bool shouldSkip) &&
+                            shouldSkip)
+                        {
+                            ret.Add("-nomethod");
+                            ret.Add(methodToSkip);
+                        }
+                    }
                 }
             }
 
@@ -123,6 +162,7 @@ Options to control toolset to test:
   -sdkConfig <config>     : Use specified configuration for SDK repo
   -noRepoInference        : Don't automatically find SDK repo to use based on path to test binaries
   -sdkVersion             : Use specified SDK version
+  -testExecutionDirectory : Folder for tests to create and build projects
   -showSdkInfo            : Shows SDK info (dotnet --info) for SDK which will be used
   -help                   : Show help");
         }

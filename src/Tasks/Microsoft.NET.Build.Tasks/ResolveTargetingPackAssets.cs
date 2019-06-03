@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -31,7 +33,99 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] PackageConflictOverrides { get; set; }
 
         [Output]
-        public ITaskItem[] RuntimeFrameworksToRemove { get; set; }
+        public ITaskItem[] UsedRuntimeFrameworks { get; set; }
+
+        private Dictionary<string, List<string>> _assemblyProfiles;
+
+        public ResolveTargetingPackAssets()
+        {
+            //  Hard-code assembly profiles for WindowDesktop targeting pack here until
+            //  they are added to its FrameworkList.xml: https://github.com/dotnet/core-setup/issues/6210
+            _assemblyProfiles = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+            var bothProfiles = new List<string>() { "WindowsForms", "WPF" };
+
+            foreach (var assemblyName in new []
+            {
+                "Accessibility",
+                "Microsoft.Win32.Registry",
+                "Microsoft.Win32.SystemEvents",
+                "System.CodeDom",
+                "System.Configuration.ConfigurationManager",
+                "System.Diagnostics.EventLog",
+                "System.DirectoryServices",
+                "System.IO.FileSystem.AccessControl",
+                "System.Media.SoundPlayer",
+                "System.Security.AccessControl",
+                "System.Security.Cryptography.Cng",
+                "System.Security.Cryptography.Pkcs",
+                "System.Security.Cryptography.ProtectedData",
+                "System.Security.Cryptography.Xml",
+                "System.Security.Permissions",
+                "System.Security.Principal.Windows",
+                "System.Threading.AccessControl",
+                "System.Windows.Extensions",
+            })
+            {
+                _assemblyProfiles[assemblyName] = bothProfiles;
+            }
+
+            var wpfProfile = new List<string>() { "WPF" };
+
+            foreach (var assemblyName in new []
+            {
+                "DirectWriteForwarder",
+                "PenImc_cor3",
+                "PresentationCore-CommonResources",
+                "PresentationCore",
+                "PresentationFramework-SystemCore",
+                "PresentationFramework-SystemData",
+                "PresentationFramework-SystemDrawing",
+                "PresentationFramework-SystemXml",
+                "PresentationFramework-SystemXmlLinq",
+                "PresentationFramework.Aero",
+                "PresentationFramework.Aero2",
+                "PresentationFramework.AeroLite",
+                "PresentationFramework.Classic",
+                "PresentationFramework",
+                "PresentationFramework.Luna",
+                "PresentationFramework.Royale",
+                "PresentationNative_cor3",
+                "PresentationUI",
+                "ReachFramework",
+                "System.Printing",
+                "System.Windows.Controls.Ribbon",
+                "System.Windows.Input.Manipulations",
+                "System.Windows.Presentation",
+                "System.Xaml",
+                "UIAutomationClient",
+                "UIAutomationClientSideProviders",
+                "UIAutomationProvider",
+                "UIAutomationTypes",
+                "WindowsBase",
+                "WPFgfx_cor3",
+            })
+            {
+                _assemblyProfiles[assemblyName] = wpfProfile;
+            }
+
+            var windowsFormsProfile = new List<string>() { "WindowsForms" };
+
+            foreach (var assemblyName in new[]
+            {
+                "System.Design",
+                "System.Drawing.Common",
+                "System.Drawing.Design",
+                "System.Drawing.Design.Primitives",
+                "System.Windows.Forms.Design",
+                "System.Windows.Forms.Design.Editors",
+                "System.Windows.Forms",
+            })
+            {
+                _assemblyProfiles[assemblyName] = windowsFormsProfile;
+            }
+
+        }
 
         protected override void ExecuteCore()
         {
@@ -72,7 +166,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
 
                         string targetingPackDataPath = Path.Combine(targetingPackRoot, "data");
-                        string[] possibleDllPaths = new[]
+                        string[] possibleDllFolders = new[]
                         {
                             Path.Combine(targetingPackRoot, "ref", targetingPackTargetFramework),
                             targetingPackDataPath
@@ -87,7 +181,7 @@ namespace Microsoft.NET.Build.Tasks
                                         targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt"),
                         };
 
-                        string targetingPackDllPath = possibleDllPaths.First(path =>
+                        string targetingPackDllFolder = possibleDllFolders.First(path =>
                                     Directory.Exists(path) &&
                                     Directory.GetFiles(path, "*.dll").Any());
 
@@ -95,11 +189,21 @@ namespace Microsoft.NET.Build.Tasks
 
                         string packageOverridesPath = Path.Combine(targetingPackDataPath, "PackageOverrides.txt");
 
-                        foreach (var dll in Directory.GetFiles(targetingPackDllPath, "*.dll"))
-                        {
-                            var reference = CreateReferenceItem(dll, targetingPack);
+                        string frameworkListPath = Path.Combine(targetingPackDataPath, "FrameworkList.xml");
 
-                            referencesToAdd.Add(reference);
+                        if (File.Exists(frameworkListPath))
+                        {
+                            AddReferencesFromFrameworkList(frameworkListPath, targetingPackDllFolder,
+                                                           targetingPack, referencesToAdd);
+                        }
+                        else
+                        {
+                            foreach (var dll in Directory.GetFiles(targetingPackDllFolder, "*.dll"))
+                            {
+                                var reference = CreateReferenceItem(dll, targetingPack);
+
+                                referencesToAdd.Add(reference);
+                            }
                         }
 
                         if (platformManifestPath != null)
@@ -122,14 +226,32 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            //  Remove RuntimeFramework items for shared frameworks which weren't referenced
+            //  Calculate which RuntimeFramework items should actually be used based on framework references
             HashSet<string> frameworkReferenceNames = new HashSet<string>(FrameworkReferences.Select(fr => fr.ItemSpec), StringComparer.OrdinalIgnoreCase);
-            RuntimeFrameworksToRemove = RuntimeFrameworks.Where(rf => !frameworkReferenceNames.Contains(rf.GetMetadata(MetadataKeys.FrameworkName)))
-                                        .ToArray();
+            UsedRuntimeFrameworks = RuntimeFrameworks.Where(rf => frameworkReferenceNames.Contains(rf.GetMetadata(MetadataKeys.FrameworkName)))
+                                    .ToArray();
 
-            ReferencesToAdd = referencesToAdd.ToArray();
+            //  Filter out duplicate references (which can happen when referencing two different profiles that overlap)
+            List<TaskItem> deduplicatedReferences = DeduplicateItems(referencesToAdd);
+            ReferencesToAdd = deduplicatedReferences.Distinct() .ToArray();
+
             PlatformManifests = platformManifests.ToArray();
             PackageConflictOverrides = packageConflictOverrides.ToArray();
+        }
+
+        //  Get distinct items based on case-insensitive ItemSpec comparison
+        private static List<TaskItem> DeduplicateItems(List<TaskItem> items)
+        {
+            HashSet<string> seenItemSpecs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<TaskItem> deduplicatedItems = new List<TaskItem>(items.Count);
+            foreach (var item in items)
+            {
+                if (seenItemSpecs.Add(item.ItemSpec))
+                {
+                    deduplicatedItems.Add(item);
+                }
+            }
+            return deduplicatedItems;
         }
 
         private TaskItem CreatePackageOverride(string runtimeFrameworkName, string packageOverridesPath)
@@ -157,6 +279,43 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private void AddReferencesFromFrameworkList(string frameworkListPath, string targetingPackDllFolder,
+            ITaskItem targetingPack, List<TaskItem> referenceItems)
+        {
+            XDocument frameworkListDoc = XDocument.Load(frameworkListPath);
+
+            string profile = targetingPack.GetMetadata("Profile");
+
+            foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
+            {
+                string assemblyName = fileElement.Attribute("AssemblyName").Value;
+
+                if (!string.IsNullOrEmpty(profile))
+                {
+                    _assemblyProfiles.TryGetValue(assemblyName, out var assemblyProfiles);
+                    if (assemblyProfiles == null)
+                    {
+                        //  If profile was specified but this assembly doesn't belong to any profiles, don't reference it
+                        continue;
+                    }
+                    if (!assemblyProfiles.Contains(profile, StringComparer.OrdinalIgnoreCase))
+                    {
+                        //  Assembly wasn't in profile specified, so don't reference it
+                        continue;
+                    }
+                }
+
+                var dllPath = Path.Combine(targetingPackDllFolder, assemblyName + ".dll");
+                var referenceItem = CreateReferenceItem(dllPath, targetingPack);
+
+                referenceItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion").Value);
+                referenceItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion").Value);
+                referenceItem.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken").Value);
+
+                referenceItems.Add(referenceItem);
+            }
+        }
+
         private TaskItem CreateReferenceItem(string dll, ITaskItem targetingPack)
         {
             var reference = new TaskItem(dll);
@@ -175,6 +334,9 @@ namespace Microsoft.NET.Build.Tasks
             reference.SetMetadata("ReferenceGrouping", targetingPack.ItemSpec);
             reference.SetMetadata("ResolvedFrom", "TargetingPack");
             reference.SetMetadata("IsSystemReference", "true");
+
+            reference.SetMetadata("FrameworkName", targetingPack.ItemSpec);
+            reference.SetMetadata("FrameworkVersion", targetingPack.GetMetadata(MetadataKeys.PackageVersion));
             
             return reference;
         }

@@ -25,6 +25,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Set default intermediate and output paths -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" />
   
+  <!-- Before any additional SDK targets are imported, import the publish profile.
+       This allows the publish profile to set properties like RuntimeIdentifier and them be
+       respected by the SDK. -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.ImportPublishProfile.targets"
+          Condition="'$(PublishProfileImported)' != 'true'"/>
+
   <!-- 
     Expand TargetFramework to TargetFrameworkIdentifier and TargetFrameworkVersion,
     and adjust intermediate and output paths to include it.
@@ -138,7 +144,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(DisableImplicitAssetTargetFallback)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' >= '2.0'">
-    <AssetTargetFallback>$(AssetTargetFallback);net461</AssetTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);net461;net462;net47;net471;net472;net48</AssetTargetFallback>
   </PropertyGroup>
 
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->

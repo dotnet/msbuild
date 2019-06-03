@@ -58,6 +58,14 @@ namespace Microsoft.NET.Publish.Tests
                 msbuildArgs.Add($"/p:UseAppHost={useAppHost}");
             }
 
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX) &&
+                targetFramework == "netcoreapp2.1")
+            {
+                //  .NET Core 2.1.0 packages don't support latest versions of OS X, so roll forward to the
+                //  latest patch which does
+                msbuildArgs.Add("/p:TargetLatestRuntimePatch=true");
+            }
+
             var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
             publishCommand
                 .Execute(msbuildArgs.ToArray())
@@ -85,12 +93,10 @@ namespace Microsoft.NET.Publish.Tests
             // Run the apphost if one was generated
             if (useAppHost != "false")
             {
-                Command.Create(Path.Combine(publishDirectory.FullName, appHostName), Enumerable.Empty<string>())
-                    .EnvironmentVariable(
+                new RunExeCommand(Log, Path.Combine(publishDirectory.FullName, appHostName))
+                    .WithEnvironmentVariable(
                         Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)",
                         Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath))
-                    .CaptureStdOut()
-                    .CaptureStdErr()
                     .Execute()
                     .Should()
                     .Pass()
@@ -106,7 +112,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset(TestProjectName)
-                .WithSource();
+                .WithSource()
+                .WithTargetFramework("netcoreapp2.0");
 
             var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
             publishCommand

@@ -24,6 +24,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
         public const string FrameworkName = "FrameworkName";
         public const string FrameworkVersion = "FrameworkVersion";
+        public const string IsTrimmable = "IsTrimmable";
 
         // SDK Metadata
         public const string SDKPackageItemSpec = "SDKPackageItemSpec";
@@ -82,6 +83,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string BuildAction = "BuildAction";
         public const string OutputPath = "OutputPath";
         public const string CopyToPublishDirectory = "CopyToPublishDirectory";
+        public const string ExcludeFromSingleFile = "ExcludeFromSingleFile";
 
         // Resource assemblies
         public const string Culture = "Culture";

@@ -27,6 +27,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0", true)]
         public void It_builds_a_runnable_output(string targetFramework, bool dependenciesIncluded)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
@@ -76,8 +81,7 @@ namespace Microsoft.NET.Build.Tests
                 $"apphost{Constants.ExeSuffix}",
             });
 
-            Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .CaptureStdOut()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()
                 .Should()
                 .Pass()
@@ -118,7 +122,7 @@ namespace Microsoft.NET.Build.Tests
 		[Fact]
 		public void It_succeeds_when_RuntimeIdentifier_and_PlatformTarget_mismatch_but_PT_is_AnyCPU()
 		{
-			var targetFramework = "netcoreapp1.1";
+			var targetFramework = "netcoreapp2.1";
 			var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
 			var testAsset = _testAssetsManager
 				.CopyTestAsset("HelloWorld")
@@ -144,8 +148,7 @@ namespace Microsoft.NET.Build.Tests
 
 			string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-			Command.Create(selfContainedExecutableFullPath, new string[] { })
-				.CaptureStdOut()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
 				.Execute()
 				.Should()
 				.Pass()
