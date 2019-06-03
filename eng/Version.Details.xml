@@ -1,33 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview5.19227.2">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview6-27730-01">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>63abc77da6d99470caa5bfa0465afe244105e595</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview6.19281.3">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>25e4d0da1b94e04ff54f8aca8d459ed39ee77450</Sha>
+      <Sha>db6afea268a5e13a2dee54f0b48594e4246c5f5c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview5.19225.2">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview6.19281.6">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>7af4517bbcf17b000889c1077ef5976f2b6350ea</Sha>
+      <Sha>5bea321cf4616560b8b5fc4442f86be3dd99df2f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.0.462">
+    <Dependency Name="Microsoft.Build" Version="16.2.0-preview-19278-01">
       <Uri>https://github.com/Microsoft/msbuild</Uri>
-      <Sha>62fb89029dac66f73a5ca52363fd11b36f12190b</Sha>
+      <Sha>d635043bd5f9f856422369fb2d222ee8f1ea57b7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="10.4.3-beta.19219.4">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="10.4.3-beta.19253.3">
       <Uri>https://github.com/Microsoft/visualfsharp</Uri>
-      <Sha>d1cc85ed116e037fe6e38fc270f9c47c72185806</Sha>
+      <Sha>42526fe359672a05fd562dc16a91a43d0fe047a7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.1.0-beta3-19217-05">
+    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.2.0-beta3-19281-01">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>79b8271f65609b23e0c0ee1babed6862b7c5ed56</Sha>
+      <Sha>3f10ddd4e64013c8e1627b24e766f9c84ef853a5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.0.0-preview5.19227.1">
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.0.0-preview6.19280.3">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
-      <Sha>9de59ed2540d3067a481763239809024bfee0886</Sha>
+      <Sha>115e416cdab678e6dd57211edb5eaab67366b6c2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview5.19223.4">
+    <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview6.19278.1" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>a482367a6b14571d3c156f0643151cccb158b47e</Sha>
+      <Sha>8f2a49898b5feb0220d1effad0bdf6d258f9cb1e</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.1.0-rtm.5921">
       <Uri>https://github.com/nuget/nuget.client</Uri>
@@ -38,19 +43,19 @@
       <Sha>
       </Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview6.19281.2">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview6.19301.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>2e4334a6f462e017574d1b2e5b8a43ccfb7092ba</Sha>
+      <Sha>2ebe44afe4317b542092ef52e78ca7857b7b3a29</Sha>
     </Dependency>
-    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19218.1">
+    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19281.1">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>c09c490012b1e11cf6d52a6c6a486d4dc5f401bc</Sha>
+      <Sha>15b5a5f682a3f3345f473b655d51940bdd8fd1a8</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19218.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19301.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>1d4c87ff798d7de521128e6c3d890055c2401e80</Sha>
+      <Sha>8fd0b50b9d689e8d87ab202f11b7c9fbe81271c4</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
