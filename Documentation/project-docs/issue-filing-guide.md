@@ -21,12 +21,12 @@ could be that you can get unblocked pretty easily.
 would get notified. In this way the correct person can immediately jump on the 
 issue and triage it.
 
-5. For bugs, please be as concrete as possible on what is working, what 
+5. For bugs, be as concrete as possible on what is working, what 
 is not working. Things like operating system, the version of the tools, the 
 version of the installer and when you installed all help us determine the 
 potential problem and allows us to easily reproduce the problem at hand.
 
-6. For enhancements please be as concrete as possible on what is the addition 
+6. For enhancements be as concrete as possible on what is the addition 
 you would like to see, what scenario it covers and especially why the current 
 tools cannot satisfy that scenario. 
 

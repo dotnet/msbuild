@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Run test(s), without displaying Microsoft Testplatform banner</source>
-        <target state="new">Run test(s), without displaying Microsoft Testplatform banner</target>
+        <target state="translated">Esegui test senza visualizzare il banner di Microsoft Testplatform</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
@@ -74,7 +74,7 @@
                                         Esempi:
                                         Log in formato trx con nome file univoco: --logger trx
                                         Log in formato trx con il nome file specificato: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Per altre informazioni sugli argomenti del logger, vedere: https://aka.ms/vstest-report.</target>
+                                        Per altre informazioni sugli argomenti del logger, vedere https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">

@@ -35,28 +35,6 @@ namespace Microsoft.DotNet.Tests
             a.ShouldThrow<CommandUnknownException>();
         }
 
-        [Fact]
-        public void WhenItCannotResolveCommandButCommandIsInListOfKnownToolsItThrowsWithGuideToUseTool()
-        {
-            Action a = () => { CommandFactoryUsingResolver.Create(new ResolveNothingCommandResolverPolicy(), "dotnet-ef", Array.Empty<string>()); };
-            a.ShouldThrow<CommandAvailableAsDotNetToolException>()
-                .And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.CannotFindCommandAvailableAsTool,
-                    "ef",
-                    "dotnet-ef"));
-        }
-
-        [Fact]
-        public void WhenItCannotResolveCommandButCommandIsInListOfKnownToolsItThrowsWithGuideToUseToolWithNormalizedCasing()
-        {
-            Action a = () => { CommandFactoryUsingResolver.Create(new ResolveNothingCommandResolverPolicy(), "dotnet-EF", Array.Empty<string>()); };
-            a.ShouldThrow<CommandAvailableAsDotNetToolException>()
-                .And.Message.Should()
-                .Contain(string.Format(LocalizableStrings.CannotFindCommandAvailableAsTool,
-                    "EF",
-                    "dotnet-ef"));
-        }
-
         private class ResolveNothingCommandResolverPolicy : ICommandResolverPolicy
         {
             public CompositeCommandResolver CreateCommandResolver()

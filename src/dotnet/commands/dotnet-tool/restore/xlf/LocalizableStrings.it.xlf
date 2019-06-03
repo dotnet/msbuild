@@ -8,15 +8,15 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">Avviso: il pacchetto strumenti '{0}' non è valido. Contattare l'autore dello strumento:
+        <target state="needs-review-translation">Avviso: il pacchetto strumenti '{0}' non è valido. Contattare l'autore dello strumento:
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NoToolsWereRestored">
         <source>No tools were restored.</source>
-	<target state="new">No tools were restored.</target>
+        <target state="translated">Non è stato ripristinato alcuno strumento.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">Versione</target>
+        <target state="translated">VERSIONE</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageFailedToRestore">
@@ -71,7 +71,7 @@
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="translated">Il ripristino non è riuscito.</target>
+        <target state="translated">Ripristino non riuscito.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsMismatch">
@@ -104,7 +104,8 @@
 {0}</source>
         <target state="translated">Conflitto di nomi di comando. I nomi dei comandi non fanno distinzione tra maiuscole/minuscole.
 {0}</target>
-        <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
+        <note />
+      </trans-unit>
       <trans-unit id="PackagesCommandNameCollisionForOnePackage">
         <source>A command "{0}" in package "{1}"</source>
         <target state="translated">Comando "{0}" nel pacchetto "{1}"</target>

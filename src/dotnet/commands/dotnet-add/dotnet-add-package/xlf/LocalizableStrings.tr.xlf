@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
-        <source>Please specify one package reference to add.</source>
-        <target state="translated">Lütfen eklenecek paket başvurusunu belirtin.</target>
+        <source>Specify one package reference to add.</source>
+        <target state="needs-review-translation">Lütfen eklenecek paket başvurusunu belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -78,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
-        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
-        <target state="translated">'{0}' projesi için bir geçici dosya oluşturulamıyor. Paket başvurusu eklenemiyor. Lütfen geçici dizini temizleyin ve yeniden deneyin.</target>
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
+        <target state="needs-review-translation">'{0}' projesi için bir geçici dosya oluşturulamıyor. Paket başvurusu eklenemiyor. Lütfen geçici dizini temizleyin ve yeniden deneyin.</target>
         <note />
       </trans-unit>
     </body>

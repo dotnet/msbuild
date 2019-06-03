@@ -43,10 +43,6 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 msbuildArgs.Add("-target:Rebuild");
             }
-            else
-            {
-                msbuildArgs.Add("-target:Build");
-            }
 
             msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
 

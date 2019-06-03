@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Non è stato trovato alcun file eseguibile corrispondente al comando "{0}". Per altre informazioni, vedere https://aka.ms/missing-command.</target>
+        <target state="translated">Non è stato possibile completare l'esecuzione perché il comando o il file specificato non è stato trovato.
+Motivi possibili:
+  * Il nome di un comando dotnet predefinito non è stato digitato correttamente.
+  * Si intendeva eseguire un programma .NET Core, ma {0} non esiste.
+  * Si intendeva eseguire uno strumento globale, ma in PATH non è stato trovato alcun eseguibile con questo nome e prefisso dotnet.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -92,10 +96,10 @@ Possible reasons for this include:
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
-        <source>Cannot find command 'dotnet {0}', please run the following command to install
+        <source>Cannot find command 'dotnet {0}', run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="translated">Il comando 'dotnet {0}' non è stato trovato. Per installare, eseguire il comando seguente:
+        <target state="needs-review-translation">Il comando 'dotnet {0}' non è stato trovato. Per installare, eseguire il comando seguente:
 
 dotnet tool install --global {1}</target>
         <note />

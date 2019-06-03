@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Do not display the startup banner or the copyright message.</source>
-        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <target state="translated">Não exibe a faixa de inicialização ou a mensagem de direitos autorais.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -50,7 +50,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">O runtime de destino a ser publicado. Isto é usado quando estiver criando um deployment auto-contido. O padrão é publicar uma aplicação dependente de framework.</target>
+        <target state="translated">O runtime de destino a ser publicado. Isto é usado quando estiver criando um deployment auto-contido.
+O padrão é publicar uma aplicação dependente de framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -61,7 +62,8 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publica o runtime do .NET Core com sua aplicação para que o mesmo não precise estar instalado na máquina de destino. O padrão é 'verdadeiro' se um identificador de runtime for especificado.</target>
+        <target state="translated">Publica o runtime do .NET Core com sua aplicação para que o mesmo não precise estar instalado na máquina de destino.
+O padrão é 'verdadeiro' se um identificador de runtime for especificado.</target>
         <note />
       </trans-unit>
     </body>

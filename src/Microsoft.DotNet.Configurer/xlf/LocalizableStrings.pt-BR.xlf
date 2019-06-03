@@ -16,13 +16,13 @@ Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 Write your first app: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</source>
-        <target state="new">----------------
-Explore documentation: https://aka.ms/dotnet-docs
-Report issues and find source on GitHub: https://github.com/dotnet/core
-Find out what's new: https://aka.ms/dotnet-whats-new
-Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-Write your first app: https://aka.ms/first-net-core-app
+        <target state="translated">----------------
+Explore a documentação: https://aka.ms/dotnet-docs
+Relate problemas e localize a origem no GitHub: https://github.com/dotnet/core
+Novidade: https://aka.ms/dotnet-whats-new
+Saiba sobre o certificado de desenvolvedor HTTPS instalado: https://aka.ms/aspnet-core-https 
+Use 'dotnet --help' para ver os comandos disponíveis ou visite: https://aka.ms/dotnet-cli-docs
+Crie seu primeiro aplicativo: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>
@@ -30,9 +30,9 @@ Write your first app: https://aka.ms/first-net-core-app
         <source>Welcome to .NET Core 3.0!
 ---------------------
 SDK Version: {0}</source>
-        <target state="new">Welcome to .NET Core 3.0!
+        <target state="translated">Bem-vindo ao .NET Core 3.0!
 ---------------------
-SDK Version: {0}</target>
+Versão do SDK: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
@@ -41,11 +41,11 @@ SDK Version: {0}</target>
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">Telemetria
+        <target state="translated">Telemetria!
 ---------
-As ferramentas do .NET Core coletam dados de uso para nos ajudar a melhorar a sua experiência. Os dados são anônimos. Eles são coletados pela Microsoft e compartilhados com a comunidade. Você pode recusar a telemetria definindo a variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT para '1' ou 'true' usando seu shell favorito.
+As ferramentas do .NET Core coletam dados de uso para nos ajudar a melhorar sua experiência. Os dados são anônimos. Eles são coletados pela Microsoft e compartilhados com a comunidade. Você pode sair de telemetria definindo a variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT para '1' ou 'true' usando o shell favorito.
 
-Saiba mais sobre a telemetria das Ferramentas CLI do .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
+Leia mais sobre a telemetria de Ferramentas da CLI do .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

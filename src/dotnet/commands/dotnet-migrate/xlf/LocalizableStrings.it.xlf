@@ -77,8 +77,8 @@ L'impostazione predefinita è la versione dell'SDK in dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
-        <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="translated">La migrazione del progetto è terminata. Visitare https://aka.ms/coremigration per segnalare eventuali problemi rilevati o richiedere assistenza.</target>
+        <source>The project migration has finished. Visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
+        <target state="needs-review-translation">La migrazione del progetto è terminata. Visitare https://aka.ms/coremigration per segnalare eventuali problemi rilevati o richiedere assistenza.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">

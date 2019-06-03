@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Restaurer par progression la version du framework (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Utilisation</target>
@@ -153,8 +158,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="translated">La commande spécifiée '{0}' n'est pas une commande de kit SDK valide. Spécifiez une commande de kit SDK valide. Pour plus d'informations, exécutez dotnet help.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="needs-review-translation">La commande spécifiée '{0}' n'est pas une commande de kit SDK valide. Spécifiez une commande de kit SDK valide. Pour plus d'informations, exécutez dotnet help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -232,11 +237,6 @@
         <target state="translated">Version du framework partagé installé à utiliser pour exécuter l'application.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major &amp; minor).</source>
-        <target state="translated">Restaurez par progression si aucun framework candidat (0=désactivé, 1=restaurer version mineure, 2=restaurer versions mineure et majeure).</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
         <target state="translated">Chemin du fichier deps.json supplémentaire.</target>
@@ -260,11 +260,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">Créez et gérez des certificats de développement.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Outils en ligne de commande Entity Framework Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +294,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">Démarrez F# Interactive / exécutez les scripts F#.</target>
+        <target state="translated">Démarrer F# Interactive / exécuter les scripts F#.</target>
         <note />
       </trans-unit>
     </body>

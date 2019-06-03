@@ -16,13 +16,13 @@ Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 Write your first app: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</source>
-        <target state="new">----------------
-Explore documentation: https://aka.ms/dotnet-docs
-Report issues and find source on GitHub: https://github.com/dotnet/core
-Find out what's new: https://aka.ms/dotnet-whats-new
-Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-Write your first app: https://aka.ms/first-net-core-app
+        <target state="translated">----------------
+Eksploruj dokumentację: https://aka.ms/dotnet-docs
+Zgłoś problemy i znajdź źródła w serwisie GitHub: https://github.com/dotnet/core
+Uzyskaj informacje o nowościach: https://aka.ms/dotnet-whats-new
+Dowiedz się więcej o certyfikacie protokołu HTTPS zainstalowanym dla dewelopera: https://aka.ms/aspnet-core-https
+Użyj polecenia „dotnet --help”, aby wyświetlić dostępne polecenia, lub odwiedź witrynę https://aka.ms/dotnet-cli-docs
+Napisz swoją pierwszą aplikację: https://aka.ms/first-net-core-app
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>
@@ -30,9 +30,9 @@ Write your first app: https://aka.ms/first-net-core-app
         <source>Welcome to .NET Core 3.0!
 ---------------------
 SDK Version: {0}</source>
-        <target state="new">Welcome to .NET Core 3.0!
+        <target state="translated">.NET Core 3.0 — Zapraszamy!
 ---------------------
-SDK Version: {0}</target>
+Wersja zestawu SDK: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
@@ -43,9 +43,9 @@ The .NET Core tools collect usage data in order to help us improve your experien
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="translated">Telemetria
 ---------
-Narzędzia .NET Core zbierają dane użycia, aby pomóc nam w ulepszaniu środowiska. Dane są anonimowe. Są one zbierane przez firmę Microsoft i udostępniane społeczności. Telemetrię możesz wyłączyć, ustawiając zmienną środowiskową DOTNET_CLI_TELEMETRY_OPTOUT na wartość „1” lub „true” przy użyciu ulubionej powłoki.
+Narzędzia programu .NET Core zbierają dane użycia, aby ułatwić nam ulepszanie środowiska. Dane są anonimowe. Są one zbierane przez firmę Microsoft i udostępniane społeczności. Możesz zrezygnować z telemetrii, ustawiając zmienną środowiskową DOTNET_CLI_TELEMETRY_OPTOUT na wartość „1” lub „true” przy użyciu ulubionej powłoki.
 
-Poznaj więcej informacji na temat telemetrii narzędzi interfejsu wiersza polecenia .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
+Dowiedz się więcej na temat telemetrii narzędzi interfejsu wiersza polecenia programu .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed globally or locally.</source>
-        <target state="translated">Enumerar herramientas instaladas a nivel global o local.</target>
+        <target state="translated">Mostrar las herramientas instaladas local o globalmente.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools installed for the current user.</source>
-        <target state="translated">Lista de herramientas instaladas para el usuario actual.</target>
+        <target state="translated">Mostrar las herramientas instaladas para el usuario actual.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de la herramienta (--tool-path) pueden darse solo de una en una. Especifique solo una de las opciones: {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de herramienta (--tool-path), solo pueden estar una cada vez. Especifique solo una de las opciones: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>List the tools installed in the local tool manifest.</source>
-        <target state="translated">Lista de las herramientas instaladas en el manifiesto de la herramienta local.</target>
+        <target state="translated">Mostrar las herramientas instaladas en el manifiesto de la herramienta local.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestFileColumn">
         <source>Manifest</source>
-        <target state="translated">MANIFEST</target>
+        <target state="translated">Manifiesto</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -43,9 +43,10 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="translated">ADVERTENCIA: El paquete de la herramienta "{0}" no es válido, póngase en contacto con el autor de la herramienta: {1}</target>
+        <target state="needs-review-translation">Advertencia: El paquete de herramienta "{0}" no es válido, póngase en contacto con el autor de la herramienta:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

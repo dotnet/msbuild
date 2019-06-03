@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Do not display the startup banner or the copyright message.</source>
-        <target state="new">Do not display the startup banner or the copyright message.</target>
+        <target state="translated">시작 배너 또는 저작권 메시지를 표시하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -62,7 +62,8 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 애플리케이션과 함께 .NET Core 런타임을 게시합니다. 런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
+        <target state="translated">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 애플리케이션과 함께 .NET Core 런타임을 게시합니다.
+런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
         <note />
       </trans-unit>
     </body>

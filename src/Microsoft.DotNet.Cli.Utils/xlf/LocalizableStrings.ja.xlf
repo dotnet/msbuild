@@ -28,7 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET Core program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">コマンド "{0}" に対応する実行可能ファイルが見つかりません。詳細については https://aka.ms/missing-command を参照してください。</target>
+        <target state="translated">指定されたコマンドまたはファイルが見つからなかったため、実行できませんでした。
+次のような原因が考えられます:
+  * 組み込みの dotnet コマンドのスペルが間違っている。
+  * .NET Core プログラムを実行しようとしたが、{0} が存在しない。
+  * グローバル ツールを実行しようとしたが、プレフィックスとして dotnet が付いたこの名前の実行可能ファイルが PATH に見つからなかった。</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -63,7 +67,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} が {1} で {2} ミリ秒で終了しました。</target>
+        <target state="translated">&lt; {0} は {2} ミリ秒で {1} により終了しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -92,10 +96,10 @@ Possible reasons for this include:
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
-        <source>Cannot find command 'dotnet {0}', please run the following command to install
+        <source>Cannot find command 'dotnet {0}', run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="translated">コマンド 'dotnet {0}' が見つかりませんでした。次のコマンドを実行してインストールしてください。
+        <target state="needs-review-translation">コマンド 'dotnet {0}' が見つかりませんでした。次のコマンドを実行してインストールしてください。
 
 dotnet tool install --global {1}</target>
         <note />

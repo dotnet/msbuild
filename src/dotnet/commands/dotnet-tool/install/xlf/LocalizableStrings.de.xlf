@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
-        <target state="translated">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nur einmal vorkommen. Legen Sie nur eine der Optionen fest: {0}.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="needs-review-translation">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nicht zusammen angegeben werden. Geben Sie nur eine der Optionen an: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -16,35 +16,36 @@ Das Tool "{1}" (Version {2}) wurde erfolgreich installiert.</target>
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
-        <target state="translated">Installieren Sie das Tool, und fügen Sie es dem lokalen Toolmanifest (Standard) hinzu.</target>
+        <target state="translated">Hiermit installieren Sie das Tool und fügen es dem lokalen Toolmanifest (Standard) hinzu.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
         <source>The local option(--local) does not support the framework option (--framework).</source>
-        <target state="translated">Die lokale Option (--local) bietet keine Unterstützung für die Frameworkoption (--framework).</target>
+        <target state="translated">Die lokale Option (--local) unterstützt nicht die Frameworkoption (--framework).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
         <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="needs-review-translation">Sie können das Tool aus diesem Verzeichnis mit dem folgenden Befehl aufrufen: dotnet tool run {0}
-Das Tool "{1}" (Version "{2}") wurde erfolgreich installiert. Der Eintrag wird zur Manifestdatei {3} hinzugefügt.</target>
+        <target state="translated">Sie können das Tool aus diesem Verzeichnis mit den folgenden Befehlen aufrufen: "dotnet tool run {0}" oder "dotnet {0}".
+Das Tool "{1}" (Version {2}) wurde erfolgreich installiert. Der Eintrag wird der Manifestdatei "{3}" hinzugefügt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
         <source>Path to the manifest file.</source>
-        <target state="translated">Der Pfad zur Manifestdatei.</target>
+        <target state="translated">Pfad zur Manifestdatei.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="translated">Pfad</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
         <source>If you intended to install a global tool, add `--global` to the command.
 If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
-        <target state="needs-review-translation">Wenn Sie ein globales Tool installieren möchten, fügen Sie "-g" hinzu. Wenn Sie ein Toolmanifest verwenden möchten, müssen Sie es zunächst mit "dotnet new tool-manifest" erstellen.</target>
+        <target state="translated">Wenn Sie ein globales Tool installieren möchten, fügen Sie dem Befehl "--global" hinzu.
+Wenn Sie ein Manifest erstellen möchten, verwenden Sie "dotnet new tool-manifest", in der Regel im Stammverzeichnis des Repositorys.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -54,7 +55,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install global or local tool. Local tools are added to manifest and restored.</source>
-        <target state="translated">Installiert das globale oder lokale Tool. Lokale Tools werden zum Manifest hinzugefügt oder wiederhergestellt.</target>
+        <target state="translated">Hiermit installieren Sie das globale oder lokale Tool. Lokale Tools werden dem Manifest hinzugefügt und wiederhergestellt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -78,13 +79,13 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to install.</source>
-        <target state="translated">Geben Sie eine Toolpaket-ID für die Installation an.</target>
+        <source>Specify one tool Package Id to install.</source>
+        <target state="needs-review-translation">Geben Sie eine Toolpaket-ID für die Installation an.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool for the current user.</source>
-        <target state="translated">Installiert das Tool für den aktuellen Benutzer.</target>
+        <target state="translated">Hiermit installieren Sie das Tool für den aktuellen Benutzer.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -98,8 +99,8 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
-        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="translated">Fehler bei der Installation des Tools "{0}". Wenden Sie sich an den Verfasser des Tools, um Unterstützung zu erhalten.</target>
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="needs-review-translation">Fehler bei der Installation des Tools "{0}". Wenden Sie sich an den Verfasser des Tools, um Unterstützung zu erhalten.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
