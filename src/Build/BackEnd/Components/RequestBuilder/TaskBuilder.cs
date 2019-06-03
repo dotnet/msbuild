@@ -555,13 +555,8 @@ namespace Microsoft.Build.BackEnd
                     {
                         taskResult = InitializeAndExecuteTask(taskLoggingContext, bucket, taskIdentityParameters, taskHost, howToExecuteTask).Result;
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
                         exceptionFromExecution = ExceptionDispatchInfo.Capture(e);
                     }
                     finally
