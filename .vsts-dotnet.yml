@@ -27,7 +27,7 @@ jobs:
   - name: VisualStudio.MajorVersion
     value: 16
   - name: VisualStudio.ChannelName
-    value: 'int.d16.1stg'
+    value: 'int.d16.2stg'
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 

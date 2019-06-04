@@ -15,6 +15,8 @@
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
     <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
 
+    <!-- Needed to ensure that RuntimeTargetsCopyLocalItems is populated for full framework -->
+    <DisableRuntimeTargets>false</DisableRuntimeTargets>
   </PropertyGroup>
 
   <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
@@ -36,7 +38,7 @@
         <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'True'" />
 
         <!-- NuGet.targets will be in the ResolvedRuntimeTargets ItemGroup -->
-        <_NuGetRuntimeDependencies Include="%(ResolvedRuntimeTargets.Identity)" Condition="'@(ResolvedRuntimeTargets->Contains('NuGet.'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'True'" />
     </ItemGroup>
   </Target>
 
@@ -56,7 +58,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;GatherNuGetDependencies">
+  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
     <ItemGroup>
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
@@ -86,6 +88,16 @@
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.pdb" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe.config" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll.config" />
+
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.tlb" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.pdb" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.pdb" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe.config" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
 
       <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.Common.props" />
       <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.VisualStudioVersion.*.Common.props" />
@@ -137,6 +149,11 @@
           DestinationFiles="@(FreshlyBuiltBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(RoslynBinaries)"
           DestinationFiles="@(RoslynBinaries -> '$(BootstrapDestination)15.0\Bin\Roslyn\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- Copy our binaries to the x64 location. -->
+     <Copy SourceFiles="@(FreshlyBuiltBinariesx64)"
+          DestinationFiles="@(FreshlyBuiltBinariesx64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" />
+    
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
     <Copy SourceFiles="@(FreshlyBuiltRootProjects)"
           DestinationFiles="@(FreshlyBuiltRootProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(Filename)%(Extension)')" />

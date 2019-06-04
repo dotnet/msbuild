@@ -38,8 +38,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_ComputeTargetFrameworkItems" Returns="@(InnerOutput)">
     <ItemGroup>
       <_TargetFramework Include="$(TargetFrameworks)" />
+      <!-- Make normalization explicit: Trim; Deduplicate by keeping first occurence, case insensitive -->
+      <_TargetFrameworkNormalized Include="@(_TargetFramework->Trim()->Distinct())" />
       <_InnerBuildProjects Include="$(MSBuildProjectFile)">
-        <AdditionalProperties>TargetFramework=%(_TargetFramework.Identity)</AdditionalProperties>
+        <AdditionalProperties>TargetFramework=%(_TargetFrameworkNormalized.Identity)</AdditionalProperties>
       </_InnerBuildProjects>
     </ItemGroup>
   </Target>

@@ -645,6 +645,7 @@ namespace Microsoft.Build.Evaluation
         public int Count { get { throw null; } }
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DisableMarkDirty { get { throw null; } set { } }
+        public static string DisplayVersion { get { throw null; } }
         public static Microsoft.Build.Evaluation.ProjectCollection GlobalProjectCollection { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } }
         public Microsoft.Build.Execution.HostServices HostServices { get { throw null; } set { } }
