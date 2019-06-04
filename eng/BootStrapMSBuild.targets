@@ -82,6 +82,7 @@
 
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.tlb" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.pdb" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe.config" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll.config" />

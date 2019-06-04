@@ -14,6 +14,7 @@ using System.IO;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
+using Microsoft.Build.Exceptions;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -730,9 +731,19 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 foreach (DictionaryEntry metadatum in metadata)
                 {
+                    string valueOrError;
+                    try
+                    {
+                        valueOrError = item.GetMetadata(metadatum.Key as string);
+                    }
+                    catch (InvalidProjectFileException e)
+                    {
+                        valueOrError = e.Message;
+                    }
+
                     // A metadatum's "value" is its escaped value, since that's how we represent them internally.
                     // So unescape before returning to the world at large.
-                    WriteLinePretty("        " + metadatum.Key + " = " + item.GetMetadata(metadatum.Key as string));
+                    WriteLinePretty("        " + metadatum.Key + " = " + valueOrError);
                 }
             }
             resetColor();

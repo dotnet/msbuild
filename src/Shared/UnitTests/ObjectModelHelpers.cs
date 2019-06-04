@@ -1269,6 +1269,24 @@ namespace Microsoft.Build.UnitTests
                 });
         }
 
+        internal static void ShouldBeEquivalentTo<K, V>(this IReadOnlyDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
+        {
+            a.ShouldBeSubsetOf(b);
+            b.ShouldBeSubsetOf(a);
+        }
+
+        internal static void ShouldBeEquivalentTo<K, V>(this IDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
+        {
+            a.ShouldBeSubsetOf(b);
+            b.ShouldBeSubsetOf(a);
+        }
+
+        internal static void ShouldBeEquivalentTo<K>(this IReadOnlyCollection<K> a, IReadOnlyCollection<K> b)
+        {
+            a.ShouldBeSubsetOf(b);
+            b.ShouldBeSubsetOf(a);
+        }
+
         /// <summary>
         /// Verify that the two enumerables are value identical
         /// </summary>
@@ -1571,8 +1589,10 @@ namespace Microsoft.Build.UnitTests
         internal static ProjectGraph CreateProjectGraph(
             TestEnvironment env,
             // direct dependencies that the kvp.key node has on the nodes represented by kvp.value
-            Dictionary<int, int[]> dependencyEdges,
-            CreateProjectFileDelegate createProjectFile = null)
+            IDictionary<int, int[]> dependencyEdges,
+            IDictionary<string, string> globalProperties = null,
+            CreateProjectFileDelegate createProjectFile = null,
+            IEnumerable<int> roots = null)
         {
             createProjectFile = createProjectFile ?? CreateProjectFile;
 
@@ -1608,9 +1628,13 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
+            var entryProjects = roots ?? nodes.Where(nodeEntry => nodeEntry.Value.IsRoot).Select(n => n.Key);
+
+            var entryProjectFiles = nodes.Where(nodeEntry => nodeEntry.Value.IsRoot).Select(nodeEntry => nodeEntry.Value.ProjectPath);
+
             return new ProjectGraph(
-                nodes.Where(nodeEntry => nodeEntry.Value.IsRoot)
-                    .Select(nodeEntry => nodeEntry.Value.ProjectPath));
+                entryProjectFiles,
+                globalProperties ?? new Dictionary<string, string>());
 
             bool IsRoot(int node)
             {

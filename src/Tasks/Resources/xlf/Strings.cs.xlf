@@ -969,10 +969,35 @@
         <target state="translated">MSB3190: Funkce ClickOnce nepodporuje požadovanou úroveň provedení {0}.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.InputDoesntExist">
+        <source>Input file "{0}" does not exist.</source>
+        <target state="translated">Vstupní soubor {0} neexistuje.</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.InputNewer">
+        <source>Input file "{0}" is newer than output file "{1}".</source>
+        <target state="translated">Vstupní soubor {0} je novější než výstupní soubor {1}.</target>
+        <note>{0} and {1} are filenames on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.LinkedInputDoesntExist">
+        <source>Linked input file "{0}" does not exist.</source>
+        <target state="translated">Propojený vstupní soubor {0} neexistuje.</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.LinkedInputNewer">
+        <source>Linked input file "{0}" is newer than output file "{1}".</source>
+        <target state="translated">Propojený vstupní soubor {0} je novější než výstupní soubor {1}.</target>
+        <note>{0} and {1} are filenames on disk.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: Nešlo zpracovat soubor {0}, protože je v zóně Internet nebo Omezené nebo má na souboru značku webu. Pokud chcete tyto soubory zpracovat, odeberte značku webu.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.OutputDoesntExist">
+        <source>Output file "{0}" does not exist.</source>
+        <target state="translated">Výstupní soubor {0} neexistuje.</target>
+        <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
@@ -2510,7 +2535,7 @@
       </trans-unit>
       <trans-unit id="Xaml.MissingTaskBody">
         <source>MSB3692: Unable to create Xaml task.  The &lt;UsingTask&gt; does not contain a &lt;Task&gt; definition.</source>
-        <target state="translated">MSB3692: Nelze vytvořit úlohu Xaml.  Element &lt;UsingTask&gt; neobsahuje definici &lt;Task&gt;.</target>
+        <target state="translated">MSB3692: Nelze vytvořit úlohu Xaml. Element &lt;UsingTask&gt; neobsahuje definici &lt;Task&gt;.</target>
         <note>{StrBegin="MSB3692: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.ArgumentOutOfRange">
@@ -2755,7 +2780,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="translated">MSB3757: Je možné určit jenom jeden element &lt;Code&gt;.</target>
+        <target state="translated">MSB3757: Zadat se dá jen jeden element &lt;Code&gt;.</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -2860,7 +2885,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKReferenceIncorrectFormat">
         <source>MSB3776: The SDK Reference "{0}" is incorrectly formatted. It must be in the following format "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;. For example: "MySDK, Version=2.0"</source>
-        <target state="translated">MSB3776: Odkaz {0} sady SDK má nesprávný formát. Musí mít následující formát: &lt;název_SDK&gt;, Version=&lt;verze_SDK&gt;. Příklad: "MojeSDK, Version=2.0".</target>
+        <target state="translated">MSB3776: Odkaz {0} sady SDK má nesprávný formát. Musí mít následující formát: "&lt;NázevSadySDK&gt;, Version=&lt;VerzeSadySDK&gt;". Příklad: "MaSadaSDK, Version=2.0"</target>
         <note>{StrBegin="MSB3776: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoMatchingFrameworkIdentity">
@@ -3140,12 +3165,12 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="translated">MSB3756: Atribut {0} není platný pro element &lt;Code&gt;. Platnými atributy jsou Language, Source a Type.</target>
+        <target state="translated">MSB3756: Atribut {0} není pro element &lt;Code&gt; platný. Platné atributy jsou Language, Source a Type.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="translated">MSB3752: Atribut {0} elementu &lt;{1}&gt; je nastavený, ale je prázdný. Pokud je atribut {0} nastavený, nesmí být prázdný.</target>
+        <target state="translated">MSB3752: Atribut {0} elementu &lt;{1}&gt; byl nastaven, je však prázdný. Pokud je atribut {0} nastaven, nesmí být prázdný.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.Comment">

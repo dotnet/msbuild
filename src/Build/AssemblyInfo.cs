@@ -40,11 +40,4 @@ using System.Security.Permissions;
 #endif
 
 [assembly: ComVisible(false)]
-
 [assembly: CLSCompliant(true)]
-
-[assembly: AssemblyTitle("Microsoft.Build.dll")]
-[assembly: AssemblyDescription("Microsoft.Build.dll")]
-[assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("Microsoft® Build Tools®")]
-[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]

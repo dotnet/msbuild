@@ -117,9 +117,13 @@ namespace Microsoft.Build.Tasks
         // When true, a separate AppDomain is always created.
         private bool _neverLockTypeAssemblies = false;
 
-        private bool _foundNewestUncorrelatedInputWriteTime = false;
+        // Newest uncorrelated input,
+        // or null if not yet determined
+        private string _newestUncorrelatedInput;
 
-        private DateTime _newestUncorrelatedInputWriteTime;
+        // Write time of newest uncorrelated input
+        // DateTime.MinValue indicates "missing" iff _newestUncorrelatedInput != null
+        private DateTime _newestUncorrelatedInputWriteTime; 
 
         // The targets may pass in the path to the SDKToolsPath. If so this should be used to generate the commandline 
         // for logging purposes.  Also, when ExecuteAsTool is true, it determines where the system goes looking for resgen.exe
@@ -961,8 +965,9 @@ namespace Microsoft.Build.Tasks
             // By default all file types that get here are considered dangerous
             bool dangerous = true;
 
-            if (String.Equals(Path.GetExtension(filename), ".resx", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(Path.GetExtension(filename), ".resw", StringComparison.OrdinalIgnoreCase))
+            string extension = Path.GetExtension(filename);
+            if (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // XML files are only dangerous if there are unrecognized objects in them
                 dangerous = false;
@@ -1502,31 +1507,34 @@ namespace Microsoft.Build.Tasks
         private bool ShouldRebuildResgenOutputFile(string sourceFilePath, string outputFilePath)
         {
             // See if any uncorrelated inputs are missing before checking source and output file timestamps.
-            // Don't consult the uncorrelated input file times if we haven't already got them:
+            // Only do this if we already checked the uncorrelated inputs, since
             // typically, it's the .resx's that are out of date so we want to check those first.
-            if (_foundNewestUncorrelatedInputWriteTime && GetNewestUncorrelatedInputWriteTime() == DateTime.MaxValue)
+            if (_newestUncorrelatedInput != null && _newestUncorrelatedInputWriteTime == DateTime.MinValue)
             {
                 // An uncorrelated input is missing; need to build
+                // We logged this once already, when we found it
                 return true;
             }
 
             DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputFilePath);
 
             // Quick check to see if any uncorrelated input is newer in which case we can avoid checking source file timestamp
-            if (_foundNewestUncorrelatedInputWriteTime && GetNewestUncorrelatedInputWriteTime() > outputTime)
+            if (_newestUncorrelatedInput != null && _newestUncorrelatedInputWriteTime > outputTime)
             {
                 // An uncorrelated input is newer, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputNewer", _newestUncorrelatedInput, outputFilePath);
                 return true;
             }
 
             DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(sourceFilePath);
 
-            if (!String.Equals(Path.GetExtension(sourceFilePath), ".resx", StringComparison.OrdinalIgnoreCase) &&
-                !String.Equals(Path.GetExtension(sourceFilePath), ".resw", StringComparison.OrdinalIgnoreCase))
+            string extension = Path.GetExtension(sourceFilePath);
+            if (!String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) &&
+                !String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // If source file is NOT a .resx, for example a .restext file, 
                 // timestamp checking is simple, because there's no linked files to examine, and no references.
-                return NeedToRebuildSourceFile(sourceTime, outputTime);
+                return NeedToRebuildSourceFile(sourceFilePath, sourceTime, outputFilePath, outputTime);
             }
 
 #if FEATURE_RESGENCACHE
@@ -1557,8 +1565,9 @@ namespace Microsoft.Build.Tasks
 
             // if the .resources file is out of date even just with respect to the .resx or 
             // the additional inputs, we don't need to go to the point of checking the linked files. 
-            if (NeedToRebuildSourceFile(sourceTime, outputTime))
+            if (NeedToRebuildSourceFile(sourceFilePath, sourceTime, outputFilePath, outputTime))
             {
+                // This already logged the reason
                 return true;
             }
 
@@ -1575,12 +1584,14 @@ namespace Microsoft.Build.Tasks
                     {
                         // Linked file is missing - force a build, so that resource generation
                         // will produce a nice error message
+                        Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.LinkedInputDoesntExist", linkedFilePath);
                         return true;
                     }
 
                     if (linkedFileTime > outputTime)
                     {
                         // Linked file is newer, need to build
+                        Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.LinkedInputNewer", linkedFilePath, outputFilePath);
                         return true;
                     }
                 }
@@ -1597,7 +1608,7 @@ namespace Microsoft.Build.Tasks
             // supported target of .NET Core MSBuild) cannot use linked
             // resources. So the only relevant comparison is input/output.
             // See https://github.com/Microsoft/msbuild/issues/1197
-            return NeedToRebuildSourceFile(sourceTime, outputTime);
+            return NeedToRebuildSourceFile(sourceFilePath, sourceTime, outputFilePath, outputTime);
 #endif
         }
 
@@ -1605,17 +1616,27 @@ namespace Microsoft.Build.Tasks
         /// Returns true if the output does not exist, if the provided source is newer than the output, 
         /// or if any of the set of additional inputs is newer than the output.  Otherwise, returns false. 
         /// </summary>
-        private bool NeedToRebuildSourceFile(DateTime sourceTime, DateTime outputTime)
+        private bool NeedToRebuildSourceFile(string sourceFilePath, DateTime sourceTime, string outputFilePath, DateTime outputTime)
         {
-            if (sourceTime > outputTime)
+            if (outputTime == DateTime.MinValue)
             {
-                // Source file is newer, need to build
+                // Output file is missing, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.OutputDoesntExist", outputFilePath);
                 return true;
             }
 
-            if (GetNewestUncorrelatedInputWriteTime() > outputTime)
+            if (sourceTime > outputTime)
+            {
+                // Source file is newer, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputNewer", sourceFilePath, outputFilePath);
+                return true;
+            }
+
+            UpdateNewestUncorrelatedInputWriteTime();
+            if (_newestUncorrelatedInput != null && _newestUncorrelatedInputWriteTime > outputTime)
             {
                 // An uncorrelated input is newer, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputNewer", _newestUncorrelatedInput, outputFilePath);
                 return true;
             }
 
@@ -1660,16 +1681,23 @@ namespace Microsoft.Build.Tasks
             DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(Sources[0].ItemSpec);
             DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(StronglyTypedFileName);
 
-            if (sourceTime == DateTime.MinValue || outputTime == DateTime.MinValue)
+            if (sourceTime == DateTime.MinValue)
             {
                 // Source file is missing - force a build, so that resource generation
-                // will produce a nice error message; or output file is missing,
-                // need to build it
+                // will produce a nice error message
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputDoesntExist", Sources[0].ItemSpec);
+                needToRebuildSTR = true;
+            }
+            else if (outputTime == DateTime.MinValue)
+            {
+                // Output file is missing, need to build it
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.OutputDoesntExist", StronglyTypedFileName);
                 needToRebuildSTR = true;
             }
             else if (sourceTime > outputTime)
             {
                 // Source file is newer, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputNewer", Sources[0].ItemSpec, StronglyTypedFileName);
                 needToRebuildSTR = true;
             }
 
@@ -1695,58 +1723,38 @@ namespace Microsoft.Build.Tasks
         /// Returns the newest last write time among the references and additional inputs.
         /// If any do not exist, returns DateTime.MaxValue so that resource generation produces a nice error.
         /// </summary>
-        private DateTime GetNewestUncorrelatedInputWriteTime()
+        private void UpdateNewestUncorrelatedInputWriteTime()
         {
-            if (!_foundNewestUncorrelatedInputWriteTime)
+            if (_newestUncorrelatedInput != null)
             {
-                _newestUncorrelatedInputWriteTime = DateTime.MinValue;
-
-                // Check the timestamp of each of the passed-in references to find the newest
-                if (this.References != null)
-                {
-                    foreach (ITaskItem reference in this.References)
-                    {
-                        DateTime referenceTime = NativeMethodsShared.GetLastWriteFileUtcTime(reference.ItemSpec);
-
-                        if (referenceTime == DateTime.MinValue)
-                        {
-                            // File does not exist: force a build to produce an error message
-                            _foundNewestUncorrelatedInputWriteTime = true;
-                            return DateTime.MaxValue;
-                        }
-
-                        if (referenceTime > _newestUncorrelatedInputWriteTime)
-                        {
-                            _newestUncorrelatedInputWriteTime = referenceTime;
-                        }
-                    }
-                }
-
-                // Check the timestamp of each of the additional inputs to see if one's even newer
-                if (this.AdditionalInputs != null)
-                {
-                    foreach (ITaskItem additionalInput in this.AdditionalInputs)
-                    {
-                        DateTime additionalInputTime = NativeMethodsShared.GetLastWriteFileUtcTime(additionalInput.ItemSpec);
-
-                        if (additionalInputTime == DateTime.MinValue)
-                        {
-                            // File does not exist: force a build to produce an error message
-                            _foundNewestUncorrelatedInputWriteTime = true;
-                            return DateTime.MaxValue;
-                        }
-
-                        if (additionalInputTime > _newestUncorrelatedInputWriteTime)
-                        {
-                            _newestUncorrelatedInputWriteTime = additionalInputTime;
-                        }
-                    }
-                }
-
-                _foundNewestUncorrelatedInputWriteTime = true;
+                // We already did this
+                return;
             }
 
-            return _newestUncorrelatedInputWriteTime;
+            // Check the timestamp of each of the passed-in references to find the newest;
+            // and then the additional inputs
+            var inputs = (this.References ?? Enumerable.Empty<ITaskItem>()).Concat(this.AdditionalInputs ?? Enumerable.Empty<ITaskItem>());
+
+            foreach (ITaskItem input in inputs)
+            {
+                DateTime time = NativeMethodsShared.GetLastWriteFileUtcTime(input.ItemSpec);
+
+                if (time == DateTime.MinValue)
+                {
+                    // File does not exist: force a build to produce an error message
+                    _newestUncorrelatedInput = input.ItemSpec;
+                    _newestUncorrelatedInputWriteTime = time;
+                    // Log it here so it's logged only once for all inputs
+                    Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputDoesntExist", _newestUncorrelatedInput);
+                    return;
+                }
+
+                if (time > _newestUncorrelatedInputWriteTime)
+                {
+                    _newestUncorrelatedInput = input.ItemSpec;
+                    _newestUncorrelatedInputWriteTime = time;
+                }
+            }
         }
 
 #if FEATURE_APPDOMAIN

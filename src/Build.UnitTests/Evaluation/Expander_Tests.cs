@@ -588,9 +588,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogContains("[foo;bar]");
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Cannot fail on path too long with Unix"
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -874,9 +873,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -937,9 +935,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1000,7 +997,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
@@ -1057,9 +1054,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4248");
         }
 
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void PathTooLongInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
@@ -3683,6 +3679,92 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringIndexOfAny()
+        {
+            TestPropertyFunction("$(prop.IndexOfAny('y'))", "prop", "x-y-z", "2");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringLastIndexOf()
+        {
+            TestPropertyFunction("$(prop.LastIndexOf('y'))", "prop", "x-x-y-y-y-z", "8");
+
+            TestPropertyFunction("$(prop.LastIndexOf('y', 7))", "prop", "x-x-y-y-y-z", "6");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringCopy()
+        {
+            string propertyFunction = @"$([System.String]::Copy($(X)).LastIndexOf(
+                                                '.designer.cs',
+                                                System.StringComparison.OrdinalIgnoreCase))";
+            TestPropertyFunction(propertyFunction,
+                                "X", "test.designer.cs", "4");
+        }
+
+        [Fact]
+        public void PropertyFunctionVersionParse()
+        {
+            TestPropertyFunction(@"$([System.Version]::Parse('$(X)').ToString(1))", "X", "4.0", "4");
+        }
+
+        [Fact]
+        public void PropertyFunctionGuidNewGuid()
+        {
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
+
+            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Guid]::NewGuid())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.True(Guid.TryParse(result, out Guid guid));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetCurrentToolsDirectory()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetCurrentToolsDirectory())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetCurrentToolsDirectory()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetToolsDirectory32()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetToolsDirectory32())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetToolsDirectory32()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetToolsDirectory64()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetToolsDirectory64())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetToolsDirectory64()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetMSBuildSDKsPath()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetMSBuildSDKsPath())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetMSBuildSDKsPath()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetVsInstallRoot()
+        {
+            string vsInstallRoot = EscapingUtilities.Escape(IntrinsicFunctions.GetVsInstallRoot());
+
+            vsInstallRoot = (vsInstallRoot == null) ? "" : vsInstallRoot;
+
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetVsInstallRoot())", "X", "_", vsInstallRoot);
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetMSBuildExtensionsPath()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetMSBuildExtensionsPath())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetMSBuildExtensionsPath()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetProgramFiles32()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetProgramFiles32())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetProgramFiles32()));
+        }
+
+        [Fact]
         public void PropertyFunctionStringArrayIndexerGetter()
         {
             TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");
@@ -3840,6 +3922,163 @@ $(
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(properties, FileSystems.Default);
             string result = expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             result.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_GetPathsOfAllDirectoriesAbove()
+        {
+            // Directory structure:
+            // <temp>\
+            //    alpha\
+            //        .proj
+            //        One.cs
+            //        beta\
+            //            Two.cs
+            //            Three.cs
+            //        gamma\
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var alpha = root.CreateDirectory("alpha");
+                var projectFile = env.CreateFile(alpha, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <Compile Include=""One.cs"" />
+    <Compile Include=""beta\Two.cs"" />
+    <Compile Include=""beta\Three.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <MyDirectories Include=""@(Compile->GetPathsOfAllDirectoriesAbove())"" />
+  </ItemGroup>
+</Project>");
+
+                var beta = alpha.CreateDirectory("beta");
+                var gamma = alpha.CreateDirectory("gamma");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> myDirectories = projectInstance.GetItems("MyDirectories");
+
+                var includes = myDirectories.Select(i => i.EvaluatedInclude);
+                includes.ShouldContain(root.Path);
+                includes.ShouldContain(alpha.Path);
+                includes.ShouldContain(beta.Path);
+                includes.ShouldNotContain(gamma.Path);
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Combine()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <MyDirectory Include=""Alpha;Beta;Alpha\Gamma"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Squiggle Include=""@(MyDirectory->Combine('.squiggle'))"" />
+  </ItemGroup>
+</Project>");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggles = projectInstance.GetItems("Squiggle");
+
+                var expectedAlphaSquigglePath = Path.Combine("Alpha", ".squiggle");
+                var expectedBetaSquigglePath = Path.Combine("Beta", ".squiggle");
+                var expectedAlphaGammaSquigglePath = Path.Combine("Alpha", "Gamma", ".squiggle");
+                squiggles.Select(i => i.EvaluatedInclude).ShouldBe(new[]
+                {
+                    expectedAlphaSquigglePath,
+                    expectedBetaSquigglePath,
+                    expectedAlphaGammaSquigglePath
+                }, Case.Insensitive);
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Exists_Files()
+        {
+            // Directory structure:
+            // <temp>\
+            //    .proj
+            //    alpha\
+            //        One.cs   // exists
+            //        Two.cs   // does not exist
+            //        Three.cs // exists
+            //        Four.cs  // does not exist
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <PotentialCompile Include=""alpha\One.cs"" />
+    <PotentialCompile Include=""alpha\Two.cs"" />
+    <PotentialCompile Include=""alpha\Three.cs"" />
+    <PotentialCompile Include=""alpha\Four.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include=""@(PotentialCompile->Exists())"" />
+  </ItemGroup>
+</Project>");
+
+                var alpha = root.CreateDirectory("alpha");
+                var one = alpha.CreateFile("One.cs");
+                var three = alpha.CreateFile("Three.cs");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("Compile");
+
+                var alphaOnePath = Path.Combine("alpha", "One.cs");
+                var alphaThreePath = Path.Combine("alpha", "Three.cs");
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { alphaOnePath, alphaThreePath }, Case.Insensitive);
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_Exists_Directories()
+        {
+            // Directory structure:
+            // <temp>\
+            //    .proj
+            //    alpha\
+            //        beta\    // exists
+            //        gamma\   // does not exist
+            //        delta\   // exists
+            //        epsilon\ // does not exist
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <PotentialDirectory Include=""alpha\beta"" />
+    <PotentialDirectory Include=""alpha\gamma"" />
+    <PotentialDirectory Include=""alpha\delta"" />
+    <PotentialDirectory Include=""alpha\epsilon"" />
+  </ItemGroup>
+  <ItemGroup>
+    <MyDirectory Include=""@(PotentialDirectory->Exists())"" />
+  </ItemGroup>
+</Project>");
+
+                var alpha = root.CreateDirectory("alpha");
+                var beta = alpha.CreateDirectory("beta");
+                var delta = alpha.CreateDirectory("delta");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> squiggleItems = projectInstance.GetItems("MyDirectory");
+
+                var alphaBetaPath = Path.Combine("alpha", "beta");
+                var alphaDeltaPath = Path.Combine("alpha", "delta");
+                squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { alphaBetaPath, alphaDeltaPath }, Case.Insensitive);
+            }
         }
     }
 }

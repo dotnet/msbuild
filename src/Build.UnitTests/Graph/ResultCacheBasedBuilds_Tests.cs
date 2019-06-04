@@ -10,13 +10,14 @@ using System.Text;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.Helpers;
 
-using ExpectedOutputDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Experimental.Graph.ProjectGraphNode, string[]>;
+using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Experimental.Graph.ProjectGraphNode, string[]>;
 using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Experimental.Graph.ProjectGraphNode, string>;
 
 namespace Microsoft.Build.Experimental.Graph.UnitTests
@@ -284,17 +285,18 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         {
             var topoSortedNodes =
                 CreateProjectGraph(
-                    _env,
-                    edges,
-                    CreateProjectFileWrapper)
+                    env: _env,
+                    dependencyEdges: edges,
+                    globalProperties: null,
+                    createProjectFile: CreateProjectFileWrapper)
                     .ProjectNodesTopologicallySorted.ToArray();
 
-            var expectedOutput = new ExpectedOutputDictionary();
+            var expectedOutput = new ExpectedNodeBuildOutput();
 
             var outputCaches = new OutputCacheDictionary();
 
             // Build unchanged project files using caches.
-            BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, populateDictionaries: true);
+            BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
 
             // Change the project files to remove all items.
             var collection = _env.CreateProjectCollection().Collection;
@@ -317,7 +319,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 topoSortedNodes,
                 expectedOutput,
                 outputCaches,
-                populateDictionaries: false,
+                generateCacheFiles: false,
                 assertBuildResults: true,
                 // there are no items in the second build. The references are loaded from cache and have items,
                 // but the current project is loaded from file and has no items
@@ -325,25 +327,64 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
+        public void OutputCacheShouldNotContainInformationFromInputCaches()
+        {
+            var topoSortedNodes =
+                CreateProjectGraph(
+                    env: _env,
+                    dependencyEdges: new Dictionary<int, int[]> { { 1, new[] { 2, 3 } } },
+                    globalProperties: null,
+                    createProjectFile: CreateProjectFileWrapper)
+                    .ProjectNodesTopologicallySorted.ToArray();
+
+            var expectedOutput = new ExpectedNodeBuildOutput();
+
+            var outputCaches = new OutputCacheDictionary();
+
+            BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
+
+            var rootNode = topoSortedNodes.First(n => Path.GetFileNameWithoutExtension(n.ProjectInstance.FullPath) == "1");
+            var outputCache = outputCaches[rootNode];
+
+            outputCache.ShouldNotBeNull();
+
+            var deserializationInfo = CacheSerialization.DeserializeCaches(outputCache);
+
+            deserializationInfo.exception.ShouldBeNull();
+
+            var buildResults = deserializationInfo.ResultsCache.GetEnumerator().ToArray();
+            buildResults.ShouldHaveSingleItem();
+
+            var rootNodeBuildResult = buildResults.First();
+            rootNodeBuildResult.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ToArray().ShouldBe(expectedOutput[rootNode]);
+
+            var configEntries = deserializationInfo.ConfigCache.GetEnumerator().ToArray();
+            configEntries.ShouldHaveSingleItem();
+
+            configEntries.First().ConfigurationId.ShouldBe(rootNodeBuildResult.ConfigurationId);
+        }
+
+        [Fact]
         public void MissingResultFromCacheShouldErrorDueToIsolatedBuildCacheEnforcement()
         {
             var topoSortedNodes =
                 CreateProjectGraph(
-                    _env,
-                    new Dictionary<int, int[]> { { 1, new[] { 2, 3 } } },
-                    CreateProjectFileWrapper)
+                    env: _env,
+                    dependencyEdges: new Dictionary<int, int[]> { { 1, new[] { 2, 3 } } },
+                    globalProperties: null,
+                    createProjectFile: CreateProjectFileWrapper)
                     .ProjectNodesTopologicallySorted.ToArray();
 
-            var expectedOutput = new ExpectedOutputDictionary();
+            var expectedOutput = new ExpectedNodeBuildOutput();
 
             var outputCaches = new OutputCacheDictionary();
 
-            BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, populateDictionaries: true);
+            BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
 
             // remove cache for project 3 to cause a cache miss
             outputCaches.Remove(expectedOutput.Keys.First(n => ProjectNumber(n) == "3"));
 
-            var results = BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, populateDictionaries: false, assertBuildResults: false);
+            var results = BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: false, assertBuildResults: false);
 
             results["3"].Result.OverallResult.ShouldBe(BuildResultCode.Success);
             results["2"].Result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -353,24 +394,43 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             results["1"].Logger.Errors.First().Message.ShouldContain("MSB4252");
         }
 
+        /// <summary>
+        /// This method runs in two modes.
+        /// When <param name="generateCacheFiles"></param> is true, the method will fill in the empty <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/>, simulating a build from scratch.
+        /// When it is false, it uses the filled in <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/> to simulate a fully cached build.
+        /// 
+        /// </summary>
+        /// <param name="topoSortedNodes"></param>
+        /// <param name="expectedNodeBuildOutput"></param>
+        /// <param name="outputCaches"></param>
+        /// <param name="generateCacheFiles"></param>
+        /// <param name="assertBuildResults"></param>
+        /// <param name="expectedOutputProducer"></param>
+        /// <returns></returns>
         private Dictionary<string, (BuildResult Result, MockLogger Logger)> BuildUsingCaches(
             IReadOnlyCollection<ProjectGraphNode> topoSortedNodes,
-            ExpectedOutputDictionary expectedOutput,
+            ExpectedNodeBuildOutput expectedNodeBuildOutput,
             OutputCacheDictionary outputCaches,
-            bool populateDictionaries,
+            bool generateCacheFiles,
             bool assertBuildResults = true,
             // (current node, expected output dictionary) -> actual expected output for current node
-            Func<ProjectGraphNode, ExpectedOutputDictionary, string[]> expectedOutputProducer = null)
+            Func<ProjectGraphNode, ExpectedNodeBuildOutput, string[]> expectedOutputProducer = null)
         {
-            expectedOutputProducer = expectedOutputProducer ?? ((node, expectedOutputs12) => expectedOutputs12[node]);
+            expectedOutputProducer = expectedOutputProducer ?? ((node, expectedOutputs) => expectedOutputs[node]);
 
             var results = new Dictionary<string, (BuildResult Result, MockLogger Logger)>(topoSortedNodes.Count);
 
+            if (generateCacheFiles)
+            {
+                outputCaches.ShouldBeEmpty();
+                expectedNodeBuildOutput.ShouldBeEmpty();
+            }
+
             foreach (var node in topoSortedNodes)
             {
-                if (populateDictionaries)
+                if (generateCacheFiles)
                 {
-                    expectedOutput[node] = ExpectedBuildOutputForNode(node);
+                    expectedNodeBuildOutput[node] = ExpectedBuildOutputForNode(node);
                 }
 
                 var cacheFilesForReferences = node.ProjectReferences.Where(r => outputCaches.ContainsKey(r)).Select(r => outputCaches[r]).ToArray();
@@ -380,7 +440,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                     InputResultsCacheFiles = cacheFilesForReferences
                 };
 
-                if (populateDictionaries)
+                if (generateCacheFiles)
                 {
                     outputCaches[node] = _env.DefaultTestDirectory.CreateFile($"OutputCache-{ProjectNumber(node)}").Path;
                     buildParameters.OutputResultsCacheFile = outputCaches[node];
@@ -401,11 +461,11 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
 
-                    var output = result.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ToArray();
+                    var actualOutput = result.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ToArray();
 
-                    var expectedOutput1 = expectedOutputProducer(node, expectedOutput);
+                    var expectedOutputForNode = expectedOutputProducer(node, expectedNodeBuildOutput);
 
-                    output.ShouldBe(expectedOutput1);
+                    actualOutput.ShouldBe(expectedOutputForNode);
                 }
             }
 
@@ -417,7 +477,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
                 expectedOutputForNode.Add(ProjectNumber(node));
 
-                foreach (var referenceOutput in node.ProjectReferences.SelectMany(n => expectedOutput[n]))
+                foreach (var referenceOutput in node.ProjectReferences.SelectMany(n => expectedNodeBuildOutput[n]))
                 {
                     if (!expectedOutputForNode.Contains(referenceOutput))
                     {

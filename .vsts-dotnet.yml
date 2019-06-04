@@ -2,9 +2,12 @@ trigger:
 - master
 - vs*
 
-variables:
-  SignType: real
-  SkipApplyOptimizationData: false
+# If defined here, these values are not overrideable
+# Once they exist, we should define these as "runtime parameters"
+# https://github.com/Microsoft/azure-pipelines-yaml/pull/129
+# variables:
+#   SignType: real
+#   SkipApplyOptimizationData: false
 
 jobs:
 - job: Windows_NT
@@ -24,7 +27,7 @@ jobs:
   - name: VisualStudio.MajorVersion
     value: 16
   - name: VisualStudio.ChannelName
-    value: 'int.d16.0stg'
+    value: 'int.d16.1stg'
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -64,7 +67,7 @@ jobs:
               -officialBuildId $(Build.BuildNumber)
               -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
               /p:RepositoryName=$(Build.Repository.Name)
-              /p:VisualStudioIbcSourceBranchName=$(Build.SourceBranchName)
+              /p:VisualStudioIbcSourceBranchName=$(IbcSourceBranchName)
               /p:VisualStudioDropAccessToken=$(System.AccessToken)
               /p:VisualStudioDropName=$(VisualStudio.DropName)
               /p:DotNetSignType=$(SignType)
