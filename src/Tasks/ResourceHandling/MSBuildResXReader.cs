@@ -207,6 +207,12 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 if (fileRefInfo.Length == 3)
                 {
                     fileRefEncoding = fileRefInfo[2];
+
+#if RUNTIME_TYPE_NETCORE
+                    // Ensure that all Windows codepages are available.
+                    // Safe to call multiple times per https://docs.microsoft.com/en-us/dotnet/api/system.text.encoding.registerprovider
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
                 }
 
                 // from https://github.com/dotnet/winforms/blob/a88c1a73fd7298b0a5c45251771f439262016826/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L231-L241
