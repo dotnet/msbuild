@@ -32,6 +32,9 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
+                // TODO: use no-typename-needed method from https://github.com/dotnet/corefx/pull/38012
+                // preserializedResourceWriter.AddBinaryFormattedResource(Name, Bytes);
+
                 preserializedResourceWriter.AddBinaryFormattedResource(Name, TypeName, Bytes);
             }
             else
