@@ -51,6 +51,18 @@
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>2d3153b356d840819e19a5b2c4c16ada20ecaa53</Sha>
     </Dependency>
+    <Dependency Name="System.CodeDom" Version="4.6.0-preview7.19281.6">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha></Sha>
+    </Dependency>
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-preview7.19281.6">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha></Sha>
+    </Dependency>
+    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-preview7.19281.6">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha></Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19302.2">
