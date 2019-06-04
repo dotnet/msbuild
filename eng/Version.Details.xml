@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview6-27803-06">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview6-27803-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>ed0c4604337e89b9211fbee3d79d05f54c1dff98</Sha>
+      <Sha>f5139e60bb06cb234fe884cde97a89cde9a97b61</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview6.19303.6">
       <Uri>https://github.com/dotnet/cli</Uri>
