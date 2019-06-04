@@ -65,8 +65,8 @@ Ve výchozím nastavení je publikována aplikace závislá na architektuře.</t
         <note />
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>Self contained and no self contained arguments are conflicting.</source>
-        <target state="new">Self contained and no self contained arguments are conflicting.</target>
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="new">The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
