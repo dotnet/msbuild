@@ -894,6 +894,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <PublishItemsOutputGroupDependsOn>
       $(PublishItemsOutputGroupDependsOn);
+      ResolveReferences;
       ComputeFilesToPublish;
     </PublishItemsOutputGroupDependsOn>
   </PropertyGroup>
