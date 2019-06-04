@@ -64,6 +64,9 @@
 
             <SdksFiles Include="$(MSBuildBinSrcDir)\Sdks\**\*" />
 
+            <SdksFiles Remove="$(MSBuildBinSrcDir)\Sdks\**\*.nupkg.metadata" />
+            <RemainingMSBuildBinFiles Include="$(MSBuildBinSrcDir)\Sdks\**\*.nupkg.metadata" />
+
             <SdkResolverFiles Include="$(MSBuildBinSrcDir)\SdkResolvers\**\*" />
             <SdkResolverFiles Include="$(RepoRoot)\mono\SdkResolvers\**\*" />
 

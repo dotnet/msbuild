@@ -31,4 +31,18 @@
       </requestedPrivileges>
     </security>
   </trustInfo>
+
+  <file name="Microsoft.Build.Framework.tlb">
+        <typelib
+            tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}"
+            version="15.1"
+            helpdir=""/>
+  </file>
+
+  <comInterfaceExternalProxyStub
+        iid="{9049A481-D0E9-414f-8F92-D4F67A0359A6}"
+        name="ITaskHost"
+        tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}"
+        proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" />
+
 </assembly>

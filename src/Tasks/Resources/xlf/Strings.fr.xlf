@@ -969,10 +969,35 @@
         <target state="translated">MSB3190: ClickOnce ne prend pas en charge le niveau d'exécution de la requête '{0}'.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.InputDoesntExist">
+        <source>Input file "{0}" does not exist.</source>
+        <target state="translated">Le fichier d'entrée "{0}" n'existe pas.</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.InputNewer">
+        <source>Input file "{0}" is newer than output file "{1}".</source>
+        <target state="translated">Le fichier d'entrée "{0}" est plus récent que le fichier de sortie "{1}".</target>
+        <note>{0} and {1} are filenames on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.LinkedInputDoesntExist">
+        <source>Linked input file "{0}" does not exist.</source>
+        <target state="translated">Le fichier d'entrée lié "{0}" n'existe pas.</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.LinkedInputNewer">
+        <source>Linked input file "{0}" is newer than output file "{1}".</source>
+        <target state="translated">Le fichier d'entrée lié "{0}" est plus récent que le fichier de sortie "{1}".</target>
+        <note>{0} and {1} are filenames on disk.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: Impossible de traiter le fichier {0} car il se trouve dans la zone Internet ou Restreinte ou il contient Mark of the Web. Pour traiter ces fichiers, supprimez Mark of the Web.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.OutputDoesntExist">
+        <source>Output file "{0}" does not exist.</source>
+        <target state="translated">Le fichier de sortie "{0}" n'existe pas.</target>
+        <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
@@ -2725,7 +2750,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CodeElementIsMissing">
         <source>MSB3751: The &lt;Code&gt; element is missing for the "{0}" task. This element is required.</source>
-        <target state="translated">MSB3751: L'élément &lt;Code&gt; est manquant pour la tâche "{0}". Cet élément est obligatoire.</target>
+        <target state="translated">MSB3751: l'élément &lt;Code&gt; est manquant pour la tâche "{0}". Cet élément est requis.</target>
         <note>{StrBegin="MSB3751: "} &lt;Code&gt; should not be localized it is the name of an xml element</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmpty">
@@ -2750,12 +2775,12 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
         <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
-        <target state="translated">MSB3756: L'élément &lt;{0}&gt; n'est pas un enfant valide de l'élément &lt;{1}&gt;. Les éléments enfants valides sont &lt;Code&gt;, &lt;Reference&gt; et &lt;Using&gt;.</target>
+        <target state="translated">MSB3756: l'élément &lt;{0}&gt; n'est pas un enfant valide de l'élément &lt;{1}&gt;. Les éléments enfants valides sont &lt;Code&gt;, &lt;Reference&gt; et &lt;Using&gt;.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="translated">MSB3757: Un seul élément &lt;Code&gt; peut être spécifié.</target>
+        <target state="translated">MSB3757: un seul élément &lt;Code&gt; peut être spécifié.</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -2860,7 +2885,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKReferenceIncorrectFormat">
         <source>MSB3776: The SDK Reference "{0}" is incorrectly formatted. It must be in the following format "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;. For example: "MySDK, Version=2.0"</source>
-        <target state="translated">MSB3776: La référence SDK "{0}" est formatée de manière incorrecte. Elle doit suivre le format suivant : "&lt;NomSDK&gt;, Version=&lt;VersionSDK&gt;. Par exemple : "MonSDK, Version=2.0"</target>
+        <target state="translated">MSB3776: La référence SDK "{0}" est formatée de manière incorrecte. Elle doit suivre le format suivant "&lt;Nom du SDK&gt;, Version=&lt;Version du SDK&gt;. Par exemple : "MySDK, Version=2.0"</target>
         <note>{StrBegin="MSB3776: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoMatchingFrameworkIdentity">
@@ -3140,12 +3165,12 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="translated">MSB3756: L'attribut "{0}" n'est pas valide pour l'élément &lt;Code&gt;. Les attributs valides sont "Language", "Source" et "Type".</target>
+        <target state="translated">MSB3756: l'attribut "{0}" est non valide pour l'élément &lt;Code&gt;. Les attributs valides sont "Language", "Source" et "Type".</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="translated">MSB3752: L'attribut "{0}" de l'élément &lt;{1}&gt; a été défini, mais il est vide. Si l'attribut "{0}" est défini, il ne doit pas être vide.</target>
+        <target state="translated">MSB3752: l'attribut "{0}" de l'élément &lt;{1}&gt; est défini, mais il est vide. Si l'attribut "{0}" est défini, il ne doit pas être vide.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.Comment">

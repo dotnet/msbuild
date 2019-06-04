@@ -233,6 +233,7 @@ Copyright (c) .NET Foundation. All rights reserved.
               MinClientVersion="$(MinClientVersion)"
               Serviceable="$(Serviceable)"
               FrameworkAssemblyReferences="@(_FrameworkAssemblyReferences)"
+              FrameworkReferences="@(_FrameworkReferences)"
               ContinuePackingAfterGeneratingNuspec="$(ContinuePackingAfterGeneratingNuspec)"
               NuspecOutputPath="$(NuspecOutputAbsolutePath)"
               IncludeBuildOutput="$(IncludeBuildOutput)"
@@ -390,6 +391,17 @@ Copyright (c) .NET Foundation. All rights reserved.
           TaskParameter="TargetOutputs"
           ItemName="_FrameworksWithSuppressedDependencies" />
     </MSBuild>
+
+    <MSBuild
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GetFrameworkReferences"
+      Properties="TargetFramework=%(_TargetFrameworks.Identity);
+                  BuildProjectReferences=false;">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_FrameworkReferences" />
+    </MSBuild>
   </Target>
 
   <Target Name ="_GetFrameworksWithSuppressedDependencies" Returns="@(_TfmWithDependenciesSuppressed)">
@@ -407,6 +419,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <Target Name ="_GetFrameworkReferences" Returns="@(TfmSpecificFrameworkReferences)">
+    <ItemGroup>
+      <TfmSpecificFrameworkReferences Include="@(FrameworkReference)"
+                                      Condition="'%(FrameworkReference.Pack)' != 'false' ">
+        <TargetFramework>$(TargetFramework)</TargetFramework>
+      </TfmSpecificFrameworkReferences>
+    </ItemGroup>
+  </Target>
+  
   <Target Name="_GetBuildOutputFilesWithTfm"
           DependsOnTargets="BuiltProjectOutputGroup;DocumentationProjectOutputGroup;SatelliteDllsProjectOutputGroup;_AddPriFileToPackBuildOutput;$(TargetsForTfmSpecificBuildOutput)"
           Returns="@(BuildOutputInPackage)">

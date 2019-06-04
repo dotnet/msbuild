@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
     <body>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
@@ -488,7 +488,7 @@
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: "{0}" 參數的語法無效 ({1})。正確的語法為 {0}="&lt;name&gt; =&lt;value&gt;"。</target>
+        <target state="translated">MSB3100: "{0}" 參數的語法不是有效的 ({1})。正確的語法為 {0}="&lt;name&gt;=&lt;value&gt;"。</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -969,10 +969,35 @@
         <target state="translated">MSB3190: ClickOnce 不支援要求執行層級 '{0}'。</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.InputDoesntExist">
+        <source>Input file "{0}" does not exist.</source>
+        <target state="translated">輸入檔 "{0}" 不存在。</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.InputNewer">
+        <source>Input file "{0}" is newer than output file "{1}".</source>
+        <target state="translated">輸入檔 "{0}" 比輸出檔 "{1}" 新。</target>
+        <note>{0} and {1} are filenames on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.LinkedInputDoesntExist">
+        <source>Linked input file "{0}" does not exist.</source>
+        <target state="translated">連結的輸入檔 "{0}" 不存在。</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.LinkedInputNewer">
+        <source>Linked input file "{0}" is newer than output file "{1}".</source>
+        <target state="translated">連結的輸入檔 "{0}" 比輸出檔案 "{1}" 新。</target>
+        <note>{0} and {1} are filenames on disk.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: 因為檔案 {0} 位於網際網路或是限制區域上，或是檔案上標有 Web 字樣，所以無法處理該檔案。若希望處理這些檔案，請移除 Web 字樣。</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.OutputDoesntExist">
+        <source>Output file "{0}" does not exist.</source>
+        <target state="translated">輸出檔 "{0}" 不存在。</target>
+        <note>{0} is a filename on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
@@ -2510,7 +2535,7 @@
       </trans-unit>
       <trans-unit id="Xaml.MissingTaskBody">
         <source>MSB3692: Unable to create Xaml task.  The &lt;UsingTask&gt; does not contain a &lt;Task&gt; definition.</source>
-        <target state="translated">MSB3692: 無法建立 XAML 工作。&lt;UsingTask&gt; 不含 &lt;Task&gt; 定義。</target>
+        <target state="translated">MSB3692:  無法建立 XAML 工作。&lt;UsingTask&gt; 不包含 &lt;Task&gt; 定義。</target>
         <note>{StrBegin="MSB3692: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.ArgumentOutOfRange">
@@ -2750,12 +2775,12 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
         <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
-        <target state="translated">MSB3756: 元素 &lt;{0}&gt; 不是 &lt;{1}&gt; 元素的有效子集。  有效的子元素為 &lt;Code&gt;、&lt;Reference&gt; 和 &lt;Using&gt;。</target>
+        <target state="translated">MSB3756: 元素 &lt;{0}&gt; 並非 &lt;{1}&gt; 元素的有效子系。有效的子元素為 &lt;Code&gt;、&lt;Reference&gt; 以及 &lt;Using&gt;。</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="translated">MSB3757: 只能指定一個 &lt;Code&gt; 元素。</target>
+        <target state="translated">MSB3757: 只可指定一個 &lt;Code&gt; 元素。</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -2860,7 +2885,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKReferenceIncorrectFormat">
         <source>MSB3776: The SDK Reference "{0}" is incorrectly formatted. It must be in the following format "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;. For example: "MySDK, Version=2.0"</source>
-        <target state="translated">MSB3776: SDK 參考 "{0}" 的格式不正確。其格式必須為 "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;"。例如: "MySDK, Version=2.0"</target>
+        <target state="translated">MSB3776: SDK 參考 "{0}" 格式不正確，必須採用 "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;" 格式。例如: "MySDK, Version=2.0"</target>
         <note>{StrBegin="MSB3776: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoMatchingFrameworkIdentity">
@@ -3085,7 +3110,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
-        <target state="translated">MSB3492: 無法讀取現有的檔案 "{0}"，所以無法判斷其是否包含最新的內容。將予覆寫。</target>
+        <target state="translated">>MSB3492: 無法讀取現有的檔案 "{0}"，所以無法判斷其是否包含最新的內容。將予覆寫。</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
@@ -3140,12 +3165,12 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="translated">MSB3756: 屬性 "{0}" 對 &lt;Code&gt; 元素無效。  有效的屬性為 "Language"、"Source" 和 "Type"。</target>
+        <target state="translated">MSB3756: 屬性 "{0}" 對 &lt;Code&gt; 元素無效。有效的屬性為 "Language"、"Source" 以及 "Type"。</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="translated">MSB3752: 已設定 &lt;{1}&gt; 元素的 "{0}" 屬性，但其為空白。若已設定 "{0}" 屬性，則其不得為空白。</target>
+        <target state="translated">MSB3752: 已設定了 &lt;{1}&gt; 元素的 "{0}" 屬性，但其為空白。若已設定了 "{0}" 屬性，就不得為空白。</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.Comment">

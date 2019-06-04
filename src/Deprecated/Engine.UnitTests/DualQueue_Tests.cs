@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
                 resetEvent.WaitOne();
             }
           
-            // Pop off items from the queue and make ture that we got all of out items back out
+            // Pop off items from the queue and make sure that we got all of out items back out
             int numberOfItemsInQueue = 0;
             string result = null;
             while ((result = stringQueue.Dequeue()) != null)
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
             // The number of items we processed should be the same as the number of EnQueues we did
             Assert.IsTrue(numberOfItemsInQueue == waitHandles.Length,"Expected the number of items in the queue to be the same as the number of Enqueues but it was not");
 
-            // Pop off items from the queue and make ture that we got all of out items back out
+            // Pop off items from the queue and make sure that we got all of out items back out
             int numberOfItemsInQueueTwo = 0;
             string result2 = null;
             while ((result2 = stringQueueTwo.Dequeue()) != null)

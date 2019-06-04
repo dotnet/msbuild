@@ -20,7 +20,7 @@
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <CreateTlb Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</CreateTlb>
     <IsPackable>true</IsPackable>
-    <Description>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</Description>
+    <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
 
@@ -156,9 +156,11 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
+    <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
+    <Compile Include="Graph\ProjectInterpretation.cs" />
     <Compile Include="Graph\GraphBuildResult.cs" />
     <Compile Include="Graph\GraphBuildSubmission.cs" />
     <Compile Include="Graph\GraphBuildRequestData.cs" />
@@ -257,6 +259,9 @@
     <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
+    <Compile Include="Instance\HostObjectException.cs" />
+    <Compile Include="Instance\IRunningObjectTableWrapper.cs" />
+    <Compile Include="Instance\RunningObjectTable.cs" />
     <Compile Include="Logging\EvaluationLocationIdAgnosticComparer.cs" />
     <Compile Include="Logging\ProfilerLogger.cs" />
     <Compile Include="Evaluation\Profiler\ProfilerResultPrettyPrinter.cs" />

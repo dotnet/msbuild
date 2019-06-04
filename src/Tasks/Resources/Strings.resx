@@ -1007,6 +1007,29 @@
   <data name="GenerateResource.NothingOutOfDate">
     <value>No resources are out of date with respect to their source files. Skipping resource generation.</value>
   </data>
+  <!-- Intentionally the same string as the engine's BuildTargetCompletelyInputNewer, so it's easy to grep the log for the out of date reason -->
+  <data name="GenerateResource.InputNewer">
+    <value>Input file "{0}" is newer than output file "{1}".</value>
+    <comment>{0} and {1} are filenames on disk.</comment>
+  </data>
+  <data name="GenerateResource.LinkedInputNewer">
+    <value>Linked input file "{0}" is newer than output file "{1}".</value>
+    <comment>{0} and {1} are filenames on disk.</comment>
+  </data>
+  <!-- Intentionally the same string as the engine's BuildTargetCompletelyInputDoesntExist, so it's easy to grep the log for the out of date reason -->
+  <data name="GenerateResource.InputDoesntExist">
+    <value>Input file "{0}" does not exist.</value>
+    <comment>{0} is a filename on disk.</comment>
+  </data>
+    <data name="GenerateResource.LinkedInputDoesntExist">
+    <value>Linked input file "{0}" does not exist.</value>
+    <comment>{0} is a filename on disk.</comment>
+  </data>
+  <!-- Intentionally the same string as the engine's BuildTargetCompletelyOutputDoesntExist, so it's easy to grep the log for the out of date reason -->
+  <data name="GenerateResource.OutputDoesntExist">
+    <value>Output file "{0}" does not exist.</value>
+    <comment>{0} is a filename on disk.</comment>
+  </data>
   <data name="GenerateResource.AdditionalInputNewerThanTLog">
     <value>Additional input "{0}" has been updated since the last build.  Forcing regeneration of all resources.</value>
   </data>

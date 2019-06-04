@@ -323,7 +323,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Target>
 
     <PropertyGroup>
-        <VisualBasicCoreTargetsPath Condition="'$(VisualBasicCoreTargetsPath)' == ''">$(RoslynTargetsPath)\Microsoft.VisualBasic.Core.targets</VisualBasicCoreTargetsPath>
+      <!-- Design-time builds require a newer version than 1.0 to succeed, so override back to inbox in that case -->
+      <VisualBasicCoreTargetsPath Condition="'$(VisualBasicCoreTargetsPath)' == '' or ('$(DesignTimeBuild)' == 'true' and $(VisualBasicCoreTargetsPath.Contains('Microsoft.Net.Compilers.1.0.0')))">$(RoslynTargetsPath)\Microsoft.VisualBasic.Core.targets</VisualBasicCoreTargetsPath>
     </PropertyGroup>
 
     <Import Project="$(VisualBasicCoreTargetsPath)" />

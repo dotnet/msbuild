@@ -1022,6 +1022,15 @@ namespace Microsoft.Build.Tasks
                         return string.Empty;
                     }
 
+                    // Per II.24.2.1, version string length is rounded up
+                    // to a multiple of 4. So we may read eg "4.0.30319\0\0"
+                    // Version.Parse works fine, but it's not pretty in the log.
+                    int firstNull = v.IndexOf('\0');
+                    if (firstNull > 0)
+                    {
+                        v = v.Substring(0, firstNull);
+                    }
+
                     // Make sure it is a version number
                     if (!Version.TryParse(v.Substring(1), out _))
                     {

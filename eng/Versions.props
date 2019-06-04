@@ -32,6 +32,6 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.1.401</DotNetCliVersion>
+    <DotNetCliVersion>2.1.503</DotNetCliVersion>
   </PropertyGroup>
 </Project>

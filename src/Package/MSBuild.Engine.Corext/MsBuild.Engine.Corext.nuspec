@@ -33,6 +33,7 @@
     <file src="$X86BinPath$/Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
     <file src="$X86BinPath$/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
     <file src="$X86BinPath$/MSBuild.rsp" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Managed.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.CSharp.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.VisualBasic.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Common.CrossTargeting.targets" target="v15.0/bin" />
@@ -73,6 +74,7 @@
     <file src="$X86BinPath$/Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
     <file src="$X86BinPath$/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />
     <file src="$X86BinPath$/MSBuild.rsp" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Managed.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.CSharp.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.VisualBasic.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Common.CrossTargeting.targets" target="v15.0/bin/amd64" />

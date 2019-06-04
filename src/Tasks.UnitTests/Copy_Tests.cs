@@ -533,11 +533,11 @@ namespace Microsoft.Build.UnitTests
         [InlineData(true)]
         public void DoCopyOverCopiedFile(bool skipUnchangedFiles)
         {
-            var sourceFile = FileUtilities.GetTemporaryFile(null, "src", false);
-            var destinationFile = FileUtilities.GetTemporaryFile(null, "dst", false);
-
-            try
+            using (var env = TestEnvironment.Create())
             {
+                var sourceFile = FileUtilities.GetTemporaryFile(env.DefaultTestDirectory.Path, "src", false);
+                var destinationFile = FileUtilities.GetTemporaryFile(env.DefaultTestDirectory.Path, "dst", false);
+
                 File.WriteAllText(sourceFile, "This is a source temp file.");
 
                 // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
@@ -559,13 +559,13 @@ namespace Microsoft.Build.UnitTests
                     Assert.True(success);
 
                     var shouldNotCopy = skipUnchangedFiles &&
-                        i == 1 &&
-                        // SkipUnchanged check will always fail for symbolic links,
-                        // because we compare attributes of real file with attributes of symbolic link.
-                        (NativeMethodsShared.IsMono || !UseSymbolicLinks) &&
-                        // On Windows and MacOS File.Copy already preserves LastWriteTime, but on Linux extra step is needed.
-                        // TODO - this need to be fixed on Linux
-                        (!NativeMethodsShared.IsLinux || UseHardLinks);
+                                        i == 1 &&
+                                        // SkipUnchanged check will always fail for symbolic links,
+                                        // because we compare attributes of real file with attributes of symbolic link.
+                                        (NativeMethodsShared.IsMono || !UseSymbolicLinks) &&
+                                        // On Windows and MacOS File.Copy already preserves LastWriteTime, but on Linux extra step is needed.
+                                        // TODO - this need to be fixed on Linux
+                                        (!NativeMethodsShared.IsLinux || UseHardLinks);
 
                     if (shouldNotCopy)
                     {
@@ -580,23 +580,18 @@ namespace Microsoft.Build.UnitTests
                     else
                     {
                         engine.AssertLogDoesntContainMessageFromResource(AssemblyResources.GetString,
-                          "Copy.DidNotCopyBecauseOfFileMatch",
-                          sourceFile,
-                          destinationFile,
-                          "SkipUnchangedFiles",
-                          "true"
-                          );
+                            "Copy.DidNotCopyBecauseOfFileMatch",
+                            sourceFile,
+                            destinationFile,
+                            "SkipUnchangedFiles",
+                            "true"
+                            );
                     }
 
                     // "Expected the destination file to contain the contents of source file."
                     Assert.Equal("This is a source temp file.", File.ReadAllText(destinationFile));
                     engine.AssertLogDoesntContain("MSB3026"); // Didn't do retries
                 }
-            }
-            finally
-            {
-                File.Delete(sourceFile);
-                File.Delete(destinationFile);
             }
         }
 
