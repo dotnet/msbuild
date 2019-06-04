@@ -97,11 +97,6 @@
         <target state="translated">Crea un pacchetto NuGet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Esegue la migrazione di un progetto project.json in un progetto MSBuild.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Comandi di modifica del progetto</target>

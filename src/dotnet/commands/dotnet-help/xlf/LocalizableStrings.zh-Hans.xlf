@@ -97,11 +97,6 @@
         <target state="translated">创建 NuGet 包。</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">将 project.json 项目迁移到 MSBuild 项目。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">项目修改命令</target>

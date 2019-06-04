@@ -97,11 +97,6 @@
         <target state="translated">NuGet 패키지를 만듭니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">project.json 프로젝트를 MSBuild 프로젝트로 마이그레이션합니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">프로젝트 수정 명령</target>

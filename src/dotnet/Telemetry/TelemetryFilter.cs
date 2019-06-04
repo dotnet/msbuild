@@ -82,11 +82,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
             ),
             new TopLevelCommandNameAndOptionToLog
             (
-                topLevelCommandName: new HashSet<string> {"migrate"},
-                optionsToLog: new HashSet<string> {"sdk-package-version"}
-            ),
-            new TopLevelCommandNameAndOptionToLog
-            (
                 topLevelCommandName: new HashSet<string> {"vstest"},
                 optionsToLog: new HashSet<string> {"platform", "framework", "logger"}
             ),
