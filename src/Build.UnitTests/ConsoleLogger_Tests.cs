@@ -186,6 +186,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Minimal path validation in Core allows expanding path containing quoted slashes.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "Minimal path validation in Mono allows expanding path containing quoted slashes.")]
         public void TestItemsWithUnexpandableMetadata()
         {
             SimulatedConsole sc = new SimulatedConsole();
