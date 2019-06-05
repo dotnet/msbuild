@@ -35,6 +35,7 @@ lib/mono/msbuild/Current/bin/Microsoft.Common.overridetasks
 lib/mono/msbuild/Current/bin/Microsoft.Common.targets
 lib/mono/msbuild/Current/bin/Microsoft.Common.tasks
 lib/mono/msbuild/Current/bin/Microsoft.Data.Entity.targets
+lib/mono/msbuild/Current/bin/Microsoft.Managed.targets
 lib/mono/msbuild/Current/bin/Microsoft.NETFramework.CurrentVersion.props
 lib/mono/msbuild/Current/bin/Microsoft.NETFramework.CurrentVersion.targets
 lib/mono/msbuild/Current/bin/Microsoft.NETFramework.props

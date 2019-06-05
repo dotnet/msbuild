@@ -38,7 +38,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ContentTargetFolders Condition="'$(ContentTargetFolders)' == ''">content;contentFiles</ContentTargetFolders>
     <PackDependsOn>$(BeforePack); _IntermediatePack; GenerateNuspec; $(PackDependsOn)</PackDependsOn>
     <IsInnerBuild Condition="'$(TargetFramework)' != '' AND '$(TargetFrameworks)' != ''">true</IsInnerBuild>
-    <NoBuild Condition="'$(GeneratePackageOnBuild)' == 'true'">true</NoBuild>
     <SymbolPackageFormat Condition="'$(SymbolPackageFormat)' == ''">symbols.nupkg</SymbolPackageFormat>
     <AddPriFileDependsOn Condition="'$(MicrosoftPortableCurrentVersionPropsHasBeenImported)' == 'true'">DeterminePortableBuildCapabilities</AddPriFileDependsOn>
     <NuspecOutputPath Condition="'$(NuspecOutputPath)' == ''">$(BaseIntermediateOutputPath)$(Configuration)\</NuspecOutputPath>
@@ -49,10 +48,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder Condition="'$(SymbolPackageFormat)' == 'snupkg'">.pdb</AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder>
     <SuppressDependenciesWhenPacking Condition="'$(SuppressDependenciesWhenPacking)' == ''">false</SuppressDependenciesWhenPacking>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(NoBuild)' == 'true' ">
+  <PropertyGroup Condition="'$(NoBuild)' == 'true' or '$(GeneratePackageOnBuild)' == 'true'">
     <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(NoBuild)' != 'true' ">
+  <PropertyGroup Condition="'$(NoBuild)' != 'true' and '$(GeneratePackageOnBuild)' != 'true'">
     <GenerateNuspecDependsOn>Build;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
   </PropertyGroup>
   <ItemGroup>
@@ -233,7 +232,6 @@ Copyright (c) .NET Foundation. All rights reserved.
               MinClientVersion="$(MinClientVersion)"
               Serviceable="$(Serviceable)"
               FrameworkAssemblyReferences="@(_FrameworkAssemblyReferences)"
-              FrameworkReferences="@(_FrameworkReferences)"
               ContinuePackingAfterGeneratingNuspec="$(ContinuePackingAfterGeneratingNuspec)"
               NuspecOutputPath="$(NuspecOutputAbsolutePath)"
               IncludeBuildOutput="$(IncludeBuildOutput)"
@@ -391,17 +389,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           TaskParameter="TargetOutputs"
           ItemName="_FrameworksWithSuppressedDependencies" />
     </MSBuild>
-
-    <MSBuild
-      Projects="$(MSBuildProjectFullPath)"
-      Targets="_GetFrameworkReferences"
-      Properties="TargetFramework=%(_TargetFrameworks.Identity);
-                  BuildProjectReferences=false;">
-
-      <Output
-          TaskParameter="TargetOutputs"
-          ItemName="_FrameworkReferences" />
-    </MSBuild>
   </Target>
 
   <Target Name ="_GetFrameworksWithSuppressedDependencies" Returns="@(_TfmWithDependenciesSuppressed)">
@@ -416,15 +403,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       Condition="'%(ReferencePath.Pack)' != 'false' AND '%(ReferencePath.ResolvedFrom)' == '{TargetFrameworkDirectory}'">
         <TargetFramework>$(TargetFramework)</TargetFramework>
       </TfmSpecificFrameworkAssemblyReferences>
-    </ItemGroup>
-  </Target>
-
-  <Target Name ="_GetFrameworkReferences" Returns="@(TfmSpecificFrameworkReferences)">
-    <ItemGroup>
-      <TfmSpecificFrameworkReferences Include="@(FrameworkReference)"
-                                      Condition="'%(FrameworkReference.Pack)' != 'false' ">
-        <TargetFramework>$(TargetFramework)</TargetFramework>
-      </TfmSpecificFrameworkReferences>
     </ItemGroup>
   </Target>
   
