@@ -216,9 +216,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <EnsureRuntimePackageDependencies>true</EnsureRuntimePackageDependencies>
     </PropertyGroup>
 
-    <!-- Disable resolution of runtime target assets if not targeting .NETCoreApp -->
-    <PropertyGroup Condition="'$(DisableRuntimeTargets)' == '' and '$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
-      <DisableRuntimeTargets>true</DisableRuntimeTargets>
+    <!-- Only copy local runtime target assets if targeting netcoreapp -->
+    <PropertyGroup Condition="'$(CopyLocalRuntimeTargetAssets)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+      <CopyLocalRuntimeTargetAssets>true</CopyLocalRuntimeTargetAssets>
     </PropertyGroup>
 
     <ItemGroup>
@@ -245,7 +245,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"
       DisablePackageAssetsCache="$(DisablePackageAssetsCache)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
-      DisableRuntimeTargets="$(DisableRuntimeTargets)"
+      CopyLocalRuntimeTargetAssets="$(CopyLocalRuntimeTargetAssets)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
       DisableTransitiveFrameworkReferences="$(DisableTransitiveFrameworkReferences)"
       DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
