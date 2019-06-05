@@ -2810,6 +2810,9 @@ namespace Microsoft.Build.Tasks
                     case NativeMethods.IMAGE_FILE_MACHINE_ARMV7:
                         dllArchitecture = SystemProcessorArchitecture.Arm;
                         break;
+                    case NativeMethods.IMAGE_FILE_MACHINE_ARM64:
+                        dllArchitecture = (SystemProcessorArchitecture) 6; // There's no entry for ARM64 in SystemProcessorArchitecture, use the next available constant
+                        break;
                     case NativeMethods.IMAGE_FILE_MACHINE_I386:
                         dllArchitecture = SystemProcessorArchitecture.X86;
                         break;

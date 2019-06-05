@@ -561,6 +561,7 @@ namespace Microsoft.Build.Tasks
         internal const UInt16 IMAGE_FILE_MACHINE_ARMV7 = 0x1c4; // ARMv7 (or higher) Thumb mode only
         internal const UInt16 IMAGE_FILE_MACHINE_I386 = 0x14c; // Intel 386 or later processors and compatible processors
         internal const UInt16 IMAGE_FILE_MACHINE_IA64 = 0x200; // Intel Itanium processor family
+        internal const UInt16 IMAGE_FILE_MACHINE_ARM64 = 0xAA64; // ARM64 Little-Endian
         internal const UInt16 IMAGE_FILE_MACHINE_R4000 = 0x166; // Used to test a architecture we do not expect to reference
 
         internal const uint GENERIC_READ = 0x80000000;

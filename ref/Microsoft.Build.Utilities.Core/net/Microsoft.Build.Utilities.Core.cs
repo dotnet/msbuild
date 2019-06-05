@@ -240,6 +240,7 @@ namespace Microsoft.Build.Utilities
     {
         public const string AMD64 = "AMD64";
         public const string ARM = "ARM";
+        public const string ARM64 = "ARM64";
         public const string IA64 = "IA64";
         public const string MSIL = "MSIL";
         public const string X86 = "x86";
