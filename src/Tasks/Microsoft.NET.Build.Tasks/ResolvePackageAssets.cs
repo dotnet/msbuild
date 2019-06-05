@@ -96,9 +96,9 @@ namespace Microsoft.NET.Build.Tasks
         public bool DisableFrameworkAssemblies { get; set; }
 
         /// <summary>
-        /// Do not resolve runtime targets.
+        /// Whether or not resolved runtime target assets should be copied locally.
         /// </summary>
-        public bool DisableRuntimeTargets { get; set; }
+        public bool CopyLocalRuntimeTargetAssets { get; set; }
 
         /// <summary>
         /// Log messages from assets log to build error/warning/message.
@@ -272,7 +272,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 8;
+        private const int CacheFormatVersion = 9;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -376,7 +376,7 @@ namespace Microsoft.NET.Build.Tasks
                     writer.Write(DesignTimeBuild);
                     writer.Write(DisablePackageAssetsCache);
                     writer.Write(DisableFrameworkAssemblies);
-                    writer.Write(DisableRuntimeTargets);
+                    writer.Write(CopyLocalRuntimeTargetAssets);
                     writer.Write(DisableTransitiveProjectReferences);
                     writer.Write(DisableTransitiveFrameworkReferences);
                     writer.Write(DotNetAppHostExecutableNameWithoutExtension);
@@ -1117,18 +1117,13 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteRuntimeTargets()
             {
-                if (_task.DisableRuntimeTargets)
-                {
-                    return;
-                }
-
                 WriteItems(
                     _runtimeTarget,
                     package => package.RuntimeTargets,
                     writeMetadata: (package, asset) =>
                     {
                         WriteMetadata(MetadataKeys.AssetType, asset.AssetType.ToLowerInvariant());
-                        if (ShouldCopyLocalPackageAssets(package))
+                        if (_task.CopyLocalRuntimeTargetAssets && ShouldCopyLocalPackageAssets(package))
                         {
                             WriteCopyLocalMetadata(
                                 package,

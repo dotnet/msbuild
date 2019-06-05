@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IsSelfContained { get; set; }
 
-        public bool DisableRuntimeTargets { get; set; }
+        public bool ResolveRuntimeTargets { get; set; }
 
         [Output]
         public ITaskItem[] ResolvedAssets => _resolvedAssets.ToArray();
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tasks
                     .WithExcludedPackages(PackageReferenceConverter.GetPackageIds(ExcludedPackageReferences))
                     .WithPreserveStoreLayout(PreserveStoreLayout);
 
-            foreach (var resolvedFile in assetsFileResolver.Resolve(projectContext, resolveRuntimeTargets: !DisableRuntimeTargets))
+            foreach (var resolvedFile in assetsFileResolver.Resolve(projectContext, resolveRuntimeTargets: ResolveRuntimeTargets))
             {
                 TaskItem item = new TaskItem(resolvedFile.SourcePath);
 

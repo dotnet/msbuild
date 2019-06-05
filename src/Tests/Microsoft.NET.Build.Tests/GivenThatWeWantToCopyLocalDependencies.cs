@@ -270,7 +270,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
-            testProject.AdditionalProperties["DisableRuntimeTargets"] = "false";
+            testProject.AdditionalProperties["CopyLocalRuntimeTargetAssets"] = "true";
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
