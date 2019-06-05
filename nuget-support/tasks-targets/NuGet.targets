@@ -55,6 +55,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_RestoreSolutionFileUsed Condition=" '$(_RestoreSolutionFileUsed)' == '' AND '$(SolutionDir)' != '' AND $(MSBuildProjectFullPath.EndsWith('.metaproj')) == 'true' " >true</_RestoreSolutionFileUsed>
     <!-- We default to MSBuildInteractive. -->
     <NuGetInteractive Condition=" '$(NuGetInteractive)' == '' ">$(MSBuildInteractive)</NuGetInteractive>
+    <!-- Mark that this targets file supports package download. -->
+    <PackageDownloadSupported>true</PackageDownloadSupported>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -288,7 +290,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Warn for projects that do not support restore. -->
     <WarnForInvalidProjectsTask
-      Condition=" '$(DisableWarnForInvalidRestoreProjects)' != 'true' "
+      Condition=" '$(DisableWarnForInvalidRestoreProjects)' != 'true' AND '$(HideWarningsAndErrors)' != 'true' "
       AllProjects="@(FilteredRestoreGraphProjectInputItemsWithoutDuplicates)"
       ValidProjects="@(FilteredRestoreGraphProjectInputItems)" />
   </Target>
