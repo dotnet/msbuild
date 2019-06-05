@@ -528,6 +528,14 @@ The following are names of parameters or literal values and should not be transl
   </data>
   <data name="ILLinkNotSupportedError" xml:space="preserve">
     <value>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</value>
-    <comment>{StrBegin="NETSDK1102: "}</comment>"
+    <comment>{StrBegin="NETSDK1102: "}</comment>
+  </data>
+  <data name="RollForwardRequiresVersion30" xml:space="preserve">
+    <value>NETSDK1103: RollForward setting is only supported on .NET Core 3.0 or higher.</value>
+    <comment>{StrBegin="NETSDK1103: "}</comment>
+  </data>
+  <data name="InvalidRollForwardValue" xml:space="preserve">
+    <value>NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</value>
+    <comment>{StrBegin="NETSDK1104: "}</comment>
   </data>
 </root>

@@ -155,6 +155,7 @@ namespace FrameworkReferenceTest
                     .And.HaveStdOutContaining("Microsoft.ASPNETCORE.App");
             }
         }
+
         [CoreMSBuildOnlyFact]
         public void TargetingPackDownloadCanBeDisabled()
         {
@@ -190,6 +191,78 @@ namespace FrameworkReferenceTest
                 .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1073");
+        }
+
+        [Theory]
+        [InlineData("Major", true)]
+        [InlineData("latestMinor", true)]
+        [InlineData("Invalid", false)]
+        public void RollForwardCanBeSpecifiedViaProperty(string rollForwardValue, bool valid)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "RollForwardSetting",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.AdditionalProperties["RollForward"] = rollForwardValue;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            if (valid)
+            {
+                buildCommand
+                    .Execute()
+                    .Should()
+                    .Pass();
+
+                var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+                string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+                JObject runtimeConfig = ReadRuntimeConfig(runtimeConfigFile);
+                runtimeConfig["runtimeOptions"]["rollForward"].Value<string>()
+                    .Should().Be(rollForwardValue);
+            }
+            else
+            {
+                buildCommand
+                    .Execute()
+                    .Should()
+                    .Fail()
+                    .And
+                    .HaveStdOutContaining("NETSDK1104");
+            }
+        }
+
+        [Fact]
+        public void RollForwardIsNotSupportedOn22()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "RollForwardSettingNotSupported",
+                TargetFrameworks = "netcoreapp2.2",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.AdditionalProperties["RollForward"] = "Major";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1103");
         }
 
         [CoreMSBuildAndWindowsOnlyFact]
@@ -703,10 +776,15 @@ namespace FrameworkReferenceTest
             }
         }
 
-        private List<string> GetRuntimeFrameworks(string runtimeConfigPath)
+        private JObject ReadRuntimeConfig(string runtimeConfigPath)
         {
             string runtimeConfigContents = File.ReadAllText(runtimeConfigPath);
-            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            return JObject.Parse(runtimeConfigContents);
+        }
+
+        private List<string> GetRuntimeFrameworks(string runtimeConfigPath)
+        {
+            JObject runtimeConfig = ReadRuntimeConfig(runtimeConfigPath);
 
             var runtimeFrameworksList = (JArray)runtimeConfig["runtimeOptions"]["frameworks"];
             if (runtimeFrameworksList == null)

@@ -191,6 +191,9 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(GenerateRuntimeConfigurationFilesInputs)"
           Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">
 
+    <NETSdkError Condition="'$(RollForward)' != '' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
+                 ResourceName="RollForwardRequiresVersion30"/>
+
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
                                        TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
                                        TargetFramework="$(TargetFramework)"
@@ -199,6 +202,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        RuntimeFrameworks="@(RuntimeFramework)"
+                                       RollForward="$(RollForward)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)"
                                        HostConfigurationOptions="@(RuntimeHostConfigurationOption)"
                                        AdditionalProbingPaths="@(AdditionalProbingPath)"

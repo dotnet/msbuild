@@ -333,6 +333,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1075: Popisovač aktualizace není platný. Tuto instanci nejde použít pro další aktualizace.</target>
         <note>{StrBegin="NETSDK1075: "}</note>
       </trans-unit>
+      <trans-unit id="InvalidRollForwardValue">
+        <source>NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</source>
+        <target state="new">NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</target>
+        <note>{StrBegin="NETSDK1104: "}</note>
+      </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
         <target state="translated">NETSDK1061: Projekt byl obnoven pomocí aplikace {0} verze {1}, ale s aktuálním nastavením by se místo toho použít verze {2}. Tento problém vyřešíte tak, že zkontrolujete, že se pro obnovení a následné operace, například sestavení nebo publikování, používá stejné nastavení. Obvykle k tomuto problému může dojít, pokud je vlastnost RuntimeIdentifier nastavena při sestavování nebo  publikování, ale ne při obnovování. Další informace najdete na stránce https://aka.ms/dotnet-runtime-patch-selection.</target>
@@ -435,6 +440,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
         <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
         <note>{StrBegin="NETSDK1095: "}</note>
+      </trans-unit>
+      <trans-unit id="RollForwardRequiresVersion30">
+        <source>NETSDK1103: RollForward setting is only supported on .NET Core 3.0 or higher.</source>
+        <target state="new">NETSDK1103: RollForward setting is only supported on .NET Core 3.0 or higher.</target>
+        <note>{StrBegin="NETSDK1103: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
         <source>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</source>
