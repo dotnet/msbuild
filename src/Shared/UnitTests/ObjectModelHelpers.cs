@@ -1112,6 +1112,13 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     internal static partial class Helpers
     {
+        internal static string Format(this string s, params object[] formatItems)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(s, nameof(s));
+
+            return string.Format(s, formatItems);
+        }
+
         internal static string GetOSPlatformAsString()
         {
             var currentPlatformString = string.Empty;
