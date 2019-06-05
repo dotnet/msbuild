@@ -129,6 +129,15 @@ namespace Microsoft.NET.Publish.Tests
                 var extraCompileLibraryNames = compileLibraryAssemblyNames.Except(expectedCompileLibraryNames).ToList();
                 var missingCompileLibraryNames = expectedCompileLibraryNames.Except(compileLibraryAssemblyNames).ToList();
 
+                if (extraCompileLibraryNames.Any())
+                {
+                    Log.WriteLine("Unexpected compile libraries: " + string.Join(' ', extraCompileLibraryNames));
+                }
+                if (missingCompileLibraryNames.Any())
+                {
+                    Log.WriteLine("Missing compile libraries: " + string.Join(' ', missingCompileLibraryNames));
+                }
+
                 compileLibraryAssemblyNames.Should().BeEquivalentTo(expectedCompileLibraryNames);
 
                 // Ensure P2P references are specified correctly
@@ -669,6 +678,7 @@ System.Text.Encoding.Extensions.dll
 System.Text.Encodings.Web.dll
 System.Text.RegularExpressions.dll
 System.Threading.dll
+System.Threading.Channels.dll
 System.Threading.Overlapped.dll
 System.Threading.Tasks.Dataflow.dll
 System.Threading.Tasks.dll
