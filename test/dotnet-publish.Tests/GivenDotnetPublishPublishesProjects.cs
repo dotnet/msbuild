@@ -186,7 +186,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute(args)
                 .Should().Fail()
-                    .And.HaveStdErr();
+                    .And.HaveStdErrContaining(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
         }
 
         private DirectoryInfo PublishApp(string testAppName, string rid, string args = null)
