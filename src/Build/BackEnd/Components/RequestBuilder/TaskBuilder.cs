@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
@@ -543,7 +544,7 @@ namespace Microsoft.Build.BackEnd
         {
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             Thread staThread = null;
-            Exception exceptionFromExecution = null;
+            ExceptionDispatchInfo exceptionFromExecution = null;
             ManualResetEvent taskRunnerFinished = new ManualResetEvent(false);
             try
             {
@@ -554,14 +555,9 @@ namespace Microsoft.Build.BackEnd
                     {
                         taskResult = InitializeAndExecuteTask(taskLoggingContext, bucket, taskIdentityParameters, taskHost, howToExecuteTask).Result;
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
-                        exceptionFromExecution = e;
+                        exceptionFromExecution = ExceptionDispatchInfo.Capture(e);
                     }
                     finally
                     {
@@ -588,8 +584,7 @@ namespace Microsoft.Build.BackEnd
 
             if (exceptionFromExecution != null)
             {
-                // Unfortunately this will reset the callstack
-                throw exceptionFromExecution;
+                exceptionFromExecution.Throw();
             }
 
             return taskResult;

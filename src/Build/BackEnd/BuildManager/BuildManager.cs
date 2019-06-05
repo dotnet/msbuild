@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -96,7 +97,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Any exception which occurs on a logging thread will go here.
         /// </summary>
-        private Exception _threadException;
+        private ExceptionDispatchInfo _threadException;
 
         /// <summary>
         /// Set of active nodes in the system.
@@ -412,8 +413,7 @@ namespace Microsoft.Build.Execution
                 {
                     ShutdownLoggingService(loggingService);
 
-                    // Unfortunately this will reset the callstack
-                    throw _threadException;
+                    _threadException.Throw();
                 }
 
                 if (_workQueue == null)
@@ -775,8 +775,7 @@ namespace Microsoft.Build.Execution
 
                     if (_threadException != null)
                     {
-                        // Unfortunately this will reset the callstack
-                        throw _threadException;
+                        _threadException.Throw();
                     }
 
                     if (BuildParameters.DumpOpportunisticInternStats)
@@ -810,7 +809,7 @@ namespace Microsoft.Build.Execution
                 result = BuildRequest(requestData);
                 if (result.Exception == null && _threadException != null)
                 {
-                    result.Exception = _threadException;
+                    result.Exception = _threadException.SourceException;
                     _threadException = null;
                 }
             }
@@ -835,7 +834,7 @@ namespace Microsoft.Build.Execution
                 result = BuildRequest(requestData);
                 if (result.Exception == null && _threadException != null)
                 {
-                    result.Exception = _threadException;
+                    result.Exception = _threadException.SourceException;
                     _threadException = null;
                 }
             }
@@ -2128,7 +2127,7 @@ namespace Microsoft.Build.Execution
             {
                 if (_threadException == null)
                 {
-                    _threadException = e;
+                    _threadException = ExceptionDispatchInfo.Capture(e);
                     var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
                     foreach (BuildSubmission submission in submissions)
                     {
@@ -2149,7 +2148,7 @@ namespace Microsoft.Build.Execution
                             }
                             else
                             {
-                                submission.BuildResult.Exception = _threadException;
+                                submission.BuildResult.Exception = _threadException.SourceException;
                             }
                         }
 
@@ -2173,7 +2172,7 @@ namespace Microsoft.Build.Execution
                             }
                             else
                             {
-                                submission.BuildResult.Exception = _threadException;
+                                submission.BuildResult.Exception = _threadException.SourceException;
                             }
                         }
 
