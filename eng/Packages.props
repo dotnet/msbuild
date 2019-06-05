@@ -1,10 +1,9 @@
 <Project>
 
   <PropertyGroup>
-      <MicrosoftNetCompilersVersion>3.1.0-beta1-19162-08</MicrosoftNetCompilersVersion>
-      <CompilerToolsVersion>3.1.0-beta1-19162-08</CompilerToolsVersion>
-      <MicrosoftNETCoreCompilersVersion>2.10.0</MicrosoftNETCoreCompilersVersion>
-      <NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-rtm.5362</NuGetPackageVersion>
+      <MicrosoftNetCompilersVersion>3.1.0</MicrosoftNetCompilersVersion>
+      <CompilerToolsVersion>3.1.0</CompilerToolsVersion>
+      <NuGetPackageVersion>5.1.0-rtm.5921</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
       <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
@@ -16,8 +15,7 @@
     <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="3.0.0-beta1-61516-01" />
     <PackageReference Update="Microsoft.DotNet.BuildTools.GenAPI" Version="2.1.0-prerelease-02404-02" />
     <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
-    <PackageReference Update="Microsoft.Net.Compilers" Version="$(MicrosoftNetCompilersVersion)" />
-    <PackageReference Update="Microsoft.NETCore.Compilers" Version="$(MicrosoftNetCoreCompilersVersion)" />
+    <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
     <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
@@ -53,7 +51,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="2.2.33" Condition="'$(DisableNerdbankVersioning)' != 'true'" PrivateAssets="All" />
     <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-004" PrivateAssets="All"/>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>

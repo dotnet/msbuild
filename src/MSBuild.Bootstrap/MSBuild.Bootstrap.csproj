@@ -56,6 +56,8 @@
     <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" />
   </Target>
 
+  <Import Project="..\Package\GetBinPaths.targets" Condition="$(TargetFramework.StartsWith('net4'))"/>
+
   <Import Project="$(RepoRoot)eng\BootStrapMSBuild.targets" />
 
 </Project>

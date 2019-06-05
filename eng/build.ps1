@@ -118,7 +118,7 @@ function Build-Repo() {
   }
 
   # Do not set this property to true explicitly, since that would override values set in projects.
-  $suppressPartialNgenOptimization = if (!$applyOptimizationData) { "/p:ApplyPartialNgenOptimization=false" } else { "" }
+  $suppressPartialNgenOptimization = if (!$applyOptimizationData) { "/p:EnableNgenOptimization=false" } else { "" }
 
   MSBuild $toolsetBuildProj `
     $bl `
@@ -148,6 +148,14 @@ function Set-OptProfVariables() {
   Write-Host "##vso[task.setvariable variable=VisualStudio.SetupManifestList;]$manifestList"
 }
 
+function Check-EditedFiles() {
+  # Log VSTS errors for changed lines
+  git --no-pager diff HEAD --unified=0 --no-color --exit-code | ForEach-Object { "##vso[task.logissue type=error] $_" }
+  if($LASTEXITCODE -ne 0) {
+    throw "##vso[task.logissue type=error] After building, there are changed files.  Please build locally and include these changes in your pull request."
+  }
+}
+
 try {
   Process-Arguments
  
@@ -161,6 +169,8 @@ try {
 
   if ($ci -and $build) {
     Set-OptProfVariables
+
+    Check-EditedFiles
   }
 }
 catch {

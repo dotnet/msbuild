@@ -12,10 +12,9 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if FEATURE_RESGENCACHE
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-#endif
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 #if FEATURE_COM_INTEROP
@@ -61,12 +60,10 @@ namespace Microsoft.Build.Tasks
 #endif
 
 
-        #region Fields
-
-#if FEATURE_RESGENCACHE
+#region Fields
+        
         // This cache helps us track the linked resource files listed inside of a resx resource file
         private ResGenDependencies _cache;
-#endif
 
         // This is where we store the list of input files/sources
         private ITaskItem[] _sources = null;
@@ -117,8 +114,12 @@ namespace Microsoft.Build.Tasks
         // When true, a separate AppDomain is always created.
         private bool _neverLockTypeAssemblies = false;
 
-        private bool _foundNewestUncorrelatedInputWriteTime = false;
+        // Newest uncorrelated input,
+        // or null if not yet determined
+        private string _newestUncorrelatedInput;
 
+        // Write time of newest uncorrelated input
+        // DateTime.MinValue indicates "missing" iff _newestUncorrelatedInput != null
         private DateTime _newestUncorrelatedInputWriteTime;
 
         // The targets may pass in the path to the SDKToolsPath. If so this should be used to generate the commandline 
@@ -858,15 +859,13 @@ namespace Microsoft.Build.Tasks
                                 {
                                     OutputResources = outputResources;
                                 }
-
-#if FEATURE_RESGENCACHE
+                                
                                 // Get portable library cache info (and if needed, marshal it to this AD).
                                 List<ResGenDependencies.PortableLibraryFile> portableLibraryCacheInfo = process.PortableLibraryCacheInfo;
                                 for (int i = 0; i < portableLibraryCacheInfo.Count; i++)
                                 {
                                     _cache.UpdatePortableLibrary(portableLibraryCacheInfo[i]);
                                 }
-#endif
                             }
 
                             process = null;
@@ -902,11 +901,9 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
-
-#if FEATURE_RESGENCACHE
+                
                 // And now we serialize the cache to save our resgen linked file resolution for later use.
                 WriteStateFile();
-#endif
 
                 RemoveUnsuccessfullyCreatedResourcesFromOutputResources();
 
@@ -961,8 +958,9 @@ namespace Microsoft.Build.Tasks
             // By default all file types that get here are considered dangerous
             bool dangerous = true;
 
-            if (String.Equals(Path.GetExtension(filename), ".resx", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(Path.GetExtension(filename), ".resw", StringComparison.OrdinalIgnoreCase))
+            string extension = Path.GetExtension(filename);
+            if (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // XML files are only dangerous if there are unrecognized objects in them
                 dangerous = false;
@@ -1365,11 +1363,9 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private void GetResourcesToProcess(out List<ITaskItem> inputsToProcess, out List<ITaskItem> outputsToProcess, out List<ITaskItem> cachedOutputFiles)
         {
-#if FEATURE_RESGENCACHE
             // First we look to see if we have a resgen linked files cache.  If so, then we can use that
             // cache to speed up processing.
             ReadStateFile();
-#endif
 
             bool nothingOutOfDate = true;
             inputsToProcess = new List<ITaskItem>();
@@ -1381,7 +1377,6 @@ namespace Microsoft.Build.Tasks
             {
                 if (ExtractResWFiles)
                 {
-#if FEATURE_RESGENCACHE
                     // We can't cheaply predict the output files, since that would require
                     // loading each assembly.  So don't even try guessing what they will be.
                     // However, our cache will sometimes record all the info we need (for incremental builds).
@@ -1393,11 +1388,8 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-#endif
                         inputsToProcess.Add(Sources[i]);
-#if FEATURE_RESGENCACHE
                     }
-#endif
 
                     continue;
                 }
@@ -1437,8 +1429,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-
-#if FEATURE_RESGENCACHE
+        
         /// <summary>
         /// Given a cached portable library that is up to date, create ITaskItems to represent the output of the task, as if we did real work.
         /// </summary>
@@ -1458,7 +1449,6 @@ namespace Microsoft.Build.Tasks
                 cachedOutputFiles.Add(item);
             }
         }
-#endif
 
         /// <summary>
         /// Checks if this list contain any duplicates.  Do this so we don't have any races where we have two
@@ -1502,34 +1492,36 @@ namespace Microsoft.Build.Tasks
         private bool ShouldRebuildResgenOutputFile(string sourceFilePath, string outputFilePath)
         {
             // See if any uncorrelated inputs are missing before checking source and output file timestamps.
-            // Don't consult the uncorrelated input file times if we haven't already got them:
+            // Only do this if we already checked the uncorrelated inputs, since
             // typically, it's the .resx's that are out of date so we want to check those first.
-            if (_foundNewestUncorrelatedInputWriteTime && GetNewestUncorrelatedInputWriteTime() == DateTime.MaxValue)
+            if (_newestUncorrelatedInput != null && _newestUncorrelatedInputWriteTime == DateTime.MinValue)
             {
                 // An uncorrelated input is missing; need to build
+                // We logged this once already, when we found it
                 return true;
             }
 
             DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputFilePath);
 
             // Quick check to see if any uncorrelated input is newer in which case we can avoid checking source file timestamp
-            if (_foundNewestUncorrelatedInputWriteTime && GetNewestUncorrelatedInputWriteTime() > outputTime)
+            if (_newestUncorrelatedInput != null && _newestUncorrelatedInputWriteTime > outputTime)
             {
                 // An uncorrelated input is newer, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputNewer", _newestUncorrelatedInput, outputFilePath);
                 return true;
             }
 
             DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(sourceFilePath);
 
-            if (!String.Equals(Path.GetExtension(sourceFilePath), ".resx", StringComparison.OrdinalIgnoreCase) &&
-                !String.Equals(Path.GetExtension(sourceFilePath), ".resw", StringComparison.OrdinalIgnoreCase))
+            string extension = Path.GetExtension(sourceFilePath);
+            if (!String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) &&
+                !String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // If source file is NOT a .resx, for example a .restext file, 
                 // timestamp checking is simple, because there's no linked files to examine, and no references.
-                return NeedToRebuildSourceFile(sourceTime, outputTime);
+                return NeedToRebuildSourceFile(sourceFilePath, sourceTime, outputFilePath, outputTime);
             }
-
-#if FEATURE_RESGENCACHE
+            
             // OK, we have a .resx file
 
             // PERF: Regardless of whether the outputFile exists, if the source file is a .resx 
@@ -1557,8 +1549,9 @@ namespace Microsoft.Build.Tasks
 
             // if the .resources file is out of date even just with respect to the .resx or 
             // the additional inputs, we don't need to go to the point of checking the linked files. 
-            if (NeedToRebuildSourceFile(sourceTime, outputTime))
+            if (NeedToRebuildSourceFile(sourceFilePath, sourceTime, outputFilePath, outputTime))
             {
+                // This already logged the reason
                 return true;
             }
 
@@ -1575,47 +1568,47 @@ namespace Microsoft.Build.Tasks
                     {
                         // Linked file is missing - force a build, so that resource generation
                         // will produce a nice error message
+                        Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.LinkedInputDoesntExist", linkedFilePath);
                         return true;
                     }
 
                     if (linkedFileTime > outputTime)
                     {
                         // Linked file is newer, need to build
+                        Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.LinkedInputNewer", linkedFilePath, outputFilePath);
                         return true;
                     }
                 }
             }
 
             return false;
-#else
-#if FEATURE_RESX_RESOURCE_READER
-            Compile error: if we get Resx reading before binary serialization
-            it might be interesting to get caching working some other way.
-#endif
-            // On .NET Core, we don't have binary serialization to maintain
-            // the cache, but conveniently .NET Core assemblies (the only
-            // supported target of .NET Core MSBuild) cannot use linked
-            // resources. So the only relevant comparison is input/output.
-            // See https://github.com/Microsoft/msbuild/issues/1197
-            return NeedToRebuildSourceFile(sourceTime, outputTime);
-#endif
         }
 
         /// <summary>
         /// Returns true if the output does not exist, if the provided source is newer than the output, 
         /// or if any of the set of additional inputs is newer than the output.  Otherwise, returns false. 
         /// </summary>
-        private bool NeedToRebuildSourceFile(DateTime sourceTime, DateTime outputTime)
+        private bool NeedToRebuildSourceFile(string sourceFilePath, DateTime sourceTime, string outputFilePath, DateTime outputTime)
         {
-            if (sourceTime > outputTime)
+            if (outputTime == DateTime.MinValue)
             {
-                // Source file is newer, need to build
+                // Output file is missing, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.OutputDoesntExist", outputFilePath);
                 return true;
             }
 
-            if (GetNewestUncorrelatedInputWriteTime() > outputTime)
+            if (sourceTime > outputTime)
+            {
+                // Source file is newer, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputNewer", sourceFilePath, outputFilePath);
+                return true;
+            }
+
+            UpdateNewestUncorrelatedInputWriteTime();
+            if (_newestUncorrelatedInput != null && _newestUncorrelatedInputWriteTime > outputTime)
             {
                 // An uncorrelated input is newer, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputNewer", _newestUncorrelatedInput, outputFilePath);
                 return true;
             }
 
@@ -1660,16 +1653,23 @@ namespace Microsoft.Build.Tasks
             DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(Sources[0].ItemSpec);
             DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(StronglyTypedFileName);
 
-            if (sourceTime == DateTime.MinValue || outputTime == DateTime.MinValue)
+            if (sourceTime == DateTime.MinValue)
             {
                 // Source file is missing - force a build, so that resource generation
-                // will produce a nice error message; or output file is missing,
-                // need to build it
+                // will produce a nice error message
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputDoesntExist", Sources[0].ItemSpec);
+                needToRebuildSTR = true;
+            }
+            else if (outputTime == DateTime.MinValue)
+            {
+                // Output file is missing, need to build it
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.OutputDoesntExist", StronglyTypedFileName);
                 needToRebuildSTR = true;
             }
             else if (sourceTime > outputTime)
             {
                 // Source file is newer, need to build
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputNewer", Sources[0].ItemSpec, StronglyTypedFileName);
                 needToRebuildSTR = true;
             }
 
@@ -1695,58 +1695,38 @@ namespace Microsoft.Build.Tasks
         /// Returns the newest last write time among the references and additional inputs.
         /// If any do not exist, returns DateTime.MaxValue so that resource generation produces a nice error.
         /// </summary>
-        private DateTime GetNewestUncorrelatedInputWriteTime()
+        private void UpdateNewestUncorrelatedInputWriteTime()
         {
-            if (!_foundNewestUncorrelatedInputWriteTime)
+            if (_newestUncorrelatedInput != null)
             {
-                _newestUncorrelatedInputWriteTime = DateTime.MinValue;
-
-                // Check the timestamp of each of the passed-in references to find the newest
-                if (this.References != null)
-                {
-                    foreach (ITaskItem reference in this.References)
-                    {
-                        DateTime referenceTime = NativeMethodsShared.GetLastWriteFileUtcTime(reference.ItemSpec);
-
-                        if (referenceTime == DateTime.MinValue)
-                        {
-                            // File does not exist: force a build to produce an error message
-                            _foundNewestUncorrelatedInputWriteTime = true;
-                            return DateTime.MaxValue;
-                        }
-
-                        if (referenceTime > _newestUncorrelatedInputWriteTime)
-                        {
-                            _newestUncorrelatedInputWriteTime = referenceTime;
-                        }
-                    }
-                }
-
-                // Check the timestamp of each of the additional inputs to see if one's even newer
-                if (this.AdditionalInputs != null)
-                {
-                    foreach (ITaskItem additionalInput in this.AdditionalInputs)
-                    {
-                        DateTime additionalInputTime = NativeMethodsShared.GetLastWriteFileUtcTime(additionalInput.ItemSpec);
-
-                        if (additionalInputTime == DateTime.MinValue)
-                        {
-                            // File does not exist: force a build to produce an error message
-                            _foundNewestUncorrelatedInputWriteTime = true;
-                            return DateTime.MaxValue;
-                        }
-
-                        if (additionalInputTime > _newestUncorrelatedInputWriteTime)
-                        {
-                            _newestUncorrelatedInputWriteTime = additionalInputTime;
-                        }
-                    }
-                }
-
-                _foundNewestUncorrelatedInputWriteTime = true;
+                // We already did this
+                return;
             }
 
-            return _newestUncorrelatedInputWriteTime;
+            // Check the timestamp of each of the passed-in references to find the newest;
+            // and then the additional inputs
+            var inputs = (this.References ?? Enumerable.Empty<ITaskItem>()).Concat(this.AdditionalInputs ?? Enumerable.Empty<ITaskItem>());
+
+            foreach (ITaskItem input in inputs)
+            {
+                DateTime time = NativeMethodsShared.GetLastWriteFileUtcTime(input.ItemSpec);
+
+                if (time == DateTime.MinValue)
+                {
+                    // File does not exist: force a build to produce an error message
+                    _newestUncorrelatedInput = input.ItemSpec;
+                    _newestUncorrelatedInputWriteTime = time;
+                    // Log it here so it's logged only once for all inputs
+                    Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.InputDoesntExist", _newestUncorrelatedInput);
+                    return;
+                }
+
+                if (time > _newestUncorrelatedInputWriteTime)
+                {
+                    _newestUncorrelatedInput = input.ItemSpec;
+                    _newestUncorrelatedInputWriteTime = time;
+                }
+            }
         }
 
 #if FEATURE_APPDOMAIN
@@ -1936,7 +1916,6 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-#if FEATURE_RESGENCACHE
                     catch (SerializationException e)
                     {
                         Log.LogMessageFromResources
@@ -1951,7 +1930,6 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-#endif
                     catch (Exception e)
                     {
                         // DDB#9819
@@ -2002,7 +1980,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool NeedSeparateAppDomainBasedOnSerializedType(XmlReader reader)
         {
-#if FEATURE_RESGENCACHE
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.Element)
@@ -2026,12 +2003,10 @@ namespace Microsoft.Build.Tasks
 
             // We didn't find any element at all -- the .resx is malformed.
             // Return true to err on the side of caution. Error will appear later.
-#endif
             return true;
         }
 #endif
 
-#if FEATURE_RESGENCACHE
         /// <summary>
         /// Deserializes a base64 block from a resx in order to figure out if its type is in the GAC.
         /// Because we're not providing any assembly resolution callback, deserialization
@@ -2086,7 +2061,6 @@ namespace Microsoft.Build.Tasks
                 return Convert.FromBase64String(text);
             }
         }
-#endif // FEATURE_RESGENCACHE
 
         /// <summary>
         /// Make sure that OutputResources has 1 file name for each name in Sources.
@@ -2230,8 +2204,7 @@ namespace Microsoft.Build.Tasks
             return null;
         }
 #endif
-
-#if FEATURE_RESGENCACHE
+        
         /// <summary>
         /// Read the state file if able.
         /// </summary>
@@ -2257,7 +2230,6 @@ namespace Microsoft.Build.Tasks
                 _cache.SerializeCache((StateFile == null) ? null : StateFile.ItemSpec, Log);
             }
         }
-#endif
     }
 
     /// <summary>
@@ -2390,8 +2362,7 @@ namespace Microsoft.Build.Tasks
             }
         }
         private List<ITaskItem> _extractedResWFiles;
-
-#if FEATURE_RESGENCACHE
+        
         /// <summary>
         /// Record all the information about outputs here to avoid future incremental builds.
         /// </summary>
@@ -2400,7 +2371,6 @@ namespace Microsoft.Build.Tasks
             get { return _portableLibraryCacheInfo; }
         }
         private List<ResGenDependencies.PortableLibraryFile> _portableLibraryCacheInfo;
-#endif
 
         /// <summary>
         /// List of output files that we failed to create due to an error.
@@ -2461,9 +2431,7 @@ namespace Microsoft.Build.Tasks
             _readers = new List<ReaderInfo>();
             _extractResWFiles = extractingResWFiles;
             _resWOutputDirectory = resWOutputDirectory;
-#if FEATURE_RESGENCACHE
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
-#endif
 
 #if FEATURE_ASSEMBLY_LOADFROM
             // If references were passed in, we will have to give the ResxResourceReader an object
@@ -2660,9 +2628,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             catch (Exception e) when (
-#if FEATURE_RESGENCACHE
                                       e is SerializationException ||
-#endif
                                       e is TargetInvocationException)
             {
                 // DDB #9819
@@ -2693,10 +2659,8 @@ namespace Microsoft.Build.Tasks
             {
                 if (GetFormat(inFile) == Format.Assembly)
                 {
-#if FEATURE_RESGENCACHE
                     // Prepare cache data
                     ResGenDependencies.PortableLibraryFile library = new ResGenDependencies.PortableLibraryFile(inFile);
-#endif
                     List<string> resWFilesForThisAssembly = new List<string>();
 
                     foreach (ReaderInfo reader in _readers)
@@ -2737,23 +2701,17 @@ namespace Microsoft.Build.Tasks
                         ITaskItem newOutputFile = new TaskItem(escapedOutputFile);
                         resWFilesForThisAssembly.Add(escapedOutputFile);
                         newOutputFile.SetMetadata("ResourceIndexName", reader.assemblySimpleName);
-#if FEATURE_RESGENCACHE
                         library.AssemblySimpleName = reader.assemblySimpleName;
-#endif
                         if (reader.fromNeutralResources)
                         {
                             newOutputFile.SetMetadata("NeutralResourceLanguage", reader.cultureName);
-#if FEATURE_RESGENCACHE
                             library.NeutralResourceLanguage = reader.cultureName;
-#endif
                         }
                         ExtractedResWFiles.Add(newOutputFile);
                     }
-
-#if FEATURE_RESGENCACHE
+                    
                     library.OutputFiles = resWFilesForThisAssembly.ToArray();
                     _portableLibraryCacheInfo.Add(library);
-#endif
                 }
                 else
                 {
@@ -2804,7 +2762,7 @@ namespace Microsoft.Build.Tasks
                     if (FileSystems.Default.FileExists(currentOutputFile))
                     {
                         if (GetFormat(currentOutputFile) != Format.Assembly)
-                            // Never delete an assembly since we don't ever actually write to assemblies.
+                        // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(currentOutputFile);
                         }
@@ -2831,9 +2789,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             catch (Exception e) when (
-#if FEATURE_RESGENCACHE
                                       e is SerializationException ||
-#endif
                                       e is TargetInvocationException)
             {
                 // DDB #9819
@@ -3886,7 +3842,6 @@ namespace Microsoft.Build.Tasks
             private int lineNumber;
             private int column;
 
-#if FEATURE_RESGENCACHE
             /// <summary>
             /// Fxcop want to have the correct basic exception constructors implemented
             /// </summary>
@@ -3894,7 +3849,6 @@ namespace Microsoft.Build.Tasks
                 : base(info, context)
             {
             }
-#endif
 
             internal TextFileException(String message, String fileName, int lineNumber, int linePosition)
                 : base(message)

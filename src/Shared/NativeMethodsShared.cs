@@ -513,7 +513,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static bool IsMaxPathLegacyWindows()
+        internal static bool IsMaxPathLegacyWindows()
         {
             try
             {

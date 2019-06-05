@@ -92,6 +92,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="NuGet.Build.Tasks.GetRestoreProjectJsonPathTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.GetRestoreProjectReferencesTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.GetRestorePackageReferencesTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
+  <UsingTask TaskName="NuGet.Build.Tasks.GetRestorePackageDownloadsTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
+  <UsingTask TaskName="NuGet.Build.Tasks.GetRestoreFrameworkReferencesTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.GetProjectTargetFrameworksTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.GetRestoreSolutionProjectsTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
@@ -162,6 +164,23 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="CollectPackageReferences" Returns="@(PackageReference)" />
+
+    <!--
+    ============================================================
+    CollectPackageDownloads
+    Gathers all PackageDownload items from the project.
+    This target may be used as an extension point to modify
+    package downloads before NuGet reads them.
+    ============================================================
+  -->
+  <Target Name="CollectPackageDownloads" Returns="@(PackageDownload)" />
+
+   <!--
+    ============================================================
+    CollectFrameworkReferences
+    ============================================================
+  -->
+  <Target Name="CollectFrameworkReferences" Returns="@(FrameworkReference)" />
 
   <!--
     ============================================================
@@ -772,7 +791,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="_GenerateProjectRestoreGraphPerFramework"
-    DependsOnTargets="_GetRestoreProjectStyle;CollectPackageReferences"
+    DependsOnTargets="_GetRestoreProjectStyle;CollectPackageReferences;CollectPackageDownloads;CollectFrameworkReferences"
     Returns="@(_RestoreGraphEntry)">
 
     <!-- Write out project references -->
@@ -787,17 +806,44 @@ Copyright (c) .NET Foundation. All rights reserved.
         ItemName="_RestoreGraphEntry" />
     </GetRestoreProjectReferencesTask>
 
-    <!-- Write out package references for NETCore -->
+    <!-- Write out package references-->
     <GetRestorePackageReferencesTask
       Condition=" '$(PackageReferenceCompatibleProjectStyle)' == 'true' "
       ProjectUniqueName="$(MSBuildProjectFullPath)"
       PackageReferences="@(PackageReference)"
-      TargetFrameworks="$(TargetFramework)">
+      TargetFrameworks="$(TargetFramework)"
+      >
 
       <Output
         TaskParameter="RestoreGraphItems"
         ItemName="_RestoreGraphEntry" />
     </GetRestorePackageReferencesTask>
+
+    <!-- Write out package downloads -->
+    <GetRestorePackageDownloadsTask
+      Condition=" '$(PackageReferenceCompatibleProjectStyle)' == 'true' "
+      ProjectUniqueName="$(MSBuildProjectFullPath)"
+      PackageDownloads="@(PackageDownload)"
+      TargetFrameworks="$(TargetFramework)"
+      >
+
+      <Output
+        TaskParameter="RestoreGraphItems"
+        ItemName="_RestoreGraphEntry" />
+    </GetRestorePackageDownloadsTask>
+
+    <!-- Write out Framework References-->
+    <GetRestoreFrameworkReferencesTask
+      Condition=" '$(PackageReferenceCompatibleProjectStyle)' == 'true' "
+      ProjectUniqueName="$(MSBuildProjectFullPath)"
+      FrameworkReferences="@(FrameworkReference)"
+      TargetFrameworks="$(TargetFramework)"
+      >
+
+      <Output
+        TaskParameter="RestoreGraphItems"
+        ItemName="_RestoreGraphEntry" />
+    </GetRestoreFrameworkReferencesTask>
 
     <PropertyGroup>
       <_CombinedFallbacks>$(PackageTargetFallback);$(AssetTargetFallback)</_CombinedFallbacks>

@@ -32,7 +32,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         protected override long GetHostHandshake()
         {
-            long hostHandshake = CommunicationsUtilities.GetTaskHostHostHandshake(CommunicationsUtilities.GetCurrentTaskHostContext());
+            long hostHandshake = CommunicationsUtilities.GetHostHandshake(CommunicationsUtilities.GetCurrentTaskHostContext());
             return hostHandshake;
         }
 
@@ -41,7 +41,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         protected override long GetClientHandshake()
         {
-            long clientHandshake = CommunicationsUtilities.GetTaskHostClientHandshake(CommunicationsUtilities.GetCurrentTaskHostContext());
+            long clientHandshake = CommunicationsUtilities.GetClientHandshake(CommunicationsUtilities.GetCurrentTaskHostContext());
             return clientHandshake;
         }
     }

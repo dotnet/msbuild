@@ -1,26 +1,39 @@
-# MSBuild.exe /pp
-MSBuild preprocessor. Pass /pp to the command line to create a single huge XML project file with all project imports inlined in the correct order. This is useful to investigate the ordering of evaluation and execution.
+# MSBuild Command-Line Switches
+See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference) for more information on switches.
+ * `MSBuild.exe -pp:<FILE>`
+   * MSBuild preprocessor. Pass /pp to the command line to create a single huge XML project file with all project imports inlined in the correct order. This is useful to investigate the ordering of imports and property and target overrides during evaluation.
+   * Example usage: `msbuild MyProject.csproj /pp:inlined.xml`
+ * `MSBuild.exe -nr:false`
+   * Disable node reuse (`/nodeReuse:false`). Don't leave MSBuild.exe processes hanging around (and possibly locking files) after the build completes. See more details in MSBuild command line help (/?). See also `MSBUILDDISABLENODEREUSE=1` below. Note that using this when building repeatedly will cause slower builds.
+ * `MSBuild.exe -bl`
+   * Records all build events to a structured binary log file. The [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) tool can be used to analyze this file.
+ * `MSBuild.exe -noconlog`
+   * Used to suppress the usage of the console logger, which is otherwise always attached.
+ * `MSBuild.exe -flp:v=diag`
+   * Passes parameters to the file logger. If you want to attach multiple file loggers, you do so by specifying additional parameters in the switches /flp1, /flp2, /flp3, and so on.
 
-Example:
-```
-msbuild MyProject.csproj /pp:inlined.proj
-```
-
-# MSBuild.exe /m
-Parallel build. Many people still don't know that they can significantly speed up their builds by passing /m to MSBuild.exe.
-
-# MSBuild.exe /nr:false
-Disable node reuse (/nodeReuse:false). Don't leave MSBuild.exe processes hanging around locking files after the build completes. See more details in MSBuild command line help (/?). See also `MSBUILDDISABLENODEREUSE=1` below.
-
-# EnvironmentVariables
- * `MSBUILDTARGETOUTPUTLOGGING=1` - set this to enable [printing all target outputs to the log](https://blogs.msdn.microsoft.com/msbuild/2010/03/31/displaying-target-output-items-using-the-console-logger).
- * `MSBUILDLOGTASKINPUTS=1` - log task inputs (not needed if there are any diagnostic loggers already).
- * `MSBUILDEMITSOLUTION=1` - save the generated .proj file for the .sln that is used to build the solution.
- * `MSBUILDENABLEALLPROPERTYFUNCTIONS=1` - enable [additional property functions](https://blogs.msdn.microsoft.com/visualstudio/2010/04/02/msbuild-property-functions).
- * `MSBUILDLOGVERBOSERARSEARCHRESULTS=1` - in ResolveAssemblyReference task, log verbose search results.
- * `MSBUILDLOGCODETASKFACTORYOUTPUT=1` - dump generated code for task to a <GUID>.txt file in the TEMP directory
- * `MSBUILDDISABLENODEREUSE=1` - set this to not leave MSBuild processes behind (see /nr:false above, but the environment variable is useful to also set this for Visual Studio for example).
- * `MSBUILDLOGASYNC=1` - enable asynchronous logging.
+# Environment Variables
+ * `MSBUILDTARGETOUTPUTLOGGING=1`
+   * Set this to enable [printing all target outputs to the log](https://blogs.msdn.microsoft.com/msbuild/2010/03/31/displaying-target-output-items-using-the-console-logger).
+ * `MSBUILDLOGTASKINPUTS=1`
+   * Log task inputs (not needed if there are any diagnostic loggers already).
+ * `MSBUILDEMITSOLUTION=1`
+   * Save the generated .proj file for the .sln that is used to build the solution.
+ * `MSBUILDENABLEALLPROPERTYFUNCTIONS=1`
+   * Enable [additional property functions](https://blogs.msdn.microsoft.com/visualstudio/2010/04/02/msbuild-property-functions).
+ * `MSBUILDLOGVERBOSERARSEARCHRESULTS=1`
+   * In ResolveAssemblyReference task, log verbose search results.
+ * `MSBUILDLOGCODETASKFACTORYOUTPUT=1`
+   * Dump generated code for task to a <GUID>.txt file in the TEMP directory
+ * `MSBUILDDISABLENODEREUSE=1`
+   * Set this to not leave MSBuild processes behind (see `/nr:false` above, but the environment variable is useful to also set this for Visual Studio for example).
+ * `MSBUILDLOGASYNC=1`
+   * Enable asynchronous logging.
+ * `MSBUILDDEBUGONSTART=1`
+   * Launch debugger on build start.
+   * Setting the value of 2 allows for manually attaching a debugger to a process ID.
+ * `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
+   * Dumps scheduler state at specified directory
 
 # TreatAsLocalProperty
 If MSBuild.exe is passed properties on the command line, such as `/p:Platform=AnyCPU` then this value overrides whatever assignments you have to that property inside property groups. For instance, `<Platform>x86</Platform>` will be ignored. To make sure your local assignment to properties overrides whatever they pass on the command line, add the following at the top of your MSBuild project file:

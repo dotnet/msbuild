@@ -4,9 +4,17 @@
       "name": "Microsoft.Build.vsix",
       "tests": [
         {
-          "container": "TeamEng",
+          "container": "VSPE",
           "testCases": [
-            "TeamEng.OptProfTest.vs_debugger_interop_managedclient"
+            "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+            "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+          ]
+        },
+        {
+          "container": "MSBuild",
+          "testCases": [
+            "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
+            "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc",
           ]
         }
       ]

@@ -642,8 +642,8 @@ namespace Microsoft.Build.Shared
 
             if (NativeMethodsShared.IsWindows && !EndsWithSlash(fullPath))
             {
-                if (FileUtilitiesRegex.DrivePattern.IsMatch(fileSpec) ||
-                    FileUtilitiesRegex.UncPattern.IsMatch(fullPath))
+                if (FileUtilitiesRegex.IsDrivePattern(fileSpec) ||
+                    FileUtilitiesRegex.IsUncPattern(fullPath))
                 {
                     // append trailing slash if Path.GetFullPath failed to (this happens with drive-specs and UNC shares)
                     fullPath += Path.DirectorySeparatorChar;

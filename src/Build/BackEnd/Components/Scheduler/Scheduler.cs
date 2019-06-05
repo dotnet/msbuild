@@ -2206,7 +2206,34 @@ namespace Microsoft.Build.BackEnd
                 accumulatedDuration += duration;
             }
 
-            string durationBar = new String('#', (int)(duration / 0.05));
+            // Limit the number of histogram bar segments. For long runs the number of segments can be counted in
+            // hundreds of thousands (for instance a build which took 8061.7s would generate a line 161,235 characters
+            // long) which is a bit excessive. The scales implemented below limit the generated line length to
+            // manageable proportions even for very long runs.
+            int durationElementCount = (int)(duration / 0.05);
+            int scale;
+            char barSegment;
+            if (durationElementCount <= 100)
+            {
+                barSegment = '.';
+                scale = 1;
+            }
+            else if (durationElementCount <= 1000)
+            {
+                barSegment = '+';
+                scale = 100;
+            }
+            else
+            {
+                barSegment = '#';
+                scale = 1000;
+            }
+
+            string durationBar = new string(barSegment, durationElementCount / scale);
+            if (scale > 1)
+            {
+                durationBar = $"{durationBar} (scale 1:{scale})";
+            }
             if (haveNonIdleNode)
             {
                 loggingService.LogComment(context, MessageImportance.Normal, "NodeUtilizationEntry", stringBuilder, duration, accumulatedDuration, durationBar);

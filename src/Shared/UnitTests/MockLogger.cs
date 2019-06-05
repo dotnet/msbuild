@@ -440,7 +440,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Assert that the log file contains the given string.
+        /// Assert that the log file does not contain the given string.
         /// </summary>
         /// <param name="contains"></param>
         internal void AssertLogDoesntContain(string contains)

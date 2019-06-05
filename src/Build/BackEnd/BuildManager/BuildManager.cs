@@ -718,7 +718,7 @@ namespace Microsoft.Build.Execution
 
                 if (_buildParameters.UsesOutputCache())
                 {
-                    SerializeOutputCache(_buildParameters.OutputResultsCacheFile);
+                    SerializeCaches();
                 }
 
                 if (loggingService != null)
@@ -785,64 +785,15 @@ namespace Microsoft.Build.Execution
                     }
                 }
             }
-        }
 
-        private void SerializeOutputCache(string outputCacheFile)
-        {
-            ErrorUtilities.VerifyThrowInternalNull(outputCacheFile, nameof(outputCacheFile));
-
-            try
+            void SerializeCaches()
             {
-                if (string.IsNullOrWhiteSpace(outputCacheFile))
+                var errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
+
+                if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EmptyOutputCacheFile"));
-                    return;
+                    LogErrorAndShutdown(errorMessage);
                 }
-
-                var fullPath = FileUtilities.NormalizePath(outputCacheFile);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-
-                using (var fileStream = File.OpenWrite(fullPath))
-                {
-                    var translator = BinaryTranslator.GetWriteTranslator(fileStream);
-
-                    ConfigCache configCache = null;
-                    ResultsCache resultsCache = null;
-
-                    switch (_configCache)
-                    {
-                        case ConfigCache asConfigCache:
-                            configCache = asConfigCache;
-                            break;
-                        case ConfigCacheWithOverride configCacheWithOverride:
-                            configCache = configCacheWithOverride.CurrentCache;
-                            break;
-                        default:
-                            ErrorUtilities.ThrowInternalErrorUnreachable();
-                            break;
-                    }
-
-                    switch (_resultsCache)
-                    {
-                        case ResultsCache asResultsCache:
-                            resultsCache = asResultsCache;
-                            break;
-                        case ResultsCacheWithOverride resultsCacheWithOverride:
-                            resultsCache = resultsCacheWithOverride.CurrentCache;
-                            break;
-                        default:
-                            ErrorUtilities.ThrowInternalErrorUnreachable();
-                            break;
-                    }
-
-                    translator.Translate(ref configCache);
-                    translator.Translate(ref resultsCache);
-                }
-            }
-            catch (Exception e)
-            {
-                LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ErrorWritingCacheFile", outputCacheFile, e.Message));
             }
         }
 
@@ -2474,7 +2425,7 @@ namespace Microsoft.Build.Execution
 
                 foreach (var inputCacheFile in inputCacheFiles)
                 {
-                    var (configCache, resultsCache, exception) = DeserializeCaches(inputCacheFile);
+                    var (configCache, resultsCache, exception) = CacheSerialization.DeserializeCaches(inputCacheFile);
 
                     if (exception != null)
                     {
@@ -2499,32 +2450,6 @@ namespace Microsoft.Build.Execution
             {
                 CancelAndMarkAsFailure();
                 throw;
-            }
-
-            (IConfigCache ConfigCache, IResultsCache ResultsCache, Exception exception) DeserializeCaches(string inputCacheFile)
-            {
-                try
-                {
-                    ConfigCache configCache = null;
-                    ResultsCache resultsCache = null;
-
-                    using (var fileStream = File.OpenRead(inputCacheFile))
-                    {
-                        var translator = BinaryTranslator.GetReadTranslator(fileStream, null);
-
-                        translator.Translate(ref configCache);
-                        translator.Translate(ref resultsCache);
-                    }
-
-                    ErrorUtilities.VerifyThrowInternalNull(configCache, nameof(configCache));
-                    ErrorUtilities.VerifyThrowInternalNull(resultsCache, nameof(resultsCache));
-
-                    return (configCache, resultsCache, null);
-                }
-                catch (Exception e)
-                {
-                    return (null, null, e);
-                }
             }
         }
 

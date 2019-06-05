@@ -331,6 +331,14 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(format, args);
             }
         }
+
+        /// <summary>
+        /// MSBuild launches the debugger on ErrorUtilities exceptions when in DEBUG. Disable this in tests that assert these exceptions.
+        /// </summary>
+        public void DoNotLaunchDebugger()
+        {
+            SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
+        }
     }
 
     /// <summary>

@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal("v13.0", t.DefaultSubToolsetVersion);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/4363")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void TestDefaultSubToolsetFor40()
         {
@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/4363")]
         public void TestDefaultWhenNoSubToolset()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/4363")]
         public void TestGenerateSubToolsetVersionWhenNoSubToolset()
         {
             if (NativeMethodsShared.IsUnixLike)

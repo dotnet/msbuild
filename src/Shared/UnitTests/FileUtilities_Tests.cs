@@ -400,9 +400,9 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>
@@ -417,7 +417,6 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
-#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -502,7 +501,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [Fact]
+        [Fact(Skip="https://github.com/Microsoft/msbuild/issues/4205")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadGlobalroot()
         {
@@ -561,7 +560,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
         // These tests will need to be redesigned for Linux
 
-        [Fact]
+        [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
         [Trait("Category", "mono-osx-failing")]
         public void FileOrDirectoryExistsNoThrowTooLongWithDots()
         {
@@ -577,7 +576,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
         [Trait("Category", "mono-osx-failing")]
         public void FileOrDirectoryExistsNoThrowTooLongWithDotsRelative()
         {
@@ -631,7 +630,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(FileUtilities.DirectoryExistsNoThrow(inputPath));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
         [Trait("Category", "mono-osx-failing")]
         public void DirectoryExistsNoThrowTooLongWithDotsRelative()
         {
@@ -642,7 +641,7 @@ namespace Microsoft.Build.UnitTests
             string inputPath = longPart + @"\..\..\..\" + Environment.SystemDirectory.Substring(3);
             Console.WriteLine(inputPath.Length);
 
-            // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
+            // "c:\windows\system32\<verylong>\..\..\..\windows\system32" exists
 
             string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -650,8 +649,8 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
-                Assert.True(FileUtilities.DirectoryExistsNoThrow(inputPath));
-                Assert.False(FileUtilities.DirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
+                FileUtilities.DirectoryExistsNoThrow(inputPath).ShouldBeTrue();
+                FileUtilities.DirectoryExistsNoThrow(inputPath.Replace('\\', 'X')).ShouldBeFalse();
             }
             finally
             {
@@ -659,7 +658,16 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        public static bool RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241()
+        {
+            // Run these tests only when we're not on Windows
+            return !NativeMethodsShared.IsWindows ||
+            // OR we're on Windows and long paths aren't enabled
+            // https://github.com/Microsoft/msbuild/issues/4241
+                   NativeMethodsShared.IsMaxPathLegacyWindows();
+        }
+
+        [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
         [Trait("Category", "mono-osx-failing")]
         public void FileExistsNoThrowTooLongWithDots()
         {
@@ -675,7 +683,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(FileUtilities.FileExistsNoThrow(inputPath));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
         [Trait("Category", "mono-osx-failing")]
         public void FileExistsNoThrowTooLongWithDotsRelative()
         {

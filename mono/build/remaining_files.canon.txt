@@ -3,7 +3,4 @@ Directory.Build.rsp
 Directory.Build.targets
 MSBuild.Bootstrap.dll
 MSBuild.Bootstrap.pdb
-Microsoft.Build.Tasks.CodeAnalysis.dll
 System.Reflection.Metadata.dll
-TestTask.v12.0.dll
-TestTask.v4.0.dll

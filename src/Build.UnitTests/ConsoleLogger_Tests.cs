@@ -184,6 +184,30 @@ namespace Microsoft.Build.UnitTests
             sc.ToString().ShouldContain("XXX:");
         }
 
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Minimal path validation in Core allows expanding path containing quoted slashes.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "Minimal path validation in Mono allows expanding path containing quoted slashes.")]
+        public void TestItemsWithUnexpandableMetadata()
+        {
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            ObjectModelHelpers.BuildProjectExpectSuccess(@"
+<Project>
+<ItemDefinitionGroup>
+  <F>
+   <MetadataFileName>a\b\%(Filename).c</MetadataFileName>
+  </F>
+ </ItemDefinitionGroup>
+ <ItemGroup>
+  <F Include=""-in &quot;x\y\z&quot;"" />
+ </ItemGroup>
+ <Target Name=""X"" />
+</Project>", logger);
+
+            sc.ToString().ShouldContain("\"a\\b\\%(Filename).c\"");
+
+        }
+
         /// <summary>
         /// Verify that on minimal verbosity the console logger does not log the target names.
         /// </summary>

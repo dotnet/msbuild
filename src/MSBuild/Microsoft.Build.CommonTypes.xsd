@@ -2397,6 +2397,20 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
+    <xs:element name="GetFileHash" substitutionGroup="msb:Task">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:TaskType">
+                    <xs:attribute name="Files" use="required" />
+                    <xs:attribute name="Algorithm" />
+                    <xs:attribute name="MetadataName" />
+                    <xs:attribute name="HashEncoding" />
+                    <xs:attribute name="Hash" />
+                    <xs:attribute name="Items" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="GetFrameworkPath" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -2899,6 +2913,18 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
+    <xs:element name="VerifyFileHash" substitutionGroup="msb:Task">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:TaskType">
+                    <xs:attribute name="File" use="required" />
+                    <xs:attribute name="Hash" use="required" />
+                    <xs:attribute name="HashEncoding" />
+                    <xs:attribute name="Algorithm" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="Warning" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -2961,6 +2987,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="File" use="required" />
                     <xs:attribute name="Lines" />
                     <xs:attribute name="Overwrite" type="msb:boolean" />
+                    <xs:attribute name="WriteOnlyWhenDifferent" type="msb:boolean" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>

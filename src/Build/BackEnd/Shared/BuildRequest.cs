@@ -292,8 +292,11 @@ namespace Microsoft.Build.BackEnd
         internal HostServices HostServices
         {
             [DebuggerStepThrough]
-            get;
+            get => _hostServices;
+            set => _hostServices = value;
         }
+
+        private HostServices _hostServices;
 
         /// <summary>
         /// Returns true if this is a root request (one which has no parent.)
@@ -343,6 +346,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
             translator.Translate(ref _skipNonexistentTargets);
             translator.Translate(ref _requestedProjectState);
+            translator.Translate(ref _hostServices);
 
             // UNDONE: (Compat) Serialize the host object.
         }

@@ -550,8 +550,8 @@ namespace Microsoft.Build.BackEnd
                                         commandLineArgs,
                                         (int)hostContext,
                                         this,
-                                        CommunicationsUtilities.GetTaskHostHostHandshake(hostContext),
-                                        CommunicationsUtilities.GetTaskHostClientHandshake(hostContext),
+                                        CommunicationsUtilities.GetHostHandshake(hostContext),
+                                        CommunicationsUtilities.GetClientHandshake(hostContext),
                                         NodeContextTerminated
                                     );
 

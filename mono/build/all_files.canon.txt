@@ -65,7 +65,6 @@ lib/mono/msbuild/Current/bin/NuGet.Frameworks.dll
 lib/mono/msbuild/Current/bin/NuGet.Frameworks.xml
 lib/mono/msbuild/Current/bin/NuGet.LibraryModel.dll
 lib/mono/msbuild/Current/bin/NuGet.LibraryModel.xml
-lib/mono/msbuild/Current/bin/NuGet.Packaging.Core.dll
 lib/mono/msbuild/Current/bin/NuGet.Packaging.dll
 lib/mono/msbuild/Current/bin/NuGet.Packaging.xml
 lib/mono/msbuild/Current/bin/NuGet.ProjectModel.dll
