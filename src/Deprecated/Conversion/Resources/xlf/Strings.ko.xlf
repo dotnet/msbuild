@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx" build-num="-1161335895">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx" build-num="-1522637684">
     <header>
       <count-group name="BlackBox wordcount">
         <count count-type="x-wordCount">231</count>
@@ -25,7 +25,7 @@
         <target state="translated">MSB2013: 모든 프로젝트를 포함하는 올바른 .SLN 파일을 찾을 수 없으므로 GUID가 {0}인 프로젝트 간 참조를 변환할 수 없습니다.</target>
         <note>{StrBegin="MSB2013: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2013: 모든 프로젝트를 포함하는 올바른 .SLN 파일을 찾을 수 없으므로 GUID가 {0}인 프로젝트 간 참조를 변환할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB2013: Der Interprojektverweis mit der GUID {0} konnte nicht konvertiert werden, da keine gültige SLN-Datei mit allen Projekten gefunden wurde.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -34,7 +34,7 @@
         <target state="translated">MSB2016: 프로젝트({0})에 빈 .RESX 파일이 있습니다.  변환된 프로젝트에서 이 파일을 제거합니다.</target>
         <note>{StrBegin="MSB2016: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2016: 프로젝트({0})에 빈 .RESX 파일이 있습니다.  변환된 프로젝트에서 이 파일을 제거합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB2016: Eine leere RESX-Datei wurde im Projekt "({0})" gefunden. Die Datei wird aus dem konvertierten Projekt entfernt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -43,7 +43,7 @@
         <target state="translated">MSB2015: 원래 프로젝트 파일에 &lt;Exclude&gt; 요소가 있습니다.  이 요소는 Visual Studio .NET으로 변환할 수 없으므로 무시됩니다.</target>
         <note>{StrBegin="MSB2015: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2015: 원본 프로젝트 파일에서 &lt; 제외 &gt; 요소를 발견 합니다.  Visual Studio.NET으로 변환할 수 없습니다 하 고 무시 합니다.</target>
+          <target state-qualifier="mt-suggestion">MSB2015: Gefunden Sie ein &lt; Exclude &gt; Element in der Projektdatei.  Dies kann nicht in Visual Studio .NET konvertiert werden und wird ignoriert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="23" adjWordcount="19.55" curWordcount="19.55"</note>
       </trans-unit>
@@ -52,7 +52,7 @@
         <target state="translated">MSB2001: &lt;{0}&gt; 요소에 필요한 "{1}" 특성이 없습니다.</target>
         <note>{StrBegin="MSB2001: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2001: 요소 &lt;{0}&gt; 필수 특성이 포함 되어 있지 않습니다 "{1}".</target>
+          <target state-qualifier="mt-suggestion">MSB2001: Element &lt;{0}&gt; enthält nicht das erforderliche Attribut "{1}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -61,7 +61,7 @@
         <target state="translated">MSB2002: 새 프로젝트의 파일 이름을 지정해야 합니다.</target>
         <note>{StrBegin="MSB2002: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2002: 새 프로젝트의 파일 이름을 지정해야 합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB2002: Der Dateiname des neuen Projekts muss angegeben werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -70,7 +70,7 @@
         <target state="translated">MSB2003: 이전 프로젝트의 파일 이름을 지정해야 합니다.</target>
         <note>{StrBegin="MSB2003: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2003: 이전 프로젝트의 파일 이름을 지정해야 합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB2003: Der Dateiname des alten Projekts muss angegeben werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -79,7 +79,7 @@
         <target state="translated">MSB2004: &lt;{0}&gt; 요소는 언어 노드를 둘 이상 포함할 수 없습니다.</target>
         <note>{StrBegin="MSB2004: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.  The {0} in this case is going to be "VisualStudioProject".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2004: 요소 &lt;{0}&gt; 언어 노드를 둘 이상 사용할 수 없습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB2004: Element &lt;{0}&gt; darf nicht mehr als einen Sprachknoten enthalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -88,7 +88,7 @@
         <target state="translated">MSB2005: &lt;{0}&gt; 요소는 특성을 포함할 수 없습니다.</target>
         <note>{StrBegin="MSB2005: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2005: 요소 &lt;{0}&gt; 특성을 포함할 수 없습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB2005: Element &lt;{0}&gt; darf keine Attribute enthalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="7" adjWordcount="5.95" curWordcount="5.95"</note>
       </trans-unit>
@@ -97,7 +97,7 @@
         <target state="translated">MSB2006: 프로젝트 파일에 &lt;{0}&gt; 루트 요소가 없습니다.</target>
         <note>{StrBegin="MSB2006: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2006: 프로젝트 파일에서 루트 요소가 아닐 &lt;{0}&gt;.</target>
+          <target state-qualifier="mt-suggestion">MSB2006: Die Projektdatei enthält kein Stammelement &lt;{0}&gt;.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
       </trans-unit>
@@ -106,7 +106,7 @@
         <target state="translated">MSB2007: Visual Studio에서 프로젝트 파일 "{0}"을(를) 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB2007: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2007: Visual Studio에서 프로젝트 파일 "{0}"을(를) 찾을 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB2007: Die Projektdatei "{0}" wurde nicht gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -115,7 +115,7 @@
         <target state="translated">MSB2014: GUID가 {0}인 프로젝트 간 참조는 '{1}' 파일에 나열되어 있지 않으므로 변환할 수 없습니다.</target>
         <note>{StrBegin="MSB2014: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2014: GUID가 {0}인 프로젝트 간 참조는 '{1}' 파일에 나열되어 있지 않으므로 변환할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB2014: Der Interprojektverweis mit der GUID {0} kann nicht konvertiert werden, da er nicht in der Datei "{1}" enthalten ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -124,7 +124,7 @@
         <target state="translated">MSB2008: 이 Visual Studio 프로젝트 시스템에서 "{0}" 프로젝트를 변환할 수 없습니다. C#, VB 및 VJ# 클라이언트 프로젝트만 변환할 수 있습니다.</target>
         <note>{StrBegin="MSB2008: "}It appears we've been asked to convert a project that either wasn't created by the Visual Studio managed client project system (C#, VB, J#), or that has been hand-modified or corrupted.  You would get this error if this conversion utility was invoked on a VC++ project (.VCPROJ) for example.  In this case, the {0} would be replaced with "Visual C++".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2008: 이 Visual Studio 프로젝트 시스템에서 "{0}" 프로젝트를 변환할 수 없습니다. C#, VB 및 VJ# 클라이언트 프로젝트만 변환할 수 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB2008: Mit diesem Visual Studio-Projektsystem können keine {0}-Projekte konvertiert werden. Mit diesem System können nur C#-, VB- und VJ#-Clientprojekte konvertiert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -133,7 +133,7 @@
         <target state="translated">MSB2009: &lt;{1}&gt; 요소의 "{0}" 특성이 잘못되었습니다.</target>
         <note>{StrBegin="MSB2009: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2009: 특성 "{0}" 요소 &lt;{1}&gt; 올바르지 않습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB2009: Das Attribut "{0}" des Elements &lt;{1}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="10" adjWordcount="8.5" curWordcount="8.5"</note>
       </trans-unit>
@@ -142,7 +142,7 @@
         <target state="translated">MSB2010: &lt;{1}&gt; 요소의 &lt;{0}&gt; 자식 요소가 잘못되었습니다.</target>
         <note>{StrBegin="MSB2010: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2010: 자식 요소 &lt;{0}&gt; 요소 &lt;{1}&gt; 올바르지 않습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB2010: Untergeordnete Element &lt;{0}&gt; Element &lt;{1}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
       </trans-unit>
@@ -151,7 +151,7 @@
         <target state="translated">MSB2011: &lt;{0}&gt; 요소가 잘못되었습니다.</target>
         <note>{StrBegin="MSB2011: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2011: 요소 &lt;{0}&gt; 올바르지 않습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB2011: Element &lt;{0}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="7" adjWordcount="5.95" curWordcount="5.95"</note>
       </trans-unit>
@@ -160,7 +160,7 @@
         <target state="translated">MSB2012: 웹 프로젝트에 대한 프로젝트 간 참조는 더 이상 지원되지 않으므로 변환할 수 없습니다. {0} 프로젝트에 대한 참조를 제거한 후 다시 추가하십시오.</target>
         <note>{StrBegin="MSB2012: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB2012: 웹 프로젝트에 대한 프로젝트 간 참조는 더 이상 지원되지 않으므로 변환할 수 없습니다. {0} 프로젝트에 대한 참조를 제거한 후 다시 추가하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB2012: Interprojektverweise auf Webprojekte werden nicht mehr unterstützt und können daher nicht konvertiert werden. Entfernen Sie den Verweis auf das Projekt "{0}", und fügen Sie es erneut hinzu.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>

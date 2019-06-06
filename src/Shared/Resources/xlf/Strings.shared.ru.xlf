@@ -275,7 +275,7 @@
       </trans-unit>
       <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
-        <target state="needs-review-translation">MSB5024: Не удалось определить допустимое расположение для MSBuild. Попробуйте запустить этот процесс из командной строки разработчика для Visual Studio.</target>
+        <target state="translated">MSB5024: Не удалось определить допустимое расположение для MSBuild. Попробуйте запустить этот процесс из командной строки разработчика для Visual Studio.</target>
         <note>{StrBegin="MSB5024: "}</note>
       </trans-unit>
       <trans-unit id="InvalidLogFileFormat">

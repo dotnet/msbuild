@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx" build-num="-1509671557">
+  <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx" build-num="-1522637684">
     <header>
       <count-group name="BlackBox wordcount">
         <count count-type="x-wordCount">231</count>
@@ -25,7 +25,7 @@
         <target state="translated">MSB2013: La referencia entre proyectos con GUID {0} no se pudo convertir porque no se encuentra un archivo .SLN válido con todos los proyectos.</target>
         <note>{StrBegin="MSB2013: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2013: La referencia entre proyectos con GUID {0} no se pudo convertir porque no se encuentra un archivo .SLN válido con todos los proyectos.</target>
+          <target state-qualifier="tm-suggestion">MSB2013: Der Interprojektverweis mit der GUID {0} konnte nicht konvertiert werden, da keine gültige SLN-Datei mit allen Projekten gefunden wurde.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -34,7 +34,7 @@
         <target state="translated">MSB2016: Se encontró un archivo .RESX vacío en el proyecto ({0}). Se quitará del proyecto convertido.</target>
         <note>{StrBegin="MSB2016: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2016: Se encontró un archivo .RESX vacío en el proyecto ({0}). Se quitará del proyecto convertido.</target>
+          <target state-qualifier="tm-suggestion">MSB2016: Eine leere RESX-Datei wurde im Projekt "({0})" gefunden. Die Datei wird aus dem konvertierten Projekt entfernt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -43,7 +43,7 @@
         <target state="translated">MSB2015: Se encontró un elemento &lt;Exclude&gt; en el archivo del proyecto original. No se puede convertir a Visual Studio .NET y se omitirá.</target>
         <note>{StrBegin="MSB2015: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2015: Se encontró un elemento &lt; Exclude &gt; en el archivo de proyecto original.  Esto no se puede convertir a Visual Studio .NET y se omitirá.</target>
+          <target state-qualifier="mt-suggestion">MSB2015: Gefunden Sie ein &lt; Exclude &gt; Element in der Projektdatei.  Dies kann nicht in Visual Studio .NET konvertiert werden und wird ignoriert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="23" adjWordcount="19.55" curWordcount="19.55"</note>
       </trans-unit>
@@ -52,7 +52,7 @@
         <target state="translated">MSB2001: El elemento &lt;{0}&gt; no contiene el atributo necesario "{1}".</target>
         <note>{StrBegin="MSB2001: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2001: El elemento &lt;{0}&gt; no contiene el atributo obligatorio "{1}".</target>
+          <target state-qualifier="mt-suggestion">MSB2001: Element &lt;{0}&gt; enthält nicht das erforderliche Attribut "{1}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -61,7 +61,7 @@
         <target state="translated">MSB2002: Debe especificarse el nombre de archivo del nuevo proyecto.</target>
         <note>{StrBegin="MSB2002: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2002: Debe especificarse el nombre de archivo del nuevo proyecto.</target>
+          <target state-qualifier="tm-suggestion">MSB2002: Der Dateiname des neuen Projekts muss angegeben werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -70,7 +70,7 @@
         <target state="translated">MSB2003: Debe especificarse el nombre de archivo del proyecto anterior.</target>
         <note>{StrBegin="MSB2003: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2003: Debe especificarse el nombre de archivo del proyecto anterior.</target>
+          <target state-qualifier="tm-suggestion">MSB2003: Der Dateiname des alten Projekts muss angegeben werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -79,7 +79,7 @@
         <target state="translated">MSB2004: El elemento &lt;{0}&gt; no puede contener más de un nodo de lenguaje.</target>
         <note>{StrBegin="MSB2004: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.  The {0} in this case is going to be "VisualStudioProject".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2004: El elemento &lt;{0}&gt; no puede contener más de un nodo de idioma.</target>
+          <target state-qualifier="mt-suggestion">MSB2004: Element &lt;{0}&gt; darf nicht mehr als einen Sprachknoten enthalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -88,7 +88,7 @@
         <target state="translated">MSB2005: El elemento &lt;{0}&gt; no puede contener atributos.</target>
         <note>{StrBegin="MSB2005: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2005: El elemento &lt;{0}&gt; no puede contener atributos.</target>
+          <target state-qualifier="mt-suggestion">MSB2005: Element &lt;{0}&gt; darf keine Attribute enthalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="7" adjWordcount="5.95" curWordcount="5.95"</note>
       </trans-unit>
@@ -97,7 +97,7 @@
         <target state="translated">MSB2006: El archivo del proyecto no contiene el elemento raíz &lt;{0}&gt;.</target>
         <note>{StrBegin="MSB2006: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2006: El archivo de proyecto no contiene el elemento raíz &lt;{0}&gt;.</target>
+          <target state-qualifier="mt-suggestion">MSB2006: Die Projektdatei enthält kein Stammelement &lt;{0}&gt;.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
       </trans-unit>
@@ -106,7 +106,7 @@
         <target state="translated">MSB2007: Visual Studio no encuentra el archivo del proyecto "{0}".</target>
         <note>{StrBegin="MSB2007: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2007: Visual Studio no encuentra el archivo del proyecto "{0}".</target>
+          <target state-qualifier="tm-suggestion">MSB2007: Die Projektdatei "{0}" wurde nicht gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -115,7 +115,7 @@
         <target state="translated">MSB2014: La referencia entre proyectos con GUID {0} no se puede convertir porque no aparece en el archivo '{1}'.</target>
         <note>{StrBegin="MSB2014: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2014: La referencia entre proyectos con GUID {0} no se puede convertir porque no aparece en el archivo '{1}'.</target>
+          <target state-qualifier="tm-suggestion">MSB2014: Der Interprojektverweis mit der GUID {0} kann nicht konvertiert werden, da er nicht in der Datei "{1}" enthalten ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -124,7 +124,7 @@
         <target state="translated">MSB2008: Este sistema de proyectos de Visual Studio no puede convertir proyectos de "{0}". Solo se puede usar para convertir proyectos de cliente C#, VB y VJ#.</target>
         <note>{StrBegin="MSB2008: "}It appears we've been asked to convert a project that either wasn't created by the Visual Studio managed client project system (C#, VB, J#), or that has been hand-modified or corrupted.  You would get this error if this conversion utility was invoked on a VC++ project (.VCPROJ) for example.  In this case, the {0} would be replaced with "Visual C++".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB2008: Este sistema de proyectos de Visual Studio no puede convertir proyectos de "{0}". Solo se puede usar para convertir proyectos de cliente C#, VB y VJ#.</target>
+          <target state-qualifier="tm-suggestion">MSB2008: Mit diesem Visual Studio-Projektsystem können keine {0}-Projekte konvertiert werden. Mit diesem System können nur C#-, VB- und VJ#-Clientprojekte konvertiert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -133,7 +133,7 @@
         <target state="translated">MSB2009: El atributo "{0}" del elemento &lt;{1}&gt; no es válido.</target>
         <note>{StrBegin="MSB2009: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2009: El atributo "{0}" del elemento &lt;{1}&gt; no es válido.</target>
+          <target state-qualifier="mt-suggestion">MSB2009: Das Attribut "{0}" des Elements &lt;{1}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="10" adjWordcount="8.5" curWordcount="8.5"</note>
       </trans-unit>
@@ -142,7 +142,7 @@
         <target state="translated">MSB2010: El elemento secundario &lt;{0}&gt; del elemento &lt;{1}&gt; no es válido.</target>
         <note>{StrBegin="MSB2010: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2010: Elemento secundario &lt;{0}&gt; del elemento &lt;{1}&gt; no es válido.</target>
+          <target state-qualifier="mt-suggestion">MSB2010: Untergeordnete Element &lt;{0}&gt; Element &lt;{1}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
       </trans-unit>
@@ -151,7 +151,7 @@
         <target state="translated">MSB2011: El elemento &lt;{0}&gt; no es válido.</target>
         <note>{StrBegin="MSB2011: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB2011: El elemento &lt;{0}&gt; no es válido.</target>
+          <target state-qualifier="mt-suggestion">MSB2011: Element &lt;{0}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="7" adjWordcount="5.95" curWordcount="5.95"</note>
       </trans-unit>
@@ -160,7 +160,7 @@
         <target state="translated">MSB2012: La referencia entre proyectos a los proyectos web ya no se admite y, en consecuencia, no se puede convertir. Quite la referencia al proyecto {0} y agréguela de nuevo.</target>
         <note>{StrBegin="MSB2012: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB2012: La referencia entre proyectos a los proyectos web ya no se admite y, en consecuencia, no se puede convertir. Quite la referencia al proyecto {0} y agréguela de nuevo.</target>
+          <target state-qualifier="leveraged-tm">MSB2012: Interprojektverweise auf Webprojekte werden nicht mehr unterstützt und können daher nicht konvertiert werden. Entfernen Sie den Verweis auf das Projekt "{0}", und fügen Sie es erneut hinzu.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>

@@ -81,16 +81,16 @@
          compatibility then delete the requestedExecutionLevel node.
     </source>
         <target state="translated">
-          Opções de Manifesto UAC
-          Se desejar mudar o nível de Controle de Conta de Usuário do Windows, substitua o
-          nó requestedExecutionLevel por um dos seguintes.
+          Opções de Manifesto do UAC
+          Para alterar o nível de Controle de Conta de Usuário do Windows, substitua o nó
+          requestedExecutionLevel por um dos seguintes.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Se deseja usar a Virtualização de Arquivos e Registro para compatibilidade
-         com versões anteriores, exclua o nó requestedExecutionLevel.
+         Para utilizar a Virtualização de Arquivos e Registro para manter a compatibilidade com versões anteriores,
+         exclua o nó requestedExecutionLevel.
     </target>
         <note />
       </trans-unit>

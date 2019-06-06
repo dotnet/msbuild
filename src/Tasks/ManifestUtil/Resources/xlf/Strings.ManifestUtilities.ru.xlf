@@ -82,15 +82,15 @@
     </source>
         <target state="translated">
           Параметры манифеста UAC
-          При необходимости изменить уровень контроля учетных записей Windows замените узел
-          requestedExecutionLevel одним из следующих значений.
+          Если нужно изменить уровень контроля учетных записей Windows, замените 
+          узел requestedExecutionLevel одним из следующих значений.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Если вы хотите использовать виртуализацию файлов и реестра для обратной
-         совместимости, удалите узел requestedExecutionLevel.
+        Если нужно использовать виртуализацию файлов и реестра для обратной
+             совместимости, удалите узел requestedExecutionLevel.
     </target>
         <note />
       </trans-unit>

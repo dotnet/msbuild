@@ -82,15 +82,15 @@
     </source>
         <target state="translated">
           UAC-Manifestoptionen
-          Wenn Sie die Ebene der Windows-Benutzerkontensteuerung ändern möchten, ersetzen Sie den
-          Knoten "requestedExecutionLevel" durch eine der folgenden Angaben.
+          Wenn Sie die Zugangsebene für das Windows-Benutzerkonto ändern möchten, ersetzen Sie den 
+          requestedExecutionLevel-Knoten durch eines der folgenden Elemente.
 
-        &lt;requestedExecutionLevel level="asInvoker" uiAccess="false" /&gt;
-        &lt;requestedExecutionLevel level="requireAdministrator" uiAccess="false" /&gt;
-        &lt;requestedExecutionLevel level="highestAvailable" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Wenn Sie Datei- und Registrierungsvirtualisierung für Abwärtskompatibilität
-         verwenden möchten, löschen Sie den Knoten "requestedExecutionLevel".
+         Löschen Sie den requestedExecutionLevel-Knoten, wenn Sie 
+         zum Gewährleisten der Abwärtskompatibilität die Datei- und Registrierungsvirtualisierung verwenden möchten.
     </target>
         <note />
       </trans-unit>
