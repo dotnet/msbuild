@@ -656,5 +656,55 @@ namespace Microsoft.NET.Build.Tests
                 metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true) ? "true" : "");
             }
         }
+
+        [Theory]
+        [InlineData("netcoreapp2.2", null, false)]
+        [InlineData("netcoreapp3.0", null, true)]
+        [InlineData("netcoreapp3.0", "LatestMajor", true)]
+        public void It_can_build_as_a_component(string targetFramework, string rollForwardValue, bool shouldSetRollForward)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "BuildAsComponent",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            testProject.AdditionalProperties["IsComponent"] = "true";
+            if (!string.IsNullOrEmpty(rollForwardValue))
+            {
+                testProject.AdditionalProperties["RollForward"] = rollForwardValue;
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string runtimeConfigName = $"{testProject.Name}.runtimeconfig.json";
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().HaveFiles(new[] {
+                runtimeConfigName,
+                $"{testProject.Name}.runtimeconfig.dev.json"
+            });
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            JToken rollForward= runtimeConfig["runtimeOptions"]["rollForward"];
+            if (shouldSetRollForward)
+            {
+                rollForward.Value<string>().Should().Be(string.IsNullOrEmpty(rollForwardValue) ? "LatestMinor" : rollForwardValue);
+            }
+            else
+            {
+                rollForward.Should().BeNull();
+            }
+        }
     }
 }
