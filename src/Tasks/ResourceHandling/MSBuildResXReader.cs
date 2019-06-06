@@ -178,7 +178,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                         // BinaryFormatter from byte array
                         byte[] binaryFormatterBytes = Convert.FromBase64String(value);
 
-                        resources.Add(new BinaryFormatterByteArrayResource(name, typename, binaryFormatterBytes, resxFilename));
+                        resources.Add(new BinaryFormatterByteArrayResource(name, binaryFormatterBytes, resxFilename));
                         return;
                     default:
                         throw new NotImplementedException();

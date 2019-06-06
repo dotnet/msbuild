@@ -16,14 +16,12 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     internal class BinaryFormatterByteArrayResource : IResource
     {
         public string Name { get; }
-        public string TypeName { get; }
         public string OriginatingFile { get; }
         public byte[] Bytes { get; }
 
-        public BinaryFormatterByteArrayResource(string name, string typeName, byte[] bytes, string originatingFile)
+        public BinaryFormatterByteArrayResource(string name, byte[] bytes, string originatingFile)
         {
             Name = name;
-            TypeName = typeName;
             Bytes = bytes;
             OriginatingFile = originatingFile;
         }
@@ -32,10 +30,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
-                // TODO: use no-typename-needed method from https://github.com/dotnet/corefx/pull/38012
-                // preserializedResourceWriter.AddBinaryFormattedResource(Name, Bytes);
-
-                preserializedResourceWriter.AddBinaryFormattedResource(Name, TypeName, Bytes);
+                preserializedResourceWriter.AddBinaryFormattedResource(Name, Bytes);
             }
             else
             {
