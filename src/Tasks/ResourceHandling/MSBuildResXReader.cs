@@ -190,7 +190,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             string[] fileRefInfo = ParseResxFileRefString(value);
 
-            string fileName = fileRefInfo[0];
+            string fileName = FileUtilities.FixFilePath(fileRefInfo[0]);
             string fileRefType = fileRefInfo[1];
 
             if (pathsRelativeToBasePath)
