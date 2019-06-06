@@ -35,96 +35,8 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] UsedRuntimeFrameworks { get; set; }
 
-        private Dictionary<string, List<string>> _assemblyProfiles;
-
         public ResolveTargetingPackAssets()
         {
-            //  Hard-code assembly profiles for WindowDesktop targeting pack here until
-            //  they are added to its FrameworkList.xml: https://github.com/dotnet/core-setup/issues/6210
-            _assemblyProfiles = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-
-            var bothProfiles = new List<string>() { "WindowsForms", "WPF" };
-
-            foreach (var assemblyName in new []
-            {
-                "Accessibility",
-                "Microsoft.Win32.Registry",
-                "Microsoft.Win32.SystemEvents",
-                "System.CodeDom",
-                "System.Configuration.ConfigurationManager",
-                "System.Diagnostics.EventLog",
-                "System.DirectoryServices",
-                "System.IO.FileSystem.AccessControl",
-                "System.Media.SoundPlayer",
-                "System.Security.AccessControl",
-                "System.Security.Cryptography.Cng",
-                "System.Security.Cryptography.Pkcs",
-                "System.Security.Cryptography.ProtectedData",
-                "System.Security.Cryptography.Xml",
-                "System.Security.Permissions",
-                "System.Security.Principal.Windows",
-                "System.Threading.AccessControl",
-                "System.Windows.Extensions",
-            })
-            {
-                _assemblyProfiles[assemblyName] = bothProfiles;
-            }
-
-            var wpfProfile = new List<string>() { "WPF" };
-
-            foreach (var assemblyName in new []
-            {
-                "DirectWriteForwarder",
-                "PenImc_cor3",
-                "PresentationCore-CommonResources",
-                "PresentationCore",
-                "PresentationFramework-SystemCore",
-                "PresentationFramework-SystemData",
-                "PresentationFramework-SystemDrawing",
-                "PresentationFramework-SystemXml",
-                "PresentationFramework-SystemXmlLinq",
-                "PresentationFramework.Aero",
-                "PresentationFramework.Aero2",
-                "PresentationFramework.AeroLite",
-                "PresentationFramework.Classic",
-                "PresentationFramework",
-                "PresentationFramework.Luna",
-                "PresentationFramework.Royale",
-                "PresentationNative_cor3",
-                "PresentationUI",
-                "ReachFramework",
-                "System.Printing",
-                "System.Windows.Controls.Ribbon",
-                "System.Windows.Input.Manipulations",
-                "System.Windows.Presentation",
-                "System.Xaml",
-                "UIAutomationClient",
-                "UIAutomationClientSideProviders",
-                "UIAutomationProvider",
-                "UIAutomationTypes",
-                "WindowsBase",
-                "WPFgfx_cor3",
-            })
-            {
-                _assemblyProfiles[assemblyName] = wpfProfile;
-            }
-
-            var windowsFormsProfile = new List<string>() { "WindowsForms" };
-
-            foreach (var assemblyName in new[]
-            {
-                "System.Design",
-                "System.Drawing.Common",
-                "System.Drawing.Design",
-                "System.Drawing.Design.Primitives",
-                "System.Windows.Forms.Design",
-                "System.Windows.Forms.Design.Editors",
-                "System.Windows.Forms",
-            })
-            {
-                _assemblyProfiles[assemblyName] = windowsFormsProfile;
-            }
-
         }
 
         protected override void ExecuteCore()
@@ -292,12 +204,15 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (!string.IsNullOrEmpty(profile))
                 {
-                    _assemblyProfiles.TryGetValue(assemblyName, out var assemblyProfiles);
-                    if (assemblyProfiles == null)
+                    var profileAttributeValue = fileElement.Attribute("Profile")?.Value;
+
+                    if (profileAttributeValue == null)
                     {
                         //  If profile was specified but this assembly doesn't belong to any profiles, don't reference it
                         continue;
                     }
+
+                    var assemblyProfiles = profileAttributeValue.Split(';');
                     if (!assemblyProfiles.Contains(profile, StringComparer.OrdinalIgnoreCase))
                     {
                         //  Assembly wasn't in profile specified, so don't reference it

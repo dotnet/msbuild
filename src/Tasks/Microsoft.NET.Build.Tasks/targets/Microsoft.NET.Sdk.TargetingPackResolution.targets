@@ -17,14 +17,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
 
-  <!-- Mark the WindowsDesktop frameworks as being windows only.
-       TODO: remove this once the metadata exists on the items in the SDK props file. -->
-  <ItemGroup>
-    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App" IsWindowsOnly="True" />
-    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WindowsForms" IsWindowsOnly="True" />
-    <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WPF" IsWindowsOnly="True" />
-  </ItemGroup>
-
   <UsingTask TaskName="CheckForDuplicateFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveAppHosts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -41,22 +33,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <FrameworkReference Remove="@(_FrameworkReferenceToRemove)" />
       <FrameworkReference Include="@(_FrameworkReferenceToAdd)" />
-    </ItemGroup>
-
-    <!-- We will add Microsoft.WindowsDesktop.App.WPF and Microsoft.WindowsDesktop.App.WindowsForms to the bundled versions.
-         Until we do, add them here. -->
-    <ItemGroup>
-      <_WPFKnownFrameworkReference Include="@(KnownFrameworkReference)"
-                                   Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App.WPF'"/>
-    </ItemGroup>
-    <ItemGroup Condition="'@(_WPFKnownFrameworkReference)' == ''">
-      <_WindowsDesktopKnownFrameworkReference Include="@(KnownFrameworkReference)"
-                                        Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App'"/>
-
-      <KnownFrameworkReference Include="@(_WindowsDesktopKnownFrameworkReference->'Microsoft.WindowsDesktop.App.WindowsForms')"
-                               Profile="WindowsForms"/>
-      <KnownFrameworkReference Include="@(_WindowsDesktopKnownFrameworkReference->'Microsoft.WindowsDesktop.App.WPF')"
-                               Profile="WPF"/>
     </ItemGroup>
 
     <PropertyGroup Condition="'$(EnableTargetingPackDownload)' == ''">
