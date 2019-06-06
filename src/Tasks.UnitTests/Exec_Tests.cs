@@ -414,20 +414,24 @@ namespace Microsoft.Build.UnitTests
         /// Exec task will NOT use UTF8 when UTF8 Never is specified and non-ANSI characters are in the Command
         /// <remarks>Exec task will fail as the cmd processor will not be able to run the command.</remarks>
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData("Never")]
+        [InlineData("System")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void ExecTaskUtf8NeverWithNonAnsi()
+        public void ExecTaskUtf8NeverWithNonAnsi(string useUtf8)
         {
-            RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never", false);
+            RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8, false);
         }
 
         /// <summary>
         /// Exec task will NOT use UTF8 when UTF8 Never is specified and only ANSI characters are in the Command
         /// </summary>
-        [Fact]
-        public void ExecTaskUtf8NeverWithAnsi()
+        [Theory]
+        [InlineData("Never")]
+        [InlineData("System")]
+        public void ExecTaskUtf8NeverWithAnsi(string useUtf8)
         {
-            RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never");
+            RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8);
         }
 
         [Theory]

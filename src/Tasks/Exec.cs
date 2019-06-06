@@ -46,6 +46,7 @@ namespace Microsoft.Build.Tasks
         private const string UseUtf8Always = "ALWAYS";
         private const string UseUtf8Never = "NEVER";
         private const string UseUtf8Detect = "DETECT";
+        private const string UseUtf8System = "SYSTEM";
 
         // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
@@ -697,6 +698,7 @@ namespace Microsoft.Build.Tasks
                 case UseUtf8Always:
                     return s_utf8WithoutBom;
                 case UseUtf8Never:
+                case UseUtf8System:
                     return defaultEncoding;
                 default:
                     return CanEncodeString(defaultEncoding.CodePage, Command + WorkingDirectory)
