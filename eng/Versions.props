@@ -33,4 +33,8 @@
   <PropertyGroup>
     <DotNetCliVersion>3.0.100-preview5-011568</DotNetCliVersion>
   </PropertyGroup>
+  <!-- Product Dependencies -->
+  <PropertyGroup>
+    <SystemResourcesExtensionsVersion>4.6.0-preview6.19225.8</SystemResourcesExtensionsVersion>
+  </PropertyGroup>
 </Project>
