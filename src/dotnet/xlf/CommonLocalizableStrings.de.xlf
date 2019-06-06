@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
-        <target state="needs-review-translation">In "{0}" wurden mehrere Projekte gefunden. Geben Sie an, welches davon verwendet werden soll.</target>
+        <target state="translated">In "{0}" wurden mehrere Projekte gefunden. Geben Sie an, welches davon verwendet werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
         <source>Specify at least one {0}.</source>
-        <target state="needs-review-translation">Geben Sie mindestens ein Element "{0}" an.</target>
+        <target state="translated">Geben Sie mindestens ein Element "{0}" an.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConnectWithTheServer">
@@ -394,7 +394,7 @@
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
         <source>Specify a version of the package.</source>
-        <target state="needs-review-translation">Geben Sie eine Paketversion an.</target>
+        <target state="translated">Geben Sie eine Paketversion an.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotExist">
@@ -489,12 +489,12 @@
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
         <source>Specify new version of the package.</source>
-        <target state="needs-review-translation">Geben Sie die neue Version des Pakets an.</target>
+        <target state="translated">Geben Sie die neue Version des Pakets an.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
         <source>Specify which package to update.</source>
-        <target state="needs-review-translation">Geben Sie das zu aktualisierende Paket an.</target>
+        <target state="translated">Geben Sie das zu aktualisierende Paket an.</target>
         <note />
       </trans-unit>
       <trans-unit id="NothingToUpdate">
@@ -524,7 +524,7 @@
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
         <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
-        <target state="needs-review-translation">Die Vorlage "{0}" wurde erfolgreich erstellt. Führen Sie "dotnet restore" aus, um zu beginnen.</target>
+        <target state="translated">Die Vorlage "{0}" wurde erfolgreich erstellt. Führen Sie "dotnet restore" aus, um zu beginnen.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInstalledSuccesfully">
@@ -544,12 +544,12 @@
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
         <source>Specified name {0} already exists. Specify a different name.</source>
-        <target state="needs-review-translation">Der angegebene Name "{0}" ist bereits vorhanden. Geben Sie einen anderen Namen an.</target>
+        <target state="translated">Der angegebene Name "{0}" ist bereits vorhanden. Geben Sie einen anderen Namen an.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
         <source>Specified alias {0} already exists. Specify a different alias.</source>
-        <target state="needs-review-translation">Der angegebene Alias "{0}" ist bereits vorhanden. Geben Sie einen anderen Alias an.</target>
+        <target state="translated">Der angegebene Alias "{0}" ist bereits vorhanden. Geben Sie einen anderen Alias an.</target>
         <note />
       </trans-unit>
       <trans-unit id="MandatoryParameterMissing">
@@ -569,7 +569,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Specify which one to use.</source>
-        <target state="needs-review-translation">In "{0}" wurden mehrere Projektmappendateien gefunden. Geben Sie an, welche davon verwendet werden soll.</target>
+        <target state="translated">In "{0}" wurden mehrere Projektmappendateien gefunden. Geben Sie an, welche davon verwendet werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -589,7 +589,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="needs-review-translation">Projekt "{0}" kann nicht hinzugefügt werden, weil die Zielframeworks der beiden Projekte nicht kompatibel sind. Bitte überprüfen Sie das Projekt, das Sie hinzuzufügen versuchen, und stellen Sie sicher, dass es mit folgenden Zielen kompatibel ist:</target>
+        <target state="translated">Das Projekt "{0}" kann nicht hinzugefügt werden, weil die Zielframeworks der beiden Projekte nicht kompatibel sind. Überprüfen Sie das Projekt, das Sie hinzuzufügen möchten, und stellen Sie sicher, dass es mit folgenden Zielen kompatibel ist:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -606,7 +606,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
-        <target state="needs-review-translation">Das Projekt "{0}" weist einen unbekannten Projekttyp auf und kann der Projektmappendatei nicht hinzugefügt werden. Wenden Sie sich an Ihren SDK-Anbieter, um Unterstützung zu erhalten.</target>
+        <target state="translated">Das Projekt "{0}" weist einen unbekannten Projekttyp auf und kann der Projektmappendatei nicht hinzugefügt werden. Wenden Sie sich an Ihren SDK-Anbieter, um Unterstützung zu erhalten.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -835,22 +835,22 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
         <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
-        <target state="needs-review-translation">Die Formatversion ist höher als unterstützt. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Aktualisieren Sie Ihr SDK.</target>
+        <target state="translated">Die Formatversion ist höher als unterstützt. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Aktualisieren Sie Ihr SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
         <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
-        <target state="needs-review-translation">Die Formatversion ist fehlerhaft. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Wenden Sie sich an den Autor des Tools.</target>
+        <target state="translated">Die Formatversion ist fehlerhaft. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Wenden Sie sich an den Autor des Tools.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
         <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
-        <target state="needs-review-translation">Die Formatversion fehlt. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Wenden Sie sich an den Autor des Tools.</target>
+        <target state="translated">Die Formatversion fehlt. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Wenden Sie sich an den Autor des Tools.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
         <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="needs-review-translation">Fehler beim Hinzufügen von "{0}" zur PATH-Umgebungsvariable. Fügen Sie dieses Verzeichnis Ihrem PATH hinzu, um mit "dotnet tool install" installierte Tools zu verwenden.</target>
+        <target state="translated">Fehler beim Hinzufügen von "{0}" zur PATH-Umgebungsvariable. Fügen Sie dieses Verzeichnis Ihrem PATH hinzu, um mit "dotnet tool install" installierte Tools zu verwenden.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">

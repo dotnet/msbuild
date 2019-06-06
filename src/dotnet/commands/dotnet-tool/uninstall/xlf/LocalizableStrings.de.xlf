@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to uninstall.</source>
-        <target state="needs-review-translation">Geben Sie eine Toolpaket-ID für die Deinstallation an.</target>
+        <target state="translated">Geben Sie eine Toolpaket-ID für die Deinstallation an.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -64,7 +64,12 @@ Tools are uninstalled using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">Das Tool "{0}" ist aktuell nicht installiert.</target>
+        <target state="translated">Ein Tool mit der Paket-ID "{0}" wurde nicht gefunden. 
+
+Tools werden unter Verwendung der zugehörigen Paket-ID deinstalliert. Diese unterscheidet sich möglicherweise 
+vom Toolnamen, den Sie zum Aufrufen des Tools verwenden. Sie können die Toolnamen 
+und die zugehörigen Paket-IDs für installierte Tools über den Befehl
+"dotnet tool list" abrufen.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -79,7 +84,7 @@ and the corresponding package Ids for installed tools using the command
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
-        <target state="needs-review-translation">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nicht zusammen angegeben werden. Geben Sie nur eine der Optionen an: {0}.</target>
+        <target state="translated">Die lokale Option (--local), die globale Option (--global) und die Toolpfadoption (--tool-path) können nicht zusammen angegeben werden. Geben Sie nur eine der Optionen an: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

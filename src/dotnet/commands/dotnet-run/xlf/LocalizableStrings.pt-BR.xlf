@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToBoolean">
         <source>Could not convert the value of property '{0}' to a boolean.</source>
-        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <target state="translated">Não foi possível converter o valor da propriedade '{0}' em um booliano.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <target state="translated">Não foi possível converter o valor da propriedade '{0}' em uma cadeia de caracteres.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
-        <target state="needs-review-translation">Ocorreu uma falha no build. Corrija os erros de build e execute novamente.</target>
+        <target state="translated">Ocorreu uma falha no build. Corrija os erros de build e execute novamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -50,8 +50,8 @@
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">Não é possível executar seu projeto
-Seu projeto tem diversas estruturas como destino. Especifique que estrutura executar usando '{0}'.</target>
+        <target state="translated">Não é possível executar o seu projeto
+Ele tem diversas estruturas como destino. Especifique que estrutura executar usando '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
@@ -59,8 +59,8 @@ Seu projeto tem diversas estruturas como destino. Especifique que estrutura exec
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Não é possível executar seu projeto.
-Verifique se você tem um tipo de projeto executável e garanta que '{0}' dê suporte a esse projeto.
+        <target state="translated">Não é possível executar o seu projeto.
+Verifique se você tem um tipo de projeto executável e se '{0}' dá suporte a esse projeto.
 Um projeto executável deve ter como destino um TFM executável (por exemplo, netcoreapp2.0) e ter OutputType 'Exe'.
 O {1} atual é '{2}'.</target>
         <note />
@@ -163,7 +163,7 @@ O {1} atual é '{2}'.</target>
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">
         <source>The property '{0}' must be an object if it is specified.</source>
-        <target state="new">The property '{0}' must be an object if it is specified.</target>
+        <target state="translated">Se especificado, a propriedade '{0}' deve ser um objeto.</target>
         <note />
       </trans-unit>
     </body>

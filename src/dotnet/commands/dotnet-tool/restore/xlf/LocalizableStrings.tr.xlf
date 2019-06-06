@@ -10,7 +10,7 @@
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="needs-review-translation">Uyarı: Araç paketi '{0}' geçersiz, lütfen araç yazarına başvurun:
+        <target state="translated">Uyarı: '{0}' araç paketi geçersiz, araç yazarına başvurun:
 {1}</target>
         <note />
       </trans-unit>
