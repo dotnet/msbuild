@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -55,10 +56,19 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
         private static void ParseAssemblyAlias(Dictionary<string,string> aliases, XElement elem)
         {
-            string alias = elem.Attribute("alias").Value;
+            string alias = elem.Attribute("alias")?.Value;
             string name = elem.Attribute("name").Value;
 
-            aliases.Add(alias, name);
+            if (string.IsNullOrEmpty(alias))
+            {
+                AssemblyName assemblyName = new AssemblyName(name);
+
+                alias = assemblyName.Name;
+            }
+
+            // Match original last-alias-definition-wins behavior
+            // https://github.com/dotnet/winforms/blob/33b9fe202f3dc1b8e7c4bf28492f8bd3252f1a20/src/System.Windows.Forms/src/System/Resources/ResXResourceReader.cs#L732-L738
+            aliases[alias] = name;
         }
 
         // Consts from https://github.com/dotnet/winforms/blob/16b192389b377c647ab3d280130781ab1a9d3385/src/System.Windows.Forms/src/System/Resources/ResXResourceWriter.cs#L46-L63

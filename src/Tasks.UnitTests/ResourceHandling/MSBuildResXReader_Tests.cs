@@ -191,6 +191,22 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
             resource.TypeName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
         }
 
+        [Fact]
+        public void AssemblyElementWithNoAliasInfersSimpleName()
+        {
+            var resxWithEmbeddedBitmap = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+@"  <assembly name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
+    <data name=""Color1"" type=""System.Drawing.Color, System.Drawing""><value>Blue</value></data>
+"));
+            resxWithEmbeddedBitmap.ShouldHaveSingleItem();
+            resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
+
+            var resource = (TypeConverterStringResource)resxWithEmbeddedBitmap[0];
+            resource.Name.ShouldBe("Color1");
+            resource.TypeName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            resource.StringRepresentation.ShouldBe("Blue");
+        }
 
         // TODO: invalid resx xml
 
