@@ -18,8 +18,6 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal class MSBuildResXReader
     {
-        public IReadOnlyList<IResource> Resources { get; }
-
         public static IReadOnlyList<IResource> ReadResources(Stream s, string filename, bool pathsRelativeToBasePath)
         {
             var resources = new List<IResource>();
