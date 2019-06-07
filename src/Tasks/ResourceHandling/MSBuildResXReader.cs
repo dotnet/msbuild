@@ -32,9 +32,6 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 {
                     switch (elem.Name.LocalName)
                     {
-                        case "schema":
-                            // TODO: this
-                            break;
                         case "assembly":
                             ParseAssemblyAlias(aliases, elem);
                             break;
@@ -43,8 +40,6 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                         case "data":
                             ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem);
                             break;
-                        default:
-                            throw new NotImplementedException();
                     }
                 }
             }
