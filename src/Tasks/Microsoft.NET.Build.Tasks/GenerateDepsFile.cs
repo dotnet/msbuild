@@ -68,7 +68,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem CompilerOptions { get; set; }
 
-        public ITaskItem[] ExcludeFromPublishPackageReferences { get; set; }
+        public ITaskItem[] ExcludeFromOutputPackageReferences { get; set; }
 
         public ITaskItem[] RuntimeStorePackages { get; set; }
 
@@ -138,7 +138,7 @@ namespace Microsoft.NET.Build.Tasks
                 ReferenceDependencyPaths,
                 ReferenceSatellitePaths);
 
-            IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
+            IEnumerable<string> excludeFromOutputPackageIds = PackageReferenceConverter.GetPackageIds(ExcludeFromOutputPackageReferences);
 
             IEnumerable<RuntimePackAssetInfo> runtimePackAssets =
                 IsSelfContained ? RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item)) : Enumerable.Empty<RuntimePackAssetInfo>();
@@ -159,7 +159,7 @@ namespace Microsoft.NET.Build.Tasks
                 .WithDirectReferences(directReferences)
                 .WithDependencyReferences(dependencyReferences)
                 .WithReferenceProjectInfos(referenceProjects)
-                .WithExcludeFromPublishAssets(excludeFromPublishAssets)
+                .WithExcludeFromOutput(excludeFromOutputPackageIds)
                 .WithRuntimePackAssets(runtimePackAssets)
                 .WithCompilationOptions(compilationOptions)
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())

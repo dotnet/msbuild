@@ -258,7 +258,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="PrepforRestoreForComposeStore;
                            _SetupStageForCrossgen;
                            ResolveFrameworkReferences;
-                           ApplyImplicitVersions"
+                           ApplyImplicitVersions;
+                           _ComputeExcludeFromOutputPackageReferences"
           Condition="$(SkipOptimization) != 'true' ">
 
     <ItemGroup>
@@ -279,7 +280,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             RuntimeIdentifier="$(RuntimeIdentifier)"
                             PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                             RuntimeFrameworks="@(RuntimeFramework)"
-                            ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
+                            ExcludedPackageReferences="@(_ExcludeFromOutputPackageReference)"
                             IsSelfContained="$(SelfContained)"
                             PreserveStoreLayout="false">
 

@@ -456,14 +456,15 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="ResolveLockFileCopyLocalFiles;
                             _ComputeUseBuildDependencyFile;
                             _DefaultMicrosoftNETPlatformLibrary;
-                            ResolveRuntimePackAssets">
+                            ResolveRuntimePackAssets;
+                            _ComputeExcludeFromOutputPackageReferences">
 
       <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               RuntimeFrameworks="@(RuntimeFramework)"
-                              ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
+                              ExcludedPackageReferences="@(_ExcludeFromOutputPackageReference)"
                               RuntimeStorePackages="@(RuntimeStorePackages)"
                               PreserveStoreLayout="$(PreserveStoreLayout)"
                               ResolveRuntimeTargets="$(CopyLocalRuntimeTargetAssets)"
@@ -484,31 +485,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ItemGroup Condition="'$(_UseBuildDependencyFile)' == 'true'">
         <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalBuildAssets)" />
       </ItemGroup>
-
-  </Target>
-
-   <!--
-    ============================================================
-    _ComputeExcludeFromPublishPackageReferences
-    Builds up the @(_ExcludeFromPublishPackageReference) item by looking for @(PackageReference) items where
-    that have Publish=false metadata, or that have PrivateAssets=All and don't specify Publish
-    ============================================================
-    -->
-  <PropertyGroup>
-    <_ComputeExcludeFromPublishPackageReferences Condition="'$(_ComputeExcludeFromPublishPackageReferences)' == ''">true</_ComputeExcludeFromPublishPackageReferences>
-  </PropertyGroup>
-
-  <Target Name="_ComputeExcludeFromPublishPackageReferences"
-          Condition="'$(_ComputeExcludeFromPublishPackageReferences)' == 'true'">
-
-    <ItemGroup>
-      <!-- PrivateAssets="All" means exclude from publish, unless Publish metadata is specified separately -->
-      <PackageReference Publish="false"
-                        Condition="('%(PackageReference.PrivateAssets)' == 'All') And ('%(PackageReference.Publish)' == '')"/>
-
-      <_ExcludeFromPublishPackageReference Include="@(PackageReference)"
-                                           Condition="('%(PackageReference.Publish)' == 'false')" />
-    </ItemGroup>
 
   </Target>
 
@@ -762,13 +738,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_ComputeUseBuildDependencyFile"
-          DependsOnTargets="_ComputeExcludeFromPublishPackageReferences;
+          DependsOnTargets="_ComputeExcludeFromOutputPackageReferences;
                             _ParseTargetManifestFiles">
 
-    <!-- If there are no excluded packages or runtime store packages, and we are not linking, then we can reuse the deps file from the build, -->
+    <!-- If there are no runtime store packages, and we are not linking, then we can reuse the deps file from the build, -->
     <PropertyGroup>
-      <_UseBuildDependencyFile Condition="'@(_ExcludeFromPublishPackageReference)' == '' and
-                                          '@(RuntimeStorePackages)' == '' and
+      <_UseBuildDependencyFile Condition="'@(RuntimeStorePackages)' == '' and
                                           '$(PreserveStoreLayout)' != 'true' and
                                           '$(PublishTrimmed)' != 'true'">true</_UseBuildDependencyFile>
     </PropertyGroup>
@@ -822,7 +797,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _HandlePackageFileConflicts;
                             _HandlePackageFileConflictsForPublish;
                             _ComputeReferenceAssemblies;
-                            ResolveRuntimePackAssets"
+                            ResolveRuntimePackAssets;
+                            _ComputeExcludeFromOutputPackageReferences"
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
 
     <PropertyGroup>
@@ -858,7 +834,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeFrameworks="@(RuntimeFramework)"
                       FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
-                      ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
+                      ExcludeFromOutputPackageReferences="@(_ExcludeFromOutputPackageReference)"
                       RuntimeStorePackages="@(RuntimeStorePackages)"
                       CompileReferences="@(ResolvedCompileFileDefinitions)"
                       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"

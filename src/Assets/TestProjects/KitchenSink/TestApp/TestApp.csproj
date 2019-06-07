@@ -60,11 +60,11 @@
   <ItemGroup>
     <!-- 
       The TestLibrary has a hard dependency on Newtonsoft.Json.
-      The TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel.
+      The TestApp has a Publish=False dependency on Microsoft.Extensions.DependencyModel.
       Microsoft.Extensions.DependencyModel depends on Newtonsoft.Json.
       Testing that Newtonsoft.Json doesn't get excluded since a P2P reference has a hard dependency on it.
     -->
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.0" Publish="False" />
 
     <!-- Has satellite assembly -->
     <PackageReference Include="Humanizer" Version="2.2.0" />

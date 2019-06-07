@@ -26,53 +26,6 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("netcoreapp1.1", false)]
         [InlineData("netcoreapp2.0", false)]
         [InlineData("netcoreapp3.0", true)]
-        public void It_does_not_publish_a_PackageReference_with_PrivateAssets_All(string targetFramework, bool shouldIncludeExecutable)
-        {
-            var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", "PublishExcludePackage", identifier: targetFramework)
-                .WithSource()
-                .WithTargetFramework(targetFramework)
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-
-                    var itemGroup = new XElement(ns + "ItemGroup");
-                    project.Root.Add(itemGroup);
-
-                    //  Using different casing for the package ID here, to test the scenario from https://github.com/dotnet/sdk/issues/376
-                    itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "NEWTONSOFT.Json"),
-                                                                        new XAttribute("Version", "9.0.1"),
-                                                                        new XAttribute("PrivateAssets", "All")));
-                })
-                .Restore(Log);
-
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
-            var publishResult = publishCommand.Execute();
-
-            publishResult.Should().Pass();
-
-            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
-
-            var expectedFiles = new List<string>()
-            {
-                "HelloWorld.dll",
-                "HelloWorld.pdb",
-                "HelloWorld.deps.json",
-                "HelloWorld.runtimeconfig.json"
-            };
-
-            if (shouldIncludeExecutable)
-            {
-                expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
-            }
-
-            publishDirectory.Should().OnlyHaveFiles(expectedFiles);
-        }
-
-        [Theory]
-        [InlineData("netcoreapp1.1", false)]
-        [InlineData("netcoreapp2.0", false)]
-        [InlineData("netcoreapp3.0", true)]
         public void It_does_not_publish_a_PackageReference_with_Publish_false(string targetFramework, bool shouldIncludeExecutable)
         {
             var helloWorldAsset = _testAssetsManager
@@ -86,7 +39,8 @@ namespace Microsoft.NET.Publish.Tests
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
 
-                    itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "Newtonsoft.Json"),
+                    //  Using different casing for the package ID here, to test the scenario from https://github.com/dotnet/sdk/issues/376
+                    itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "NEWTONSOFT.Json"),
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("Publish", "false")));
                 })

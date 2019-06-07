@@ -177,13 +177,18 @@ namespace Microsoft.NET.Build.Tasks
 
         public IEnumerable<string> GetTopLevelDependencies()
         {
-            Dictionary<string, LockFileTargetLibrary> libraryLookup =
-                LockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+            return GetTopLevelDependencies(LockFile, LockFileTarget);
+        }
 
-            return LockFile
+        static public IEnumerable<string> GetTopLevelDependencies(LockFile lockFile, LockFileTarget lockFileTarget)
+        {
+            Dictionary<string, LockFileTargetLibrary> libraryLookup =
+                lockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+
+            return lockFile
                 .ProjectFileDependencyGroups
                 .Where(dg => dg.FrameworkName == string.Empty ||
-                             dg.FrameworkName == LockFileTarget.TargetFramework.DotNetFrameworkName)
+                             dg.FrameworkName == lockFileTarget.TargetFramework.DotNetFrameworkName)
                 .SelectMany(g => g.Dependencies)
                 .Select(projectFileDependency =>
                 {

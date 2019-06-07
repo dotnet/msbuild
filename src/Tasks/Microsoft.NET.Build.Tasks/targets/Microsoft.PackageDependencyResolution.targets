@@ -197,7 +197,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ResolvePackageAssets" 
           Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
-          DependsOnTargets="ResolveFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary">
+          DependsOnTargets="ResolveFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary;_ComputeExcludeFromOutputPackageReferences">
 
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                           and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'
@@ -254,7 +254,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
       ExpectedPlatformPackages="@(ExpectedPlatformPackages)"
       SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
-      DesignTimeBuild="$(DesignTimeBuild)">
+      DesignTimeBuild="$(DesignTimeBuild)"
+      ExcludeFromOutputPackageReferences="@(_ExcludeFromOutputPackageReference)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->

@@ -124,6 +124,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError ResourceName="NoBuildRequested" />
   </Target>
 
+  <Target Name="_ComputeExcludeFromOutputPackageReferences">
+    <ItemGroup>
+      <_ExcludeFromOutputPackageReference Include="@(PackageReference)"
+                                          Condition="('%(PackageReference.Publish)' == 'false')" />
+    </ItemGroup>
+  </Target>
+
   <!--
     ============================================================
                                         GenerateBuildDependencyFile
@@ -136,7 +143,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _ComputeReferenceAssemblies;
-                            ResolveRuntimePackAssets"
+                            ResolveRuntimePackAssets;
+                            _ComputeExcludeFromOutputPackageReferences"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition="'$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
@@ -171,6 +179,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       FilesToSkip="@(_ConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       CompileReferences="@(ResolvedCompileFileDefinitions)"
+                      ExcludeFromOutputPackageReferences="@(_ExcludeFromOutputPackageReference)"
                       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
