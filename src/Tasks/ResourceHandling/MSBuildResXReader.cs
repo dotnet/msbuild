@@ -96,10 +96,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 return aliasedTypeName.Substring(0, indexStart + 2) + fullAssemblyIdentity;
             }
 
-            // Allow "System.String" bare or with no registered alias
-            // TODO: is this overzealous? _Hopefully_ no one is putting a System.String type in their
-            // own assembly.
-            if (aliasedTypeName.StartsWith("System.String"))
+            // Allow "System.String" bare
+            if (aliasedTypeName.Equals("System.String", StringComparison.Ordinal))
             {
                 return StringTypeName;
             }
