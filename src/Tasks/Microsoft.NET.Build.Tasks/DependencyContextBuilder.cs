@@ -11,7 +11,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    internal class DependencyContextBuilder2
+    internal class DependencyContextBuilder
     {
         private readonly SingleProjectInfo _mainProjectInfo;
         private readonly bool _includeRuntimeFileVersions;
@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
-        public DependencyContextBuilder2(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
+        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
         {
             _mainProjectInfo = mainProjectInfo;
             _includeRuntimeFileVersions = includeRuntimeFileVersions;
@@ -106,7 +106,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        public DependencyContextBuilder2 WithReferenceAssemblies(IEnumerable<ReferenceInfo> referenceAssemblies)
+        public DependencyContextBuilder WithReferenceAssemblies(IEnumerable<ReferenceInfo> referenceAssemblies)
         {
             // note: ReferenceAssembly libraries only export compile-time stuff
             // since they assume the runtime library is present already
@@ -114,19 +114,19 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder2 WithDirectReferences(IEnumerable<ReferenceInfo> directReferences)
+        public DependencyContextBuilder WithDirectReferences(IEnumerable<ReferenceInfo> directReferences)
         {
             _directReferences = directReferences;
             return this;
         }
 
-        public DependencyContextBuilder2 WithDependencyReferences(IEnumerable<ReferenceInfo> dependencyReferences)
+        public DependencyContextBuilder WithDependencyReferences(IEnumerable<ReferenceInfo> dependencyReferences)
         {
             _dependencyReferences = dependencyReferences;
             return this;
         }
 
-        public DependencyContextBuilder2 WithCompileReferences(IEnumerable<ReferenceInfo> compileReferences)
+        public DependencyContextBuilder WithCompileReferences(IEnumerable<ReferenceInfo> compileReferences)
         {
             _compileReferences = new Dictionary<string, List<ReferenceInfo>>(StringComparer.OrdinalIgnoreCase);
             foreach (var group in compileReferences.GroupBy(r => r.PackageName, StringComparer.OrdinalIgnoreCase))
@@ -137,7 +137,7 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder2 WithResolvedNuGetFiles(IEnumerable<ResolvedFile> resolvedNuGetFiles)
+        public DependencyContextBuilder WithResolvedNuGetFiles(IEnumerable<ResolvedFile> resolvedNuGetFiles)
         {
             _resolvedNuGetFiles = new Dictionary<string, List<ResolvedFile>>(StringComparer.OrdinalIgnoreCase);
             foreach (var group in resolvedNuGetFiles.GroupBy(f => f.PackageName, StringComparer.OrdinalIgnoreCase))
@@ -148,25 +148,25 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder2 WithReferenceProjectInfos(Dictionary<string, SingleProjectInfo> referenceProjectInfos)
+        public DependencyContextBuilder WithReferenceProjectInfos(Dictionary<string, SingleProjectInfo> referenceProjectInfos)
         {
             _referenceProjectInfos = referenceProjectInfos;
             return this;
         }
 
-        public DependencyContextBuilder2 WithMainProjectInDepsFile(bool includeMainProjectInDepsFile)
+        public DependencyContextBuilder WithMainProjectInDepsFile(bool includeMainProjectInDepsFile)
         {
             _includeMainProjectInDepsFile = includeMainProjectInDepsFile;
             return this;
         }
 
-        public DependencyContextBuilder2 WithExcludeFromPublishAssets(IEnumerable<string> excludeFromPublishPackageIds)
+        public DependencyContextBuilder WithExcludeFromPublishAssets(IEnumerable<string> excludeFromPublishPackageIds)
         {
             _excludeFromPublishPackageIds = excludeFromPublishPackageIds;
             return this;
         }
 
-        public DependencyContextBuilder2 WithRuntimePackAssets(IEnumerable<RuntimePackAssetInfo> runtimePackAssets)
+        public DependencyContextBuilder WithRuntimePackAssets(IEnumerable<RuntimePackAssetInfo> runtimePackAssets)
         {
             _runtimePackAssets = new Dictionary<string, List<RuntimePackAssetInfo>>();
             foreach (var runtimePackGroup in runtimePackAssets.GroupBy(a => a.PackageName))
@@ -182,13 +182,13 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder2 WithCompilationOptions(CompilationOptions compilationOptions)
+        public DependencyContextBuilder WithCompilationOptions(CompilationOptions compilationOptions)
         {
             _compilationOptions = compilationOptions;
             return this;
         }
 
-        public DependencyContextBuilder2 WithReferenceAssembliesPath(string referenceAssembliesPath)
+        public DependencyContextBuilder WithReferenceAssembliesPath(string referenceAssembliesPath)
         {
             // if the path is empty, we want to use the original string instead of a single trailing character.
             if (string.IsNullOrEmpty(referenceAssembliesPath) ||
@@ -204,7 +204,7 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder2 WithPackagesThatWereFiltered(Dictionary<PackageIdentity, string> packagesThatWhereFiltered)
+        public DependencyContextBuilder WithPackagesThatWereFiltered(Dictionary<PackageIdentity, string> packagesThatWhereFiltered)
         {
             _filteredPackages = packagesThatWhereFiltered;
             return this;

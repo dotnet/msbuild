@@ -151,7 +151,7 @@ namespace Microsoft.NET.Build.Tasks
                 RuntimeFrameworks,
                 IsSelfContained);
 
-            var builder = new DependencyContextBuilder2(mainProject, projectContext, IncludeRuntimeFileVersions);
+            var builder = new DependencyContextBuilder(mainProject, projectContext, IncludeRuntimeFileVersions);
 
             builder = builder
                 .WithMainProjectInDepsFile(IncludeMainProject)
