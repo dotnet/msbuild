@@ -658,10 +658,12 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp2.2", null, false)]
-        [InlineData("netcoreapp3.0", null, true)]
-        [InlineData("netcoreapp3.0", "LatestMajor", true)]
-        public void It_can_build_as_a_component(string targetFramework, string rollForwardValue, bool shouldSetRollForward)
+        [InlineData("netcoreapp2.2", null, false, null, false)]
+        [InlineData("netcoreapp3.0", null, true, null, true)]
+        [InlineData("netcoreapp3.0", "LatestMajor", true, null, true)]
+        [InlineData("netcoreapp3.0", null, true, false, false)]
+        [InlineData("netcoreapp3.0", "LatestMajor", true, false, false)]
+        public void It_can_build_as_a_component(string targetFramework, string rollForwardValue, bool shouldSetRollForward, bool? copyLocal, bool shouldCopyLocal)
         {
             var testProject = new TestProject()
             {
@@ -674,6 +676,12 @@ namespace Microsoft.NET.Build.Tests
             if (!string.IsNullOrEmpty(rollForwardValue))
             {
                 testProject.AdditionalProperties["RollForward"] = rollForwardValue;
+            }
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            if (copyLocal.HasValue)
+            {
+                testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = copyLocal.ToString().ToLower();
             }
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -693,6 +701,15 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.runtimeconfig.dev.json"
             });
 
+            if (shouldCopyLocal)
+            {
+                outputDirectory.Should().HaveFile("Newtonsoft.Json.dll");
+            }
+            else
+            {
+                outputDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+            }
+
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
             string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
             JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
@@ -705,6 +722,8 @@ namespace Microsoft.NET.Build.Tests
             {
                 rollForward.Should().BeNull();
             }
+
+
         }
     }
 }

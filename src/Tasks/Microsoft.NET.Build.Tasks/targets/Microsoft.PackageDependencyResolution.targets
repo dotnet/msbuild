@@ -32,11 +32,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
                                             '$(TargetFrameworkIdentifier)' == '.NETStandard'">false</CopyLocalLockFileAssemblies>
 
-    <!-- Don't copy local for netcoreapp projects before 3.0 or non-exe projects. -->
+    <!-- Don't copy local for netcoreapp projects before 3.0 or non-exe and non-component projects. -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
                                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                                             ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0' or
-                                             '$(HasRuntimeOutput)' != 'true')">false</CopyLocalLockFileAssemblies>
+                                             ('$(HasRuntimeOutput)' != 'true' and '$(IsComponent)' != 'true'))">false</CopyLocalLockFileAssemblies>
 
     <!-- All other project types should copy local. -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
