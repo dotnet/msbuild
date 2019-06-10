@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Update the tool and the local tool manifest.</source>
-        <target state="needs-review-translation">Aracı güncelleştirin ve yerel araç bildiriminden güncelleştirin.</target>
+        <target state="translated">Aracı ve yerel araç bildirimini güncelleştirin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to update.</source>
-        <target state="needs-review-translation">Lütfen güncelleştirilecek bir araç Paketi Kimliğini belirtin.</target>
+        <target state="translated">Güncelleştirilecek tek bir aracın Paketi Kimliğini belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
         <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Lütfen genel seçeneğini (--global) veya araç yolu seçeneğini (--tool-path) belirtin.</target>
+        <target state="translated">Genel seçeneğini (--global) veya araç yolu seçeneğini (--tool-path) belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
-        <target state="needs-review-translation">(--global), araç yolu seçeneği (--tool-path) ile çakışıyor. Lütfen seçeneklerden yalnızca birini belirtin.</target>
+        <target state="translated">(--global), araç yolu seçeneği (--tool-path) ile çakışıyor. Seçeneklerden yalnızca birini belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -124,7 +124,12 @@ Tools are updated using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">'{0}' aracı şu anda yüklü değil.</target>
+        <target state="translated">'{0}' paket kimliğine sahip araç bulunamadı. 
+
+Araçlar, aracı çağırırken kullandığınız araç adından farklı olabilen 
+paket kimlikleri kullanılarak güncelleştirilir. Yüklü araçların araç adlarını ve 
+karşılık gelen paket kimliklerini bulmak için 
+'dotnet tool list' komutunu kullanabilirsiniz.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">

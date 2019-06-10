@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to uninstall.</source>
-        <target state="needs-review-translation">제거할 도구 패키지 ID를 하나 지정하세요.</target>
+        <target state="translated">제거할 도구 패키지 ID를 하나 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -64,7 +64,12 @@ Tools are uninstalled using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">도구 '{0}'이(가) 현재 설치되어 있지 않습니다.</target>
+        <target state="translated">패키지 ID가 '{0}'인 도구를 찾을 수 없습니다. 
+
+도구를 호출할 때 사용한 도구 이름과 다를 수 있는 패키지 ID를 사용하여 
+도구가 제거되었습니다. 'dotnet tool list' 명령을 사용하여 설치된 도구의 도구 이름 
+및 해당 패키지 ID를
+확인할 수 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -79,7 +84,7 @@ and the corresponding package Ids for installed tools using the command
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
-        <target state="needs-review-translation">로컬 옵션(--local), 전역 옵션(--global), 도구 경로 옵션(--tool-path)은 한 번에 하나씩만 사용할 수 있습니다. {0} 옵션 중에서 하나만 지정하세요.</target>
+        <target state="translated">로컬 옵션(--local), 전역 옵션(--global), 도구 경로 옵션(--tool-path)은 한 번에 하나씩만 사용할 수 있습니다. {0} 옵션 중에서 하나만 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

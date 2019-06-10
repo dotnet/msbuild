@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToBoolean">
         <source>Could not convert the value of property '{0}' to a boolean.</source>
-        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <target state="translated">Der Wert der Eigenschaft "{0}" konnte nicht in einen booleschen Wert konvertiert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <target state="translated">Der Wert der Eigenschaft "{0}" konnte nicht in eine Zeichenfolge konvertiert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
-        <target state="needs-review-translation">Fehler beim Buildvorgang. Beheben Sie die Buildfehler, und wiederholen Sie anschließend den Vorgang.</target>
+        <target state="translated">Fehler beim Buildvorgang. Beheben Sie die Buildfehler, und versuchen Sie es anschließend noch mal.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -50,8 +50,8 @@
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">Ihr Projekt kann nicht ausgeführt werden.
-Ihr Projekt verwendet mehrere Zielframeworks. Geben Sie an, welches Framework mithilfe von "{0}" ausgeführt werden soll.</target>
+        <target state="translated">Ihr Projekt kann nicht ausgeführt werden.
+Ihr Projekt verwendet mehrere Zielframeworks. Geben Sie über "{0}" an, welches Framework ausgeführt werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
@@ -59,10 +59,10 @@ Ihr Projekt verwendet mehrere Zielframeworks. Geben Sie an, welches Framework mi
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Ihr Projekt kann nicht ausgeführt werden.
+        <target state="translated">Ihr Projekt kann nicht ausgeführt werden.
 Stellen Sie sicher, dass der Projekttyp ausführbar ist und "{0}" dieses Projekt unterstützt.
-Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verwenden und über den OutputType "Exe" verfügen.
-{1} ist aktuell "{2}".</target>
+Ein ausführbares Projekt muss ein ausführbares TFM (z. B. netcoreapp2.0) und den OutputType "Exe" verwenden.
+{1} lautet aktuell "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionNoProjects">
@@ -163,7 +163,7 @@ Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verw
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">
         <source>The property '{0}' must be an object if it is specified.</source>
-        <target state="new">The property '{0}' must be an object if it is specified.</target>
+        <target state="translated">Die Eigenschaft "{0}" muss ein Objekt sein, sofern angegeben.</target>
         <note />
       </trans-unit>
     </body>

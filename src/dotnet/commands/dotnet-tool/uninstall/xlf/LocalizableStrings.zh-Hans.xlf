@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to uninstall.</source>
-        <target state="needs-review-translation">请指定一个要卸载的工具包 ID。</target>
+        <target state="translated">请指定一个要卸载的工具包 ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -64,7 +64,12 @@ Tools are uninstalled using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">工具“{0}”目前尚未安装。</target>
+        <target state="translated">找不到具有包 ID“{0}”的工具。
+
+工具是使用其包 ID 卸载的，该 ID 可能
+与调用工具时使用的工具名称不同。可使用 "dotnet tool list" 命令查找
+已安装工具的工具名称和
+对应的包 ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -79,7 +84,7 @@ and the corresponding package Ids for installed tools using the command
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
-        <target state="needs-review-translation">本地选项(--local)、全局选项(--global)和工具路径选项(--tool-path)一次只能有一个。请仅指定其中一个选项: {0}。</target>
+        <target state="translated">本地选项(--local)、全局选项(--global)和工具路径选项(--tool-path)一次只能有一个。请仅指定其中一个选项: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Specify one package reference to add.</source>
-        <target state="needs-review-translation">Specificare almeno un riferimento al pacchetto da aggiungere.</target>
+        <target state="translated">Specificare almeno un riferimento al pacchetto da aggiungere.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
         <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
-        <target state="needs-review-translation">Non è possibile generare un file temporaneo per il progetto '{0}'. Non è possibile aggiungere il riferimento al pacchetto. Cancellare la directory temp e riprovare.</target>
+        <target state="translated">Non è possibile generare un file temporaneo per il progetto '{0}'. Non è possibile aggiungere il riferimento al pacchetto. Cancellare la directory temp e riprovare.</target>
         <note />
       </trans-unit>
     </body>

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Update the tool and the local tool manifest.</source>
-        <target state="needs-review-translation">Met à jour l'outil et met à jour le manifeste d'outils locaux.</target>
+        <target state="translated">Met à jour l'outil et met à jour le manifeste d'outils locaux.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to update.</source>
-        <target state="needs-review-translation">Spécifiez un ID de package d'outil à mettre à jour.</target>
+        <target state="translated">Spécifiez un ID de package d'outil à mettre à jour.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
         <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Spécifiez l'option globale (--global) ou l'option de chemin de l'outil (--tool-path).</target>
+        <target state="translated">Spécifiez l'option globale (--global) ou l'option de chemin d'outil (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
-        <target state="needs-review-translation">(--global) est en conflit avec l'option de chemin de l'outil (--tool-path). Spécifiez uniquement l'une des options.</target>
+        <target state="translated">(--global) est en conflit avec l'option de chemin d'outil (--tool-path). Spécifiez une seule des options.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -124,7 +124,12 @@ Tools are updated using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">L'outil '{0}' n'est pas installé actuellement.</target>
+        <target state="translated">L'outil ayant l'ID de package '{0}' est introuvable. 
+
+Les outils sont mis à jour via leur ID de package, lequel peut être différent 
+du nom d'outil que vous utilisez quand vous appelez ce dernier. Pour trouver les noms d'outils 
+et les ID de package correspondants aux outils installés, utilisez la commande
+'dotnet tool list'.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">

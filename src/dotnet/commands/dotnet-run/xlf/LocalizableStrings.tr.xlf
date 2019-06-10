@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToBoolean">
         <source>Could not convert the value of property '{0}' to a boolean.</source>
-        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <target state="translated">'{0}' özelliğinin değeri boole değerine dönüştürülemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <target state="translated">'{0}' özelliğinin değeri dizeye dönüştürülemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
-        <target state="needs-review-translation">Derleme başarısız oldu. Lütfen derleme hatalarını düzeltip yeniden çalıştırın.</target>
+        <target state="translated">Derleme başarısız oldu. Derleme hatalarını düzeltip yeniden çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -50,8 +50,8 @@
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">Projeniz çalıştırılamıyor
-Projeniz birden fazla çerçeveyi hedefliyor. Lütfen '{0}' kullanılarak hangi çerçevenin çalıştırılacağını belirtin.</target>
+        <target state="translated">Projeniz çalıştırılamıyor
+Projeniz birden fazla Framework'ü hedefliyor. '{0}' kullanarak hangi Framework'ün çalıştırılacağını belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
@@ -59,9 +59,9 @@ Projeniz birden fazla çerçeveyi hedefliyor. Lütfen '{0}' kullanılarak hangi 
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Projeniz çalıştırılamıyor.
-Lütfen çalıştırılabilir bir proje türüne sahip olduğunuzdan ve bu projenin '{0}' tarafından desteklendiğinden emin olun.
-Çalıştırılabilir bir proje, çalıştırılabilir bir TFM’yi hedeflemeli (örneğin, netcoreapp2.0) ve OutputType 'Exe' dosyasına sahip olmalıdır.
+        <target state="translated">Projeniz çalıştırılamıyor.
+Çalıştırılabilir bir proje türüne sahip olduğunuzdan ve bu projenin '{0}' tarafından desteklendiğinden emin olun.
+Çalıştırılabilir bir proje, çalıştırılabilir bir TFM’yi (örneğin, netcoreapp2.0) hedeflemeli ve OutputType 'Exe' dosyasına sahip olmalıdır.
 Geçerli {1}: '{2}'.</target>
         <note />
       </trans-unit>
@@ -163,7 +163,7 @@ Geçerli {1}: '{2}'.</target>
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">
         <source>The property '{0}' must be an object if it is specified.</source>
-        <target state="new">The property '{0}' must be an object if it is specified.</target>
+        <target state="translated">'{0}' özelliği belirtilmişse bir nesne olmalıdır.</target>
         <note />
       </trans-unit>
     </body>

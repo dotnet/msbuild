@@ -99,9 +99,9 @@ Possible reasons for this include:
         <source>Cannot find command 'dotnet {0}', run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="needs-review-translation">没有找到命令 "dotnet {0}"，请运行以下命令安装
+        <target state="translated">找不到 "dotnet {0}" 命令，请运行以下命令进行安装
 
-dotnet 工具安装 -- 全局 {1}</target>
+dotnet tool install --global {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetCliHomeUsed">

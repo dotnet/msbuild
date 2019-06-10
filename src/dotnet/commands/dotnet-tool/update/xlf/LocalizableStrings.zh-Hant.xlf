@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Update the tool and the local tool manifest.</source>
-        <target state="needs-review-translation">更新該工具，並從本機工具資訊清單更新。</target>
+        <target state="translated">更新工具與本機工具資訊清單。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to update.</source>
-        <target state="needs-review-translation">請指定一個要更新的工具套件識別碼。</target>
+        <target state="translated">請指定一個要更新的工具套件識別碼。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
         <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">請指定全域選項 (--global) 或工具路徑選項 (--tool-path) 兩者之一。</target>
+        <target state="translated">請指定全域選項 (--global) 或工具路徑選項 (--tool-path) 兩者之一。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
-        <target state="needs-review-translation">(--global) 與工具路徑選項 (--tool-path) 衝突。請只指定其中一個選項。</target>
+        <target state="translated">(--global) 與工具路徑選項 (--tool-path) 相衝突。請只要指定其中一個選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -124,7 +124,12 @@ Tools are updated using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">目前未安裝工具 '{0}'。</target>
+        <target state="translated">找不到套件識別碼為 '{0}' 的工具。
+
+必須使用工具的套件識別碼才能將其更新，
+而該識別碼可能與您在呼叫工具時的工具名稱不同。您可以使用命令
+'dotnet tool list' 來針對已安裝工具尋找工具名稱
+和對應的套件識別碼。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">

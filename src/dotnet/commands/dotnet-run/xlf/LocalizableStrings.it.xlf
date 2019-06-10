@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToBoolean">
         <source>Could not convert the value of property '{0}' to a boolean.</source>
-        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <target state="translated">Non è stato possibile convertire il valore della proprietà '{0}' in un valore booleano.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <target state="translated">Non è stato possibile convertire il valore della proprietà '{0}' in una stringa.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
-        <target state="needs-review-translation">La compilazione non è riuscita. Correggere gli errori di compilazione e ripetere l'esecuzione.</target>
+        <target state="translated">La compilazione non è riuscita. Correggere gli errori di compilazione e ripetere l'esecuzione.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -50,7 +50,7 @@
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">Non è possibile eseguire il progetto
+        <target state="translated">Non è possibile eseguire il progetto
 Il progetto è destinato a più framework. Specificare il framework da eseguire con '{0}'.</target>
         <note />
       </trans-unit>
@@ -59,7 +59,7 @@ Il progetto è destinato a più framework. Specificare il framework da eseguire 
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Non è possibile eseguire il progetto.
+        <target state="translated">Non è possibile eseguire il progetto.
 Assicurarsi che sia presente un tipo di progetto eseguibile e che '{0}' supporti tale progetto.
 Un progetto eseguibile deve essere destinato a un TFM eseguibile, ad esempio netcoreapp2.0, inoltre OutputType deve essere impostato su 'Exe'.
 Il valore corrente di {1} è '{2}'.</target>
@@ -163,7 +163,7 @@ Il valore corrente di {1} è '{2}'.</target>
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">
         <source>The property '{0}' must be an object if it is specified.</source>
-        <target state="new">The property '{0}' must be an object if it is specified.</target>
+        <target state="translated">Se è specificata, la proprietà '{0}' deve essere un oggetto.</target>
         <note />
       </trans-unit>
     </body>

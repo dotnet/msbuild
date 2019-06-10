@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to uninstall.</source>
-        <target state="needs-review-translation">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
+        <target state="translated">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -64,7 +64,12 @@ Tools are uninstalled using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">ツール '{0}' は現在、インストールされていません。</target>
+        <target state="translated">パッケージ Id が ' {0} ' のツールが見つかりませんでした。
+
+ツールは、異なるパッケージ Id を使用してアンインストールされます
+ツールを呼び出すときに使用するツール名。ツール名が見つかります
+と、コマンドを使用してインストールされたツールの対応するパッケージ Id
+' dotnet tool list '。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -79,7 +84,7 @@ and the corresponding package Ids for installed tools using the command
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
-        <target state="needs-review-translation">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定してください: {0}。</target>
+        <target state="translated">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定します: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

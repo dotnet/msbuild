@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToBoolean">
         <source>Could not convert the value of property '{0}' to a boolean.</source>
-        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <target state="translated">Не удалось преобразовать значение свойства "{0}" в логическое значение.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <target state="translated">Не удалось преобразовать значение свойства "{0}" в строку.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
-        <target state="needs-review-translation">Ошибка сборки. Устраните ошибки сборки и повторите попытку.</target>
+        <target state="translated">Ошибка сборки. Устраните ошибки сборки и повторите попытку.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -50,7 +50,7 @@
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">Не удается запустить проект
+        <target state="translated">Не удается запустить проект
 Проект предназначен для нескольких платформ. Укажите платформу, для которой следует запустить проект, с помощью "{0}".</target>
         <note />
       </trans-unit>
@@ -59,9 +59,9 @@ Your project targets multiple frameworks. Specify which framework to run using '
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Не удается запустить проект.
-Убедитесь в том, что тип проекта поддерживает запуск и что "{0}" поддерживает этот проект.
-Запускаемый проект должен быть предназначен для TFM с поддержкой запуска (например, netcoreapp2.0) и иметь тип выходных данных "Exe".
+        <target state="translated">Не удается запустить проект.
+Убедитесь, что тип проекта поддерживает запуск и что "{0}" поддерживает этот проект.
+Запускаемый проект должен быть предназначен для TFM с поддержкой запуска (например, netcoreapp2.0) и иметь тип выходных данных "EXE".
 Текущий {1} — "{2}".</target>
         <note />
       </trans-unit>
@@ -163,7 +163,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">
         <source>The property '{0}' must be an object if it is specified.</source>
-        <target state="new">The property '{0}' must be an object if it is specified.</target>
+        <target state="translated">Если свойство "{0}" задано, оно должно быть объектом.</target>
         <note />
       </trans-unit>
     </body>

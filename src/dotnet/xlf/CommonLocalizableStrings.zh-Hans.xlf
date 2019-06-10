@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
-        <target state="needs-review-translation">“{0}”中找到多个项目。请指定使用哪一个。</target>
+        <target state="translated">在“{0}”中找到多个项目。请指定使用哪一个。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
         <source>Specify at least one {0}.</source>
-        <target state="needs-review-translation">请至少指定一个 {0}。</target>
+        <target state="translated">请至少指定一个 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConnectWithTheServer">
@@ -394,7 +394,7 @@
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
         <source>Specify a version of the package.</source>
-        <target state="needs-review-translation">请指定包的版本。</target>
+        <target state="translated">请指定包的版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotExist">
@@ -489,12 +489,12 @@
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
         <source>Specify new version of the package.</source>
-        <target state="needs-review-translation">请指定包的新版本。</target>
+        <target state="translated">请指定包的新版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
         <source>Specify which package to update.</source>
-        <target state="needs-review-translation">请指定要更新的包。</target>
+        <target state="translated">请指定要更新的包。</target>
         <note />
       </trans-unit>
       <trans-unit id="NothingToUpdate">
@@ -524,7 +524,7 @@
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
         <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
-        <target state="needs-review-translation">已成功创建模板 {0}。请运行 "dotnet restore" 以开始使用!</target>
+        <target state="translated">已成功创建模板 {0}。请运行 "dotnet restore" 以开始使用!</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInstalledSuccesfully">
@@ -544,12 +544,12 @@
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
         <source>Specified name {0} already exists. Specify a different name.</source>
-        <target state="needs-review-translation">已存在指定的名称 {0}。请指定不同的名称。</target>
+        <target state="translated">已存在指定的名称 {0}。请指定不同的名称。</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
         <source>Specified alias {0} already exists. Specify a different alias.</source>
-        <target state="needs-review-translation">已存在指定的别名 {0}。请指定不同的别名。</target>
+        <target state="translated">已存在指定的别名 {0}。请指定不同的别名。</target>
         <note />
       </trans-unit>
       <trans-unit id="MandatoryParameterMissing">
@@ -569,7 +569,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Specify which one to use.</source>
-        <target state="needs-review-translation">在 {0} 中找到多个解决方案文件。请指定使用哪一个。</target>
+        <target state="translated">在 {0} 中找到多个解决方案文件。请指定使用哪一个。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -589,7 +589,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="needs-review-translation">由于两个项目之间的目标框架不兼容，无法添加项目“{0}”。请检查要添加的项目，并验证是否与以下目标兼容:</target>
+        <target state="translated">由于两个项目之间的目标框架不兼容，无法添加项目“{0}”。请检查要添加的项目，并验证是否与以下目标兼容:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -606,7 +606,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
-        <target state="needs-review-translation">项目“{0}”包含未知的项目类型，且无法添加到解决方案文件。请联系 SDK 提供商获取支持。</target>
+        <target state="translated">项目“{0}”包含未知的项目类型，且无法添加到解决方案文件。请联系 SDK 提供商获取支持。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -835,22 +835,22 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
         <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
-        <target state="needs-review-translation">格式版本高于受支持的版本。该 SDK 版本可能不支持此工具。请更新 SDK。</target>
+        <target state="translated">格式版本高于受支持的版本。该 SDK 版本可能不支持此工具。请更新 SDK。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
         <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
-        <target state="needs-review-translation">格式版本格式不正确。该 SDK 版本可能不支持此工具。请联系工具作者。</target>
+        <target state="translated">格式版本格式不正确。该 SDK 版本可能不支持此工具。请联系工具作者。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
         <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
-        <target state="needs-review-translation">格式版本缺失。该 SDK 版本可能不支持此工具。请联系工具作者。</target>
+        <target state="translated">缺少格式版本。该 SDK 版本可能不支持此工具。请联系工具作者。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
         <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="needs-review-translation">未能将“{0}”添加到 PATH 环境变量。请将此目录添加到 PATH，以使用通过“dotnet tool install”安装的工具。</target>
+        <target state="translated">未能将“{0}”添加到 PATH 环境变量。请将此目录添加到 PATH，以使用通过 "dotnet tool install" 安装的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">
