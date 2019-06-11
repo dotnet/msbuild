@@ -245,12 +245,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Default patch versions for each minor version of ASP.NET Core -->
     <DefaultPatchVersionForAspNetCoreAll2_1>$(_DefaultPatchVersionForAspNetCoreAll2_1)</DefaultPatchVersionForAspNetCoreAll2_1>
     <DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreApp2_1)</DefaultPatchVersionForAspNetCoreApp2_1>
-
-    <!-- Latest patch versions for each minor version of .NET Core -->
-    <LatestPatchVersionForNetCore1_0 Condition="'%24(LatestPatchVersionForNetCore1_0)' == ''">1.0.14</LatestPatchVersionForNetCore1_0>
-    <LatestPatchVersionForNetCore1_1 Condition="'%24(LatestPatchVersionForNetCore1_1)' == ''">1.1.11</LatestPatchVersionForNetCore1_1>
-    <LatestPatchVersionForNetCore2_0 Condition="'%24(LatestPatchVersionForNetCore2_0)' == ''">2.0.9</LatestPatchVersionForNetCore2_0>
-    <LatestPatchVersionForNetCore2_1 Condition="'%24(LatestPatchVersionForNetCore2_1)' == ''">2.1.2</LatestPatchVersionForNetCore2_1>
   </PropertyGroup>
   <ItemGroup>
     @(ImplicitPackageVariable->'<ImplicitPackageReferenceVersion Include="%(Identity)" TargetFrameworkVersion="%(TargetFrameworkVersion)" DefaultVersion="%(DefaultVersion)" LatestVersion="%(LatestVersion)"/>', '%0A    ')
