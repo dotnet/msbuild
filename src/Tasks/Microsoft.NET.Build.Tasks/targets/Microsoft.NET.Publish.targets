@@ -847,8 +847,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
-                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
-                      DepsFileGenerationMode="$(DepsFileGenerationMode)"/>
+                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"/>
 
     <ItemGroup>
       <_FilesToBundle Include="$(PublishDepsFilePath)" Condition="'$(PublishSingleFile)' == 'true'">

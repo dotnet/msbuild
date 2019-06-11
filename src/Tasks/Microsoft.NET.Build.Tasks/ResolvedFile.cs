@@ -42,14 +42,16 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        public ResolvedFile(string sourcePath, string destinationSubDirectory, PackageIdentity package, AssetType assetType = AssetType.None)
+        public ResolvedFile(string sourcePath, string destinationSubDirectory, PackageIdentity package,
+            AssetType assetType = AssetType.None,
+            string pathInPackage = null)
         {
             SourcePath = Path.GetFullPath(sourcePath);
             DestinationSubDirectory = destinationSubDirectory;
             Asset = assetType;
             PackageName = package.Id;
             PackageVersion = package.Version.ToString();
-
+            PathInPackage = pathInPackage;
         }
 
         public ResolvedFile(ITaskItem item, bool isRuntimeTarget)
