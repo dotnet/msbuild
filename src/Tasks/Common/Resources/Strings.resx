@@ -538,4 +538,16 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</value>
     <comment>{StrBegin="NETSDK1104: "}</comment>
   </data>
+  <data name="WindowsDesktopFrameworkRequiresVersion30" xml:space="preserve">
+    <value>NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</value>
+    <comment>{StrBegin="NETSDK1105: "}</comment>
+  </data>
+  <data name="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework" xml:space="preserve">
+    <value>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</value>
+    <comment>{StrBegin="NETSDK1107: "}</comment>
+  </data>
+  <data name="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms" xml:space="preserve">
+    <value>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</value>
+    <comment>{StrBegin="NETSDK1106: "}</comment>
+  </data>
 </root>

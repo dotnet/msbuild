@@ -333,4 +333,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
     
   </Target>
+
+  <Target Name="CheckWindowsDesktopSdkInUse" 
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform" 
+          Condition="'$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true'">
+    <NetSdkWarning Condition="'$(_MicrosoftNetSdkWindowsDesktop)' != 'true'" 
+                   ResourceName="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework" />
+  </Target>
 </Project>
