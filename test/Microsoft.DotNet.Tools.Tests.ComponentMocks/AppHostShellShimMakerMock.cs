@@ -3,7 +3,7 @@
 
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {

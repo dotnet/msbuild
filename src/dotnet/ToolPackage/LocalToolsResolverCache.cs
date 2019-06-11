@@ -9,7 +9,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
