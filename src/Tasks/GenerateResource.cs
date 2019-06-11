@@ -3014,9 +3014,26 @@ namespace Microsoft.Build.Tasks
                         ReadResources(reader, resXReader, filename);
                         break;
 #else
-                        foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath))
+                        if (Traits.Instance.EscapeHatches.UseMinimalResxParsingInCoreScenarios)
                         {
-                            AddResource(reader, resource, filename, 0, 0);
+                            using (var xmlReader = new XmlTextReader(filename))
+                            {
+                                xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+                                XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
+                                foreach (XElement dataElem in doc.Element("root").Elements("data"))
+                                {
+                                    string name = dataElem.Attribute("name").Value;
+                                    string value = dataElem.Element("value").Value;
+                                    AddResource(reader, name, value, filename);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath))
+                            {
+                                AddResource(reader, resource, filename, 0, 0);
+                            }
                         }
                         break;
 #endif
