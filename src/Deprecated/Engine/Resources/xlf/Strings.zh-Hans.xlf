@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx" build-num="1938968566">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../Strings.resx" build-num="-1944534404">
     <header>
       <count-group name="BlackBox wordcount">
         <count count-type="x-wordCount">4013</count>
@@ -26,7 +26,7 @@
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4001: “{0}”任务包含多个名为“{1}”的参数。</target>
+          <target state-qualifier="tm-suggestion">MSB4001: Die {0}-Aufgabe enthält mehrere Parameter mit dem Namen "{1}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -35,7 +35,7 @@
         <target state="translated">MSB4081: 元素 &lt;Output&gt; 中的“ItemName”特性的值“{0}”包含“@”字符。如果打算使用项名称，请移除该项名两边的 @( )。</target>
         <note>{StrBegin="MSB4081: "}UE: This message is shown when an output tag has an itemname that contains an @. They probably typed @(foo) instead of foo in the ItemName.LOCALIZATION: Output and ItemName should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4081: 值"{0}"的"项目名称"&lt; 输出 &gt; 元素中的属性包含"@"字符。如果您想要使用的项名称，然后移除 @ （) 的项目名称。</target>
+          <target state-qualifier="mt-suggestion">MSB4081: Der Wert "{0}" "ItemName-Attribut im Element &lt; Output &gt; enthält ein" @"Zeichen. Soll ein Elementname verwenden und entfernen dann die @ (), um den Namen des Elements.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="30" adjWordcount="25.5" curWordcount="25.5"</note>
       </trans-unit>
@@ -46,7 +46,7 @@
     retrieved -- this is typically because the .NET classes that define the .NET attributes cannot be loaded because the assembly
     they are defined in cannot be found, or the classes themselves cannot be found.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4002: 检索任务“{0}”中参数的特性时失败。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4002: Fehler beim Abrufen der Attribute für Parameter in der {0}-Aufgabe. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -56,7 +56,7 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4003:"{0}"是保留的属性 &lt;{1}&gt; 元素中，并且必须拼写正确的大小写。此属性不能用作参数与"{2}"任务。</target>
+          <target state-qualifier="mt-suggestion">MSB4003: "{0}" ist ein reserviertes Attribut der &lt;{1}&gt;-Element und mit der richtigen Groß-/Kleinschreibung geschrieben werden muss. Dieses Attribut kann nicht verwendet werden, als Parameter an die "{2}" Aufgabe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="31" adjWordcount="26.35" curWordcount="26.35"</note>
       </trans-unit>
@@ -65,7 +65,7 @@
         <target state="translated">“REQUESTBATCHSIZE”必须是大于 1 的数字。“{0}”是无效的值。将改用值 10。</target>
         <note>The name "REQUESTBATCHSIZE" is an environment variable</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">“REQUESTBATCHSIZE”必须是大于 1 的数字。“{0}”是无效的值。将改用值 10。</target>
+          <target state-qualifier="tm-suggestion">Die "REQUESTBATCHSIZE" muss eine Zahl größer als 1 sein. "{0}" ist ein ungültiger Wert. Der Wert 10 wird stattdessen verwendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -74,7 +74,7 @@
         <target state="translated">生成在 {0} 内完成。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">生成在 {0} 内完成。</target>
+          <target state-qualifier="tm-suggestion">Das Erstellen wurde in {0} beendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -83,7 +83,7 @@
         <target state="translated">生成失败。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">生成失败。</target>
+          <target state-qualifier="tm-suggestion">Fehler beim Buildvorgang.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -92,7 +92,7 @@
         <target state="translated">已成功生成。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">生成成功。</target>
+          <target state-qualifier="tm-suggestion">Buildvorgang erfolgreich.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -101,7 +101,7 @@
         <target state="translated">已启动生成。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已启动生成。</target>
+          <target state-qualifier="tm-suggestion">Der Buildvorgang wurde gestartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -110,7 +110,7 @@
         <target state="translated">生成启动时间为 {0}。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">生成启动时间为 {0}。</target>
+          <target state-qualifier="tm-suggestion">Der Buildvorgang wurde am {0} gestartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -119,7 +119,7 @@
         <target state="translated">正在完全生成目标“{0}”。</target>
         <note>{0} is the name of the target.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在完全生成目标“{0}”。</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wird vollständig erstellt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -128,7 +128,7 @@
         <target state="translated">未指定输入文件。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">未指定输入文件。</target>
+          <target state-qualifier="tm-suggestion">Es wurden keine Eingabedateien angegeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -137,7 +137,7 @@
         <target state="translated">输入文件“{0}”比输出文件“{1}”新。</target>
         <note>{0} and {1} are filenames on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">输入文件“{0}”比输出文件“{1}”新。</target>
+          <target state-qualifier="tm-suggestion">Die Eingabedatei "{0}" ist neuer als die Ausgabedatei "{1}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -146,7 +146,7 @@
         <target state="translated">输出文件“{0}”不存在。</target>
         <note>{0} is a filename on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">输出文件“{0}”不存在。</target>
+          <target state-qualifier="tm-suggestion">Die Ausgabedatei "{0}" ist nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -155,7 +155,7 @@
         <target state="translated">输入文件“{0}”不存在。</target>
         <note>{0} is a filename on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">输入文件“{0}”不存在。</target>
+          <target state-qualifier="tm-suggestion">Die Eingabedatei "{0}" ist nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -164,7 +164,7 @@
         <target state="translated">正在部分生成目标“{0}”，因为某些输出文件相对于其输入文件而言已经过期。</target>
         <note>{0} is the name of the target.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在部分生成目标“{0}”，因为某些输出文件相对于其输入文件而言已经过期。</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wird teilweise erstellt, da einige Ausgabedateien hinsichtlich ihrer Eingabedateien veraltet sind.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -173,7 +173,7 @@
         <target state="translated">[{0}: Input={1}, Output={2}] 输入文件比输出文件新。</target>
         <note>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">[{0}: Input={1}, Output={2}] 输入文件比输出文件新。</target>
+          <target state-qualifier="tm-suggestion">[{0}: Eingabe={1}, Ausgabe={2}] Die Eingabedatei ist neuer als die Ausgabedatei.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -182,7 +182,7 @@
         <target state="translated">[{0}: Input={1}, Output={2}] 输出文件不存在。</target>
         <note>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">[{0}: Input={1}, Output={2}] 输出文件不存在。</target>
+          <target state-qualifier="tm-suggestion">[{0}: Eingabe={1}, Ausgabe={2}] Die Ausgabedatei ist nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -191,7 +191,7 @@
         <target state="translated">[{0}: Input={1}, Output={2}] 输入文件不存在。</target>
         <note>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">[{0}: Input={1}, Output={2}] 输入文件不存在。</target>
+          <target state-qualifier="tm-suggestion">[{0}: Eingabe={1}, Ausgabe={2}] Die Eingabedatei ist nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -200,7 +200,7 @@
         <target state="translated">特性“{0}”是已知的 MSBuild 特性，不能使用此方法访问。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">特性“{0}”是已知的 MSBuild 特性，不能使用此方法访问。</target>
+          <target state-qualifier="tm-suggestion">Das {0}-Attribut ist ein bekanntes MSBuild-Attribut, auf das mithilfe dieser Methode nicht zugegriffen werden kann.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -209,7 +209,7 @@
         <target state="translated">不能通过名称访问保留的属性组中的属性。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">不能通过名称访问保留的属性组中的属性。</target>
+          <target state-qualifier="tm-suggestion">Auf Eigenschaften in persistenten Eigenschaftengruppen ist kein Zugriff über den Namen möglich.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -220,7 +220,7 @@
     %(RootDir) to an item-spec that's not a valid path, would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4023: 无法计算项元数据“%({0})”。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4023: Elementmetadaten "%({0})" können nicht ausgewertet werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -229,7 +229,7 @@
         <target state="translated">无法执行未与项目对象关联的任务。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">无法执行未与项目对象关联的任务。</target>
+          <target state-qualifier="tm-suggestion">Eine Aufgabe, die keinem Projektobjekt zugeordnet ist, kann nicht ausgeführt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -238,7 +238,7 @@
         <target state="translated">缓存条目已被设置为其他值，并且无法修改。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">缓存条目已被设置为其他值，并且无法修改。</target>
+          <target state-qualifier="tm-suggestion">Der Cacheeintrag wurde bereits auf einen anderen Wert festgelegt und kann nicht geändert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -247,7 +247,7 @@
         <target state="translated">“{0}”属性来自环境变量，无法修改。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">“{0}”属性来自环境变量，无法修改。</target>
+          <target state-qualifier="tm-suggestion">Die {0}-Eigenschaft stammt aus einer Umgebungsvariablen und kann nicht geändert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -256,7 +256,7 @@
         <target state="translated">“{0}”属性是全局属性，无法通过计算的属性组修改。请改用“{1}”。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">“{0}”属性是全局属性，无法通过计算的属性组修改。请改用“{1}”。</target>
+          <target state-qualifier="tm-suggestion">Die {0}-Eigenschaft ist eine globale Eigenschaft und kann nicht über eine ausgewertete Eigenschaftengruppe geändert werden. Verwenden Sie stattdessen {1}.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -265,7 +265,7 @@
         <target state="translated">不允许修改导入的项目文件的 XML。请直接打开该项目文件。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">不允许修改导入的项目文件的 XML。请直接打开该项目文件。</target>
+          <target state-qualifier="tm-suggestion">Der XML-Code einer importierten Projektdatei darf nicht geändert werden. Öffnen Sie diese Projektdatei direkt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -274,7 +274,7 @@
         <target state="translated">MSB4117: 项名称“{0}”是保留名称，不能使用。</target>
         <note>{StrBegin="MSB4117: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4117: 项名称“{0}”是保留名称，不能使用。</target>
+          <target state-qualifier="tm-suggestion">MSB4117: Der Elementname "{0}" ist reserviert und kann nicht verwendet werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -283,7 +283,7 @@
         <target state="translated">MSB4118: 项元数据名称“{0}”是保留名称，不能使用。</target>
         <note>{StrBegin="MSB4118: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4118: 项元数据名称“{0}”是保留名称，不能使用。</target>
+          <target state-qualifier="tm-suggestion">MSB4118: Der Elementmetadatenname "{0}" ist reserviert und kann nicht verwendet werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -292,7 +292,7 @@
         <target state="translated">MSB4004: “{0}”属性是保留属性，不能修改。</target>
         <note>{StrBegin="MSB4004: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild properties e.g. $(MSBuildProjectFile)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4004: “{0}”属性是保留属性，不能修改。</target>
+          <target state-qualifier="tm-suggestion">MSB4004: Die {0}-Eigenschaft ist reserviert und kann nicht geändert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -303,7 +303,7 @@
             UE: This error is shown when a project tries to pass multiple items into a task parameter of type ITaskItem (singular).
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4094: “{0}”对于“{3}”任务的“{1}”参数是无效值。不能将多个项传入“{2}”类型的参数。</target>
+          <target state-qualifier="leveraged-tm">MSB4094: "{0}" ist ein ungültiger Wert für den "{1}"-Parameter der "{3}"-Aufgabe. Mehrere Elemente können nicht in einen Parameter vom Typ "{2}" übergeben werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -314,7 +314,7 @@
         UE: This error is shown when a project tries to pass multiple items into a function in a conditional expression, that can only accept a scalar value (such as the "exists()" function).
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4115: 函数“{0}”只接受标量值，但其参数“{1}”的计算结果为“{2}”，不是标量值。</target>
+          <target state-qualifier="tm-suggestion">MSB4115: Die "{0}"-Funktion nimmt nur einen Skalarwert an, ihr "{1}"-Argument wird jedoch zu "{2}" ausgewertet, bei dem es sich nicht um einen Skalarwert handelt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="22" adjWordcount="5.5" curWordcount="5.5" tmLabel="N''"</note>
       </trans-unit>
@@ -323,16 +323,16 @@
         <target state="translated">该任务当前已与某项目对象相关联，不应添加到其他项目对象中。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">该任务当前已与某项目对象相关联，不应添加到其他项目对象中。</target>
+          <target state-qualifier="tm-suggestion">Die Aufgabe ist derzeit einem Projektobjekt zugeordnet und sollte zu keinem anderen Projektobjekt hinzugefügt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="CannotReferenceItemMetadataWithoutItemName">
         <source>MSB4095: The item metadata %({0}) is being referenced without an item name.  Specify the item name by using %(itemname.{0}).</source>
-        <target state="translated">MSB4095: 引用项元数据 %({0}) 时未指定项名称。 请使用 %(itemname.{0}) 指定项名称。</target>
+        <target state="translated">MSB4095: 引用项元数据 %({0}) 时未指定项名称。请使用 %(itemname.{0}) 指定项名称。</target>
         <note>{StrBegin="MSB4095: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4095: 引用项元数据 %({0}) 时未指定项名称。 请使用 %(itemname.{0}) 指定项名称。</target>
+          <target state-qualifier="tm-suggestion">MSB4095: Auf die %({0})-Elementmetadaten wird ohne einen Elementnamen verwiesen. Geben Sie den Namen mithilfe von %(itemname.{0}) an.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -341,7 +341,7 @@
         <target state="translated">该任务未与指定的目标元素集合相关联，不应从该集合中移除。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">该任务未与指定的目标元素集合相关联，不应从该集合中移除。</target>
+          <target state-qualifier="tm-suggestion">Die Aufgabe ist nicht der angegebenen Auflistung von Zielelementen zugeordnet und sollte nicht daraus entfernt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -351,7 +351,7 @@
         <note>{StrBegin="MSB4005: "}UE: This message is shown when the current working directory cannot be reset after a build. "{1}" contains a message explaining why.
     LOCALIZATION: "{1}" is a message from an CLR/FX exception and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4005: 未能将当前工作目录还原到 {0}。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4005: Das aktuelle Arbeitsverzeichnis konnte unter {0} nicht wiederhergestellt werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -360,7 +360,7 @@
         <target state="translated">无法在未用项目文件中的 XML 元素表示的对象上设置条件。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">无法在未用项目文件中的 XML 元素表示的对象上设置条件。</target>
+          <target state-qualifier="tm-suggestion">Eine Bedingung kann nicht für ein Objekt festgelegt werden, wenn das Objekt nicht von einem XML-Element in der Projektdatei repräsentiert wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -369,7 +369,7 @@
         <target state="translated">在不是用项目文件中的 XML 元素表示的对象上不能设置 ContinueOnError。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">在不是用项目文件中的 XML 元素表示的对象上不能设置 ContinueOnError。</target>
+          <target state-qualifier="tm-suggestion">Das ContinueOnError-Attribut kann nicht für ein Objekt festgelegt werden, wenn das Objekt nicht von einem XML-Element in der Projektdatei repräsentiert wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -378,7 +378,7 @@
         <target state="translated">MSB4134: 将项目加载到引擎中后，将无法设置 DefaultToolsVersion。</target>
         <note>{StrBegin="MSB4134: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4134: 将项目加载到引擎中后，将无法设置 DefaultToolsVersion。</target>
+          <target state-qualifier="tm-suggestion">MSB4134: DefaultToolsVersion darf nicht festgelegt werden, nachdem ein Projekt in das Modul geladen wurde.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -387,7 +387,7 @@
         <target state="translated">不允许对已计算的项指定“{0}”特性。只允许对直接来自项目文件的原始保留项执行此操作。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">不允许对已计算的项指定“{0}”特性。只允许对直接来自项目文件的原始保留项执行此操作。</target>
+          <target state-qualifier="leveraged-tm">Das {0}-Attribut darf nicht einem Element zugewiesen werden, das ausgewertet wurde. Dieser Vorgang ist nur für das ursprüngliche persistente Element zulässig, das direkt aus der Projektdatei stammt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="31" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -396,7 +396,7 @@
         <target state="translated">不允许指定虚拟项的“{0}”特性。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">不允许指定虚拟项的“{0}”特性。</target>
+          <target state-qualifier="tm-suggestion">Das Zuweisen des {0}-Attributs eines virtuellen Elements ist nicht zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -405,7 +405,7 @@
         <target state="translated">不能在生成过程中设置属性。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">不能在生成过程中设置属性。</target>
+          <target state-qualifier="tm-suggestion">Eine Eigenschaft kann nicht während des Erstellens festgelegt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -414,7 +414,7 @@
         <target state="translated">属性不能设置为 null。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">属性不能设置为 null。</target>
+          <target state-qualifier="tm-suggestion">Eine Eigenschaft kann nicht auf NULL festgelegt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -423,7 +423,7 @@
         <target state="translated">无法对未与项目对象关联的任务获取或设置参数。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">无法对未与项目对象关联的任务获取或设置参数。</target>
+          <target state-qualifier="tm-suggestion">Parameter für eine Aufgabe können nicht abgefragt oder festgelegt werden, wenn die Aufgabe keinem Projektobjekt zugeordnet ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -432,7 +432,7 @@
         <target state="translated">MSB4162: &lt;{0}&gt; 无效。item remove 元素下不允许有子元素。</target>
         <note>{StrBegin="MSB4162: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4162: &lt;{0}&gt; 是无效。不允许有子元素项删除元素的下面。</target>
+          <target state-qualifier="mt-suggestion">MSB4162: &lt;{0}&gt; ist ungültig. Untergeordnete Elemente dürfen nicht unter einem Element Element entfernen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="16" adjWordcount="13.6" curWordcount="13.6"</note>
       </trans-unit>
@@ -441,7 +441,7 @@
         <target state="translated">MSB4166: 子节点“{0}”过早退出。正在关闭。</target>
         <note>{StrBegin="MSB4166: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4166: 子节点“{0}”过早退出。正在关闭。</target>
+          <target state-qualifier="tm-suggestion">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Herunterfahren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -450,7 +450,7 @@
         <target state="translated">MSB4085: 一个 &lt;Choose&gt; 必须包含至少一个 &lt;When&gt;。</target>
         <note>{StrBegin="MSB4085: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4085: &lt; 选择 &gt; 必须包含至少一个 &lt; 当 &gt;。</target>
+          <target state-qualifier="mt-suggestion">MSB4085: &lt; auswählen &gt; muss mindestens &lt; Wenn &gt;.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -460,7 +460,7 @@
         <note>{StrBegin="MSB4114: "}UE: This message appears if the project file contains unreasonably nested Choose elements.
     LOCALIZATION: Do not localize "Choose" as it is an XML element name.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4114: &lt; 选择 &gt; 元素不能嵌套多个{0}层深。</target>
+          <target state-qualifier="mt-suggestion">MSB4114: &lt; auswählen &gt; Elemente können nicht geschachtelt werden mehr als {0} Ebenen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
       </trans-unit>
@@ -470,7 +470,7 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4006: 涉及目标“{0}”的目标依赖项关系图中存在循环依赖项。</target>
+          <target state-qualifier="tm-suggestion">MSB4006: Im Zielabhängigkeitsdiagramm besteht eine Ringabhängigkeit im Zusammenhang mit dem Ziel "{0}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -479,7 +479,7 @@
         <target state="translated">MSB4086: 尝试在条件“{0}”中对计算结果为“{2}”而不是数字的“{1}”进行数值比较。</target>
         <note>{StrBegin="MSB4086: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4086: 尝试在条件“{0}”中对计算结果为“{2}”而不是数字的“{1}”进行数值比较。</target>
+          <target state-qualifier="tm-suggestion">MSB4086: Es wurde versucht, einen numerischen Vergleich für "{1}" auszuführen, der zu "{2}" anstatt zu einer Zahl in Bedingung "{0}" ausgewertet wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -488,7 +488,7 @@
         <target state="translated">MSB4007: 在特性“{1}”中指定的子句“{0}”无效。</target>
         <note>{StrBegin="MSB4007: "}UE: This message is shown when the Condition on an element is invalid in some way -- e.g. syntax error, unrecognized operator.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4007: 在特性“{1}”中指定的子句“{0}”无效。</target>
+          <target state-qualifier="tm-suggestion">MSB4007: Die im {1}-Attribut festgelegte {0}-Klausel ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -497,7 +497,7 @@
         <target state="translated">MSB4130: 在 MSBuild 的早期版本中，条件“{0}”的计算可能有误。请验证 AND 和 OR 子句的编写顺序是否与预期相符。若要避免此警告，请添加括号以使求值顺序清晰明确。</target>
         <note>{StrBegin="MSB4130: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4130: 在 MSBuild 的早期版本中，条件“{0}”的计算可能有误。请验证 AND 和 OR 子句的编写顺序是否与预期相符。若要避免此警告，请添加括号以使求值顺序清晰明确。</target>
+          <target state-qualifier="leveraged-tm">MSB4130: Die Bedingung "{0}" ist in einer früheren Version von MSBuild möglicherweise fehlerhaft ausgewertet worden. Stellen Sie sicher, dass die AND- und OR-Klauseln in der beabsichtigten Reihenfolge stehen. Damit diese Warnung nicht angezeigt wird, fügen Sie Klammern hinzu, um die Auswertungsreihenfolge explizit anzugeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="42" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -506,7 +506,7 @@
         <target state="translated">MSB4087: 指定的条件“{0}”的计算结果不是布尔值。</target>
         <note>{StrBegin="MSB4087: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4087: 指定的条件“{0}”的计算结果不是布尔值。</target>
+          <target state-qualifier="tm-suggestion">MSB4087: Die angegebene {0}-Bedingung wird nicht zu einem booleschen Wert ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -515,7 +515,7 @@
         <target state="translated">MSB4113: 指定条件“{0}”的计算结果为“{1}”而不是布尔值。</target>
         <note>{StrBegin="MSB4113: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4113: 指定条件“{0}”的计算结果为“{1}”而不是布尔值。</target>
+          <target state-qualifier="tm-suggestion">MSB4113: Die angegebene Bedingung {0} wird zu {1} statt zu einem booleschen Wert ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -524,7 +524,7 @@
         <target state="translated">{0}，第 {1} 行</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0}，第 {1} 行</target>
+          <target state-qualifier="tm-suggestion">{0}, Zeile {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -533,7 +533,7 @@
         <target state="translated">MSB4136: 从配置文件“{0}”中读取工具集信息时出错。{1}</target>
         <note>{StrBegin="MSB4136: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4136: 从配置文件“{0}”中读取工具集信息时出错。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4136: Fehler beim Lesen der Toolsetinformationen aus der Konfigurationsdatei "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -542,7 +542,7 @@
         <target state="translated">MSB4008: 在“{1}”处发现了与任务程序集“{0}”冲突的程序集。</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4008: 在“{1}”处发现了与任务程序集“{0}”冲突的程序集。</target>
+          <target state-qualifier="tm-suggestion">MSB4008: Eine mit der Aufgabenassembly "{0}" in Konflikt stehende Assembly wurde in "{1}" gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -551,7 +551,7 @@
         <target state="translated">MSB4142: MSBuildToolsPath 与 ToolsVersion“{0}”(在“{1}”处定义) 的 MSBuildBinPath 不同。如果两者都存在，它们的值必须相同。</target>
         <note>{StrBegin="MSB4142: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4142: MSBuildToolsPath 与 ToolsVersion“{0}”(在“{1}”处定义) 的 MSBuildBinPath 不同。如果两者都存在，它们的值必须相同。</target>
+          <target state-qualifier="leveraged-tm">MSB4142: MSBuildToolsPath ist nicht identisch mit MSBuildBinPath für die bei "{1}" definierte ToolsVersion {0}. Wenn beide Pfade vorhanden sind, müssen sie identische Werte haben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -560,7 +560,7 @@
         <target state="translated">MSB4097: 元素 &lt;{1}&gt; 下的元素 &lt;{0}&gt; 可能没有自定义 XML 命名空间。</target>
         <note>{StrBegin="MSB4097: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4097︰ 元素 &lt;{0}&gt; 下的元素 &lt;{1}&gt; 可能没有自定义的 XML 命名空间。</target>
+          <target state-qualifier="mt-suggestion">MSB4097: Das Element &lt;{0}&gt; unter Element &lt;{1}&gt; möglicherweise keinen benutzerdefinierten XML-Namespace.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="16" adjWordcount="13.6" curWordcount="13.6"</note>
       </trans-unit>
@@ -572,7 +572,7 @@
     separately to loggers.
     LOCALIZATION: "{0}" is a message from some FX method and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4009: 未能成功加载默认任务文件。{0}</target>
+          <target state-qualifier="tm-suggestion">MSB4009: Die Standardaufgabendatei konnte nicht geladen werden. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -583,7 +583,7 @@
     found, either because they don't exist, or because of lack of permissions. "{2}" contains a message explaining why.
     LOCALIZATION: "{2}" is a message from some FX method and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4010: 未能从预期位置“{1}”成功加载“{0}”文件。默认任务将不可用。{2}</target>
+          <target state-qualifier="tm-suggestion">MSB4010: Die {0}-Dateien konnten nicht vom erwarteten Speicherplatz "{1}" geladen werden. Standardaufgaben sind nicht verfügbar. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -592,7 +592,7 @@
         <target state="translated">MSB4140: 默认工具版本既不是在注册表中指定的，也不是在配置文件中指定的。</target>
         <note>{StrBegin="MSB4140: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4140: 默认工具版本既不是在注册表中指定的，也不是在配置文件中指定的。</target>
+          <target state-qualifier="tm-suggestion">MSB4140: Die Standardtoolsversion ist weder in der Registrierung noch in der Konfigurationsdatei angegeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -601,7 +601,7 @@
         <target state="translated">MSB4133: 指定了默认工具版本“{0}”，但未能找到其定义。</target>
         <note>{StrBegin="MSB4133: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4133: 指定了默认工具版本“{0}”，但未能找到其定义。</target>
+          <target state-qualifier="tm-suggestion">MSB4133: Eine Standardtoolsversion "{0}" wurde angegeben, aber ihre Definition konnte nicht gefunden werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -610,7 +610,7 @@
         <target state="translated">MSB4080: 元素 &lt;Output&gt; 中的“PropertyName”特性的值“{0}”包含字符“$”。如果打算使用属性名称，请移除该属性名称两边的 $( )。</target>
         <note>{StrBegin="MSB4080: "}UE: This message is shown when an output tag has an property name that contains an $. They probably typed $(foo) instead of foo in the PropertyName. LOCALIZATION: Output and PropertyName should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4080: 值"{0}"的"属性名称"&lt; 输出 &gt; 元素中的属性包含"$"字符。如果您想要使用的属性名称，然后删除属性名称 $ （）。</target>
+          <target state-qualifier="mt-suggestion">MSB4080: Der Wert "{0}" "PropertyName-Attribut im Element &lt; Output &gt;"$"-Zeichen enthält. Wenn Sie auf einen Eigenschaftennamen verwenden und entfernen Sie anschließend die ($), um den Eigenschaftennamen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="32" adjWordcount="27.2" curWordcount="27.2"</note>
       </trans-unit>
@@ -619,7 +619,7 @@
         <target state="translated">MSB4011: 文件“{0}”的导入存在循环引用。此文件可能已被导入多次，或者您尝试导入的是主项目文件。此文件的第一个实例以外的所有实例都将被忽略。</target>
         <note>{StrBegin="MSB4011: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4011: 文件“{0}”的导入存在循环引用。此文件可能已被导入多次，或者您尝试导入的是主项目文件。此文件的第一个实例以外的所有实例都将被忽略。</target>
+          <target state-qualifier="leveraged-tm">MSB4011: Es besteht eine Ringabhängigkeit im Zusammenhang mit dem Import der Datei {0}. Diese Datei wurde unter Umständen mehrmals importiert, oder es wurde versucht, die Hauptprojektdatei zu importieren. Alle außer der ersten Instanz dieser Datei werden ignoriert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="43" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -628,7 +628,7 @@
         <target state="translated">MSB4079: &lt;ProjectExtensions&gt; 元素出现多次。</target>
         <note>{StrBegin="MSB4079: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4079: &lt; ProjectExtensions &gt; 元素出现多次。</target>
+          <target state-qualifier="mt-suggestion">MSB4079: Das Element &lt; ProjectExtensions &gt; tritt mehr als einmal.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="9" adjWordcount="7.65" curWordcount="7.65"</note>
       </trans-unit>
@@ -638,7 +638,7 @@
         <note>{StrBegin="MSB4012: "}UE: This message is shown when the user does not properly specify an item list when an item list is expected
     e.g. "badprefix@(foo)badsuffix" instead of "prefix; @(foo); suffix"</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4012: 表达式“{0}”不能用在此上下文中。在应使用项列表的位置，项列表不能与其他字符串相串联。请使用分号来分隔多个项列表。</target>
+          <target state-qualifier="leveraged-tm">MSB4012: Der Ausdruck {0} kann in diesem Kontext nicht verwendet werden. Elementlisten können nicht mit anderen Zeichenfolgen verkettet werden, wenn eine Elementliste erwartet wird. Verwenden Sie ein Semikolon, um mehrere Elementlisten voneinander zu trennen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="32" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -647,7 +647,7 @@
         <target state="translated">需要指定项目文件名。</target>
         <note>UE: This message is shown when the user calls into the engine to build a project without specifying a filename.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">需要指定项目文件名。</target>
+          <target state-qualifier="tm-suggestion">Geben Sie den Projektdateinamen an.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -657,7 +657,7 @@
         <note>This is the name of the "EndOfInput" token. It is displayed in quotes as the
     unexpected char or token when the end of a conditional was unexpectedly reached.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">输入结束</target>
+          <target state-qualifier="tm-suggestion">Ende der Eingabe</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -666,7 +666,7 @@
         <target state="translated">上一错误已转换为警告，因为调用任务时指定了 ContinueOnError=true。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">上一错误已转换为警告，因为调用任务时指定了 ContinueOnError=true。</target>
+          <target state-qualifier="tm-suggestion">Der vorherige Fehler wurde in eine Warnung umgewandelt, da die Aufgabe mit ContinueOnError=true aufgerufen wurde.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -675,7 +675,7 @@
         <target state="translated">{0} 个错误</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0} 个错误</target>
+          <target state-qualifier="tm-suggestion">{0} Fehler</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -684,7 +684,7 @@
         <target state="translated">MSB4159: 创建工具集“{0}”时出错。{1}</target>
         <note>{StrBegin="MSB4159: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4159: 创建工具集“{0}”时出错。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4159: Fehler beim Erstellen des Toolsets "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -693,7 +693,7 @@
         <target state="translated">MSB4146: 无法计算“{1}”处的属性表达式“{0}”的值。{2}</target>
         <note>{StrBegin="MSB4146: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4146: 无法计算“{1}”处的属性表达式“{0}”的值。{2}</target>
+          <target state-qualifier="tm-suggestion">MSB4146: Der bei "{1}" gefundene Eigenschaftsausdruck "{0}" kann nicht ausgewertet werden. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -702,7 +702,7 @@
         <target state="translated">不再支持将 &lt;{0}&gt; 标记作为 &lt;Project&gt; 元素的子元素。请将此标记放在某个目标中，然后向 &lt;Project&gt; 元素的“InitialTargets”特性中添加该目标的名称。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">&lt;{0}&gt; 标记不再支持为 &lt; 项目 &gt; 元素的子元素。将此标记在一个目标，并将目标的名称添加到"InitialTargets"&lt; 项目 &gt; 元素的属性。</target>
+          <target state-qualifier="mt-suggestion">Das &lt;{0}&gt;-Tag nicht als untergeordnetes Element des &lt; Project &gt;-Elements unterstützt. Platzieren Sie dieses Tag in einem Ziel und fügen Sie den Namen des Ziels InitialTargets-Attribut des &lt; Project &gt;-Elements hinzu.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="38" adjWordcount="32.3" curWordcount="32.3"</note>
       </trans-unit>
@@ -711,7 +711,7 @@
         <target state="translated">MSB4100: 在条件“{2}”中，“{0}”的计算结果应为布尔值而不是“{1}”。</target>
         <note>{StrBegin="MSB4100: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4100: 在条件“{2}”中，“{0}”的计算结果应为布尔值而不是“{1}”。</target>
+          <target state-qualifier="tm-suggestion">MSB4100: Das Ergebnis der Auswertung von {0} war {1}, es wurde jedoch ein boolescher Wert in der {2}-Bedingung erwartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -720,7 +720,7 @@
         <target state="translated">MSB4028: 未能从“{1}”参数中检索到“{0}”任务的输出。{2}</target>
         <note>{StrBegin="MSB4028: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4028: 未能从“{1}”参数中检索到“{0}”任务的输出。{2}</target>
+          <target state-qualifier="tm-suggestion">MSB4028: Die Ausgaben der {0}-Aufgabe konnten nicht aus dem {1}-Parameter abgerufen werden. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -730,7 +730,7 @@
         <note>{StrBegin="MSB4014: "}UE: This message is shown when an unhandled exception terminates the build. The cause is most likely a programming
     error in the build engine.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4014: 由于发生内部错误，已中止生成。</target>
+          <target state-qualifier="tm-suggestion">MSB4014: Das Erstellen wurde aufgrund eines internen Fehlers abgebrochen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -741,7 +741,7 @@
     because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a special
     exception to abort the build.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4015: 由于“{0}”记录器在关闭过程中意外失败，已中止生成。</target>
+          <target state-qualifier="tm-suggestion">MSB4015: Das Erstellen wurde abgebrochen, da für die {0}-Protokollierung beim Herunterfahren ein unerwarteter Fehler aufgetreten ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -752,7 +752,7 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4016: 由于“{0}”记录器在初始化过程中意外失败，已中止生成。</target>
+          <target state-qualifier="tm-suggestion">MSB4016: Das Erstellen wurde abgebrochen, da für die {0}-Protokollierung bei der Initialisierung ein unerwarteter Fehler aufgetreten ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -763,7 +763,7 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4017: 由于发生意外的记录器错误，已中止生成。</target>
+          <target state-qualifier="tm-suggestion">MSB4017: Das Erstellen wurde wegen eines unerwarteten Protokollierungsfehlers abgebrochen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -774,7 +774,7 @@
     programming error in the task; however, it is also possible that the unhandled exception originated in the engine, and was
     surfaced through the task when the task called into the engine.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4018: “{0}”任务意外失败。</target>
+          <target state-qualifier="tm-suggestion">MSB4018: Unerwarteter Fehler bei der {0}-Aufgabe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -783,7 +783,7 @@
         <target state="translated">MSB4165: 未能在超时期限“{1}”毫秒内收到来自子节点“{0}”的响应。正在关闭。</target>
         <note>{StrBegin="MSB4165: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4165: 未能在超时期限“{1}”毫秒内收到来自子节点“{0}”的响应。正在关闭。</target>
+          <target state-qualifier="tm-suggestion">MSB4165: Vom untergeordneten Knoten "{0}" wurde innerhalb des Zeitlimits von "{1}" ms keine Antwort empfangen. Herunterfahren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -792,7 +792,7 @@
         <target state="translated">MSB4088: 条件“{0}”的构造不正确。</target>
         <note>{StrBegin="MSB4088: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4088: 条件“{0}”的构造不正确。</target>
+          <target state-qualifier="tm-suggestion">MSB4088: Die {0}-Bedingung ist falsch konstruiert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -801,7 +801,7 @@
         <target state="translated">MSB4105: 在条件“{0}”中的位置 {1} 处发现意外字符“{2}”。是否希望使用“==”?</target>
         <note>{StrBegin="MSB4105: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4105: 在条件“{0}”中的位置 {1} 处发现意外字符“{2}”。是否希望使用“==”?</target>
+          <target state-qualifier="tm-suggestion">MSB4105: Ein unerwartetes Zeichen {2} wurde an Position {1} in der {0}-Bedingung gefunden. Wollten Sie "==" verwenden?</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -810,7 +810,7 @@
         <target state="translated">MSB4106: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了右括号?</target>
         <note>{StrBegin="MSB4106: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4106: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了右括号?</target>
+          <target state-qualifier="tm-suggestion">MSB4106: Eine Elementliste wurde an Position {1} in Bedingung {0} erwartet. Haben Sie die schließende Klammer vergessen?</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -819,7 +819,7 @@
         <target state="translated">MSB4107: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了“@”后面的左括号?若要使用“@”，请改用“%40”。</target>
         <note>{StrBegin="MSB4107: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4107: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了“@”后面的左括号? 若要使用“@”，请改用“%40”。</target>
+          <target state-qualifier="leveraged-tm">MSB4107: Eine Elementliste wurde an Position {1} in Bedingung {0} erwartet. Haben Sie die öffnende Klammer hinter dem Zeichen "@" vergessen? Wenn Sie ein literales "@" verwenden möchten, geben Sie "%40" ein.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -828,7 +828,7 @@
         <target state="translated">MSB4108: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了项列表表达式内的右引号?</target>
         <note>{StrBegin="MSB4108: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4108: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了项列表表达式内的右引号?</target>
+          <target state-qualifier="tm-suggestion">MSB4108: Eine Elementliste wurde an Position {1} in Bedingung {0} erwartet. Haben Sie das schließende Anführungszeichen innerhalb des Elementlistenausdrucks vergessen?</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -837,7 +837,7 @@
         <target state="translated">MSB4109: 条件“{0}”中的位置 {1} 处应为属性。是否忘记了右括号?</target>
         <note>{StrBegin="MSB4109: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4109: 条件“{0}”中的位置 {1} 处应为属性。是否忘记了右括号?</target>
+          <target state-qualifier="tm-suggestion">MSB4109: Eine Eigenschaft wurde an Position {1} in Bedingung {0} erwartet. Haben Sie die schließende Klammer vergessen?</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -846,7 +846,7 @@
         <target state="translated">MSB4110: 条件“{0}”中的位置 {1} 处应为属性。是否忘记了“$”后面的左括号?若要使用“$”，请改用“%24”。</target>
         <note>{StrBegin="MSB4110: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4110: 条件“{0}”中的位置 {1} 处应为属性。是否忘记了“$”后面的左括号? 若要使用“$”，请改用“%24”。</target>
+          <target state-qualifier="leveraged-tm">MSB4110: Eine Eigenschaft wurde an Position {1} in Bedingung {0} erwartet. Haben Sie die öffnende Klammer hinter dem Zeichen "$" vergessen? Wenn Sie eine literales "$" verwenden möchten, geben Sie "%24" ein.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="27" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -855,7 +855,7 @@
         <target state="translated">MSB4101: 条件“{0}”中的位置 {1} 后面应为右引号。</target>
         <note>{StrBegin="MSB4101: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4101: 条件“{0}”中的位置 {1} 后面应为右引号。</target>
+          <target state-qualifier="tm-suggestion">MSB4101: Es wurde ein schließendes Anführungszeichen hinter Position {1} in Bedingung {0} erwartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -864,7 +864,7 @@
         <target state="translated">MSB4019: 未找到导入的项目“{0}”。请确认 &lt;Import&gt; 声明中的路径正确，且磁盘上存在该文件。</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4019︰ 导入的项目"{0}"找不到。确认在 &lt; 导入 &gt; 声明中的路径正确，以及该文件存在于磁盘上。</target>
+          <target state-qualifier="mt-suggestion">MSB4019: Das importierte Projekt "{0}" wurde nicht gefunden. Bestätigen Sie den Pfad in der Deklaration &lt; Import &gt; und die Datei auf dem Datenträger vorhanden ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="26" adjWordcount="22.1" curWordcount="22.1"</note>
       </trans-unit>
@@ -873,7 +873,7 @@
         <target state="translated">MSB4089: 条件“{0}”中的函数参数数目不正确。应为 {2} 个，但找到 {1} 个。</target>
         <note>{StrBegin="MSB4089: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4089: 条件“{0}”中的函数参数数目不正确。应为 {2} 个，但找到 {1} 个。</target>
+          <target state-qualifier="tm-suggestion">MSB4089: Falsche Anzahl von Argumenten für eine Funktion in der Bedingung "{0}". {1} Argument(e) gefunden, obwohl {2} erwartet wurde(n).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -882,7 +882,7 @@
         <target state="translated">指定的“{0}”对象不属于正确的“{1}”对象。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">指定的“{0}”对象不属于正确的“{1}”对象。</target>
+          <target state-qualifier="tm-suggestion">Das angegebene {0}-Objekt gehört nicht zum korrekten {1}-Objekt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -892,7 +892,7 @@
         <note>{StrBegin="MSB4020: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
     attributes e.g. &lt;Import Project=""&gt; -- the value of Project should not be an empty string.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4020: 值"{0}"的"{1}"属性在元素 &lt;{2}&gt; 是无效的。</target>
+          <target state-qualifier="mt-suggestion">MSB4020: Der Wert "{0}" von der "{1}" Attribut im Element &lt;{2}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="14" adjWordcount="11.9" curWordcount="11.9"</note>
       </trans-unit>
@@ -902,7 +902,7 @@
         <note>{StrBegin="MSB4102: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
         attributes. At the end of the message we show the exception text we got trying to use the value.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4102: 值"{0}"的"{1}"属性在元素 &lt;{2}&gt; 是无效的。 {3}</target>
+          <target state-qualifier="mt-suggestion">MSB4102: Der Wert "{0}" von der "{1}" Attribut im Element &lt;{2}&gt; ist ungültig. {3}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="15" adjWordcount="12.75" curWordcount="12.75"</note>
       </trans-unit>
@@ -911,7 +911,7 @@
         <target state="translated">MSB4021: “{0}”任务的“ContinueOnError”特性无效。{1}</target>
         <note>{StrBegin="MSB4021: "}LOCALIZATION: "ContinueOnError" should not be localized. "{1}" is a message from another exception explaining the problem.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4021: “{0}”任务的“ContinueOnError”特性无效。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4021: Das ContinueOnError-Attribut für die {0}-Aufgabe ist ungültig. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -920,7 +920,7 @@
         <target state="translated">MSB4139: 在注册表项“{0}”中指定的默认 ToolsVersion 值无效。</target>
         <note>{StrBegin="MSB4139: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4139: 在注册表项“{0}”中指定的默认 ToolsVersion 值无效。</target>
+          <target state-qualifier="tm-suggestion">MSB4139: Im Registrierungsschlüssel "{0}" ist ein ungültiger Wert für die Standard-ToolsVersion angegeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -930,7 +930,7 @@
         <note>{StrBegin="MSB4022: "}UE: This message is shown when the engine is checking the correctness of the value (after evaluating embedded
     properties/items) assigned to an XML attribute of an XML element in the project file.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4022: 结果"{0}"的评估值"{1}"的"{2}"属性在元素 &lt;{3}&gt; 是无效。</target>
+          <target state-qualifier="mt-suggestion">MSB4022: Das Ergebnis "{0}"der Auswertung des Werts"{1}" von der "{2}" Attribut im Element &lt;{3}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="20" adjWordcount="17" curWordcount="17"</note>
       </trans-unit>
@@ -939,7 +939,7 @@
         <target state="translated">“{0}”不是有效的事件类别。若要引发自定义事件，请使用“{1}”类别。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">“{0}”不是有效的事件类别。若要引发自定义事件，请使用“{1}”类别。</target>
+          <target state-qualifier="tm-suggestion">{0} ist keine gültige Ereigniskategorie. Verwenden Sie die {1}-Kategorie, um ein benutzerdefiniertes Ereignis auszulösen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -948,7 +948,7 @@
         <target state="translated">“{0}”不是事件的有效重要性级别。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">“{0}”不是事件的有效重要性级别。</target>
+          <target state-qualifier="tm-suggestion">{0} ist kein gültiger Wert für die Bedeutung eines Ereignisses.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -957,7 +957,7 @@
         <target state="translated">MSB4104: 未能写入日志文件“{0}”。{1}</target>
         <note>{StrBegin="MSB4104: "}UE: This is shown when the File Logger can't create or write to the file it was instructed to log to.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4104: 未能写入日志文件“{0}”。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4104: Fehler beim Schreiben in die Protokollierungsdatei "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -968,7 +968,7 @@
     filename is not part of the message because it is provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4024: 未能加载导入的项目文件。{0}</target>
+          <target state-qualifier="tm-suggestion">MSB4024: Die importierte Projektdatei konnte nicht geladen werden. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -977,7 +977,7 @@
         <target state="translated">操作对于保留的项组无效。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">操作对于保留的项组无效。</target>
+          <target state-qualifier="tm-suggestion">Ungültiger Vorgang für eine persistente Elementgruppe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -986,7 +986,7 @@
         <target state="translated">操作对于虚拟项组无效。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">操作对于虚拟项组无效。</target>
+          <target state-qualifier="tm-suggestion">Ungültiger Vorgang für eine virtuelle Elementgruppe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1001,7 +1001,7 @@
                   Normal should not be localized.
                   Low should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4071︰ 值重要性 ="{0}"在 &lt; 消息 &gt; 元素无效。有效值为︰ 高、 普通和低。</target>
+          <target state-qualifier="mt-suggestion">MSB4071: Der Wert Importance = "{0}" in &lt; Nachricht &gt; Element ist ungültig. Gültige Werte sind: hoch, Normal und niedrig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="18" adjWordcount="15.3" curWordcount="15.3"</note>
       </trans-unit>
@@ -1013,7 +1013,7 @@
     provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4025: 未能加载项目文件。{0}</target>
+          <target state-qualifier="tm-suggestion">MSB4025: Die Projektdatei konnte nicht geladen werden. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1022,7 +1022,7 @@
         <target state="translated">MSB4147: “{1}”处的属性“{0}”无效。{2}</target>
         <note>{StrBegin="MSB4147: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4147: “{1}”处的属性“{0}”无效。{2}</target>
+          <target state-qualifier="tm-suggestion">MSB4147: Die {0}-Eigenschaft bei "{1}" ist ungültig. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1031,7 +1031,7 @@
         <target state="translated">“{0}”为无效的“ProjectFileEncoding”值。</target>
         <note>LOCALIZATION: "ProjectFileEncoding" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">“{0}”为无效的“ProjectFileEncoding”值。</target>
+          <target state-qualifier="tm-suggestion">{0} ist ein ungültiger ProjectFileEncoding-Wert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1043,7 +1043,7 @@
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4143: 无法计算表达式“{0}”的值。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4143: Der Ausdruck "{0}" kann nicht ausgewertet werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1056,7 +1056,7 @@
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4184: 无法计算表达式“{0}”。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4184: Der Ausdruck "{0}" kann nicht ausgewertet werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1068,7 +1068,7 @@
       LOCALIZATION: "{0}" is the static function name, "{1}" is the .NET Framework type name
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4185: 类型“{1}”上的函数“{0}”尚未启用，无法执行。</target>
+          <target state-qualifier="tm-suggestion">MSB4185: Die {0}-Funktion für den {1}-Typ wurde nicht für die Ausführung aktiviert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1080,7 +1080,7 @@
       LOCALIZATION: "{0}" is the function expression which is in error
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4186: 静态方法调用语法“{0}”无效。静态方法调用应采用以下形式:$([FullTypeName]::Method())，例如 $([System.IO.Path]::Combine(`a`, `b`))</target>
+          <target state-qualifier="tm-suggestion">MSB4186: Ungültige Aufrufsyntax für statische Methode: "{0}". Für den Aufruf statischer Methoden muss folgendes Format verwendet werden: $([vollständiger Typname]::Methode()), z. B. $([System.IO.Path]::Combine(`a`, `b`))</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1090,7 +1090,7 @@
         <note>{StrBegin="MSB4070: "}UE: This message is shown when the schema file provided for the validation of a project is itself not valid.
     LOCALIZATION: "{0}" is the schema file path. "{1}" is a message from an FX exception that describes why the schema file is bad.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4070: 架构“{0}”无效。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4070: Das Schema "{0}" ist nicht gültig. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1099,7 +1099,7 @@
         <target state="translated">MSB4026: “{2}”任务的“{0}={1}”参数无效。</target>
         <note>{StrBegin="MSB4026: "}UE: This message is displayed when a task has an invalid parameter that cannot be initialized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4026: “{2}”任务的“{0}={1}”参数无效。</target>
+          <target state-qualifier="tm-suggestion">MSB4026: Der {0}={1}-Parameter für die {2}-Aufgabe ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1108,7 +1108,7 @@
         <target state="translated">MSB4027: “{0}”任务从“{1}”输出参数生成了无效项。{2}</target>
         <note>{StrBegin="MSB4027: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4027: “{0}”任务从“{1}”输出参数生成了无效项。{2}</target>
+          <target state-qualifier="tm-suggestion">MSB4027: Die {0}-Aufgabe generierte ungültige Elemente aus dem {1}-Ausgabeparameter. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1117,7 +1117,7 @@
         <target state="translated">MSB4029: “{0}”任务包含无效的输出规范。“TaskParameter”特性是必需的，并且必须指定“ItemName”或“PropertyName”特性(但不能同时指定二者)。</target>
         <note>{StrBegin="MSB4029: "}LOCALIZATION: "TaskParameter", "ItemName" and "PropertyName" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4029: “{0}”任务包含无效的输出规范。“TaskParameter”特性是必需的，并且必须指定“ItemName”或“PropertyName”特性(但不能同时指定二者)。</target>
+          <target state-qualifier="leveraged-tm">MSB4029: Die {0}-Aufgabe enthält eine ungültige Ausgabespezifikation. Das TaskParameter-Attribut ist erforderlich, und es muss entweder das ItemName- oder PropertyName-Attribut angegeben werden (jedoch nicht beide).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="27" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1128,7 +1128,7 @@
     and the type of the .NET property that corresponds to the task parameter. For example, if an int task parameter called "Count"
     is assigned the value "x", this error would be displayed: &lt;MyTask Count="x" /&gt;</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4030: “{0}”对于“{3}”任务的“{1}”参数是无效值。“{1}”参数的类型为“{2}”。</target>
+          <target state-qualifier="tm-suggestion">MSB4030: "{0}" ist ein ungültiger Wert für den {1}-Parameter der {3}-Aufgabe. Der {1}-Parameter ist vom Typ "{2}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1137,7 +1137,7 @@
         <target state="translated">MSB4137: 在配置文件的“{0}”处指定的值无效。属性名或工具版本名称为空字符串。</target>
         <note>{StrBegin="MSB4137: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4137: 在配置文件的“{0}”处指定的值无效。属性名或工具版本名称为空字符串。</target>
+          <target state-qualifier="tm-suggestion">MSB4137: In der Konfigurationsdatei ist bei "{0}" ein ungültiger Wert angegeben. Der Eigenschaftenname oder der Toolsversionname ist eine leere Zeichenfolge.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="20" adjWordcount="5" curWordcount="5" tmLabel="N''"</note>
       </trans-unit>
@@ -1146,7 +1146,7 @@
         <target state="translated">MSB4103: “{0}”不是有效的记录器详细级别。</target>
         <note>{StrBegin="MSB4103: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4103: “{0}”不是有效的记录器详细级别。</target>
+          <target state-qualifier="tm-suggestion">MSB4103: "{0}" ist kein gültiger Ausführlichkeitsgrad für die Protokollierung.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1155,7 +1155,7 @@
         <target state="translated">MSB4163: 目标内部不允许有 &lt;ItemDefinitionGroup&gt;。</target>
         <note>{StrBegin="MSB4163: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4163: &lt; ItemDefinitionGroup &gt; 不允许在目标内。</target>
+          <target state-qualifier="mt-suggestion">MSB4163: &lt; ItemDefinitionGroup &gt; ist in einem Ziel nicht zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="9" adjWordcount="7.65" curWordcount="7.65"</note>
       </trans-unit>
@@ -1164,16 +1164,16 @@
         <target state="translated">指定项不属于当前项组。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">指定项不属于当前项组。</target>
+          <target state-qualifier="tm-suggestion">Das angegebene Element gehört nicht zu der aktuellen Elementgruppe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="ItemDoesNotContainValueForUnqualifiedMetadata">
         <source>MSB4096: The item "{0}" in item list "{1}" does not define a value for metadata "{2}".  In order to use this metadata, either qualify it by specifying %({1}.{2}), or ensure that all items in this list define a value for this metadata.</source>
-        <target state="translated">MSB4096: 项列表“{1}”中的项“{0}”没有定义元数据“{2}”的值。 要使用此元数据，请通过指定 %({1}.{2}) 来限定它，或确保此列表中的所有项都为此元数据定义了一个值。</target>
+        <target state="translated">MSB4096: 项列表“{1}”中的项“{0}”没有定义元数据“{2}”的值。要使用此元数据，请通过指定 %({1}.{2}) 来限定它，或确保此列表中的所有项都为此元数据定义了一个值。</target>
         <note>{StrBegin="MSB4096: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4096: 项列表“{1}”中的项“{0}”没有定义元数据“{2}”的值。 要使用此元数据，请通过指定 %({1}.{2}) 来限定它，或确保此列表中的所有项都为此元数据定义了一个值。</target>
+          <target state-qualifier="leveraged-tm">MSB4096: Das Element "{0}" in der Elementliste "{1}" definiert keinen Wert für die {2}-Metadaten. Wenn Sie diese Metadaten verwenden möchten, qualifizieren Sie sie, indem Sie %({1}.{2}) angeben, oder vergewissern Sie sich, dass alle Elemente in der Liste einen Wert für diese Metadaten definieren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="42" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1182,7 +1182,7 @@
         <target state="translated">MSB4099: 在条件“{0}”中，不允许存在对位置 {1} 处的项列表的引用。</target>
         <note>{StrBegin="MSB4099: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4099: 在条件“{0}”中，不允许存在对位置 {1} 处的项列表的引用。</target>
+          <target state-qualifier="tm-suggestion">MSB4099: Ein Verweis auf eine Elementliste an Position {1} ist in dieser {0}-Bedingung nicht zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1191,7 +1191,7 @@
         <target state="translated">MSB4033: “{0}”是保留的项元数据，不能重新定义为该项的自定义元数据。</target>
         <note>{StrBegin="MSB4033: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4033: “{0}”是保留的项元数据，不能重新定义为该项的自定义元数据。</target>
+          <target state-qualifier="tm-suggestion">MSB4033: "{0}" sind reservierte Elementmetadaten und können nicht als benutzerdefinierte Metadaten für das Element neu definiert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1202,7 +1202,7 @@
     only the engine is allowed to create and throw this exception.
     LOCALIZATION: "InternalLoggerException" and "MSBuild" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">InternalLoggerException 只能由 MSBuild 引擎引发。不能使用此类的公共构造函数创建该异常的实例。</target>
+          <target state-qualifier="leveraged-tm">Eine InternalLoggerException kann nur durch das MSBuild-Modul ausgelöst werden. Die öffentlichen Konstruktoren dieser Klasse können nicht verwendet werden, um eine Instanz der Ausnahme zu erstellen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1211,7 +1211,7 @@
         <target state="translated">初始项:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">初始项:</target>
+          <target state-qualifier="tm-suggestion">Ursprüngliche Elemente:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1220,7 +1220,7 @@
         <target state="translated">MSB4083: 元素“{0}”上需要 Condition 特性。</target>
         <note>{StrBegin="MSB4083: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4083: 元素“{0}”上需要 Condition 特性。</target>
+          <target state-qualifier="tm-suggestion">MSB4083: Es wurde ein Bedingungsattribut für das {0}-Element erwartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1229,7 +1229,7 @@
         <target state="translated">MSB4164: 元数据“{1}”的值“{0}”包含一个项列表表达式。默认元数据值不能包含项列表表达式。</target>
         <note>{StrBegin="MSB4164: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4164: 元数据“{1}”的值“{0}”包含一个项列表表达式。默认元数据值不能包含项列表表达式。</target>
+          <target state-qualifier="tm-suggestion">MSB4164: Der Wert "{0}" der {1}-Metadaten enthält einen Elementlistenausdruck. Elementlistenausdrücke sind nicht als Standardwerte für Metadaten zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="22" adjWordcount="5.5" curWordcount="5.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1238,7 +1238,7 @@
         <target state="translated">MSBuild 需要有效的“{0}”对象。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSBuild 需要有效的“{0}”对象。</target>
+          <target state-qualifier="tm-suggestion">MSBuild erwartet ein gültiges {0}-Objekt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1248,7 +1248,7 @@
         <note>{StrBegin="MSB4035: "}UE: This message is shown when a user leaves off a required attribute from a project element
     e.g. &lt;UsingTask AssemblyName="foo"&gt; -- this is missing the "TaskName" attribute.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4035: 所需的属性"{0}"元素中缺少 &lt;{1}&gt;。</target>
+          <target state-qualifier="mt-suggestion">MSB4035: Das erforderliche Attribut "{0}"-Element fehlt &lt;{1}&gt;.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -1257,7 +1257,7 @@
         <target state="translated">MSB4036: 未找到“{0}”任务。请检查下列各项: 1.) 项目文件中的任务名称与任务类的名称相同。2.) 任务类为“public”且实现 Microsoft.Build.Framework.ITask 接口。3.) 在项目文件中或位于“{1}”目录的 *.tasks 文件中使用 &lt;UsingTask&gt; 正确声明了该任务。</target>
         <note>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4036:"{0}"找不到任务。检查以下项目︰ 1。) 的项目文件中的任务名称为的任务类的名称相同。2) 任务类是"公用"，实现 Microsoft.Build.Framework.ITask 接口。3) 在项目文件中，或位于 *.tasks 文件中正确使用 &lt; UsingTask &gt; 声明任务"{1}"目录。</target>
+          <target state-qualifier="mt-suggestion">MSB4036: Die "{0}" Task wurde nicht gefunden. Überprüfen Sie Folgendes: 1.) der Name der Aufgabe in der Projektdatei entspricht dem Namen der Aufgabenklasse. 2) die Aufgabenklasse ist "public" und implementiert die Microsoft.Build.Framework.ITask-Schnittstelle. 3) die Aufgabe korrekt mit &lt; UsingTask &gt; deklariert, in der Projektdatei oder in den Tasks-Dateien der "{1}" Verzeichnis.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="64" adjWordcount="54.4" curWordcount="54.4"</note>
       </trans-unit>
@@ -1266,7 +1266,7 @@
         <target state="translated">MSB4141: 没有为 ToolsVersion“{0}”(在“{1}”处定义)指定 MSBuildToolsPath，或者指定值的计算结果为空字符串。</target>
         <note>{StrBegin="MSB4141: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4141: 没有为 ToolsVersion“{0}”(在“{1}”处定义)指定 MSBuildToolsPath，或者指定值的计算结果为空字符串。</target>
+          <target state-qualifier="tm-suggestion">MSB4141: MSBuildToolsPath ist für die bei "{1}" definierte ToolsVersion {0} nicht angegeben, oder der angegebene Wert wird zu einer leeren Zeichenfolge ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1278,7 +1278,7 @@
     version information we need.
     LOCALIZATION: "MSBuild", "MSBuildVersion" and &lt;Project&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4031:"MSBuildVersion"属性已被否决。如果项目用 MSBuild 2003 格式编写的请从 &lt; 项目 &gt; 标记删除的属性。如果是用旧的 1.0 或 1.2 格式编写的项目，请将其转换为 MSBuild 2003 格式。</target>
+          <target state-qualifier="mt-suggestion">MSB4031: Das Attribut "MSBuildVersion" ist veraltet. Wenn das Projekt im Format MSBuild 2003 erstellt wurde, entfernen Sie das Attribut aus dem Tag &lt; Project &gt;. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="45" adjWordcount="38.25" curWordcount="38.25"</note>
       </trans-unit>
@@ -1287,7 +1287,7 @@
         <target state="translated">MSB4144: 找到了工具集“{0}”的多个定义。 </target>
         <note>{StrBegin="MSB4144: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4144︰ 对于工具集找到多个定义的"{0}"。</target>
+          <target state-qualifier="mt-suggestion">MSB4144: Für das Toolset wurden mehrere Definitionen gefunden "{0}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="9" adjWordcount="7.65" curWordcount="7.65"</note>
       </trans-unit>
@@ -1296,7 +1296,7 @@
         <target state="translated">MSB4145: 找到了属性“{0}”的多个定义。</target>
         <note>{StrBegin="MSB4145: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4145: 找到了属性“{0}”的多个定义。</target>
+          <target state-qualifier="tm-suggestion">MSB4145: Für die {0}-Eigenschaft wurden mehrere Definitionen gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1305,7 +1305,7 @@
         <target state="translated">MSB4082: Choose 包含多个 &lt;Otherwise&gt; 元素。</target>
         <note>{StrBegin="MSB4082: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4082︰ 选择具有多个 &lt; 否则为 &gt; 元素。</target>
+          <target state-qualifier="mt-suggestion">MSB4082: Wählen Sie mehrere &lt; Otherwise &gt;-Element enthält.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="9" adjWordcount="7.65" curWordcount="7.65"</note>
       </trans-unit>
@@ -1314,7 +1314,7 @@
         <target state="translated">此方法仅对保留的 &lt;{0}&gt; 元素有效。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">此方法才有效保持 &lt;{0}&gt; 元素。</target>
+          <target state-qualifier="mt-suggestion">Diese Methode ist nur gültig für beibehalten &lt;{0}&gt; Elemente.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="10" adjWordcount="8.5" curWordcount="8.5"</note>
       </trans-unit>
@@ -1323,7 +1323,7 @@
         <target state="translated">此方法只对虚拟属性组有效，对 &lt;{0}&gt; 元素无效。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">此方法仅对虚拟属性组有效不是 &lt;{0}&gt; 元素。</target>
+          <target state-qualifier="mt-suggestion">Diese Methode gilt nur für virtuelle Eigenschaftengruppen nicht &lt;{0}&gt; Elemente.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="13" adjWordcount="11.05" curWordcount="11.05"</note>
       </trans-unit>
@@ -1332,7 +1332,7 @@
         <target state="translated">MSB4038: 元素 &lt;{0}&gt; 必须是元素 &lt;{1}&gt; 下的最后一个元素。但找到的是元素 &lt;{2}&gt;。</target>
         <note>{StrBegin="MSB4038: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4038︰ 该元素 &lt;{0}&gt; 必须是最后一个元素下 &lt;{1}&gt;。找到元素 &lt;{2}&gt; 相反。</target>
+          <target state-qualifier="mt-suggestion">MSB4038: Das Element &lt;{0}&gt; muss unter Element &lt;{1}&gt;. Element wurde gefunden &lt;{2}&gt; statt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="17" adjWordcount="14.45" curWordcount="14.45"</note>
       </trans-unit>
@@ -1341,7 +1341,7 @@
         <target state="translated">MSB4138: 在注册表位置“{0}”处指定了非字符串数据。</target>
         <note>{StrBegin="MSB4138: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4138: 在注册表位置“{0}”处指定了非字符串数据。</target>
+          <target state-qualifier="tm-suggestion">MSB4138: Am Registrierungsspeicherort "{0}" wurden Daten angegeben, die keine Zeichenfolge sind.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1350,7 +1350,7 @@
         <target state="translated">MSB4039: 未在项目文件中找到任何“{0}”元素。</target>
         <note>{StrBegin="MSB4039: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4039: 未在项目文件中找到任何“{0}”元素。</target>
+          <target state-qualifier="tm-suggestion">MSB4039: Das {0}-Element wurde in der Projektdatei nicht gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1359,7 +1359,7 @@
         <target state="translated">MSB4040: 项目中无任何目标。</target>
         <note>{StrBegin="MSB4040: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4040: 项目中无任何目标。</target>
+          <target state-qualifier="tm-suggestion">MSB4040: Das Projekt enthält kein Ziel.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1368,7 +1368,7 @@
         <target state="translated">不允许移除项的“{0}”特性。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">不允许移除项的“{0}”特性。</target>
+          <target state-qualifier="tm-suggestion">Das Löschen des {0}-Attributs eines Elements ist nicht zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1377,7 +1377,7 @@
         <target state="translated">传入的对象不属于该项目。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">传入的对象不属于该项目。</target>
+          <target state-qualifier="tm-suggestion">Das übergebene Objekt ist nicht Teil des Projekts.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1386,7 +1386,7 @@
         <target state="translated">正在使用项目“{3}”中的目标“{2}”重写项目“{1}”中的目标“{0}”。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在使用项目“{3}”中的目标“{2}”重写项目“{1}”中的目标“{0}”。</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" im Projekt "{1}" wird durch das Ziel "{2}" aus dem Projekt "{3}" außer Kraft gesetzt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1395,7 +1395,7 @@
         <target state="translated">MSB4167: 父进程意外退出。正在关闭子节点“{0}”。</target>
         <note>{StrBegin="MSB4167: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4167: 父进程意外退出。正在关闭子节点“{0}”。</target>
+          <target state-qualifier="tm-suggestion">MSB4167: Der übergeordnete Prozess wurde unerwartet beendet. Der untergeordnete Knoten "{0}" wird heruntergefahren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1404,7 +1404,7 @@
         <target state="translated">{0} 毫秒 {1} {2} 次调用</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0} 毫秒 {1} {2} 次调用</target>
+          <target state-qualifier="tm-suggestion">{0} ms {1} {2} Aufrufe</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1413,7 +1413,7 @@
         <target state="translated">(* = 由于重新进入而未记录执行时间)</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">(* = 由于重新进入而未记录执行时间)</target>
+          <target state-qualifier="tm-suggestion">(* = Zeit wurde aufgrund des erneuten Eintretens nicht aufgezeichnet)</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1422,7 +1422,7 @@
         <target state="translated">此项目对象已从 MSBuild 引擎卸载，因此不再有效。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">此项目对象已从 MSBuild 引擎卸载，因此不再有效。</target>
+          <target state-qualifier="tm-suggestion">Dieses Projektobjekt wurde aus dem MSBuild-Modul entladen und ist nicht mehr gültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1431,7 +1431,7 @@
         <target state="translated">未找到项目文件“{0}”。</target>
         <note>UE: This message is shown when the user calls into the OM to build a project that doesn't exist on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">未找到项目文件“{0}”。</target>
+          <target state-qualifier="tm-suggestion">Die Projektdatei "{0}" wurde nicht gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1440,7 +1440,7 @@
         <target state="translated">已完成生成项目“{0}”的操作 - 失败。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成生成项目 "{0}" - 失败。</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung des Projekts "{0}" ist abgeschlossen – FEHLER.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1449,7 +1449,7 @@
         <target state="translated">已完成生成项目“{0}”的操作。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成生成项目 "{0}"。</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung des Projekts "{0}" ist abgeschlossen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -1459,7 +1459,7 @@
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
     LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4041︰ 默认 XML 命名空间的项目必须是 MSBuild XML 命名空间。如果项目用 MSBuild 2003 格式编写的请添加 xmlns ="{0}"&lt; 项目 &gt; 元素。如果是用旧的 1.0 或 1.2 格式编写的项目，请将其转换为 MSBuild 2003 格式。</target>
+          <target state-qualifier="mt-suggestion">MSB4041: Der XML-Standardnamespace des Projekts muss MSBuild XML-Namespace. Wenn das Projekt im Format MSBuild 2003 erstellt wurde, fügen Sie Xmlns = "{0}" &lt; Project &gt;-Element. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="52" adjWordcount="44.2" curWordcount="44.2"</note>
       </trans-unit>
@@ -1468,7 +1468,7 @@
         <target state="translated">项目性能摘要:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目性能摘要:</target>
+          <target state-qualifier="tm-suggestion">Leistungszusammenfassung für das Projekt:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1477,7 +1477,7 @@
         <target state="translated">MSB4042: 由于项目文件中存在语法错误而正在停止。</target>
         <note>{StrBegin="MSB4042: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4042: 由于项目文件中存在语法错误而正在停止。</target>
+          <target state-qualifier="tm-suggestion">MSB4042: Prozess aufgrund von Syntaxfehlern in der Projektdatei angehalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1486,7 +1486,7 @@
         <target state="translated">项目“{0}”正在生成“{1}”({2} 目标):</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{0}”正在生成“{1}”({2} 目标):</target>
+          <target state-qualifier="tm-suggestion">Das Projekt {0} erstellt {1} ({2} Ziel(e)):</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1495,7 +1495,7 @@
         <target state="translated">项目“{0}”正在生成“{1}”(默认目标):</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{0}”正在生成“{1}”(默认目标):</target>
+          <target state-qualifier="tm-suggestion">Das Projekt "{0}" erstellt "{1}" (Standardziele):</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1504,7 +1504,7 @@
         <target state="translated">项目“{0}”({1} 个目标):</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{0}”({1} 个目标):</target>
+          <target state-qualifier="tm-suggestion">Projekt "{0}", {1} Ziel(e):</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -1513,7 +1513,7 @@
         <target state="translated">项目“{0}”(默认目标):</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{0}”(默认目标):</target>
+          <target state-qualifier="tm-suggestion">Projekt "{0}" (Standardziele):</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -1522,7 +1522,7 @@
         <target state="translated">已完成生成项目“{0}”({1} 个目标)的操作。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成生成项目“{0}”({1} 个目标)的操作。</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung von Projekt "{0}" ist abgeschlossen ({1} Ziel(e)).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1531,7 +1531,7 @@
         <target state="translated">已完成生成项目“{0}”(默认目标)的操作。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成生成项目“{0}”(默认目标)的操作。</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung von Projekt "{0}" ist abgeschlossen (Standardziele).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1540,7 +1540,7 @@
         <target state="translated">已完成生成项目“{0}”({1} 个目标)的操作 - 失败。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成生成项目“{0}”({1} 个目标)的操作 - 失败。</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung des Projekts "{0}" ist abgeschlossen, {1} Ziel(e) -- FEHLER.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1549,7 +1549,7 @@
         <target state="translated">已完成生成项目“{0}”(默认目标)的操作 - 失败。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成生成项目“{0}”(默认目标)的操作 - 失败。</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung von Projekt "{0}" ist abgeschlossen (Standardziele) -- FEHLER.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1558,16 +1558,16 @@
         <target state="translated">MSB4075: 必须在 Visual Studio IDE 中打开该项目文件，并将其转换为最新版本，然后才能由 MSBuild 生成。</target>
         <note>{StrBegin="MSB4075: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4075: 必须在 Visual Studio IDE 中打开该项目文件，并将其转换为最新版本，然后才能由 MSBuild 生成。</target>
+          <target state-qualifier="leveraged-tm">MSB4075: Die Projektdatei muss in der Visual Studio IDE geöffnet und in ein aktuelles Versionsformat gebracht werden, bevor sie mit MSBuild erstellt werden kann.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
         <source>MSB4192: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</source>
-        <target state="translated">MSB4192: 项目文件“{0}”为“.vcproj”文件格式，而 MSBuild 不再支持该格式。请通过在 Visual Studio IDE 中打开该项目或运行转换工具来转换项目，或者使用 MSBuild 3.5 或早期版本来生成该项目。</target>
+        <target state="translated">MSB4192: 项目文件“{0}”为“.vcproj”文件格式，而 MSBuild 不再支持该格式。请通过在 Visual Studio IDE 中打开该项目或运行转换工具来转换该项目，或者使用 MSBuild 3.5 或早期版本来生成该项目。</target>
         <note>{StrBegin="MSB4192: "} LOC: ".vcproj" should not be localized</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4192: 项目文件“{0}”为“.vcproj”文件格式，而 MSBuild 不再支持该格式。请通过在 Visual Studio IDE 中打开该项目或运行转换工具来转换项目，或者使用 MSBuild 3.5 或早期版本来生成该项目。</target>
+          <target state-qualifier="leveraged-tm">MSB4192: Die Projektdatei "{0}" ist im VSPROJ-Dateiformat gespeichert, das nicht mehr von MSBuild unterstützt wird. Konvertieren Sie das Projekt, indem Sie es in der Visual Studio IDE öffnen oder das Konvertierungstool ausführen, oder verwenden Sie MSBuild 3.5 oder früher zum Erstellen des Projekts.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="42" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1576,7 +1576,7 @@
         <target state="translated">指定的属性不属于当前属性组。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">指定的属性不属于当前属性组。</target>
+          <target state-qualifier="tm-suggestion">Die angegebene Eigenschaft gehört nicht zu der aktuellen Eigenschaftengruppe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1585,7 +1585,7 @@
         <target state="translated">初始属性:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">初始属性:</target>
+          <target state-qualifier="tm-suggestion">Ursprüngliche Eigenschaften:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1594,7 +1594,7 @@
         <target state="translated">MSB4148: 存储在注册表项“{0}”下的属性名称的长度为零。</target>
         <note>{StrBegin="MSB4148: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4148: 存储在注册表项“{0}”下的属性名称的长度为零。</target>
+          <target state-qualifier="tm-suggestion">MSB4148: Der Name einer unter dem Registrierungsschlüssel "{0}" gespeicherten Eigenschaft hat eine Länge von Null.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1603,7 +1603,7 @@
         <target state="translated">索引器中的属性名称与“{0}”对象不匹配。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">索引器中的属性名称与“{0}”对象不匹配。</target>
+          <target state-qualifier="tm-suggestion">Die Eigenschaftennamen im Indexer und das {0}-Objekt stimmen nicht überein.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1614,7 +1614,7 @@
     "foo.metadata", because "foo" is automatically deduced. In corollary, "bar.metadata" is not allowed either, where "bar" is a different
     item list type.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4043: 项元数据引用“{0}”无效，因为它是用项名称限定的。不需要限定转换中引用的项元数据，因为项名称会自动根据所转换的项推导出来。请将“{0}”更改为“%({1})”。</target>
+          <target state-qualifier="leveraged-tm">MSB4043: Der Elementmetadatenverweis "{0}" ist ungültig, da er mit einem Elementnamen qualifiziert ist. Elementmetadaten, auf die bei Transformationen verwiesen wird, müssen nicht qualifiziert werden, da der Elementname automatisch aus den transformierten Elementen abgeleitet wird. Ändern Sie "{0}" in "%({1})".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="43" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1623,7 +1623,7 @@
         <target state="translated">MSB4135: 从注册表位置“{0}”读取工具集信息时出错。{1}</target>
         <note>{StrBegin="MSB4135: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4135: 从注册表位置“{0}”读取工具集信息时出错。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4135: Fehler beim Lesen der Toolsetinformationen am Registrierungsspeicherort "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1632,7 +1632,7 @@
         <target state="translated">MSB4044: 未给任务“{0}”的必需参数“{1}”赋值。</target>
         <note>{StrBegin="MSB4044: "}UE: This message is shown when a task parameter designated as "required" is not set in the project file.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4044: 未给任务“{0}”的必需参数“{1}”赋值。</target>
+          <target state-qualifier="tm-suggestion">MSB4044: Die {0}-Aufgabe hat keinen Wert für den erforderlichen {1}-Parameter erhalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1641,7 +1641,7 @@
         <target state="translated">正在使用架构文件“{0}”验证项目。</target>
         <note>LOCALIZATION: "{0}" is the location of the schema file.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在使用架构文件“{0}”验证项目。</target>
+          <target state-qualifier="tm-suggestion">Das Projekt wird anhand der Schemadatei "{0}" überprüft.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1652,7 +1652,7 @@
     MSBuild.exe), and the project has errors. "{0}" contains a message explaining the problem.
     LOCALIZATION: "{0}" is a message from the System.XML schema validator and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4045: 项目无效。{0}</target>
+          <target state-qualifier="tm-suggestion">MSB4045: Ungültiges Projekt. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1661,7 +1661,7 @@
         <target state="translated">MSB4112: 此项目中的目标已被宿主禁用，因此无法在此时生成。这可能是出于安全考虑。若要启用这些目标，宿主必须将 Project.BuildEnabled 设置为“true”。</target>
         <note>{StrBegin="MSB4112: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4112: 此项目中的目标已被宿主禁用，因此无法在此时生成。这可能是出于安全考虑。若要启用这些目标，宿主必须将 Project.BuildEnabled 设置为“true”。</target>
+          <target state-qualifier="leveraged-tm">MSB4112: Die Ziele in diesem Projekt wurden vom Host deaktiviert und können aus diesem Grund derzeit nicht erstellt werden. Die Deaktivierung wurde wahrscheinlich aus Sicherheitsgründen durchgeführt. Wenn Sie die Ziele aktivieren möchten, muss der Host Project.BuildEnabled auf "true" festlegen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="39" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1671,7 +1671,7 @@
         <note>{StrBegin="MSB4093: "}UE: This error is shown when a project tries to assign a value to a task parameter that does not have a "set"
     accessor on the corresponding .NET property on the task class.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4093: 无法写入“{1}”任务的“{0}”参数，因为它没有“set”访问器。</target>
+          <target state-qualifier="tm-suggestion">MSB4093: In den {0}-Parameter der {1}-Aufgabe kann nicht geschrieben werden, da er keinen set-Accessor besitzt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="20" adjWordcount="5" curWordcount="5" tmLabel="N''"</note>
       </trans-unit>
@@ -1680,7 +1680,7 @@
         <target state="translated">无法创建此对象的浅表克隆。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">无法创建此对象的浅表克隆。</target>
+          <target state-qualifier="tm-suggestion">Ein unechter Klon dieses Objekts kann nicht erstellt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1689,7 +1689,7 @@
         <target state="translated">正在跳过目标“{0}”，因为它没有输入。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在跳过目标“{0}”，因为它没有输入。</target>
+          <target state-qualifier="tm-suggestion">Das {0}-Ziel wird übersprungen, da es keine Eingaben besitzt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1698,7 +1698,7 @@
         <target state="translated">虽然目标已声明其输入，但输入规范仅引用了空属性和/或空项列表。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">虽然目标已声明其输入，但输入规范仅引用了空属性和/或空项列表。</target>
+          <target state-qualifier="tm-suggestion">Obwohl das Ziel seine Eingaben deklariert hat, verweist die Eingabespezifikation nur auf leere Eigenschaften und/oder leere Elementlisten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1707,7 +1707,7 @@
         <target state="translated">正在跳过目标“{0}”，因为它没有输出。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在跳过目标“{0}”，因为它没有输出。</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wird übersprungen, da es keine Ausgaben enthält.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1716,7 +1716,7 @@
         <target state="translated">虽然目标已声明其输出，但输出规范仅引用了空属性和/或空项列表。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">虽然目标已声明其输出，但输出规范仅引用了空属性和/或空项列表。</target>
+          <target state-qualifier="tm-suggestion">Obwohl das Ziel seine Ausgaben deklariert hat, verweist die Ausgabespezifikation nur auf leere Eigenschaften und/oder leere Elementlisten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1725,7 +1725,7 @@
         <target state="translated">正在跳过目标“{0}”，因为所有输出文件相对于输入文件而言都是最新的。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在跳过目标“{0}”，因为所有输出文件相对于输入文件而言都是最新的。</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wird übersprungen, da alle Ausgabedateien hinsichtlich der Eingabedateien aktuell sind.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1734,7 +1734,7 @@
         <target state="translated">输入文件:{0}</target>
         <note>{0} is a semicolon-separated list of filenames.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">输入文件:{0}</target>
+          <target state-qualifier="tm-suggestion">Eingabedateien: {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1743,7 +1743,7 @@
         <target state="translated">输出文件:{0}</target>
         <note>{0} is a semicolon-separated list of filenames.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">输出文件:{0}</target>
+          <target state-qualifier="tm-suggestion">Ausgabedateien: {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1752,7 +1752,7 @@
         <target state="translated">正在生成解决方案配置“{0}”。</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在生成解决方案配置“{0}”。</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappenkonfiguration "{0}" wird erstellt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -1761,7 +1761,7 @@
         <target state="translated">对配置“{1}”和工具版本“{2}”使用解决方案缓存文件“{0}”。</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">对配置“{1}”和工具版本“{2}”使用解决方案缓存文件“{0}”。</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappen-Cachedatei "{0}" wird für die Konfiguration "{1}" und die Toolsversion "{2}" verwendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1770,7 +1770,7 @@
         <target state="translated">未能读取解决方案缓存文件“{0}”。{1} 直接使用解决方案文件。</target>
         <note>UE: This is not a true error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">未能读取解决方案缓存文件“{0}”。{1} 直接使用解决方案文件。</target>
+          <target state-qualifier="tm-suggestion">Fehler beim Lesen der Projektmappen-Cachedatei "{0}". {1} Projektmappendatei wird direkt verwendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1779,7 +1779,7 @@
         <target state="translated">未能写入解决方案缓存文件“{0}”。{1}</target>
         <note>UE: This is not a true error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">未能写入解决方案缓存文件“{0}”。{1}</target>
+          <target state-qualifier="tm-suggestion">Fehler beim Schreiben der Projektmappen-Cachedatei "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1788,7 +1788,7 @@
         <target state="translated">为“{0}”值“{1}”创建了解决方案缓存文件，但当前值为“{2}”。正在刷新缓存文件。</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">为“{0}”值“{1}”创建了解决方案缓存文件，但当前值为“{2}”。正在刷新缓存文件。</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappen-Cachedatei wurde für den {0}-Wert "{1}" erstellt, aber der aktuelle Wert ist "{2}". Cachedatei wird aktualisiert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="20" adjWordcount="5" curWordcount="5" tmLabel="N''"</note>
       </trans-unit>
@@ -1797,7 +1797,7 @@
         <target state="translated">解决方案缓存文件的内部版本号为“{0}”，但当前值为“{1}”。正在刷新缓存文件。</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">解决方案缓存文件的内部版本号为“{0}”，但当前值为“{1}”。正在刷新缓存文件。</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappen-Cachedatei hat die interne Versionsnummer "{0}", der aktuelle Wert ist aber "{1}". Cachedatei wird aktualisiert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1806,7 +1806,7 @@
         <target state="translated">解决方案缓存文件已过期。正在刷新缓存文件。{0}</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">解决方案缓存文件已过期。正在刷新缓存文件。{0}</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappen-Cachedatei ist veraltet. Cachedatei wird aktualisiert. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1815,7 +1815,7 @@
         <target state="translated">MSB4160: 检测到涉及项目“{0}”的循环依赖项。</target>
         <note>{StrBegin="MSB4160: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4160: 检测到涉及项目“{0}”的循环依赖项。</target>
+          <target state-qualifier="tm-suggestion">MSB4160: Eine Ringabhängigkeit im Zusammenhang mit dem Projekt "{0}" wurde erkannt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1824,7 +1824,7 @@
         <target state="translated">MSB4126: 指定的解决方案配置“{0}”无效。请使用 Configuration 和 Platform 属性指定有效的解决方案配置(例如 MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU")，或者将这些属性保留为空，以使用默认的解决方案配置。</target>
         <note>{StrBegin="MSB4126: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4126: 指定的解决方案配置“{0}”无效。请使用 Configuration 和 Platform 属性指定有效的解决方案配置(例如 MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU")，或者将这些属性保留为空，以使用默认的解决方案配置。</target>
+          <target state-qualifier="leveraged-tm">MSB4126: Die angegebene Projektmappenkonfiguration "{0}" ist ungültig. Geben Sie mithilfe der Konfigurations- und Plattformeigenschaften eine gültige Projektmappenkonfiguration an (z. B. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU"), oder lassen Sie diese Eigenschaften leer, sodass die Standardprojektmappenkonfiguration verwendet wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="37" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1833,7 +1833,7 @@
         <target state="translated">MSB4046: 读取项目文件“{0}”时出错: {1}</target>
         <note>{StrBegin="MSB4046: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4046: 读取项目文件“{0}”时出错: {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4046: Fehler beim Lesen der Projektdatei "{0}": {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1842,7 +1842,7 @@
         <target state="translated">MSB4125: 项目文件名“{0}”无效。{1}</target>
         <note>{StrBegin="MSB4125: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4125: 项目文件名“{0}”无效。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4125: Der Projektdateiname "{0}" ist ungültig. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1851,7 +1851,7 @@
         <target state="translated">MSB4051: 项目 {0} 引用的是 GUID 为 {1} 的项目，但在 .SLN 文件中找不到具有此 GUID 的项目。</target>
         <note>{StrBegin="MSB4051: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4051: 项目 {0} 引用的是 GUID 为 {1} 的项目，但在 .SLN 文件中找不到具有此 GUID 的项目。</target>
+          <target state-qualifier="tm-suggestion">MSB4051: Das Projekt "{0}" verweist auf ein Projekt mit der GUID {1}, in der SLN-Datei wurde jedoch kein Projekt mit dieser GUID gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1860,7 +1860,7 @@
         <target state="translated">MSB4078: 项目文件“{0}”不受 MSBuild 支持，无法生成。</target>
         <note>{StrBegin="MSB4078: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4078: 项目文件“{0}”不受 MSBuild 支持，无法生成。</target>
+          <target state-qualifier="tm-suggestion">MSB4078: Die Projektdatei "{0}" wird nicht von MSBuild unterstützt und kann nicht erstellt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1869,7 +1869,7 @@
         <target state="translated">MSB4054: 必须在 Visual Studio IDE 中打开该解决方案文件，并将其转换为最新版本，然后才能使用 MSBuild 生成该解决方案文件。</target>
         <note>{StrBegin="MSB4054: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4054: 必须在 Visual Studio IDE 中打开该解决方案文件，并将其转换为最新版本，然后才能使用 MSBuild 生成该解决方案文件。</target>
+          <target state-qualifier="leveraged-tm">MSB4054: Die Projektmappendatei muss in der Visual Studio IDE geöffnet und in die neuste Version konvertiert werden, bevor sie mit MSBuild erstellt werden kann.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1878,7 +1878,7 @@
         <target state="translated">MSB4121: 在解决方案文件中没有为解决方案配置“{1}”指定项目“{0}”的项目配置。</target>
         <note>{StrBegin="MSB4121: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4121: 在解决方案文件中没有为解决方案配置“{1}”指定项目“{0}”的项目配置。</target>
+          <target state-qualifier="tm-suggestion">MSB4121: Die Projektkonfiguration für das Projekt "{0}" wurde nicht in der Projektmappendatei für die Projektmappenkonfiguration "{1}" angegeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1889,7 +1889,7 @@
       UE: This is not an error, so doesn't need an error code.
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">在解决方案配置“{1}”中未选定生成项目“{0}”。</target>
+          <target state-qualifier="tm-suggestion">Das Projekt "{0}" ist in der Projektmappenkonfiguration "{1}" nicht zum Erstellen ausgewählt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1898,7 +1898,7 @@
         <target state="translated">MSB4122: 扫描项目“{0}”的项目依赖项失败。{1}</target>
         <note>{StrBegin="MSB4122: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4122: 扫描项目“{0}”的项目依赖项失败。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4122: Fehler beim Überprüfen der Projektabhängigkeiten für Projekt "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1907,7 +1907,7 @@
         <target state="translated">MSB4149: 解决方案的工具版本“{0}”不支持使用其他工具版本生成项目。</target>
         <note>{StrBegin="MSB4149: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4149: 解决方案的工具版本“{0}”不支持使用其他工具版本生成项目。</target>
+          <target state-qualifier="tm-suggestion">MSB4149: Die Toolsversion {0} der Projektmappe unterstützt das Erstellen von Projekten mit unterschiedlichen Toolsversionen nicht.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1917,7 +1917,7 @@
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">Web 项目不支持“Clean”目标。 继续余下的项目...</target>
+          <target state-qualifier="tm-suggestion">Webprojekte unterstützen das Clean-Ziel nicht. Verbleibende Projekte werden fortgesetzt...</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1927,7 +1927,7 @@
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">Web 项目不支持“Publish”目标。 继续余下的项目...</target>
+          <target state-qualifier="tm-suggestion">Webprojekte unterstützen das Publish-Ziel nicht. Verbleibende Projekte werden fortgesetzt...</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1939,7 +1939,7 @@
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">跳过，因为"$(AspNetConfiguration)"此 web 项目不支持配置。 可以使用 AspNetConfiguration 属性来重写配置用于生成 web 项目，加上 /p:AspNetConfiguration = &lt; 值 &gt; 到命令行。当前 web 项目只支持调试和发布配置。</target>
+          <target state-qualifier="mt-suggestion">Da der "$(AspNetConfiguration)" Konfiguration für dieses Webprojekt nicht unterstützt.  Verwenden die AspNetConfiguration-Eigenschaft die Konfiguration zum Erstellen von Webprojekten hinzufügen/p: AspNetConfiguration überschreiben = &lt; Wert &gt; in der Befehlszeile. Aktuell unterstützen Webprojekte nur Debug- und Releasekonfigurationen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="44" adjWordcount="37.4" curWordcount="37.4"</note>
       </trans-unit>
@@ -1948,7 +1948,7 @@
         <target state="translated">MSB4076: VC 项目不支持“Publish”目标。</target>
         <note>{StrBegin="MSB4076: "}LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4076: VC 项目不支持“Publish”目标。</target>
+          <target state-qualifier="tm-suggestion">MSB4076: VC-Projekte unterstützen nicht das Publish-Ziel.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1957,7 +1957,7 @@
         <target state="translated">MSB4098: MSBuild 正在调用 VCBuild 以生成此项目。生成独立的 VC++ 项目时，命令行生成系统不支持 VC++ 项目(.VCPROJ)与 C#/VB/VJ# 项目(.CSPROJ、.VBPROJ、.VJSPROJ)之间的项目到项目的引用，因此无法生成包含这种项目到项目的引用的项目。请生成包含此项目的解决方案文件。</target>
         <note>{StrBegin="MSB4098: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4098: MSBuild 正在调用 VCBuild 以生成此项目。生成独立的 VC++ 项目时，命令行生成系统不支持 VC++ 项目(.VCPROJ)与 C#/VB/VJ# 项目(.CSPROJ、.VBPROJ、.VJSPROJ)之间的项目到项目的引用，因此无法生成包含这种项目到项目的引用的项目。请生成包含此项目的解决方案文件。</target>
+          <target state-qualifier="leveraged-tm">MSB4098: MSBuild ruft zum Erstellen dieses Projekts VCBuild auf. Interprojektverweise zwischen VC++-Projekten (.VCPROJ) und C#-/VB-/VJ#-Projekten (.CSPROJ, .VBPROJ, .VJSPROJ) werden beim Erstellen eigenständiger VC++-Projekte von den Befehlszeilen-Buildsystemen nicht unterstützt. Projekte, die solche Interprojektverweise enthalten, werden nicht erstellt. Erstellen Sie stattdessen die Projektmappendatei, die dieses Projekt enthält.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="53" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1966,7 +1966,7 @@
         <target state="translated">MSB4056: 必须对单线程单元调用 MSBuild 引擎。当前线程模型为“{0}”。将继续，但某些任务可能无法正常工作。</target>
         <note>{StrBegin="MSB4056: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4056: 必须对单线程单元调用 MSBuild 引擎。当前线程模型为“{0}”。将继续，但某些任务可能无法正常工作。</target>
+          <target state-qualifier="tm-suggestion">MSB4056: Das MSBuild-Modul muss in einem Singlethread-Apartment aufgerufen werden. Das aktuelle Threadmodell ist {0}. Der Vorgang wird fortgesetzt, aber einige Aufgaben werden möglicherweise nicht ordnungsgemäß ausgeführt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1978,7 +1978,7 @@
     "MSBUILD : Schema validation error MSB0000: This is an error."
     LOCALIZATION: This fragment needs to be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">架构验证</target>
+          <target state-qualifier="tm-suggestion">Schemavalidierung</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1987,7 +1987,7 @@
         <target state="translated">已跳过目标“{0}”。以前的生成不成功。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已跳过目标“{0}”。以前的生成不成功。</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wurde übersprungen. Die vorherige Erstellung war nicht erfolgreich.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1996,7 +1996,7 @@
         <target state="translated">已跳过目标“{0}”。以前的生成已成功。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已跳过目标“{0}”。以前的生成已成功。</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wurde übersprungen. Die vorherige Erstellung war erfolgreich.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2005,7 +2005,7 @@
         <target state="translated">MSB4116: 目标“{0}”上的条件“{1}”有一个对项元数据的引用。除非对项元数据的引用是项转换的一部分，否则不允许在目标条件中进行这种引用。</target>
         <note>{StrBegin="MSB4116: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4116: 目标“{0}”上的条件“{1}”有一个对项元数据的引用。除非对项元数据的引用是项转换的一部分，否则不允许在目标条件中进行这种引用。</target>
+          <target state-qualifier="leveraged-tm">MSB4116: Die Bedingung "{1}" des {0}-Ziels enthält einen Verweis auf Elementmetadaten. Verweise auf Elementmetadaten sind in Zielbedingungen nicht zulässig, es sei denn, sie sind Teil einer Elementtransformation.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="32" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2014,7 +2014,7 @@
         <target state="translated">MSB4057: 该项目中不存在目标“{0}”。</target>
         <note>{StrBegin="MSB4057: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4057: 该项目中不存在目标“{0}”。</target>
+          <target state-qualifier="tm-suggestion">MSB4057: Das Ziel "{0}" ist im Projekt nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2023,7 +2023,7 @@
         <target state="translated">已完成在项目“{1}”中生成目标“{0}”的操作 - 失败。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成在项目“{1}”中生成目标“{0}”的操作 - 失败。</target>
+          <target state-qualifier="tm-suggestion">Erstellen des {0}-Ziels in Projekt {1} beendet - Fehler beim Erstellen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -2032,7 +2032,7 @@
         <target state="translated">已完成在项目“{1}”中生成目标“{0}”的操作。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成在项目“{1}”中生成目标“{0}”的操作。</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung des Ziels "{0}" im Projekt "{1}" ist abgeschlossen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2041,7 +2041,7 @@
         <target state="translated">{0}: (目标 ID: {1})</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0}: (目标 ID: {1})</target>
+          <target state-qualifier="tm-suggestion">{0}: (Ziel-ID:{1})</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2050,7 +2050,7 @@
         <target state="translated">MSB4058: 目标“{0}”缺少输出规范。如果目标声明输入，也必须声明输出。</target>
         <note>{StrBegin="MSB4058: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4058: 目标“{0}”缺少输出规范。如果目标声明输入，也必须声明输出。</target>
+          <target state-qualifier="tm-suggestion">MSB4058: Das {0}-Ziel enthält keine Ausgabespezifikation. Wenn ein Ziel Eingaben deklariert, muss es auch Ausgaben deklarieren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2059,7 +2059,7 @@
         <target state="translated">MSB4168: 类型“{1}”的项“{0}”没有定义表达式“{2}”中元数据的值。该表达式用在目标“{3}”的目标输出中。如果目标声明的输出是转换，则转换中的所有项都必须具有转换中的元数据值。</target>
         <note>{StrBegin="MSB4168: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4168: 类型“{1}”的项“{0}”没有定义表达式“{2}”中元数据的值。该表达式用在目标“{3}”的目标输出中。如果目标声明的输出是转换，则转换中的所有项都必须具有转换中的元数据值。</target>
+          <target state-qualifier="leveraged-tm">MSB4168: Das Element "{0}" vom Typ "{1}" definiert keinen Wert für die Metadaten im Ausdruck "{2}". Dieser Ausdruck wird in der Zielausgabe für "{3}" verwendet. Wenn ein Ziel Ausgaben deklariert, bei denen es sich um Transformationen handelt, müssen alle Elemente in der Transformation einen Wert für die in der Transformation enthaltenen Metadaten aufweisen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="53" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2068,7 +2068,7 @@
         <target state="translated">目标性能摘要:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">目标性能摘要:</target>
+          <target state-qualifier="tm-suggestion">Leistungszusammenfassung für das Ziel:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2077,7 +2077,7 @@
         <target state="translated">由于条件的计算结果为 false，已跳过目标“{0}”；({1})的计算结果为({2})。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">由于条件的计算结果为 false，已跳过目标“{0}”；({1})的计算结果为({2})。</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wurde übersprungen, da die Bedingung "false" war . ({1}) wurde als ({2}) ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2086,7 +2086,7 @@
         <target state="translated">目标“{0}”在项目“{1}”中</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">目标“{0}”在项目“{1}”中</target>
+          <target state-qualifier="tm-suggestion">{0}-Ziel in {1}-Projekt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2095,7 +2095,7 @@
         <target state="translated">目标 {0}:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">目标 {0}:</target>
+          <target state-qualifier="tm-suggestion">Ziel "{0}":</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2104,7 +2104,7 @@
         <target state="translated">文件“{1}”中的目标“{0}”:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">文件“{1}”中的目标“{0}”:</target>
+          <target state-qualifier="tm-suggestion">Ziel "{0}" in Datei "{1}":</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2113,7 +2113,7 @@
         <target state="translated">继续生成，因为任务“{1}”的“{0}”设置为“{2}”。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">继续生成，因为任务“{1}”的“{0}”设置为“{2}”。</target>
+          <target state-qualifier="tm-suggestion">Der Buildvorgang wird fortgesetzt, da {0} in der {1}-Aufgabe auf "{2}" festgelegt ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2122,7 +2122,7 @@
         <target state="translated">项目“{1}”中的目标 {0}:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{1}”中的目标 {0}:</target>
+          <target state-qualifier="tm-suggestion">Ziel "{0}" aus Projekt "{1}":</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2131,7 +2131,7 @@
         <target state="translated">项目“{2}”的文件“{1}”中的目标“{0}”:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{2}”的文件“{1}”中的目标“{0}”:</target>
+          <target state-qualifier="tm-suggestion">Ziel "{0}" in Datei "{1}" aus Projekt "{2}":</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -2140,7 +2140,7 @@
         <target state="translated">MSB4060: “{0}”任务的声明或使用不正确，或在构造过程中失败。请检查任务名称和程序集名称的拼写是否正确。</target>
         <note>{StrBegin="MSB4060: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4060: “{0}”任务的声明或使用不正确，或在构造过程中失败。请检查任务名称和程序集名称的拼写是否正确。</target>
+          <target state-qualifier="leveraged-tm">MSB4060: Die {0}-Aufgabe wurde falsch deklariert, falsch verwendet oder konnte bei der Erstellung nicht ausgeführt werden. Überprüfen Sie die Schreibweise des Aufgaben- und des Assemblynamens.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2149,7 +2149,7 @@
         <target state="translated">MSB4077: “{0}”任务已标记为 LoadInSeparateAppDomain 特性，但未派生自 MarshalByRefObject。请检查该任务是派生自 MarshalByRefObject 还是 AppDomainIsolatedTask。</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4077: “{0}”任务已标记为 LoadInSeparateAppDomain 特性，但未派生自 MarshalByRefObject。请检查该任务是派生自 MarshalByRefObject 还是 AppDomainIsolatedTask。</target>
+          <target state-qualifier="leveraged-tm">MSB4077: Die Aufgabe "{0}" wurde mit dem LoadInSeparateAppDomain-Attribut markiert, ist jedoch nicht von MarshalByRefObject abgeleitet. Stellen Sie sicher, dass die Aufgabe von MarshalByRefObject oder AppDomainIsolatedTask abgeleitet wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2158,7 +2158,7 @@
         <target state="translated">已完成执行任务“{0}”的操作 - 失败。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成执行任务 "{0}" - 失败。</target>
+          <target state-qualifier="tm-suggestion">Die Ausführung von Task "{0}" wurde beendet – FEHLER.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2167,7 +2167,7 @@
         <target state="translated">已完成执行任务“{0}”的操作。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已完成执行任务 "{0}"。</target>
+          <target state-qualifier="tm-suggestion">Die Ausführung von Task "{0}" wurde beendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -2176,7 +2176,7 @@
         <target state="translated">{0} (任务 ID: {1})</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0} (任务 ID: {1})</target>
+          <target state-qualifier="tm-suggestion">{0} (Aufgaben-ID: {1})</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2185,7 +2185,7 @@
         <target state="translated">正在使用程序集“{1}”中的“{0}”任务。</target>
         <note>UE: This informational message helps users determine which assemblies their tasks were loaded from.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在使用程序集“{1}”中的“{0}”任务。</target>
+          <target state-qualifier="tm-suggestion">Die {0}-Aufgabe aus der {1}-Assembly wird verwendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2194,7 +2194,7 @@
         <target state="translated">MSB4061: 未能从程序集“{1}”中实例化“{0}”任务。{2}</target>
         <note>{StrBegin="MSB4061: "}LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4061: 未能从程序集“{1}”中实例化“{0}”任务。{2}</target>
+          <target state-qualifier="tm-suggestion">MSB4061: Die {0}-Aufgabe konnte nicht aus der {1}-Assembly instanziiert werden. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2204,7 +2204,7 @@
         <note>{StrBegin="MSB4127: "}UE: This message is a specialized version of the TaskInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4127: 未能从程序集“{1}”实例化“{0}”任务。请确认任务程序集是使用与计算机上所安装版本相同的 Microsoft.Build.Framework 程序集版本生成的，并且宿主应用程序不缺少对 Microsoft.Build.Framework 的绑定重定向。{2}</target>
+          <target state-qualifier="leveraged-tm">MSB4127: Die "{0}"-Aufgabe konnte nicht aus der "{1}"-Assembly instanziiert werden. Überprüfen Sie, ob die Aufgabenassembly mit der gleichen Version der Microsoft.Build.Framework-Assembly erstellt wurde, die auf Ihrem Computer installiert ist, und dass Ihrer Hostanwendung kein BindingRedirect-Eintrag für Microsoft.Build.Framework fehlt. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="49" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2215,7 +2215,7 @@
     invalid task declaration, disk error, etc. "{2}" contains a message explaining what happened.
     LOCALIZATION: "{2}" is a message from the CLR loader and is already localized. Also, &lt;UsingTask&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4062:"{0}"无法从程序集加载任务{1}。{2}确认 &lt; UsingTask &gt; 声明是正确的而且该程序集及其所有依赖项都可用。</target>
+          <target state-qualifier="mt-suggestion">MSB4062: Die "{0}" Vorgang konnte nicht aus der Assembly geladen werden {1}. {2} Bestätigen &lt; UsingTask &gt; Erklärung richtig ist und die Assembly und die zugehörigen Dateien verfügbar sind.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="31" adjWordcount="26.35" curWordcount="26.35"</note>
       </trans-unit>
@@ -2224,7 +2224,7 @@
         <target state="translated">MSB4063: 未能使用“{0}”任务的输入参数初始化该任务。{1}</target>
         <note>{StrBegin="MSB4063: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4063: 未能使用“{0}”任务的输入参数初始化该任务。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4063: Die "{0}"-Aufgabe konnte nicht mit ihren Eingabeparametern initialisiert werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2233,7 +2233,7 @@
         <target state="translated">任务性能摘要:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">任务性能摘要:</target>
+          <target state-qualifier="tm-suggestion">Leistungszusammenfassung für die Aufgabe:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2242,7 +2242,7 @@
         <target state="translated">由于 false 条件，已跳过任务“{0}”；({1})计算为({2})。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">由于 false 条件，已跳过任务“{0}”；({1})计算为({2})。</target>
+          <target state-qualifier="tm-suggestion">Die {0}-Aufgabe wurde übersprungen, da die Bedingung "false" war . ({1}) wurde als ({2}) ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2251,7 +2251,7 @@
         <target state="translated">任务“{0}”</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">任务 "{0}"</target>
+          <target state-qualifier="tm-suggestion">Task "{0}"</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2260,7 +2260,7 @@
         <target state="translated">已用时间 {0}</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">已用时间 {0}</target>
+          <target state-qualifier="tm-suggestion">Verstrichene Zeit {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2269,7 +2269,7 @@
         <target state="translated">正在使用工具版本“{0}”进行生成。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">正在使用工具版本“{0}”进行生成。</target>
+          <target state-qualifier="tm-suggestion">Erstellung mit der Toolsversion "{0}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2278,7 +2278,7 @@
         <target state="translated">项目文件包含 ToolsVersion="{0}" 设置，但此工具集未知或缺失。您可以通过为此工具集安装相应的 .NET Framework 来解决此问题。将项目视为具有 ToolsVersion="4.0" 设置。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">项目文件包含 ToolsVersion="{0}" 设置，但此工具集未知或缺失。您可以通过为此工具集安装相应的 .NET Framework 来解决此问题。将项目视为具有 ToolsVersion="4.0" 设置。</target>
+          <target state-qualifier="leveraged-tm">Die Projektdatei enthält ToolsVersion="{0}". Dieses Toolset ist nicht bekannt oder nicht vorhanden. Sie können das Problem möglicherweise beheben, indem Sie das entsprechende .NET Framework für dieses Toolset installieren. Das Projekt wird behandelt als enthielte es ToolsVersion="4.0".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="34" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2287,7 +2287,7 @@
         <target state="translated">延迟消息</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">延迟消息</target>
+          <target state-qualifier="tm-suggestion">Zurückgestellte Meldungen</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2296,7 +2296,7 @@
         <target state="translated">某些消息未显示，因为它们未与任何 ProjectStarted 事件关联。请在诊断详细信息中查看这些消息。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">某些消息未显示，因为它们未与任何 ProjectStarted 事件关联。请在诊断详细信息中查看这些消息。</target>
+          <target state-qualifier="tm-suggestion">Einige Meldungen wurden nicht angezeigt, weil sie keinem ProjectStarted-Ereignis zugeordnet sind. Verwenden Sie den Ausführlichkeitsgrad "diagnostic", um diese Meldungen anzuzeigen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2305,7 +2305,7 @@
         <target state="translated">MSB4090: 在条件“{0}”中的位置 {1} 处发现意外字符“{2}”。</target>
         <note>{StrBegin="MSB4090: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4090: 在条件“{0}”中的位置 {1} 处发现意外字符“{2}”。</target>
+          <target state-qualifier="tm-suggestion">MSB4090: Das unerwartete Zeichen {2} wurde an Position {1} in der {0}-Bedingung gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2314,7 +2314,7 @@
         <target state="translated">MSB4091: 在条件“{0}”中发现对未定义函数“{1}”的调用。</target>
         <note>{StrBegin="MSB4091: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4091: 在条件“{0}”中发现对未定义函数“{1}”的调用。</target>
+          <target state-qualifier="tm-suggestion">MSB4091: Aufruf zu einer undefinierten Funktion "{1}" in Bedingung "{0}" gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2323,7 +2323,7 @@
         <target state="translated">MSB4064: “{1}”任务不支持“{0}”参数。请确认该参数存在于此任务中，并且是可设置的公共实例属性。</target>
         <note>{StrBegin="MSB4064: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4064: “{1}”任务不支持“{0}”参数。请确认该参数存在于此任务中，并且是可设置的公共实例属性。</target>
+          <target state-qualifier="leveraged-tm">MSB4064: Der {0}-Parameter wird von der {1}-Aufgabe nicht unterstützt. Vergewissern Sie sich, dass der Parameter in der Aufgabe vorhanden ist und es sich um eine festlegbare öffentliche Instanzeigenschaft handelt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2332,7 +2332,7 @@
         <target state="translated">MSB4131: “{1}”任务不支持“{0}”参数。请确认该参数存在于此任务中，并且是可获得的公共实例属性。</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4131: “{1}”任务不支持“{0}”参数。请确认该参数存在于此任务中，并且是可获取的公共实例属性。</target>
+          <target state-qualifier="leveraged-tm">MSB4131: Der {0}-Parameter wird von der {1}-Aufgabe nicht unterstützt. Vergewissern Sie sich, dass der Parameter in der Aufgabe vorhanden ist und es sich um eine abrufbare öffentliche Instanzeigenschaft handelt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2341,7 +2341,7 @@
         <target state="translated">MSB4092: 在条件“{0}”中的字符位置 {2} 处发现意外标记“{1}”。</target>
         <note>{StrBegin="MSB4092: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4092: 在条件“{0}”中的字符位置 {2} 处发现意外标记“{1}”。</target>
+          <target state-qualifier="tm-suggestion">MSB4092: Ein unerwartetes Token "{1}" wurde an Zeichenposition "{2}" in Bedingung "{0}" gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2350,7 +2350,7 @@
         <target state="translated">MSB4065: 任务“{1}”未将“{0}”参数标记为输出。</target>
         <note>{StrBegin="MSB4065: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4065: 任务“{1}”未将“{0}”参数标记为输出。</target>
+          <target state-qualifier="tm-suggestion">MSB4065: Der {0}-Parameter ist nicht für die Ausgabe durch die {1}-Aufgabe markiert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2359,7 +2359,7 @@
         <target state="translated">MSB4066: 无法识别元素 &lt;{1}&gt; 中的特性“{0}”。</target>
         <note>{StrBegin="MSB4066: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4066︰ 该属性"{0}"元素中 &lt;{1}&gt; 无法识别。</target>
+          <target state-qualifier="mt-suggestion">MSB4066: Das Attribut "{0}" im Element &lt;{1}&gt; wurde nicht erkannt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="10" adjWordcount="8.5" curWordcount="8.5"</note>
       </trans-unit>
@@ -2368,7 +2368,7 @@
         <target state="translated">MSB4067: 无法识别元素 &lt;{1}&gt; 下面的元素 &lt;{0}&gt;。</target>
         <note>{StrBegin="MSB4067: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4067︰ 该元素 &lt;{0}&gt; 下的元素 &lt;{1}&gt; 无法识别。</target>
+          <target state-qualifier="mt-suggestion">MSB4067: Das Element &lt;{0}&gt; unter Element &lt;{1}&gt; wurde nicht erkannt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -2377,7 +2377,7 @@
         <target state="translated">MSB4068: 无法识别元素 &lt;{0}&gt;，或者在此上下文中不支持该元素。</target>
         <note>{StrBegin="MSB4068: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4068︰ 该元素 &lt;{0}&gt; 不可识别，或在此上下文中不支持。</target>
+          <target state-qualifier="mt-suggestion">MSB4068: Das Element &lt;{0}&gt; ist unbekannt oder in diesem Kontext nicht unterstützt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="13" adjWordcount="11.05" curWordcount="11.05"</note>
       </trans-unit>
@@ -2386,7 +2386,7 @@
         <target state="translated">MSB4132: 无法识别工具版本“{0}”。</target>
         <note>{StrBegin="MSB4132: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4132: 无法识别工具版本“{0}”。</target>
+          <target state-qualifier="tm-suggestion">MSB4132: Die Toolsversion "{0}" ist unbekannt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2395,7 +2395,7 @@
         <target state="translated">MSB4069: MSBuild 不支持“{2}”任务的“{1}”参数的“{0}”类型。</target>
         <note>{StrBegin="MSB4069: "}LOCALIZATION: "MSBuild" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4069: MSBuild 不支持“{2}”任务的“{1}”参数的“{0}”类型。</target>
+          <target state-qualifier="tm-suggestion">MSB4069: Der {0}-Typ des {1}-Parameters der {2}-Aufgabe wird von MSBuild nicht unterstützt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2404,7 +2404,7 @@
         <target state="translated">MSB4072: &lt;{0}&gt; 元素必须包含“{1}”特性或“{2}”特性(但不能同时包含二者)。</target>
         <note>{StrBegin="MSB4072: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4072︰ 一个 &lt;{0}&gt; 元素必须包含"{1}"属性或"{2}"属性 （但不是能同时）。</target>
+          <target state-qualifier="mt-suggestion">MSB4072: Ein &lt;{0}&gt;-Element muss entweder die "{1}" Attribut oder "{2}" Attribut (jedoch nicht beide).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="18" adjWordcount="15.3" curWordcount="15.3"</note>
       </trans-unit>
@@ -2413,7 +2413,7 @@
         <target state="translated">{0} 个警告</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0} 个警告</target>
+          <target state-qualifier="tm-suggestion">{0} Warnung(en)</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2422,7 +2422,7 @@
         <target state="translated">MSB4084: 在 &lt;Choose&gt; 中 &lt;When&gt; 元素不能跟在 &lt;Otherwise&gt; 元素之后。</target>
         <note>{StrBegin="MSB4084: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4084︰ 一个 &lt; 当 &gt; 元素可能不符合在 &lt; 选择 &gt; &lt; 否则为 &gt; 元素。</target>
+          <target state-qualifier="mt-suggestion">MSB4084: A &lt; &gt;-Element kein Element &lt; Otherwise &gt; &lt; auswählen &gt; folgen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="16" adjWordcount="13.6" curWordcount="13.6"</note>
       </trans-unit>
@@ -2431,7 +2431,7 @@
         <target state="translated">目标名:“{0}”项目名:“{1}”</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">目标名:“{0}”项目名:“{1}”</target>
+          <target state-qualifier="tm-suggestion">Zielname: "{0}" Projektname: "{1}"</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2440,7 +2440,7 @@
         <target state="translated">循环跟踪:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">循环跟踪:</target>
+          <target state-qualifier="tm-suggestion">Schleifenablaufverfolgung:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2449,7 +2449,7 @@
         <target state="translated">MSB4150: 在使用 ApplyParameter 之前，必须使用 initialize 方法来初始化控制台记录器</target>
         <note>{StrBegin="MSB4150: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4150: 在使用 ApplyParameter 之前，必须使用 initialize 方法来初始化控制台记录器</target>
+          <target state-qualifier="tm-suggestion">MSB4150: Die Konsolenprotokollierung muss vor der Verwendung von ApplyParameter mithilfe der Initialisierungsmethode initialisiert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2458,7 +2458,7 @@
         <target state="translated">MSB4151: 生成项目“{0}”(目标“{1}”)时出错。有关详细信息，请参阅 innerException。</target>
         <note>{StrBegin="MSB4151: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4151: 生成项目“{0}”(目标“{1}”)时出错。有关详细信息，请参阅 innerException。</target>
+          <target state-qualifier="tm-suggestion">MSB4151: Fehler beim Erstellen von Projekt "{0}", Ziel "{1}". Ausführliche Informationen finden Sie in der innerException.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -2467,7 +2467,7 @@
         <target state="translated">MSB4152: 子节点“{0}”上出错，未能传递到父节点。{1}</target>
         <note>{StrBegin="MSB4152: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4152: 子节点“{0}”上出错，未能传递到父节点。{1}</target>
+          <target state-qualifier="tm-suggestion">MSB4152: Fehler im untergeordneten Knoten "{0}", der nicht an den übergeordneten Knoten übergeben werden konnte. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2476,7 +2476,7 @@
         <target state="translated">MSB4153: 调用了对应于已完成执行的任务的不活动 IBuildEngine 接口。</target>
         <note>{StrBegin="MSB4153: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4153: 调用了对应于已完成执行的任务的不活动 IBuildEngine 接口。</target>
+          <target state-qualifier="tm-suggestion">MSB4153: Eine inaktive IBuildEngine-Schnittstelle wird aufgerufen, der eine Aufgabe entspricht, deren Ausführung bereits abgeschlossen wurde.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2485,7 +2485,7 @@
         <target state="translated">MSB4154: 转发记录器正在尝试转发 BuildFinished 事件</target>
         <note>{StrBegin="MSB4154: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4154: 转发记录器正在尝试转发 BuildFinished 事件</target>
+          <target state-qualifier="tm-suggestion">MSB4154: Eine weiterleitende Protokollierung versucht, das BuildFinished-Ereignis weiterzuleiten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2494,7 +2494,7 @@
         <target state="translated">MSB4155: 与节点通信时出错。</target>
         <note>{StrBegin="MSB4155: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4155: 与节点通信时出错。</target>
+          <target state-qualifier="tm-suggestion">MSB4155: Fehler bei der Kommunikation mit einem Knoten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2503,7 +2503,7 @@
         <target state="translated">MSB1021: 无法创建记录器的实例 - {0}。</target>
         <note>{StrBegin="MSB1021: "}The error code for this message is duplicated from MSBuild.exe. </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB1021: 无法创建记录器的实例 - {0}。</target>
+          <target state-qualifier="tm-suggestion">MSB1021: Eine Instanz der Protokollierung kann nicht erstellt werden - {0}.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2512,7 +2512,7 @@
         <target state="translated">MSB1020: 找不到记录器 {0}。请检查以下各项: 1.) 指定的记录器名称与记录器类的名称相同。2.) 记录器类为“公共的”并且实现 Microsoft.Build.Framework.ILogger 接口。3.) 记录器程序集的路径正确无误，或者只能使用提供的程序集名称来加载记录器。</target>
         <note>{StrBegin="MSB1020: "}The error code for this message is duplicated from MSBuild.exe.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB1020: 找不到记录器 {0}。请检查以下各项: 1.) 指定的记录器名称与记录器类的名称相同。2.) 记录器类为“公共的”并且实现 Microsoft.Build.Framework.ILogger 接口。3.) 记录器程序集的路径正确无误，或者只能使用提供的程序集名称来加载记录器。</target>
+          <target state-qualifier="leveraged-tm">MSB1020: Die Protokollierung {0} wurde nicht gefunden. Überprüfen Sie Folgendes: 1.) Der angegebene Name der Protokollierung ist mit dem Namen der Protokollierungsklasse identisch. 2.) Die Protokollierungsklasse ist "public" und implementiert die Microsoft.Build.Framework.ILogger-Schnittstelle. 3.) Der Pfad zur Protokollierungsassembly ist richtig, bzw. die Protokollierung kann alleine mithilfe des angegebenen Assemblynamens geladen werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="57" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2521,7 +2521,7 @@
         <target state="translated">MSB4156: 转发记录器正在尝试转发 BuildStarted 事件</target>
         <note>{StrBegin="MSB4156: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4156: 转发记录器正在尝试转发 BuildStarted 事件</target>
+          <target state-qualifier="tm-suggestion">MSB4156: Eine weiterleitende Protokollierung versucht, das BuildStarted-Ereignis weiterzuleiten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2539,7 +2539,7 @@
         <target state="translated">“{0}”(默认目标) ({1}) -&gt;</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">"{0}"（默认目标） ({1})-&gt;</target>
+          <target state-qualifier="mt-suggestion">"{0}" (Standardziel) ({1}) -&gt;</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="5" adjWordcount="4.25" curWordcount="4.25"</note>
       </trans-unit>
@@ -2548,7 +2548,7 @@
         <target state="translated">{0} {1,5}</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">{0} {1.5}</target>
+          <target state-qualifier="mt-suggestion">{0} {1,5}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="2" adjWordcount="1.7" curWordcount="1.7"</note>
       </trans-unit>
@@ -2557,7 +2557,7 @@
         <target state="translated">项目“{0}”在节点 {1} 上({2} 个目标)。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{0}”在节点 {1} 上({2} 个目标)。</target>
+          <target state-qualifier="tm-suggestion">Projekt "{0}" auf Knoten "{1}", {2} Ziel(e).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2566,7 +2566,7 @@
         <target state="translated">节点 {1} 上的项目“{0}”(默认目标)。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">节点 {1} 上的项目“{0}”(默认目标)。</target>
+          <target state-qualifier="tm-suggestion">Projekt "{0}" auf Knoten "{1}" (Standardziele).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2575,7 +2575,7 @@
         <target state="translated">项目“{0}”({1})正在节点 {4} 上生成“{2}”({3}) ({5} 个目标)。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{0}”({1})正在节点 {4} 上生成“{2}”({3}) ({5} 个目标)。</target>
+          <target state-qualifier="tm-suggestion">Das Projekt "{0}" ({1}) erstellt "{2}" ({3}) auf Knoten "{4}", {5} Ziel(e).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2584,7 +2584,7 @@
         <target state="translated">项目“{0}”({1})正在节点 {4} 上生成“{2}”({3}) (默认目标)。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">项目“{0}”({1})正在节点 {4} 上生成“{2}”({3}) (默认目标)。</target>
+          <target state-qualifier="tm-suggestion">Das Projekt "{0}" ({1}) erstellt "{2}" ({3}) auf Knoten "{4}" (Standardziele).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2593,7 +2593,7 @@
         <target state="translated">({0} 目标) -&gt; </target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">({0}目标)-&gt;</target>
+          <target state-qualifier="mt-suggestion">({0} Ziel) -&gt;</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="3" adjWordcount="2.55" curWordcount="2.55"</note>
       </trans-unit>
@@ -2602,7 +2602,7 @@
         <target state="translated">MSB4157: 项目文件的数组至少需要包含一个值。 </target>
         <note>{StrBegin="MSB4157: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4157︰ 项目文件的数组必须包含至少一个值。</target>
+          <target state-qualifier="mt-suggestion">MSB4157: Das Array der Projektdateien muss mindestens einen Wert enthalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="13" adjWordcount="11.05" curWordcount="11.05"</note>
       </trans-unit>
@@ -2611,7 +2611,7 @@
         <target state="translated">MSB4158: 元素 {0} 处的项目文件名为空。</target>
         <note>{StrBegin="MSB4158: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4158: 元素 {0} 处的项目文件名为空。</target>
+          <target state-qualifier="tm-suggestion">MSB4158: Der Projektdateiname bei Element {0} ist leer.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2620,7 +2620,7 @@
         <target state="translated">值为“{1}”的属性“{0}”被另一个 Batch 重写。该属性现在为:“{2}”</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">值为“{1}”的属性“{0}”被另一个 Batch 重写。该属性现在为:“{2}”</target>
+          <target state-qualifier="tm-suggestion">Die Eigenschaft "{0}" mit dem Wert "{1}" wird von einem anderen Batch überschrieben. Die Eigenschaft ist jetzt: "{2}"</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2629,7 +2629,7 @@
         <target state="translated">有关错误信息，请参阅内部异常。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">有关错误信息，请参阅内部异常。</target>
+          <target state-qualifier="tm-suggestion">Fehlerinformationen finden Sie in der internen Ausnahme.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2638,7 +2638,7 @@
         <target state="translated">事件类型“{0}”应是可序列化的。该事件不可序列化，已被忽略。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">事件类型“{0}”应是可序列化的。该事件不可序列化，已被忽略。</target>
+          <target state-qualifier="tm-suggestion">Es wurde erwartet, dass der Typ "{0}" serialisierbar ist. Das Ereignis war nicht serialisierbar und wurde ignoriert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2647,7 +2647,7 @@
         <target state="translated">日志文件路径不能为 null 或为空。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">日志文件路径不能为 null 或为空。</target>
+          <target state-qualifier="tm-suggestion">Der Protokolldateipfad darf nicht NULL oder leer sein.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2656,7 +2656,7 @@
         <target state="translated">MSB4161: 在当前生成过程中加载和卸载了项目“{0}”。在生成过程中重新加载项目可能会导致错误或生成状态不一致。请避免卸载项目“{0}”，或在卸载项目之前将目标“{1}”的求值结果存入缓存。</target>
         <note>{StrBegin="MSB4161: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4161: 在当前生成过程中加载和卸载了项目“{0}”。在生成过程中重新加载项目可能会导致错误或生成状态不一致。请避免卸载项目“{0}”，或在卸载项目之前将目标“{1}”的求值结果存入缓存。</target>
+          <target state-qualifier="leveraged-tm">MSB4161: Das Projekt "{0}" wurde während der aktuellen Erstellung geladen und entladen. Das erneute Laden eines Projekts während der Erstellung kann zu Fehlern oder einem nicht konsistenten Buildzustand führen. Vermeiden Sie entweder das Entladen des Projekts "{0}", oder speichern Sie die Auswertungsergebnisse der Ziele "{1}" vor dem Entladen des Projekts im Cache.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="43" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2665,7 +2665,7 @@
         <target state="translated">[默认值]</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">[默认值]</target>
+          <target state-qualifier="tm-suggestion">[Standard]</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="1" adjWordcount="0.25" curWordcount="0.25" tmLabel="N''"</note>
       </trans-unit>

@@ -253,7 +253,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      osobno.
 
                      Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie
-                     używane z następujących lokalizacji:
+                     wykorzystywane z następujących lokalizacji: 
                      (1) katalog programu msbuild.exe
                      (2) katalog pierwszej kompilacji projektu lub rozwiązania
 </target>
@@ -289,9 +289,9 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;elementy docelowe&gt;  Kompiluje podane elementy docelowe w tym projekcie. Przy użyciu średnika lub przecinka można
-                     rozdzielić wiele elementów docelowych, można również
-                     określić każdy z nich osobno. (Krótka wersja: -t)
+        <target state="translated">  -target:&lt;elementy docelowe&gt;  Kompiluje podane elementy docelowe w tym projekcie.
+                     Przy użyciu średnika lub przecinka można rozdzielić wiele elementów docelowych,
+                      można również określić każdy z nich osobno. (Krótka wersja: -t)
                      Przykład:
                        -target:Resources;Compile
 </target>
@@ -312,10 +312,10 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Ustawia lub przesłania podane właściwości na poziomie
-                     projektu. &lt;n&gt; jest nazwą właściwości, a &lt;w&gt; jest jej wartością. Przy użyciu średnika lub przecinka można
-                     rozdzielać wiele właściwości, można również określić każdą
-                     właściwość osobno. (Krótka wersja: -p)
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Ustawia lub przesłania podane właściwości na poziomie projektu.
+                     &lt;n&gt; jest nazwą właściwości, a &lt;v&gt; jest jej wartością. Przy użyciu średnika
+                      lub przecinka można rozdzielać wiele właściwości,
+                      można również określić każdą właściwość osobno. (Krótka wersja: -p)
                      Przykład:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
@@ -343,16 +343,20 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania zdarzeń pochodzących z programu MSBuild. Aby określić
+        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania
+                         zdarzeń pochodzących z programu MSBuild. Aby określić
                      wiele rejestratorów, określ każdy z nich osobno.
                      Składnia elementu &lt;rejestrator&gt;:
-                       [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;[;&lt;parametry rejestratora&gt;]
+                        [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;
+                        [;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
-                       &lt;częściowa lub pełna przestrzeń nazw&gt;.]&lt;nazwa klasy rejestratora&gt;
+                        &lt;częściowa lub pełna przestrzeń nazw&gt;.]
+                        &lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                       {&lt;nazwa zestawu&gt;[,&lt;silna nazwa&gt;] | &lt;plik zestawu&gt;}
+                        {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
-                     przekazywane do rejestratora dokładnie tak, jak zostały wpisane. (Krótka wersja: -l)
+                     przekazywane do rejestratora dokładnie tak, jak zostały
+                     wpisane. (Krótka wersja: -l)
                      Przykłady:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -375,7 +379,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
 </source>
         <target state="translated">  -verbosity:&lt;poziom&gt; Wyświetla podaną ilość informacji w dzienniku zdarzeń.
                      Dostępne poziomy szczegółowości: q[uiet], m[inimal],
-                     n[ormal], d[etailed] i diag[nostic]. (Krótka wersja: -v)
+                     n[ormal], d[etailed] i diag[nostic]. (Krótka wersja: /v)
                      Przykład:
                        -verbosity:quiet
 </target>
@@ -428,33 +432,35 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      Parametry rejestratora konsoli. (Krótka wersja: -clp)
                      Dostępne parametry:
                         PerformanceSummary — pokazuje czas spędzony
-                            na zadaniach, elementach docelowych i projektach.
+                        na zadaniach, elementach docelowych i projektach.
                         Summary — pokazuje na końcu podsumowanie błędów i ostrzeżeń.
                         NoSummary — nie pokazuje na końcu podsumowania błędów
-                            i ostrzeżeń.
+                        i ostrzeżeń.
                         ErrorsOnly — pokazuje tylko błędy.
                         WarningsOnly — pokazuje tylko ostrzeżenia.
                         NoItemAndPropertyList — nie pokazuje listy elementów
-                            i właściwości na początku każdej kompilacji projektu.
-                        ShowCommandLine — pokazuje komunikaty TaskCommandLineEvent.
+                        i właściwości na początku każdej kompilacji projektu.    
+                        ShowCommandLine — pokazuje komunikaty
+                        TaskCommandLineEvent.
                         ShowTimestamp — wyświetla sygnaturę czasową jako
-                            prefiks każdego komunikatu.
+                        prefiks każdego komunikatu.                                           
                         ShowEventId — pokazuje identyfikator zdarzenia dla
-                            rozpoczętych zdarzeń, zakończonych zdarzeń i komunikatów.
+                        rozpoczętych zdarzeń, zakończonych zdarzeń
+                        i komunikatów.
                         ForceNoAlign — nie dopasowuje tekstu do rozmiaru
-                            buforu konsoli.
+                        buforu konsoli.
                         DisableConsoleColor — używa domyślnych kolorów konsoli
                             dla wszystkich komunikatów dotyczących rejestrowania.
                         DisableMPLogging — wyłącza styl rejestrowania
-                            wieloprocesorowego wyników podczas działania w trybie
-                            jednoprocesorowym.
+                        wieloprocesorowego wyników podczas działania w trybie
+                        jednoprocesorowym.
                         EnableMPLogging — włącza styl rejestrowania
-                            wieloprocesorowego nawet podczas działania w trybie
-                            jednoprocesorowym. Ten styl rejestrowania jest włączony domyślnie.
+                        wieloprocesorowego nawet podczas działania w trybie
+                        jednoprocesorowym. Ten styl rejestrowania jest włączony domyślnie. 
                         ForceConsoleColor — używa kolorów konsoli ANSI nawet wtedy,
                             gdy konsola ich nie obsługuje.
                         Verbosity — przesłania ustawienie -verbosity dla tego
-                            rejestratora.
+                        rejestratora.
                      Przykład:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
@@ -496,8 +502,8 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
         <target state="translated">  -validate           Weryfikuje projekt na podstawie schematu domyślnego. (Krótka
                      wersja: -val)
 
-  -validate:&lt;schemat&gt; Weryfikuje projekt na podstawie określonego schematu. (Krótka
-                     wersja: -val)
+  -validate:&lt;schemat&gt; Weryfikuje projekt na podstawie określonego
+                     schematu. (Krótka wersja: -val)
                      Przykład:
                        -validate:MyExtendedBuildSchema.xsd
 </target>
@@ -611,18 +617,19 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
         <target state="translated">  -distributedLogger:&lt;centralny rejestrator&gt;*&lt;rejestrator przekazujący&gt;
-                     Umożliwia użycie podanego rejestratora do rejestrowania zdarzeń pochodzących z programu MSBuild
-                     i dołączenie osobnego wystąpienia rejestratora do każdego węzła. Aby określić
+                     Umożliwia użycie podanego rejestratora do rejestrowania
+                     zdarzeń pochodzących z programu MSBuild. Aby określić
                      wiele rejestratorów, określ każdy z nich osobno.
                      (Krótka wersja: -dl)
                      Składnia elementu &lt;rejestrator&gt;:
                        [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;[;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
-                       &lt;częściowa lub pełna przestrzeń nazw&gt;.]&lt;nazwa klasy rejestratora&gt;
+                       [&lt;częściowa lub pełna przestrzeń nazw&gt;.]&lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                       {&lt;nazwa zestawu&gt;[,&lt;silna nazwa&gt;] | &lt;plik zestawu&gt;}
+                       {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
-                     przekazywane do rejestratora dokładnie tak, jak zostały wpisane. (Krótka wersja: -l)
+                     przekazywane do rejestratora dokładnie tak, jak zostały
+                     wpisane. (Krótka wersja: -l)
                      Przykłady:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -645,7 +652,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="translated">  -ignoreProjectExtensions:&lt;rozszerzenia&gt;
+        <target state="translated">-ignoreProjectExtensions:&lt;rozszerzenia&gt;
                      Lista rozszerzeń, które mają zostać zignorowane podczas
                      ustalania pliku projektu do kompilacji. Przy użyciu średnika lub przecinka
                      można rozdzielać wiele rozszerzeń.
@@ -732,16 +739,17 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
     </source>
         <target state="translated">  -distributedFileLogger
                      Rejestruje dane wyjściowe kompilacji w wielu plikach
-                     dziennika, po jednym pliku na węzeł programu MSBuild. Początkową lokalizacją tych plików jest
-                     bieżący katalog. Domyślnie pliki mają nazwę
-                     „MSBuild&lt;identyfikator_węzła&gt;.log”. Lokalizację plików
+                     dziennika, po jednym pliku na węzeł programu MSBuild.
+                     Początkową lokalizacją tych plików jest bieżący katalog.
+                     Domyślnie pliki mają nazwę
+                     „MSBuild&lt;identyfikator węzła&gt;.log”. Lokalizację plików
                      i inne parametry rejestratora plików można określić
                      przez dodanie przełącznika „-fileLoggerParameters”.
 
                      Jeśli nazwa pliku zostanie ustawiona za pomocą przełącznika
                      fileLoggerParameters, rejestrator rozproszony użyje nazwy
                      pliku jako szablonu i dołączy identyfikator węzła do tej
-                     nazwy, aby utworzyć plik dziennika dla każdego węzła.
+                     nazwy pliku, aby utworzyć plik dziennika dla każdego węzła.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -785,30 +793,30 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
         <target state="translated">  -fileLoggerParameters[n]:&lt;parametry&gt;
                      Dodatkowe parametry dla rejestratorów plików.
                      Występowanie tego przełącznika implikuje
-                     odpowiedni przełącznik -filelogger[n].
-                     Parametr „n”, jeżeli jest określony, może być cyfrą od 1 do 9.
+                     odpowiedni przełącznik -fileLogger[n].
+                     „n”, jeżeli jest używane, może być cyfrą od 1 do 9.
                      Przełącznik -fileLoggerParameters jest również używany przez
                      rozproszony rejestrator plików; zobacz opis przełącznika -distributedFileLogger.
                      (Krótka wersja: -flp[n])
-                     Dostępne są parametry takie same jak podane dla rejestratora
+                     Dostępne są parametry takie same, jak podane dla rejestratora
                      konsoli. Dostępne są również dodatkowe parametry:
-                        LogFile — ścieżka do pliku dziennika, w którym będzie
-                            zapisywany dziennik kompilacji.
-                        Append — określa, czy plik dziennika kompilacji zostanie
-                            dołączony do pliku dziennika, czy go zastąpi. Ustawienie tego przełącznika powoduje
-                            dołączenie dziennika kompilacji do pliku dziennika;
-                            brak ustawienia przełącznika powoduje zastąpienie zawartości
-                            istniejącego pliku dziennika.
-                            Wartość domyślna to niedołączanie do pliku dziennika.
-                        Encoding — określa kodowanie pliku,
+                       LogFile — ścieżka do pliku dziennika, w którym będzie
+                                 zapisywany dziennik kompilacji. 
+                       Append — określa, czy plik dziennika kompilacji zostanie
+                                dołączony do pliku dziennika, czy go zastąpi.
+                                Ustawienie tego przełącznika powoduje dołączenie dziennika kompilacji
+                                do pliku dziennika; brak ustawienia przełącznika
+                                powoduje zastąpienie zawartości istniejącego
+                                pliku dziennika. Wartość domyślna to niedołączanie do pliku dziennika.
+                       Encoding — określa kodowanie pliku,
                             na przykład UTF-8, Unicode lub ASCII.
-                     Domyślnie przyjmowany jest wysoki (Detailed) poziom szczegółowości.
+                       Domyślnie przyjmowany jest wysoki (Detailed) poziom szczegółowości.
                      Przykłady:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1335,7 +1343,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
-        <target state="translated">MSBUILD: błąd MSB1050: określ plik projektu lub rozwiązania, który zostanie użyty, ponieważ folder „{0}” zawiera więcej niż jeden plik projektu lub rozwiązania.</target>
+        <target state="translated">MSBUILD : error MSB1050: określ plik projektu lub rozwiązania, który zostanie użyty, ponieważ folder „{0}” zawiera więcej niż jeden plik projektu lub rozwiązania.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
       project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
@@ -1401,12 +1409,12 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="ParameterRequiredError">
         <source>MSBUILD : error MSB1049: The {0} parameter must be specified</source>
-        <target state="translated">MSBUILD: błąd MSB1049: konieczne jest określenie parametru {0}</target>
+        <target state="translated">MSBUILD : error MSB1049: konieczne jest określenie parametru {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="translated">MSBUILD: błąd MSB1051: określ kody ostrzeżeń traktowane jak komunikaty o małej ważności podczas używania przełącznika -warnAsMessage.</target>
+        <target state="translated">MSBUILD : error MSB1051: określ kody ostrzeżeń traktowane jak komunikaty o małej ważności podczas używania przełącznika -warnAsMessage.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1564,9 +1572,9 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
         <target state="translated">  -profileEvaluation:&lt;plik&gt;
                      Profiluje oszacowanie programu MSBuild i zapisuje wynik
                      w określonym pliku. Jeśli rozszerzenie określonego
-                     pliku to „md”, wynik jest generowany w formacie
-                     znaczników markdown. W przeciwnym razie jest tworzony plik rozdzielany tabulatorami.
-    </target>
+                     pliku to „md”, wynik jest generowany w formacie znaczników
+                     markdown. W przeciwnym razie jest tworzony plik rozdzielany tabulatorami.
+</target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_33_RestorePropertySwitch">
@@ -1588,7 +1596,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      właściwości, a &lt;v&gt; to wartość właściwości. Użyj
                      średnika lub przecinka do rozdzielenia wielu właściwości
                      albo określ każdą właściwość osobno.
-                     (Krótka forma: -rp)
+                     (Krótka wersja: -rp)
                      Przykład:
                        -restoreProperty:IsRestore=true;MyProperty=wartość
     </target>
@@ -1599,7 +1607,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="translated">MSBUILD : błąd MSB1053: Podana nazwa pliku jest nieprawidłowa. {0}</target>
+        <target state="translated">MSBUILD : error MSB1053: Podana nazwa pliku jest nieprawidłowa. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">

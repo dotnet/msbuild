@@ -81,16 +81,16 @@
          compatibility then delete the requestedExecutionLevel node.
     </source>
         <target state="translated">
-          Možnosti manifestu pro nástroj Řízení uživatelských účtů
-          Pokud chcete změnit úroveň nástroje Řízení uživatelských účtů, nahraďte
-          uzel requestedExecutionLevel jednou z následujících hodnot.
+          Možnosti manifestu UAC
+          Chcete-li změnit úroveň řízení uživatelských účtů v systému Windows, nahraďte 
+          uzel requestedExecutionLevel jedním z následujících.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Pokud chcete využívat virtualizaci souborů a registru pro zpětnou
-         kompatibilitu, pak uzel requestedExecutionLevel odstraňte.
+         Chcete-li využít virtualizaci souborů a registru pro zpětnou 
+         kompatibilitu, odstraňte uzel requestedExecutionLevel.
     </target>
         <note />
       </trans-unit>

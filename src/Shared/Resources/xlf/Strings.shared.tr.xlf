@@ -275,7 +275,7 @@
       </trans-unit>
       <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
-        <target state="needs-review-translation">MSB5024: MSBuild için geçerli bir konum belirlenemedi. Bu işlemi Visual Studio için Geliştirici Komut İstemi’nde çalıştırmayı deneyin.</target>
+        <target state="translated">MSB5024: MSBuild için geçerli bir konum belirlenemedi. Bu işlemi Visual Studio için Geliştirici Komut İstemi’nde çalıştırmayı deneyin.</target>
         <note>{StrBegin="MSB5024: "}</note>
       </trans-unit>
       <trans-unit id="InvalidLogFileFormat">
