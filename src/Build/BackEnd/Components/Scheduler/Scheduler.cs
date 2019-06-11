@@ -1582,8 +1582,10 @@ namespace Microsoft.Build.BackEnd
                         abortRequestBatch = true;
                     }
                 }
-                else if (CheckIfCacheMissesAreAllowed(nodeForResults, request, responses))
+                else if (CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(nodeForResults, request, responses, out var emitNonErrorLogs))
                 {
+                    emitNonErrorLogs(_componentHost.LoggingService);
+
                     // Ensure there is no affinity mismatch between this request and a previous request of the same configuration.
                     NodeAffinity requestAffinity = GetNodeAffinityForRequest(request);
                     NodeAffinity existingRequestAffinity = NodeAffinity.Any;
@@ -1730,7 +1732,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                CheckIfCacheMissesAreAllowed(nodeForResults, request.BuildRequest, responses);
+                CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(nodeForResults, request.BuildRequest, responses, out _);
             }
         }
 
@@ -1786,72 +1788,95 @@ namespace Microsoft.Build.BackEnd
             return null;
         }
 
-        private bool CheckIfCacheMissesAreAllowed(int nodeForResults, BuildRequest request, List<ScheduleResponse> responses)
+        /// <returns>True if caches misses are allowed, false otherwise</returns>
+        private bool CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(int nodeForResults, BuildRequest request, List<ScheduleResponse> responses, out Action<ILoggingService> emitNonErrorLogs)
         {
+            emitNonErrorLogs = _ => { };
+
             var isIsolatedBuild = _componentHost.BuildParameters.IsolateProjects;
+            var configCache = (IConfigCache) _componentHost.GetComponent(BuildComponentType.ConfigCache);
 
             // do not check root requests as nothing depends on them
-            if (!request.IsRootRequest && isIsolatedBuild)
+            if (!isIsolatedBuild || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
             {
-                var configCache = (IConfigCache) _componentHost.GetComponent(BuildComponentType.ConfigCache);
-                var requestConfig = configCache[request.ConfigurationId];
-
-                // Need the parent request. But the parent / child relationship is sometimes formed after the cache is queried, so get creative
-                var parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
-                if (parentRequest == null)
+                if (isIsolatedBuild && request.SkipStaticGraphIsolationConstraints)
                 {
-                    // the parent might still be in executing requests because the scheduler might not have had a chance to mark it as blocked yet
-                    parentRequest = _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
+                    // retrieving the configs is not quite free, so avoid computing them eagerly
+                    var configs = GetConfigurations();
+
+                    emitNonErrorLogs = ls => ls.LogComment(
+                            NewBuildEventContext(),
+                            MessageImportance.Normal,
+                            "SkippedConstraintsOnRequest",
+                            configs.parentConfig.ProjectFullPath,
+                            configs.requestConfig.ProjectFullPath);
                 }
+
+                return true;
+            }
+
+            var (requestConfig, parentConfig) = GetConfigurations();
+
+            // allow self references (project calling the msbuild task on itself, potentially with different global properties)
+            if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            var errorMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                "CacheMissesNotAllowedInIsolatedGraphBuilds",
+                parentConfig.ProjectFullPath,
+                requestConfig.ProjectFullPath,
+                request.Targets.Count == 0
+                    ? "default"
+                    : string.Join(";", request.Targets));
+
+            // Issue a failed build result to have the msbuild task marked as failed and thus stop the build
+            BuildResult result = new BuildResult(request, new InvalidOperationException(errorMessage));
+            result.SetOverallResult(false);
+
+            var response = GetResponseForResult(nodeForResults, request, result);
+            responses.Add(response);
+
+            // Log an error to have something displayed to the user and to avoid having a failed build with 0 errors
+            // todo Search if there's a way to have the error automagically logged in response to the failed build result
+            _componentHost.LoggingService.LogErrorFromText(
+                NewBuildEventContext(),
+                null,
+                null,
+                null,
+                new BuildEventFileInfo(requestConfig.ProjectFullPath),
+                errorMessage);
+
+            return false;
+
+            BuildEventContext NewBuildEventContext()
+            {
+                return new BuildEventContext(
+                    request.SubmissionId,
+                    1,
+                    BuildEventContext.InvalidProjectInstanceId,
+                    BuildEventContext.InvalidProjectContextId,
+                    BuildEventContext.InvalidTargetId,
+                    BuildEventContext.InvalidTaskId);
+            }
+
+            (BuildRequestConfiguration requestConfig, BuildRequestConfiguration parentConfig) GetConfigurations()
+            {
+                var buildRequestConfiguration = configCache[request.ConfigurationId];
+
+                // Need the parent request. It might be blocked or executing; check both.
+                var parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
+                                    ?? _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
 
                 ErrorUtilities.VerifyThrowInternalNull(parentRequest, nameof(parentRequest));
                 ErrorUtilities.VerifyThrow(
                     configCache.HasConfiguration(parentRequest.BuildRequest.ConfigurationId),
                     "All non root requests should have a parent with a loaded configuration");
 
-                var parentConfig = configCache[parentRequest.BuildRequest.ConfigurationId];
-
-                // allow self references (project calling the msbuild task on itself, potentially with different global properties)
-                if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                var errorMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                    "CacheMissesNotAllowedInIsolatedGraphBuilds",
-                    parentConfig.ProjectFullPath,
-                    requestConfig.ProjectFullPath,
-                    request.Targets.Count == 0
-                        ? "default"
-                        : string.Join(";", request.Targets));
-
-                // Issue a failed build result to have the msbuild task marked as failed and thus stop the build
-                BuildResult result = new BuildResult(request, new InvalidOperationException(errorMessage));
-                result.SetOverallResult(false);
-
-                var response = GetResponseForResult(nodeForResults, request, result);
-                responses.Add(response);
-
-                // Log an error to have something displayed to the user and to avoid having a failed build with 0 errors
-                // todo Search if there's a way to have the error automagically logged in response to the failed build result
-                _componentHost.LoggingService.LogErrorFromText(
-                    new BuildEventContext(
-                        request.SubmissionId,
-                        1,
-                        BuildEventContext.InvalidProjectInstanceId,
-                        BuildEventContext.InvalidProjectContextId,
-                        BuildEventContext.InvalidTargetId,
-                        BuildEventContext.InvalidTaskId),
-                    null,
-                    null,
-                    null,
-                    new BuildEventFileInfo(requestConfig.ProjectFullPath),
-                    errorMessage);
-
-                return false;
+                var parentConfiguration = configCache[parentRequest.BuildRequest.ConfigurationId];
+                return (buildRequestConfiguration, parentConfiguration);
             }
-
-            return true;
         }
 
         /// <summary>

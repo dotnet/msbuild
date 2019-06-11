@@ -223,7 +223,7 @@ namespace Microsoft.Build.Globbing
 
         /// <summary>
         ///     See <see cref="Parse(string,string)" />.
-        ///     The glob root will be the current working directory.
+        ///     The glob root, if the glob is not fully qualified, will be the current working directory.
         /// </summary>
         /// <param name="fileSpec"></param>
         /// <returns></returns>
