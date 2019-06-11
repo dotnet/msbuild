@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 FileStream fileStream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-                preserializedResourceWriter.AddActivatorResource(Name, TypeName, fileStream, closeAfterWrite: true);
+                preserializedResourceWriter.AddActivatorResource(Name, fileStream, TypeName, closeAfterWrite: true);
             }
             else
             {

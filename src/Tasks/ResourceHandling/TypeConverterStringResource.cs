@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
-                preserializedResourceWriter.AddResource(Name, TypeName, StringRepresentation);
+                preserializedResourceWriter.AddResource(Name, StringRepresentation, TypeName);
             }
             else
             {

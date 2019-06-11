@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
-                preserializedResourceWriter.AddTypeConverterResource(Name, TypeName, Bytes);
+                preserializedResourceWriter.AddTypeConverterResource(Name, Bytes, TypeName);
             }
             else
             {
