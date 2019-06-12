@@ -823,10 +823,20 @@ namespace Microsoft.Build.Tasks
                                 process = new ProcessResourceFiles();
                             }
 
-                            process.Run(Log, _references, inputsToProcess, _satelliteInputs, outputsToProcess, UseSourcePath,
-                                StronglyTypedLanguage, _stronglyTypedNamespace, _stronglyTypedManifestPrefix,
-                                StronglyTypedFileName, StronglyTypedClassName, PublicClass,
-                                ExtractResWFiles, OutputDirectory);
+                            process.Run(Log,
+                                        _references,
+                                        inputsToProcess,
+                                        _satelliteInputs,
+                                        outputsToProcess,
+                                        UseSourcePath,
+                                        StronglyTypedLanguage,
+                                        _stronglyTypedNamespace,
+                                        _stronglyTypedManifestPrefix,
+                                        StronglyTypedFileName,
+                                        StronglyTypedClassName,
+                                        PublicClass,
+                                        ExtractResWFiles,
+                                        OutputDirectory);
 
                             this.StronglyTypedClassName = process.StronglyTypedClassName; // in case a default was chosen
                             this.StronglyTypedFileName = process.StronglyTypedFilename;   // in case a default was chosen
@@ -2414,9 +2424,21 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Process all files.
         /// </summary>
-        internal void Run(TaskLoggingHelper log, ITaskItem[] assemblyFilesList, List<ITaskItem> inputs, List<ITaskItem> satelliteInputs, List<ITaskItem> outputs, bool sourcePath,
-                          string language, string namespacename, string resourcesNamespace, string filename, string classname, bool publicClass,
-                          bool extractingResWFiles, string resWOutputDirectory)
+        internal void Run(
+            TaskLoggingHelper log,
+            ITaskItem[] assemblyFilesList,
+            List<ITaskItem> inputs,
+            List<ITaskItem> satelliteInputs,
+            List<ITaskItem> outputs,
+            bool sourcePath,
+            string language,
+            string namespacename,
+            string resourcesNamespace,
+            string filename,
+            string classname,
+            bool publicClass,
+            bool extractingResWFiles,
+            string resWOutputDirectory)
         {
             _logger = log;
             _assemblyFiles = assemblyFilesList;
