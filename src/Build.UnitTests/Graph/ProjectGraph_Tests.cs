@@ -11,10 +11,9 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Internal;
+using static Microsoft.Build.Experimental.Graph.UnitTests.GraphTestingUtilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -1467,21 +1466,6 @@ $@"
             }
         }
 
-        private static bool IsOuterBuild(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.OuterBuild;
-        }
-
-        private static bool IsInnerBuild(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.InnerBuild;
-        }
-
-        private static bool IsNotMultitargeting(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.NonMultitargeting;
-        }
-
         private static void AssertNonMultitargetingNode(ProjectGraphNode node, Dictionary<string, string> additionalGlobalProperties = null)
         {
             additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
@@ -1969,11 +1953,11 @@ $@"
 
         [Theory]
         [MemberData(nameof(AllNodesShouldHaveGraphBuildGlobalPropertyData))]
-        public void AllNodesShouldHaveGraphBuildGlobalProperty(Dictionary<int, int[]> edges, int[] roots, Dictionary<string, string> globalProperties)
+        public void AllNodesShouldHaveGraphBuildGlobalProperty(Dictionary<int, int[]> edges, int[] entryPoints, Dictionary<string, string> globalProperties)
         {
             using (var env = TestEnvironment.Create())
             {
-                var projectGraph = Helpers.CreateProjectGraph(env, edges, globalProperties, null, roots);
+                var projectGraph = Helpers.CreateProjectGraph(env, edges, globalProperties, null, entryPoints);
 
                 var dot = projectGraph.ToDot();
 
@@ -2001,12 +1985,27 @@ $@"
             }
         }
 
-        private static ProjectGraphNode GetOuterBuild(ProjectGraph graph, int projectNumber)
+        internal static bool IsOuterBuild(ProjectGraphNode project)
+        {
+            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.OuterBuild;
+        }
+
+        internal static bool IsInnerBuild(ProjectGraphNode project)
+        {
+            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.InnerBuild;
+        }
+
+        internal static bool IsNotMultitargeting(ProjectGraphNode project)
+        {
+            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.NonMultitargeting;
+        }
+
+        internal static ProjectGraphNode GetOuterBuild(ProjectGraph graph, int projectNumber)
         {
             return GetNodesWithProjectNumber(graph, projectNumber).FirstOrDefault(IsOuterBuild);
         }
 
-        private static IReadOnlyCollection<ProjectGraphNode> GetInnerBuilds(ProjectGraph graph, int projectNumber)
+        internal static IReadOnlyCollection<ProjectGraphNode> GetInnerBuilds(ProjectGraph graph, int projectNumber)
         {
             var outerBuild = GetOuterBuild(graph, projectNumber);
 
@@ -2024,36 +2023,6 @@ $@"
 
                 return innerBuilds;
             }
-        }
-
-        private static ProjectGraphNode GetFirstNodeWithProjectNumber(ProjectGraph graph, int projectNum) => GetNodesWithProjectNumber(graph, projectNum).First();
-
-        private static IEnumerable<ProjectGraphNode> GetNodesWithProjectNumber(ProjectGraph graph, int projectNum)
-        {
-            return graph.ProjectNodes.Where(node => node.ProjectInstance.FullPath.EndsWith(projectNum + ".proj"));
-        }
-
-        private static string GetProjectFileName(ProjectGraphNode node) => Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath);
-
-        private static int GetProjectNumber(ProjectGraphNode node) => int.Parse(GetProjectFileName(node));
-
-        internal static TransientTestFile CreateProjectFile(
-            TestEnvironment env,
-            int projectNumber,
-            int[] projectReferences = null,
-            Dictionary<string, string[]> projectReferenceTargets = null,
-            string defaultTargets = null,
-            string extraContent = null
-            )
-        {
-            return Helpers.CreateProjectFile(
-                env,
-                projectNumber,
-                projectReferences,
-                projectReferenceTargets,
-                // Use "Build" when the default target is unspecified since in practice that is usually the default target.
-                defaultTargets ?? "Build",
-                extraContent);
         }
 
         public void Dispose()

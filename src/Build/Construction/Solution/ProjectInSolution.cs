@@ -180,6 +180,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Configurations for this project, keyed off the configuration's full name, e.g. "Debug|x86"
+        /// They contain only the project configurations from the solution file that fully matched (configuration and platform) against the solution configurations.
         /// </summary>
         public IReadOnlyDictionary<string, ProjectConfigurationInSolution> ProjectConfigurations =>
             new ReadOnlyDictionary<string, ProjectConfigurationInSolution>(_projectConfigurations);

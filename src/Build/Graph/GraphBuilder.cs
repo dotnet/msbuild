@@ -4,12 +4,15 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -48,7 +51,8 @@ namespace Microsoft.Build.Experimental.Graph
             int degreeOfParallelism,
             CancellationToken cancellationToken)
         {
-            _entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(entryPoints);
+            _entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(ExpandSolutionIfNecessary(entryPoints.ToImmutableArray()));
+            
             IEqualityComparer<ConfigurationMetadata> configComparer = EqualityComparer<ConfigurationMetadata>.Default;
 
             _graphWorkSet = new ParallelWorkSet<ConfigurationMetadata, ProjectGraphNode>(
@@ -90,6 +94,122 @@ namespace Microsoft.Build.Experimental.Graph
                 graphRoots.TrimExcess();
 
                 return graphRoots;
+            }
+        }
+
+        private IReadOnlyCollection<ProjectGraphEntryPoint> ExpandSolutionIfNecessary(IReadOnlyCollection<ProjectGraphEntryPoint> entryPoints)
+        {
+            if (entryPoints.Count == 0 || !entryPoints.Any(e => FileUtilities.IsSolutionFilename(e.ProjectFile)))
+            {
+                return entryPoints;
+            }
+
+            if (entryPoints.Count != 1)
+            {
+                throw new ArgumentException(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphAcceptsSingleSolutionEntryPoint",
+                        string.Join(";", entryPoints.Select(e => e.ProjectFile))));
+            }
+
+            ErrorUtilities.VerifyThrowArgument(entryPoints.Count == 1, "StaticGraphAcceptsSingleSolutionEntryPoint");
+
+            var solutionEntryPoint = entryPoints.Single();
+            var solutionGlobalProperties = ImmutableDictionary.CreateRange(
+                keyComparer: StringComparer.OrdinalIgnoreCase,
+                valueComparer: StringComparer.OrdinalIgnoreCase,
+                items: solutionEntryPoint.GlobalProperties ?? ImmutableDictionary<string, string>.Empty);
+
+            var solution = SolutionFile.Parse(FileUtilities.NormalizePath(solutionEntryPoint.ProjectFile));
+
+            if (solution.SolutionParserWarnings.Count != 0 || solution.SolutionParserErrorCodes.Count != 0)
+            {
+                throw new InvalidProjectFileException(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphSolutionLoaderEncounteredSolutionWarningsAndErrors",
+                        solutionEntryPoint.ProjectFile,
+                        string.Join(";", solution.SolutionParserWarnings),
+                        string.Join(";", solution.SolutionParserErrorCodes)));
+            }
+
+            var projectsInSolution = GetBuildableProjects(solution);
+
+            var currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionGlobalProperties);
+
+            var newEntryPoints = new List<ProjectGraphEntryPoint>(projectsInSolution.Count);
+
+            foreach (var project in projectsInSolution)
+            {
+                if (project.ProjectConfigurations.Count == 0)
+                {
+                    continue;
+                }
+
+                var projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
+
+                if (projectConfiguration.IncludeInBuild)
+                {
+                    newEntryPoints.Add(
+                        new ProjectGraphEntryPoint(
+                            project.AbsolutePath,
+                            solutionGlobalProperties
+                                .SetItem("Configuration", projectConfiguration.ConfigurationName)
+                                .SetItem("Platform", projectConfiguration.PlatformName)
+                            ));
+                }
+            }
+
+            newEntryPoints.TrimExcess();
+
+            return newEntryPoints;
+
+            IReadOnlyCollection<ProjectInSolution> GetBuildableProjects(SolutionFile solutionFile)
+            {
+                var buildableProjects = solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat).ToImmutableArray();
+
+                var projectsWithSolutionDependencies = buildableProjects.Where(p => p.Dependencies.Count != 0);
+
+                if (projectsWithSolutionDependencies.Any())
+                {
+                    throw new ArgumentException(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "StaticGraphDoesNotHandleSolutionOnlyDependencies",
+                            solutionFile.FullPath,
+                            string.Join(";", projectsWithSolutionDependencies))
+                        );
+                }
+
+                return buildableProjects;
+            }
+
+            SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, ImmutableDictionary<string, string> globalProperties)
+            {
+                var solutionConfiguration = globalProperties.ContainsKey("Configuration")
+                    ? globalProperties["Configuration"]
+                    : solutionFile.GetDefaultConfigurationName();
+
+                var solutionPlatform = globalProperties.ContainsKey("Platform")
+                    ? globalProperties["Platform"]
+                    : solutionFile.GetDefaultPlatformName();
+
+                return new SolutionConfigurationInSolution(solutionConfiguration, solutionPlatform);
+            }
+
+            ProjectConfigurationInSolution SelectProjectConfiguration(
+                SolutionConfigurationInSolution solutionConfig,
+                IReadOnlyDictionary<string, ProjectConfigurationInSolution> projectConfigs)
+            {
+                // implements the matching described in https://docs.microsoft.com/en-us/visualstudio/ide/understanding-build-configurations?view=vs-2019#how-visual-studio-assigns-project-configuration
+
+                var solutionConfigFullName = solutionConfig.FullName;
+
+                if (projectConfigs.ContainsKey(solutionConfigFullName))
+                {
+                    return projectConfigs[solutionConfigFullName];
+                }
+
+                var partiallyMarchedConfig = projectConfigs.FirstOrDefault(pc => pc.Value.ConfigurationName.Equals(solutionConfig.ConfigurationName, StringComparison.OrdinalIgnoreCase)).Value;
+                return partiallyMarchedConfig ?? projectConfigs.First().Value;
             }
         }
 
@@ -243,6 +363,10 @@ namespace Microsoft.Build.Experimental.Graph
             foreach (ConfigurationMetadata projectToEvaluate in _entryPointConfigurationMetadata)
             {
                 ParseProject(projectToEvaluate);
+                                /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
+                             meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
+                             and duplicates the information, leading to wasted work
+                             */
             }
 
             _graphWorkSet.WaitForAllWork();
@@ -261,6 +385,15 @@ namespace Microsoft.Build.Experimental.Graph
         {
             foreach ((ConfigurationMetadata referenceConfig, _) in _projectInterpretation.GetReferences(parsedProject.ProjectInstance))
             {
+                if (FileUtilities.IsSolutionFilename(referenceConfig.ProjectFullPath))
+                {
+                    throw new InvalidOperationException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphDoesNotSupportSlnReferences",
+                        referenceConfig.ProjectFullPath,
+                        referenceConfig.ProjectFullPath
+                        ));
+                }
+                
                 ParseProject(referenceConfig);
             }
         }
