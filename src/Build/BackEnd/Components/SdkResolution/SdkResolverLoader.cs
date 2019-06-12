@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
+using System.Xml;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -97,7 +97,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 path = FileUtilities.FixFilePath(manifest.Path);
             }
-            catch (SerializationException e)
+            catch (XmlException e)
             {
                 // Note: Not logging e.ToString() as most of the information is not useful, the Message will contain what is wrong with the XML file.
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e, "SdkResolverManifestInvalid", pathToManifest, e.Message);
