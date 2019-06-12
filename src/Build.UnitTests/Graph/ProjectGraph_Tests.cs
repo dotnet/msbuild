@@ -281,7 +281,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 });
                 var proj2 = CreateProjectFile(env, 2, new[] { 3 });
                 var proj3 = CreateProjectFile(env, 3, new[] { 1 });
-                var projectsInCycle = new List<string>() {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
+                var projectsInCycle = new List<string> {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
                 string expectedErrorMessage = GraphBuilder.FormatCircularDependencyError(projectsInCycle);
                 Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage.ToString());
             }
@@ -315,10 +315,47 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 CreateProjectFile(env, 8);
                 CreateProjectFile(env, 9);
                 CreateProjectFile(env, 10);
-                var projectsInCycle = new List<string>(){proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
+                var projectsInCycle = new List<string> {proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
                 var errorMessage = GraphBuilder.FormatCircularDependencyError(projectsInCycle);
                 Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage.ToString());
             }
+        }
+
+        [Fact]
+        public void ProjectCollectionShouldNotInfluenceGlobalProperties()
+        {
+            var entryFile1 = CreateProjectFile(_env, 1, new[] { 3 ,4 });
+            var entryFile2 = CreateProjectFile(_env, 2, new []{ 4, 5 });
+            CreateProjectFile(_env, 3);
+            CreateProjectFile(_env, 4);
+            CreateProjectFile(_env, 5);
+
+
+            var entryPoint1 = new ProjectGraphEntryPoint(entryFile1.Path, new Dictionary<string, string> {["B"] = "EntryPointB", ["C"] = "EntryPointC"});
+            var entryPoint2 = new ProjectGraphEntryPoint(entryFile2.Path, null);
+
+            var collection = _env.CreateProjectCollection().Collection;
+            collection.SetGlobalProperty("A", "CollectionA");
+            collection.SetGlobalProperty("B", "CollectionB");
+
+            var graph = new ProjectGraph(
+                entryPoints: new[] { entryPoint1, entryPoint2 },
+                projectCollection: collection,
+                projectInstanceFactory: null);
+
+            var root1 = GetFirstNodeWithProjectNumber(graph, 1);
+            var globalPropertiesFor1 = new Dictionary<string, string> { ["B"] = "EntryPointB", ["C"] = "EntryPointC", ["IsGraphBuild"] = "true" };
+
+            root1.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor1);
+            root1.ProjectReferences.First(r => GetProjectNumber(r) == 3).ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor1);
+            root1.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor1);
+
+            var root2 = GetFirstNodeWithProjectNumber(graph, 2);
+            var globalPropertiesFor2 = new Dictionary<string, string> { ["IsGraphBuild"] = "true" };
+
+            root2.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor2);
+            root2.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor2);
+            root2.ProjectReferences.First(r => GetProjectNumber(r) == 5).ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor2);
         }
 
         [Fact]
@@ -1997,6 +2034,8 @@ $@"
         }
 
         private static string GetProjectFileName(ProjectGraphNode node) => Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath);
+
+        private static int GetProjectNumber(ProjectGraphNode node) => int.Parse(GetProjectFileName(node));
 
         internal static TransientTestFile CreateProjectFile(
             TestEnvironment env,

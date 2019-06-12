@@ -24,7 +24,7 @@ namespace Microsoft.Build.Experimental.Graph
         /// Constructs an entry point with the given project file and global properties.
         /// </summary>
         /// <param name="projectFile">The project file to use for this entry point</param>
-        /// <param name="globalProperties">The global properties to use for this entry point. May be null, in which case the global properties of the project collection provided to the project graph will be used.</param>
+        /// <param name="globalProperties">The global properties to use for this entry point. May be null.</param>
         public ProjectGraphEntryPoint(string projectFile, IDictionary<string, string> globalProperties)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
