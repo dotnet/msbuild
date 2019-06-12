@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
         private readonly ITelemetry _telemetry;
         private const string NewEventName = "msbuild";
         internal const string TargetFrameworkTelemetryEventName = "targetframeworkeval";
+        internal const string SdkTaskBaseCatchExceptionTelemetryEventName = "taskBaseCatchException";
 
         internal const string TargetFrameworkVersionTelemetryPropertyKey = "TargetFrameworkVersion";
         internal const string UseWindowsFormsTelemetryPropertyKey = "UseWindowsForms";
@@ -94,6 +95,11 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 }
 
                 telemetry.TrackEvent(newEventName, maskedProperties, measurements: null);
+            }
+
+            if (args.EventName == SdkTaskBaseCatchExceptionTelemetryEventName)
+            {
+                telemetry.TrackEvent(args.EventName, args.Properties, measurements: null);
             }
         }
 

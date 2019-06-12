@@ -68,6 +68,8 @@ namespace Microsoft.DotNet.Cli
             }
             catch (Exception e) when (!e.ShouldBeDisplayedAsError())
             {
+                // If telemetry object has not been initialized yet. It cannot be collected
+                TelemetryEventEntry.SendFiltered(e);
                 Reporter.Error.WriteLine(e.ToString().Red().Bold());
 
                 return 1;

@@ -78,5 +78,26 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 "MSBuild will throw when the task param contain empty and if the field is empty json will emit the entry, so it still need to be set to something.");
         }
 
+        [Fact]
+        public void ItDoesNotMasksExceptionTelemetry()
+        {
+            var fakeTelemetry = new FakeTelemetry();
+            var telemetryEventArgs = new TelemetryEventArgs
+            {
+                EventName = MSBuildLogger.SdkTaskBaseCatchExceptionTelemetryEventName,
+                Properties = new Dictionary<string, string>
+                {
+                    { "exceptionType", "System.Exception"},
+                    { "detail", "Exception detail"}
+                }
+            };
+
+            MSBuildLogger.FormatAndSend(fakeTelemetry, telemetryEventArgs);
+
+            fakeTelemetry.LogEntry.EventName.Should().Be(MSBuildLogger.SdkTaskBaseCatchExceptionTelemetryEventName);
+            fakeTelemetry.LogEntry.Properties.Keys.Count.Should().Be(2);
+            fakeTelemetry.LogEntry.Properties["exceptionType"].Should().Be("System.Exception");
+            fakeTelemetry.LogEntry.Properties["detail"].Should().Be("Exception detail");
+        }
     }
 }

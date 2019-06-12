@@ -297,5 +297,31 @@ namespace Microsoft.DotNet.Tests
         {
             BuiltInCommandsCatalog.Commands.Should().ContainKey("internal-reportinstallsuccess");
         }
+
+        [Fact]
+        public void ExceptionShouldBeSentToTelemetry()
+        {
+            Exception caughtException = null;
+            try
+            {
+                string[] args = { "build" };
+                Cli.Program.ProcessArgs(args);
+                throw new ArgumentException("test exception");
+            }
+            catch (Exception ex)
+            {
+                caughtException = ex;
+                TelemetryEventEntry.SendFiltered(ex);
+            }
+
+            var exception = new Exception();
+            _fakeTelemetry
+                 .LogEntries.Should()
+                 .Contain(e => e.EventName == "mainCatchException/exception" &&
+                               e.Properties.ContainsKey("exceptionType") &&
+                               e.Properties["exceptionType"] == "System.ArgumentException" &&
+                               e.Properties.ContainsKey("detail") &&
+                               e.Properties["detail"].Contains(caughtException.StackTrace));
+        }
     }
 }
