@@ -9,6 +9,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 {
     public class MockInstallUnitDescriptor : IInstallUnitDescriptor
     {
+        public MockInstallUnitDescriptor()
+        {
+            DetailKeysDisplayOrder = new List<string>();
+        }
+
+        public Guid DescriptorId { get; set; }
+
         public string Identifier { get; set; }
 
         public Guid FactoryId { get; set; }
@@ -17,6 +24,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 
         public IReadOnlyDictionary<string, string> Details { get; set; }
 
-        public string UserReadableIdentifier { get; set; }
+        public string UninstallString => Identifier;
+
+        public IReadOnlyList<string> DetailKeysDisplayOrder { get; }
     }
 }

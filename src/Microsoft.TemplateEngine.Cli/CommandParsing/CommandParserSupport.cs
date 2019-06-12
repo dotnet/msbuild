@@ -138,6 +138,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                                     Accept.ExactlyOneArgument()
                                         .WithSuggestionsFrom("C#", "F#")),
                                         // don't give this a default, otherwise 'new -lang' is valid and assigns the default. User should have to explicitly give the value.
+                    Create.Option("--update-check", LocalizableStrings.UpdateCheckCommandHelp, Accept.NoArguments()),
+                    Create.Option("--update-apply", LocalizableStrings.UpdateApplyCommandHelp, Accept.NoArguments()),
                 };
             }
         }
@@ -159,8 +161,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("-all|--show-all", string.Empty, Accept.NoArguments()),
                     Create.Option("--allow-scripts", string.Empty, Accept.ZeroOrOneArgument()),
                     Create.Option("--baseline", string.Empty, Accept.ExactlyOneArgument()),
-                    Create.Option("--update", string.Empty, Accept.NoArguments()),
-                    Create.Option("--update-no-prompt", string.Empty, Accept.NoArguments()),
                 };
             }
         }

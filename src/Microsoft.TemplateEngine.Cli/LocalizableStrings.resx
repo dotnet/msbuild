@@ -350,7 +350,7 @@ See https://aka.ms/dotnet-install-templates to learn how to install additional t
     <value>Unknown Change</value>
   </data>
   <data name="UpdateAvailable" xml:space="preserve">
-    <value>An update for {0} is available...</value>
+    <value>An update for template pack {0} is available.</value>
   </data>
   <data name="UpdateHelp" xml:space="preserve">
     <value>Update matching templates.</value>
@@ -562,17 +562,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="InstalledItems" xml:space="preserve">
     <value>Currently installed items:</value>
   </data>
-  <data name="AllUpdatesApplyPrompt" xml:space="preserve">
-    <value>Apply updates ([A]ll|[N]one|[P]rompt)?</value>
-  </data>
-  <data name="ApplyUpdatesInvalidChoiceResponse" xml:space="preserve">
-    <value>Invalid choice...</value>
-  </data>
   <data name="NoUpdatesFound" xml:space="preserve">
     <value>No updates found.</value>
-  </data>
-  <data name="SingleUpdateApplyPrompt" xml:space="preserve">
-    <value>{0} : update ([Y]es|[N]o)?</value>
   </data>
   <data name="UpdatesAvailableListHeader" xml:space="preserve">
     <value>Updates are available for the following:</value>
@@ -624,5 +615,53 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   </data>
   <data name="CouldntDetermineFilesToRestore" xml:space="preserve">
     <value>Couldn't determine files to restore.</value>
+  </data>
+  <data name="UninstallListDetailsHeader" xml:space="preserve">
+    <value>Details:</value>
+  </data>
+  <data name="UninstallListUninstallCommand" xml:space="preserve">
+    <value>Uninstall Command:</value>
+  </data>
+  <data name="InstallDescriptor_NotFound" xml:space="preserve">
+    <value>Could not find install descriptor for template: {0}</value>
+  </data>
+  <data name="UpdateCheck_InstallCommand" xml:space="preserve">
+    <value>    install command: dotnet {0} -i {1}</value>
+  </data>
+  <data name="UpdateCheck_UnknownError" xml:space="preserve">
+    <value>An error occured checking for updates for template pack {0}</value>
+  </data>
+  <data name="SearchingOnlineNotification" xml:space="preserve">
+    <value>Couldn't find an installed template that matches the input, searching online for one that does...</value>
+  </data>
+  <data name="SearchResultInstallCommand" xml:space="preserve">
+    <value>        dotnet {0} -i {1}</value>
+  </data>
+  <data name="SearchResultInstallHeader" xml:space="preserve">
+    <value>    To use this template, run the following command and try again:</value>
+  </data>
+  <data name="SearchResultNoMatches" xml:space="preserve">
+    <value>...No matches found</value>
+  </data>
+  <data name="SearchResultPackInfo" xml:space="preserve">
+    <value>Template name "{0}" ({1}) from author "{2}" in pack {3}</value>
+  </data>
+  <data name="SearchResultSourceIndicator" xml:space="preserve">
+    <value>Matches from template source: {0}</value>
+  </data>
+  <data name="NuGetPackUpdateDisplayInfo" xml:space="preserve">
+    <value>"{0}" (currently installed version = {1})</value>
+  </data>
+  <data name="UpdateApplyCommandHelp" xml:space="preserve">
+    <value>Check the currently installed template packs for update, and install the updates.</value>
+  </data>
+  <data name="UpdateApplyStartMessage" xml:space="preserve">
+    <value>Updating...</value>
+  </data>
+  <data name="UpdateApplySuccessMessage" xml:space="preserve">
+    <value>...Update succeeded</value>
+  </data>
+  <data name="UpdateCheckCommandHelp" xml:space="preserve">
+    <value>Check the currently installed template packs for updates.</value>
   </data>
 </root>

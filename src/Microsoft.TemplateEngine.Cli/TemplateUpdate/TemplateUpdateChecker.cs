@@ -7,8 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
+using Microsoft.TemplateEngine.Edge.Settings;
 
-namespace Microsoft.TemplateEngine.Cli
+namespace Microsoft.TemplateEngine.Cli.TemplateUpdater
 {
     public class TemplateUpdateChecker
     {
@@ -24,37 +25,9 @@ namespace Microsoft.TemplateEngine.Cli
         public async Task<IReadOnlyList<IUpdateUnitDescriptor>> CheckForUpdatesAsync(IReadOnlyList<IInstallUnitDescriptor> installUnitsToCheck)
         {
             EnsureFactoryToUpdaterMapping();
-            Dictionary<Guid, List<IInstallUnitDescriptor>> installUnitsToCheckForUpdates = new Dictionary<Guid, List<IInstallUnitDescriptor>>();
-            List<IInstallUnitDescriptor> descriptorsWithoutUpdaters = new List<IInstallUnitDescriptor>();
+
+            IReadOnlyDictionary<Guid, List<IInstallUnitDescriptor>> installUnitsToCheckForUpdates = GetInstallUnitsToCheckForUpdates(installUnitsToCheck);
             List<IUpdateUnitDescriptor> updateDescriptors = new List<IUpdateUnitDescriptor>();
-
-            // collect the descriptors by their factoryId, ignoring descriptors that don't have corresponding factories or updaters.
-            foreach (IInstallUnitDescriptor descriptor in installUnitsToCheck)
-            {
-                if (_factoryIdToUpdaterMap.TryGetValue(descriptor.FactoryId, out IUpdater updater))
-                {
-                    if (!installUnitsToCheckForUpdates.TryGetValue(descriptor.FactoryId, out List<IInstallUnitDescriptor> updateList))
-                    {
-                        updateList = new List<IInstallUnitDescriptor>();
-                        installUnitsToCheckForUpdates[descriptor.FactoryId] = updateList;
-                    }
-
-                    updateList.Add(descriptor);
-                }
-                else
-                {
-                    descriptorsWithoutUpdaters.Add(descriptor);
-                }
-            }
-
-            if (descriptorsWithoutUpdaters.Count > 0)
-            {
-                Reporter.Output.WriteLine(LocalizableStrings.UpdateCheckerNotAvailable.Bold().Red());
-                foreach (IInstallUnitDescriptor descriptor in descriptorsWithoutUpdaters)
-                {
-                    Reporter.Output.WriteLine($"\t{descriptor.UserReadableIdentifier}".Bold().Red());
-                }
-            }
 
             // check for updates
             foreach (KeyValuePair<Guid, List<IInstallUnitDescriptor>> descriptorsForType in installUnitsToCheckForUpdates)
@@ -82,6 +55,44 @@ namespace Microsoft.TemplateEngine.Cli
             return updateDescriptors;
         }
 
+        private IReadOnlyDictionary<Guid, List<IInstallUnitDescriptor>> GetInstallUnitsToCheckForUpdates(IReadOnlyList<IInstallUnitDescriptor> installUnitsToCheck)
+        {
+            Dictionary<Guid, List<IInstallUnitDescriptor>> installUnitsToCheckForUpdates = new Dictionary<Guid, List<IInstallUnitDescriptor>>();
+            List<IInstallUnitDescriptor> descriptorsWithoutUpdaters = new List<IInstallUnitDescriptor>();
+
+            // collect the descriptors by their factoryId, ignoring descriptors that don't have corresponding factories or updaters.
+            foreach (IInstallUnitDescriptor descriptor in installUnitsToCheck)
+            {
+                if (_factoryIdToUpdaterMap.ContainsKey(descriptor.FactoryId))
+                {
+                    if (!installUnitsToCheckForUpdates.TryGetValue(descriptor.FactoryId, out List<IInstallUnitDescriptor> updateList))
+                    {
+                        updateList = new List<IInstallUnitDescriptor>();
+                        installUnitsToCheckForUpdates[descriptor.FactoryId] = updateList;
+                    }
+
+                    updateList.Add(descriptor);
+                }
+                else
+                {
+                    descriptorsWithoutUpdaters.Add(descriptor);
+                }
+            }
+
+            if (descriptorsWithoutUpdaters.Count > 0)
+            {
+                Reporter.Output.WriteLine(LocalizableStrings.UpdateCheckerNotAvailable.Bold().Red());
+                foreach (IInstallUnitDescriptor descriptor in descriptorsWithoutUpdaters)
+                {
+                    Reporter.Output.WriteLine($"  {descriptor.UninstallString}".Bold().Red());
+                }
+
+                Reporter.Output.WriteLine();
+            }
+
+            return installUnitsToCheckForUpdates;
+        }
+
         public bool TryGetUpdaterForDescriptorFactoryId(Guid factoryId, out IUpdater updater)
         {
             EnsureFactoryToUpdaterMapping();
@@ -93,10 +104,21 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (_factoryIdToUpdaterMap == null)
             {
+                IReadOnlyList<IInstallUnitDescriptor> existingInstallDescriptors;
+                if (_environmentSettings.SettingsLoader is SettingsLoader settingsLoader)
+                {
+                    existingInstallDescriptors = settingsLoader.InstallUnitDescriptorCache.Descriptors.Values.ToList();
+                }
+                else
+                {
+                    existingInstallDescriptors = new List<IInstallUnitDescriptor>();
+                }
+
                 Dictionary<Guid, IUpdater> factoryIdToUpdaterMap = new Dictionary<Guid, IUpdater>();
 
                 foreach (IUpdater updater in _environmentSettings.SettingsLoader.Components.OfType<IUpdater>().ToList())
                 {
+                    updater.Configure(_environmentSettings, existingInstallDescriptors);
                     factoryIdToUpdaterMap[updater.DescriptorFactoryId] = updater;
                 }
 

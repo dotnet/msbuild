@@ -138,6 +138,12 @@ namespace dotnet_new3
 
                 installer.InstallPackages(toInstallList);
             }
+
+            // copy the in-box nuget template search metadata file.
+            if (paths.FileExists(paths.Global.DefaultInstallTemplateSearchData))
+            {
+                paths.Copy(paths.Global.DefaultInstallTemplateSearchData, paths.User.NuGetScrapedTemplateSearchFile);
+            }
         }
     }
 }

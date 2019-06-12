@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
+using Microsoft.TemplateEngine.Cli.TemplateUpdater;
 using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
@@ -15,6 +17,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
         // a mapping from install descriptor identifiers to the update that should be emitted.
         [ThreadStatic]
         private static IReadOnlyDictionary<string, IUpdateUnitDescriptor> _mockUpdates;
+
+        public void Configure(IEngineEnvironmentSettings environmentSettings, IReadOnlyList<IInstallUnitDescriptor> existingInstallDescriptors)
+        {
+            // do nothing, this mock isn't trying to do real matches, so no need to store / use the existingInstallDescriptors
+        }
 
         // Pass in the update descriptors that should be emitted.
         // The checker matches them based on the IInstallUnitDescriptor.Identifier
@@ -47,7 +54,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 
         public void ApplyUpdates(IInstaller installer, IReadOnlyList<IUpdateUnitDescriptor> updatesToApply)
         {
-            // TODO: revisit whether this should happen, or something else.
             if (updatesToApply.Any(x => x.InstallUnitDescriptor.FactoryId != DescriptorFactoryId))
             {
                 throw new Exception("Incorrect descriptor type");

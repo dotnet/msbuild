@@ -15,21 +15,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 
             // template one
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "bar" });
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "bar" });
             ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
             // template two
             List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
-            templateTwoDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            templateTwoDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
             ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
             // template three
             List<MatchInfo> templateThreeDispositions = new List<MatchInfo>();
-            templateThreeDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
-            templateThreeDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "baz" });
+            templateThreeDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
+            templateThreeDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "baz" });
             ITemplateMatchInfo templateThreeMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateThreeDispositions);
             matchInfo.Add(templateThreeMatchInfo);
 
@@ -50,8 +50,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 
             // template one
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "bar" });
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "bar" });
             ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
@@ -76,13 +76,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 
             // template one
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
             ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
             // template two
             List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
-            templateTwoDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            templateTwoDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
             ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
