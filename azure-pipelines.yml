@@ -100,38 +100,40 @@ jobs:
         displayName: Windows Build / Publish
 
     - job: OSX
-      parameters:
-        pool:
-          name: Hosted macOS
-        strategy:
-          matrix:
-            debug_configuration:
-              _BuildConfig: Debug
-            release_configuration:
-              _BuildConfig: Release
-        steps:
-        - script: eng/common/cibuild.sh
-            --configuration $(_BuildConfig)
-            --prepareMachine
-          name: Build
-          displayName: Build
-          condition: succeeded()
+      pool:
+        name: Hosted macOS
+      strategy:
+        matrix:
+          debug_configuration:
+            _BuildConfig: Debug
+          release_configuration:
+            _BuildConfig: Release
+      steps:
+      - checkout: self
+        clean: true
+      - script: eng/common/cibuild.sh
+          --configuration $(_BuildConfig)
+          --prepareMachine
+        name: Build
+        displayName: Build
+        condition: succeeded()
         
     - job: Linux
-      parameters:
-        pool:
-          name: Hosted Ubuntu 1604
-        container: LinuxContainer
-        strategy:
-          matrix:
-            debug_configuration:
-              _BuildConfig: Debug
-            release_configuration:
-              _BuildConfig: Release
-        steps:
-        - script: eng/common/cibuild.sh
-            --configuration $(_BuildConfig)
-            --prepareMachine
-          name: Build
-          displayName: Build
-          condition: succeeded()
+      pool:
+        name: Hosted Ubuntu 1604
+      container: LinuxContainer
+      strategy:
+        matrix:
+          debug_configuration:
+            _BuildConfig: Debug
+          release_configuration:
+            _BuildConfig: Release
+      steps:
+      - checkout: self
+        clean: true
+      - script: eng/common/cibuild.sh
+          --configuration $(_BuildConfig)
+          --prepareMachine
+        name: Build
+        displayName: Build
+        condition: succeeded()
