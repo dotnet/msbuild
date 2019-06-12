@@ -349,6 +349,25 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 return item2;
             }
 
+            if (item1.ItemType == ConflictItemType.CopyLocal && item2.ItemType == ConflictItemType.CopyLocal)
+            {
+                // If two items are copy local, we must pick one even if versions are identical, as only 
+                // one of them can be copied locally. The policy here must be deterministic, but it can
+                // be chosen arbitrarily. The assumption is that the assemblies are fully semantically 
+                // equivalent.
+                //
+                // We choose ordinal string comparison of package id as a final tie-breaker for this case. 
+                // We will get here in the real case of frameworks with overlapping assemblies (including 
+                // version) and self-contained apps. The assembly we choose here is not guaranteed to match
+                // the assembly that would be chosen by the host for a framework-dependent app. The host
+                // is free to make its own deterministic but arbitrary choice.
+                int cmp = string.CompareOrdinal(item1.PackageId, item2.PackageId);
+                if (cmp != 0)
+                {
+                    return cmp < 0 ? item1 : item2;
+                }
+            }
+
             if (logUnresolvedConflicts)
             {
                 string message = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ConflictCouldNotDetermineWinner);
