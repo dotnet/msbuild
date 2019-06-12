@@ -132,6 +132,11 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 var assetItem = CreateAssetItem(assetPath, assetType, runtimePack);
+
+                assetItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion")?.Value);
+                assetItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion")?.Value);
+                assetItem.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken")?.Value);
+
                 runtimePackAssets.Add(assetItem);
             }
 
