@@ -14,7 +14,7 @@
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to implement custom MSBuild tasks.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
-    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
+    <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">partial</ApplyNgenOptimization>
   </PropertyGroup>
 
   <ItemGroup>
