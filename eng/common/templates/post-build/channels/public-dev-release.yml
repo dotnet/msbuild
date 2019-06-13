@@ -115,7 +115,7 @@ stages:
         - task: PowerShell@2
           displayName: Check Symbol Availability
           inputs:
-            filePath: $(Build.SourcesDirectory)/eng/common/release/symbols-validation.ps1
+            filePath: $(Build.SourcesDirectory)/eng/common/post-build/symbols-validation.ps1
             arguments: -InputPath $(Build.ArtifactStagingDirectory)/PackageArtifacts/ -ExtractPath $(Agent.BuildDirectory)/Temp/ -DotnetSymbolVersion $(SymbolToolVersion)
 
   - job:

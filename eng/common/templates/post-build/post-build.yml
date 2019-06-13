@@ -45,15 +45,15 @@ stages:
         - task: PowerShell@2
           displayName: Validate
           inputs:
-            filePath: $(Build.SourcesDirectory)/eng/common/release/sourcelink-validation.ps1
+            filePath: $(Build.SourcesDirectory)/eng/common/post-build/sourcelink-validation.ps1
             arguments: -InputPath $(Build.ArtifactStagingDirectory)/BlobArtifacts/ 
               -ExtractPath $(Agent.BuildDirectory)/Extract/ 
               -GHRepoName $(Build.Repository.Name) 
               -GHCommit $(Build.SourceVersion)
               -SourcelinkCliVersion $(SourceLinkCLIVersion)
 
-- template: \eng\common\templates\release\channels\public-dev-release.yml
+- template: \eng\common\templates\post-build\channels\public-dev-release.yml
   parameters:
     enableSymbolValidation: ${{ parameters.enableSymbolValidation }}
 
-- template: \eng\common\templates\release\channels\public-validation-release.yml
+- template: \eng\common\templates\post-build\channels\public-validation-release.yml
