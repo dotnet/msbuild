@@ -4,6 +4,8 @@
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -15,27 +17,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void ItHashesAllParameters()
         {
-            var inputProperties = typeof(ResolvePackageAssets)
-                .GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                .Where(p => !p.IsDefined(typeof(OutputAttribute)) &&
-                            p.Name != nameof(ResolvePackageAssets.DesignTimeBuild))
-                .OrderBy(p => p.Name, StringComparer.Ordinal);
+            IEnumerable<PropertyInfo> inputProperties;
 
-            var requiredProperties = inputProperties
-                .Where(p => p.IsDefined(typeof(RequiredAttribute)));
-
-            var task = new ResolvePackageAssets();
-
-            // Initialize all required properties as a genuine task invocation would. We do this
-            // because HashSettings need not defend against required parameters being null.
-            foreach (var property in requiredProperties)
-            {
-                property.PropertyType.Should().Be(
-                    typeof(string), 
-                    because: $"this test hasn't been updated to handle non-string required task parameters like {property.Name}");
-
-                property.SetValue(task, "_");
-            }
+            var task = InitializeTask(out inputProperties);
 
             byte[] oldHash;
             try
@@ -79,6 +63,50 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
                 oldHash = newHash;
             }
+        }
+
+        [Fact]
+        public void ItDoesNotHashDesignTimeBuild()
+        {
+            var task = InitializeTask(out _);
+
+            task.DesignTimeBuild = false;
+
+            byte[] oldHash = task.HashSettings();
+
+            task.DesignTimeBuild = true;
+
+            byte[] newHash = task.HashSettings();
+
+            newHash.Should().BeEquivalentTo(oldHash,
+                because: $"{nameof(task.DesignTimeBuild)} should not be included in hash.");
+        }
+
+        private ResolvePackageAssets InitializeTask(out IEnumerable<PropertyInfo> inputProperties)
+        {
+            inputProperties = typeof(ResolvePackageAssets)
+                .GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
+                .Where(p => !p.IsDefined(typeof(OutputAttribute)) &&
+                            p.Name != nameof(ResolvePackageAssets.DesignTimeBuild))
+                .OrderBy(p => p.Name, StringComparer.Ordinal);
+
+            var requiredProperties = inputProperties
+                .Where(p => p.IsDefined(typeof(RequiredAttribute)));
+
+            var task = new ResolvePackageAssets();
+
+            // Initialize all required properties as a genuine task invocation would. We do this
+            // because HashSettings need not defend against required parameters being null.
+            foreach (var property in requiredProperties)
+            {
+                property.PropertyType.Should().Be(
+                    typeof(string),
+                    because: $"this test hasn't been updated to handle non-string required task parameters like {property.Name}");
+
+                property.SetValue(task, "_");
+            }
+
+            return task;
         }
     }
 }
