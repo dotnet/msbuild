@@ -1847,6 +1847,203 @@ $@"
             innerBuild1WithReferenceToInnerBuild2.ProjectReferences.ShouldBeEquivalentTo(new []{outerBuild2, innerBuild2});
         }
 
+        [Fact]
+        public void EnvironmentVariablesReadReturnsNullWhenDisabled()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "");
+                var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
+                <Project>
+                  <PropertyGroup>
+                    <NotAnEnvVar>booyah</NotAnEnvVar>
+                  </PropertyGroup>
+                </Project>");
+
+                var graph = new ProjectGraph(projFile.Path);
+                graph.ProjectNodes.ShouldNotBeNull();
+                graph.ProjectNodes.Count.ShouldBe(1);
+                var first = graph.ProjectNodes.First();
+                first.ProjectInstance.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.ShouldBeNull();
+            }
+        }
+
+        [Fact]
+        public void EnvironmentVariablesReadReturnsNotNullWhenEnabled()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "1");
+
+                var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
+                <Project>
+                  <PropertyGroup>
+                    <NotAnEnvVar>booyah</NotAnEnvVar>
+                  </PropertyGroup>
+                </Project>");
+
+                var graph = new ProjectGraph(projFile.Path);
+                graph.ProjectNodes.ShouldNotBeNull();
+                graph.ProjectNodes.Count.ShouldBe(1);
+                var first = graph.ProjectNodes.First();
+                first.ProjectInstance.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.Count.ShouldBe(0);
+            }
+        }
+
+        [Fact]
+        public void EnvironmentVariablesReadReturnsNumActuallyRead()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "1");
+
+                var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
+                <Project>
+                  <PropertyGroup>
+                    <NotAnEnvVar>$(Path)</NotAnEnvVar>
+                  </PropertyGroup>
+                </Project>");
+
+                var graph = new ProjectGraph(projFile.Path);
+                graph.ProjectNodes.ShouldNotBeNull();
+                graph.ProjectNodes.Count.ShouldBe(1);
+                var first = graph.ProjectNodes.First();
+                first.ProjectInstance.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.Count.ShouldBe(1);
+                first.ProjectInstance.EnvironmentVariableReads.First().ShouldBe("Path");
+            }
+        }
+
+        [Fact]
+        public void EnvironmentVariablesReadIgnoresOverwrittenEnvVars()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "1");
+                env.SetEnvironmentVariable("SomeTestEnvVar", "SomeValue");
+
+                var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
+                <Project>
+                  <PropertyGroup>
+                    <NotAnEnvVar>$(Path)</NotAnEnvVar>
+                    <SomeTestEnvVar>Overwritten!</SomeTestEnvVar>
+                  </PropertyGroup>
+                </Project>");
+
+                var graph = new ProjectGraph(projFile.Path);
+                graph.ProjectNodes.ShouldNotBeNull();
+                graph.ProjectNodes.Count.ShouldBe(1);
+                var first = graph.ProjectNodes.First();
+                first.ProjectInstance.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.Count.ShouldBe(1); // NOT TWO!
+                first.ProjectInstance.EnvironmentVariableReads.First().ShouldBe("Path");
+            }
+        }
+
+        [Fact]
+        public void EnvironmentVariablesReadReturnsNumActuallyReadMultiple()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "1");
+                env.SetEnvironmentVariable("SomeTestEnvVar", "SomeValue");
+
+                var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
+                <Project>
+                  <PropertyGroup>
+                    <NotAnEnvVar>$(Path)</NotAnEnvVar>
+                    <Property2>$(SomeTestEnvVar)</Property>
+                    <CompName>$(ComputerName)</CompName>
+                  </PropertyGroup>
+                </Project>");
+
+                var graph = new ProjectGraph(projFile.Path);
+                graph.ProjectNodes.ShouldNotBeNull();
+                graph.ProjectNodes.Count.ShouldBe(1);
+                var first = graph.ProjectNodes.First();
+                first.ProjectInstance.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.ShouldNotBeNull();
+                first.ProjectInstance.EnvironmentVariableReads.Count.ShouldBe(3);
+            }
+        }
+
+        [Fact]
+        public void UninitializedVariablesNullWhenDisabled()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "");
+
+                var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
+                <Project>
+                  <PropertyGroup>
+                    <NotAnEnvVar>$(This_Should_Not_Exist)</NotAnEnvVar>
+                  </PropertyGroup>
+                </Project>");
+
+                var graph = new ProjectGraph(projFile.Path);
+                graph.ProjectNodes.ShouldNotBeNull();
+                graph.ProjectNodes.Count.ShouldBe(1);
+                var first = graph.ProjectNodes.First();
+                first.ProjectInstance.ShouldNotBeNull();
+                first.ProjectInstance.UninitializedPropertyReads.ShouldBeNull();
+            }
+        }
+
+        [Fact]
+        public void UninitializedVariablesWithActualValues()
+        {
+            int defaultUninitPropCount = 0;
+
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "1");
+
+                var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
+                <Project>
+                  <PropertyGroup>
+                  </PropertyGroup>
+                </Project>");
+
+                var graph = new ProjectGraph(projFile.Path);
+                graph.ProjectNodes.ShouldNotBeNull();
+                graph.ProjectNodes.Count.ShouldBe(1);
+                var first = graph.ProjectNodes.First();
+                first.ProjectInstance.ShouldNotBeNull();
+                first.ProjectInstance.UninitializedPropertyReads.ShouldNotBeNull();
+
+                // Determine how many uninitialized variables are present by default.
+                defaultUninitPropCount = first.ProjectInstance.UninitializedPropertyReads.Count;
+            }
+
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "1");
+
+                var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
+                <Project>
+                  <PropertyGroup Condition=""'$(This_Should_Not_Exist)'=='Nope!'"">
+                  </PropertyGroup>
+                </Project>");
+
+                var graph = new ProjectGraph(projFile.Path);
+                graph.ProjectNodes.ShouldNotBeNull();
+                graph.ProjectNodes.Count.ShouldBe(1);
+                var first = graph.ProjectNodes.First();
+                first.ProjectInstance.ShouldNotBeNull();
+                first.ProjectInstance.UninitializedPropertyReads.ShouldNotBeNull();
+                int count = first.ProjectInstance.UninitializedPropertyReads.Count;
+
+                first.ProjectInstance.UninitializedPropertyReads.Where(p => p.Equals("This_Should_Not_Exist")).FirstOrDefault().ShouldNotBeNull();
+                (count - defaultUninitPropCount).ShouldBe(1);
+            }
+        }
+
         public static IEnumerable<object[]> AllNodesShouldHaveGraphBuildGlobalPropertyData
         {
             get

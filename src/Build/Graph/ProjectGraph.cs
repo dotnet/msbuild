@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -74,6 +75,16 @@ namespace Microsoft.Build.Experimental.Graph
         public IReadOnlyCollection<ProjectGraphNode> ProjectNodesTopologicallySorted => _projectNodesTopologicallySorted.Value;
 
         public IReadOnlyCollection<ProjectGraphNode> GraphRoots { get; }
+
+        /// <summary>
+        ///     Gets a distinct enumeration of all of the environment variables reads during evaluation.
+        /// </summary>
+        public IEnumerable<string> EnvironmentVariableReads => _projectNodesTopologicallySorted?.Value.Select(p => p.ProjectInstance).SelectMany(pi => pi.EnvironmentVariableReads).Distinct();
+
+        /// <summary>
+        ///     Get a distinct enumeration of all the uninitialized property reads during evaluation.
+        /// </summary>
+        public IEnumerable<string> UninitializedPropertyReads => _projectNodesTopologicallySorted?.Value.Select(p => p.ProjectInstance).SelectMany(pi => pi.UninitializedPropertyReads).Distinct();
 
         /// <summary>
         ///     Constructs a graph starting from the given project file, evaluating with the global project collection and no

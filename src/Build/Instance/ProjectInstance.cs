@@ -178,6 +178,11 @@ namespace Microsoft.Build.Execution
         private bool _translateEntireState;
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
+        // Fields for tracking property usage:
+        private bool _trackPropertyReads = false;
+        private HashSet<string> _environmentVariables;
+        private HashSet<string> _environmentVariableReads;
+        private HashSet<string> _uninitializedPropertyReads;
 
         /// <summary>
         /// Creates a ProjectInstance directly.
@@ -819,6 +824,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// The collection of environment variables read.
+        /// </summary>
+        public ICollection<string> EnvironmentVariableReads => _environmentVariableReads;
+
+        /// <summary>
+        /// The collection of uninitialized variables read.
+        /// </summary>
+        public ICollection<string> UninitializedPropertyReads => _uninitializedPropertyReads;
+
+        /// <summary>
         /// Task classes and locations known to this project. 
         /// This is the project-specific task registry, which is consulted before
         /// the toolset's task registry.
@@ -1314,11 +1329,30 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvVar)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable);
             _properties.Set(property);
+
+            if (_trackPropertyReads)
+            {
+                if (isEnvVar)
+                {
+                    if (!_environmentVariables.Contains(name))
+                    {
+                        // If it's a new env var, track it.
+                        _environmentVariables.Add(name);
+                    }
+                }
+                else if (_environmentVariables.Contains(name))
+                {
+                    // If it's NOT an env var but the property has the same name,
+                    // then we're not dependent on the env var any more: remove it.
+                    _environmentVariables.Remove(name);
+                }
+            }
+
             return property;
         }
 
@@ -1383,7 +1417,14 @@ namespace Microsoft.Build.Execution
         [DebuggerStepThrough]
         public ProjectPropertyInstance GetProperty(string name)
         {
-            return _properties[name];
+            ProjectPropertyInstance prop = _properties[name];
+
+            if (_trackPropertyReads)
+            {
+                this.TrackPropertyRead(name, prop == null);
+            }
+
+            return prop;
         }
 
         /// <summary>
@@ -1394,7 +1435,14 @@ namespace Microsoft.Build.Execution
         [DebuggerStepThrough]
         ProjectPropertyInstance IPropertyProvider<ProjectPropertyInstance>.GetProperty(string name, int startIndex, int endIndex)
         {
-            return _properties.GetProperty(name, startIndex, endIndex);
+            ProjectPropertyInstance prop = _properties.GetProperty(name, startIndex, endIndex);
+
+            if (_trackPropertyReads)
+            {
+                this.TrackPropertyRead(name.Substring(startIndex, endIndex-startIndex + 1), prop == null);
+            }
+
+            return prop;
         }
 
         /// <summary>
@@ -1415,6 +1463,11 @@ namespace Microsoft.Build.Execution
         {
             ProjectPropertyInstance property = _properties[name];
             string value = (property == null) ? String.Empty : property.EvaluatedValue;
+
+            if (_trackPropertyReads)
+            {
+                this.TrackPropertyRead(name, property == null);
+            }
 
             return value;
         }
@@ -2477,6 +2530,14 @@ namespace Microsoft.Build.Execution
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
 
+            _trackPropertyReads = buildParameters.TrackReadsOnEnvironmentVariables;
+            if (_trackPropertyReads)
+            {
+                _environmentVariables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                _environmentVariableReads = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                _uninitializedPropertyReads = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            }
+
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);
@@ -2708,6 +2769,31 @@ namespace Microsoft.Build.Execution
                 // The caller has prevented users setting them themselves.
                 ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable);
                 _properties.Set(instance);
+            }
+        }
+
+        /// <summary>
+        /// Tracks this property read if it's from an environment variable or uninitialized.
+        /// </summary>
+        /// <param name="name">The name of the property being read.</param>
+        private void TrackPropertyRead(string name, bool propertyMissing)
+        {
+            if (string.IsNullOrEmpty(name))
+                return;
+
+            if (propertyMissing)
+            {
+                if (!_uninitializedPropertyReads.Contains(name))
+                {
+                    _uninitializedPropertyReads.Add(name);
+                }
+            }
+            else if (_environmentVariables.Contains(name))
+            {
+                if (!_environmentVariableReads.Contains(name))
+                {
+                    _environmentVariableReads.Add(name);
+                }
             }
         }
     }

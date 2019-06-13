@@ -97,6 +97,11 @@ namespace Microsoft.Build.Execution
         private static string s_msbuildExeKnownToExistAt;
 
         /// <summary>
+        /// Specifies whether or not MSBuild will track environment variable reads
+        /// </summary>
+        private static bool? s_trackReadsOnEnvironmentVariables;
+
+        /// <summary>
         /// The build id
         /// </summary>
         private int _buildId;
@@ -761,6 +766,15 @@ namespace Microsoft.Build.Execution
         {
             get => _outputResultsCacheFile;
             set => _outputResultsCacheFile = value;
+        }
+
+        /// <summary>
+        /// Track the environment variables actually read and used.
+        /// </summary>
+        public bool TrackReadsOnEnvironmentVariables
+        {
+            get => GetStaticBoolVariableOrDefault("MSBUILDTRACKENVVARREADS", ref s_trackReadsOnEnvironmentVariables, false);
+            set => s_trackReadsOnEnvironmentVariables = value;
         }
 
         /// <summary>

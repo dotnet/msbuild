@@ -973,6 +973,7 @@ namespace Microsoft.Build.Execution
         public bool ShutdownInProcNodeOnBuildFinish { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ToolsetDefinitionLocations ToolsetDefinitionLocations { get { throw null; } set { } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.Toolset> Toolsets { get { throw null; } }
+        public bool TrackReadsOnEnvironmentVariables { get { throw null; } set { } }
         public System.Globalization.CultureInfo UICulture { get { throw null; } set { } }
         public bool UseSynchronousLogging { get { throw null; } set { } }
         public System.Collections.Generic.ISet<string> WarningsAsErrors { get { throw null; } set { } }
@@ -1095,6 +1096,7 @@ namespace Microsoft.Build.Execution
         public ProjectInstance(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.List<string> DefaultTargets { get { throw null; } }
         public string Directory { get { throw null; } }
+        public System.Collections.Generic.ICollection<string> EnvironmentVariableReads { get { throw null; } }
         public System.Collections.Generic.List<Microsoft.Build.Construction.ProjectItemElement> EvaluatedItemElements { get { throw null; } }
         public int EvaluationId { get { throw null; } set { } }
         public string FullPath { get { throw null; } }
@@ -1109,6 +1111,7 @@ namespace Microsoft.Build.Execution
         public System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.ProjectTargetInstance> Targets { get { throw null; } }
         public string ToolsVersion { get { throw null; } }
         public bool TranslateEntireState { get { throw null; } set { } }
+        public System.Collections.Generic.ICollection<string> UninitializedPropertyReads { get { throw null; } }
         public Microsoft.Build.Execution.ProjectItemInstance AddItem(string itemType, string evaluatedInclude) { throw null; }
         public Microsoft.Build.Execution.ProjectItemInstance AddItem(string itemType, string evaluatedInclude, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> metadata) { throw null; }
         public bool Build() { throw null; }
@@ -1425,9 +1428,11 @@ namespace Microsoft.Build.Experimental.Graph
         public ProjectGraph(string entryProjectFile, System.Collections.Generic.IDictionary<string, string> globalProperties) { }
         public ProjectGraph(string entryProjectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> EntryPointNodes { get { throw null; } }
+        public System.Collections.Generic.IEnumerable<string> EnvironmentVariableReads { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> GraphRoots { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> ProjectNodes { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> ProjectNodesTopologicallySorted { get { throw null; } }
+        public System.Collections.Generic.IEnumerable<string> UninitializedPropertyReads { get { throw null; } }
         public System.Collections.Generic.IReadOnlyDictionary<Microsoft.Build.Experimental.Graph.ProjectGraphNode, System.Collections.Immutable.ImmutableList<string>> GetTargetLists(System.Collections.Generic.ICollection<string> entryProjectTargets) { throw null; }
         public delegate Microsoft.Build.Execution.ProjectInstance ProjectInstanceFactoryFunc(string projectPath, System.Collections.Generic.Dictionary<string, string> globalProperties, Microsoft.Build.Evaluation.ProjectCollection projectCollection);
     }
