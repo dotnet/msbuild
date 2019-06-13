@@ -120,9 +120,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             Dictionary<string, string> templateParamValues = new Dictionary<string, string>();
             Dictionary<string, IList<string>> remainingParams = new Dictionary<string, IList<string>>();
 
-            //HashSet<string> hostSpecificOverrides = new HashSet<string>(hostSpecificTemplateData.LongNameOverrides.Values);
-            //hostSpecificOverrides.UnionWith(hostSpecificTemplateData.ShortNameOverrides.Values);
-
             Dictionary<string, string> overrideToCanonicalMap = hostSpecificTemplateData.LongNameOverrides.ToDictionary(o => o.Value, o => o.Key);
             foreach (KeyValuePair<string, string> shortNameOverride in hostSpecificTemplateData.ShortNameOverrides)
             {
@@ -146,10 +143,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
                 {
                     templateParamValues.Add(canonical, inputParam.Value);
                 }
-                //else if (hostSpecificOverrides.Contains(inputParam.Key))
-                //{
-                //    templateParamValues.Add(inputParam.Key, inputParam.Value);
-                //}
                 else
                 {
                     remainingParams.Add(inputParam.Key, new List<string>());
