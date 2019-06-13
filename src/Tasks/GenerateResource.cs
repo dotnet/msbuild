@@ -206,6 +206,13 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Indicates whether resources should be passed through in their current serialization
+        /// format. .NET Core-targeted assemblies should use this; it's the only way to support
+        /// non-string resources with MSBuild running on .NET Core.
+        /// </summary>
+        public bool UsePreserializedResources { get; set; } = false;
+
+        /// <summary>
         /// Additional inputs to the dependency checking done by this task. For example,
         /// the project and targets files typically should be inputs, so that if they are updated,
         /// all resources are regenerated.
@@ -829,6 +836,7 @@ namespace Microsoft.Build.Tasks
                                         _satelliteInputs,
                                         outputsToProcess,
                                         UseSourcePath,
+                                        UsePreserializedResources,
                                         StronglyTypedLanguage,
                                         _stronglyTypedNamespace,
                                         _stronglyTypedManifestPrefix,
@@ -2362,6 +2370,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private string _resWOutputDirectory;
 
+        private bool _usePreserializedResources;
+
         internal List<ITaskItem> ExtractedResWFiles
         {
             get
@@ -2431,6 +2441,7 @@ namespace Microsoft.Build.Tasks
             List<ITaskItem> satelliteInputs,
             List<ITaskItem> outputs,
             bool sourcePath,
+            bool usePreserializedResources,
             string language,
             string namespacename,
             string resourcesNamespace,
@@ -2456,6 +2467,7 @@ namespace Microsoft.Build.Tasks
             _extractResWFiles = extractingResWFiles;
             _resWOutputDirectory = resWOutputDirectory;
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
+            _usePreserializedResources = usePreserializedResources;
 
 #if FEATURE_ASSEMBLY_LOADFROM
             // If references were passed in, we will have to give the ResxResourceReader an object
@@ -3016,49 +3028,57 @@ namespace Microsoft.Build.Tasks
                         break;
 
                     case Format.XML:
+                        // On full framework, the default is to use the longstanding
+                        // deserialize/reserialize approach. On Core, always use the new
+                        // preserialized approach.
 #if FEATURE_RESX_RESOURCE_READER
-                        ResXResourceReader resXReader = null;
-                        if (_typeResolver != null)
+                        if (!_usePreserializedResources)
                         {
-                            resXReader = new ResXResourceReader(filename, _typeResolver);
+                            ResXResourceReader resXReader = null;
+                            if (_typeResolver != null)
+                            {
+                                resXReader = new ResXResourceReader(filename, _typeResolver);
+                            }
+                            else
+                            {
+                                resXReader = new ResXResourceReader(filename);
+                            }
+
+                            if (shouldUseSourcePath)
+                            {
+                                String fullPath = Path.GetFullPath(filename);
+                                resXReader.BasePath = Path.GetDirectoryName(fullPath);
+                            }
+                            // ReadResources closes the reader for us
+                            ReadResources(reader, resXReader, filename);
                         }
                         else
+#endif
                         {
-                            resXReader = new ResXResourceReader(filename);
-                        }
-
-                        if (shouldUseSourcePath)
-                        {
-                            String fullPath = Path.GetFullPath(filename);
-                            resXReader.BasePath = Path.GetDirectoryName(fullPath);
-                        }
-                        // ReadResources closes the reader for us
-                        ReadResources(reader, resXReader, filename);
-                        break;
-#else
-                        if (Traits.Instance.EscapeHatches.UseMinimalResxParsingInCoreScenarios)
-                        {
-                            using (var xmlReader = new XmlTextReader(filename))
+                            if (Traits.Instance.EscapeHatches.UseMinimalResxParsingInCoreScenarios)
                             {
-                                xmlReader.WhitespaceHandling = WhitespaceHandling.None;
-                                XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
-                                foreach (XElement dataElem in doc.Element("root").Elements("data"))
+                                using (var xmlReader = new XmlTextReader(filename))
                                 {
-                                    string name = dataElem.Attribute("name").Value;
-                                    string value = dataElem.Element("value").Value;
-                                    AddResource(reader, name, value, filename);
+                                    xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+                                    XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
+                                    foreach (XElement dataElem in doc.Element("root").Elements("data"))
+                                    {
+                                        string name = dataElem.Attribute("name").Value;
+                                        string value = dataElem.Element("value").Value;
+                                        AddResource(reader, name, value, filename);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath))
+                                {
+                                    AddResource(reader, resource, filename, 0, 0);
                                 }
                             }
                         }
-                        else
-                        {
-                            foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath))
-                            {
-                                AddResource(reader, resource, filename, 0, 0);
-                            }
-                        }
                         break;
-#endif
+
                     case Format.Binary:
 #if FEATURE_RESX_RESOURCE_READER
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
@@ -3323,13 +3343,16 @@ namespace Microsoft.Build.Tasks
                     break;
 
                 case Format.Binary:
-#if FEATURE_RESX_RESOURCE_READER
-                    WriteResources(reader, new ResourceWriter(File.OpenWrite(filename))); // closes writer for us
-#else
-                    WriteResources(reader, new PreserializedResourceWriter(File.OpenWrite(filename))); // closes writer for us
-#endif
+                    if (_usePreserializedResources)
+                    {
+                        // TODO: check TF/references and error if System.Resources.Extensions not available
+                        WriteResources(reader, new PreserializedResourceWriter(File.OpenWrite(filename))); // closes writer for us
+                    }
+                    else
+                    {
+                        WriteResources(reader, new ResourceWriter(File.OpenWrite(filename))); // closes writer for us
+                    }
                     break;
-
 
                 default:
                     // We should never get here, we've already checked the format
