@@ -4319,7 +4319,7 @@ elementFormDefault="qualified">
     <xs:element name="EntryPointProjectUniqueName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation>
-                <!-- _locID_text="EntryPointProjectUniqueName" _locComment="" -->Windows Application Packaging project-specific: Relative path to entry point project file
+                <!-- _locID_text="EntryPointProjectUniqueName" _locComment="" -->Windows Application Packaging project-specific: Relative path to entry point project file.
             </xs:documentation>
         </xs:annotation>
     </xs:element>
