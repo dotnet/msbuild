@@ -674,6 +674,7 @@ System.Security.SecureString.dll
 System.ServiceModel.Web.dll
 System.ServiceProcess.dll
 System.Text.Encoding.dll
+System.Text.Encoding.CodePages.dll
 System.Text.Encoding.Extensions.dll
 System.Text.Encodings.Web.dll
 System.Text.RegularExpressions.dll
