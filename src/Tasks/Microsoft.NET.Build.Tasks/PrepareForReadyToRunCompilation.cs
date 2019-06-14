@@ -69,7 +69,9 @@ namespace Microsoft.NET.Build.Tasks
             string supportedRuntimeIdentifiers = frameworkRef == null ? null : frameworkRef.GetMetadata("RuntimePackRuntimeIdentifiers");
 
             // Get information on the runtime package used for the current target
-            ITaskItem frameworkPack = RuntimePacks.Where(pack => pack.ItemSpec.EndsWith(".Microsoft.NETCore.App", StringComparison.InvariantCultureIgnoreCase)).SingleOrDefault();
+            ITaskItem frameworkPack = RuntimePacks.Where(pack => 
+                    pack.GetMetadata(MetadataKeys.FrameworkName).Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
+                .SingleOrDefault();
             _runtimeIdentifier = frameworkPack == null ? null : frameworkPack.GetMetadata(MetadataKeys.RuntimeIdentifier);
             _packagePath = frameworkPack == null ? null : frameworkPack.GetMetadata(MetadataKeys.PackageDirectory);
 
