@@ -1951,13 +1951,11 @@ $@"
             using (var env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDTRACKENVVARREADS", "1");
-                env.SetEnvironmentVariable("SomeTestEnvVar", "SomeValue");
 
                 var projFile = env.CreateFile($"{Guid.NewGuid()}.proj", @"
                 <Project>
                   <PropertyGroup>
                     <NotAnEnvVar>$(Path)</NotAnEnvVar>
-                    <Property2>$(SomeTestEnvVar)</Property2>
                     <CompName>$(ComputerName)</CompName>
                   </PropertyGroup>
                 </Project>");
@@ -1971,7 +1969,7 @@ $@"
 
                 string readEnvVars = string.Join(", ", first.ProjectInstance.EnvironmentVariableReads);
                 string allEnvVars = string.Join(", ", first.ProjectInstance.TestEnvironmentalProperties.Select(p => p.Name));
-                first.ProjectInstance.EnvironmentVariableReads.Count.ShouldBe(3, $"All: {allEnvVars} | Read: {readEnvVars}");
+                first.ProjectInstance.EnvironmentVariableReads.Count.ShouldBe(2, $"All: {allEnvVars} | Read: {readEnvVars}");
             }
         }
 
