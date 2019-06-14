@@ -1957,7 +1957,7 @@ $@"
                 <Project>
                   <PropertyGroup>
                     <NotAnEnvVar>$(Path)</NotAnEnvVar>
-                    <Property2>$(SomeTestEnvVar)</Property>
+                    <Property2>$(SomeTestEnvVar)</Property2>
                     <CompName>$(ComputerName)</CompName>
                   </PropertyGroup>
                 </Project>");
@@ -1968,7 +1968,10 @@ $@"
                 var first = graph.ProjectNodes.First();
                 first.ProjectInstance.ShouldNotBeNull();
                 first.ProjectInstance.EnvironmentVariableReads.ShouldNotBeNull();
-                first.ProjectInstance.EnvironmentVariableReads.Count.ShouldBe(3);
+
+                string readEnvVars = string.Join(", ", first.ProjectInstance.EnvironmentVariableReads);
+                string allEnvVars = string.Join(", ", first.ProjectInstance.TestEnvironmentalProperties.Select(p => p.Name));
+                first.ProjectInstance.EnvironmentVariableReads.Count.ShouldBe(3, $"All: {allEnvVars} | Read: {readEnvVars}");
             }
         }
 

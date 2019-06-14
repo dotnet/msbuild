@@ -968,7 +968,6 @@ namespace Microsoft.Build.Execution
         public bool ShutdownInProcNodeOnBuildFinish { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ToolsetDefinitionLocations ToolsetDefinitionLocations { get { throw null; } set { } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.Toolset> Toolsets { get { throw null; } }
-        public bool TrackReadsOnEnvironmentVariables { get { throw null; } set { } }
         public System.Globalization.CultureInfo UICulture { get { throw null; } set { } }
         public bool UseSynchronousLogging { get { throw null; } set { } }
         public System.Collections.Generic.ISet<string> WarningsAsErrors { get { throw null; } set { } }
@@ -1423,6 +1422,7 @@ namespace Microsoft.Build.Experimental.Graph
         public ProjectGraph(string entryProjectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> EntryPointNodes { get { throw null; } }
         public System.Collections.Generic.IEnumerable<string> EnvironmentVariableReads { get { throw null; } }
+        public System.Collections.Generic.IEnumerable<string> EnvironmentVariablesImpactingBuild { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> GraphRoots { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> ProjectNodes { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.Graph.ProjectGraphNode> ProjectNodesTopologicallySorted { get { throw null; } }

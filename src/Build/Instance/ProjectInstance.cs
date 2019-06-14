@@ -1329,7 +1329,7 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvVar)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable);
@@ -1337,7 +1337,7 @@ namespace Microsoft.Build.Execution
 
             if (_trackPropertyReads)
             {
-                if (isEnvVar)
+                if (isEnvironmentVariable)
                 {
                     if (!_environmentVariables.Contains(name))
                     {
@@ -1349,6 +1349,7 @@ namespace Microsoft.Build.Execution
                 {
                     // If it's NOT an env var but the property has the same name,
                     // then we're not dependent on the env var any more: remove it.
+                    // Note: Any reads that happened before this removal will still be tracked.
                     _environmentVariables.Remove(name);
                 }
             }
@@ -2530,7 +2531,7 @@ namespace Microsoft.Build.Execution
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
 
-            _trackPropertyReads = buildParameters.TrackReadsOnEnvironmentVariables;
+            _trackPropertyReads = Traits.Instance.TrackReadsOnEnvironmentVariables;
             if (_trackPropertyReads)
             {
                 _environmentVariables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -2776,12 +2777,12 @@ namespace Microsoft.Build.Execution
         /// Tracks this property read if it's from an environment variable or uninitialized.
         /// </summary>
         /// <param name="name">The name of the property being read.</param>
-        private void TrackPropertyRead(string name, bool propertyMissing)
+        private void TrackPropertyRead(string name, bool propertyUninitialized)
         {
             if (string.IsNullOrEmpty(name))
                 return;
 
-            if (propertyMissing)
+            if (propertyUninitialized)
             {
                 if (!_uninitializedPropertyReads.Contains(name))
                 {

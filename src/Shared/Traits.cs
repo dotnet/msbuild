@@ -77,6 +77,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
+        /// <summary>
+        /// Track the environment variables actually read and used.
+        /// </summary>
+        public readonly bool TrackReadsOnEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTRACKENVVARREADS"));
+
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)

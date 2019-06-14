@@ -79,12 +79,65 @@ namespace Microsoft.Build.Experimental.Graph
         /// <summary>
         ///     Gets a distinct enumeration of all of the environment variables reads during evaluation.
         /// </summary>
-        public IEnumerable<string> EnvironmentVariableReads => _projectNodesTopologicallySorted?.Value.Select(p => p.ProjectInstance).SelectMany(pi => pi.EnvironmentVariableReads).Distinct();
+        public IEnumerable<string> EnvironmentVariableReads
+        {
+            get
+            {
+                if (!ProjectNodes.Any())
+                {
+                    return Enumerable.Empty<string>();
+                }
+
+                var distinctReads = new HashSet<string>();
+
+                foreach (ProjectGraphNode projectNode in ProjectNodes)
+                {
+                    foreach (string environmentVariableRead in projectNode.ProjectInstance.EnvironmentVariableReads)
+                    {
+                        if (!distinctReads.Contains(environmentVariableRead))
+                        {
+                            distinctReads.Add(environmentVariableRead);
+                        }
+                    }
+                }
+
+                return distinctReads;
+            }
+        }
 
         /// <summary>
         ///     Get a distinct enumeration of all the uninitialized property reads during evaluation.
         /// </summary>
-        public IEnumerable<string> UninitializedPropertyReads => _projectNodesTopologicallySorted?.Value.Select(p => p.ProjectInstance).SelectMany(pi => pi.UninitializedPropertyReads).Distinct();
+        public IEnumerable<string> UninitializedPropertyReads
+        {
+            get
+            {
+                if (!ProjectNodes.Any())
+                {
+                    return Enumerable.Empty<string>();
+                }
+
+                var distinctUninitializedProperties = new HashSet<string>();
+
+                foreach (ProjectGraphNode projectNode in ProjectNodes)
+                {
+                    foreach (string uninitializedPropertyRead in projectNode.ProjectInstance.UninitializedPropertyReads)
+                    {
+                        if (!distinctUninitializedProperties.Contains(uninitializedPropertyRead))
+                        {
+                            distinctUninitializedProperties.Add(uninitializedPropertyRead);
+                        }
+                    }
+                }
+
+                return distinctUninitializedProperties;
+            }
+        }
+
+        /// <summary>
+        ///     A list of all potentially impactful environment variables.
+        /// </summary>
+        public IEnumerable<string> EnvironmentVariablesImpactingBuild => UninitializedPropertyReads.Concat(EnvironmentVariableReads);
 
         /// <summary>
         ///     Constructs a graph starting from the given project file, evaluating with the global project collection and no
