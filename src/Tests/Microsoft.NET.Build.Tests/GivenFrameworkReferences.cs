@@ -396,7 +396,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(runtimeFrameworkVersion);
             resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
-                .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
+                .Where(k => k.StartsWith("Microsoft.NETCore.App.Runtime."))
                 .Single();
             resolvedVersions.PackageDownload[runtimePackName].Should().Be(runtimeFrameworkVersion);
             resolvedVersions.TargetingPack["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
@@ -419,7 +419,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(runtimeFrameworkVersion);
             resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
-                .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
+                .Where(k => k.StartsWith("Microsoft.NETCore.App.Runtime."))
                 .Single();
             resolvedVersions.PackageDownload[runtimePackName].Should().Be(runtimeFrameworkVersion);
             resolvedVersions.TargetingPack["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
@@ -455,7 +455,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(expectedRuntimeFrameworkVersion);
             resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
-                .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
+                .Where(k => k.StartsWith("Microsoft.NETCore.App.Runtime."))
                 .Single();
             resolvedVersions.PackageDownload[runtimePackName].Should().Be(expectedRuntimeFrameworkVersion);
             resolvedVersions.TargetingPack["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
@@ -481,7 +481,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(expectedRuntimeFrameworkVersion);
             resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
-                .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
+                .Where(k => k.StartsWith("Microsoft.NETCore.App.Runtime."))
                 .Single();
             resolvedVersions.PackageDownload[runtimePackName].Should().Be(expectedRuntimeFrameworkVersion);
             resolvedVersions.TargetingPack["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
@@ -512,7 +512,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.RuntimeFramework["Microsoft.NETCore.App"].Should().Be(expectedRuntimeFrameworkVersion);
             resolvedVersions.PackageDownload["Microsoft.NETCore.App.Ref"].Should().Be(targetingPackVersion);
             string runtimePackName = resolvedVersions.PackageDownload.Keys
-                .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
+                .Where(k => k.StartsWith("Microsoft.NETCore.App.Runtime."))
                 .Single();
             resolvedVersions.PackageDownload[runtimePackName].Should().Be(expectedRuntimeFrameworkVersion);
             resolvedVersions.TargetingPack["Microsoft.NETCore.App"].Should().Be(targetingPackVersion);
@@ -629,7 +629,7 @@ namespace FrameworkReferenceTest
             var runtimeAssetTrimInfo = GetRuntimeAssetTrimInfo(testProject);
 
             string runtimePackName = runtimeAssetTrimInfo.Keys
-                .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
+                .Where(k => k.StartsWith("Microsoft.NETCore.App.Runtime."))
                 .Single();
 
             foreach (var runtimeAsset in runtimeAssetTrimInfo[runtimePackName])
@@ -657,7 +657,7 @@ namespace FrameworkReferenceTest
                 });
 
             string runtimePackName = runtimeAssetTrimInfo.Keys
-                .Where(k => k.StartsWith("runtime.") && k.EndsWith(".Microsoft.NETCore.App"))
+                .Where(k => k.StartsWith("Microsoft.NETCore.App.Runtime."))
                 .Single();
 
             foreach (var runtimeAsset in runtimeAssetTrimInfo[runtimePackName])
