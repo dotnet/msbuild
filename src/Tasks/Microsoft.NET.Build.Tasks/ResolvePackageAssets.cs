@@ -373,7 +373,6 @@ namespace Microsoft.NET.Build.Tasks
             {
                 using (var writer = new BinaryWriter(stream, TextEncoding, leaveOpen: true))
                 {
-                    writer.Write(DesignTimeBuild);
                     writer.Write(DisablePackageAssetsCache);
                     writer.Write(DisableFrameworkAssemblies);
                     writer.Write(CopyLocalRuntimeTargetAssets);
