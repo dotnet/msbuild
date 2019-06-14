@@ -4308,6 +4308,22 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
 
+    <xs:element name="WapProjPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation>
+                <!-- _locID_text="WapProjPath" _locComment="" -->Windows Application Packaging project-specific: Path to Windows Application Packaging project root folder.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:element name="EntryPointProjectUniqueName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation>
+                <!-- _locID_text="EntryPointProjectUniqueName" _locComment="" -->Windows Application Packaging project-specific: Relative path to entry point project file
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
     <!-- Properties enabling Store submission of appx/msix packages. -->
     <xs:element name="EnableDirectStoreSubmission" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
