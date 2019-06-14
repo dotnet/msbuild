@@ -94,10 +94,7 @@ namespace Microsoft.Build.Experimental.Graph
                 {
                     foreach (string environmentVariableRead in projectNode.ProjectInstance.EnvironmentVariableReads)
                     {
-                        if (!distinctReads.Contains(environmentVariableRead))
-                        {
-                            distinctReads.Add(environmentVariableRead);
-                        }
+                        distinctReads.Add(environmentVariableRead);
                     }
                 }
 
@@ -123,10 +120,7 @@ namespace Microsoft.Build.Experimental.Graph
                 {
                     foreach (string uninitializedPropertyRead in projectNode.ProjectInstance.UninitializedPropertyReads)
                     {
-                        if (!distinctUninitializedProperties.Contains(uninitializedPropertyRead))
-                        {
-                            distinctUninitializedProperties.Add(uninitializedPropertyRead);
-                        }
+                        distinctUninitializedProperties.Add(uninitializedPropertyRead);
                     }
                 }
 

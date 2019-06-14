@@ -1956,7 +1956,7 @@ $@"
                 <Project>
                   <PropertyGroup>
                     <NotAnEnvVar>$(Path)</NotAnEnvVar>
-                    <CompName>$(ComputerName)</CompName>
+                    <AlsoNotAnEnvVar>$(LocalAppData)</AlsoNotAnEnvVar>
                   </PropertyGroup>
                 </Project>");
 

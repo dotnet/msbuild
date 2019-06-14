@@ -1339,11 +1339,8 @@ namespace Microsoft.Build.Execution
             {
                 if (isEnvironmentVariable)
                 {
-                    if (!_environmentVariables.Contains(name))
-                    {
-                        // If it's a new env var, track it.
-                        _environmentVariables.Add(name);
-                    }
+                    // If it's an env var, track it.
+                    _environmentVariables.Add(name);
                 }
                 else if (_environmentVariables.Contains(name))
                 {
