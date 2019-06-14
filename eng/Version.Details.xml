@@ -5,6 +5,10 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>757a60649f8a929f11b178301e2cbf2c6dc82c46</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview7.19313.10">
+      <Uri>https://github.com/aspnet/aspnetcore</Uri>
+      <Sha>8e4825fd6b9b52d487a83115cd2814bd0cc5fb5d</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19311.2">
