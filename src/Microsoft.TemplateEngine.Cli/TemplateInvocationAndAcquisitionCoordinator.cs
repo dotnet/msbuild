@@ -7,9 +7,9 @@ using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;
-using Microsoft.TemplateEngine.Cli.TemplateUpdater;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateSearch.Common.TemplateUpdate;
 using static Microsoft.TemplateEngine.Cli.TemplateListResolutionResult;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -26,7 +26,6 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly string _commandName;
         private readonly Func<string> _inputGetter;
 
-        private readonly TemplateUpdateChecker _updateChecker;
 
         private bool _resolutionResultInitialized = false;
         TemplateListResolutionResult _templateResolutionResult;
@@ -44,8 +43,6 @@ namespace Microsoft.TemplateEngine.Cli
             _defaultLanguage = defaultLanguage;
             _commandName = commandName;
             _inputGetter = inputGetter;
-
-            _updateChecker = new TemplateUpdateChecker(_environment);
         }
 
         public async Task<CreationResultStatus> CoordinateInvocationOrAcquisitionAsync()
@@ -63,6 +60,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
+                // The command didn't resolve to an installed template. Search for something that does.
                 bool anySearchMatches = await SearchForTemplateMatchesAsync();
 
                 if (!anySearchMatches)
@@ -98,15 +96,16 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             List<IInstallUnitDescriptor> descriptorList = new List<IInstallUnitDescriptor>() { descriptor };
-            IReadOnlyList<IUpdateUnitDescriptor> updateDescriptorList = await _updateChecker.CheckForUpdatesAsync(descriptorList);
+            TemplateUpdateChecker updateChecker = new TemplateUpdateChecker(_environment);
+            IUpdateCheckResult updateCheckResult = await updateChecker.CheckForUpdatesAsync(descriptorList);
 
-            if (updateDescriptorList.Count == 0)
+            if (updateCheckResult.Updates.Count == 0)
             {
                 return;
             }
-            else if (updateDescriptorList.Count == 1)
+            else if (updateCheckResult.Updates.Count == 1)
             {
-                DisplayUpdateMessage(updateDescriptorList[0]);
+                DisplayUpdateMessage(updateCheckResult.Updates[0]);
             }
             else
             {

@@ -3,18 +3,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
+using Microsoft.TemplateSearch.Common.TemplateUpdate;
 using Xunit;
-using Microsoft.TemplateEngine.Cli.TemplateUpdater;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 {
     public class UpdateCheckerTests : TestBase
     {
         [Fact(DisplayName = nameof(UpdateCheckerCorrectlyFindsUpdate))]
-        public void UpdateCheckerCorrectlyFindsUpdate()
+        public async Task UpdateCheckerCorrectlyFindsUpdate()
         {
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockNupkgUpdater));
 
@@ -31,14 +32,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
             MockNupkgUpdater.SetMockUpdates(new List<IUpdateUnitDescriptor>() { mockUpdateDescriptor, unrelatedUpdateDescriptor });
 
             TemplateUpdateChecker updateChecker = new TemplateUpdateChecker(EngineEnvironmentSettings);
-            IReadOnlyList<IUpdateUnitDescriptor> foundUpdates = updateChecker.CheckForUpdatesAsync(new List<IInstallUnitDescriptor>() { testInstallDescriptor }).Result;
 
-            Assert.Equal(1, foundUpdates.Count);
-            Assert.Equal(mockMountPointId, foundUpdates[0].InstallUnitDescriptor.MountPointId);
+            IUpdateCheckResult updateCheckResult = await updateChecker.CheckForUpdatesAsync(new List<IInstallUnitDescriptor>() { testInstallDescriptor });
+            Assert.Equal(1, updateCheckResult.Updates.Count);
+            Assert.Equal(mockMountPointId, updateCheckResult.Updates[0].InstallUnitDescriptor.MountPointId);
         }
 
         [Fact(DisplayName = nameof(UpdateCheckerIgnoresInstallUnitWithUnknownDescriptorFactoryId))]
-        public void UpdateCheckerIgnoresInstallUnitWithUnknownDescriptorFactoryId()
+        public async Task UpdateCheckerIgnoresInstallUnitWithUnknownDescriptorFactoryId()
         {
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockNupkgUpdater));
 
@@ -54,9 +55,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
             MockNupkgUpdater.SetMockUpdates(new List<IUpdateUnitDescriptor>() { updateDescriptor });
 
             TemplateUpdateChecker updateChecker = new TemplateUpdateChecker(EngineEnvironmentSettings);
-            IReadOnlyList<IUpdateUnitDescriptor> foundUpdates = updateChecker.CheckForUpdatesAsync(new List<IInstallUnitDescriptor>() { installDescriptor }).Result;
 
-            Assert.Equal(0, foundUpdates.Count);
+            IUpdateCheckResult updateCheckResult = await updateChecker.CheckForUpdatesAsync(new List<IInstallUnitDescriptor>() { installDescriptor });
+            Assert.Equal(0, updateCheckResult.Updates.Count);
         }
     }
 }

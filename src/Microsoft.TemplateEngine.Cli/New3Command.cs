@@ -460,8 +460,8 @@ namespace Microsoft.TemplateEngine.Cli
                 if (_commandInput.CheckForUpdates || _commandInput.CheckForUpdatesNoPrompt)
                 {
                     bool applyUpdates = _commandInput.CheckForUpdatesNoPrompt;
-                    TemplateUpdateCoordinator updateCoordinator = new TemplateUpdateCoordinator(EnvironmentSettings, Installer, CommandName);
-                    bool updateCheckResult = await updateCoordinator.CheckForUpdates(_settingsLoader.InstallUnitDescriptorCache.Descriptors.Values.ToList(), applyUpdates);
+                    CliTemplateUpdater updater = new CliTemplateUpdater(EnvironmentSettings, Installer, CommandName);
+                    bool updateCheckResult = await updater.CheckForUpdatesAsync(_settingsLoader.InstallUnitDescriptorCache.Descriptors.Values.ToList(), applyUpdates);
 
                     return updateCheckResult ? CreationResultStatus.Success : CreationResultStatus.CreateFailed;
                 }

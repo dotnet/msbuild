@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
@@ -38,17 +37,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Single(searchResults.MatchesBySource[0].PacksWithMatches[_packTwoInfo].TemplateMatches.Where(t => string.Equals(t.Info.Name, _fooTwoTemplate.Name)));
         }
 
+
+        // check that the symbol name-value correctly matches.
+        // The _fooOneTemplate is a non-match because of a framework choice param value mismatch.
+        // But the _fooTwoTemplate matches because the framework choice is valid for that template.
         [Fact(DisplayName = nameof(CacheSearchCliSymbolNameFilterTest))]
         public void CacheSearchCliSymbolNameFilterTest()
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(true);
-
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
             const string searchTemplateName = "foo";
             const string defaultLanguage = "C#";
 
+            // The template symbol is "Framework" (capital "F"). This checks that the host specific override is applied
             Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>()
             {
                 { "framework", "netcoreapp2.0" }
@@ -56,7 +59,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             INewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs);
 
             Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> matchFilter = new CliHostSpecificDataMatchFilterFactory(commandInput, defaultLanguage).MatchFilter;
-
             TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, matchFilter);
             List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
 
@@ -65,13 +67,57 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal(1, searchResults.MatchesBySource.Count);
             Assert.Equal(1, searchResults.MatchesBySource[0].PacksWithMatches.Count);
             Assert.Single(searchResults.MatchesBySource[0].PacksWithMatches[_packTwoInfo].TemplateMatches.Where(t => string.Equals(t.Info.Name, _fooTwoTemplate.Name)));
+
+            // same check, except with the short version of Framework, namely "f"
+            Dictionary<string, string> shortNameCheckRawCommandInputs = new Dictionary<string, string>()
+            {
+                { "f", "netcoreapp2.0" }
+            };
+            INewCommandInput shortNameCommandInput = new MockNewCommandInput(shortNameCheckRawCommandInputs);
+
+            Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> shortNameMatchFilter = new CliHostSpecificDataMatchFilterFactory(shortNameCommandInput, defaultLanguage).MatchFilter;
+            TemplateSearcher shortNameSearcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, shortNameMatchFilter);
+
+            SearchResults shortNameSearchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
+            Assert.True(shortNameSearchResults.AnySources);
+            Assert.Equal(1, shortNameSearchResults.MatchesBySource.Count);
+            Assert.Equal(1, shortNameSearchResults.MatchesBySource[0].PacksWithMatches.Count);
+            Assert.Single(shortNameSearchResults.MatchesBySource[0].PacksWithMatches[_packTwoInfo].TemplateMatches.Where(t => string.Equals(t.Info.Name, _fooTwoTemplate.Name)));
         }
 
+        // test that an invalid symbol makes the search be a non-match
+        [Fact(DisplayName = nameof(CacheSearchCliSymbolNameMismatchFilterTest))]
+        public void CacheSearchCliSymbolNameMismatchFilterTest()
+        {
+            TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(true);
+            MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
+            EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+
+            const string searchTemplateName = "foo";
+            const string defaultLanguage = "C#";
+
+            // "tfm" is not a vaild symbol for the "foo" template. So it should not match.
+            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>()
+            {
+                { "tfm", "netcoreapp2.0" }
+            };
+            INewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs);
+
+            Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> matchFilter = new CliHostSpecificDataMatchFilterFactory(commandInput, defaultLanguage).MatchFilter;
+            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, matchFilter);
+            List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
+
+            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
+            Assert.True(searchResults.AnySources);
+            Assert.Equal(0, searchResults.MatchesBySource.Count);
+            Assert.Equal(0, searchResults.MatchesBySource[0].PacksWithMatches.Count);
+        }
+
+        // Tests that the input language causes the correct match filtering.
         [Fact(DisplayName = nameof(CacheSearchLanguageFilterTest))]
         public void CacheSearchLanguageFilterTest()
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
-
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
@@ -92,6 +138,31 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal(1, searchResults.MatchesBySource.Count);
             Assert.Equal(1, searchResults.MatchesBySource[0].PacksWithMatches.Count);
             Assert.Single(searchResults.MatchesBySource[0].PacksWithMatches[_packThreeInfo].TemplateMatches.Where(t => string.Equals(t.Info.Name, _barFSharpTemplate.Name)));
+        }
+
+        [Fact(DisplayName = nameof(CacheSearchLanguageMismatchFilterTest))]
+        public void CacheSearchLanguageMismatchFilterTest()
+        {
+            TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
+            MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
+            EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+
+            const string searchTemplateName = "bar";
+            const string defaultLanguage = "C#";
+
+            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
+            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs);
+            commandInput.Language = "VB";
+
+            Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> matchFilter = new CliHostSpecificDataMatchFilterFactory(commandInput, defaultLanguage).MatchFilter;
+
+            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, matchFilter);
+            List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
+
+            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
+            Assert.True(searchResults.AnySources);
+            Assert.Equal(0, searchResults.MatchesBySource.Count);
+            Assert.Equal(0, searchResults.MatchesBySource[0].PacksWithMatches.Count);
         }
 
         private static readonly PackInfo _packOneInfo = new PackInfo("PackOne", "1.0.0");

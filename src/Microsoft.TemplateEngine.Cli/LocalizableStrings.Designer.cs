@@ -1054,15 +1054,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;{0}&quot; (currently installed version = {1}).
-        /// </summary>
-        public static string NuGetPackUpdateDisplayInfo {
-            get {
-                return ResourceManager.GetString("NuGetPackUpdateDisplayInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Specifies a NuGet source to use during install..
         /// </summary>
         public static string NuGetSourceHelp {

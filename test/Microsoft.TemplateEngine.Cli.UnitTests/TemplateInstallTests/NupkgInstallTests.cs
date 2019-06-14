@@ -13,6 +13,7 @@ using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Utils;
+using Microsoft.TemplateSearch.Common.TemplateUpdate;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
@@ -118,7 +119,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             {
                 typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
                 typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
-                typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly     // for assembly: Microsoft.TemplateEngine.Cli
+                typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly,    // for assembly: Microsoft.TemplateEngine.Cli
+                typeof(NupkgUpdater).GetTypeInfo().Assembly                         // for assembly: Microsoft.TemplateSearch.Common
             });
 
             return new DefaultTemplateEngineHost(hostIdentifier, hostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns, new[] { "dotnetcli" });

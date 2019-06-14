@@ -649,9 +649,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="SearchResultSourceIndicator" xml:space="preserve">
     <value>Matches from template source: {0}</value>
   </data>
-  <data name="NuGetPackUpdateDisplayInfo" xml:space="preserve">
-    <value>"{0}" (currently installed version = {1})</value>
-  </data>
   <data name="UpdateApplyCommandHelp" xml:space="preserve">
     <value>Check the currently installed template packs for update, and install the updates.</value>
   </data>

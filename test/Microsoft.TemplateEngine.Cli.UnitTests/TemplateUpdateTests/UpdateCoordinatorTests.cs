@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.TemplateUpdate;
-using Microsoft.TemplateEngine.Cli.TemplateUpdater;
 using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
@@ -35,12 +34,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
             // start with nothing "installed", so checking what was installed can happen.
             MockInstaller installer = new MockInstaller();
 
-            TemplateUpdateCoordinator updateCoordinator = new TemplateUpdateCoordinator(EngineEnvironmentSettings, installer, "new");
+            CliTemplateUpdater updater = new CliTemplateUpdater(EngineEnvironmentSettings, installer, "new");
             Assert.Empty(installer.Installed);
-            bool updateResult = await updateCoordinator.CheckForUpdates(installsToUpdate, true);
+
+            bool updateResult = await updater.CheckForUpdatesAsync(installsToUpdate, true);
             Assert.True(updateResult);
             Assert.Single(installer.Installed);
-            Assert.Contains(updateDescriptor.InstallString, installer.Installed);
         }
 
         [Fact(DisplayName = nameof(NoUpdatesFoundSuccessfullyDoesNothing))]
@@ -58,12 +57,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
                 Identifier = "MockPackage",
                 MountPointId = new Guid("C5A4D83F-7005-4B38-BF47-DFF5CB5F5881"),
             };
+            List<IInstallUnitDescriptor> installsToUpdate = new List<IInstallUnitDescriptor>() { installDescriptor };
 
-            TemplateUpdateCoordinator updateCoordinator = new TemplateUpdateCoordinator(EngineEnvironmentSettings, installer, "new");
+            MockNupkgUpdater.SetMockUpdates(new List<IUpdateUnitDescriptor>());
+
+            CliTemplateUpdater updater = new CliTemplateUpdater(EngineEnvironmentSettings, installer, "new");
             Assert.Empty(installer.Installed);
 
-            List<IInstallUnitDescriptor> installsToUpdate = new List<IInstallUnitDescriptor>();
-            bool updateResult = await updateCoordinator.CheckForUpdates(installsToUpdate, true);
+            bool updateResult = await updater.CheckForUpdatesAsync(installsToUpdate, true);
             Assert.True(updateResult);
             Assert.Empty(installer.Installed);
         }
@@ -82,11 +83,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
                 MountPointId = new Guid("C5A4D83F-7005-4B38-BF47-DFF5CB5F5881"),
             };
 
-            TemplateUpdateCoordinator updateCoordinator = new TemplateUpdateCoordinator(EngineEnvironmentSettings, installer, "new");
+            CliTemplateUpdater updater = new CliTemplateUpdater(EngineEnvironmentSettings, installer, "new");
             Assert.Empty(installer.Installed);
 
-            List<IInstallUnitDescriptor> installsToUpdate = new List<IInstallUnitDescriptor>();
-            bool updateResult = await updateCoordinator.CheckForUpdates(installsToUpdate, true);
+            List<IInstallUnitDescriptor> installsToUpdate = new List<IInstallUnitDescriptor>() { installDescriptor };
+            bool updateResult = await updater.CheckForUpdatesAsync(installsToUpdate, true);
             Assert.True(updateResult);
             Assert.Empty(installer.Installed);
         }

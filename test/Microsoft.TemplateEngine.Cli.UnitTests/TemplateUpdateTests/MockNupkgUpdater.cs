@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
-using Microsoft.TemplateEngine.Cli.TemplateUpdater;
 using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
@@ -16,7 +15,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
     {
         // a mapping from install descriptor identifiers to the update that should be emitted.
         [ThreadStatic]
-        private static IReadOnlyDictionary<string, IUpdateUnitDescriptor> _mockUpdates;
+        private static IReadOnlyDictionary<string, IUpdateUnitDescriptor> _mockUpdates = new Dictionary<string, IUpdateUnitDescriptor>();
 
         public void Configure(IEngineEnvironmentSettings environmentSettings, IReadOnlyList<IInstallUnitDescriptor> existingInstallDescriptors)
         {
@@ -52,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
             return Task.FromResult(resultList);
         }
 
-        public void ApplyUpdates(IInstaller installer, IReadOnlyList<IUpdateUnitDescriptor> updatesToApply)
+        public void ApplyUpdates(IInstallerBase installer, IReadOnlyList<IUpdateUnitDescriptor> updatesToApply)
         {
             if (updatesToApply.Any(x => x.InstallUnitDescriptor.FactoryId != DescriptorFactoryId))
             {
