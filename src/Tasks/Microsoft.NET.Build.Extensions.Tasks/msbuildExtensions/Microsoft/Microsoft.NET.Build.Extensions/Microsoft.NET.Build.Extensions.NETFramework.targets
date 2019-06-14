@@ -88,6 +88,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup Condition="'@(_NETStandardLibraryNETFrameworkLib)' != ''">
+      
+      <!-- Save references that could be simple references with metadata that we want to preserve if they
+           are replaced with a facade -->
+      <_ReferenceWithMetadataToPreserve Include="@(Reference)"
+                                        Condition="'%(Reference.IsImplicitlyDefined)' != 'true' And '%(Reference.NuGetSourceType)' == ''" />
+      
       <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
            consider a project with a Reference Include="System.Net.Http" or "System.IO.Compression", which are both in
            _NETStandardLibraryNETFrameworkReference.
@@ -110,14 +116,31 @@ Copyright (c) .NET Foundation. All rights reserved.
            and VS won't show a warning icon on the reference.  See https://github.com/dotnet/sdk/issues/1499
            -->
 
-      <Reference Include="%(_NETStandardLibraryNETFrameworkLib.FileName)">
-        <HintPath>%(_NETStandardLibraryNETFrameworkLib.Identity)</HintPath>
-        <Private>false</Private>
-      </Reference>
-
       <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)" Condition="'%(FileName)' != 'netfx.force.conflicts'">
         <Private>false</Private>
       </ReferenceCopyLocalPaths>
+      
+      <_NETStandardLibraryNETFrameworkReference Include="%(_NETStandardLibraryNETFrameworkLib.FileName)">
+        <HintPath>%(_NETStandardLibraryNETFrameworkLib.Identity)</HintPath>
+        <Private>false</Private>
+      </_NETStandardLibraryNETFrameworkReference>
+      
+    </ItemGroup>
+
+    <!-- Join items in order to add metadata that was on simple references to the new facade references -->
+    <JoinItems Left="@(_NETStandardLibraryNETFrameworkReference)" LeftKey="" LeftMetadata=""
+               Right="@(_ReferenceWithMetadataToPreserve)" RightKey="" RightMetadata="*"
+               Condition="'@(_NETStandardLibraryNETFrameworkLib)' != ''">
+      <Output TaskParameter="JoinResult" ItemName="_NETStandardLibraryNETFrameworkReferenceWithMetadata" />
+    </JoinItems>
+
+    <ItemGroup Condition="'@(_NETStandardLibraryNETFrameworkLib)' != ''">
+      <!-- Add facade references that flowed through the join to preserve metadata -->
+      <Reference Include="@(_NETStandardLibraryNETFrameworkReferenceWithMetadata)" />
+      
+      <!-- Add the rest of the facade references -->
+      <Reference Include="@(_NETStandardLibraryNETFrameworkReference)" 
+                 Exclude="@(_NETStandardLibraryNETFrameworkReferenceWithMetadata)"/>
     </ItemGroup>
   </Target>
 

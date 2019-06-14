@@ -453,8 +453,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       </Reference>
 
       <!-- Add framework references from NuGet packages here, so that if there is also a matching reference from a NuGet package,
-           it will be treated the same as a reference from the project file. -->
-      <Reference Include="@(ResolvedFrameworkAssemblies)" />
+           it will be treated the same as a reference from the project file.  If there is already an explicit Reference from the
+           project, use that, in order to preserve metadata (such as aliases). -->
+      <Reference Include="@(ResolvedFrameworkAssemblies)" 
+                 Exclude="@(Reference)" />
+      
     </ItemGroup>
     
     <!-- If there are any references from a NuGet package that match a simple reference which
@@ -462,7 +465,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          simple name as the ItemSpec.  This will prevent the VS project system from marking
          a reference with a warning.  See https://github.com/dotnet/sdk/issues/1499 -->
     <JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="FileName" LeftMetadata="*"
-               Right="@(Reference)" RightKey="" RightMetadata="">
+               Right="@(Reference)" RightKey="" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_JoinedResolvedCompileFileDefinitions" />
     </JoinItems>
 
