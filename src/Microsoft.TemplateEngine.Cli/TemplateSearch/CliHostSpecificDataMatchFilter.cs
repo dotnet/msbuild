@@ -38,17 +38,14 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
             TemplateListResolutionResult templateResolutionResult = TemplateListResolver.GetTemplateResolutionResult(nameMatches.Select(x => x.Template).ToList(), hostSpecificDataLoader, _commandInput, _defaultLanguage);
 
-            IReadOnlyList<ITemplateMatchInfo> templateMatches;
-            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousMatches))
+            if (templateResolutionResult.TryGetAllInvokableTemplates(out IReadOnlyList<ITemplateMatchInfo> invokableTemplates))
             {
-                templateMatches = unambiguousMatches;
+                return invokableTemplates;
             }
             else
             {
-                templateMatches = templateResolutionResult.GetBestTemplateMatchList();
+                return new List<ITemplateMatchInfo>();
             }
-
-            return templateMatches;
         };
     }
 }

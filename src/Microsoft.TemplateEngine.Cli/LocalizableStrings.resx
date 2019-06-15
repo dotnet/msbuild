@@ -643,7 +643,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="SearchResultNoMatches" xml:space="preserve">
     <value>...No matches found</value>
   </data>
-  <data name="SearchResultPackInfo" xml:space="preserve">
+  <data name="SearchResultTemplateInfo" xml:space="preserve">
     <value>Template name "{0}" ({1}) from author "{2}" in pack {3}</value>
   </data>
   <data name="SearchResultSourceIndicator" xml:space="preserve">

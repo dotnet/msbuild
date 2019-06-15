@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
@@ -17,19 +17,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class TemplateSearchCacheTests : TestBase
     {
+        private static readonly string DefaultLanguage = "C#";
+
         [Fact(DisplayName = nameof(CacheSearchNameMatchTest))]
-        public void CacheSearchNameMatchTest()
+        public async Task CacheSearchNameMatchTest()
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            const string searchTemplateName = "foo";
+            INewCommandInput commandInput = new MockNewCommandInput()
+            {
+                TemplateName = "foo"
+            };
 
-            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, "C#", MockTemplateSearchHelpers.DefaultMatchFilter);
-            List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync();
 
-            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
             Assert.True(searchResults.AnySources);
             Assert.Equal(1, searchResults.MatchesBySource.Count);
             Assert.Equal(2, searchResults.MatchesBySource[0].PacksWithMatches.Count);
@@ -37,32 +41,29 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Single(searchResults.MatchesBySource[0].PacksWithMatches[_packTwoInfo].TemplateMatches.Where(t => string.Equals(t.Info.Name, _fooTwoTemplate.Name)));
         }
 
-
         // check that the symbol name-value correctly matches.
         // The _fooOneTemplate is a non-match because of a framework choice param value mismatch.
         // But the _fooTwoTemplate matches because the framework choice is valid for that template.
         [Fact(DisplayName = nameof(CacheSearchCliSymbolNameFilterTest))]
-        public void CacheSearchCliSymbolNameFilterTest()
+        public async Task CacheSearchCliSymbolNameFilterTest()
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(true);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
-
-            const string searchTemplateName = "foo";
-            const string defaultLanguage = "C#";
 
             // The template symbol is "Framework" (capital "F"). This checks that the host specific override is applied
             Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>()
             {
                 { "framework", "netcoreapp2.0" }
             };
-            INewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs);
+            INewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
+            {
+                TemplateName = "foo"
+            };
 
-            Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> matchFilter = new CliHostSpecificDataMatchFilterFactory(commandInput, defaultLanguage).MatchFilter;
-            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, matchFilter);
-            List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync();
 
-            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
             Assert.True(searchResults.AnySources);
             Assert.Equal(1, searchResults.MatchesBySource.Count);
             Assert.Equal(1, searchResults.MatchesBySource[0].PacksWithMatches.Count);
@@ -73,12 +74,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             {
                 { "f", "netcoreapp2.0" }
             };
-            INewCommandInput shortNameCommandInput = new MockNewCommandInput(shortNameCheckRawCommandInputs);
+            INewCommandInput shortNameCommandInput = new MockNewCommandInput(shortNameCheckRawCommandInputs)
+            {
+                TemplateName = "foo"
+            };
 
-            Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> shortNameMatchFilter = new CliHostSpecificDataMatchFilterFactory(shortNameCommandInput, defaultLanguage).MatchFilter;
-            TemplateSearcher shortNameSearcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, shortNameMatchFilter);
+            TemplateSearchCoordinator shortNameSearchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, shortNameCommandInput, DefaultLanguage);
+            SearchResults shortNameSearchResults = await searchCoordinator.SearchAsync();
 
-            SearchResults shortNameSearchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
             Assert.True(shortNameSearchResults.AnySources);
             Assert.Equal(1, shortNameSearchResults.MatchesBySource.Count);
             Assert.Equal(1, shortNameSearchResults.MatchesBySource[0].PacksWithMatches.Count);
@@ -87,53 +90,47 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
         // test that an invalid symbol makes the search be a non-match
         [Fact(DisplayName = nameof(CacheSearchCliSymbolNameMismatchFilterTest))]
-        public void CacheSearchCliSymbolNameMismatchFilterTest()
+        public async Task CacheSearchCliSymbolNameMismatchFilterTest()
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(true);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
-
-            const string searchTemplateName = "foo";
-            const string defaultLanguage = "C#";
 
             // "tfm" is not a vaild symbol for the "foo" template. So it should not match.
             Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>()
             {
                 { "tfm", "netcoreapp2.0" }
             };
-            INewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs);
+            INewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
+            {
+                TemplateName = "foo"
+            };
 
-            Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> matchFilter = new CliHostSpecificDataMatchFilterFactory(commandInput, defaultLanguage).MatchFilter;
-            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, matchFilter);
-            List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync();
 
-            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
             Assert.True(searchResults.AnySources);
             Assert.Equal(0, searchResults.MatchesBySource.Count);
-            Assert.Equal(0, searchResults.MatchesBySource[0].PacksWithMatches.Count);
         }
 
         // Tests that the input language causes the correct match filtering.
         [Fact(DisplayName = nameof(CacheSearchLanguageFilterTest))]
-        public void CacheSearchLanguageFilterTest()
+        public async Task CacheSearchLanguageFilterTest()
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            const string searchTemplateName = "bar";
-            const string defaultLanguage = "C#";
-
             Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
-            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs);
-            commandInput.Language = "F#";
+            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
+            {
+                Language = "F#",
+                TemplateName = "bar"
+            };
 
-            Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> matchFilter = new CliHostSpecificDataMatchFilterFactory(commandInput, defaultLanguage).MatchFilter;
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync();
 
-            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, matchFilter);
-            List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
-
-            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
             Assert.True(searchResults.AnySources);
             Assert.Equal(1, searchResults.MatchesBySource.Count);
             Assert.Equal(1, searchResults.MatchesBySource[0].PacksWithMatches.Count);
@@ -141,28 +138,24 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         }
 
         [Fact(DisplayName = nameof(CacheSearchLanguageMismatchFilterTest))]
-        public void CacheSearchLanguageMismatchFilterTest()
+        public async Task CacheSearchLanguageMismatchFilterTest()
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            const string searchTemplateName = "bar";
-            const string defaultLanguage = "C#";
-
             Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
-            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs);
-            commandInput.Language = "VB";
+            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
+            {
+                TemplateName = "bar",
+                Language = "VB"
+            };
 
-            Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<Edge.Template.ITemplateMatchInfo>> matchFilter = new CliHostSpecificDataMatchFilterFactory(commandInput, defaultLanguage).MatchFilter;
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync();
 
-            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, defaultLanguage, matchFilter);
-            List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
-
-            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, searchTemplateName).Result;
             Assert.True(searchResults.AnySources);
             Assert.Equal(0, searchResults.MatchesBySource.Count);
-            Assert.Equal(0, searchResults.MatchesBySource[0].PacksWithMatches.Count);
         }
 
         private static readonly PackInfo _packOneInfo = new PackInfo("PackOne", "1.0.0");

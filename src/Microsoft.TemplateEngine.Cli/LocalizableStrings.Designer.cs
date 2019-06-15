@@ -1325,20 +1325,20 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Template name &quot;{0}&quot; ({1}) from author &quot;{2}&quot; in pack {3}.
-        /// </summary>
-        public static string SearchResultPackInfo {
-            get {
-                return ResourceManager.GetString("SearchResultPackInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Matches from template source: {0}.
         /// </summary>
         public static string SearchResultSourceIndicator {
             get {
                 return ResourceManager.GetString("SearchResultSourceIndicator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template name &quot;{0}&quot; ({1}) from author &quot;{2}&quot; in pack {3}.
+        /// </summary>
+        public static string SearchResultTemplateInfo {
+            get {
+                return ResourceManager.GetString("SearchResultTemplateInfo", resourceCulture);
             }
         }
         
