@@ -68,17 +68,11 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                var possibleRuntimeListPaths = new[]
-                {
-                    Path.Combine(runtimePackRoot, "data", "RuntimeListList.xml"),
-                    Path.Combine(runtimePackRoot, "data", "FrameworkList.xml")
-                };
+                var runtimeListPath = Path.Combine(runtimePackRoot, "data", "RuntimeListList.xml");
 
-                var runtimeListPath = possibleRuntimeListPaths.FirstOrDefault(File.Exists);
-
-                if (runtimeListPath != null)
+                if (File.Exists(runtimeListPath))
                 {
-                    runtimePackAssets.AddRange(GetRuntimePackAssetsFromManifest(runtimePackRoot, runtimeListPath, runtimePack));
+                    AddRuntimePackAssetsFromManifest(runtimePackAssets, runtimePackRoot, runtimeListPath, runtimePack);
                 }
                 else
                 {
@@ -89,35 +83,17 @@ namespace Microsoft.NET.Build.Tasks
             RuntimePackAssets = runtimePackAssets.ToArray();
         }
 
-        private IEnumerable<TaskItem> GetRuntimePackAssetsFromManifest(string runtimePackRoot, string runtimeListPath,
-            ITaskItem runtimePack)
-        {
-            List<TaskItem> runtimePackAssets = new List<TaskItem>();
-
-            //  Resources are currently listed as Type="Managed" in the runtime pack manifest, but we need to handle
-            //  them differently.  So we still use the convention to find them (and to skip their entries from the
-            //  manifest).
-            string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
-            string runtimeAssetsPath =
-                Path.GetFullPath(GetRuntimeAssetsPath(runtimePackRoot, runtimeIdentifier));
-            
+        private void AddRuntimePackAssetsFromManifest(List<ITaskItem> runtimePackAssets, string runtimePackRoot,
+            string runtimeListPath, ITaskItem runtimePack)
+        {            
             XDocument frameworkListDoc = XDocument.Load(runtimeListPath);
             foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
             {
                 string assetPath = Path.Combine(runtimePackRoot, fileElement.Attribute("Path").Value);
 
-                //  Exclude resources files from manifest
-                string assetParentPath = Path.GetFullPath(Directory.GetParent(Path.GetDirectoryName(assetPath)).FullName);
-                if (assetParentPath.Equals(runtimeAssetsPath, StringComparison.OrdinalIgnoreCase) &&
-                    assetPath.EndsWith(".resources.dll", StringComparison.OrdinalIgnoreCase))
-                {
-                    //  Asset is in a subfolder of the main runtime assets path, and ends with .resources.dll
-                    //  IE it's a resource / satellite assembly
-                    continue;
-                }
-                
                 string typeAttributeValue = fileElement.Attribute("Type").Value;
                 string assetType;
+                string culture = null;
                 if (typeAttributeValue.Equals("Managed", StringComparison.OrdinalIgnoreCase))
                 {
                     assetType = "runtime";
@@ -126,12 +102,26 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     assetType = "native";
                 }
+                else if (typeAttributeValue.Equals("Resources", StringComparison.OrdinalIgnoreCase))
+                {
+                    assetType = "resources";
+                    culture = fileElement.Attribute("Culture")?.Value;
+                    if (culture == null)
+                    {
+                        throw new BuildErrorException($"Culture not set in runtime manifest for {assetPath}");
+                    }
+                    if (this.SatelliteResourceLanguages.Length > 1 &&
+                        !this.SatelliteResourceLanguages.Any(lang => string.Equals(lang.ItemSpec, culture, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+                }
                 else
                 {
                     throw new BuildErrorException($"Unrecognized file type '{typeAttributeValue}' in {runtimeListPath}");
                 }
 
-                var assetItem = CreateAssetItem(assetPath, assetType, runtimePack);
+                var assetItem = CreateAssetItem(assetPath, assetType, runtimePack, culture);
 
                 assetItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion")?.Value);
                 assetItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion")?.Value);
@@ -139,10 +129,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 runtimePackAssets.Add(assetItem);
             }
-
-            runtimePackAssets.AddRange(EnumerateResourceAssets(runtimePackRoot, runtimeIdentifier, runtimePack));
-
-            return runtimePackAssets;
         }
 
         private IEnumerable<TaskItem> GetRuntimePackAssetsFromConvention(string runtimePackRoot, ITaskItem runtimePack)
@@ -173,7 +159,7 @@ namespace Microsoft.NET.Build.Tasks
                     return;
                 }
 
-                var assetItem = CreateAssetItem(assetPath, assetType, runtimePack);
+                var assetItem = CreateAssetItem(assetPath, assetType, runtimePack, null);
 
                 runtimePackAssets.Add(assetItem);
             }
@@ -191,14 +177,24 @@ namespace Microsoft.NET.Build.Tasks
             return runtimePackAssets;
         }
 
-        private static TaskItem CreateAssetItem(string assetPath, string assetType, ITaskItem runtimePack)
+        private static TaskItem CreateAssetItem(string assetPath, string assetType, ITaskItem runtimePack, string culture)
         {
             string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
             var assetItem = new TaskItem(assetPath);
 
             assetItem.SetMetadata(MetadataKeys.CopyLocal, "true");
-            assetItem.SetMetadata(MetadataKeys.DestinationSubPath, Path.GetFileName(assetPath));
+            if (string.IsNullOrEmpty(culture))
+            {
+                assetItem.SetMetadata(MetadataKeys.DestinationSubPath, Path.GetFileName(assetPath));
+            }
+            else
+            {
+                assetItem.SetMetadata(MetadataKeys.DestinationSubDirectory, culture + Path.DirectorySeparatorChar);
+                assetItem.SetMetadata(MetadataKeys.DestinationSubPath, Path.Combine(culture, Path.GetFileName(assetPath)));
+                assetItem.SetMetadata(MetadataKeys.Culture, culture);
+            }
+
             assetItem.SetMetadata(MetadataKeys.AssetType, assetType);
             assetItem.SetMetadata(MetadataKeys.PackageName, runtimePack.GetMetadata(MetadataKeys.PackageName));
             assetItem.SetMetadata(MetadataKeys.PackageVersion, runtimePack.GetMetadata(MetadataKeys.PackageVersion));
@@ -244,16 +240,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var file in Directory.EnumerateFiles(cultureDirectory, "*.resources.dll"))
             {
-                var item = new TaskItem(file);
-
-                item.SetMetadata(MetadataKeys.CopyLocal, "true");
-                item.SetMetadata(MetadataKeys.DestinationSubDirectory, culture + Path.DirectorySeparatorChar);
-                item.SetMetadata(MetadataKeys.DestinationSubPath, Path.Combine(culture, Path.GetFileName(file)));
-                item.SetMetadata(MetadataKeys.AssetType, "resources");
-                item.SetMetadata(MetadataKeys.PackageName, runtimePack.GetMetadata(MetadataKeys.PackageName));
-                item.SetMetadata(MetadataKeys.PackageVersion, runtimePack.GetMetadata(MetadataKeys.PackageVersion));
-                item.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
-                item.SetMetadata(MetadataKeys.Culture, culture);
+                var item = CreateAssetItem(file, "resources", runtimePack, culture);
 
                 yield return item;
             }
