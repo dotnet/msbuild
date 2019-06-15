@@ -105,7 +105,7 @@ namespace dotnet_new3
             host.RegisterDiagnosticLogger("Install", installLogger);
         }
 
-        private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
+        private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstallerExtended installer)
         {
             string baseDir = Environment.ExpandEnvironmentVariables("%DN3%");
 

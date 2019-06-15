@@ -37,15 +37,15 @@ namespace Microsoft.TemplateEngine.Cli
                         (?:-[A-Z]{2})?
                     $"
             , RegexOptions.IgnorePatternWhitespace);
-        private readonly Action<IEngineEnvironmentSettings, IInstaller> _onFirstRun;
+        private readonly Action<IEngineEnvironmentSettings, IInstallerExtended> _onFirstRun;
         private readonly Func<string> _inputGetter = () => Console.ReadLine();
 
-        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, INewCommandInput commandInput)
+        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstallerExtended> onFirstRun, INewCommandInput commandInput)
             : this(commandName, host, telemetryLogger, onFirstRun, commandInput, null)
         {
         }
 
-        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, INewCommandInput commandInput, string hivePath)
+        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstallerExtended> onFirstRun, INewCommandInput commandInput, string hivePath)
         {
             _telemetryLogger = telemetryLogger;
             host = new ExtendedTemplateEngineHost(host, this);
@@ -76,7 +76,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstallerExtended> onFirstRun, string[] args)
         {
             return Run(commandName, host, telemetryLogger, onFirstRun, args, null);
         }
@@ -106,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli
             return _entryMutex;
         }
 
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstallerExtended> onFirstRun, string[] args, string hivePath)
         {
             if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
             {
@@ -131,7 +131,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
+        private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstallerExtended> onFirstRun, string[] args, string hivePath)
         {
             if (args.Any(x => string.Equals(x, "--debug:version", StringComparison.Ordinal)))
             {

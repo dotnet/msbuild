@@ -14,7 +14,7 @@ using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    internal class Installer : IInstaller
+    internal class Installer : IInstallerExtended
     {
         private readonly IEngineEnvironmentSettings _environmentSettings;
         private readonly Paths _paths;

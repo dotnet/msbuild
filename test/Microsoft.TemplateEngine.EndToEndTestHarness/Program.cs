@@ -214,7 +214,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns, new[] { "dotnetcli" });
         }
 
-        private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
+        private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstallerExtended installer)
         {
             string codebase = typeof(Program).GetTypeInfo().Assembly.CodeBase;
             Uri cb = new Uri(codebase);

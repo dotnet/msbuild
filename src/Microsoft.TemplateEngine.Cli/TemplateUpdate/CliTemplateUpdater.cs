@@ -8,7 +8,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateUpdate
 {
     internal class CliTemplateUpdater
     {
-        public CliTemplateUpdater(IEngineEnvironmentSettings environmentSettings, IInstallerBase installer, string commandName)
+        public CliTemplateUpdater(IEngineEnvironmentSettings environmentSettings, IInstaller installer, string commandName)
         {
             _commandName = commandName;
             _updateCoordinator = new TemplateUpdateCoordinator(environmentSettings, installer);
