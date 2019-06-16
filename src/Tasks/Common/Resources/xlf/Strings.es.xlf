@@ -516,10 +516,25 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1045: El SDK de .NET actual no admite el destino {0} {1}. Use el destino {0} {2} u otro inferior, o bien una versión del SDK de .NET que admita {0} {1}.</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
+      <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
+        <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
+        <target state="new">NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</target>
+        <note>{StrBegin="NETSDK1107: "}</note>
+      </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
         <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
         <target state="translated">NETSDK1057: Está utilizando una versión preliminar de .NET Core. Vea: https://aka.ms/dotnet-core-preview</target>
         <note>{StrBegin="NETSDK1057: "}</note>
+      </trans-unit>
+      <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">
+        <source>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</source>
+        <target state="new">NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</target>
+        <note>{StrBegin="NETSDK1106: "}</note>
+      </trans-unit>
+      <trans-unit id="WindowsDesktopFrameworkRequiresVersion30">
+        <source>NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</source>
+        <target state="new">NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</target>
+        <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
         <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
