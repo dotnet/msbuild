@@ -68,6 +68,7 @@
     <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
     <None Include="..\Common\targets\**\*" PackagePath="msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\" LinkBase="%(PackagePath)" />
+    <UpToDateCheckInput Include="@(None)" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">

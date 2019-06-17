@@ -81,6 +81,7 @@
     <None Include="sdk\**\*" PackagePath="Sdk\" />
     <None Include="..\Common\targets\**\*" PackagePath="targets\" LinkBase="targets" />
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
+    <UpToDateCheckInput Include="@(None)" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
