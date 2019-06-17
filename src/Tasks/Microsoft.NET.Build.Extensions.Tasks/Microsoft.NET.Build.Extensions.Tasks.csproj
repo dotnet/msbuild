@@ -98,14 +98,6 @@
     </ItemGroup>
   </Target>
 
-  <!-- TODO: remove this target when building with a newer 3.0 toolset as this workaround is no longer needed. -->
-  <Target Name="FilterCopyLocal" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
-    <ItemGroup>
-      <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
-      <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
-    </ItemGroup>
-  </Target>
-
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>
