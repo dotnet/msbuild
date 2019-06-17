@@ -131,10 +131,10 @@ jobs:
     condition: succeededOrFailed()
 
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: bin'
+    displayName: 'Publish Artifact: symbols'
     inputs:
-      PathtoPublish: 'artifacts\bin'
-      ArtifactName: bin
+      PathtoPublish: 'artifacts\bin\**\*.pdb'
+      ArtifactName: symbols
     condition: succeededOrFailed()
 
   # Publishes setup VSIXes to a drop.
