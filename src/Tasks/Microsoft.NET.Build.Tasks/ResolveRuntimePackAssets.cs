@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -66,62 +68,152 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
+                var runtimeListPath = Path.Combine(runtimePackRoot, "data", "RuntimeListList.xml");
 
-                //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened
-                //  folder structure and a manifest indicating how the files should be used: https://github.com/dotnet/cli/issues/10442
-                string runtimeAssetsPath = Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "lib", "netcoreapp3.0");
-                string nativeAssetsPath = Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "native");
-
-                var runtimeAssets = Directory.Exists(runtimeAssetsPath) ? Directory.GetFiles(runtimeAssetsPath) : Array.Empty<string>();
-                var nativeAssets = Directory.Exists(nativeAssetsPath) ? Directory.GetFiles(nativeAssetsPath) : Array.Empty<string>();
-
-                void AddAsset(string assetPath, string assetType)
+                if (File.Exists(runtimeListPath))
                 {
-                    if (assetPath.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase) ||
-                        assetPath.EndsWith(".map", StringComparison.OrdinalIgnoreCase) ||
-                        assetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
-                        assetPath.EndsWith(".xml", StringComparison.OrdinalIgnoreCase) ||
-                        assetPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ||
-                        assetPath.EndsWith("._", StringComparison.Ordinal))
-                    {
-                        //  Don't add assets for these files (shouldn't be necessary if/once we have a manifest in the runtime pack
-                        //  https://github.com/dotnet/cli/issues/10442
-                        return;
-                    }
-
-                    var assetItem = new TaskItem(assetPath);
-
-                    assetItem.SetMetadata(MetadataKeys.CopyLocal, "true");
-                    assetItem.SetMetadata(MetadataKeys.DestinationSubPath, Path.GetFileName(assetPath));
-                    assetItem.SetMetadata(MetadataKeys.AssetType, assetType);
-                    assetItem.SetMetadata(MetadataKeys.PackageName, runtimePack.GetMetadata(MetadataKeys.PackageName));
-                    assetItem.SetMetadata(MetadataKeys.PackageVersion, runtimePack.GetMetadata(MetadataKeys.PackageVersion));
-                    assetItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
-                    assetItem.SetMetadata(MetadataKeys.IsTrimmable, runtimePack.GetMetadata(MetadataKeys.IsTrimmable));
-
-                    runtimePackAssets.Add(assetItem);
+                    AddRuntimePackAssetsFromManifest(runtimePackAssets, runtimePackRoot, runtimeListPath, runtimePack);
                 }
-
-                foreach (var asset in runtimeAssets)
+                else
                 {
-                    AddAsset(asset, "runtime");
+                    runtimePackAssets.AddRange(GetRuntimePackAssetsFromConvention(runtimePackRoot, runtimePack));
                 }
-                foreach (var asset in nativeAssets)
-                {
-                    AddAsset(asset, "native");
-                }
-
-                runtimePackAssets.AddRange(EnumerateResourceAssets(runtimePackRoot, runtimeIdentifier, runtimePack));
             }
 
             RuntimePackAssets = runtimePackAssets.ToArray();
         }
 
-        private IEnumerable<ITaskItem> EnumerateResourceAssets(string runtimePackRoot, string runtimeIdentifier, ITaskItem runtimePack)
+        private void AddRuntimePackAssetsFromManifest(List<ITaskItem> runtimePackAssets, string runtimePackRoot,
+            string runtimeListPath, ITaskItem runtimePack)
+        {            
+            XDocument frameworkListDoc = XDocument.Load(runtimeListPath);
+            foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
+            {
+                string assetPath = Path.Combine(runtimePackRoot, fileElement.Attribute("Path").Value);
+
+                string typeAttributeValue = fileElement.Attribute("Type").Value;
+                string assetType;
+                string culture = null;
+                if (typeAttributeValue.Equals("Managed", StringComparison.OrdinalIgnoreCase))
+                {
+                    assetType = "runtime";
+                }
+                else if (typeAttributeValue.Equals("Native", StringComparison.OrdinalIgnoreCase))
+                {
+                    assetType = "native";
+                }
+                else if (typeAttributeValue.Equals("Resources", StringComparison.OrdinalIgnoreCase))
+                {
+                    assetType = "resources";
+                    culture = fileElement.Attribute("Culture")?.Value;
+                    if (culture == null)
+                    {
+                        throw new BuildErrorException($"Culture not set in runtime manifest for {assetPath}");
+                    }
+                    if (this.SatelliteResourceLanguages.Length > 1 &&
+                        !this.SatelliteResourceLanguages.Any(lang => string.Equals(lang.ItemSpec, culture, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    throw new BuildErrorException($"Unrecognized file type '{typeAttributeValue}' in {runtimeListPath}");
+                }
+
+                var assetItem = CreateAssetItem(assetPath, assetType, runtimePack, culture);
+
+                assetItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion")?.Value);
+                assetItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion")?.Value);
+                assetItem.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken")?.Value);
+
+                runtimePackAssets.Add(assetItem);
+            }
+        }
+
+        private IEnumerable<TaskItem> GetRuntimePackAssetsFromConvention(string runtimePackRoot, ITaskItem runtimePack)
+        {
+            List<TaskItem> runtimePackAssets = new List<TaskItem>();
+
+            string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
+
+            //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened
+            //  folder structure and a manifest indicating how the files should be used: https://github.com/dotnet/cli/issues/10442
+            string runtimeAssetsPath = GetRuntimeAssetsPath(runtimePackRoot, runtimeIdentifier);
+            string nativeAssetsPath = Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "native");
+
+            var runtimeAssets = Directory.Exists(runtimeAssetsPath) ? Directory.GetFiles(runtimeAssetsPath) : Array.Empty<string>();
+            var nativeAssets = Directory.Exists(nativeAssetsPath) ? Directory.GetFiles(nativeAssetsPath) : Array.Empty<string>();
+
+            void AddAsset(string assetPath, string assetType)
+            {
+                if (assetPath.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase) ||
+                    assetPath.EndsWith(".map", StringComparison.OrdinalIgnoreCase) ||
+                    assetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
+                    assetPath.EndsWith(".xml", StringComparison.OrdinalIgnoreCase) ||
+                    assetPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ||
+                    assetPath.EndsWith("._", StringComparison.Ordinal))
+                {
+                    //  Don't add assets for these files (shouldn't be necessary if/once we have a manifest in the runtime pack
+                    //  https://github.com/dotnet/cli/issues/10442
+                    return;
+                }
+
+                var assetItem = CreateAssetItem(assetPath, assetType, runtimePack, null);
+
+                runtimePackAssets.Add(assetItem);
+            }
+
+            foreach (var asset in runtimeAssets)
+            {
+                AddAsset(asset, "runtime");
+            }
+            foreach (var asset in nativeAssets)
+            {
+                AddAsset(asset, "native");
+            }
+
+            runtimePackAssets.AddRange(EnumerateResourceAssets(runtimePackRoot, runtimeIdentifier, runtimePack));
+            return runtimePackAssets;
+        }
+
+        private static TaskItem CreateAssetItem(string assetPath, string assetType, ITaskItem runtimePack, string culture)
+        {
+            string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
+
+            var assetItem = new TaskItem(assetPath);
+
+            assetItem.SetMetadata(MetadataKeys.CopyLocal, "true");
+            if (string.IsNullOrEmpty(culture))
+            {
+                assetItem.SetMetadata(MetadataKeys.DestinationSubPath, Path.GetFileName(assetPath));
+            }
+            else
+            {
+                assetItem.SetMetadata(MetadataKeys.DestinationSubDirectory, culture + Path.DirectorySeparatorChar);
+                assetItem.SetMetadata(MetadataKeys.DestinationSubPath, Path.Combine(culture, Path.GetFileName(assetPath)));
+                assetItem.SetMetadata(MetadataKeys.Culture, culture);
+            }
+
+            assetItem.SetMetadata(MetadataKeys.AssetType, assetType);
+            assetItem.SetMetadata(MetadataKeys.PackageName, runtimePack.GetMetadata(MetadataKeys.PackageName));
+            assetItem.SetMetadata(MetadataKeys.PackageVersion, runtimePack.GetMetadata(MetadataKeys.PackageVersion));
+            assetItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
+            assetItem.SetMetadata(MetadataKeys.IsTrimmable, runtimePack.GetMetadata(MetadataKeys.IsTrimmable));
+
+            return assetItem;
+        }
+
+        private static string GetRuntimeAssetsPath(string runtimePackRoot, string runtimeIdentifier)
         {
             //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened structure
-            var directory = Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "lib", "netcoreapp3.0");
+            return Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "lib", "netcoreapp3.0");
+        }
+
+        private IEnumerable<TaskItem> EnumerateResourceAssets(string runtimePackRoot, string runtimeIdentifier, ITaskItem runtimePack)
+        {
+            //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened structure
+            var directory = GetRuntimeAssetsPath(runtimePackRoot, runtimeIdentifier);
             if (!Directory.Exists(directory))
             {
                 yield break;
@@ -136,7 +228,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private IEnumerable<ITaskItem> EnumerateCultureAssets(string cultureDirectory, string runtimeIdentifier, ITaskItem runtimePack)
+        private IEnumerable<TaskItem> EnumerateCultureAssets(string cultureDirectory, string runtimeIdentifier, ITaskItem runtimePack)
         {
             var culture = Path.GetFileName(cultureDirectory);
 
@@ -148,16 +240,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var file in Directory.EnumerateFiles(cultureDirectory, "*.resources.dll"))
             {
-                var item = new TaskItem(file);
-
-                item.SetMetadata(MetadataKeys.CopyLocal, "true");
-                item.SetMetadata(MetadataKeys.DestinationSubDirectory, culture + Path.DirectorySeparatorChar);
-                item.SetMetadata(MetadataKeys.DestinationSubPath, Path.Combine(culture, Path.GetFileName(file)));
-                item.SetMetadata(MetadataKeys.AssetType, "resources");
-                item.SetMetadata(MetadataKeys.PackageName, runtimePack.GetMetadata(MetadataKeys.PackageName));
-                item.SetMetadata(MetadataKeys.PackageVersion, runtimePack.GetMetadata(MetadataKeys.PackageVersion));
-                item.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
-                item.SetMetadata(MetadataKeys.Culture, culture);
+                var item = CreateAssetItem(file, "resources", runtimePack, culture);
 
                 yield return item;
             }
