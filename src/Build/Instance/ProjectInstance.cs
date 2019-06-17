@@ -1342,7 +1342,7 @@ namespace Microsoft.Build.Execution
                     // If it's an env var, track it.
                     _environmentVariables.Add(name);
                 }
-                else if (_environmentVariables.Contains(name))
+                else
                 {
                     // If it's NOT an env var but the property has the same name,
                     // then we're not dependent on the env var any more: remove it.
