@@ -19,14 +19,11 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <OutDirName>$(Configuration)\Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <!-- MSBuild Task DLLs need to be versioned with every build -->
+    <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-
-  <PropertyGroup>
-    <!-- MSBuild Task DLLs need to be versioned with every build -->
-    <AssemblyVersion>$(FileVersion)</AssemblyVersion>
-  </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>$(BaseOutputPath)</OutputPath>
