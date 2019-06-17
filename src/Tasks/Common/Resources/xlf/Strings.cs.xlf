@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
-        <target state="translated">NETSDK1076: AddResource se dá použít jenom se zdroji typu celé číslo.</target>
+        <target state="translated">NETSDK1076: AddResource se dá použít jen spolu s celočíselnými typy prostředků.</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="translated">NETSDK1074: Hostitelský spustitelný soubor aplikace se neupraví, protože pro přidání zdrojů je nutné, aby se sestavení provedlo ve Windows (kromě Nano Serveru).</target>
+        <target state="translated">NETSDK1074: Spustitelný soubor hostitele aplikace se nepřizpůsobí, protože přidávání prostředků vyžaduje, aby se sestavení provedlo na Windows (bez Nano Serveru).</target>
         <note>{StrBegin="NETSDK1074: "}</note>
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
@@ -24,22 +24,22 @@
       </trans-unit>
       <trans-unit id="AppHostNotWindows">
         <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
-        <target state="translated">NETSDK1078: {0} nejde použít jako hostitelský spustitelný soubor aplikace, protože to není soubor Windows PE.</target>
+        <target state="translated">NETSDK1078: Nepovedlo se použít {0} jako spustitelný soubor aplikace, protože to není soubor Windows PE.</target>
         <note>{StrBegin="NETSDK1078: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
-        <target state="translated">NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</target>
+        <target state="translated">NETSDK1072: Nepovedlo se použít {0} jako spustitelný soubor aplikace, protože to není spustitelný soubor Windows pro subsystém CUI (Console).</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="translated">NETSDK1079: Balíček Microsoft.AspNetCore.All se při cílení na .NET Core 3.0 nebo vyšší nepodporuje. Místo toho byste měli použít FrameworkReference na Microsoft.AspNetCore.App. Ten implicitně zahrnuje Microsoft.NET.Sdk.Web.</target>
+        <target state="translated">NETSDK1079: Když se cílí na .NET Core 3.0 nebo vyšší, balíček Microsoft.AspNetCore.All se nepodporuje. Místo něj by se měl použít odkaz FrameworkReference na Microsoft.AspNetCore.App, který se implicitně zahrne pomocí Microsoft.NET.Sdk.Web.</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="translated">NETSDK1080: Při cílení na .NET Core 3.0 nebo vyšší se nevyžaduje PackageReference na Microsoft.AspNetCore.App. Pokud použijete Microsoft.NET.Sdk.Web, bude se na sdílenou platformu odkazovat automaticky. V opačném případě byste místo PackageReference měli použít FrameworkReference.</target>
+        <target state="translated">NETSDK1080: Když se cílí na .NET Core 3.0 a vyšší, odkaz PackageReference na Microsoft.AspNetCore.App není nutný. Pokud se použije Microsoft.NET.Sdk.Web, odkaz na sdílenou architekturu vznikne automaticky. Jinak by se PackageReference mělo nahradit za FrameworkReference.</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="new">NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</target>
+        <target state="translated">NETSDK1092: CLSIDMap se nedá vložit do hostitele COM, protože přidávání prostředků vyžaduje, aby se sestavení provedlo na Windows (bez Nano Serveru).</target>
         <note>{StrBegin="NETSDK1092: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="CannotFindComhost">
         <source>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
-        <target state="new">NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <target state="translated">NETSDK1091: Nepovedlo se najít hostitele COM architektury .NET Core. Když se cílí na Windows, je hostitel COM architektury .NET Core k dispozici jen v architektuře .NET Core 3.0 a vyšší.</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
@@ -109,17 +109,17 @@
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
         <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="new">NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</target>
+        <target state="translated">NETSDK1097: Publikování aplikace do jednoho souboru bez zadání parametru RuntimeIdentifier není podporované. Buď prosím zadejte parametr RuntimeIdentifier, nebo nastavte parametr PublishSingleFile na hodnotu False.</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
         <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="new">NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</target>
+        <target state="translated">NETSDK1098: Aplikace publikované do jednoho souboru musí používat hostitele aplikací. Buď prosím nastavte parametr PublishSingleFile na hodnotu False, nebo parametr UseAppHost na hodnotu True.</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
         <source>NETSDK1099: Publishing to a single-file is only supported for executable applications.</source>
-        <target state="new">NETSDK1099: Publishing to a single-file is only supported for executable applications.</target>
+        <target state="translated">NETSDK1099: Publikování do jednoho souboru je podporované jen u spustitelných aplikací.</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
@@ -154,7 +154,7 @@
       </trans-unit>
       <trans-unit id="ClsidMapConflictingGuids">
         <source>NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</source>
-        <target state="new">NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</target>
+        <target state="translated">NETSDK1089: Typy {0} a {1} mají v GuidAttribute nastavené stejné CLSID {2}. Každá třída COMVisible potřebuje pro své CLSID jedinečné GUID.</target>
         <note>{StrBegin="NETSDK1089: "}
 {0} - The first type with the conflicting guid.
 {1} - The second type with the conflicting guid.
@@ -162,13 +162,13 @@
       </trans-unit>
       <trans-unit id="ClsidMapExportedTypesRequireExplicitGuid">
         <source>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</source>
-        <target state="new">NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</target>
+        <target state="translated">NETSDK1088: Třída COMVisible {0} musí mít GuidAttribute s CLSID třídy, která se má zviditelnit pro model COM v architektuře .NET Core.</target>
         <note>{StrBegin="NETSDK1088: "}
 {0} - The ComVisible class that doesn't have a GuidAttribute on it.</note>
       </trans-unit>
       <trans-unit id="ClsidMapInvalidAssembly">
         <source>NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</source>
-        <target state="new">NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</target>
+        <target state="translated">NETSDK1090: Zadané sestavení {0} není platné. Nedá se z něj vygenerovat CLSIDMap.</target>
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
@@ -189,7 +189,7 @@
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>NETSDK1038: Could not determine winner because '{0}' does not exist.</source>
-        <target state="needs-review-translation">NETSDK1038: Vítěze nebylo možné určit, protože {0} neexistuje.</target>
+        <target state="translated">NETSDK1038: Vítěze nebylo možné určit, protože {0} neexistuje.</target>
         <note>{StrBegin="NETSDK1038: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
@@ -254,7 +254,7 @@
       </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
-        <target state="translated">NETSDK1077: Prostředek se nepovedlo uzamknout.</target>
+        <target state="translated">NETSDK1077: Nepovedlo se uzamknout prostředek.</target>
         <note>{StrBegin="NETSDK1077: "}</note>
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
@@ -279,12 +279,12 @@
       </trans-unit>
       <trans-unit id="FrameworkReferenceDuplicateError">
         <source>NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</source>
-        <target state="new">NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</target>
+        <target state="translated">NETSDK1087: Do projektu se zahrnulo několik položek FrameworkReference pro {0}.</target>
         <note>{StrBegin="NETSDK1087: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkReferenceOverrideWarning">
         <source>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="new">NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</target>
+        <target state="translated">NETSDK1086: Do projektu se zahrnulo FrameworkReference pro {0}. Na tento odkaz se implicitně odkazuje sada .NET SDK, takže na něj zpravidla nemusíte odkazovat z projektu. Další informace najdete na adrese {1}.</target>
         <note>{StrBegin="NETSDK1086: "}</note>
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
@@ -294,12 +294,12 @@
       </trans-unit>
       <trans-unit id="ILLinkInformation">
         <source>NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <target state="needs-review-translation">NETSDK1101: Optimalizuje se velikost sestavení, což může změnit chování aplikace. Nezapomeňte po vydání provést testy. Další informace: https://aka.ms/illink</target>
         <note>{StrBegin="NETSDK1101: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
-        <target state="new">NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</target>
+        <target state="translated">NETSDK1102: Pro vybranou konfiguraci publikování se optimalizace velikosti sestavení nepodporuje. Ujistěte se, že publikujete samostatnou aplikaci.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
@@ -330,7 +330,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="InvalidResourceUpdate">
         <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
-        <target state="translated">NETSDK1075: Popisovač aktualizace není platný. Tuto instanci nejde použít pro další aktualizace.</target>
+        <target state="translated">NETSDK1075: Popisovač aktualizace není platný. Instance se nebude dát použít pro další aktualizace.</target>
         <note>{StrBegin="NETSDK1075: "}</note>
       </trans-unit>
       <trans-unit id="InvalidRollForwardValue">
@@ -340,7 +340,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
-        <target state="translated">NETSDK1061: Projekt byl obnoven pomocí aplikace {0} verze {1}, ale s aktuálním nastavením by se místo toho použít verze {2}. Tento problém vyřešíte tak, že zkontrolujete, že se pro obnovení a následné operace, například sestavení nebo publikování, používá stejné nastavení. Obvykle k tomuto problému může dojít, pokud je vlastnost RuntimeIdentifier nastavena při sestavování nebo  publikování, ale ne při obnovování. Další informace najdete na stránce https://aka.ms/dotnet-runtime-patch-selection.</target>
+        <target state="translated">NETSDK1061: Projekt byl obnoven pomocí aplikace {0} verze {1}, ale s aktuálním nastavením by se místo toho použít verze {2}. Tento problém vyřešíte tak, že zkontrolujete, že se pro obnovení a následné operace, například sestavení nebo publikování, používá stejné nastavení. Obvykle k tomuto problému může dojít, pokud je vlastnost RuntimeIdentifier nastavena při sestavování nebo publikování, ale ne při obnovování. Další informace najdete na stránce https://aka.ms/dotnet-runtime-patch-selection.</target>
         <note>{StrBegin="NETSDK1061: "}
 {0} - Package Identifier for platform package
 {1} - Restored version of platform package
@@ -363,12 +363,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
-        <target state="translated">NETSDK1084: Není dostupný žádný hostitel aplikace pro zadaný RuntimeIdentifier {0}.</target>
+        <target state="translated">NETSDK1084: Pro zadaný identifikátor RuntimeIdentifier {0} není k dispozici žádný hostitel aplikace.</target>
         <note>{StrBegin="NETSDK1084: "}</note>
       </trans-unit>
       <trans-unit id="NoBuildRequested">
         <source>NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</source>
-        <target state="new">NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</target>
+        <target state="translated">NETSDK1085: Vlastnost NoBuild se nastavila na true, ale vyvolal se cíl Build.</target>
         <note>{StrBegin="NETSDK1085: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
@@ -378,12 +378,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoRuntimePackAvailable">
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
-        <target state="translated">NETSDK1082: Nebyl dostupný žádný balíček runtime pro {0} pro zadaný RuntimeIdentifier {1}.</target>
+        <target state="translated">NETSDK1082: Pro zadaný identifikátor RuntimeIdentifier {1} nebyl k dispozici žádný balíček modulu runtime {0}.</target>
         <note>{StrBegin="NETSDK1082: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
-        <target state="needs-review-translation">NETSDK1053: Zabalit jako nástroj nepodporuje nezávislost.</target>
+        <target state="translated">NETSDK1053: Zabalit jako nástroj nepodporuje nezávislost.</target>
         <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
       <trans-unit id="PackageInfoLog">
@@ -403,7 +403,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="needs-review-translation">NETSDK1071: PackageReference na balíček {0} určuje verzi {1}. Určení verze tohoto balíčku se nedoporučuje. Další informace najdete na adrese https://aka.ms/sdkimplicitrefs.</target>
+        <target state="translated">NETSDK1071: PackageReference na balíček {0} určuje verzi {1}. Určení verze tohoto balíčku se nedoporučuje. Další informace najdete na adrese https://aka.ms/sdkimplicitrefs.</target>
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="ParsingFiles">
@@ -423,22 +423,22 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
         <source>NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
-        <target state="new">NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</target>
+        <target state="translated">NETSDK1093: NETSDK1093: Nástroje projektu (DotnetCliTool) podporují jen cílení na .NET Core 2.2 a nižší.</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
-        <target state="new">NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</target>
+        <target state="translated">NETSDK1096: Nepovedlo se optimalizovat sestavení pro výkonnost. Můžete buď vyloučit neúspěšná sestavení z optimalizace, nebo nastavit vlastnost PublishReadyToRun na false.</target>
         <note>{StrBegin="NETSDK1096: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
         <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
-        <target state="new">NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</target>
+        <target state="translated">NETSDK1094: Nepovedlo se optimalizovat sestavení pro výkonnost: nenašel se platný balíček modulu runtime. Buď nastavte vlastnost PublishReadyToRun na false, nebo při publikování použijte podporovaný identifikátor modulu runtime.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSuppotedError">
         <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
+        <target state="translated">NETSDK1095: Optimalizace sestavení z hlediska výkonu není u vybrané cílové platformy nebo architektury podporovaná. Ujistěte se prosím, že publikujete samostatnou aplikaci používající identifikátor podporovaného modulu runtime, nebo nastavte vlastnost PublishReadyToRun na hodnotu False.</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">
@@ -448,7 +448,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
         <source>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</source>
-        <target state="translated">NETSDK1083: Zadaný RuntimeIdentifier {0} nejde rozpoznat.</target>
+        <target state="translated">NETSDK1083: Zadaný identifikátor RuntimeIdentifier {0} se nerozpoznal.</target>
         <note>{StrBegin="NETSDK1083: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
@@ -483,7 +483,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
-        <target state="translated">NETSDK1073: FrameworkReference {0} nejde rozpoznat.</target>
+        <target state="translated">NETSDK1073: Odkaz FrameworkReference {0} se nerozpoznal.</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -493,7 +493,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnresolvedTargetingPack">
         <source>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</source>
-        <target state="translated">NETSDK1081: Nešlo najít Targeting Pack pro {0}. Tento problém možná půjde vyřešit tak, že pro projekt spustíte obnovení z NuGetu.</target>
+        <target state="translated">NETSDK1081: Balíček Targeting Pack pro {0} se nenašel. Možná to budete moct vyřešit tak, že v projektu spustíte obnovení NuGet.</target>
         <note>{StrBegin="NETSDK1081: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFramework">
@@ -538,7 +538,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
         <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
-        <target state="new">NETSDK1100: Windows is required to build Windows desktop applications.</target>
+        <target state="translated">NETSDK1100: K sestavování desktopových aplikací pro Windows se vyžaduje systém Windows.</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
     </body>

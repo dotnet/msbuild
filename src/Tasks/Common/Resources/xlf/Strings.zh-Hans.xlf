@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../Strings.resx">
     <body>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
-        <target state="translated">NETSDK1076: AddResource 仅可用于整数资源类型。</target>
+        <target state="translated">NETSDK1076: AddResource 只能使用整数资源类型。</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="translated">NETSDK1074: 由于必须在 Windows 上执行生成项才能添加资源，因此将不自定义应用程序主机可执行文件(Nano Server 除外)。</target>
+        <target state="translated">NETSDK1074: 未自定义应用程序主机可执行文件，因为添加资源要求在 Windows (不包括 Nano 服务器)上执行生成。</target>
         <note>{StrBegin="NETSDK1074: "}</note>
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
@@ -29,17 +29,17 @@
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
-        <target state="translated">NETSDK1072: 无法将“{0}”用作应用程序主机可执行文件，因为它不是 CUI (Console)子系统的 Windows 可执行文件。</target>
+        <target state="translated">NETSDK1072: 无法将“{0}”用作应用程序主机可执行文件，因为它不是 CUI (控制台)子系统的 Windows 可执行文件。</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="translated">NETSDK1079: 在面向 .NET Core 3.0 或更高版本时不支持 Microsoft.AspNetCore.All 包。应改用 Microsoft.AspNetCore.App 的 FrameworkReference，且 Microsoft.NET.Sdk.Web 将隐式包含此引用。</target>
+        <target state="translated">NETSDK1079: 当面向 .NET Core 3.0 或更高版本时，不支持 Microsoft.AspNetCore.All 包。应改为使用 Microsoft.AspNetCore.App 的 FrameworkReference，并且 Microsoft.NET.Sdk.Web 将隐式包含它。</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="translated">NETSDK1080: 在面向 .NET Core 3.0 或更高版本时，PackageReference to Microsoft.AspNetCore.App 不是必需项。如果使用了 Microsoft.NET.Sdk.Web，则自动引用共享框架。否则，应将 PackageReference 替换为 FrameworkReference。</target>
+        <target state="translated">NETSDK1080: 当面向 .NET Core 3.0 或更高版本时，不需要 Microsoft.AspNetCore.App 的 PackageReference。如果使用 Microsoft.NET.Sdk.Web，则将自动引用共享框架。否则，应使用 FrameworkReference 替换 PackageReference。</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="new">NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</target>
+        <target state="translated">NETSDK1092: CLSIDMap 无法嵌入 COM 主机，因为添加资源要求在 Windows (不包括 Nano 服务器)上执行生成。</target>
         <note>{StrBegin="NETSDK1092: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="CannotFindComhost">
         <source>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
-        <target state="new">NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <target state="translated">NETSDK1091: 找不到 .NET Core COM 主机。仅当面向 Windows 时，.NET Core COM 主机才在 .NET Core 3.0 或更高版本上可用。</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
@@ -109,17 +109,17 @@
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
         <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="new">NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</target>
+        <target state="translated">NETSDK1097: 不可在未指定 RuntimeIdentifier 的情况下发布将应用程序发布到单一文件中。请指定 RuntimeIdentifier 或将 PublishSingleFile 设置为 false。</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
         <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="new">NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</target>
+        <target state="translated">NETSDK1098: 使用应用程序主机需要发布到单一文件中的应用程序。请将 PublishSingleFile 设置为 false，或将 UseAppHost 设置为 true。</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
         <source>NETSDK1099: Publishing to a single-file is only supported for executable applications.</source>
-        <target state="new">NETSDK1099: Publishing to a single-file is only supported for executable applications.</target>
+        <target state="translated">NETSDK1099: 发布到单一文件仅适用于可执行应用程序。</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
@@ -154,7 +154,7 @@
       </trans-unit>
       <trans-unit id="ClsidMapConflictingGuids">
         <source>NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</source>
-        <target state="new">NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</target>
+        <target state="translated">NETSDK1089: “{0}”和“{1}”类型在其 GuidAttribute 中设置了相同的 CLSID“{2}”。每个 COMVisible 类都需要为其 CLSID 提供一个不同的 GUID。</target>
         <note>{StrBegin="NETSDK1089: "}
 {0} - The first type with the conflicting guid.
 {1} - The second type with the conflicting guid.
@@ -162,13 +162,13 @@
       </trans-unit>
       <trans-unit id="ClsidMapExportedTypesRequireExplicitGuid">
         <source>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</source>
-        <target state="new">NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</target>
+        <target state="translated">NETSDK1088: COMVisible 类“{0}”必须具有 GuidAttribute，该类的 CLSID 将在 .NET Core 中对 COM 可见。</target>
         <note>{StrBegin="NETSDK1088: "}
 {0} - The ComVisible class that doesn't have a GuidAttribute on it.</note>
       </trans-unit>
       <trans-unit id="ClsidMapInvalidAssembly">
         <source>NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</source>
-        <target state="new">NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</target>
+        <target state="translated">NETSDK1090: 提供的程序集“{0}”无效。无法从该程序集生成 CLSIDMap。</target>
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>NETSDK1014: Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="translated">NETSDK1014:“{0}”的内容项设置为“{1}”，但不提供“{2}”或“{3}”。</target>
+        <target state="translated">NETSDK1014: “{0}”的内容项设置为“{1}”，但不提供“{2}”或“{3}”。</target>
         <note>{StrBegin="NETSDK1014: "}</note>
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
@@ -189,7 +189,7 @@
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>NETSDK1038: Could not determine winner because '{0}' does not exist.</source>
-        <target state="needs-review-translation">NETSDK1038: 由于“{0}”不存在，因此无法确定优胜者。</target>
+        <target state="translated">NETSDK1038: 由于“{0}”不存在，因此无法确定优胜者。</target>
         <note>{StrBegin="NETSDK1038: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
@@ -229,7 +229,7 @@
       </trans-unit>
       <trans-unit id="EncounteredConflict">
         <source>NETSDK1041: Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="translated">NETSDK1041:“{0}”和“{1}”之间存在冲突。</target>
+        <target state="translated">NETSDK1041: “{0}”和“{1}”之间存在冲突。</target>
         <note>{StrBegin="NETSDK1041: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -254,7 +254,7 @@
       </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
-        <target state="translated">NETSDK1077: 未能锁定资源。</target>
+        <target state="translated">NETSDK1077: 无法锁定资源。</target>
         <note>{StrBegin="NETSDK1077: "}</note>
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
@@ -279,12 +279,12 @@
       </trans-unit>
       <trans-unit id="FrameworkReferenceDuplicateError">
         <source>NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</source>
-        <target state="new">NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</target>
+        <target state="translated">NETSDK1087: 项目中包含“{0}”的多个 FrameworkReference 项。</target>
         <note>{StrBegin="NETSDK1087: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkReferenceOverrideWarning">
         <source>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="new">NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</target>
+        <target state="translated">NETSDK1086: 项目中包含了“{0}”的 FrameworkReference。它由 .NET SDK 隐式引用，且通常情况下无需从项目中对其进行引用。有关详细信息，请参阅 {1}</target>
         <note>{StrBegin="NETSDK1086: "}</note>
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
@@ -294,12 +294,12 @@
       </trans-unit>
       <trans-unit id="ILLinkInformation">
         <source>NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <target state="needs-review-translation">NETSDK1101: 正在优化程序集的大小，这可能更改应用的行为。请务必在发布后进行测试。请参阅: https://aka.ms/illink</target>
         <note>{StrBegin="NETSDK1101: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
-        <target state="new">NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</target>
+        <target state="translated">NETSDK1102: 所选发布配置不支持优化程序集的大小。请确保你发布的是独立应用。</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
@@ -330,7 +330,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="InvalidResourceUpdate">
         <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
-        <target state="translated">NETSDK1075: 更新句柄无效。此实例不能用于进一步的更新。</target>
+        <target state="translated">NETSDK1075: 更新句柄无效。此实例不能用于进一步更新。</target>
         <note>{StrBegin="NETSDK1075: "}</note>
       </trans-unit>
       <trans-unit id="InvalidRollForwardValue">
@@ -363,12 +363,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
-        <target state="translated">NETSDK1084: 对于指定的 RuntimeIdentifier“{0}”，没有可用的应用程序主机。</target>
+        <target state="translated">NETSDK1084: 没有应用程序主机可用于指定的 RuntimeIdentifier“{0}”。</target>
         <note>{StrBegin="NETSDK1084: "}</note>
       </trans-unit>
       <trans-unit id="NoBuildRequested">
         <source>NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</source>
-        <target state="new">NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</target>
+        <target state="translated">NETSDK1085: "NoBuild" 属性已设置为 true，但调用了 "Build" 目标。</target>
         <note>{StrBegin="NETSDK1085: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
@@ -378,12 +378,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoRuntimePackAvailable">
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
-        <target state="translated">NETSDK1082: 对于指定的 RuntimeIdentifier “{1}”，不存在 {0} 的运行时包。</target>
+        <target state="translated">NETSDK1082: {0} 没有运行时包可用于指定的 RuntimeIdentifier“{1}”。</target>
         <note>{StrBegin="NETSDK1082: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
-        <target state="needs-review-translation">NETSDK1053: 打包为工具不支持自包含。</target>
+        <target state="translated">NETSDK1053: 打包为工具不支持自包含。</target>
         <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
       <trans-unit id="PackageInfoLog">
@@ -403,7 +403,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="needs-review-translation">NETSDK1071:“{0}”的 PackageReference 指定了版本“{1}”。不建议指定此包的版本。有关详细信息，请查看 https://aka.ms/sdkimplicitrefs</target>
+        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="ParsingFiles">
@@ -423,22 +423,22 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
         <source>NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
-        <target state="new">NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</target>
+        <target state="translated">NETSDK1093: NETSDK1093: 项目工具(DotnetCliTool)仅支持面向 .NET Core 2.2 及更低版本。</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
-        <target state="new">NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</target>
+        <target state="translated">NETSDK1096: 程序集性能优化失败。可将失败的程序集排除在优化操作之外，或者将 PublishReadyToRun 属性设置为 false。</target>
         <note>{StrBegin="NETSDK1096: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
         <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
-        <target state="new">NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</target>
+        <target state="translated">NETSDK1094: 无法优化程序集性能: 找不到有效的运行时包。请将 PublishReadyToRun 属性设置为 false，或者在发布时使用受支持的运行时标识符。</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSuppotedError">
         <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
+        <target state="translated">NETSDK1095: 所选目标平台或体系结构不支持优化程序集的性能。请验证确保你在使用受支持的运行时标识符发布独立应用程序，或者将 PublishReadyToRun 属性设置为 false。</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">
@@ -478,22 +478,22 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>NETSDK1012: Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="translated">NETSDK1012:“{0}”的文件类型非预期。类型是“{1}”和“{2}”。</target>
+        <target state="translated">NETSDK1012: “{0}”的文件类型非预期。类型是“{1}”和“{2}”。</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
-        <target state="translated">NETSDK1073: 未能识别 FrameworkReference“{0}”</target>
+        <target state="translated">NETSDK1073: 未识别 FrameworkReference“{0}”</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="translated">NETSDK1009:“{1}”中无法识别预处理器标记“{0}”。</target>
+        <target state="translated">NETSDK1009: “{1}”中无法识别预处理器标记“{0}”。</target>
         <note>{StrBegin="NETSDK1009: "}</note>
       </trans-unit>
       <trans-unit id="UnresolvedTargetingPack">
         <source>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</source>
-        <target state="translated">NETSDK1081: 找不到 {0} 的目标包。可通过在项目上运行 NuGet 还原来解决此问题。</target>
+        <target state="translated">NETSDK1081: 找不到 {0} 的目标包。你可以通过对项目运行 NuGet 还原来解决此问题。</target>
         <note>{StrBegin="NETSDK1081: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFramework">
@@ -538,7 +538,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
         <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
-        <target state="new">NETSDK1100: Windows is required to build Windows desktop applications.</target>
+        <target state="translated">NETSDK1100: 需使用 Windows 才能构建 Windows 桌面应用程序。</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
     </body>

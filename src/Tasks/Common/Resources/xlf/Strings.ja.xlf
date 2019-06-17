@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
-        <target state="translated">NETSDK1076: AddResource は、整数リソース型でのみ使用することができます。</target>
+        <target state="translated">NETSDK1076: AddResource は、整数のリソースの種類でのみ使用できます。</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="translated">NETSDK1074: リソースを追加するには Windows (Nano Server を除く) でビルドを実行する必要があるため、アプリケーション ホストの実行可能ファイルはカスタマイズされません。</target>
+        <target state="translated">NETSDK1074: リソースの追加ではビルドが Windows 上で実行される必要があるため、アプリケーション ホストの実行可能ファイルはカスタマイズされません (Nano Server を除く)。</target>
         <note>{StrBegin="NETSDK1074: "}</note>
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
@@ -24,22 +24,22 @@
       </trans-unit>
       <trans-unit id="AppHostNotWindows">
         <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
-        <target state="translated">NETSDK1078: Windows PE ファイルではないため、 '{0}' をアプリケーション ホストの実行可能ファイルとして使用できません。</target>
+        <target state="translated">NETSDK1078: Windows PE ファイルではないため、'{0}' をアプリケーション ホストの実行可能ファイルとして使用することはできません。</target>
         <note>{StrBegin="NETSDK1078: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
-        <target state="translated">NETSDK1072: CUI (コンソール) サブシステムの Windows 実行可能ファイルではないため '{0}' をアプリケーション ホストの実行可能ファイルとして使用できません。</target>
+        <target state="translated">NETSDK1072: CUI (コンソール) サブシステム用の Windows 実行可能ファイルではないため、'{0}' をアプリケーション ホストの実行可能ファイルとして使用することはできません。</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="translated">NETSDK1079: .NET Core 3.0 以上をターゲットにする場合、Microsoft.AspNetCore.All パッケージはサポートされていません。 代わりに、Microsoft.AspNetCore.App への FrameworkReference を使用する必要があり、それは、Microsoft.NET.Sdk.Web によって暗黙的に含まれます。</target>
+        <target state="translated">NETSDK1079: .NET Core 3.0 以上がターゲットの場合、Microsoft.AspNetCore.All パッケージはサポートされていません。代わりに Microsoft.AspNetCore.App への FrameworkReference を使用する必要があり、これは Microsoft.NET.Sdk.Web によって暗黙的に含まれます。</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="translated">NETSDK1080: .NET Core 3.0 以上をターゲットにする場合は、Microsoft.AspNetCore.App への PackageReference は必要ありません。Microsoft.NET.Sdk.Web を使用する場合、共有のフレームワークは自動的に参照されます。それ以外の場合、PackageReference は、FrameworkReference に置き換える必要があります。</target>
+        <target state="translated">NETSDK1080: .NET Core 3.0 以上がターゲットの場合、Microsoft.AspNetCore.App への PackageReference は必要ありません。Microsoft.NET.Sdk.Web が使用される場合、この共有フレームワークは自動的に参照されます。そうでない場合、PackageReference を FrameworkReference で置き換える必要があります。</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="new">NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</target>
+        <target state="translated">NETSDK1092: リソースの追加にはビルドが Windows 上で実行されることが要求されるため、CLSIDMap を COM ホストに埋め込むことはできません (Nano Server を除く)。</target>
         <note>{StrBegin="NETSDK1092: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="CannotFindComhost">
         <source>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
-        <target state="new">NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <target state="translated">NETSDK1091: .NET Core COM ホストが見つかりません。Windows がターゲットの場合、.NET Core COM ホストを利用できるのは .NET Core 3.0 以上の場合のみです。</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
@@ -109,17 +109,17 @@
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
         <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="new">NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</target>
+        <target state="translated">NETSDK1097: RuntimeIdentifier を指定せずにアプリケーションを単一ファイルに発行することはサポートされていません。RuntimeIdentifier を指定するか、PublishSingleFile を false に設定してください。</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
         <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="new">NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</target>
+        <target state="translated">NETSDK1098: 単一ファイルに発行されたアプリケーションでは、アプリケーション ホストを使用する必要があります。PublishSingleFile を false に設定するか、UseAppHost を true に設定してください。</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
         <source>NETSDK1099: Publishing to a single-file is only supported for executable applications.</source>
-        <target state="new">NETSDK1099: Publishing to a single-file is only supported for executable applications.</target>
+        <target state="translated">NETSDK1099: 単一ファイルへの発行は実行可能アプリケーションに対してのみサポートされています。</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
@@ -154,7 +154,7 @@
       </trans-unit>
       <trans-unit id="ClsidMapConflictingGuids">
         <source>NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</source>
-        <target state="new">NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</target>
+        <target state="translated">NETSDK1089: 型 '{0}' および '{1}' では、GuidAttribute で同じ CLSID '{2}' が設定されています。各 COMVisible クラスでは、CLSID に異なる guid が設定されている必要があります。</target>
         <note>{StrBegin="NETSDK1089: "}
 {0} - The first type with the conflicting guid.
 {1} - The second type with the conflicting guid.
@@ -162,13 +162,13 @@
       </trans-unit>
       <trans-unit id="ClsidMapExportedTypesRequireExplicitGuid">
         <source>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</source>
-        <target state="new">NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</target>
+        <target state="translated">NETSDK1088: COMVisible クラス '{0}' を .NET Core 内の COM に対して参照可能にするには、クラスの CLSID を持つ GuidAttribute を含める必要があります。</target>
         <note>{StrBegin="NETSDK1088: "}
 {0} - The ComVisible class that doesn't have a GuidAttribute on it.</note>
       </trans-unit>
       <trans-unit id="ClsidMapInvalidAssembly">
         <source>NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</source>
-        <target state="new">NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</target>
+        <target state="translated">NETSDK1090: 指定されたアセンブリ '{0}' が無効です。CLSIDMap を生成できません。</target>
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
@@ -189,7 +189,7 @@
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>NETSDK1038: Could not determine winner because '{0}' does not exist.</source>
-        <target state="needs-review-translation">NETSDK1038: '{0}' が存在しないため勝者を判別できませんでした。</target>
+        <target state="translated">NETSDK1038: '{0}' が存在しないため勝者を判別できませんでした。</target>
         <note>{StrBegin="NETSDK1038: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
@@ -279,12 +279,12 @@
       </trans-unit>
       <trans-unit id="FrameworkReferenceDuplicateError">
         <source>NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</source>
-        <target state="new">NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</target>
+        <target state="translated">NETSDK1087: '{0}' に対する複数の FrameworkReference 項目がプロジェクトに含められました。</target>
         <note>{StrBegin="NETSDK1087: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkReferenceOverrideWarning">
         <source>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="new">NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</target>
+        <target state="translated">NETSDK1086: '{0}' の FrameworkReference がプロジェクトに含められました。これは .NET SDK によって暗黙的に参照されるため、通常はプロジェクトから参照する必要はありません。詳細については、{1} をご覧ください</target>
         <note>{StrBegin="NETSDK1086: "}</note>
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
@@ -294,12 +294,12 @@
       </trans-unit>
       <trans-unit id="ILLinkInformation">
         <source>NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <target state="needs-review-translation">NETSDK1101: アセンブリのサイズを最適化しています。これにより、アプリの動作が変更される可能性があります。公開した後にテストしてください。https://aka.ms/illink を参照してください</target>
         <note>{StrBegin="NETSDK1101: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
-        <target state="new">NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</target>
+        <target state="translated">NETSDK1102: アセンブリのサイズの最適化は、選択された公開構成に対してはサポートされていません。自己完結型のアプリを公開していることをご確認ください。</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
@@ -330,7 +330,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="InvalidResourceUpdate">
         <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
-        <target state="translated">NETSDK1075: 更新ハンドルが有効ではありません。このインスタンスは、以降の更新に使用できない可能性があります。</target>
+        <target state="translated">NETSDK1075: 更新ハンドルが無効です。このインスタンスは、今後の更新には使用できない可能性があります。</target>
         <note>{StrBegin="NETSDK1075: "}</note>
       </trans-unit>
       <trans-unit id="InvalidRollForwardValue">
@@ -363,12 +363,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
-        <target state="translated">NETSDK1084: 指定された RuntimeIdentifier '{0}' で利用可能なアプリケーション ホストがありません。</target>
+        <target state="translated">NETSDK1084: 指定された RuntimeIdentifier '{0}' で利用できるアプリケーション ホストはありません。</target>
         <note>{StrBegin="NETSDK1084: "}</note>
       </trans-unit>
       <trans-unit id="NoBuildRequested">
         <source>NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</source>
-        <target state="new">NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</target>
+        <target state="translated">NETSDK1085: 'NoBuild' プロパティが true に設定されていますが、'Build' ターゲットが呼び出されました。</target>
         <note>{StrBegin="NETSDK1085: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
@@ -383,7 +383,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
-        <target state="needs-review-translation">NETSDK1053: Pack As ツールは自己完結型をサポートしていません。</target>
+        <target state="translated">NETSDK1053: Pack As ツールは自己完結型をサポートしていません。</target>
         <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
       <trans-unit id="PackageInfoLog">
@@ -403,7 +403,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="needs-review-translation">NETSDK1071: '{0}' への PackageReference は '{1}' のバージョンを指定しました。このパッケージのバージョンを指定することは推奨されません。詳細については、https://aka.ms/sdkimplicitrefs を参照してください</target>
+        <target state="translated">NETSDK1071: '{0}' への PackageReference は '{1}' のバージョンを指定しました。このパッケージのバージョンを指定することは推奨されません。詳細については、https://aka.ms/sdkimplicitrefs を参照してください</target>
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="ParsingFiles">
@@ -423,22 +423,22 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
         <source>NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
-        <target state="new">NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</target>
+        <target state="translated">NETSDK1093: NETSDK1093: プロジェクト ツール (DotnetCliTool) は、ターゲットが .NET Core 2.2 以下の場合のみサポートされます。</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
-        <target state="new">NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</target>
+        <target state="translated">NETSDK1096: アセンブリのパフォーマンスの最適化が失敗しました。失敗したアセンブリを最適化の対象から除外するか、PublishReadyToRun プロパティを false に設定してください。</target>
         <note>{StrBegin="NETSDK1096: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
         <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
-        <target state="new">NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</target>
+        <target state="translated">NETSDK1094: アセンブリのパフォーマンスを最適化できません。有効なランタイム パッケージが見つかりませんでした。PublishReadyToRun プロパティを false に設定するか、公開するときに、サポートされているランタイム識別子を使用してください。</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSuppotedError">
         <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
+        <target state="translated">NETSDK1095: アセンブリのパフォーマンスの最適化は、選択されたターゲット プラットフォームまたはアーキテクチャに対してはサポートされていません。サポートされているランタイム識別子を使用して、自己完結型のアプリケーションを発行することを確認するか、PublishReadyToRun プロパティを false に設定してください。</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">
@@ -448,7 +448,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
         <source>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</source>
-        <target state="translated">NETSDK1083: 指定された RuntimeIdentifier '{0}' を認識できません。</target>
+        <target state="translated">NETSDK1083: 指定された RuntimeIdentifier '{0}' は認識されていません。</target>
         <note>{StrBegin="NETSDK1083: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
@@ -483,7 +483,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
-        <target state="translated">NETSDK1073: FrameworkReference '{0}' が認識されませんでした</target>
+        <target state="translated">NETSDK1073: FrameworkReference '{0}' は認識されませんでした</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -493,7 +493,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnresolvedTargetingPack">
         <source>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</source>
-        <target state="translated">NETSDK1081: {0} のターゲット パックが見つかりませんでした。プロジェクトで NuGet 復元を実行することによってこの問題を解決できる可能性があります。</target>
+        <target state="translated">NETSDK1081: {0} の Targeting Pack が見つかりませんでした。プロジェクトで NuGet の復元を実行することにより、この問題を解決できる場合があります。</target>
         <note>{StrBegin="NETSDK1081: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFramework">
@@ -538,7 +538,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
         <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
-        <target state="new">NETSDK1100: Windows is required to build Windows desktop applications.</target>
+        <target state="translated">NETSDK1100: Windows デスクトップ アプリケーションを構築するには Windows が必要です。</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
     </body>
