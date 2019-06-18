@@ -80,7 +80,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Track the environment variables actually read and used.
         /// </summary>
-        public readonly bool TrackReadsOnEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTRACKENVVARREADS"));
+        public readonly bool TrackReadsOnEnvironmentVariables = Environment.GetEnvironmentVariable("MSBUILDTRACKENVVARREADS") == "1";
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
