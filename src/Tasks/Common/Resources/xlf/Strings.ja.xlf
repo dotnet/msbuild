@@ -431,9 +431,9 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1094: アセンブリのパフォーマンスを最適化できません。有効なランタイム パッケージが見つかりませんでした。PublishReadyToRun プロパティを false に設定するか、公開するときに、サポートされているランタイム識別子を使用してください。</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
-      <trans-unit id="ReadyToRunTargetNotSuppotedError">
-        <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="translated">NETSDK1095: アセンブリのパフォーマンスの最適化は、選択されたターゲット プラットフォームまたはアーキテクチャに対してはサポートされていません。サポートされているランタイム識別子を使用して、自己完結型のアプリケーションを発行することを確認するか、PublishReadyToRun プロパティを false に設定してください。</target>
+      <trans-unit id="ReadyToRunTargetNotSupportedError">
+        <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
+        <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">

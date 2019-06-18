@@ -90,6 +90,12 @@ namespace Microsoft.NET.Build.Tasks
         {
             // Reference only managed assemblies that will be published to the root directory.
             string relativeOutputPath = file.GetMetadata(MetadataKeys.RelativePath);
+
+            if (string.IsNullOrEmpty(relativeOutputPath))
+            {
+                relativeOutputPath = file.GetMetadata(MetadataKeys.DestinationSubPath);
+            }
+
             if (!String.IsNullOrEmpty(Path.GetDirectoryName(relativeOutputPath)))
             {
                 return false;
@@ -172,7 +178,7 @@ namespace Microsoft.NET.Build.Tasks
                 if (IsPdbCompilation && String.Equals(Path.GetFileName(runtimeAssembly.ItemSpec), Path.GetFileName(_outputR2RImage), StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                // TODO: Delete check when fixing https://github.com/dotnet/sdk/issues/3110
+                // TODO: Delete check when fixing https://github.com/dotnet/sdk/issues/3109
                 if (!IsManagedAssemblyToUseAsCrossgenReference(runtimeAssembly))
                     continue;
 

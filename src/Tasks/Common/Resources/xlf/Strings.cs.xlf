@@ -431,9 +431,9 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1094: Nepovedlo se optimalizovat sestavení pro výkonnost: nenašel se platný balíček modulu runtime. Buď nastavte vlastnost PublishReadyToRun na false, nebo při publikování použijte podporovaný identifikátor modulu runtime.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
-      <trans-unit id="ReadyToRunTargetNotSuppotedError">
-        <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="translated">NETSDK1095: Optimalizace sestavení z hlediska výkonu není u vybrané cílové platformy nebo architektury podporovaná. Ujistěte se prosím, že publikujete samostatnou aplikaci používající identifikátor podporovaného modulu runtime, nebo nastavte vlastnost PublishReadyToRun na hodnotu False.</target>
+      <trans-unit id="ReadyToRunTargetNotSupportedError">
+        <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
+        <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">

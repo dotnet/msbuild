@@ -237,9 +237,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ReadyToRunOutputPath>$(IntermediateOutputPath)R2R</_ReadyToRunOutputPath>
     </PropertyGroup>
 
-    <!-- TODO: Temp error to limit R2R compilation to self-contained mode only. Delete this when fixing #3109 and #3110 -->
-    <NETSdkError Condition="'$(SelfContained)' != 'true'" ResourceName="ReadyToRunTargetNotSuppotedError" />
-
     <MakeDir Directories="$(_ReadyToRunOutputPath)" />
 
     <PrepareForReadyToRunCompilation RuntimePacks="@(ResolvedRuntimePack)"
@@ -261,6 +258,28 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </PrepareForReadyToRunCompilation>
 
+    <!--  TODO: https://github.com/dotnet/sdk/issues/3109 - Gather appropriate list of managed runtime assemblies for crossen.
+          Current approach is to pass all resolved files to publish and inspect if they are managed. -->
+    <ItemGroup>
+      <_ReadyToRunImplementationAssemblies Include="@(ResolvedFileToPublish)" />
+    </ItemGroup>
+
+    <!-- Even if app is not self-contained, crossgen requires closure of implementation assemblies. Resolve conflicts
+         of the runtime pack assets as though we were copying them locally, and add them to the R2R implementation
+         assembly list. -->
+    <ItemGroup Condition="'$(SelfContained)' != 'true'">
+      <_ReadyToRunImplementationAssemblies Include="@(RuntimePackAsset)" />
+    </ItemGroup>
+
+    <ResolvePackageFileConflicts Condition="'$(SelfContained)' != 'true'"
+                                 ReferenceCopyLocalPaths="@(_ReadyToRunImplementationAssemblies)">
+      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReadyToRunImplementationAssembliesWithoutConflicts" />
+    </ResolvePackageFileConflicts>
+
+    <ItemGroup Condition="'$(SelfContained)' != 'true'">
+      <_ReadyToRunImplementationAssemblies Remove="@(_ReadyToRunImplementationAssemblies)" />
+      <_ReadyToRunImplementationAssemblies Include="@(_ReadyToRunImplementationAssembliesWithoutConflicts)" />
+    </ItemGroup>
   </Target>
 
   <!--
@@ -275,9 +294,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ReadyToRunCompileList)"
           Outputs="%(_ReadyToRunCompileList.OutputR2RImage)">
 
-    <!-- TODO: BUG - FIX ImplementationAssemblies to take managed implementation assemblies to use as crossgen references -->
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
-                           ImplementationAssemblies="@(ResolvedFileToPublish)"
+                           ImplementationAssemblies="@(_ReadyToRunImplementationAssemblies)"
                            CompilationEntry="@(_ReadyToRunCompileList)"
                            ContinueOnError="ErrorAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
@@ -300,9 +318,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ReadyToRunSymbolsCompileList)"
           Outputs="%(_ReadyToRunSymbolsCompileList.OutputPDBImage)">
 
-    <!-- TODO: BUG - FIX ImplementationAssemblies to take managed implementation assemblies to use as crossgen references -->
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
-                           ImplementationAssemblies="@(ResolvedFileToPublish)"
+                           ImplementationAssemblies="@(_ReadyToRunImplementationAssemblies)"
                            CompilationEntry="@(_ReadyToRunSymbolsCompileList)"
                            ContinueOnError="ErrorAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
@@ -456,7 +473,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </ResolveCopyLocalAssets>
 
       <ItemGroup>
-        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)" />
+        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)" Condition="'$(SelfContained)' == 'true'" />
       </ItemGroup>
 
       <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">

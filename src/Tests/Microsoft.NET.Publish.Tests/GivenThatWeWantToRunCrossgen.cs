@@ -34,15 +34,17 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore(Log, testProject.Name);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
-            publishCommand.Execute("/v:n").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework,
                 "Debug",
-                EnvironmentInfo.GetCompatibleRid(targetFramework));
+                testProject.RuntimeIdentifier);
 
-            DoesImageHaveR2RInfo(Path.Combine(publishDirectory.FullName, $"{projectName}.dll")).ToString().Should().Be(false.ToString());
-            DoesImageHaveR2RInfo(Path.Combine(publishDirectory.FullName, "ClassLib.dll")).ToString().Should().Be(false.ToString());
+            DoesImageHaveR2RInfo(Path.Combine(publishDirectory.FullName, $"{projectName}.dll")).Should().BeFalse();
+            DoesImageHaveR2RInfo(Path.Combine(publishDirectory.FullName, "ClassLib.dll")).Should().BeFalse();
+
+            publishDirectory.Should().HaveFile("System.Private.CoreLib.dll"); // self-contained
         }
 
         [Theory]
@@ -63,12 +65,12 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore(Log, testProject.Name);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
-            publishCommand.Execute("/v:n").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework, 
-                "Debug", 
-                EnvironmentInfo.GetCompatibleRid(targetFramework));
+                "Debug",
+                testProject.RuntimeIdentifier);
 
             var mainProjectDll = Path.Combine(publishDirectory.FullName, $"{projectName}.dll");
             var classLibDll = Path.Combine(publishDirectory.FullName, $"ClassLib.dll");
@@ -81,8 +83,10 @@ namespace Microsoft.NET.Publish.Tests
                 });
             }
 
-            DoesImageHaveR2RInfo(mainProjectDll).ToString().Should().Be(true.ToString());
-            DoesImageHaveR2RInfo(classLibDll).ToString().Should().Be(false.ToString());
+            DoesImageHaveR2RInfo(mainProjectDll).Should().BeTrue();
+            DoesImageHaveR2RInfo(classLibDll).Should().BeFalse();
+
+            publishDirectory.Should().HaveFile("System.Private.CoreLib.dll"); // self-contained
         }
 
         [Theory]
@@ -103,12 +107,12 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore(Log, testProject.Name);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
-            publishCommand.Execute("/v:n").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework, 
                 "Debug",
-                EnvironmentInfo.GetCompatibleRid(targetFramework));
+                testProject.RuntimeIdentifier);
 
             var mainProjectDll = Path.Combine(publishDirectory.FullName, $"{projectName}.dll");
             var classLibDll = Path.Combine(publishDirectory.FullName, $"ClassLib.dll");
@@ -121,13 +125,15 @@ namespace Microsoft.NET.Publish.Tests
                 });
             }
 
-            DoesImageHaveR2RInfo(mainProjectDll).ToString().Should().Be(true.ToString());
-            DoesImageHaveR2RInfo(classLibDll).ToString().Should().Be(true.ToString());
+            DoesImageHaveR2RInfo(mainProjectDll).Should().BeTrue();
+            DoesImageHaveR2RInfo(classLibDll).Should().BeTrue();
+
+            publishDirectory.Should().HaveFile("System.Private.CoreLib.dll"); // self-contained
         }
 
         [Theory]
         [InlineData("netcoreapp3.0")]
-        public void It_does_not_support_framework_dependent_publishing(string targetFramework)
+        public void It_supports_framework_dependent_publishing(string targetFramework)
         {
             var projectName = "FrameworkDependent";
 
@@ -137,18 +143,35 @@ namespace Microsoft.NET.Publish.Tests
                 "ClassLib");
 
             testProject.AdditionalProperties["PublishReadyToRun"] = "True";
+            testProject.AdditionalProperties["PublishReadyToRunEmitSymbols"] = "True";
+            testProject.AdditionalProperties["SelfContained"] = "False";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
 
-            // TODO: This test should be changed to expect publishing to succeed when fixing #3109 and #3110.
-            // When fixing the issues, change the function name to reflect what we're testing, and change the test's expected 
-            // behavior (check that the output assemblies exist and are R2R images).
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
-            publishCommand.Execute("/p:SelfContained=false", "/v:n")
-                .Should()
-                .Fail()
-                .And.HaveStdOutContainingIgnoreCase("NETSDK1095");
+            publishCommand.Execute().Should().Pass();
+
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(
+                targetFramework,
+                "Debug",
+                testProject.RuntimeIdentifier);
+
+            var mainProjectDll = Path.Combine(publishDirectory.FullName, $"{projectName}.dll");
+            var classLibDll = Path.Combine(publishDirectory.FullName, $"ClassLib.dll");
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                publishDirectory.Should().HaveFiles(new[] {
+                    GetPDBFileName(mainProjectDll),
+                    GetPDBFileName(classLibDll),
+                });
+            }
+
+            DoesImageHaveR2RInfo(mainProjectDll).Should().BeTrue();
+            DoesImageHaveR2RInfo(classLibDll).Should().BeTrue();
+
+            publishDirectory.Should().NotHaveFile("System.Private.CoreLib.dll"); // framework-dependent
         }
 
         [Theory]
@@ -201,7 +224,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
 
-            publishCommand.Execute("/v:n")
+            publishCommand.Execute()
                 .Should()
                 .Fail()
                 .And.HaveStdOutContainingIgnoreCase("NETSDK1095");

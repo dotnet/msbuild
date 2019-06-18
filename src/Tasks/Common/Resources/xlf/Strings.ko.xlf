@@ -431,9 +431,9 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1094: 성능 향상을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishReadyToRun 속성을 false로 설정하거나, 게시할 때 지원되는 런타임 식별자를 사용하세요.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
-      <trans-unit id="ReadyToRunTargetNotSuppotedError">
-        <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="translated">NETSDK1095: 선택한 대상 플랫폼 또는 아키텍처의 경우 성능 향상을 위해 어셈블리를 최적화할 수 없습니다. 지원되는 런타임 식별자를 사용하여 자체 포함 애플리케이션을 게시 중인지 확인하거나 PublishReadyToRun 속성을 false로 설정하세요.</target>
+      <trans-unit id="ReadyToRunTargetNotSupportedError">
+        <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
+        <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">

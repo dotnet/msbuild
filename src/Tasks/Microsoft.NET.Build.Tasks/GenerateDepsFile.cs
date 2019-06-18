@@ -141,7 +141,7 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
 
             IEnumerable<RuntimePackAssetInfo> runtimePackAssets =
-                RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item));
+                IsSelfContained ? RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item)) : Enumerable.Empty<RuntimePackAssetInfo>();
 
 
             ProjectContext projectContext = lockFile.CreateProjectContext(

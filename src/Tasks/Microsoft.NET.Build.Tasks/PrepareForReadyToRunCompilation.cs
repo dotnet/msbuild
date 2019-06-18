@@ -95,13 +95,13 @@ namespace Microsoft.NET.Build.Tasks
                 !ExtractTargetPlatformAndArchitecture(hostRuntimeIdentifier, out string hostPlatform, out Architecture hostArchitecture) ||
                 targetPlatform != hostPlatform)
             {
-                Log.LogError(Strings.ReadyToRunTargetNotSuppotedError);
+                Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
                 return;
             }
 
             if (!GetCrossgenComponentsPaths() || !File.Exists(_crossgenPath) || !File.Exists(_clrjitPath))
             {
-                Log.LogError(Strings.ReadyToRunTargetNotSuppotedError);
+                Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
                 return;
             }
 

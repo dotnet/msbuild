@@ -431,9 +431,9 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1094: 無法最佳化組件的效能: 找不到有效的執行階段套件。請將 ReadyToRun 屬性設定為 false，或在發佈時使用支援的執行階段識別碼。</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
-      <trans-unit id="ReadyToRunTargetNotSuppotedError">
-        <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are publishing a self-contained application using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="translated">NETSDK1095: 選取的目標平台或架構不支援最佳化組件的效能。請務必使用支援的執行階段識別碼發佈獨立式應用程式，或將 ReadyToRun 屬性設為 false。</target>
+      <trans-unit id="ReadyToRunTargetNotSupportedError">
+        <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
+        <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">

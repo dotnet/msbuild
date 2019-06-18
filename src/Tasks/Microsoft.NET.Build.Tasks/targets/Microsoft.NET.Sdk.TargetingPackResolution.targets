@@ -50,7 +50,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetingPackRoot="$(NetCoreTargetingPackRoot)"
                                 RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                                 SelfContained="$(SelfContained)"
-                                ReadyToRunEnabled="$(ReadyToRun)"
+                                ReadyToRunEnabled="$(PublishReadyToRun)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
@@ -253,7 +253,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <ItemGroup>
       <ReferenceCopyLocalPaths Include="@(RuntimePackAsset)"
-                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true'" />
+                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true' and '$(SelfContained)' == 'true'" />
     </ItemGroup>
   
   
