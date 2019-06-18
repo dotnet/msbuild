@@ -6,9 +6,11 @@
     </Exec>
 
     <ItemGroup>
-      <Stage0FilesToCopy Include="$(DotNetRoot)/**/*.*"
-                          Exclude="$(DotNetRoot)/sdk/$(Stage0SdkVersion)/Sdks/**/*.*)"/>
-      <LayoutFilesToCopy Include="$(ArtifactsBinDir)$(Configuration)/Sdks/**/*.*" />
+      <Stage0FilesToCopy Include="$(DotNetRoot)/**/*.*" />
+      <Stage0FilesToCopy Remove="$(DotNetRoot)/sdk/$(Stage0SdkVersion)/Sdks/**/*.*)" />
+      <Stage0FilesToCopy Remove="$(DotNetRoot)/sdk/$(Stage0SdkVersion)/Microsoft/Microsoft.NET.Build.Extensions/**/*.*)" />
+      <LayoutFilesToCopy Include="$(ArtifactsBinDir)$(Configuration)/Sdks/**/*.*" TargetDir="$(SdkLayoutDirectory)\sdk\$(Stage0SdkVersion)\Sdks\"/>
+      <LayoutFilesToCopy Include="$(ArtifactsBinDir)$(Configuration)/Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/**/*.*" TargetDir="$(SdkLayoutDirectory)\sdk\$(Stage0SdkVersion)\"/>
     </ItemGroup>
 
     <RemoveDir Directories="SdkLayoutDirectory" />
@@ -17,6 +19,6 @@
           DestinationFiles="@(Stage0FilesToCopy->'$(SdkLayoutDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <Copy SourceFiles="@(LayoutFilesToCopy)"
-          DestinationFiles="@(LayoutFilesToCopy->'$(SdkLayoutDirectory)\sdk\$(Stage0SdkVersion)\Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(LayoutFilesToCopy->'%(TargetDir)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>
