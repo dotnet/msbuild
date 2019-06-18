@@ -157,7 +157,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             //  So what we do is keep track of Platform items that win conflicts with Reference items in
             //  the compile scope, and explicitly add references to them here.
 
-            HashSet<string> referenceItemSpecs = new HashSet<string>(ReferencesWithoutConflicts?.Select(r => r.ItemSpec) ?? Enumerable.Empty<string>(),
+            var referenceItemSpecs = new HashSet<string>(ReferencesWithoutConflicts?.Select(r => r.ItemSpec) ?? Enumerable.Empty<string>(),
                                                                      StringComparer.OrdinalIgnoreCase);
             ReferencesWithoutConflicts = SafeConcat(ReferencesWithoutConflicts,
                 //  The Reference item we create in this case should be without the .dll extension
