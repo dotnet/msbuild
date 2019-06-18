@@ -132,25 +132,30 @@
         <target state="translated">NETSDK1067: Las aplicaciones independientes deben utilizar un host de aplicación. Establezca SelfContained en false o UseAppHost en true.</target>
         <note>{StrBegin="NETSDK1067: "}</note>
       </trans-unit>
-      <trans-unit id="ChoosingAssemblyVersion">
-        <source>NETSDK1033: Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="translated">NETSDK1033: Se elegirá "{0}" porque AssemblyVersion "{1}" es mayor que "{2}".</target>
-        <note>{StrBegin="NETSDK1033: "}</note>
+      <trans-unit id="ChoosingAssemblyVersion_Info">
+        <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
+        <target state="new">Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</target>
+        <note />
       </trans-unit>
-      <trans-unit id="ChoosingFileVersion">
-        <source>NETSDK1034: Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="translated">NETSDK1034: Se elegirá "{0}" porque la versión del archivo "{1}" es mayor que "{2}".</target>
-        <note>{StrBegin="NETSDK1034: "}</note>
+      <trans-unit id="ChoosingCopyLocalArbitrarily_Info">
+        <source>Choosing '{0}' arbitrarily as both items are copy-local and have equal file and assembly versions.</source>
+        <target state="new">Choosing '{0}' arbitrarily as both items are copy-local and have equal file and assembly versions.</target>
+        <note />
       </trans-unit>
-      <trans-unit id="ChoosingPlatformItem">
-        <source>NETSDK1035: Choosing '{0}' because it is a platform item.</source>
-        <target state="translated">NETSDK1035: Se elegirá "{0}" porque es un elemento de la plataforma.</target>
-        <note>{StrBegin="NETSDK1035: "}</note>
+      <trans-unit id="ChoosingFileVersion_Info">
+        <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
+        <target state="new">Choosing '{0}' because file version '{1}' is greater than '{2}'.</target>
+        <note />
       </trans-unit>
-      <trans-unit id="ChoosingPreferredPackage">
-        <source>NETSDK1036: Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="translated">NETSDK1036: Se elegirá "{0}" porque viene de un paquete que es preferido.</target>
-        <note>{StrBegin="NETSDK1036: "}</note>
+      <trans-unit id="ChoosingPlatformItem_Info">
+        <source>Choosing '{0}' because it is a platform item.</source>
+        <target state="new">Choosing '{0}' because it is a platform item.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ChoosingPreferredPackage_Info">
+        <source>Choosing '{0}' because it comes from a package that is preferred.</source>
+        <target state="new">Choosing '{0}' because it comes from a package that is preferred.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ClsidMapConflictingGuids">
         <source>NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</source>
@@ -172,11 +177,6 @@
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
-      <trans-unit id="ConflictCouldNotDetermineWinner">
-        <source>NETSDK1037: Could not determine winner due to equal file and assembly versions.</source>
-        <target state="translated">NETSDK1037: No se pudo determinar el ganador porque las versiones de archivo y ensamblado son iguales.</target>
-        <note>{StrBegin="NETSDK1037: "}</note>
-      </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>NETSDK1014: Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
         <target state="translated">NETSDK1014: El elemento de contenido de "{0}" establece "{1}", pero no proporciona "{2}" ni "{3}".</target>
@@ -187,20 +187,25 @@
         <target state="translated">NETSDK1010: Debe darse un valor al parámetro "{1}" de la tarea "{0}" para poder consumir contenido preprocesado.</target>
         <note>{StrBegin="NETSDK1010: "}</note>
       </trans-unit>
-      <trans-unit id="CouldNotDetermineWinner_DoesntExist">
-        <source>NETSDK1038: Could not determine winner because '{0}' does not exist.</source>
-        <target state="translated">NETSDK1038: No se pudo determinar el ganador porque "{0}" no existe.</target>
-        <note>{StrBegin="NETSDK1038: "}</note>
+      <trans-unit id="CouldNotDetermineWinner_DoesNotExist_Info">
+        <source>Could not determine winner because '{0}' does not exist.</source>
+        <target state="new">Could not determine winner because '{0}' does not exist.</target>
+        <note />
       </trans-unit>
-      <trans-unit id="CouldNotDetermineWinner_FileVersion">
-        <source>NETSDK1039: Could not determine a winner because '{0}' has no file version.</source>
-        <target state="translated">NETSDK1039: No se pudo determinar un ganador porque "{0}" no tiene una versión de archivo.</target>
-        <note>{StrBegin="NETSDK1039: "}</note>
+      <trans-unit id="CouldNotDetermineWinner_EqualVersions_Info">
+        <source>Could not determine winner due to equal file and assembly versions.</source>
+        <target state="new">Could not determine winner due to equal file and assembly versions.</target>
+        <note />
       </trans-unit>
-      <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
-        <source>NETSDK1040: Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="translated">NETSDK1040: No se pudo determinar un ganador porque "{0}" no es un ensamblado.</target>
-        <note>{StrBegin="NETSDK1040: "}</note>
+      <trans-unit id="CouldNotDetermineWinner_NoFileVersion_Info">
+        <source>Could not determine a winner because '{0}' has no file version.</source>
+        <target state="new">Could not determine a winner because '{0}' has no file version.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotDetermineWinner_NotAnAssembly_Info">
+        <source>Could not determine a winner because '{0}' is not an assembly.</source>
+        <target state="new">Could not determine a winner because '{0}' is not an assembly.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
@@ -227,10 +232,10 @@
         <target state="translated">NETSDK1015: Se han dado varios valores para el token de preprocesador "{0}". Se va a elegir "{1}" como valor.</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
-      <trans-unit id="EncounteredConflict">
-        <source>NETSDK1041: Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="translated">NETSDK1041: Se encontró un conflicto entre "{0}" y "{1}".</target>
-        <note>{StrBegin="NETSDK1041: "}</note>
+      <trans-unit id="EncounteredConflict_Info">
+        <source>Encountered conflict between '{0}' and '{1}'.</source>
+        <target state="new">Encountered conflict between '{0}' and '{1}'.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
         <source>NETSDK1051: Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
@@ -292,15 +297,15 @@
         <target state="translated">NETSDK1049: El archivo resuelto tiene una imagen incorrecta, no tiene metadatos o no es posible su acceso. {0} {1}</target>
         <note>{StrBegin="NETSDK1049: "}</note>
       </trans-unit>
-      <trans-unit id="ILLinkInformation">
-        <source>NETSDK1101: Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="needs-review-translation">NETSDK1101: Se está optimizando el tamaño de los ensamblados, lo que puede cambiar el comportamiento de la aplicación. Asegúrese de probarlo después de publicar. Consulte https://aka.ms/illink</target>
-        <note>{StrBegin="NETSDK1101: "}</note>
-      </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
         <target state="translated">NETSDK1102: No se admite la optimización de tamaño de los ensamblados para la configuración de publicación seleccionada. Asegúrese de que está publicando una aplicación autónoma.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
+      </trans-unit>
+      <trans-unit id="ILLink_Info">
+        <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
+        <target state="new">Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
@@ -308,8 +313,8 @@
         <note>{StrBegin="NETSDK1020: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
-        <source>NETSDK1025: WRThe target manifest {0} provided is of not the correct format</source>
-        <target state="translated">NETSDK1025: El manifiesto de destino {0} proporcionado no tiene el formato correcto</target>
+        <source>NETSDK1025: The target manifest {0} provided is of not the correct format</source>
+        <target state="needs-review-translation">NETSDK1025: El manifiesto de destino {0} proporcionado no tiene el formato correcto</target>
         <note>{StrBegin="NETSDK1025: "}</note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
@@ -386,11 +391,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1053: El paquete como herramienta no admite la autocontención.</target>
         <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
-      <trans-unit id="PackageInfoLog">
-        <source>NETSDK1027: Package Name='{0}', Version='{1}' was parsed</source>
-        <target state="translated">NETSDK1027: Nombre del paquete="{0}", versión analizada="{1}"</target>
-        <note>{StrBegin="NETSDK1027: "}</note>
-      </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
         <target state="translated">NETSDK1064: No se encontró el paquete {0}, versión {1}. Es posible que se haya eliminado desde la restauración de NuGet. De lo contrario, la restauración de NuGet podría haberse completado solo parcialmente, lo que puede deberse a las restricciones de longitud de ruta máxima.</target>
@@ -405,11 +405,6 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
         <target state="translated">NETSDK1071: Un PackageReference a "{0}" especificó una versión de "{1}". No se recomienda especificar la versión de este paquete. Para obtener más información, consulte https://aka.ms/sdkimplicitrefs</target>
         <note>{StrBegin="NETSDK1071: "}</note>
-      </trans-unit>
-      <trans-unit id="ParsingFiles">
-        <source>NETSDK1026: Parsing the Files : '{0}'</source>
-        <target state="translated">NETSDK1026: Analizando los archivos: "{0}"</target>
-        <note>{StrBegin="NETSDK1026: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
@@ -521,10 +516,10 @@ The following are names of parameters or literal values and should not be transl
         <target state="new">NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
-      <trans-unit id="UsingPreviewSdkWarning">
-        <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="translated">NETSDK1057: Está utilizando una versión preliminar de .NET Core. Vea: https://aka.ms/dotnet-core-preview</target>
-        <note>{StrBegin="NETSDK1057: "}</note>
+      <trans-unit id="UsingPreviewSdk_Info">
+        <source>You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
+        <target state="new">You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</target>
+        <note />
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">
         <source>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</source>

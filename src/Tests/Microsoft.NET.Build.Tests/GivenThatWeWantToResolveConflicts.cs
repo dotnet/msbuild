@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tests
                 "Reference",
                 GetValuesCommand.ValueType.Item);
             getReferenceCommand.DependsOnTargets = "Build";
-            var result = getReferenceCommand.Execute("/v:normal").Should().Pass();
+            var result = getReferenceCommand.Execute("/v:detailed").Should().Pass();
             if (expectConflicts)
             {
                 result.And.HaveStdOutMatching("Encountered conflict", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
