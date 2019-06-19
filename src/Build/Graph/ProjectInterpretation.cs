@@ -41,7 +41,19 @@ namespace Microsoft.Build.Experimental.Graph
             OuterBuild, InnerBuild, NonMultitargeting
         }
 
-        public IEnumerable<(ConfigurationMetadata referenceConfiguration, ProjectItemInstance projectReferenceItem)> GetReferences(ProjectInstance requesterInstance)
+        internal readonly struct ReferenceInfo
+        {
+            public ConfigurationMetadata ReferenceConfiguration { get; }
+            public ProjectItemInstance ProjectReferenceItem { get; }
+
+            public ReferenceInfo(ConfigurationMetadata referenceConfiguration, ProjectItemInstance projectReferenceItem)
+            {
+                ReferenceConfiguration = referenceConfiguration;
+                ProjectReferenceItem = projectReferenceItem;
+            }
+        }
+
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance)
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
@@ -82,7 +94,7 @@ namespace Microsoft.Build.Experimental.Graph
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
 
-                yield return (referenceConfig, projectReferenceItem);
+                yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
             }
         }
 
@@ -123,11 +135,11 @@ namespace Microsoft.Build.Experimental.Graph
         /// OuterAsRoot -> Inner stays the same
         /// Node -> Outer -> Inner goes to: Node -> Outer; Node->Inner; Outer -> empty
         /// </summary>
-        public void PostProcess(Dictionary<ConfigurationMetadata, ProjectGraphNode> allNodes, GraphBuilder graphBuilder)
+        public void PostProcess(Dictionary<ConfigurationMetadata, ParsedProject> allNodes, GraphBuilder graphBuilder)
         {
-            foreach (var nodeKvp in allNodes)
+            foreach (var node in allNodes)
             {
-                var outerBuild = nodeKvp.Value;
+                var outerBuild = node.Value.GraphNode;
 
                 if (GetProjectType(outerBuild.ProjectInstance) == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
                 {
