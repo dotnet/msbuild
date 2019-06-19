@@ -156,11 +156,17 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             //  passed to the compiler.
             //  So what we do is keep track of Platform items that win conflicts with Reference items in
             //  the compile scope, and explicitly add references to them here.
+
+            var referenceItemSpecs = new HashSet<string>(ReferencesWithoutConflicts?.Select(r => r.ItemSpec) ?? Enumerable.Empty<string>(),
+                                                                     StringComparer.OrdinalIgnoreCase);
             ReferencesWithoutConflicts = SafeConcat(ReferencesWithoutConflicts,
                 //  The Reference item we create in this case should be without the .dll extension
                 //  (which is added in FrameworkListReader in order to make the framework items
                 //  correctly conflict with DLLs from NuGet packages)
                 compilePlatformWinners.Select(c => Path.GetFileNameWithoutExtension(c.FileName))
+                                      //  Don't add a reference if we already have one (especially in case the existing one has
+                                      //  metadata we want to keep, such as aliases)
+                                      .Where(simplename => !referenceItemSpecs.Contains(simplename))
                                       .Select(r => new TaskItem(r)));
 
         }

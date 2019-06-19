@@ -126,9 +126,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!--<Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
     <_SDKImplicitReference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
 
-    <!-- Set Pack=false on implicit references so they don't get added to NuGet packages as framework assemblies -->
     <_SDKImplicitReference Update="@(_SDKImplicitReference)"
-                           Pack="false" />
+                           Pack="false"
+                           IsImplicitlyDefined="true" />
 
     <!-- Don't duplicate any references that are explicit in the project file.  This means that if you do want to include a framework assembly in your
          NuGet package, you can just add the Reference to your project file. -->
