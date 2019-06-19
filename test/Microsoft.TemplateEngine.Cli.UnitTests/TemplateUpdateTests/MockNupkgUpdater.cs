@@ -51,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
             return Task.FromResult(resultList);
         }
 
-        public void ApplyUpdates(IInstaller installer, IReadOnlyList<IUpdateUnitDescriptor> updatesToApply)
+        public void ApplyUpdates(IInstallerBase installer, IReadOnlyList<IUpdateUnitDescriptor> updatesToApply)
         {
             if (updatesToApply.Any(x => x.InstallUnitDescriptor.FactoryId != DescriptorFactoryId))
             {

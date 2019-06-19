@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 {
-    public class MockInstaller : IInstallerExtended
+    public class MockInstaller : IInstaller
     {
         public MockInstaller()
         {
