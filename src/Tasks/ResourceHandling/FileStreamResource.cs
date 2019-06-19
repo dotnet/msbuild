@@ -20,6 +20,13 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         public string OriginatingFile { get; }
         public string FileName { get; }
 
+        /// <summary>
+        /// Construct a new linked resource.
+        /// </summary>
+        /// <param name="name">The resource's name</param>
+        /// <param name="typeName">The assembly-qualified type name of the resource (at runtime).</param>
+        /// <param name="fileName">The absolute path of the file to be embedded as a resource.</param>
+        /// <param name="originatingFile">The absolute path of the file that defined the ResXFileRef to this resource.</param>
         public FileStreamResource(string name, string typeName, string fileName, string originatingFile)
         {
             Name = name;
