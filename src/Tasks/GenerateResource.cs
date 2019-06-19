@@ -1541,7 +1541,7 @@ namespace Microsoft.Build.Tasks
                 // timestamp checking is simple, because there's no linked files to examine, and no references.
                 return NeedToRebuildSourceFile(sourceFilePath, sourceTime, outputFilePath, outputTime);
             }
-            
+
             // OK, we have a .resx file
 
             // PERF: Regardless of whether the outputFile exists, if the source file is a .resx 
@@ -1550,10 +1550,10 @@ namespace Microsoft.Build.Tasks
             // Note that this is a trade-off: clean builds will be slightly slower. However,
             // for clean builds we're about to read in this very same .resx file so reading
             // it now will page it in. The second read should be cheap.
-            ResGenDependencies.ResXFile resxFileInfo = null;
+            ResGenDependencies.ResXFile resxFileInfo;
             try
             {
-                resxFileInfo = _cache.GetResXFileInfo(sourceFilePath);
+                resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources);
             }
             catch (Exception e)  // Catching Exception, but rethrowing unless it's a well-known exception.
             {

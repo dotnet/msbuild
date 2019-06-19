@@ -363,18 +363,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
-#if FEATURE_LINKED_RESOURCES
-        [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
-#endif
-        public void ForceOutOfDateLinked()
+        [Theory]
+        [MemberData(nameof(Utilities.UsePreserializedResourceStates), MemberType = typeof(Utilities))]
+        public void ForceOutOfDateLinked(bool usePreserialized)
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
             GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+            t.UsePreserializedResources = usePreserialized;
 
             try
             {
@@ -392,6 +391,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                t2.UsePreserializedResources = usePreserialized;
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 System.Threading.Thread.Sleep(200);
@@ -419,18 +419,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
-#if FEATURE_LINKED_RESOURCES
-        [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
-#endif
-        public void ForceOutOfDateLinkedByDeletion()
+        [Theory]
+        [MemberData(nameof(Utilities.UsePreserializedResourceStates), MemberType = typeof(Utilities))]
+        public void ForceOutOfDateLinkedByDeletion(bool usePreserialized)
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
             GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+            t.UsePreserializedResources = usePreserialized;
 
             try
             {
@@ -448,6 +447,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                t2.UsePreserializedResources = usePreserialized;
 
                 File.Delete(bitmap);
 
@@ -531,18 +531,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Allow ShouldRebuildResgenOutputFile to return "false" since nothing's out of date, including linked file
         /// </summary>
-#if FEATURE_RESX_RESOURCE_READER
-        [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
-#endif
-        public void AllowLinkedNoGenerate()
+        [Theory]
+        [MemberData(nameof(Utilities.UsePreserializedResourceStates), MemberType = typeof(Utilities))]
+        public void AllowLinkedNoGenerate(bool usePreserialized)
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
             GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+            t.UsePreserializedResources = usePreserialized;
 
             try
             {
@@ -3749,6 +3748,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                     }
                 }
             }
+        }
+
+        public static IEnumerable<object[]> UsePreserializedResourceStates()
+        {
+            // All MSBuilds should be able to use the new resource codepaths
+            yield return new object[] { true };
+
+#if FEATURE_RESX_RESOURCE_READER
+            // But the old get-live-objects codepath is supported only on full framework.
+            yield return new object[] { false };
+#endif
         }
     }
 
