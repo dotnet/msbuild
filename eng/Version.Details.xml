@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19316.1">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19318.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>88feb5983d2b7bce61bcf8dff10ba74231f876f6</Sha>
+      <Sha>84d778990198681b27f4a9b2eeea6efaeeb431a3</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview7.19318.5">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
