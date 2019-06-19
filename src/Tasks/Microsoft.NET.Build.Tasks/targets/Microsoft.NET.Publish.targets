@@ -457,22 +457,25 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputeUseBuildDependencyFile;
                             _DefaultMicrosoftNETPlatformLibrary;
                             ResolveRuntimePackAssets;
-                            _ComputeExcludeFromOutputPackageReferences">
+                            _ComputePackageReferencePublish">
 
+      <!-- For future: Delete ResolveCopyLocalAssets task.  Need to figure out how to get correct DestinationSubPath for
+           PreserveStoreLayout without this task, and how to handle RuntimeStorePackages. -->
       <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               RuntimeFrameworks="@(RuntimeFramework)"
-                              ExcludedPackageReferences="@(_ExcludeFromOutputPackageReference)"
+                              ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
                               RuntimeStorePackages="@(RuntimeStorePackages)"
                               PreserveStoreLayout="$(PreserveStoreLayout)"
                               ResolveRuntimeTargets="$(CopyLocalRuntimeTargetAssets)"
                               IsSelfContained="$(SelfContained)"
-                              Condition="'$(_UseBuildDependencyFile)' != 'true'">
+                              Condition="'$(PreserveStoreLayout)' == 'true' Or '@(RuntimeStorePackages)' != ''">
         <Output TaskParameter="ResolvedAssets" ItemName="_ResolvedCopyLocalPublishAssets" />
       </ResolveCopyLocalAssets>
-
+    
+    
       <ItemGroup>
         <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)" Condition="'$(SelfContained)' == 'true'" />
       </ItemGroup>
@@ -482,8 +485,9 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_ResolvedCopyLocalPublishAssets Remove="@(_NativeRestoredAppHostNETCore)" />
       </ItemGroup>
 
-      <ItemGroup Condition="'$(_UseBuildDependencyFile)' == 'true'">
-        <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalBuildAssets)" />
+      <ItemGroup Condition="'$(PreserveStoreLayout)' != 'true' And '@(RuntimeStorePackages)' == ''">
+        <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalBuildAssets)" 
+                                         Condition="'%(_ResolvedCopyLocalBuildAssets.CopyToPublishDirectory)' != 'false' "/>
       </ItemGroup>
 
   </Target>
@@ -738,12 +742,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_ComputeUseBuildDependencyFile"
-          DependsOnTargets="_ComputeExcludeFromOutputPackageReferences;
+          DependsOnTargets="_ComputePackageReferencePublish;
                             _ParseTargetManifestFiles">
-
     <!-- If there are no runtime store packages, and we are not linking, then we can reuse the deps file from the build, -->
     <PropertyGroup>
-      <_UseBuildDependencyFile Condition="'@(RuntimeStorePackages)' == '' and
+      <_UseBuildDependencyFile Condition="'@(_ExcludeFromPublishPackageReference)' == '' and
+                                          '@(RuntimeStorePackages)' == '' and
                                           '$(PreserveStoreLayout)' != 'true' and
                                           '$(PublishTrimmed)' != 'true'">true</_UseBuildDependencyFile>
     </PropertyGroup>
@@ -798,7 +802,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _HandlePackageFileConflictsForPublish;
                             _ComputeReferenceAssemblies;
                             ResolveRuntimePackAssets;
-                            _ComputeExcludeFromOutputPackageReferences"
+                            _ComputePackageReferencePublish"
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
 
     <PropertyGroup>
@@ -808,11 +812,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <ResolvedCompileFileDefinitions Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' == 'Reference'" />
-      <NativeCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
-      <ResourceCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
-      <RuntimeCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
       <RuntimeTargetsCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
       <RuntimePackAsset Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+
+      <_ResolvedNuGetFilesForPublish Include="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)" />
+      <_ResolvedNuGetFilesForPublish Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+      <_ResolvedNuGetFilesForPublish Remove="@(_ResolvedNuGetFilesForPublish)" Condition="'%(_ResolvedNuGetFilesForPublish.CopyToPublishDirectory)' == 'false'" />
     </ItemGroup>
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
@@ -834,10 +839,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeFrameworks="@(RuntimeFramework)"
                       FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
-                      ExcludeFromOutputPackageReferences="@(_ExcludeFromOutputPackageReference)"
                       RuntimeStorePackages="@(RuntimeStorePackages)"
                       CompileReferences="@(ResolvedCompileFileDefinitions)"
-                      ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
+                      ResolvedNuGetFiles="@(_ResolvedNuGetFilesForPublish)"
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"/>

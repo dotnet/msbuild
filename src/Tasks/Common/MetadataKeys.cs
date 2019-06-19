@@ -65,6 +65,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string NuGetSourceType = "NuGetSourceType";
         public const string PathInPackage = "PathInPackage";
         public const string PackageDirectory = "PackageDirectory";
+        public const string Publish = "Publish";
 
         // References
         public const string ExternallyResolved = "ExternallyResolved";

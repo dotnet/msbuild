@@ -259,7 +259,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                            _SetupStageForCrossgen;
                            ResolveFrameworkReferences;
                            ApplyImplicitVersions;
-                           _ComputeExcludeFromOutputPackageReferences"
+                           _ComputePackageReferencePublish"
           Condition="$(SkipOptimization) != 'true' ">
 
     <ItemGroup>
@@ -274,13 +274,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                              StorePackageName=$(MicrosoftNETPlatformLibrary);
                              StorePackageVersion=%(PackageReferenceForCrossGen.Version);"/>
 
+    <!-- For future: Use ResolvePackageAssets instead of ResolveCopyLocalAssets, delete ResolveCopyLocalAssets task -->
     <ResolveCopyLocalAssets Condition="'$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                             AssetsFilePath="$(_CrossProjAssetsFile)"
                             TargetFramework="$(_TFM)"
                             RuntimeIdentifier="$(RuntimeIdentifier)"
                             PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                             RuntimeFrameworks="@(RuntimeFramework)"
-                            ExcludedPackageReferences="@(_ExcludeFromOutputPackageReference)"
+                            ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
                             IsSelfContained="$(SelfContained)"
                             PreserveStoreLayout="false">
 
