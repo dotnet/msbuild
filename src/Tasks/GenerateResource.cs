@@ -2337,13 +2337,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private ITaskItem[] _assemblyFiles;
 
-#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// The AssemblyNameExtensions for each of the referenced assemblies in "assemblyFiles".
         /// This is populated lazily.
         /// </summary>
         private AssemblyNameExtension[] _assemblyNames;
-#endif
 
         /// <summary>
         /// List of input files to process.
@@ -2523,37 +2521,7 @@ namespace Microsoft.Build.Tasks
 
             if (_assemblyFiles != null)
             {
-                // Populate the list of assembly names for all passed-in references if it hasn't 
-                // been populated already.
-                if (_assemblyNames == null)
-                {
-                    _assemblyNames = new AssemblyNameExtension[_assemblyFiles.Length];
-                    for (int i = 0; i < _assemblyFiles.Length; i++)
-                    {
-                        ITaskItem assemblyFile = _assemblyFiles[i];
-                        _assemblyNames[i] = null;
-
-                        if (assemblyFile.ItemSpec != null && FileSystems.Default.FileExists(assemblyFile.ItemSpec))
-                        {
-                            string fusionName = assemblyFile.GetMetadata(ItemMetadataNames.fusionName);
-                            if (!String.IsNullOrEmpty(fusionName))
-                            {
-                                _assemblyNames[i] = new AssemblyNameExtension(fusionName);
-                            }
-                            else
-                            {
-                                // whoever passed us this reference wasn't polite enough to also 
-                                // give us a metadata with the fusion name.  Trying to load up every 
-                                // assembly here would take a lot of time, so just stick the assembly 
-                                // file name (which we assume generally maps to the simple name) into 
-                                // the list instead. If there's a fusion name that matches, we'll get 
-                                // that first; otherwise there's a good chance that if the simple name
-                                // matches the file name, it's a good match.  
-                                _assemblyNames[i] = new AssemblyNameExtension(Path.GetFileNameWithoutExtension(assemblyFile.ItemSpec));
-                            }
-                        }
-                    }
-                }
+                PopulateAssemblyNames();
 
                 // Loop through all the references passed in, and see if any of them have an assembly
                 // name that exactly matches the requested one.
@@ -2592,7 +2560,42 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-#region Code from ResGen.EXE
+        private void PopulateAssemblyNames()
+        {
+            // Populate the list of assembly names for all passed-in references if it hasn't 
+            // been populated already.
+            if (_assemblyNames == null)
+            {
+                _assemblyNames = new AssemblyNameExtension[_assemblyFiles.Length];
+                for (int i = 0; i < _assemblyFiles.Length; i++)
+                {
+                    ITaskItem assemblyFile = _assemblyFiles[i];
+                    _assemblyNames[i] = null;
+
+                    if (assemblyFile.ItemSpec != null && FileSystems.Default.FileExists(assemblyFile.ItemSpec))
+                    {
+                        string fusionName = assemblyFile.GetMetadata(ItemMetadataNames.fusionName);
+                        if (!String.IsNullOrEmpty(fusionName))
+                        {
+                            _assemblyNames[i] = new AssemblyNameExtension(fusionName);
+                        }
+                        else
+                        {
+                            // whoever passed us this reference wasn't polite enough to also 
+                            // give us a metadata with the fusion name.  Trying to load up every 
+                            // assembly here would take a lot of time, so just stick the assembly 
+                            // file name (which we assume generally maps to the simple name) into 
+                            // the list instead. If there's a fusion name that matches, we'll get 
+                            // that first; otherwise there's a good chance that if the simple name
+                            // matches the file name, it's a good match.  
+                            _assemblyNames[i] = new AssemblyNameExtension(Path.GetFileNameWithoutExtension(assemblyFile.ItemSpec));
+                        }
+                    }
+                }
+            }
+        }
+
+        #region Code from ResGen.EXE
 
         /// <summary>
         /// Read all resources from a file and write to a new file in the chosen format
@@ -3345,7 +3348,22 @@ namespace Microsoft.Build.Tasks
                 case Format.Binary:
                     if (_usePreserializedResources)
                     {
-                        // TODO: check TF/references and error if System.Resources.Extensions not available
+                        // check TF/references and error if System.Resources.Extensions not available
+                        PopulateAssemblyNames();
+                        bool foundExtensions = false;
+                        foreach (var assemblyName in _assemblyNames)
+                        {
+                            if (assemblyName.Name == "System.Resources.Extensions")
+                            {
+                                foundExtensions = true;
+                            }
+                        }
+
+                        if (!foundExtensions)
+                        {
+                            _logger.LogErrorFromResources("GenerateResource.PreserializedResourcesRequiresExtensions");
+                        }
+
                         WriteResources(reader, new PreserializedResourceWriter(File.OpenWrite(filename))); // closes writer for us
                     }
                     else

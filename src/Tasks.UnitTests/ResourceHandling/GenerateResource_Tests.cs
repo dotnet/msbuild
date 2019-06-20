@@ -370,10 +370,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask(_output);
+            GenerateResource t = Utilities.CreateTask(_output, usePreserialized, _env);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
-
-            t.UsePreserializedResources = usePreserialized;
 
             try
             {
@@ -383,13 +381,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Path.GetExtension(t.OutputResources[0].ItemSpec).ShouldBe(".resources");
                 Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
-                GenerateResource t2 = Utilities.CreateTask(_output);
+                GenerateResource t2 = Utilities.CreateTask(_output, usePreserialized, _env);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
-                t2.UsePreserializedResources = usePreserialized;
 
                 DateTime firstWriteTime = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 System.Threading.Thread.Sleep(200);
@@ -428,7 +425,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask(_output);
+            GenerateResource t = Utilities.CreateTask(_output, usePreserialized, _env);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             t.UsePreserializedResources = usePreserialized;
@@ -444,7 +441,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.AssertStateFileWasWritten(t);
 
-                GenerateResource t2 = Utilities.CreateTask(_output);
+                GenerateResource t2 = Utilities.CreateTask(_output, usePreserialized, _env);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t2.UsePreserializedResources = usePreserialized;
@@ -542,7 +539,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask(_output);
+            GenerateResource t = Utilities.CreateTask(_output, usePreserialized, _env);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             t.UsePreserializedResources = usePreserialized;
@@ -562,7 +559,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
 
-                GenerateResource t2 = Utilities.CreateTask(_output);
+                GenerateResource t2 = Utilities.CreateTask(_output, usePreserialized, _env);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
@@ -3380,7 +3377,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// This method creates a GenerateResource task and performs basic setup on it, e.g. BuildEngine
         /// </summary>
         /// <param name="output"></param>
-        public static GenerateResource CreateTask(ITestOutputHelper output)
+        public static GenerateResource CreateTask(ITestOutputHelper output, bool usePreserialized = false, TestEnvironment env = null)
         {
             // always use the internal ctor that says don't perform separate app domain check
             GenerateResource t = new GenerateResource();
@@ -3388,6 +3385,27 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             // Make the task execute in-proc
             t.ExecuteAsTool = false;
+
+            if (usePreserialized)
+            {
+                t.UsePreserializedResources = usePreserialized;
+
+                // Synthesize a reference that looks close enough to System.Resources.Extensions
+                // to pass the "is it ok to use preserialized resources?" check
+
+                var folder = env.CreateFolder(true);
+                var dll = folder.CreateFile("System.Resource.Extensions.dll");
+
+                // Make sure the reference looks old relative to all the other inputs
+                File.SetLastWriteTime(dll.Path, DateTime.Now - TimeSpan.FromDays(30));
+
+                var referenceItem = new TaskItem(dll.Path);
+                referenceItem.SetMetadata(Tasks.ItemMetadataNames.fusionName, "System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51");
+
+                t.References = new ITaskItem[] {
+                    referenceItem
+                };
+            }
 
             return t;
         }
