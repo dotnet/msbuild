@@ -393,7 +393,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 DateTime firstWriteTime = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 System.Threading.Thread.Sleep(200);
-                File.SetLastWriteTime(bitmap, DateTime.Now);
+                File.SetLastWriteTime(bitmap, DateTime.Now + TimeSpan.FromSeconds(2));
 
                 Utilities.ExecuteTask(t2);
 
