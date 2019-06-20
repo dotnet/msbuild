@@ -468,7 +468,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (!task.DisablePackageAssetsCache)
                 {
-                    task.Log.LogMessage(MessageImportance.High, Strings.UnableToUsePackageAssetsCache);
+                    task.Log.LogMessage(MessageImportance.High, Strings.UnableToUsePackageAssetsCache_Info);
                 }
 
                 Stream stream;
@@ -690,7 +690,8 @@ namespace Microsoft.NET.Build.Tasks
 
             public void Dispose()
             {
-                _writer.Dispose();
+                _writer?.Dispose();
+                _writer = null;
             }
 
             private void FlushMetadata()

@@ -466,10 +466,10 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1016: No se encuentra la ruta de acceso resuelta para "{0}".</target>
         <note>{StrBegin="NETSDK1016: "}</note>
       </trans-unit>
-      <trans-unit id="UnableToUsePackageAssetsCache">
-        <source>NETSDK1062: Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="translated">NETSDK1062: No se puede usar la memoria caché de recursos del paquete debido a un error de E/S. Esto puede ocurrir cuando un mismo proyecto se compila más de una vez en paralelo. Puede que se reduzca el rendimiento, pero no afectará al resultado de la compilación.</target>
-        <note>{StrBegin="NETSDK1062: "}</note>
+      <trans-unit id="UnableToUsePackageAssetsCache_Info">
+        <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
+        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>NETSDK1012: Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>

@@ -466,10 +466,10 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1016: '{0}'에 대해 확인된 경로를 찾을 수 없습니다.</target>
         <note>{StrBegin="NETSDK1016: "}</note>
       </trans-unit>
-      <trans-unit id="UnableToUsePackageAssetsCache">
-        <source>NETSDK1062: Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="translated">NETSDK1062: I/O 오류로 인해 패키지 자산 캐시를 사용할 수 없습니다. 동일한 프로젝트가 두 번 이상 동시에 빌드되면 이 오류가 발생합니다. 성능이 저하될 수 있지만 빌드 결과는 영향을 받지 않습니다.</target>
-        <note>{StrBegin="NETSDK1062: "}</note>
+      <trans-unit id="UnableToUsePackageAssetsCache_Info">
+        <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
+        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>NETSDK1012: Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>

@@ -350,9 +350,8 @@ The following are names of parameters or literal values and should not be transl
 {1} - Restored version of platform package
 {2} - Current version of platform package</comment>
   </data>
-  <data name="UnableToUsePackageAssetsCache" xml:space="preserve">
-    <value>NETSDK1062: Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</value>
-    <comment>{StrBegin="NETSDK1062: "}</comment>
+  <data name="UnableToUsePackageAssetsCache_Info" xml:space="preserve">
+    <value>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</value>
   </data>
   <data name="AssetsFileNotSet" xml:space="preserve">
     <value>NETSDK1063: The path to the project assets file was not set. Run a NuGet package restore to generate this file.</value>
