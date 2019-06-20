@@ -67,31 +67,25 @@ namespace Microsoft.NET.Perf.Tests
         [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
         public void BuildWebLarge(ProjectPerfOperation operation)
         {
-            string sourceProject = Path.Combine(TestContext.GetRepoRoot(), ".perftestsource/PerformanceTestProjects/WebLarge");
-            var testDir = _testAssetsManager.CreateTestDirectory("WebLarge", identifier: operation.ToString());
-            Console.WriteLine($"Mirroring {sourceProject} to {testDir}...");
-            FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
-            TestContext.Current.WriteGlobalJson(testDir.Path);
-            Console.WriteLine("Done");
-
-            TestProject(Path.Combine(testDir.Path, "mvc"), "Build Web Large", operation);
+            TestProjectFromPerfTestSourceRepository(
+                operation: operation,
+                testName: "Build Web Large",
+                solutionDirectoryNameInPerfTestRepo: "WebLarge",
+                projectDirectoryName: "mvc");
         }
-   
+
         [CoreMSBuildOnlyTheory]
         [InlineData(ProjectPerfOperation.CleanBuild)]
         [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
         public void BuildWebLarge30(ProjectPerfOperation operation)
         {
-            string sourceProject = Path.Combine(TestContext.GetRepoRoot(), ".perftestsource/PerformanceTestProjects/WebLarge30");
-            var testDir = _testAssetsManager.CreateTestDirectory("WebLarge30", identifier: operation.ToString());
-            Console.WriteLine($"Mirroring {sourceProject} to {testDir}...");
-            FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
-            TestContext.Current.WriteGlobalJson(testDir.Path);
-            Console.WriteLine("Done");
-
-            TestProject(Path.Combine(testDir.Path, "mvc"), "Build Web Large 3.0", operation);
+            TestProjectFromPerfTestSourceRepository(
+                operation: operation,
+                testName: "Build Web Large 3.0",
+                solutionDirectoryNameInPerfTestRepo: "WebLarge30",
+                projectDirectoryName: "mvc");
         }
-   
+
         [CoreMSBuildOnlyTheory]
         [InlineData(ProjectPerfOperation.CleanBuild)]
         [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
@@ -230,6 +224,52 @@ namespace Microsoft.NET.Perf.Tests
             TestProject(testAsset.Path, "Full Windows Forms hello world", operation);
         }
 
+        [WindowsOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildNetCoreWindowsFormsLarge(ProjectPerfOperation operation)
+        {
+            TestProjectFromPerfTestSourceRepository(
+                operation: operation,
+                testName: "Build Windows Forms large",
+                solutionDirectoryNameInPerfTestRepo: "WinformsNetCorePerfApp1");
+        }
+
+        [FullMSBuildOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildNetFullFrameworkWindowsFormsLarge(ProjectPerfOperation operation)
+        {
+            TestProjectFromPerfTestSourceRepository(
+                operation: operation,
+                testName: "Build Full framework Windows Forms large",
+                solutionDirectoryNameInPerfTestRepo: "WinformsNetFrameworkPerfApp1");
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildNetCoreWpfLarge(ProjectPerfOperation operation)
+        {
+            TestProjectFromPerfTestSourceRepository(
+                operation: operation,
+                testName: "Build WPF large",
+                solutionDirectoryNameInPerfTestRepo: "WpfLarge",
+                projectDirectoryName: "WpfLarge");
+        }
+
+        [FullMSBuildOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildNetFullFrameworkWpfLarge(ProjectPerfOperation operation)
+        {
+            TestProjectFromPerfTestSourceRepository(
+                operation: operation,
+                testName: "Build Full framework WPF large",
+                solutionDirectoryNameInPerfTestRepo: "WpfLargeFullframework",
+                projectDirectoryName: "WpfLargeFullframework");
+        }
+
         public enum ProjectPerfOperation
         {
             CleanBuild,
@@ -338,6 +378,33 @@ namespace Microsoft.NET.Perf.Tests
             perfTest.TestFolder = testProjectDirectory;
 
             perfTest.Run();
+        }
+
+        private void TestProjectFromPerfTestSourceRepository(
+            ProjectPerfOperation operation,
+            string testName,
+            string solutionDirectoryNameInPerfTestRepo,
+            string projectDirectoryName = null)
+        {
+            string sourceProject = Path.Combine(
+                TestContext.GetRepoRoot(),
+                $".perftestsource/PerformanceTestProjects/{solutionDirectoryNameInPerfTestRepo}");
+
+            var testDir = _testAssetsManager.CreateTestDirectory(
+                solutionDirectoryNameInPerfTestRepo,
+                identifier: operation.ToString());
+
+            Console.WriteLine($"Mirroring {sourceProject} to {testDir}...");
+            FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
+            TestContext.Current.WriteGlobalJson(testDir.Path);
+            Console.WriteLine("Done");
+
+            string projectFolderOrFile =
+                projectDirectoryName != null
+                ? Path.Combine(testDir.Path, projectDirectoryName)
+                : testDir.Path;
+
+            TestProject(projectFolderOrFile, testName, operation);
         }
     }
 }
