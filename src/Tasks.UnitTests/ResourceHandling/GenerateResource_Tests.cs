@@ -399,8 +399,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 File.GetLastWriteTime(t2.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstWriteTime);
 
-                // ToUpper because WriteTestResX uppercases links
-                Utilities.AssertLogContainsResource(t2, "GenerateResource.LinkedInputNewer", bitmap.ToUpper(), t2.OutputResources[0].ItemSpec);
+                Utilities.AssertLogContainsResource(
+                    t2,
+                    "GenerateResource.LinkedInputNewer",
+                    // ToUpper because WriteTestResX uppercases links
+                    NativeMethodsShared.IsWindows ? bitmap.ToUpper() : bitmap,
+                    t2.OutputResources[0].ItemSpec);
             }
             finally
             {
@@ -450,7 +454,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t2.Execute().ShouldBeFalse();
 
                 // ToUpper because WriteTestResX uppercases links
-                Utilities.AssertLogContainsResource(t2, "GenerateResource.LinkedInputDoesntExist", bitmap.ToUpper());
+                Utilities.AssertLogContainsResource(
+                    t2,
+                    "GenerateResource.LinkedInputDoesntExist",
+                    // ToUpper because WriteTestResX uppercases links
+                    NativeMethodsShared.IsWindows ? bitmap.ToUpper() : bitmap);
             }
             finally
             {
