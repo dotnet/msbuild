@@ -22,6 +22,8 @@ Install the latest .NET Core SDK from http://dot.net/core. That will ensure all 
 
 `./build.sh`
 
+If you encounter errors, see [Something's wrong in my build](Something's-wrong-in-my-build.md)
+
 ## Tests
 
 `./build.sh --test`
