@@ -381,10 +381,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.ExecuteTask(t);
 
-                string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.Equal(".resources", Path.GetExtension(resourcesFile));
+                Path.GetExtension(t.OutputResources[0].ItemSpec).ShouldBe(".resources");
+                Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
                 
                 Utilities.AssertStateFileWasWritten(t);
 
@@ -393,13 +391,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t2.UsePreserializedResources = usePreserialized;
 
-                DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
+                DateTime firstWriteTime = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 System.Threading.Thread.Sleep(200);
                 File.SetLastWriteTime(bitmap, DateTime.Now);
 
                 Utilities.ExecuteTask(t2);
 
-                Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+                File.GetLastWriteTime(t2.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstWriteTime);
 
                 // ToUpper because WriteTestResX uppercases links
                 Utilities.AssertLogContainsResource(t2, "GenerateResource.LinkedInputNewer", bitmap.ToUpper(), t2.OutputResources[0].ItemSpec);
@@ -437,11 +435,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.ExecuteTask(t);
 
-                string resourcesFile = t.OutputResources[0].ItemSpec;
-                Path.GetExtension(resourcesFile).ShouldBe(".resources");
-                resourcesFile = t.FilesWritten[0].ItemSpec;
-                Path.GetExtension(resourcesFile).ShouldBe(".resources");
-                
+                Path.GetExtension(t.OutputResources[0].ItemSpec).ShouldBe(".resources");
+                Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 GenerateResource t2 = Utilities.CreateTask(_output);
