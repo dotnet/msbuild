@@ -1,2 +1,2 @@
 #!/bin/sh
-MONO_GC_PARAMS="nursery-size=64m,$MONO_GC_PARAMS" exec @bindir@/mono $MONO_OPTIONS @mono_instdir@/msbuild/15.0/bin/MSBuild.dll "$@"
+MONO_GC_PARAMS="nursery-size=64m,$MONO_GC_PARAMS" exec @bindir@/mono --assembly-loader=strict $MONO_OPTIONS @mono_instdir@/msbuild/15.0/bin/MSBuild.dll "$@"
