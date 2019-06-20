@@ -121,19 +121,10 @@
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
       </trans-unit>
-      <trans-unit id="StaticGraphDoesNotHandleSolutionOnlyDependencies">
-        <source>MSB4263: Static graph does not support solutions containing solution only dependencies. Solution file "{0}" contains the following projects with solution only dependencies: {1}
-    </source>
-        <target state="new">MSB4263: Static graph does not support solutions containing solution only dependencies. Solution file "{0}" contains the following projects with solution only dependencies: {1}
-    </target>
-        <note>
-      LOCALIZATION: {0} is a file and {1} is a semicolon delimited list of files
-    </note>
-      </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
-        <source>MSB4264: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+        <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </source>
-        <target state="new">MSB4264: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+        <target state="new">MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </target>
         <note>
       LOCALIZATION: {0} and {1} are file paths

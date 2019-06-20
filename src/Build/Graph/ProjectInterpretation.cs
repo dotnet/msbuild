@@ -25,6 +25,7 @@ namespace Microsoft.Build.Experimental.Graph
         private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
         private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
         private const string ProjectReferenceTargetIsOuterBuildMetadataName = "OuterBuild";
+        internal const string InnerBuildReferenceItemName = "_ProjectSelfReference";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Experimental.Graph
             switch (GetProjectType(requesterInstance))
             {
                 case ProjectType.OuterBuild:
-                    projectReferenceItems = GetInnerBuildReferences(requesterInstance);
+                    projectReferenceItems = ConstructInnerBuildReferences(requesterInstance);
                     break;
                 case ProjectType.InnerBuild:
                     globalPropertiesModifiers = ModifierForNonMultitargetingNodes.Add((parts, reference) => parts.AddPropertyToUndefine(GetInnerBuildPropertyName(requesterInstance)));
@@ -162,7 +163,7 @@ namespace Microsoft.Build.Experimental.Graph
             }
         }
 
-        private static IEnumerable<ProjectItemInstance> GetInnerBuildReferences(ProjectInstance outerBuild)
+        private static IEnumerable<ProjectItemInstance> ConstructInnerBuildReferences(ProjectInstance outerBuild)
         {
             var globalPropertyName = GetInnerBuildPropertyName(outerBuild);
             var globalPropertyValues = GetInnerBuildPropertyValues(outerBuild);
@@ -174,7 +175,7 @@ namespace Microsoft.Build.Experimental.Graph
             {
                 yield return new ProjectItemInstance(
                     outerBuild,
-                    "_ProjectSelfReference",
+                    InnerBuildReferenceItemName,
                     outerBuild.FullPath,
                     new[] {new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}")},
                     outerBuild.FullPath);

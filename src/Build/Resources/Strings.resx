@@ -1784,15 +1784,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </comment>
   </data>
-  <data name="StaticGraphDoesNotHandleSolutionOnlyDependencies" UESanitized="false" Visibility="Public">
-    <value>MSB4263: Static graph does not support solutions containing solution only dependencies. Solution file "{0}" contains the following projects with solution only dependencies: {1}
-    </value>
-    <comment>
-      LOCALIZATION: {0} is a file and {1} is a semicolon delimited list of files
-    </comment>
-  </data>
   <data name="StaticGraphDoesNotSupportSlnReferences" UESanitized="false" Visibility="Public">
-    <value>MSB4264: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+    <value>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </value>
     <comment>
       LOCALIZATION: {0} and {1} are file paths
@@ -1804,7 +1797,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4265.
+        Next message code should be MSB4264.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

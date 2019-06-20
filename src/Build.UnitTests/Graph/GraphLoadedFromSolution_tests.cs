@@ -4,8 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -84,7 +87,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                     new ProjectGraph(root.Path);
                 });
 
-            exception.Message.ShouldContain("MSB4264:");
+            exception.Message.ShouldContain("MSB4263:");
         }
 
         public static IEnumerable<object[]> Graphs
@@ -256,6 +259,398 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             graph.ProjectNodes.ShouldBeEmpty();
         }
 
+        public static IEnumerable<object[]> SolutionOnlyDependenciesData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]> //graph nodes and ProjectReference edges
+                    {
+                        {1, null},
+                        {2, null}
+                    },
+                    new[] {(1, 2)}, // solution only edges
+                    false, // is there a cycle
+                    false // solution edges overlap with graph edges
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, null},
+                        {2, null}
+                    },
+                    new[] {(1, 2), (2, 1)},
+                    true,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, null},
+                        {2, null},
+                        {3, null},
+                        {4, null},
+                        {5, null}
+                    },
+                    new[] {(1, 2), (1, 3), (2, 4), (3,4), (4, 5)},
+                    false,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, null},
+                        {2, null},
+                        {3, null},
+                        {4, null},
+                        {5, null}
+                    },
+                    new[] {(1, 2), (1, 3), (2, 4), (3, 4), (4, 5), (2, 3)},
+                    false,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, null},
+                        {2, null},
+                        {3, null},
+                        {4, null},
+                        {5, null}
+                    },
+                    new[] {(1, 3), (2, 3), (3, 4), (3, 5), (5, 4), (2, 1)},
+                    false,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2}},
+                    },
+                    new[] {(1, 2)},
+                    false,
+                    true
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2}},
+                    },
+                    new[] {(1, 2), (1, 2)},
+                    false,
+                    true
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2}},
+                    },
+                    new[] {(2, 1)},
+                    true,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2, 3}},
+                        {2, new []{4}},
+                        {3, new []{4}},
+                        {4, new []{5}},
+                        {5, null}
+                    },
+                    new[] {(3, 2)},
+                    false,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2, 3}},
+                        {2, new []{4}},
+                        {3, new []{4}},
+                        {4, new []{5}},
+                        {5, null}
+                    },
+                    new[] {(1, 2), (1, 3), (3, 2), (1, 5)},
+                    false,
+                    true
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2, 3}},
+                        {2, new []{4}},
+                        {3, new []{4}},
+                        {4, new []{5}},
+                        {5, null}
+                    },
+                    new[] {(3, 2), (5, 3)},
+                    true,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new []{2, 3}},
+                        {2, new []{4}},
+                        {3, new []{4}},
+                        {4, new []{5}},
+                        {5, null}
+                    },
+                    new[] {(5, 3)},
+                    true,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new[] {2}},
+                        {2, new[] {3}},
+                        {3, new[] {4}},
+                    },
+                    new[] {(1,3), (2, 4)},
+                    false,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new[] {2}},
+                        {2, new[] {3}},
+                        {3, new[] {4}},
+                    },
+                    new[] {(1,3), (2, 4), (1, 2), (2, 3), (3, 4)},
+                    false,
+                    true
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new[] {2}},
+                        {3, null},
+                        {4, null}
+                    },
+                    new[] {(3, 2), (2, 4)},
+                    false,
+                    false
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new[] {2}},
+                        {3, null},
+                        {4, null}
+                    },
+                    new[] {(3, 2), (2, 4), (4, 1)},
+                    true,
+                    false
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SolutionOnlyDependenciesData))]
+        public void SolutionsCanInjectEdgesIntoTheProjectGraph(Dictionary<int, int[]> edges, (int, int)[] solutionDependencies, bool hasCycle, bool solutionEdgesOverlapGraphEdges)
+        {
+            // Use the same global properties as the solution would use so all ConfigurationMetadata objects would match on global properties.
+            var graph = CreateProjectGraph(
+                _env,
+                edges,
+                new Dictionary<string, string>()
+                {
+                    {"Configuration", "Debug"},
+                    {"Platform", "AnyCPU"}
+                });
+
+            // Use ConfigutationMetadata because it is IEquatable, whereas ProjectGraphNode is node.
+            var graphEdges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+
+            var solutionContents =
+                SolutionFileBuilder.FromGraph(
+                    graph,
+                    solutionDependencies: solutionDependencies.Select(dependency => (dependency.Item1.ToString(), dependency.Item2.ToString())).ToArray())
+                    .BuildSolution();
+            var solutionFile = _env.CreateFile("solution.sln", solutionContents).Path;
+
+            Exception exception = null;
+
+            ProjectGraph graphFromSolution = null;
+
+            try
+            {
+                graphFromSolution = new ProjectGraph(solutionFile);
+            }
+            catch (Exception e)
+            {
+                exception = e;
+            }
+
+            if (hasCycle)
+            {
+                exception.ShouldNotBeNull();
+                exception.Message.ShouldContain("MSB4251");
+
+                return;
+            }
+
+            exception.ShouldBeNull();
+
+            var graphFromSolutionEdges = graphFromSolution.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+
+            // Original edges get preserved.
+            foreach (var graphEdge in graphEdges)
+            {
+                graphFromSolutionEdges.Keys.ShouldContain(graphEdge.Key);
+            }
+
+            // Solution edges get added. Assert each solution dependency is found within the graph edges
+            var solutionOnlyEdges = graphFromSolutionEdges.Keys.Except(graphEdges.Keys).ToList();
+
+            foreach (var solutionDependency in solutionDependencies)
+            {
+                if (!solutionEdgesOverlapGraphEdges)
+                {
+                    solutionOnlyEdges.ShouldContain(edge => EdgeCompliesWithSolutionDependency(edge, solutionDependency));
+                }
+
+                graphFromSolutionEdges.Keys.ShouldContain(edge => EdgeCompliesWithSolutionDependency(edge, solutionDependency));
+
+                solutionOnlyEdges.RemoveAll(edge => EdgeCompliesWithSolutionDependency(edge, solutionDependency));
+            }
+
+            // no extra edges get added
+            solutionOnlyEdges.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void SolutionEdgesShouldNotOverwriteProjectReferenceEdges()
+        {
+            var solutionContents = SolutionFileBuilder.FromGraphEdges(
+                _env,
+                new Dictionary<int, int[]>()
+                {
+                    {1, new[] {2}}
+                }).BuildSolution();
+
+            var graph = new ProjectGraph(_env.CreateFile("solution.sln", solutionContents).Path);
+
+            var edges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+
+            edges.Count.ShouldBe(1);
+
+            edges.First().Value.ItemType.ShouldBe(ItemTypeNames.ProjectReference);
+        }
+
+        [Fact]
+        public void SolutionEdgesShouldNotOverwriteMultitargetingEdges()
+        {
+            var solutionContents = new SolutionFileBuilder
+            {
+                Projects = new Dictionary<string, string>
+                {
+                    {"1", GraphTestingUtilities.CreateProjectFile(_env, 1, new[] {2}).Path},
+                    {"2", GraphTestingUtilities.CreateProjectFile(_env, 2, extraContent: MultitargetingSpecification).Path},
+                    {"3", GraphTestingUtilities.CreateProjectFile(_env, 3, new[] {4}, extraContent: MultitargetingSpecification).Path},
+                    {"4", GraphTestingUtilities.CreateProjectFile(_env, 4).Path}
+                },
+                SolutionDependencies = new[] {("1", "2"), ("3", "4")}
+            }.BuildSolution();
+
+            var graph = new ProjectGraph(_env.CreateFile("solution.sln", solutionContents).Path);
+
+            var edges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+            edges.Count.ShouldBe(8);
+
+            var node1 = GetFirstNodeWithProjectNumber(graph, 1);
+            node1.ProjectReferences.Count.ShouldBe(3);
+            node1.ProjectReferences.Count(r => GetProjectNumber(r) == 2).ShouldBe(3);
+            GetOutgoingEdgeItemsFromNode(node1, edges).ShouldAllBe(edgeItem => !IsSolutionItemReference(edgeItem));
+
+            var outerBuild3 = GetOuterBuild(graph, 3);
+            outerBuild3.ProjectReferences.Count.ShouldBe(3);
+            outerBuild3.ProjectReferences.Count(r => GetProjectNumber(r) == 3).ShouldBe(2);
+            outerBuild3.ProjectReferences.Count(r => GetProjectNumber(r) == 4).ShouldBe(1);
+
+            GetInnerBuilds(graph, 3).SelectMany(n => n.ProjectReferences).Count(r => GetProjectNumber(r) == 4).ShouldBe(2);
+            GetInnerBuilds(graph, 3).SelectMany(n => GetIncomingEdgeItemsToNode(n, edges)).ShouldAllBe(edgeItem => !IsSolutionItemReference(edgeItem));
+            GetInnerBuilds(graph, 3).SelectMany(n => GetOutgoingEdgeItemsFromNode(n, edges)).ShouldAllBe(edgeItem => !IsSolutionItemReference(edgeItem));
+
+            IEnumerable<ProjectItemInstance> GetOutgoingEdgeItemsFromNode(ProjectGraphNode node, IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> edgeInfos)
+            {
+                return edgeInfos.Where(e => e.Key.Item1.Equals(node.ToConfigurationMetadata())).Select(e => e.Value);
+            }
+
+            IEnumerable<ProjectItemInstance> GetIncomingEdgeItemsToNode(ProjectGraphNode node, IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> edgeInfos)
+            {
+                return edgeInfos.Where(e => e.Key.Item2.Equals(node.ToConfigurationMetadata())).Select(e => e.Value);
+            }
+        }
+
+        [Fact]
+        public void GraphConstructionShouldThrowOnMissingSolutionDependencies()
+        {
+            _env.DoNotLaunchDebugger();
+
+            var solutionContents = SolutionFileBuilder.FromGraphEdges(
+                _env,
+                new Dictionary<int, int[]> {{1, null}, {2, null}},
+                new[] {("1", new[] {Guid.NewGuid().ToString("B")})}).BuildSolution();
+
+            var solutionFile = _env.CreateFile(
+                "solution.sln",
+                solutionContents)
+                .Path;
+
+            var exception = Should.Throw<InvalidProjectFileException>(
+                () =>
+                {
+                    new ProjectGraph(solutionFile);
+                });
+
+            exception.Message.ShouldContain("but a project with this GUID was not found in the .SLN file");
+        }
+
+        private static bool IsSolutionItemReference(ProjectItemInstance edgeItem)
+        {
+            return edgeItem.ItemType == GraphBuilder.SolutionItemReference;
+        }
+
+        private static bool EdgeCompliesWithSolutionDependency((ConfigurationMetadata, ConfigurationMetadata) edge, (int, int) solutionDependency)
+        {
+            return GetProjectNumber(edge.Item1) == solutionDependency.Item1 && GetProjectNumber(edge.Item2) == solutionDependency.Item2;
+        }
+
         private void AssertSolutionBasedGraph(
             Dictionary<int, int[]> edges,
             SolutionConfigurationInSolution currentSolutionConfiguration,
@@ -263,15 +658,9 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             Dictionary<string, Dictionary<SolutionConfigurationInSolution, ProjectConfigurationInSolution>> projectConfigurations = null)
         {
             var graph = CreateProjectGraph(_env, edges);
+            var graphEdges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
 
-            var solutionFileBuilder = new SolutionFileBuilder
-            {
-                Projects = graph.ProjectNodes.ToDictionary(
-                    n => GetProjectNumber(n)
-                        .ToString(),
-                    n => n.ProjectInstance.FullPath),
-                ProjectConfigurations = projectConfigurations
-            };
+            var solutionFileBuilder = SolutionFileBuilder.FromGraph(graph, projectConfigurations);
 
             var solutionContents = solutionFileBuilder.BuildSolution();
 
