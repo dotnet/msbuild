@@ -65,7 +65,7 @@ RepoRoot="$ScriptRoot/.."
 artifacts_dir="$RepoRoot/artifacts"
 
 mono_msbuild_dir="$artifacts_dir/mono-msbuild"
-msbuild_download_url="https://github.com/mono/msbuild/releases/download/0.06/mono_msbuild_xplat-master-3c930fa8.zip"
+msbuild_download_url="https://github.com/mono/msbuild/releases/download/0.07/mono_msbuild_xplat-master-8f608e49.zip"
 msbuild_zip="$artifacts_dir/msbuild.zip"
 
 if [ $host_type = "mono" ] ; then
@@ -74,6 +74,7 @@ if [ $host_type = "mono" ] ; then
   export _InitializeBuildTool="mono"
   export _InitializeBuildToolCommand="$mono_msbuild_dir/MSBuild.dll"
   export _InitializeBuildToolFramework="net472"
+  export MONO_ENV_OPTIONS="$MONO_ENV_OPTIONS --assembly-loader=strict"
 
   configuration="$configuration-MONO"
   extn_path="$mono_msbuild_dir/Extensions"
