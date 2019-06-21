@@ -246,7 +246,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             using (var x = new MemoryStream(Encoding.UTF8.GetBytes(resxContent)))
             {
-                return ReadResources(x, basePath, useRelativePath.GetValueOrDefault(false));
+                return ReadResources(x, basePath, useRelativePath.GetValueOrDefault(basePath != null));
             }
         }
 
