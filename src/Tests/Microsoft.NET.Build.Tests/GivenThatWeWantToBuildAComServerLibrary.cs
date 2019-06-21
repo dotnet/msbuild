@@ -53,7 +53,6 @@ namespace Microsoft.NET.Build.Tests
                 .Should().Be("LatestMinor");
         }
 
-
         [WindowsOnlyFact]
         public void It_generates_a_regfree_com_manifest_when_requested()
         {

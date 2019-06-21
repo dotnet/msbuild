@@ -37,8 +37,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <IsComponent Condition="'$(IsComponent)' == '' and '$(UseComHost)' == 'true'">true</IsComponent>
-    <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and ('$(HasRuntimeOutput)' == 'true' or '$(UseComHost)' == 'true' or '$(IsComponent)' == 'true') ">true</GenerateRuntimeConfigurationFiles>
+    <EnableDynamicLoading Condition="'$(EnableDynamicLoading)' == '' and '$(EnableComHosting)' == 'true'">true</EnableDynamicLoading>
+    <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and ('$(HasRuntimeOutput)' == 'true' or '$(EnableComHosting)' == 'true' or '$(EnableDynamicLoading)' == 'true') ">true</GenerateRuntimeConfigurationFiles>
     <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
     <GenerateSatelliteAssembliesForCore Condition=" '$(GenerateSatelliteAssembliesForCore)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">true</GenerateSatelliteAssembliesForCore>
     <ComputeNETCoreBuildOutputFiles Condition=" '$(ComputeNETCoreBuildOutputFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</ComputeNETCoreBuildOutputFiles>
@@ -194,7 +194,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <_IsRollForwardSupported Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0'">true</_IsRollForwardSupported>
-      <RollForward Condition="'$(RollForward)' == '' and '$(IsComponent)' == 'true' and '$(_IsRollForwardSupported)' == 'true'">LatestMinor</RollForward>
+      <RollForward Condition="'$(RollForward)' == '' and '$(EnableDynamicLoading)' == 'true' and '$(_IsRollForwardSupported)' == 'true'">LatestMinor</RollForward>
     </PropertyGroup>
 
     <NETSdkError Condition="'$(RollForward)' != '' and '$(_IsRollForwardSupported)' != 'true'"
@@ -386,7 +386,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="@(ClsidMap)"
           DependsOnTargets="CoreCompile"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and
-                     '$(UseComHost)' == 'true'">
+                     '$(EnableComHosting)' == 'true'">
     <GenerateClsidMap
         IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
         CLsidMapDestinationPath="@(ClsidMap->'%(FullPath)')" />
@@ -429,7 +429,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(ClsidMap);@(IntermediateAssembly)"
           Outputs="@(RegFreeComManifest)"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and
-                     '$(UseComHost)' == 'true' and
+                     '$(EnableComHosting)' == 'true' and
                      '$(EnableRegFreeCom)' == 'true'">
     <GenerateRegFreeComManifest
       IntermediateAssembly="@(IntermediateAssembly)"
@@ -448,7 +448,7 @@ Copyright (c) .NET Foundation. All rights reserved.
      -->
   <Target Name="_GetComHostPaths"
           DependsOnTargets="ResolvePackageAssets"
-          Condition="'$(UseComHost)' == 'true' and '$(_IsExecutable)' != 'true'">
+          Condition="'$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true'">
     <PropertyGroup>
       <ComHostFileName>$(AssemblyName).comhost$(_ComHostLibraryExtension)</ComHostFileName>
       <ComHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)$(ComHostFileName)'))</ComHostIntermediatePath>

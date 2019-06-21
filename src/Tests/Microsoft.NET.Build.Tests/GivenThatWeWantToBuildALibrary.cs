@@ -663,16 +663,16 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.0", "LatestMajor", true, null, true)]
         [InlineData("netcoreapp3.0", null, true, false, false)]
         [InlineData("netcoreapp3.0", "LatestMajor", true, false, false)]
-        public void It_can_build_as_a_component(string targetFramework, string rollForwardValue, bool shouldSetRollForward, bool? copyLocal, bool shouldCopyLocal)
+        public void It_can_build_with_dynamic_loading_enabled(string targetFramework, string rollForwardValue, bool shouldSetRollForward, bool? copyLocal, bool shouldCopyLocal)
         {
             var testProject = new TestProject()
             {
-                Name = "BuildAsComponent",
+                Name = "EnableDynamicLoading",
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true
             };
 
-            testProject.AdditionalProperties["IsComponent"] = "true";
+            testProject.AdditionalProperties["EnableDynamicLoading"] = "true";
             if (!string.IsNullOrEmpty(rollForwardValue))
             {
                 testProject.AdditionalProperties["RollForward"] = rollForwardValue;

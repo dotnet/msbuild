@@ -36,7 +36,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
                                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                                             ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0' or
-                                             ('$(HasRuntimeOutput)' != 'true' and '$(IsComponent)' != 'true'))">false</CopyLocalLockFileAssemblies>
+                                             ('$(HasRuntimeOutput)' != 'true' and '$(EnableDynamicLoading)' != 'true'))">false</CopyLocalLockFileAssemblies>
 
     <!-- All other project types should copy local. -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
