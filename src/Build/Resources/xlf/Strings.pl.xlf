@@ -110,14 +110,14 @@
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
-        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <target state="translated">MSB4260: W przypadku projektu „{0}” pominięto ograniczenia izolacji grafu dla przywoływanego projektu „{1}”</target>
         <note>
       LOCALIZATION: {0} and {1} are file paths
     </note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="needs-review-translation">MSB4254: Zadanie programu MSBuild kompiluje projekty {0}, które nie są określone w elemencie ProjectReference. W przypadku kompilacji izolowanych prawdopodobnie oznacza to, że odwołania nie zostały jawnie określone jako element ProjectReference w pliku „{1}”</target>
+        <target state="translated">MSB4254: Zadanie programu MSBuild kompiluje projekty „{0}”, które nie są określone w elemencie ProjectReference. W przypadku kompilacji izolowanych prawdopodobnie oznacza to, że odwołania nie zostały jawnie określone jako element ProjectReference w pliku „{1}”</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
