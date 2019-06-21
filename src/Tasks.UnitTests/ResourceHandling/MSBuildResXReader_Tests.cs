@@ -89,16 +89,34 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         [Fact]
         public void LoadsStringFromFileRefAsStringWithShiftJISEncoding()
         {
-            File.Exists(Path.Combine("ResourceHandling", "TextFileInShiftJIS.txt")).ShouldBeTrue("Test deployment is missing None files");
+            using (var env = TestEnvironment.Create(_output))
+            {
+                const string JapaneseString = "ハローワールド！";
 
-            var resxWithLinkedString = MSBuildResXReader.GetResourcesFromString(
-                ResXHelper.SurroundWithBoilerplate(
-@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
+                var baseDir = env.CreateFolder(createFolder: true);
+                var resourceHandlingFolder = baseDir.CreateDirectory("ResourceHandling");
+
+                var linkedTextFile = resourceHandlingFolder.CreateFile("TextFileInShiftJIS.txt");
+
+#if RUNTIME_TYPE_NETCORE
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
+
+                File.WriteAllText(linkedTextFile.Path,
+                                  JapaneseString,
+                                  Encoding.GetEncoding("shift_jis"));
+
+                var resxWithLinkedString = MSBuildResXReader.GetResourcesFromString(
+                    ResXHelper.SurroundWithBoilerplate(
+    @"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
     <value>ResourceHandling\TextFileInShiftJIS.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;shift_jis</value>
-  </data>"));
+  </data>"),
+                    Path.Combine(baseDir.Path, nameof(LoadsStringFromFileRefAsStringWithShiftJISEncoding) + ".resx"),
+                    useRelativePath: true);
 
-            resxWithLinkedString.ShouldBe(new[] { new StringResource("TextFile1", "ハローワールド！", null) });
+                resxWithLinkedString.ShouldBe(new[] { new StringResource("TextFile1", JapaneseString, null) });
+            }
         }
 
         [Fact]
