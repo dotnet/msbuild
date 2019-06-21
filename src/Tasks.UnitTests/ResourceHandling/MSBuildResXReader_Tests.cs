@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
     <comment>Comment</comment>
   </data>"));
 
-            resxWithSingleString.ShouldBe(new[] { new StringResource("StringResource", "StringValue", null) });
+            AssertSingleStringResource(resxWithSingleString, "StringResource", "StringValue");
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
     <value>StringValue</value>
   </data>"));
 
-            resxWithSingleString.ShouldBe(new[] { new StringResource("StringResource", "StringValue", null) });
+            AssertSingleStringResource(resxWithSingleString, "StringResource", "StringValue");
         }
 
 
@@ -64,11 +64,15 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
     <value>2StringValue2</value>
   </data>"));
 
-            resxWithTwoStrings.ShouldBe(
-                new[] {
-                    new StringResource("StringResource", "StringValue", null),
-                    new StringResource("2StringResource2", "2StringValue2", null),
-                });
+            resxWithTwoStrings.Count.ShouldBe(2);
+
+            resxWithTwoStrings[0].Name.ShouldBe("StringResource");
+            resxWithTwoStrings[0].ShouldBeOfType<StringResource>()
+                .Value.ShouldBe("StringValue");
+
+            resxWithTwoStrings[1].Name.ShouldBe("2StringResource2");
+            resxWithTwoStrings[1].ShouldBeOfType<StringResource>()
+                .Value.ShouldBe("2StringValue2");
         }
 
         [Fact]
@@ -83,7 +87,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
     <value>ResourceHandling\TextFile1.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>"));
 
-            resxWithLinkedString.ShouldBe(new[] { new StringResource("TextFile1", "Contents of TextFile1", null) });
+            AssertSingleStringResource(resxWithLinkedString, "TextFile1", "Contents of TextFile1");
         }
 
         [Fact]
@@ -115,8 +119,18 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     Path.Combine(baseDir.Path, nameof(LoadsStringFromFileRefAsStringWithShiftJISEncoding) + ".resx"),
                     useRelativePath: true);
 
-                resxWithLinkedString.ShouldBe(new[] { new StringResource("TextFile1", JapaneseString, null) });
+                AssertSingleStringResource(resxWithLinkedString, "TextFile1", JapaneseString);
             }
+        }
+
+        private static void AssertSingleStringResource(IReadOnlyList<IResource> resources, string name, string value)
+        {
+            resources.ShouldHaveSingleItem();
+
+            resources[0].Name.ShouldBe(name);
+
+            resources[0].ShouldBeOfType<StringResource>()
+                .Value.ShouldBe(value);
         }
 
         [Fact]
