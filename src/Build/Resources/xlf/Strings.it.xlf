@@ -67,6 +67,11 @@
         <target state="translated">MSB4257: il file della cache dei risultati di output specificato è vuoto.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentVariableRead">
+        <source>MSB4262: Read environment variable "{0}"</source>
+        <target state="new">MSB4262: Read environment variable "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: durante la lettura dei file della cache dei risultati di input dal percorso "{0}" è stato rilevato un errore: {1}</target>
@@ -151,6 +156,11 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UninitializedPropertyRead">
+        <source>MSB4261: Read uninitialized property "{0}"</source>
+        <target state="new">MSB4261: Read uninitialized property "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>

@@ -745,7 +745,7 @@
   </data>
   <data name="PropertyNameInRegistryHasZeroLength" UESanitized="false" Visibility="Public">
     <value>MSB4148: The name of a property stored under the registry key "{0}" has zero length.</value>
-    <comment>{StrBegin="MSB4148: "}</comment>
+    <comment>{StrBegin="MSB4148: "}</comment> 
   </data>
   <data name="PropertyReassignment" UESanitized="false" Visibility="Public">
     <value>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</value>

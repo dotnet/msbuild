@@ -67,6 +67,11 @@
         <target state="translated">MSB4257: 지정한 출력 결과 캐시 파일이 비어 있습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentVariableRead">
+        <source>MSB4262: Read environment variable "{0}"</source>
+        <target state="new">MSB4262: Read environment variable "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: "{0}" 경로에서 입력 결과 캐시 파일을 읽는 중 오류가 발생했습니다. {1}</target>
@@ -151,6 +156,11 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UninitializedPropertyRead">
+        <source>MSB4261: Read uninitialized property "{0}"</source>
+        <target state="new">MSB4261: Read uninitialized property "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
