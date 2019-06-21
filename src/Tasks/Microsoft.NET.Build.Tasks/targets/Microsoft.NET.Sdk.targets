@@ -84,6 +84,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UserProfileRuntimeStorePath Condition="'$(UserProfileRuntimeStorePath)' == ''">$(_DefaultUserProfileRuntimeStorePath)</UserProfileRuntimeStorePath>
   </PropertyGroup>
 
+  <!-- Opt into .NET Core resource-serialization strategy by default when targeting frameworks
+       that support it by default.
+       -->
+  <PropertyGroup>
+    <GenerateResourceUsePreserializedResources
+      Condition="'$(GenerateResourceUsePreserializedResources)' == '' and
+                 ('$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.0')">true</GenerateResourceUsePreserializedResources>
+  </PropertyGroup>
+
   <PropertyGroup>
     <CoreBuildDependsOn>
       _CheckForBuildWithNoBuild;
