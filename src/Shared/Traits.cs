@@ -79,6 +79,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
+        /// <summary>
+        /// Log property tracking information.
+        /// </summary>
+        public bool LogPropertyTracking => Environment.GetEnvironmentVariable("MsBuildLogPropertyTracking") == "1";
+
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)

@@ -662,55 +662,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Log when a property is being assigned a new value.
-        /// </summary>
-        [Fact]
-        public void LogPropertyAssignments()
-        {
-            string testtargets = ObjectModelHelpers.CleanupFileContents(@"
-                                <Project xmlns='msbuildnamespace'>
-                                     <PropertyGroup>
-                                         <Prop>OldValue</Prop>
-                                         <Prop>NewValue</Prop>
-                                     </PropertyGroup>
-
-                                  <Target Name=""Test""/>
-                                </Project>");
-
-            string tempPath = Path.GetTempPath();
-            string targetDirectory = Path.Combine(tempPath, "LogPropertyAssignments");
-            string testTargetPath = Path.Combine(targetDirectory, "test.proj");
-
-            bool originalValue = BuildParameters.WarnOnUninitializedProperty;
-            try
-            {
-                BuildParameters.WarnOnUninitializedProperty = true;
-                Directory.CreateDirectory(targetDirectory);
-                File.WriteAllText(testTargetPath, testtargets);
-
-                MockLogger logger = new MockLogger();
-                logger.Verbosity = LoggerVerbosity.Diagnostic;
-                ProjectCollection pc = new ProjectCollection();
-                pc.RegisterLogger(logger);
-                Project project = pc.LoadProject(testTargetPath);
-
-                bool result = project.Build();
-                Assert.True(result);
-                logger.AssertLogContains("Evaluation started");
-                logger.AssertLogContains("Property reassignment");
-                logger.AssertLogContains("Evaluation finished");
-                logger.AssertLogContains("Prop");
-                logger.AssertLogContains("OldValue");
-                logger.AssertLogContains("NewValue");
-            }
-            finally
-            {
-                BuildParameters.WarnOnUninitializedProperty = originalValue;
-                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
-            }
-        }
-
-        /// <summary>
         /// If we use a property twice make sure we warn and don't crash due to the dictionary which is holding the used but uninitialized variables..
         /// </summary>
         [Fact]
@@ -4551,6 +4502,76 @@ namespace Microsoft.Build.UnitTests.Evaluation
             project.Build(logger);
             logger.AssertLogContains(
                 ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OM_GlobalProperty", "Foo"));
+        }
+
+        [Fact]
+        public void VerifyPropertyTrackingLogging()
+        {
+           string testtargets = ObjectModelHelpers.CleanupFileContents(@"
+                                <Project>
+                                     <PropertyGroup>
+                                         <Prop>$(DOES_NOT_EXIST)</Prop>
+                                         <EnvVar>$(PATH)</EnvVar>
+                                         <LocalAppData>Overwritten!</LocalAppData>
+                                         <NotEnvVarRead>$(LocalAppData)</NotEnvVarRead>
+                                         <Prop2>Value1</Prop2>
+                                         <Prop2>Value2</Prop2>
+                                     </PropertyGroup>
+                                     <Target Name='Build' />
+                                </Project>");
+
+            string tempPath = Path.GetTempPath();
+            string targetDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            string testTargetPath = Path.Combine(targetDirectory, "test.proj");
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildLogPropertyTracking", "1");
+
+                try
+                {
+                    BuildParameters.WarnOnUninitializedProperty = true;
+                    Directory.CreateDirectory(targetDirectory);
+                    File.WriteAllText(testTargetPath, testtargets);
+
+                    MockLogger logger = new MockLogger();
+                    logger.Verbosity = LoggerVerbosity.Diagnostic;
+                    ProjectCollection pc = new ProjectCollection();
+                    pc.RegisterLogger(logger);
+                    Project project = pc.LoadProject(testTargetPath);
+
+                    bool result = project.Build();
+                    Assert.True(result);
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<UninitializedPropertyReadEventArgs>()
+                        .Any(p => p.PropertyName == "DOES_NOT_EXIST")
+                        .ShouldBeTrue();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .Any(ev => ev.EnvironmentVariableName == "PATH")
+                        .ShouldBeTrue();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .Any(ev => ev.EnvironmentVariableName == "LocalAppData")
+                        .ShouldBeFalse();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .Any(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2")
+                        .ShouldBeTrue();
+                }
+                finally
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
+                }
+            }
         }
 
 #if FEATURE_HTTP_LISTENER

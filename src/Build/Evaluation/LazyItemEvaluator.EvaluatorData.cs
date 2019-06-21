@@ -297,7 +297,7 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped, predecessor);
             }
 
-            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
             {
                 return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
             }

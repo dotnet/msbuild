@@ -263,7 +263,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved);
+        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false);
 
         /// <summary>
         /// Sets a property which comes from the Xml.
