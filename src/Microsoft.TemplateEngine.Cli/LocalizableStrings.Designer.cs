@@ -10,7 +10,6 @@
 
 namespace Microsoft.TemplateEngine.Cli {
     using System;
-    using System.Reflection;
     
     
     /// <summary>
@@ -20,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class LocalizableStrings {
@@ -40,7 +39,7 @@ namespace Microsoft.TemplateEngine.Cli {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.TemplateEngine.Cli.LocalizableStrings", typeof(LocalizableStrings).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.TemplateEngine.Cli.LocalizableStrings", typeof(LocalizableStrings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -410,29 +409,11 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Apply updates ([A]ll|[N]one|[P]rompt)?.
-        /// </summary>
-        public static string AllUpdatesApplyPrompt {
-            get {
-                return ResourceManager.GetString("AllUpdatesApplyPrompt", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unable to determine the desired template from the input template name: {0}..
         /// </summary>
         public static string AmbiguousInputTemplateName {
             get {
                 return ResourceManager.GetString("AmbiguousInputTemplateName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid choice....
-        /// </summary>
-        public static string ApplyUpdatesInvalidChoiceResponse {
-            get {
-                return ResourceManager.GetString("ApplyUpdatesInvalidChoiceResponse", resourceCulture);
             }
         }
         
@@ -805,6 +786,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string Id {
             get {
                 return ResourceManager.GetString("Id", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find install descriptor for template: {0}.
+        /// </summary>
+        public static string InstallDescriptor_NotFound {
+            get {
+                return ResourceManager.GetString("InstallDescriptor_NotFound", resourceCulture);
             }
         }
         
@@ -1299,6 +1289,60 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t find an installed template that matches the input, searching online for one that does....
+        /// </summary>
+        public static string SearchingOnlineNotification {
+            get {
+                return ResourceManager.GetString("SearchingOnlineNotification", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to         dotnet {0} -i {1}.
+        /// </summary>
+        public static string SearchResultInstallCommand {
+            get {
+                return ResourceManager.GetString("SearchResultInstallCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     To use this template, run the following command and try again:.
+        /// </summary>
+        public static string SearchResultInstallHeader {
+            get {
+                return ResourceManager.GetString("SearchResultInstallHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ...No matches found.
+        /// </summary>
+        public static string SearchResultNoMatches {
+            get {
+                return ResourceManager.GetString("SearchResultNoMatches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Matches from template source: {0}.
+        /// </summary>
+        public static string SearchResultSourceIndicator {
+            get {
+                return ResourceManager.GetString("SearchResultSourceIndicator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template name &quot;{0}&quot; ({1}) from author &quot;{2}&quot; in pack {3}.
+        /// </summary>
+        public static string SearchResultTemplateInfo {
+            get {
+                return ResourceManager.GetString("SearchResultTemplateInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit&apos; flag.
         /// </summary>
         public static string SettingsReadError {
@@ -1349,15 +1393,6 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches {
             get {
                 return ResourceManager.GetString("SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} : update ([Y]es|[N]o)?.
-        /// </summary>
-        public static string SingleUpdateApplyPrompt {
-            get {
-                return ResourceManager.GetString("SingleUpdateApplyPrompt", resourceCulture);
             }
         }
         
@@ -1470,6 +1505,24 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Details:.
+        /// </summary>
+        public static string UninstallListDetailsHeader {
+            get {
+                return ResourceManager.GetString("UninstallListDetailsHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstall Command:.
+        /// </summary>
+        public static string UninstallListUninstallCommand {
+            get {
+                return ResourceManager.GetString("UninstallListUninstallCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown Change.
         /// </summary>
         public static string UnknownChangeKind {
@@ -1479,11 +1532,65 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An update for {0} is available....
+        ///   Looks up a localized string similar to Check the currently installed template packs for update, and install the updates..
+        /// </summary>
+        public static string UpdateApplyCommandHelp {
+            get {
+                return ResourceManager.GetString("UpdateApplyCommandHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updating....
+        /// </summary>
+        public static string UpdateApplyStartMessage {
+            get {
+                return ResourceManager.GetString("UpdateApplyStartMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ...Update succeeded.
+        /// </summary>
+        public static string UpdateApplySuccessMessage {
+            get {
+                return ResourceManager.GetString("UpdateApplySuccessMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An update for template pack {0} is available..
         /// </summary>
         public static string UpdateAvailable {
             get {
                 return ResourceManager.GetString("UpdateAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     install command: dotnet {0} -i {1}.
+        /// </summary>
+        public static string UpdateCheck_InstallCommand {
+            get {
+                return ResourceManager.GetString("UpdateCheck_InstallCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occured checking for updates for template pack {0}.
+        /// </summary>
+        public static string UpdateCheck_UnknownError {
+            get {
+                return ResourceManager.GetString("UpdateCheck_UnknownError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check the currently installed template packs for updates..
+        /// </summary>
+        public static string UpdateCheckCommandHelp {
+            get {
+                return ResourceManager.GetString("UpdateCheckCommandHelp", resourceCulture);
             }
         }
         

@@ -120,6 +120,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             Dictionary<string, string> templateParamValues = new Dictionary<string, string>();
             Dictionary<string, IList<string>> remainingParams = new Dictionary<string, IList<string>>();
 
+            Dictionary<string, string> overrideToCanonicalMap = hostSpecificTemplateData.LongNameOverrides.ToDictionary(o => o.Value, o => o.Key);
+            foreach (KeyValuePair<string, string> shortNameOverride in hostSpecificTemplateData.ShortNameOverrides)
+            {
+                overrideToCanonicalMap[shortNameOverride.Value] = shortNameOverride.Key;
+            }
+
             foreach (KeyValuePair<string, string> inputParam in _rawParameterInputs)
             {
                 ITemplateParameter matchedParam = default(ITemplateParameter);
@@ -132,6 +138,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
                 if (matchedParam != default(ITemplateParameter))
                 {
                     templateParamValues.Add(inputParam.Key, inputParam.Value);
+                }
+                else if (overrideToCanonicalMap.TryGetValue(inputParam.Key, out string canonical))
+                {
+                    templateParamValues.Add(canonical, inputParam.Value);
                 }
                 else
                 {

@@ -49,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli
         public static IReadOnlyList<string> GetInvalidParameterNames(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Where(x => x.Kind == MatchKind.InvalidParameterName)
-                                                   .Select(x => x.ChoiceIfLocationIsOtherChoice).ToList();
+                                                   .Select(x => x.InputParameterName).ToList();
         }
 
         public static bool HasParseError(this ITemplateMatchInfo templateMatchInfo)
@@ -66,7 +66,7 @@ namespace Microsoft.TemplateEngine.Cli
         public static IReadOnlyDictionary<string, string> GetValidTemplateParameters(this ITemplateMatchInfo templateMatchInfo)
         { 
             return templateMatchInfo.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && (x.Kind == MatchKind.Exact || x.Kind == MatchKind.SingleStartsWith))
-                                    .ToDictionary(x => x.ChoiceIfLocationIsOtherChoice, x => x.ParameterValue);
+                                    .ToDictionary(x => x.InputParameterName, x => x.ParameterValue);
         }
 
         public static bool IsContextOnlyMatch(this ITemplateMatchInfo templateMatchInfo)
