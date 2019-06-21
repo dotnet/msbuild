@@ -13,15 +13,15 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         public LiveObjectResource(string name, object value)
         {
             Name = name;
-            this.value = value;
+            Value = value;
         }
 
         public string Name { get; }
-        public object value;
+        public object Value { get; }
 
         public void AddTo(IResourceWriter writer)
         {
-            writer.AddResource(Name, value);
+            writer.AddResource(Name, Value);
         }
     }
 }

@@ -3752,7 +3752,7 @@ namespace Microsoft.Build.Tasks
                 foreach (LiveObjectResource entry in reader.resources)
                 {
                     String key = entry.Name;
-                    Object v = entry.value;
+                    Object v = entry.Value;
                     String value = v as String;
                     if (value == null)
                     {
