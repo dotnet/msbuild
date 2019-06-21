@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
     [Trait("Category", "mono-osx-failing")]
     [Trait("Category", "mono-windows-failing")]
-    public sealed class RequiredTransformations
+    public sealed class RequiredTransformations : IDisposable
     {
         private readonly TestEnvironment _env;
         private readonly ITestOutputHelper _output;
@@ -29,6 +29,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         {
             _env = TestEnvironment.Create(output);
             _output = output;
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
         }
 
         /// <summary>
