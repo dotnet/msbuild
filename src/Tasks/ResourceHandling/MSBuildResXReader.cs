@@ -23,28 +23,35 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             var resources = new List<IResource>();
             var aliases = new Dictionary<string, string>();
 
-            using (var xmlReader = new XmlTextReader(s))
+            try
             {
-                xmlReader.WhitespaceHandling = WhitespaceHandling.None;
-
-                XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
-                foreach (XElement elem in doc.Element("root").Elements())
+                using (var xmlReader = new XmlTextReader(s))
                 {
-                    switch (elem.Name.LocalName)
+                    xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+
+                    XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
+                    foreach (XElement elem in doc.Element("root").Elements())
                     {
-                        case "assembly":
-                            ParseAssemblyAlias(aliases, elem);
-                            break;
-                        case "resheader":
-                            break;
-                        case "data":
-                            ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem);
-                            break;
+                        switch (elem.Name.LocalName)
+                        {
+                            case "assembly":
+                                ParseAssemblyAlias(aliases, elem);
+                                break;
+                            case "resheader":
+                                break;
+                            case "data":
+                                ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem);
+                                break;
+                        }
                     }
                 }
-            }
 
-            return resources;
+                return resources;
+            }
+            catch (Exception e)
+            {
+                throw new MSBuildResXException("Error reading resx", e);
+            }
         }
 
         private static void ParseAssemblyAlias(Dictionary<string,string> aliases, XElement elem)

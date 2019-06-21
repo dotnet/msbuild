@@ -1557,7 +1557,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e)  // Catching Exception, but rethrowing unless it's a well-known exception.
             {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(e))
+                if (ExceptionHandling.NotExpectedIoOrXmlException(e) && !(e is MSBuildResXException))
                 {
                     throw;
                 }
@@ -2637,6 +2637,12 @@ namespace Microsoft.Build.Tasks
             try
             {
                 ReadResources(inFile, _useSourcePath, outFileOrDir);
+            }
+            catch (MSBuildResXException msbuildResXException)
+            {
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                    "General.InvalidResxFile", msbuildResXException.InnerException.ToString());
+                return false;
             }
             catch (ArgumentException ae)
             {
