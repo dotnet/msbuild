@@ -3060,17 +3060,7 @@ namespace Microsoft.Build.Tasks
                         {
                             if (Traits.Instance.EscapeHatches.UseMinimalResxParsingInCoreScenarios)
                             {
-                                using (var xmlReader = new XmlTextReader(filename))
-                                {
-                                    xmlReader.WhitespaceHandling = WhitespaceHandling.None;
-                                    XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
-                                    foreach (XElement dataElem in doc.Element("root").Elements("data"))
-                                    {
-                                        string name = dataElem.Attribute("name").Value;
-                                        string value = dataElem.Element("value").Value;
-                                        AddResource(reader, name, value, filename);
-                                    }
-                                }
+                                AddResourcesUsingMinimalCoreResxParsing(filename, reader);
                             }
                             else
                             {
@@ -3096,6 +3086,24 @@ namespace Microsoft.Build.Tasks
                         return;
                 }
                 _logger.LogMessageFromResources(MessageImportance.Low, "GenerateResource.ReadResourceMessage", reader.resources.Count, filename);
+            }
+        }
+
+        /// <summary>
+        /// Legacy Core implementation of string-only ResX handling
+        /// </summary>
+        private void AddResourcesUsingMinimalCoreResxParsing(string filename, ReaderInfo reader)
+        {
+            using (var xmlReader = new XmlTextReader(filename))
+            {
+                xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+                XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
+                foreach (XElement dataElem in doc.Element("root").Elements("data"))
+                {
+                    string name = dataElem.Attribute("name").Value;
+                    string value = dataElem.Element("value").Value;
+                    AddResource(reader, name, value, filename);
+                }
             }
         }
 
