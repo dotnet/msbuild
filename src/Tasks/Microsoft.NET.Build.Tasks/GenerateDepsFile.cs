@@ -52,7 +52,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public bool IncludeMainProject { get; set; }
 
-
         public ITaskItem[] ReferencePaths { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem[] ReferenceDependencyPaths { get; set; } = Array.Empty<ITaskItem>();
@@ -61,14 +60,9 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] ReferenceAssemblies { get; set; } = Array.Empty<ITaskItem>();
 
-        [Required]
-        public ITaskItem[] FilesToSkip { get; set; }
-
         public ITaskItem[] RuntimePackAssets { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem CompilerOptions { get; set; }
-
-        public ITaskItem[] ExcludeFromOutputPackageReferences { get; set; }
 
         public ITaskItem[] RuntimeStorePackages { get; set; }
 
@@ -138,8 +132,6 @@ namespace Microsoft.NET.Build.Tasks
                 ReferenceDependencyPaths,
                 ReferenceSatellitePaths);
 
-            IEnumerable<string> excludeFromOutputPackageIds = PackageReferenceConverter.GetPackageIds(ExcludeFromOutputPackageReferences);
-
             IEnumerable<RuntimePackAssetInfo> runtimePackAssets =
                 IsSelfContained ? RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item)) : Enumerable.Empty<RuntimePackAssetInfo>();
 
@@ -159,7 +151,6 @@ namespace Microsoft.NET.Build.Tasks
                 .WithDirectReferences(directReferences)
                 .WithDependencyReferences(dependencyReferences)
                 .WithReferenceProjectInfos(referenceProjects)
-                .WithExcludeFromOutput(excludeFromOutputPackageIds)
                 .WithRuntimePackAssets(runtimePackAssets)
                 .WithCompilationOptions(compilationOptions)
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())

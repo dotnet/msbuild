@@ -57,7 +57,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       AssemblyVersion="_"
       AssetsFilePath="$(ProjectAssetsFile)"
       DepsFilePath="$(_DesignerDepsFilePath)"
-      FilesToSkip="@(_ConflictPackageFiles)"
       IncludeMainProject="false"
       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
       IsSelfContained="false"
