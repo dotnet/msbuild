@@ -95,6 +95,10 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
+            //  Add some package references to test more code paths (such as in ResolvePackageAssets)
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(p =>
                 {

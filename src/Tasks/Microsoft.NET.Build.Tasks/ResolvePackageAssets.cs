@@ -636,6 +636,8 @@ namespace Microsoft.NET.Build.Tasks
 
             public bool CanWriteToCacheFile { get; set; }
 
+            private bool MismatchedAssetsFile => !CanWriteToCacheFile;
+
             private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
             public CacheWriter(ResolvePackageAssets task)
@@ -681,7 +683,12 @@ namespace Microsoft.NET.Build.Tasks
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
                 _bufferedMetadata = new List<int>();
-                ComputePackageExclusions();
+
+                //  If the assets file doesn't match the inputs, don't bother trying to compute package exclusions
+                if (!MismatchedAssetsFile)
+                {
+                    ComputePackageExclusions();
+                }
             }
 
             public void WriteToCacheFile()
