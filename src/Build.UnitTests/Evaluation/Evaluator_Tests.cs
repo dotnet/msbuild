@@ -506,9 +506,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string testTargetPath = Path.Combine(targetDirectory, "test.proj");
 
             string originalValue = Environment.GetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY");
+            bool originalValue2 = BuildParameters.WarnOnUninitializedProperty;
+
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY", null);
+                BuildParameters.WarnOnUninitializedProperty = false;
                 Directory.CreateDirectory(targetDirectory);
                 File.WriteAllText(testTargetPath, testtargets);
 
@@ -524,6 +527,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 Environment.SetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY", originalValue);
+                BuildParameters.WarnOnUninitializedProperty = originalValue2;
                 FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
             }
         }
