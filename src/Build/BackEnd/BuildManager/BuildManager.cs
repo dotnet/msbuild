@@ -756,6 +756,11 @@ namespace Microsoft.Build.Execution
                     Debug.Assert(allMismatchedProjectStartedEventsDueToLoggerErrors, "There was a mismatched project started event not caused by an exception result");
                 }
 #endif
+
+                if (!_buildParameters.CacheBuildResults)
+                {
+                    _resultsCache.ClearResults();
+                }
             }
             finally
             {

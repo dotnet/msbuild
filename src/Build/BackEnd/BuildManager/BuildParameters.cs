@@ -216,6 +216,11 @@ namespace Microsoft.Build.Execution
         private string _outputResultsCacheFile;
 
         /// <summary>
+        /// Whether the build results should be cached for this build after the build ends.
+        /// </summary>
+        private bool _cacheBuildResults = true;
+
+        /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
         public BuildParameters()
@@ -761,6 +766,15 @@ namespace Microsoft.Build.Execution
         {
             get => _outputResultsCacheFile;
             set => _outputResultsCacheFile = value;
+        }
+
+        /// <summary>
+        /// Determines whether MSBuild will cache the results of builds after EndBuild to speed up future builds.
+        /// </summary>
+        public bool CacheBuildResults
+        {
+            get => _cacheBuildResults;
+            set => _cacheBuildResults = value;
         }
 
         /// <summary>

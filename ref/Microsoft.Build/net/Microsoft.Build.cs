@@ -946,6 +946,7 @@ namespace Microsoft.Build.Execution
         public BuildParameters(Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.IDictionary<string, string> BuildProcessEnvironment { get { throw null; } }
         public System.Threading.ThreadPriority BuildThreadPriority { get { throw null; } set { } }
+        public bool CacheBuildResults { get { throw null; } set { } }
         public System.Globalization.CultureInfo Culture { get { throw null; } set { } }
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DetailedSummary { get { throw null; } set { } }
