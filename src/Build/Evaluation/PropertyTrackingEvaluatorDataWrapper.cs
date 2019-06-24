@@ -39,8 +39,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluationLoggingContext">The <see cref="EvaluationLoggingContext"/> used to log relevant events.</param>
         public PropertyTrackingEvaluatorDataWrapper(IEvaluatorData<P, I, M, D> dataToWrap, EvaluationLoggingContext evaluationLoggingContext)
         {
-            _wrapped = dataToWrap ?? throw new ArgumentNullException(nameof(dataToWrap));
-            _evaluationLoggingContext = evaluationLoggingContext ?? throw new ArgumentNullException(nameof(evaluationLoggingContext));
+            ErrorUtilities.VerifyThrowInternalNull(dataToWrap, nameof(dataToWrap));
+            ErrorUtilities.VerifyThrowInternalNull(evaluationLoggingContext, nameof(evaluationLoggingContext));
+
+            _wrapped = dataToWrap;
+            _evaluationLoggingContext = evaluationLoggingContext;
         }
 
         #region IEvaluatorData<> members with tracking-related code in them.
