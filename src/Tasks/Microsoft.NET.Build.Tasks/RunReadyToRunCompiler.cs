@@ -20,6 +20,10 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem CompilationEntry { get; set; }
         [Required]
         public ITaskItem[] ImplementationAssemblies { get; set; }
+        public bool ShowCompilerWarnings { get; set; }
+
+        [Output]
+        public bool WarningsDetected { get; set; }
 
         private string _crossgenPath;
         private string _clrjitPath;
@@ -224,7 +228,22 @@ namespace Microsoft.NET.Build.Tasks
             // '/out' parameter has to have an existing directory.
             Directory.CreateDirectory(Path.GetDirectoryName(_outputR2RImage));
 
+            WarningsDetected = false;
+
             return base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
+        }
+
+        protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
+        {
+            if (!ShowCompilerWarnings && singleLine.IndexOf("warning:", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                Log.LogMessage(MessageImportance.Normal, singleLine);
+                WarningsDetected = true;
+            }
+            else
+            {
+                base.LogEventsFromTextOutput(singleLine, messageImportance);
+            }
         }
     }
 }

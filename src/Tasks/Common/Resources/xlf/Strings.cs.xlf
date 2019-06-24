@@ -426,6 +426,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1096: Nepovedlo se optimalizovat sestavení pro výkonnost. Můžete buď vyloučit neúspěšná sestavení z optimalizace, nebo nastavit vlastnost PublishReadyToRun na false.</target>
         <note>{StrBegin="NETSDK1096: "}</note>
       </trans-unit>
+      <trans-unit id="ReadyToRunCompilationHasWarnings_Info">
+        <source>Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</source>
+        <target state="new">Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
         <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
         <target state="translated">NETSDK1094: Nepovedlo se optimalizovat sestavení pro výkonnost: nenašel se platný balíček modulu runtime. Buď nastavte vlastnost PublishReadyToRun na false, nebo při publikování použijte podporovaný identifikátor modulu runtime.</target>

@@ -533,4 +533,7 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</value>
     <comment>{StrBegin="NETSDK1106: "}</comment>
   </data>
+  <data name="ReadyToRunCompilationHasWarnings_Info" xml:space="preserve">
+    <value>Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</value>
+  </data>
 </root>
