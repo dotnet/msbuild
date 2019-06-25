@@ -267,12 +267,8 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Sets a property which comes from the Xml.
-        /// Predecessor is any immediately previous property that was overridden by this one during evaluation.
-        /// This would include all properties with the same name that lie above in the logical
-        /// project file, and whose conditions evaluated to true.
-        /// If there are none above this is null.
         /// </summary>
-        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, P predecessor);
+        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped);
 
         /// <summary>
         /// Retrieves an existing target, if any.

@@ -1401,11 +1401,7 @@ namespace Microsoft.Build.Evaluation
 
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = null;
 
-                P property = _data.SetProperty(
-                    propertyElement,
-                    evaluatedValue,
-                    // If we're tracking property usage, don't first do a get here. The tracker will give false "uninitialized property read" events.
-                    Traits.Instance.LogPropertyTracking ? null : _data.GetProperty(propertyElement.Name));
+                _data.SetProperty(propertyElement, evaluatedValue);
             }
         }
 

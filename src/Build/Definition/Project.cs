@@ -3383,13 +3383,10 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Sets a property derived from Xml.
-            /// Predecessor is any immediately previous property that was overridden by this one during evaluation.
-            /// This would include all properties with the same name that lie above in the logical
-            /// project file, and whose conditions evaluated to true.
-            /// If there are none above this is null.
             /// </summary>
-            public ProjectProperty SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, ProjectProperty predecessor)
+            public ProjectProperty SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
             {
+                ProjectProperty predecessor = GetProperty(propertyElement.Name);
                 ProjectProperty property = ProjectProperty.Create(Project, propertyElement, evaluatedValueEscaped, predecessor);
                 Properties.Set(property);
 

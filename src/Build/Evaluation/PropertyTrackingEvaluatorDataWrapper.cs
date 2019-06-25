@@ -105,10 +105,10 @@ namespace Microsoft.Build.Evaluation
         /// project file, and whose conditions evaluated to true.
         /// If there are none above this is null.
         /// </summary>
-        public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, P predecessor)
+        public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
         {
-            P originalProperty = predecessor ?? _wrapped.GetProperty(propertyElement.Name);
-            P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped, originalProperty);
+            P originalProperty = _wrapped.GetProperty(propertyElement.Name);
+            P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped);
 
             this.TrackPropertyReassignment(originalProperty, newProperty, propertyElement.Location.LocationString);
 
