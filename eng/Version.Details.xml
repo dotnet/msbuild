@@ -5,9 +5,9 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>cd8a65408312bf4a92de7e97948782f9f88471e6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview7.19324.5">
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview7.19324.6">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>151ae526610a6a32efb09aee8cd7b3960a6f5aa8</Sha>
+      <Sha>b31bdd43738a55e10bb38336406ee0db56c66b44</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
