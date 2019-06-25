@@ -1274,7 +1274,7 @@ namespace Microsoft.NET.Build.Tasks
                     shouldIncludeInPublish = false;
                 }
 
-                if (shouldCopyLocal == false && shouldIncludeInPublish == false)
+                if (!shouldCopyLocal&& !shouldIncludeInPublish)
                 {
                     return false;
                 }

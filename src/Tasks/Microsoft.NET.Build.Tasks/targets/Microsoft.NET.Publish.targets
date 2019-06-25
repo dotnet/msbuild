@@ -744,7 +744,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_ComputeUseBuildDependencyFile"
           DependsOnTargets="_ComputePackageReferencePublish;
                             _ParseTargetManifestFiles">
-    <!-- If there are no runtime store packages, and we are not linking, then we can reuse the deps file from the build, -->
+    <!-- Check to see whether we can re-use the .deps.json file from the build for publish, or whether we have to
+         generate a different one. -->
     <PropertyGroup>
       <_UseBuildDependencyFile Condition="'@(_ExcludeFromPublishPackageReference)' == '' and
                                           '@(RuntimeStorePackages)' == '' and
