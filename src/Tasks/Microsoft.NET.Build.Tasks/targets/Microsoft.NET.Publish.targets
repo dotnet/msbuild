@@ -816,9 +816,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RuntimeTargetsCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
       <RuntimePackAsset Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
 
-      <_ResolvedNuGetFilesForPublish Include="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)" />
+      <_ResolvedNuGetFilesForPublish Include="@(NativeCopyLocalItems)" Condition="'%(NativeCopyLocalItems.CopyToPublishDirectory)' != 'false'" />
+      <_ResolvedNuGetFilesForPublish Include="@(ResourceCopyLocalItems)" Condition="'%(ResourceCopyLocalItems.CopyToPublishDirectory)' != 'false'" />
+      <_ResolvedNuGetFilesForPublish Include="@(RuntimeCopyLocalItems)" Condition="'%(RuntimeCopyLocalItems.CopyToPublishDirectory)' != 'false'" />
       <_ResolvedNuGetFilesForPublish Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
-      <_ResolvedNuGetFilesForPublish Remove="@(_ResolvedNuGetFilesForPublish)" Condition="'%(_ResolvedNuGetFilesForPublish.CopyToPublishDirectory)' == 'false'" />
     </ItemGroup>
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
