@@ -237,21 +237,11 @@ namespace Microsoft.NET.Build.Tasks
 
             reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
             reference.SetMetadata(MetadataKeys.Private, "false");
-            reference.SetMetadata("Visible", "false");
             reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.PackageName));
             reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.PackageVersion));
 
-            //  TODO: Once we work out what metadata we should use here to display these references grouped under the targeting pack
-            //  in solution explorer, set that metadata here.These metadata values are based on what PCLs were using.
-            //  https://github.com/dotnet/sdk/issues/2802
-            reference.SetMetadata("WinMDFile", "false");
-            reference.SetMetadata("ReferenceGroupingDisplayName", targetingPack.ItemSpec);
-            reference.SetMetadata("ReferenceGrouping", targetingPack.ItemSpec);
-            reference.SetMetadata("ResolvedFrom", "TargetingPack");
-            reference.SetMetadata("IsSystemReference", "true");
-
-            reference.SetMetadata("FrameworkName", targetingPack.ItemSpec);
-            reference.SetMetadata("FrameworkVersion", targetingPack.GetMetadata(MetadataKeys.PackageVersion));
+            reference.SetMetadata("FrameworkReferenceName", targetingPack.ItemSpec);
+            reference.SetMetadata("FrameworkReferenceVersion", targetingPack.GetMetadata(MetadataKeys.PackageVersion));
             
             return reference;
         }
