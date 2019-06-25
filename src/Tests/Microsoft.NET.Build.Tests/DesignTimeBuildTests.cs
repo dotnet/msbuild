@@ -50,6 +50,7 @@ namespace Microsoft.NET.Build.Tests
             var projectDirectory = Path.Combine(testAsset.TestRoot, relativeProjectPath);
 
             var command = new MSBuildCommand(Log, "ResolveAssemblyReferencesDesignTime", projectDirectory);
+            command.WorkingDirectory = projectDirectory;
             var result = command.Execute(args);
 
             result.Should().Pass();
@@ -172,7 +173,9 @@ namespace Microsoft.NET.Build.Tests
                 "/t:CollectUpToDateCheckBuiltDesignTime;CollectPackageDownloads;ResolveAssemblyReferencesDesignTime",
                 "/t:CollectAnalyzersDesignTime;CollectSDKReferencesDesignTime;CollectUpToDateCheckInputDesignTime",
                 "/t:CollectUpToDateCheckOutputDesignTime;ResolvePackageDependenciesDesignTime;CompileDesignTime",
-                "/t:CollectResolvedCompilationReferencesDesignTime",
+                "/t:CollectResolvedCompilationReferencesDesignTime;ResolveFrameworkReferences",
+                //  Set targeting pack folder to nonexistant folder so the project won't use installed targeting packs
+                "/p:NetCoreTargetingPackRoot=" + Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()),
                 "/bl:designtime.binlog"
             };
 
