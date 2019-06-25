@@ -231,6 +231,22 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         }
 
         [Fact]
+        public void GivenInvalidJsonIntergerManifestFileItThrows()
+        {
+            _fileSystem.File.WriteAllText(
+                Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonInvalidJsonInterger);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(_testDirectoryRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            Action a = () => toolManifest.Find();
+
+            a.ShouldThrow<ToolManifestException>();
+        }
+
+        [Fact]
         public void GivenConflictedManifestFileInDifferentDirectoriesItReturnMergedContent()
         {
             var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
@@ -843,6 +859,19 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
    }
 }";
 
+        private string _jsonInvalidJsonInterger =
+    @"{
+   ""version"":1.23,
+   ""isRoot"":true,
+   ""tools"":{
+      ""t-rex"":{
+         ""version"":""1.0.53"",
+         ""commands"":[
+            ""t-rex""
+         ]
+      }
+   }
+}";
 
     }
 }
