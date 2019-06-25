@@ -115,7 +115,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(DefaultAppHostRuntimeIdentifier)' == '' and
                             '$(RuntimeIdentifier)' == '' and
                             (('$(UseAppHost)' == 'true' and '$(ProjectDepsFilePath)' == '') or
-                            ('$(UseComHost)' == 'true' and '$(_IsExecutable)' != 'true'))">
+                            ('$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true'))">
     <DefaultAppHostRuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x64'">win-x64</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x86'">win-x86</DefaultAppHostRuntimeIdentifier>

@@ -67,7 +67,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveFrameworkReferences>
 
     <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == '' And
-                              ('$(UseAppHost)' == 'true' Or '$(UseComHost)' == 'true')">
+                              ('$(UseAppHost)' == 'true' Or '$(EnableComHosting)' == 'true')">
       <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
       <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
     </PropertyGroup>
