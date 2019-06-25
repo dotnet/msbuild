@@ -13,7 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <ResolveAssemblyReferencesDependsOn>
       $(ResolveAssemblyReferencesDependsOn);
-      ResolveTargetingPacks;
+      ResolveTargetingPackAssets;
     </ResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
 
@@ -21,6 +21,18 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="ProcessFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveAppHosts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
+  <!--
+    ============================================================
+                                        ProcessFrameworkReferences
+
+    Matches FrameworkReference items with KnownFrameworkReference items to determine the corresponding
+    targeting pack and if necessary the runtime pack.  If the packs aren't available in the NetCoreTargetingPackRoot
+    folder, then generate PackageDownload items in order to download the packs during restore.
+    
+    Also resolves app host packs in a similar fashion, and checks for duplicate FrameworkReference items.
+    ============================================================
+    -->
+  
   <Target Name="ProcessFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads">
     
     <CheckForDuplicateFrameworkReferences
@@ -122,6 +134,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <!--
+    ============================================================
+                                        AddTransitiveFrameworkReferences
+
+    Adds FrameworkReference items for shared frameworks which weren't directly referenced,
+    but were referenced transitively via a project or package reference.  NuGet writes these
+    to the assets file, and the ResolvePackageAssets target adds them to the TransitiveFrameworkReference
+    item.  Here, we add them to FrameworkReference if they aren't already referenced.
+    ============================================================
+    -->
   <Target Name="AddTransitiveFrameworkReferences" AfterTargets="ResolvePackageAssets"
           Condition="'@(TransitiveFrameworkReference)' != ''" >
 
@@ -131,52 +153,31 @@ Copyright (c) .NET Foundation. All rights reserved.
     
   </Target>
 
-  <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <UsingTask TaskName="ResolveTargetingPackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  
-  <Target Name="ResolveTargetingPacks" DependsOnTargets="ResolvePackageAssets"
-          Condition="'@(TargetingPack)' != '' Or '@(FrameworkReference)' != ''">
+  <!--
+    ============================================================
+                                        ResolveFrameworkReferences
+
+    Resolves paths to various FrameworkReference-related items (targeting packs, runtime packs,
+    app host packs).  Some of these may already have had the path set if they were in the
+    NetCoreTargetingPackRoot folder.  Others which were downloaded as NuGet packages will
+    need to have the path set here.
+    ============================================================
+    -->
+  <Target Name="ResolveFrameworkReferences" DependsOnTargets="ProcessFrameworkReferences;ResolvePackageAssets"
+          Condition="'@(FrameworkReference)' != ''">
 
     <GetPackageDirectory
       Items="@(TargetingPack)"
       PackageFolders="@(AssetsFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedTargetingPack" />
-      
-    </GetPackageDirectory>    
-    
+
+    </GetPackageDirectory>
+
     <ItemGroup>
       <ResolvedTargetingPack Condition="'%(ResolvedTargetingPack.Path)' == '' and '%(ResolvedTargetingPack.PackageDirectory)' != ''">
         <Path>%(ResolvedTargetingPack.PackageDirectory)</Path>
       </ResolvedTargetingPack>
-      
-    </ItemGroup>
-
-    <!-- For design-time builds, don't generate an error if a targeting pack isn't available (ie because it hasn't been restored yet) -->
-    <PropertyGroup Condition="'$(GenerateErrorForMissingTargetingPacks)' == ''">
-      <GenerateErrorForMissingTargetingPacks>true</GenerateErrorForMissingTargetingPacks>
-      <GenerateErrorForMissingTargetingPacks Condition="'$(DesignTimeBuild)' == 'true'">false</GenerateErrorForMissingTargetingPacks>
-    </PropertyGroup>
-
-    <ResolveTargetingPackAssets FrameworkReferences="@(FrameworkReference)"
-                                ResolvedTargetingPacks="@(ResolvedTargetingPack)"
-                                RuntimeFrameworks="@(RuntimeFramework)"
-                                GenerateErrorForMissingTargetingPacks="$(GenerateErrorForMissingTargetingPacks)">
-      <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
-      <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
-      <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
-      <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
-      <Output TaskParameter="UsedRuntimeFrameworks" ItemName="_UsedRuntimeFramework" />
-      
-    </ResolveTargetingPackAssets>
-    
-    <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(SelfContained)' != 'true'">
-      <PackageConflictPlatformManifests Include="@(PlatformManifestsFromTargetingPacks)" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <RuntimeFramework Remove="@(RuntimeFramework)" />
-      <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
     </ItemGroup>
 
     <GetPackageDirectory
@@ -206,13 +207,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_ApphostsForShimRuntimeIdentifiers Include="%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.PackageDirectory)\%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.PathInPackage)" >
         <RuntimeIdentifier>%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.RuntimeIdentifier)</RuntimeIdentifier>
-       </_ApphostsForShimRuntimeIdentifiers>
+      </_ApphostsForShimRuntimeIdentifiers>
     </ItemGroup>
 
     <ItemGroup>
       <ResolvedAppHostPack Condition="'%(ResolvedAppHostPack.Path)' == '' and '%(ResolvedAppHostPack.PackageDirectory)' != ''">
         <Path>%(ResolvedAppHostPack.PackageDirectory)\%(ResolvedAppHostPack.PathInPackage)</Path>
-      </ResolvedAppHostPack>      
+      </ResolvedAppHostPack>
     </ItemGroup>
 
     <PropertyGroup Condition="'@(ResolvedAppHostPack)' != '' And '$(AppHostSourcePath)' == ''">
@@ -229,21 +230,70 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ComHostSourcePath>@(ResolvedComHostPack->'%(Path)')</ComHostSourcePath>
     </PropertyGroup>
 
+    <GetPackageDirectory
+      Items="@(RuntimePack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedRuntimePack" />
+
+    </GetPackageDirectory>
+
+  </Target>
+
+  <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="ResolveTargetingPackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!--
+    ============================================================
+                                        ResolveTargetingPackAssets
+
+    Resolve assets (primarily references) from targeting packs.
+    ============================================================
+    -->
+  <Target Name="ResolveTargetingPackAssets" DependsOnTargets="ResolveFrameworkReferences"
+          Condition="'@(FrameworkReference)' != ''">
+
+    <!-- For design-time builds, don't generate an error if a targeting pack isn't available (ie because it hasn't been restored yet) -->
+    <PropertyGroup Condition="'$(GenerateErrorForMissingTargetingPacks)' == ''">
+      <GenerateErrorForMissingTargetingPacks>true</GenerateErrorForMissingTargetingPacks>
+      <GenerateErrorForMissingTargetingPacks Condition="'$(DesignTimeBuild)' == 'true'">false</GenerateErrorForMissingTargetingPacks>
+    </PropertyGroup>
+
+    <ResolveTargetingPackAssets FrameworkReferences="@(FrameworkReference)"
+                                ResolvedTargetingPacks="@(ResolvedTargetingPack)"
+                                RuntimeFrameworks="@(RuntimeFramework)"
+                                GenerateErrorForMissingTargetingPacks="$(GenerateErrorForMissingTargetingPacks)">
+      <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
+      <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
+      <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
+      <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
+      <Output TaskParameter="UsedRuntimeFrameworks" ItemName="_UsedRuntimeFramework" />
+      
+    </ResolveTargetingPackAssets>
+    
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(SelfContained)' != 'true'">
+      <PackageConflictPlatformManifests Include="@(PlatformManifestsFromTargetingPacks)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <RuntimeFramework Remove="@(RuntimeFramework)" />
+      <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
+    </ItemGroup>
+
   </Target>
   
   <UsingTask TaskName="ResolveRuntimePackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  
-  <Target Name="ResolveRuntimePackAssets" DependsOnTargets="ResolvePackageAssets"
-          Condition="'@(RuntimePack)' != '' And '$(DesignTimeBuild)' != 'true'">
-    
-      <GetPackageDirectory
-        Items="@(RuntimePack)"
-        PackageFolders="@(AssetsFilePackageFolder)">
 
-      <Output TaskParameter="Output" ItemName="ResolvedRuntimePack" />
-      
-    </GetPackageDirectory>    
-    
+  <!--
+    ============================================================
+                                        ResolveRuntimePackAssets
+
+    Resolve assets from runtime packs.
+    ============================================================
+    -->
+  <Target Name="ResolveRuntimePackAssets" DependsOnTargets="ResolveFrameworkReferences"
+          Condition="'@(RuntimePack)' != '' And '$(DesignTimeBuild)' != 'true'">
+        
     <ResolveRuntimePackAssets FrameworkReferences="@(FrameworkReference)"
                               ResolvedRuntimePacks="@(ResolvedRuntimePack)"
                               UnavailableRuntimePacks="@(UnavailableRuntimePack)"
