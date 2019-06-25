@@ -153,6 +153,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     
   </Target>
 
+  <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  
   <!--
     ============================================================
                                         ResolveFrameworkReferences
@@ -164,7 +166,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="ResolveFrameworkReferences" DependsOnTargets="ProcessFrameworkReferences;ResolvePackageAssets"
-          Condition="'@(FrameworkReference)' != ''">
+          Condition="'@(FrameworkReference)' != ''"
+          Returns="@(ResolvedFrameworkReference)">
 
     <GetPackageDirectory
       Items="@(TargetingPack)"
@@ -238,6 +241,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </GetPackageDirectory>
 
+    <ResolveFrameworkReferences
+      FrameworkReferences="@(FrameworkReference)"
+      ResolvedTargetingPacks="@(ResolvedTargetingPack)"
+      ResolvedRuntimePacks="@(ResolvedRuntimePack)">
+
+      <Output TaskParameter="ResolvedFrameworkReferences" ItemName="ResolvedFrameworkReference" />
+      
+    </ResolveFrameworkReferences>
+
   </Target>
 
   <UsingTask TaskName="GetPackageDirectory" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -279,7 +291,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RuntimeFramework Remove="@(RuntimeFramework)" />
       <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
     </ItemGroup>
-
   </Target>
   
   <UsingTask TaskName="ResolveRuntimePackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

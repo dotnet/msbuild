@@ -52,7 +52,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 ITaskItem targetingPack;
                 resolvedTargetingPacks.TryGetValue(frameworkReference.ItemSpec, out targetingPack);
-                string targetingPackRoot = targetingPack?.GetMetadata("Path");
+                string targetingPackRoot = targetingPack?.GetMetadata(MetadataKeys.Path);
  
                 if (string.IsNullOrEmpty(targetingPackRoot) || !Directory.Exists(targetingPackRoot))
                 {
