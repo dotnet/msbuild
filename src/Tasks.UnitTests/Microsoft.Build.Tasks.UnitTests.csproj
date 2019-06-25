@@ -99,14 +99,14 @@
     <Compile Remove="DependentAssembly_Tests.cs" />
     <Compile Remove="ErrorWarningMessage_Tests.cs" />
     <Compile Remove="FindInvalidProjectReferences_Tests.cs" />
-    <Compile Remove="GenerateResourceOutOfProc_Tests.cs" />
+    <Compile Remove="ResourceHandling\GenerateResourceOutOfProc_Tests.cs" />
+    <Compile Remove="ResourceHandling\ResGen_Tests.cs" />
+    <Compile Remove="ResourceHandling\ResGenDependencies_Tests.cs" />
     <Compile Remove="GetInstalledSDKLocations_Tests.cs" />
     <Compile Remove="GetSDKReference_Tests.cs" />
     <Compile Remove="LC_Tests.cs" />
     <Compile Remove="MockTypeInfo.cs" />
     <Compile Remove="MockTypeLib.cs" />
-    <Compile Remove="ResGen_Tests.cs" />
-    <Compile Remove="ResGenDependencies_Tests.cs" />
     <Compile Remove="AssemblyDependency\AssemblyFoldersFromConfig_Tests.cs" />
     <Compile Remove="AssemblyDependency\FilePrimary.cs" />
     <Compile Remove="AssemblyDependency\GlobalAssemblyCacheTests.cs" />
@@ -140,6 +140,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ResourceHandling\*.txt" CopyToOutputDirectory="PreserveNewest" />
     <None Update="TestResources\lorem.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

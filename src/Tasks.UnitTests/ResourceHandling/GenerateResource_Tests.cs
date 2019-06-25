@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
     [Trait("Category", "mono-osx-failing")]
     [Trait("Category", "mono-windows-failing")]
-    public sealed class RequiredTransformations
+    public sealed class RequiredTransformations : IDisposable
     {
         private readonly TestEnvironment _env;
         private readonly ITestOutputHelper _output;
@@ -29,6 +29,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         {
             _env = TestEnvironment.Create(output);
             _output = output;
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
         }
 
         /// <summary>
@@ -363,17 +368,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
-#if FEATURE_LINKED_RESOURCES
-        [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
-#endif
-        public void ForceOutOfDateLinked()
+        [Theory]
+        [MemberData(nameof(Utilities.UsePreserializedResourceStates), MemberType = typeof(Utilities))]
+        public void ForceOutOfDateLinked(bool usePreserialized)
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask(_output);
+            GenerateResource t = Utilities.CreateTask(_output, usePreserialized, _env);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
@@ -382,27 +384,29 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.ExecuteTask(t);
 
-                string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                
+                Path.GetExtension(t.OutputResources[0].ItemSpec).ShouldBe(".resources");
+                Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
+
                 Utilities.AssertStateFileWasWritten(t);
 
-                GenerateResource t2 = Utilities.CreateTask(_output);
+                GenerateResource t2 = Utilities.CreateTask(_output, usePreserialized, _env);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
-                DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
+                DateTime firstWriteTime = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 System.Threading.Thread.Sleep(200);
-                File.SetLastWriteTime(bitmap, DateTime.Now);
+                File.SetLastWriteTime(bitmap, DateTime.Now + TimeSpan.FromSeconds(2));
 
                 Utilities.ExecuteTask(t2);
 
-                Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+                File.GetLastWriteTime(t2.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstWriteTime);
 
-                // ToUpper because WriteTestResX uppercases links
-                Utilities.AssertLogContainsResource(t2, "GenerateResource.LinkedInputNewer", bitmap.ToUpper(), t2.OutputResources[0].ItemSpec);
+                Utilities.AssertLogContainsResource(
+                    t2,
+                    "GenerateResource.LinkedInputNewer",
+                    // ToUpper because WriteTestResX uppercases links
+                    NativeMethodsShared.IsWindows ? bitmap.ToUpper() : bitmap,
+                    t2.OutputResources[0].ItemSpec);
             }
             finally
             {
@@ -419,18 +423,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
-#if FEATURE_LINKED_RESOURCES
-        [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
-#endif
-        public void ForceOutOfDateLinkedByDeletion()
+        [Theory]
+        [MemberData(nameof(Utilities.UsePreserializedResourceStates), MemberType = typeof(Utilities))]
+        public void ForceOutOfDateLinkedByDeletion(bool usePreserialized)
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask(_output);
+            GenerateResource t = Utilities.CreateTask(_output, usePreserialized, _env);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+            t.UsePreserializedResources = usePreserialized;
 
             try
             {
@@ -438,23 +441,26 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.ExecuteTask(t);
 
-                string resourcesFile = t.OutputResources[0].ItemSpec;
-                Path.GetExtension(resourcesFile).ShouldBe(".resources");
-                resourcesFile = t.FilesWritten[0].ItemSpec;
-                Path.GetExtension(resourcesFile).ShouldBe(".resources");
-                
+                Path.GetExtension(t.OutputResources[0].ItemSpec).ShouldBe(".resources");
+                Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
+
                 Utilities.AssertStateFileWasWritten(t);
 
-                GenerateResource t2 = Utilities.CreateTask(_output);
+                GenerateResource t2 = Utilities.CreateTask(_output, usePreserialized, _env);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                t2.UsePreserializedResources = usePreserialized;
 
                 File.Delete(bitmap);
 
                 t2.Execute().ShouldBeFalse();
 
                 // ToUpper because WriteTestResX uppercases links
-                Utilities.AssertLogContainsResource(t2, "GenerateResource.LinkedInputDoesntExist", bitmap.ToUpper());
+                Utilities.AssertLogContainsResource(
+                    t2,
+                    "GenerateResource.LinkedInputDoesntExist",
+                    // ToUpper because WriteTestResX uppercases links
+                    NativeMethodsShared.IsWindows ? bitmap.ToUpper() : bitmap);
             }
             finally
             {
@@ -531,18 +537,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Allow ShouldRebuildResgenOutputFile to return "false" since nothing's out of date, including linked file
         /// </summary>
-#if FEATURE_RESX_RESOURCE_READER
-        [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
-#endif
-        public void AllowLinkedNoGenerate()
+        [Theory]
+        [MemberData(nameof(Utilities.UsePreserializedResourceStates), MemberType = typeof(Utilities))]
+        public void AllowLinkedNoGenerate(bool usePreserialized)
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask(_output);
+            GenerateResource t = Utilities.CreateTask(_output, usePreserialized, _env);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+            t.UsePreserializedResources = usePreserialized;
 
             try
             {
@@ -559,7 +564,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
 
-                GenerateResource t2 = Utilities.CreateTask(_output);
+                GenerateResource t2 = Utilities.CreateTask(_output, usePreserialized, _env);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
@@ -2591,9 +2596,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
-        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/677
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/microsoft/msbuild/issues/4094")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "https://github.com/Microsoft/msbuild/issues/677")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2769,9 +2773,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// Assembly.LoadFrom instead.
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
-        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/677
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/microsoft/msbuild/issues/4094")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "https://github.com/Microsoft/msbuild/issues/677")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3379,7 +3382,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// This method creates a GenerateResource task and performs basic setup on it, e.g. BuildEngine
         /// </summary>
         /// <param name="output"></param>
-        public static GenerateResource CreateTask(ITestOutputHelper output)
+        public static GenerateResource CreateTask(ITestOutputHelper output, bool usePreserialized = false, TestEnvironment env = null)
         {
             // always use the internal ctor that says don't perform separate app domain check
             GenerateResource t = new GenerateResource();
@@ -3387,6 +3390,27 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             // Make the task execute in-proc
             t.ExecuteAsTool = false;
+
+            if (usePreserialized)
+            {
+                t.UsePreserializedResources = usePreserialized;
+
+                // Synthesize a reference that looks close enough to System.Resources.Extensions
+                // to pass the "is it ok to use preserialized resources?" check
+
+                var folder = env.CreateFolder(true);
+                var dll = folder.CreateFile("System.Resource.Extensions.dll");
+
+                // Make sure the reference looks old relative to all the other inputs
+                File.SetLastWriteTime(dll.Path, DateTime.Now - TimeSpan.FromDays(30));
+
+                var referenceItem = new TaskItem(dll.Path);
+                referenceItem.SetMetadata(Tasks.ItemMetadataNames.fusionName, "System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51");
+
+                t.References = new ITaskItem[] {
+                    referenceItem
+                };
+            }
 
             return t;
         }
@@ -3751,6 +3775,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                     }
                 }
             }
+        }
+
+        public static IEnumerable<object[]> UsePreserializedResourceStates()
+        {
+            // All MSBuilds should be able to use the new resource codepaths
+            yield return new object[] { true };
+
+#if FEATURE_RESX_RESOURCE_READER
+            // But the old get-live-objects codepath is supported only on full framework.
+            yield return new object[] { false };
+#endif
         }
     }
 
