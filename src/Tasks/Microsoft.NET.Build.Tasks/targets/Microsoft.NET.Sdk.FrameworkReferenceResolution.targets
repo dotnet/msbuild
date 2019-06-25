@@ -1,6 +1,6 @@
 ﻿<!--
 ***********************************************************************************************
-Microsoft.NET.Sdk.TargetingPackResolution.targets
+Microsoft.NET.Sdk.FrameworkReferenceResolution.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
