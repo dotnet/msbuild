@@ -16,12 +16,29 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
+using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    public class BuildRequestConfiguration_Tests
+    public class BuildRequestConfiguration_Tests : IDisposable
     {
+        private TestEnvironment _env;
+
+        public BuildRequestConfiguration_Tests(ITestOutputHelper testOutput)
+        {
+            _env = TestEnvironment.Create(testOutput);
+            _env.DoNotLaunchDebugger();
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
+        }
+
         [Fact]
         public void TestConstructorNullFile()
         {
@@ -426,6 +443,93 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("TEMP", originalTemp);
                 FileUtilities.ClearCacheDirectoryPath();
             }
+        }
+
+        [Fact]
+        public void SkipIsolationChecksRejectsMissingEvaluation()
+        {
+            var configWithoutEvaluation = new BuildRequestConfiguration();
+
+            var exception = Assert.Throws<InternalErrorException>(
+                () =>
+                {
+                    configWithoutEvaluation.ShouldSkipIsolationConstraintsForReference(Path.GetFullPath("foo"));
+                });
+        }
+
+        [Fact]
+        public void SkipIsolationChecksRejectsRelativeReferencePaths()
+        {
+            var exception = Assert.Throws<InternalErrorException>(
+                () =>
+                {
+                    TestSkipIsolationConstraints("*", "build.proj", false);
+                });
+
+            exception.Message.ShouldContain("Method does not treat path normalization cases");
+        }
+
+        [Fact]
+        public void SkipIsolationConstraintsDoesNotSkipWhenItemDoesNotExist()
+        {
+            TestSkipIsolationConstraints(@"c:\*.csproj", @"c:\foo.csproj", false, "<Project></Project>");
+        }
+
+        [Theory]
+        [InlineData("", @"c:\foo", false)]
+        [InlineData("*", @"c:\foo.proj", false)] // relative glob is normalized to project directory
+        [InlineData("*", @"$(MSBuildProjectDirectory)\foo.proj", true)] // relative glob is normalized to project directory
+        [InlineData(@"c:\*.csproj", @"c:\foo.proj", false)]
+        [InlineData(@"c:\*.csproj", @"c:\foo.csproj", true)]
+        [InlineData(@"c:\*.props;c:\*.csproj", @"c:\foo.csproj", true)]
+        [InlineData(@"c:\project\*script*\**\*.proj", @"c:\foo.csproj", false)]
+        [InlineData(@"c:\project\*script*\**\*.proj", @"c:\project\scripts\a\b\build.proj", true)]
+        [InlineData(@"c:\project\script\Project*.proj", @"c:\project\script\Project.proj", true)]
+        [InlineData(@"c:\project\script\Project*.proj", @"c:\project\script\Project1.proj", true)]
+        [InlineData(@"c:\project\script\Project*.proj", @"c:\project\script\build.proj", false)]
+        public void SkipIsolationCheckShouldFilterReferencesViaMSBuildGlobs(string glob, string referencePath, bool expectedOutput)
+        {
+            TestSkipIsolationConstraints(glob, referencePath, expectedOutput);
+        }
+
+        private void TestSkipIsolationConstraints(string glob, string referencePath, bool expectedOutput, string projectContents = null)
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                glob = glob.Replace(@"c:\", "/").ToSlash();
+                referencePath = referencePath.Replace(@"c:\", "/").ToSlash();
+            }
+
+            glob = $"$([MSBuild]::Escape('{glob}'))";
+
+            projectContents = projectContents ?? $@"
+<Project>
+    <ItemGroup>
+        <{ItemTypeNames.GraphIsolationExemptReference} Include=`{glob};ShouldNotMatchAnything`/>
+    </ItemGroup>
+</Project>
+".Cleanup();
+
+            var projectCollection = _env.CreateProjectCollection().Collection;
+            var project = Project.FromXmlReader(
+                XmlReader.Create(new StringReader(projectContents)),
+                new ProjectOptions
+                {
+                    ProjectCollection = projectCollection
+                });
+
+            project.FullPath = _env.CreateFolder().Path;
+
+            var projectInstance = project.CreateProjectInstance();
+
+            var configuration = new BuildRequestConfiguration(new BuildRequestData(projectInstance, new string[] {}), MSBuildConstants.CurrentToolsVersion);
+
+            if (referencePath.Contains("$"))
+            {
+                referencePath = project.ExpandPropertyValueBestEffortLeaveEscaped(referencePath, ElementLocation.EmptyLocation);
+            }
+
+            configuration.ShouldSkipIsolationConstraintsForReference(referencePath).ShouldBe(expectedOutput);
         }
     }
 }

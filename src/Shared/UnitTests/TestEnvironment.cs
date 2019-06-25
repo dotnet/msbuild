@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private readonly List<TransientTestState> _variants = new List<TransientTestState>();
 
-        private readonly ITestOutputHelper _output;
+        public ITestOutputHelper Output { get; }
 
         private readonly Lazy<TransientTestFolder> _defaultTestDirectory;
 
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
 
         private TestEnvironment(ITestOutputHelper output)
         {
-            _output = output;
+            Output = output;
             _defaultTestDirectory = new Lazy<TransientTestFolder>(() => CreateFolder());
             SetDefaultInvariant();
         }
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Assert invariants
                 foreach (var item in _invariants)
-                    item.AssertInvariant(_output);
+                    item.AssertInvariant(Output);
             }
         }
 
@@ -294,8 +294,8 @@ namespace Microsoft.Build.UnitTests
         /// Will not work for out of proc nodes since the output writer does not reach into those
         public TransientPrintLineDebugger CreatePrintLineDebuggerWithTestOutputHelper()
         {
-            ErrorUtilities.VerifyThrowInternalNull(_output, nameof(_output));
-            return WithTransientTestState(new TransientPrintLineDebugger(this, OutPutHelperWriter(_output)));
+            ErrorUtilities.VerifyThrowInternalNull(Output, nameof(Output));
+            return WithTransientTestState(new TransientPrintLineDebugger(this, OutPutHelperWriter(Output)));
 
             CommonWriterType OutPutHelperWriter(ITestOutputHelper output)
             {

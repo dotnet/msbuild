@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
@@ -472,5 +473,11 @@ namespace Microsoft.Build.UnitTests
         /// Assert that no warnings were logged
         /// </summary>
         internal void AssertNoWarnings() => Assert.Equal(0, WarningCount);
+
+        internal void AssertMessageCount(string message, int expectedCount)
+        {
+            var matches = Regex.Matches(FullLog, message);
+            matches.Count.ShouldBe(expectedCount);
+        }
     }
 }

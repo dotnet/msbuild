@@ -6,7 +6,7 @@
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
-    <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization>
+    <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">partial</ApplyNgenOptimization>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="BinaryWriterExtensions.cs" />

@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.AddResultsForTarget("testTarget2", BuildResultUtilities.GetEmptySucceedingTargetResult());
             cache.AddResult(result);
 
-            ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), new List<string>(new string[] { "testTarget" }), skippedResultsAreOK: false);
+            ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), new List<string>(new string[] { "testTarget" }), skippedResultsDoNotCauseCacheMiss: false);
 
             Assert.Equal(ResultsCacheResponseType.Satisfied, response.Type);
 

@@ -35,6 +35,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <DisableTransitiveProjectReferences Condition="'$(BuildProjectReferences)' != 'false' and '$(DisableTransitiveProjectReferences)' == ''">true</DisableTransitiveProjectReferences>
    </PropertyGroup>
 
+   <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+      <!-- WPF projects generate a project with a random name at build time and then build the project via the IBuildEngine callbacks.
+           Detect WPF, and exclude the generated project from static graph isolation constraint checking.
+           Escape the item to avoid eager evaluation of the wildcards.
+      -->
+      <GraphIsolationExemptReference
+         Condition="'$(UseWPF)' == 'true' or '@(Page)' != '' or '@(ApplicationDefinition)' != '' or '@(XamlPage)' != '' or '@(XamlAppDef)' != ''"
+         Include="$([MSBuild]::Escape('$(MSBuildProjectDirectory)\$(MSBuildProjectName)*_wpftmp$(MSBuildProjectExtension)'))" />
+   </ItemGroup>
+
   <!--
     Properties for extension of ProjectReferenceTargets.
     Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.

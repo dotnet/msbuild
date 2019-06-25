@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../Strings.resx">
     <body>
       <trans-unit id="AmbiguousProjectError">
         <source>MSBUILD : error MSB1011: Specify which project or solution file to use because this folder contains more than one project or solution file.</source>
@@ -241,14 +241,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;file&gt;            从文本文件插入命令行设置。若要指定
-                    多个响应文件，请分别指定每个响应
-                    文件。
+        <target state="translated"> @&lt;file&gt;      从文本文件插入命令行设置。若要指定
+           多个响应文件，请分别指定每个响应
+           文件。
 
-                    自动从以下位置使用任何名为 "msbuild.rsp" 的
-                    响应文件:
-                    (1) msbuild.exe 的目录
-                    (2) 生成的第一个项目或解决方案的目录
+           自动从以下位置使用任何
+           名为 "msbuild.rsp" 的响应文件:
+           (1) msbuild.exe 的目录
+           (2) 生成的第一个项目或解决方案的目录
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -282,11 +282,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;targets&gt;  在此项目中生成这些目标。使用分号或
-                    逗号分隔多个目标，或者分别指定
-                    每个目标。(缩写: -t)
-                    示例:
-                      -target:Resources;Compile
+        <target state="translated">  -target:&lt;targets&gt; 在此项目中生成这些目标。使用
+           分号或逗号分隔多个目标，或者分别指定
+           每个目标。(缩写: -t)
+           示例:
+            -target:Resources;Compile
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -305,11 +305,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  设置或重写这些项目级属性。&lt;n&gt; 是
-                    属性名，&lt;v&gt; 为属性值。请使用
-                    分号或逗号分隔多个属性，或者
-                    分别指定每个属性。(缩写: -p)
-                    示例:
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt; 设置或重写这些项目级属性。&lt;n&gt; 是
+           属性名，&lt;v&gt; 为属性值。请使用
+           分号或逗号分隔多个属性，或者
+           分别指定每个属性。(缩写: -p)
+           示例:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
         <note>
@@ -336,17 +336,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;logger&gt;   使用此记录器来记录 MSBuild 中的事件。若要指定
-                    多个记录器，请分别指定每个记录器。
-                    &lt;logger&gt; 语法为:
-                      [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
-                    &lt;logger class&gt; 语法为:
-                      [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
-                    &lt;logger assembly&gt; 语法为:
-                      {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                    &lt;logger parameters&gt; 是可选的，并按键入的
-                    形式原样传递给记录器。(缩写: -l)
-                    示例:
+        <target state="translated">  -logger:&lt;logger&gt;  使用此记录器来记录 MSBuild 中的事件。若要指定
+           多个记录器，请分别指定每个记录器。
+           &lt;logger&gt; 语法为:
+            [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+          &lt;logger class&gt; 语法为: 
+            [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+          &lt;logger assembly&gt; 语法为: 
+            {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+           &lt;logger parameters&gt; 是可选的，并按键入的
+          形式原样传递给记录器。(缩写: -l)
+           示例: 
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
@@ -367,9 +367,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -verbosity:quiet
 </source>
         <target state="translated">  -verbosity:&lt;level&gt; 在事件日志中显示此级别的信息量。
-                    可用的详细级别有: q[uiet]、m[inimal]、
-                    n[ormal]、d[etailed] 和 diag[nostic]。(缩写: -v)
-                    示例:
+           可用的详细级别有: q[uiet]、 m[inimal]、
+           n[ormal]、d[etailed] 和 diag[nostic]。(缩写: -v)
+           示例:
                        -verbosity:quiet
 </target>
         <note>
@@ -417,40 +417,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     控制台记录器的参数。(缩写: -clp)
-                     可用的参数有:
-                        PerformanceSummary -- 显示在任务、目标和项目上
-                            花费的时间。
-                        Summary -- 结束时显示错误和警告的摘要。
-                        NoSummary -- 结束时不显示错误和警告
-                            的摘要。
-                        ErrorsOnly -- 仅显示错误。
-                        WarningsOnly -- 仅显示警告。
-                        NoItemAndPropertyList -- 在开始生成每个项目时不显示
-                            项和属性的列表。
-                        ShowCommandLine -- 显示 TaskCommandLineEvent 消息
-                        ShowTimestamp -- 将时间戳作为所有消息的前缀
-                            显示。
-                        ShowEventId -- 显示已开始事件、已完成事件和消息
-                            的事件 ID
-                        ForceNoAlign -- 不将文本与控制台缓冲区的大小
-                            匹配
-                        DisableConsoleColor -- 将默认控制台颜色
-                            用于所有记录消息。
-                        DisableMPLogging -- 在非多处理器
-                            模式下运行时，禁用输出的多处理器
-                            日志记录样式。
-                        EnableMPLogging -- 即使在非多处理器
-                            模式下运行，也启用多处理器
-                            日志记录样式。默认情况下启用此日志记录样式。
-                        ForceConsoleColor -- 使用 ANSI 控制台颜色，即使
+        <target state="translated">  -consoleloggerparameters:&lt;parameters&gt;
+           控制台记录器的参数。(缩写: -clp)
+           可用参数包括:
+            PerformanceSummary -- 显示在任务、目标和项目上
+              花费的时间。
+            Summary -- 结束时显示错误和警告的摘要。
+            NoSummary -- 结束时不显示错误和警告
+              的摘要。
+            ErrorsOnly -- 仅显示错误。
+            WarningsOnly -- 仅显示警告。
+            NoItemAndPropertyList -- 在开始生成每个项目时不显示
+              项和属性的列表。  
+            ShowCommandLine -- 显示 TaskCommandLineEvent 消息 
+            ShowTimestamp -- 将时间戳作为所有消息的前缀
+              显示。                      
+            ShowEventId -- 显示已开始事件、已完成事件和消息
+              的事件 ID。
+            ForceNoAlign -- 不将文本与控制台缓冲区的大小
+              匹配。
+            DisableConsoleColor -- 将默认控制台颜色
+              用于所有记录消息。
+            DisableMPLogging -- 在非多处理器
+              模式下运行时，禁用输出的多处理器
+              日志记录样式。
+            EnableMPLogging -- 即使在非多处理器
+              模式下运行，也启用多处理器
+              日志记录样式。默认情况下启用此日志记录样式。
+                        ForceConsoleColor--使用 ANSI 控制台颜色，即使
                             控制台不支持它
                         Verbosity -- 重写此记录器的 -verbosity
-                            设置。
-                     示例:
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                                                 Verbosity=minimal
+              设置。
+           示例:
+                        -consoleloggerparameters:PerformanceSummary;NoSummary;
+                         Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -486,13 +486,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          依据默认架构验证项目。(缩写:
-                    -val)
+        <target state="translated">  -validate     依据默认架构验证项目。(缩写: 
+           -val)
 
-  -validate:&lt;schema&gt; 依据指定的架构验证项目。(缩写:
-                    -val)
-                    示例:
-                       -validate:MyExtendedBuildSchema.xsd
+ -validate:&lt;schema&gt; 依据指定的架构验证项目。(缩写: 
+           -val)
+           示例:
+            -validate:MyExtendedBuildSchema.xsd
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -551,10 +551,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     分号分隔的输入缓存文件列表，MSBuild 
-                     将从中读取生成结果。
-                     设置它也会打开隔离的生成 (-isolate).
-                     (short form: -irc)
+                     输入缓存文件的分号分隔列表，MSBuild
+                     将从这些文件中读取生成结果。
+                     设置此列表还将打开分隔的生成(-isolate)。
+                     (缩写: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -603,22 +603,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
-                    使用此记录器来记录 MSBuild 中的事件，向每个节点
-                    附加不同的记录器实例。若要指定
-                    多个记录器，请分别指定每个记录器。
-                    (缩写 -dl)
-                    &lt;logger&gt; 语法为:
-                      [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
-                    &lt;logger class&gt; 语法为:
-                      [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
-                    &lt;logger assembly&gt; 语法为:
-                      {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                    &lt;logger parameters&gt; 是可选的，并按键入的
-                    形式原样传递给记录器。(缩写: -l)
-                    示例:
-                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+        <target state="translated"> -distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;           
+           使用此记录器来记录 MSBuild 中的事件，向每个节点
+           附加不同的记录器实例。若要指定
+           多个记录器，请分别指定每个记录器。
+           (缩写 -dl)
+           &lt;logger&gt; 语法为: 
+            [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+           &lt;logger class&gt; 语法为: 
+            [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+           &lt;logger assembly&gt; 语法为: 
+            {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+           &lt;logger parameters&gt; 是可选的，并且按键入的
+           形式原样传递给记录器。(缩写: -l)
+           示例: 
+            -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+            -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -638,14 +638,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="translated">  -ignoreProjectExtensions:&lt;extensions&gt;
-                    确定要生成的项目文件时要忽略的
-                    扩展名的列表。使用分号或逗号来分隔
-                    多个扩展名。
-                    (缩写: -ignore)
-                    示例:
-                       -ignoreProjectExtensions:.sln
-    </target>
+        <target state="translated">  -ignoreprojectextensions:&lt;extensions&gt;
+           确定要生成的项目文件时要忽略的
+           扩展名的列表。使用分号或逗号来分隔
+           多个扩展名。
+           (缩写: -ignore)
+           示例:
+            -ignoreprojectextensions:.sln
+  </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -664,14 +664,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -toolsVersion:3.5
    </source>
-        <target state="translated">  -toolsVersion:&lt;version&gt;
-                    要在生成过程中使用的 MSBuild 工具集(任务、目标等)
-                    的版本。此版本将重写
-                    个别项目指定的版本。(缩写:
-                     -tv)
-                     示例:
-                       -toolsVersion:3.5
-   </target>
+        <target state="translated">  -toolsversion:&lt;version&gt;
+           要在生成过程中使用的 MSBuild 工具集
+           (任务、目标等)的版本。此版本将重写
+           各个项目指定的版本。(缩写: 
+           -tv)
+           示例:
+            -toolsversion:3.5
+  </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -723,19 +723,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  -distributedFileLogger
-                    将生成输出记录到多个日志文件，每个 MSBuild 节点
-                    一个日志文件。这些文件的初始位置为
-                    当前目录。默认情况下，这些文件名为
-                    "MSBuild&lt;nodeid&gt;.log"。可通过添加
-                    "-fileLoggerParameters" 开关来指定
-                    这些文件的位置和 fileLogger 的其他参数。
+        <target state="translated">  -distributedFileLogger                            
+           将生成输出记录到多个日志文件，每个 MSBuild 节点
+           一个日志文件。这些文件的初始位置为
+           当前目录。默认情况下，这些文件名为
+           “MSBuild&lt;nodeid&gt;.log”。可通过添加
+           “-fileLoggerParameters”开关来指定 
+           这些文件的位置和 fileLogger 的其他参数。
 
-                    如果日志文件名是通过 fileLoggerParameters
-                    开关设置的，分布式记录器将使用 fileName 作为
-                    模板并将节点 ID 附加到此 fileName
-                    以便为每个节点创建一个日志文件。
-    </target>
+           如果日志文件名是通过 fileLoggerParameters
+           开关设置的，分布式记录器将使用 fileName 作为
+           模板并将节点 ID 附加到此 fileName 
+           以便为每个节点创建一个日志文件。
+  </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -775,35 +775,35 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  -fileLoggerParameters[n]:&lt;parameters&gt;
-                    为文件记录器提供任何额外的参数。
-                    存在此开关意味着
-                    存在对应的 -fileLogger[n] 开关。
-                    "n" (如果存在)可以为 1-9 的数字。
-                    任何分布式文件记录器也可以使用 -fileLoggerParameters，
-                    具体可参阅 -distributedFileLogger 的说明。
-                    (缩写: -flp[n])
-                    为控制台记录器列出的相同参数
-                    可用。某些其他可用参数有:
-                       LogFile -- 生成日志将写入其中的
-                           日志文件的路径。
-                       Append -- 确定是将生成日志附加到日志文件，
-                           还是覆盖日志文件。如果设置此
-                           开关，则会将生成日志附加到日志文件；
-                           如果不设置此开关，则会覆盖
-                           现有日志文件的内容。
-                           默认值为不附加到日志文件。
-                       Encoding -- 指定文件的编码，
-                           例如，UTF-8、Unicode 或 ASCII
-                    默认的详细级别为 Detailed。
-                    示例:
-                       -fileLoggerParameters:LogFile=MyLog.log;Append;
-                                           Verbosity=diagnostic;Encoding=UTF-8
+        <target state="translated">  -fileloggerparameters[n]:&lt;parameters&gt;                
+           为文件记录器提供任何额外的参数。
+           存在此开关意味着
+           存在对应的 -filelogger[n] 开关。
+          “n”(如果存在)可以为 1-9 的数字。
+           任何分布式文件记录器也可以使用 
+           -fileloggerparameters，具体可参阅 -distributedFileLogger 的说明。
+           (缩写: -flp[n])
+           为控制台记录器列出的相同参数
+           可用。某些其他可用参数有:
+            LogFile -- 生成日志将写入其中的
+              日志文件的路径。
+            Append -- 确定是将生成日志附加到日志文件，
+              还是覆盖日志文件。如果设置此
+              开关，则会将生成日志附加到日志文件；
+              如果不设置此开关，则会覆盖
+              现有日志文件的内容。
+              默认值为不附加到日志文件。
+            Encoding -- 指定文件的编码，
+              例如，UTF-8、Unicode 或 ASCII
+           默认的详细级别为 Detailed。
+           示例:
+            -fileLoggerParameters:LogFile=MyLog.log;Append;
+                      Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
-                       -flp2:errorsonly;logfile=msbuild.err
-    </target>
+            -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+            -flp1:warningsonly;logfile=msbuild.wrn 
+            -flp2:errorsonly;logfile=msbuild.err
+  </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -825,15 +825,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;parameters&gt;
-                    启用或禁止重复使用 MSBuild 节点。
-                    参数包括:
-                    True -- 生成完成后节点将保留，
-                           并且将由后面的生成重复使用(默认)
-                    False -- 生成完成后节点将不会保留
-                    (缩写: -nr)
-                    示例:
-                       -nr:true
-    </target>
+           允许或禁止重复使用 MSBuild 节点。
+           参数包括:
+           True -- 生成完成后节点将保留，
+               并且将由后面的生成重复使用(默认)
+           False -- 生成完成后节点将不会保留
+           (缩写: -nr)
+           示例:
+            -nr:true
+  </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_25_PreprocessSwitch">
@@ -891,7 +891,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
-        <target state="translated">MSBUILD : 错误 MSB1057: 关系图生成值无效。{0}</target>
+        <target state="translated">MSBUILD : error MSB1057: 关系图生成值无效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -901,7 +901,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidInteractiveValue">
         <source>MSBUILD : error MSB1055: Interactive value is not valid. {0}</source>
-        <target state="translated">MSBUILD : 错误 MSB1055: 交互值无效。{0}</target>
+        <target state="translated">MSBUILD : error MSB1055: 交互值无效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1055: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -911,7 +911,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="translated">MSBUILD : 错误 MSB1056: 独立项目值无效。{0}</target>
+        <target state="translated">MSBUILD : error MSB1056: 独立项目值无效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1532,7 +1532,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="translated">MSBUILD: 错误 MSB1042: 节点重复使用值无效。此版本的 MSBuild 不支持节点重复使用。若已指定，则节点重复使用开关值必须为 false。</target>
+        <target state="translated">MSBUILD : error MSB1042: 节点重复使用值无效。此版本的 MSBuild 不支持节点重复使用。若已指定，则节点重复使用开关值必须为 false。</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1541,7 +1541,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="translated">MSBUILD: 错误 MSB1052: 还原值无效。{0}</target>
+        <target state="translated">MSBUILD : error MSB1052: 还原值无效。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1556,11 +1556,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      format. Otherwise, a tab separated file is produced.
     </source>
         <target state="translated">  -profileEvaluation:&lt;file&gt;
-                     解析 MSBuild 评估并将结果写入
-                     指定文件。如果指定文件的扩展名
-                     为“.md”，则结果将以 markdown 格式
-                     生成。否则，将生成制表符分隔文件。
-    </target>
+                     配置文件 MSBuild 求值并将结果写入
+                     指定的文件。如果指定文件的扩展
+                     为 .md，将以 markdown 格式生成
+                     结果。否则，将生成制表符分隔文件。
+ </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_33_RestorePropertySwitch">
@@ -1576,16 +1576,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     在还原期间仅设置或重写这些项目级
-                     属性并且不使用通过
-                     -property argument 参数指定的属性。&lt;n&gt; 是属性
-                     名，&lt;v&gt; 是属性值。请使用
+                     在还原期间设置或重写这些项目级属性
+                     并且不使用 -property 参数
+                     指定的属性。&lt;n&gt; 为属性
+                     名称，&lt;v&gt; 为属性值。使用
                      分号或逗号分隔多个属性，
-                     或分别指定每个属性。
+                     或者分别指定每个属性。
                      (缩写: -rp)
                      示例:
                        -restoreProperty:IsRestore=true;MyProperty=value
-    </target>
+  </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -1593,7 +1593,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="translated">MSBUILD : 错误 MSB1053: 提供的文件名无效。{0}</target>
+        <target state="translated">MSBUILD : error MSB1053: 提供的文件名无效。{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">

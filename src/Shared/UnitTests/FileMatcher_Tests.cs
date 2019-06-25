@@ -151,6 +151,8 @@ namespace Microsoft.Build.UnitTests
                 @"src\bar\inner\baz.cs",
                 @"src\bar\inner\baz\baz.cs",
                 @"src\bar\inner\foo\foo.cs",
+                @"subd\sub.cs",
+                @"subdirectory\subdirectory.cs",
                 @"build\baz\foo.cs",
                 @"readme.txt",
                 @"licence.md"
@@ -349,7 +351,8 @@ namespace Microsoft.Build.UnitTests
                         Include = @"**\*.*",
                         Excludes = new[]
                         {
-                            @"**\???\**\*.cs"
+                            @"**\???\**\*.cs",
+                            @"subd*\*",
                         },
                         ExpectedMatches = new[]
                         {
@@ -387,6 +390,24 @@ namespace Microsoft.Build.UnitTests
                             @"src\foo\inner\bar\bar.cs",
                             @"src\bar\inner\baz.cs"
                         }
+                    }
+                };
+
+                // Regression test for https://github.com/Microsoft/msbuild/issues/4175
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"subdirectory\**",
+                        Excludes = new[]
+                        {
+                            @"sub\**"
+                        },
+                        ExpectedMatches = new[]
+                        {
+                            @"subdirectory\subdirectory.cs",
+                        },
+                        ExpectNoMatches = NativeMethodsShared.IsLinux,
                     }
                 };
             }

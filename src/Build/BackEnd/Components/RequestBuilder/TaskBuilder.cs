@@ -990,7 +990,7 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            var projectReferenceItems = _taskExecutionHost.ProjectInstance.GetItems(ItemTypeNames.ProjectReference);
+            var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
 
             var declaredProjects = new HashSet<string>(projectReferenceItems.Count);
 
@@ -1008,7 +1008,9 @@ namespace Microsoft.Build.BackEnd
             {
                 var normalizedMSBuildProject = FileUtilities.NormalizePath(msbuildProject.ItemSpec);
 
-                if (!declaredProjects.Contains(normalizedMSBuildProject))
+                if (
+                    !(declaredProjects.Contains(normalizedMSBuildProject)
+                      || _buildRequestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(normalizedMSBuildProject)))
                 {
                     if (undeclaredProjects == null)
                     {

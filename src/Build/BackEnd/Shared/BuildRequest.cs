@@ -80,10 +80,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private RequestedProjectState _requestedProjectState;
 
-        /// <summary>
-        /// If set, skip targets that are not defined in the projects to be built.
-        /// </summary>
-        private bool _skipNonexistentTargets;
+        private bool _skipStaticGraphIsolationConstraints;
 
         /// <summary>
         /// Constructor for serialization.
@@ -102,6 +99,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="hostServices">Host services if any. May be null.</param>
         /// <param name="parentBuildEventContext">The build event context of the parent project.</param>
         /// <param name="parentRequest">The parent build request, if any.</param>
+        /// <param name="skipStaticGraphIsolationConstraints"></param>
         /// <param name="buildRequestDataFlags">Additional flags for the request.</param>
         /// <param name="requestedProjectState">Filter for desired build results.</param>
         public BuildRequest(
@@ -113,7 +111,8 @@ namespace Microsoft.Build.BackEnd
             BuildEventContext parentBuildEventContext,
             BuildRequest parentRequest,
             BuildRequestDataFlags buildRequestDataFlags = BuildRequestDataFlags.None,
-            RequestedProjectState requestedProjectState = null)
+            RequestedProjectState requestedProjectState = null,
+            bool skipStaticGraphIsolationConstraints = false)
         {
             ErrorUtilities.VerifyThrowArgumentNull(escapedTargets, "targets");
             ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext, "parentBuildEventContext");
@@ -137,6 +136,8 @@ namespace Microsoft.Build.BackEnd
             _nodeRequestId = nodeRequestId;
             _buildRequestDataFlags = buildRequestDataFlags;
             _requestedProjectState = requestedProjectState;
+
+            _skipStaticGraphIsolationConstraints = skipStaticGraphIsolationConstraints;
         }
 
         /// <summary>
@@ -309,13 +310,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// If set, skip targets that are not defined in the projects to be built.
+        /// Whether static graph isolation constraints should be skipped for this request
         /// </summary>
-        internal bool SkipNonexistentTargets
-        {
-            get => _skipNonexistentTargets;
-            set => _skipNonexistentTargets = value;
-        }
+        internal bool SkipStaticGraphIsolationConstraints => _skipStaticGraphIsolationConstraints;
 
         /// <summary>
         /// Sets the configuration id to a resolved id.
@@ -344,7 +341,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _parentBuildEventContext);
             translator.Translate(ref _buildEventContext);
             translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
-            translator.Translate(ref _skipNonexistentTargets);
+            translator.Translate(ref _skipStaticGraphIsolationConstraints);
             translator.Translate(ref _requestedProjectState);
             translator.Translate(ref _hostServices);
 

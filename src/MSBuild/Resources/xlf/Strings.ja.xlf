@@ -241,14 +241,14 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;ファイル&gt;            コマンド ライン設定をテキスト ファイルから挿入します。複数の
-                     応答ファイルがある場合は各応答ファイルを個別に
-                     指定します。
+        <target state="translated">  @&lt;file&gt;            テキスト ファイルからコマンド ラインの設定を挿入します。
+                     複数の応答ファイルを指定するには、各応答ファイルを
+                     別個に指定します。
 
-                     "msbuild.rsp" という名前の応答ファイルは、
-                     次の場所から自動的に利用されます:
+                     "msbuild.rsp" という名前を持つ任意の応答ファイルは、自動的に
+                     次の場所から実行されます。
                      (1) msbuild.exe のディレクトリ
-                     (2) プロジェクトまたはソリューションが最初にビルドされたディレクトリ
+                     (2) 最初にビルドされたプロジェクトまたはソリューションのディレクトリ
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -282,11 +282,11 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;ターゲット&gt;  このプロジェクト内でビルドするターゲットです。複数のターゲットをセミコロンまたは
-                    コンマで区切って指定するか、
-                    各ターゲットを個別に指定します。(短い形式: -t)。
-                    例:
-                      -target:Resources;Compile
+        <target state="translated">  -target:&lt;targets&gt;  このプロジェクトでこれらのターゲットをビルドします。セミコロンか
+                     コンマを使用して複数のターゲットを区切るか、各ターゲットを
+                     別個に指定します。(短縮形: -t)
+                     例:
+                       -target:Resources;Compile
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -305,12 +305,12 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt; これらのプロジェクト レベルのプロパティを設定またはオーバーライドします。&lt;n&gt; は
-                    プロパティ名、&lt;v&gt; はプロパティ値です。複数の
-                    プロパティを区切るには、セミコロンまたはコンマを使用するか、または
-                    各プロパティを個別に指定します。(短い形式: -p)
-                    例:
-                      -property:WarningLevel=2;OutDir=bin\Debug\
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  これらのプロジェクトレベルのプロパティを設定または上書きします。&lt;n&gt; は
+                     プロパティ名で、&lt;v&gt; はプロパティ値です。
+                     セミコロンまたはコンマを使用して複数のプロパティを区切るか、
+                     各プロパティを別個に指定します。(短縮形: -p)
+                     例:
+                       -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -336,20 +336,20 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;ロガー&gt;  MSBuild のイベントを記録するロガーです。複数の
-                    ロガーがある場合は、各ロガーを個別に指定します
-                    &lt;ロガー&gt; の構文:
-                      [&lt;ロガー クラス&gt;,]&lt;ロガー アセンブリ&gt;[;&lt;ロガー パラメーター&gt;]
-                    &lt;ロガー クラス&gt; の構文:
-                      [&lt;一部または完全な名前空間&gt;.]&lt;ロガー クラス名&gt;
-                    &lt;ロガー アセンブリ&gt; の構文:
-                      {&lt;アセンブリ名&gt;[,&lt;厳密な名前&gt;] | &lt;アセンブリ ファイル&gt;}
-                    &lt;ロガー パラメーター&gt; は省略可能であり、
-                    入力したとおりにロガーに渡されます (短い形式: -l)。
-                    例:
-                      -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                      -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
-</target>
+        <target state="translated">  -logger:&lt;logger&gt;   このロガーを使用して、MSBuild からのイベントのログを記録します。複数のロガーを
+                     指定するには、各ロガーを別個に指定します。
+                     &lt;logger&gt; の構文:
+                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                     &lt;logger class&gt; の構文:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     &lt;logger assembly&gt; の構文:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     &lt;logger parameters&gt; はオプションで、入力したとおりに
+                     ロガーに渡されます。(短縮形: -l)
+                     例:
+                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+\</target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -366,11 +366,11 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="translated">  -verbosity:&lt;レベル&gt; 表示するイベント ログの情報量です。
-                    使用できる詳細レベル: q[uiet]、m[inimal]、
-                    n[ormal]、d[etailed]、diag[nostic](短い形式: -v)。
-                    例:
-                      -verbosity:quiet
+        <target state="translated">  -verbosity:&lt;level&gt; イベント ログに表示する情報量です。
+                     利用可能な詳細レベル: q[uiet]、m[inimal]、
+                     n[ormal]、d[etailed]、diag[nostic]。(短縮形: -v)
+                     例:
+                       -verbosity:quiet
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -417,40 +417,40 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;パラメーター&gt;
-                    コンソール ロガーへのパラメーターです。(短い形式: -clp)
-                    使用できるパラメーター:
-                       PerformanceSummary--タスク、ターゲット、プロジェクトに
-                           費やした時間を表示します。
-                       Summary---エラーや警告の概要を終了時に表示します。
-                       NoSummary--エラーや警告の概要を終了時に
-                           表示しません。
-                       ErrorsOnly--エラーのみを表示します。
-                       WarningsOnly--警告のみを表示します。
-                       NoItemAndPropertyList--各プロジェクト ビルドの開始時に
-                           項目とプロパティの一覧を表示しません。
-                       ShowCommandLine--TaskCommandLineEvent メッセージを表示します。
-                       ShowTimestamp--タイムスタンプを
-                           メッセージの先頭に表示します。
-                       ShowEventId--開始したイベント、終了したイベント、
-                           およびメッセージの eventId を表示します。
-                       ForceNoAlign--テキストを
-                           コンソール バッファーのサイズに合わせません。
-                       DisableConsoleColor--すべてのログ メッセージに、コンソールの既定の色を
-                           使用します。
-                       DisableMPLogging--マルチプロセッサ
-                           ログ出力方法を無効にします
-                           (マルチプロセッサ以外のモードで実行されている場合)。
-                       EnableMPLogging--マルチプロセッサ
-                           ログ出力方法を有効にします
-                           (マルチプロセッサ以外のモードで実行されている場合でも)。このログ出力方法は既定で有効です。
-                       ForceConsoleColor--コンソールが ANSI コンソールの色を
-                           サポートしていない場合でもその色を使用します。
-                       Verbosity--このロガーの -verbosity 設定をオーバーライド
-                           します。
-                    例:
-                       -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                                                Verbosity=minimal
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+                     コンソール ロガーへのパラメーターです。(短縮形: -clp)
+                     利用可能なパラメーター:
+                        PerformanceSummary--タスク、ターゲット、プロジェクトにかかった時間を
+                            表示します。
+                        Summary--最後にエラーと警告の概要を表示します。
+                        NoSummary--最後にエラーと警告の概要を表示
+                            しません。
+                        ErrorsOnly--エラーのみを表示します。
+                        WarningsOnly--警告のみを表示します。
+                        NoItemAndPropertyList--各プロジェクトのビルド開始時に、
+                            項目とプロパティのリストを表示しません。
+                        ShowCommandLine--TaskCommandLineEvent メッセージを表示します
+                        ShowTimestamp--Timestamp を任意のメッセージへのプレフィックスとして
+                            表示します。
+                        ShowEventId--開始されたイベント、終了したイベント、
+                            メッセージの eventId を表示します。
+                        ForceNoAlign--テキストを、コンソール バッファーの
+                            サイズに合わせません
+                        DisableConsoleColor--すべてのログ メッセージに対して
+                            既定のコンソール カラーを使用します。
+                        DisableMPLogging-- 非マルチプロセッサ モードで
+                            実行する際、マルチプロセッサの
+                            出力ログ形式を無効にします。
+                        EnableMPLogging--非マルチプロセッサ モードで
+                            実行する場合も、マルチプロセッサのログ形式を有効にします。
+                            このログ形式は、既定で有効です。
+                        ForceConsoleColor--コンソールでサポートされていない場合でも、
+                            ANSI コンソール カラーを使用します。
+                        Verbosity--このロガーの -verbosity 設定を
+                            上書きします。
+                     例:
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
+                                                 Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -486,13 +486,13 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          プロジェクトを既定のスキーマと比較して検証します (短い
-                    形式: -val)。
+        <target state="translated">  -validate          プロジェクトを既定のスキーマに対して検証します。(短縮形
+                     : -val)
 
- -validate:&lt;スキーマ&gt; プロジェクトを指定したスキーマと比較して検証します (短い
-                    形式: -val)。
-                    例:
-                      -validate:MyExtendedBuildSchema.xsd
+  -validate:&lt;schema&gt; プロジェクトを指定したスキーマに対して検証します。(短縮形
+                     : -val)
+                     例:
+                       -validate:MyExtendedBuildSchema.xsd
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -551,10 +551,10 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     MSBuild がビルド結果を読み取る入力キャッシュ ファイルの
-                     セミコロン区切りリスト。
-                     設定すると、分離されたビルドも有効になります (-isolate)。
-                     (短い形式: -irc)
+                     MSBuild がビルド結果を読み込む、入力キャッシュ ファイルの
+                     セミコロンで区切られたリスト。
+                     これを設定すると、分離されたビルド (-isolate) も有効になります。
+                     (短縮形: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -603,22 +603,22 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;中心ロガー&gt;*&lt;転送ロガー&gt;
-                    MSBuild のイベントを記録して、各ノードに異なる
-                    ロガー インスタンスをアタッチするロガーです。複数の
-                    ロガーがある場合は、各ロガーを個別に指定します。
-                    (短い形式 -dl)。
-                    &lt;ロガー&gt; の構文:
-                      [&lt;ロガー クラス&gt;,]&lt;ロガー アセンブリ&gt;[;&lt;ロガー パラメーター&gt;]
-                    &lt;ロガー クラス&gt; の構文:
-                      [&lt;一部または完全な名前空間&gt;.]&lt;ロガー クラス名&gt;
-                    &lt;ロガー アセンブリ&gt; の構文:
-                      {&lt;アセンブリ名&gt;[,&lt;厳密な名前&gt;] | &lt;アセンブリ ファイル&gt;}
-                    &lt;ロガー パラメーター&gt; は省略可能であり、
-                    入力したとおりにロガーに渡されます (短い形式: -l)。
-                    例:
-                      -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                      -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+                     このロガーを使用して MSBuild からのイベントのログを記録し、
+                     別のロガー インスタンスを各ノードに追加します。
+                     複数のロガーを指定するには、各ロガーを別個に指定します。
+                     (短縮形 -dl)
+                     &lt;logger&gt; の構文:
+                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                     &lt;logger class&gt; の構文:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     &lt;logger assembly&gt; の構文:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     &lt;logger parameters&gt; はオプションで、入力したとおりに
+                     ロガーに渡されます。(短縮形: -l)
+                     例:
+                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -638,13 +638,13 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="translated">  -ignoreProjectExtensions:&lt;拡張子&gt;
-                    ビルドするプロジェクト ファイルを決定するときに除外する
-                    拡張子の一覧です。複数の拡張子はセミコロン
-                    またはコンマで区切ります。
-                    (短い形式: -ignore)
-                    例:
-                      -ignoreProjectExtensions:.sln
+        <target state="translated">  -ignoreProjectExtensions:&lt;extensions&gt;
+                     ビルドするプロジェクトファイルを決定する際に
+                     無視する拡張機能のリスト。セミコロンかコンマを使用して
+                     複数の拡張機能を区切ります。
+                     (短縮形: -ignore)
+                     例:
+                       -ignoreProjectExtensions:.sln
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -664,13 +664,13 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        -toolsVersion:3.5
    </source>
-        <target state="translated">  -toolsVersion:&lt;バージョン&gt;
-                    ビルド中に使用する MSBuild Toolset (タスク、ターゲットなど)
-                     のバージョンです。このバージョンは、
-                    個別のプロジェクトで指定されたバージョンをオーバーライドします。(短い形式:
+        <target state="translated">  -toolsVersion:&lt;version&gt;
+                     ビルド中に使用する MSBuild ツールセット (タスク、ターゲットなど)
+                     のバージョン。このバージョンは、
+                     それぞれのプロジェクトで指定されたバージョンを上書きします。(短縮形:
                      -tv)
-                    例:
-                      -toolsVersion:3.5
+                     例:
+                       -toolsVersion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -724,17 +724,17 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                    ビルド出力のログを MSBuild ノードごとに 1 つずつ、全体で
-                    複数のログ ファイルに記録します。これらのファイルが最初に
-                    置かれる場所は、現在のディレクトリです。既定では、これらの
-                    ファイル名は "MSBuild&lt;nodeid&gt;.log" のようになります。ファイルの場所と
-                    fileLogger の他のパラメーターは、
-                    "-fileLoggerParameters" スイッチを追加して指定できます。
+                     ビルド出力のログを、MSBuild ノードあたり 1 ログ ファイルずつ、
+                     複数のログファイルに記録します。これらのファイルの
+                     初期設定の場所は現在のディレクトリです。既定では、
+                     これらのファイルは "MSBuild&lt;nodeid&gt;.log" と呼ばれます。
+                     ファイルの場所と fileLogger の他のパラメーターは、
+                     "-fileLoggerParameters" スイッチを追加して指定できます。
 
-                    fileLoggerParameters スイッチでログ ファイル名を設定した場合、
-                    分散ロガーは fileName をテンプレートとして使用し、
-                    この fileName の末尾にノード ID を追加して、
-                    各ノードのログ ファイルを作成します。
+                     ログ ファイル名を fileLoggerParameters スイッチで
+                     設定した場合、分散ロガーは fileName を
+                     テンプレートとして使用し、ノード ID をこの fileName に追加して
+                     各ノードのログ ファイルを作成します。
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -775,35 +775,35 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  -fileLoggerParameters[n]:&lt;パラメーター&gt;
-                    ファイル ロガーの追加のパラメーターを提供します。
-                    このスイッチの存在は、対応する
-                    -fileLogger[n] スイッチの存在を暗示します。
-                    "n" は (存在する場合は) 1 から 9 の数値です。
-                    -fileLoggerParameters も分散ファイル ロガーによって使用されます。
-                    -distributedFileLogger の説明を参照してください
-                    (短い形式: -flp[n])。
-                    コンソール ロガーと同じパラメーターを使用
-                    できます。使用できるその他の主要なパラメーター:
-                       LogFile--ビルド ログの書き込み先の
-                           ログ ファイルへのパス。
-                       Append--ビルド ログをログ ファイルに追加するか、
-                           ビルド ログでログ ファイルを上書きするかを決定します。このスイッチを
-                           設定すると、ビルド ログはログ ファイルに追加されます。
-                           スイッチを設定しない場合は、既存の
-                           ログ ファイルの内容が上書きされます。
-                           既定ではログ ファイルに追加されません。
-                       Encoding--ファイルのエンコーディングを指定します
-                            (UTF-8、Unicode、ASCII など)。
-                    既定の詳細設定は Detailed です。
-                    例:
-                      -fileLoggerParameters:LogFile=MyLog.log;Append;
-                                          Verbosity=diagnostic;Encoding=UTF-8
+        <target state="translated">  -fileLoggerParameters[n]:&lt;parameters&gt;
+                     ファイル ロガーの追加のパラメーターを指定します。
+                     このスイッチの存在は、対応する
+                     -fileLogger[n] スイッチを示しています。
+                     "n" がある場合、1-9 の数字を指定できます。
+                     -fileLoggerParameters は任意の分散ファイル ロガーで
+                     使用することができます。-distributedFileLogger の説明を参照してください。
+                     (短縮形: -flp[n])
+                     コンソール ロガーでリストされているのと同じパラメーターを
+                     使用できます。他にも次のパラメーターを使用できます。
+                        LogFile--ビルド ログが書き込まれる
+                            ログファイルのパス。
+                        Append--ビルド ログがログ ファイルに追加されるのか、
+                            上書きされるのかを決定します。スイッチを
+                            設定すると、ビルド ログがログ ファイルに追加されます。
+                            スイッチを設定しないと、既存の
+                            ログ ファイルの内容を上書きします。
+                            既定では、ログ ファイルに追加しません。
+                        Encoding--ファイルのエンコードを指定します。
+                            例: UTF-8、Unicode、ASCII
+                     既定の詳細レベルは Detailed です。
+                     例:
+                       -fileLoggerParameters:LogFile=MyLog.log;Append;
+                                           Verbosity=diagnostic;Encoding=UTF-8
 
-                      -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                      -flp1:warningsonly;logfile=msbuild.wrn
-                      -flp2:errorsonly;logfile=msbuild.err
-    </target>
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp2:errorsonly;logfile=msbuild.err
+</target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -824,16 +824,16 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        -nr:true
     </source>
-        <target state="translated">  -nodeReuse:&lt;パラメーター&gt;
-                    MSBuild ノードの再利用を有効または無効にします。
-                    パラメーター:
-                    True--ビルドが完了してもノードを残し、
-                           後のビルドで再利用します (既定)。
-                    False--ビルドが完了したらノードを残しません
-                    (短い形式: -nr)。
-                    例:
-                      -nr:true
-    </target>
+        <target state="translated">  -nodeReuse:&lt;parameters&gt;
+                     MSBuild ノードの再利用を有効化または無効化します。
+                     パラメーター:
+                     True --ビルドが完了した後もノードが残り、
+                            後続のビルドで利用されます (既定)
+                     False--ビルドが完了した後はノードは残りません
+                     (短縮形: -nr)
+                     例:
+                       -nr:true
+</target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_25_PreprocessSwitch">
@@ -1328,7 +1328,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
-        <target state="translated">MSBUILD : エラー MSB1050: フォルダー "{0}" は複数のプロジェクトまたはソリューション ファイルを含んでいるため、使用するプロジェクトまたはソリューション ファイルを指定してください。</target>
+        <target state="translated">MSBUILD : error MSB1050: フォルダー "{0}" は複数のプロジェクトまたはソリューション ファイルを含んでいるため、使用するプロジェクトまたはソリューション ファイルを指定してください。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
       project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
@@ -1394,12 +1394,12 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="ParameterRequiredError">
         <source>MSBUILD : error MSB1049: The {0} parameter must be specified</source>
-        <target state="translated">MSBUILD : エラー MSB1049: {0} パラメーターを指定する必要があります</target>
+        <target state="translated">MSBUILD : error MSB1049: {0} パラメーターを指定する必要があります</target>
         <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="translated">MSBUILD : エラー MSB1051: -warnAsMessage スイッチを使用する場合、重要度の低いメッセージとして扱う警告コードを 1 つ以上指定してください。</target>
+        <target state="translated">MSBUILD : error MSB1051: -warnAsMessage スイッチを使用する場合、重要度の低いメッセージとして扱う警告コードを 1 つ以上指定してください。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1531,7 +1531,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="translated">MSBUILD : エラー MSB1042: ノードの再利用値が無効です。このバージョンの MSBuild はノードの再利用をサポートしていません。指定する場合には、ノードの再利用スイッチ値を false にする必要があります。</target>
+        <target state="translated">MSBUILD : error MSB1042: ノードの再利用値が無効です。このバージョンの MSBuild はノードの再利用をサポートしていません。指定する場合には、ノードの再利用スイッチ値を false にする必要があります。</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1540,7 +1540,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="translated">MSBUILD : エラー MSB1052: 復元値が無効です。 {0}</target>
+        <target state="translated">MSBUILD : error MSB1052: 復元値が無効です。 {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1554,11 +1554,11 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  -profileEvaluation:&lt;ファイル&gt;
-                     MSBuild の評価のプロファイリングを行い、結果を
-                     指定されたファイルに書き込みます。指定されたファイルの拡張子が
-                     '.md' の場合、結果は
-                     Markdown 形式 で生成されます。'.md' 以外の場合は、タブ区切りファイルが生成されます。
+        <target state="translated">  -profileEvaluation:&lt;file&gt;
+                     MSBuild の評価をプロファイルし、結果を指定のファイルに
+                     書き込みます。指定のファイルの拡張子が
+                      '.md' の場合、結果はマークダウン形式で生成されます。
+                     それ以外の場合、タブで区切られたファイルが生成されます。
     </target>
         <note />
       </trans-unit>
@@ -1575,13 +1575,13 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     復元時にのみ、これらのプロジェクト レベルのプロパティを
-                     設定またはオーバーライドします。-property 引数で
-                     指定したプロパティは使用しません。&lt;n&gt; はプロパティ
-                     名、&lt;v&gt; はプロパティ値です。
-                     複数のプロパティを区切るには、セミコロンまたはコンマを使用するか、
-                     各プロパティを個別に指定します。
-                     (短い形式: -rp)
+                     これらのプロジェクトレベルのプロパティは
+                     復元時のみ設定または上書きし、-property 引数で指定した
+                     プロパティは使用しないでください。&lt;n&gt; はプロパティ名で、
+                     &lt;v&gt; はプロパティ値です。
+                     セミコロンまたはコンマを使用して複数のプロパティを区切るか、
+                     各プロパティを別個に指定します。
+                     (短縮形: -rp)
                      例:
                        -restoreProperty:IsRestore=true;MyProperty=value
     </target>
@@ -1592,7 +1592,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="translated">MSBUILD : エラー MSB1053: 指定したファイル名が無効です。{0}</target>
+        <target state="translated">MSBUILD : error MSB1053: 指定したファイル名が無効です。{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">

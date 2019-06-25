@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="translated">MSBUILD : 오류 MSB1058: 출력 결과 캐시는 하나만 지정할 수 있습니다.</target>
+        <target state="translated">MSBUILD : error MSB1058: 출력 결과 캐시는 하나만 지정할 수 있습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -241,14 +241,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;file&gt;           텍스트 파일에서 명령줄 설정을 삽입합니다. 여러
-                     지시 파일을 지정하려면 각 지시 파일을 따로
-                     지정하세요.
+        <target state="translated">  @&lt;file&gt;            텍스트 파일에서 명령줄 설정을 삽입합니다. 
+                     여러 지시 파일을 지정하려면 각 지시 파일을 개별적으로 
+                     지정합니다.
 
-                     "msbuild.rsp"라는 지시 파일은 다음 위치에서
+                     "msbuild.rsp"라는 지시 파일이 다음 위치에서 
                      자동으로 사용됩니다.
-                     (1) msbuild.exe 디렉터리
-                     (2) 빌드된 첫 번째 프로젝트 또는 솔루션 디렉터리
+                     (1) msbuild.exe의 디렉터리
+                     (2) 빌드된 첫 번째 프로젝트 또는 솔루션의 디렉터리
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -282,9 +282,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;targets&gt;  지정한 대상을 이 프로젝트에 빌드합니다. 세미콜론 또는
-                     쉼표를 사용하여 여러 대상을 구분하거나 각 대상을 따로
-                     지정하세요. (약식: -t)
+        <target state="translated">  -target:&lt;targets&gt;  이 프로젝트에서 대상을 빌드합니다. 세미콜론 또는 쉼표를 사용하여 
+                     여러 대상을 구분하거나, 각 대상을 
+                     개별적으로 지정합니다. (약식: -t)
                      예:
                        -target:Resources;Compile
 </target>
@@ -305,10 +305,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  지정한 프로젝트 수준 속성을 설정하거나 재정의합니다. 여기서 &lt;n&gt;은
-                     속성 이름이고 &lt;v&gt;는 속성 값입니다. 세미콜론
-                     또는 쉼표를 사용하여 여러 속성을 구분하거나
-                     각 속성을 따로 지정하세요. (약식: -p)
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  프로젝트 수준 속성을 설정하거나 재정의합니다. &lt;n&gt;은 
+                     속성 이름이고 &lt;v&gt;는 속성 값입니다. 
+                     세미콜론 또는 쉼표를 사용하여 여러 속성을 구분하거나, 
+                     각 속성을 개별적으로 지정합니다. (약식: -p)
                      예:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
@@ -336,16 +336,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;logger&gt;   이 로거를 사용하여 MSBuild에서 이벤트를 로깅합니다. 여러
-                     로거를 지정하려면 각 로거를 따로 지정하세요.
-                     &lt;logger&gt; 구문:
+        <target state="translated">  -logger:&lt;logger&gt;   이 로거를 사용하여 MSBuild의 이벤트를 기록합니다. 
+                     여러 로거를 지정하려면 각 로거를 개별적으로 지정합니다.
+                     &lt;logger&gt; 구문은 다음과 같습니다.
                        [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
-                     &lt;logger class&gt; 구문:
+                     &lt;logger class&gt; 구문은 다음과 같습니다.
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
-                     &lt;logger assembly&gt; 구문:
+                     &lt;logger assembly&gt; 구문은 다음과 같습니다.
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     &lt;logger parameters&gt;는 선택적 요소이며, 입력한 그대로
-                     로거로 전달됩니다. (약식: -l)
+                     &lt;logger parameters&gt;는 선택 사항이고 입력한 대로 정확히 
+                     로거에 전달됩니다. (약식: -l)
                      예:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -366,9 +366,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="translated">  -verbosity:&lt;level&gt; 지정한 양의 정보를 이벤트 로그에 표시합니다.
-                     사용할 수 있는 세부 정보 표시 수준은 q[uiet], m[inimal],
-                     n[ormal], d[etailed] 및 diag[nostic]입니다. (약식: -v)
+        <target state="translated">  -verbosity:&lt;level&gt; 이벤트 로그에 이 정보의 양을 표시합니다.
+                     사용 가능한 세부 정보 표시 수준은 다음과 같습니다. q[uiet], m[inimal],
+                     n[ormal], d[etailed], 및 diag[nostic]. (약식: -v)
                      예:
                        -verbosity:quiet
 </target>
@@ -419,34 +419,34 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      콘솔 로거에 대한 매개 변수입니다. (약식: -clp)
-                     사용할 수 있는 매개 변수:
-                        PerformanceSummary--작업, 대상 및 프로젝트에 소요된
-                            시간을 표시합니다.
-                        Summary--끝에 오류 및 경고 요약을 표시합니다.
-                        NoSummary--끝에 오류 및 경고 요약을 표시하지
+                     사용 가능한 매개 변수는 다음과 같습니다.
+                        PerformanceSummary--작업, 대상 및 프로젝트에서 소요된 시간을 
+                            표시합니다.
+                        Summary--종료 시 오류 및 경고 요약을 표시합니다.
+                        NoSummary--종료 시 오류 및 경고 요약을 표시하지 
                             않습니다.
                         ErrorsOnly--오류만 표시합니다.
                         WarningsOnly--경고만 표시합니다.
-                        NoItemAndPropertyList--각 프로젝트 빌드의 시작 부분에
-                            항목 및 속성 목록을 표시하지 않습니다.
+                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때 항목 및 속성 목록을 
+                            표시하지 않습니다.
                         ShowCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
-                        ShowTimestamp--모든 메시지의 접두사로 타임스탬프를
+                        ShowTimestamp--메시지 접두사로 타임스탬프를 
                             표시합니다.
-                        ShowEventId--시작된 이벤트, 완료된
-                            이벤트 및 메시지의 eventId를 표시합니다.
-                        ForceNoAlign--콘솔 버퍼 크기로 텍스트를
-                            정렬하지 않습니다.
-                        DisableConsoleColor--모든 로깅 메시지에 기본
-                            콘솔 색을 사용합니다.
-                        DisableMPLogging-- 다중 프로세서가 아닌 모드에서 실행할 때
-                            출력의 다중 프로세서 로깅
-                            스타일을 사용하지 않습니다.
-                        EnableMPLogging--다중 프로세서가 아닌 모드에서 실행할 때도
-                            다중 프로세서 로깅 스타일을
-                            사용합니다. 이 로깅 스타일은 기본적으로 설정됩니다.
-                        ForceConsoleColor--콘솔에서 지원하지 않아도
-                            ANSI 콘솔 색을 사용합니다.
-                        Verbosity--이 로거에 대한 -verbosity 설정을
+                        ShowEventId--시작된 이벤트 완료된 이벤트 및 메시지의 eventId를 
+                            표시합니다.
+                        ForceNoAlign--콘솔 버퍼 크기에 텍스트를 맞추지 
+                            않습니다.
+                        DisableConsoleColor--모든 로깅 메시지에 기본 콘솔 색을 
+                            사용합니다.
+                        DisableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우 
+                            출력의 다중 프로세서 로깅 스타일을 
+                            사용하지 않도록 설정합니다.
+                        EnableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우에도 
+                            다중 프로세서 로깅 스타일을 사용하도록 설정합니다.
+                            이 로깅 스타일은 기본적으로 켜집니다.
+                        ForceConsoleColor--콘솔에서 지원하지 않더라도 ANSI 콘솔 색을 
+                            사용합니다
+                        Verbosity--이 로거에 대한 -verbosity 설정을 
                             재정의합니다.
                      예:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
@@ -486,11 +486,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          기본 스키마에 대해 프로젝트의 유효성을 검사합니다. (약식:
-                     -val)
+        <target state="translated">  -validate          기본 스키마를 기준으로 프로젝트의 유효성을 검사합니다. 
+                     (약식: -val)
 
-  -validate:&lt;schema&gt; 지정한 스키마에 대해 프로젝트의 유효성을 검사합니다. (약식:
-                     -val)
+  -validate:&lt;schema&gt; 지정된 스키마를 기준으로 프로젝트의 유효성을 검사합니다. 
+                     (약식: -val)
                      예:
                        -validate:MyExtendedBuildSchema.xsd
 </target>
@@ -551,10 +551,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     MSBuild에서 빌드 결과를 읽을
-                     세미콜론으로 구분된 입력 캐시 파일 목록입니다.
-                     설정하면 격리된 빌드에서도 설정됩니다(-isolate).
-                     (short form: -irc)
+                     MSBuild가 빌드 결과를 읽는 소스 입력 캐시 파일의 
+                     세미콜론으로 구분된 목록입니다.
+                     이 스위치를 설정하면 격리된 빌드(-isolate)도 켜집니다.
+                     (약식: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -604,18 +604,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
         <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
-                     이 로거를 사용하여 MSBuild에서 이벤트를 로깅하고 각 노드에
-                     서로 다른 로거 인스턴스를 추가합니다. 여러
-                     로거를 지정하려면 각 로거를 따로 지정하세요.
-                     (약식: -dl)
-                     &lt;logger&gt; 구문:
+                     이 로거를 통해 MSBuild의 이벤트를 기록하여 
+                     각 노드에 다른 로거 인스턴스를 연결합니다. 
+                     여러 로거를 지정하려면 각 로거를 개별적으로 지정합니다.
+                     (약식 -dl)
+                     &lt;logger&gt; 구문은 다음과 같습니다.
                        [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
-                     &lt;logger class&gt; 구문:
+                     &lt;logger class&gt; 구문은 다음과 같습니다.
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
-                     &lt;logger assembly&gt; 구문:
+                     &lt;logger assembly&gt; 구문은 다음과 같습니다.
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     &lt;logger parameters&gt;는 선택적 요소이며, 입력한 그대로
-                     로거로 전달됩니다. (약식: -l)
+                     &lt;logger parameters&gt;는 선택 사항이고 
+                     입력한 대로 정확히 로거에 전달됩니다. (약식: -l)
                      예:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -639,9 +639,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;extensions&gt;
-                     빌드할 프로젝트 파일을 결정할 때 무시할
-                     확장명의 목록입니다. 세미콜론 또는 쉼표를 사용하여
-                     여러 확장명을 구분하세요.
+                     빌드할 프로젝트 파일을 결정할 때 
+                     무시할 확장 목록입니다. 여러 확장을 구분하는 데는 
+                     세미콜론 또는 쉼표를 사용합니다.
                      (약식: -ignore)
                      예:
                        -ignoreProjectExtensions:.sln
@@ -665,9 +665,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -toolsVersion:3.5
    </source>
         <target state="translated">  -toolsVersion:&lt;version&gt;
-                     빌드 중 사용할 MSBuild 도구 집합(작업, 대상 등)의
-                     버전입니다. 이 버전은 개별 프로젝트에서 
-                     지정한 버전을 재정의합니다. (약식: 
+                     빌드 중에 사용할 MSBuild 도구 세트(작업, 대상 등)의 버전입니다.
+                     이 버전은 개별 프로젝트에서 지정한 버전을 
+                     재정의합니다. (약식:
                      -tv)
                      예:
                        -toolsVersion:3.5
@@ -724,17 +724,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     빌드 출력을 여러 개의 로그 파일에
-                     로깅합니다(MSBuild 노드당 로그 파일 하나). 이 파일의 초기 위치는
-                     현재 디렉터리입니다. 기본적으로 이 파일의 이름은
-                     "MSBuild&lt;nodeid&gt;.log"입니다. 파일의 위치 및
-                     fileLogger의 다른 매개 변수는
-                     "-fileLoggerParameters" 스위치를 추가하여 지정할 수 있습니다.
+                     MSBuild 노드당 로그 파일 하나씩, 여러 로그 파일에 빌드 출력을 
+                     기록합니다. 해당 파일의 초기 위치는 
+                     현재 디렉터리입니다. 기본적으로 해당 파일을 
+                     "MSBuild&lt;nodeid&gt;.log"라고 합니다. 파일 위치 및 fileLogger의 기타 매개 변수는 
+                     "-fileLoggerParameters" 스위치를 추가해서 
+                     지정할 수 있습니다.
 
-                     fileLoggerParameters 스위치를 통해 로그 파일 이름이 설정되면
-                     분산 로거는 fileName을 템플릿으로 사용하고 이 fileName에
-                     노드 ID를 추가하여 각 노드에 대한 로그 파일을
-                     만듭니다.
+                     로그 파일 이름이 fileLoggerParameters 스위치를 통해 설정되면 
+                     배포된 로거가 fileName을 템플릿으로 사용하고 
+                     노드 ID를 이 fileName에 추가하여 
+                     각 노드의 로그 파일을 만듭니다.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -776,25 +776,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;parameters&gt;
-                     파일 로거에 대한 추가 매개 변수를 제공합니다.
-                     이 스위치가 있으면 
-                     해당 -fileLogger[n] 스위치도 있습니다.
-                     "n"은 1-9 사이의 숫자일 수 있습니다.
-                     -fileLoggerParameters는 모든 분산 파일 로거에도 사용할 수 있습니다.
-                     -distributedFileLogger의 설명을 참조하세요.
+                     파일 로거의 추가 매개 변수를 제공합니다.
+                     이 스위치가 있다는 것은 
+                     해당 fileLogger[n] 스위치를 의미합니다.
+                     "n"(있는 경우)은 1~9의 숫자일 수 있습니다.
+                     -fileLoggerParameters는 배포된 파일 로거에서도 
+                     사용됩니다. -distributedFileLogger에 대한 설명을 참조하세요.
                      (약식: -flp[n])
-                     콘솔 로거에 대해 나열된 것과 동일한 매개 변수를 사용할
-                     수 있습니다. 사용할 수 있는 추가 매개 변수:
-                        LogFile--빌드 로그를 기록할 로그 파일의
-                            경로입니다.
-                        Append--빌드 로그를 로그 파일에 추가할지 아니면
-                            로그 파일을 덮어쓸지 결정합니다. 이 스위치를 설정하면
-                            빌드 로그가 로그 파일에 추가됩니다.
-                            이 스위치를 설정하지 않으면
-                            기존 로그 파일의 내용을 덮어씁니다.
+                     콘솔 로거용으로 나열된 동일한 매개 변수를 사용할 수 있습니다.
+                     다음과 같은 몇 가지 추가 매개 변수를 사용할 수 있습니다.
+                        LogFile--빌드 로그가 기록되는 
+                            로그 파일의 경로입니다.
+                        Append--빌드 로그가 로그 파일에 추가되는지, 
+                            아니면 로그 파일을 덮어쓰는지 여부를 결정합니다. 
+                            스위치를 설정하면 빌드 로그가 로그 파일에 추가됩니다.
+                            스위치를 설정하지 않으면 기존 로그 파일의 
+                            콘텐츠를 덮어씁니다.
                             기본값은 로그 파일에 추가하지 않는 것입니다.
-                        Encoding--UTF-8, 유니코드, ASCII와 같은
-                            파일 인코딩을 지정합니다.
+                        Encoding--파일의 인코딩을 지정합니다
+                            (예: UTF-8, 유니코드 또는 ASCII).
                      기본 세부 정보 표시는 Detailed입니다.
                      예:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
@@ -825,11 +825,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;parameters&gt;
-                     MSBuild 노드를 다시 사용하도록 설정하거나 해제합니다.
-                     매개 변수:
-                     True --빌드가 완료된 후 노드가 남아 있으며
-                            이 노드는 이후 빌드에 다시 사용됩니다(기본값).
-                     False--빌드가 완료된 후 노드가 남아 있지 않습니다.
+                     MSBuild 노드를 다시 사용하거나 다시 사용하지 않도록 설정합니다.
+                     매개 변수는 다음가 같습니다.
+                     True --빌드 완료 후 노드가 유지되고 
+                            후속 빌드에서 다시 사용됩니다(기본값).
+                     False--빌드 완료 후 노드가 유지되지 않습니다.
                      (약식: -nr)
                      예:
                        -nr:true
@@ -1531,7 +1531,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="translated">MSBUILD: error MSB1042: 노드 다시 사용 값이 유효하지 않습니다. 이 버전의 MSBuild에서는 노드 다시 사용을 지원하지 않습니다. 지정하는 경우 노드 다시 사용 스위치 값이 false여야 합니다.</target>
+        <target state="translated">MSBUILD : error MSB1042: 노드 다시 사용 값이 유효하지 않습니다. 이 버전의 MSBuild에서는 노드 다시 사용을 지원하지 않습니다. 지정하는 경우 노드 다시 사용 스위치 값이 false여야 합니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1555,10 +1555,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      format. Otherwise, a tab separated file is produced.
     </source>
         <target state="translated">  -profileEvaluation:&lt;file&gt;
-                     MSBuild 실행을 프로파일링하고 결과를 
-                     지정된 파일에 씁니다. 지정된 파일의 확장명이
-                     '.md'이면 결과가 markdown 형식으로
-                     생성됩니다. 그렇지 않으면 탭으로 구분된 파일이 생성됩니다.
+                     MSBuild 평가를 프로파일링하고 결과를 지정된 파일에 기록합니다.
+                     지정된 파일의 확장명이 '.md'이면 
+                     결과가 Markdown 형식으로 생성됩니다.
+                     그렇지 않으면 탭으로 구분된 파일이 생성됩니다.
     </target>
         <note />
       </trans-unit>
@@ -1575,12 +1575,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     복원 중에만 이러한 프로젝트 수준 속성을
-                     설정하거나 재정의하고 -property 인수로 지정된 속성을
-                     사용하지 않습니다. 여기서, &lt;n&gt;은 속성 이름이고
-                     &lt;v&gt;는 속성 값입니다. 세미콜론
-                     또는 쉼표를 사용하여 여러 속성을 구분하거나
-                     각 속성을 따로 지정하세요.
+                     복원하는 동안 프로젝트 수준 속성만 설정하거나 
+                     재정의하고, -property 인수로 지정된 속성을 
+                     사용하지 않습니다. &lt;n&gt;은 속성 이름이고 
+                     &lt;v&gt;는 속성 값입니다.
+                     세미콜론 또는 쉼표를 사용하여 여러 속성을 구분하거나,
+                     각 속성을 개별적으로 지정합니다.
                      (약식: -rp)
                      예:
                        -restoreProperty:IsRestore=true;MyProperty=value
@@ -1592,7 +1592,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="translated">MSBUILD : 오류 MSB1053: 지정한 파일 이름이 유효하지 않습니다. {0}</target>
+        <target state="translated">MSBUILD : error MSB1053: 지정한 파일 이름이 유효하지 않습니다. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">

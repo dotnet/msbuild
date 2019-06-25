@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.ManifestUtilities.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.ManifestUtilities.resx">
     <body>
       <trans-unit id="ComImporter.LocalServerNotSupported">
         <source>Out of process servers are not supported</source>
@@ -82,15 +82,15 @@
     </source>
         <target state="translated">
           UAC 資訊清單選項
-         如需變更 Windows 使用者帳戶控制層級，
-         請以下列其中一個項目取代 requestedExecutionLevel 節點。
+          若希望變更 Windows 使用者帳戶控制層級，
+          請用下列其中一項取代 requestedExecutionLevel 節點。
 
-       &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
-       &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
-       &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-        如需利用回溯相容性的檔案及登錄模擬，
-        請刪除 requestedExecutionLevel 節點。
+         若希望利用檔案及登錄模擬，提供回溯相容性，
+         則請刪除 requestedExecutionLevel 節點。
     </target>
         <note />
       </trans-unit>
