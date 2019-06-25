@@ -330,7 +330,7 @@ namespace Microsoft.Build.Logging
         private void Write(PropertyReassignmentEventArgs e)
         {
             Write(BinaryLogRecordKind.PropertyReassignment);
-            WriteMessageFields(e);
+            WriteBuildEventArgsFields(e);
             Write(e.PropertyName);
             Write(e.PreviousValue);
             Write(e.NewValue);
@@ -339,15 +339,15 @@ namespace Microsoft.Build.Logging
 
         private void Write(UninitializedPropertyReadEventArgs e)
         {
-             Write(BinaryLogRecordKind.UninitializedPropertyRead);
-             WriteMessageFields(e);
-             Write(e.PropertyName);
+            Write(BinaryLogRecordKind.UninitializedPropertyRead);
+            WriteBuildEventArgsFields(e);
+            Write(e.PropertyName);
         }
 
         private void Write(EnvironmentVariableReadEventArgs e)
         {
             Write(BinaryLogRecordKind.EnvironmentVariableRead);
-            WriteMessageFields(e);
+            WriteBuildEventArgsFields(e);
             Write(e.EnvironmentVariableName);
         }
 

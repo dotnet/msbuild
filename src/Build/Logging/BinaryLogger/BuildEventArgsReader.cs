@@ -112,6 +112,15 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.TargetSkipped:
                     result = ReadTargetSkippedEventArgs();
                     break;
+                case BinaryLogRecordKind.EnvironmentVariableRead:
+                    result = ReadEnvironmentVariableReadEventArgs();
+                    break;
+                case BinaryLogRecordKind.PropertyReassignment:
+                    result = ReadPropertyReassignmentEventArgs();
+                    break;
+                case BinaryLogRecordKind.UninitializedPropertyRead:
+                    result = ReadUninitializedPropertyReadEventArgs();
+                    break;
                 default:
                     break;
             }
@@ -505,6 +514,57 @@ namespace Microsoft.Build.Logging
                 fields.Timestamp);
             e.BuildEventContext = fields.BuildEventContext;
             e.ProjectFile = fields.ProjectFile;
+            return e;
+        }
+
+        private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var environmentVariableName = ReadString();
+
+            var e = new EnvironmentVariableReadEventArgs(
+                environmentVariableName,
+                fields.Message,
+                fields.HelpKeyword,
+                fields.SenderName);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadPropertyReassignmentEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            string propertyName = ReadString();
+            string previousValue = ReadString();
+            string newValue = ReadString();
+            string location = ReadString();
+
+            var e = new PropertyReassignmentEventArgs(
+                propertyName,
+                previousValue,
+                newValue,
+                location,
+                fields.Message,
+                fields.HelpKeyword,
+                fields.SenderName);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadUninitializedPropertyReadEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            string propertyName = ReadString();
+
+            var e = new UninitializedPropertyReadEventArgs(
+                propertyName,
+                fields.Message,
+                fields.HelpKeyword,
+                fields.SenderName);
+            SetCommonFields(e, fields);
+
             return e;
         }
 

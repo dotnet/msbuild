@@ -9,7 +9,7 @@ namespace Microsoft.Build.Framework
     /// The arguments for an uninitialized property read event.
     /// </summary>
     [Serializable]
-    public class UninitializedPropertyReadEventArgs : BuildMessageEventArgs
+    public class UninitializedPropertyReadEventArgs : BuildStatusEventArgs
     {
         /// <summary>
         /// UninitializedPropertyReadEventArgs
@@ -26,8 +26,7 @@ namespace Microsoft.Build.Framework
             string propertyName,
             string message,
             string helpKeyword = null,
-            string senderName = null,
-            MessageImportance importance = MessageImportance.Low) : base(message, helpKeyword, senderName, importance)
+            string senderName = null) : base(message, helpKeyword, senderName)
         {
             this.PropertyName = propertyName;
         }

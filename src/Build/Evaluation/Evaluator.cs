@@ -202,19 +202,16 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
+            ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
+
+            _evaluationLoggingContext = new EvaluationLoggingContext(
+                loggingService,
+                buildEventContext,
+                string.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File);
 
             if (Traits.Instance.LogPropertyTracking)
             {
-                // These are only necessary when property tracking logging is enabled..
-                ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
-                ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
-
-                // Only allocate this early if we're logging property tracking data.
-                _evaluationLoggingContext = new EvaluationLoggingContext(
-                    loggingService,
-                    buildEventContext,
-                    string.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File);
-
                 // Wrap the IEvaluatorData<> object passed in.
                 data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext);
             }
@@ -322,7 +319,7 @@ namespace Microsoft.Build.Evaluation
                     loggingService,
                     buildEventContext);
 
-                evaluator.Evaluate(loggingService, buildEventContext);
+                evaluator.Evaluate();
 #if MSBUILDENABLEVSPROFILING 
             }
             finally
@@ -619,27 +616,24 @@ namespace Microsoft.Build.Evaluation
         /// Do the evaluation.
         /// Called by the static helper method.
         /// </summary>
-        private void Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
+        private void Evaluate()
         {
-            string projectFile;
+            string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
 
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
-                ICollection<P> builtInProperties;
-                ICollection<P> environmentProperties;
-                ICollection<P> toolsetProperties;
                 ICollection<P> globalProperties;
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.InitialProperties))
                 {
                     // Pass0: load initial properties
                     // Follow the order of precedence so that Global properties overwrite Environment properties
-                    builtInProperties = AddBuiltInProperties();
-                    environmentProperties = AddEnvironmentProperties();
-                    toolsetProperties = AddToolsetProperties();
+                    AddBuiltInProperties();
+                    AddEnvironmentProperties();
+                    AddToolsetProperties();
                     globalProperties = AddGlobalProperties();
 
                     if (_interactive)
@@ -651,12 +645,6 @@ namespace Microsoft.Build.Evaluation
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass0End);
 #endif
-                projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
-
-                // This will be true when NOT logging property tracking data.
-                if (_evaluationLoggingContext == null)
-                    _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
-
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
 
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
