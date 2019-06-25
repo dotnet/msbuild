@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tasks
     /// targeting packs which provide the reference assemblies, and creates RuntimeFramework
     /// items, which are written to the runtimeconfig file
     /// </summary>
-    public class ResolveFrameworkReferences : TaskBase
+    public class ProcessFrameworkReferences : TaskBase
     {
         public string TargetFrameworkIdentifier { get; set; }
 

@@ -157,7 +157,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ApplyImplicitVersions" 
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;ResolveFrameworkReferences"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;ProcessFrameworkReferences"
           DependsOnTargets="UpdateAspNetToFrameworkReference;CheckForImplicitPackageReferenceOverrides"
           Condition="'@(PackageReference)' != ''">
     

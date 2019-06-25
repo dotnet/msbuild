@@ -197,12 +197,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ResolvePackageAssets" 
           Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
-          DependsOnTargets="ResolveFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary;_ComputePackageReferencePublish">
+          DependsOnTargets="ProcessFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary;_ComputePackageReferencePublish">
 
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                           and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'
                           and '$(UseAppHostFromAssetsFile)' == ''">
-      <!-- For .NET Core 3.0 and higher, we'll get the apphost from an apphost pack (via ResolveFrameworkReferences) -->
+      <!-- For .NET Core 3.0 and higher, we'll get the apphost from an apphost pack (via ProcessFrameworkReferences) -->
       <UseAppHostFromAssetsFile>false</UseAppHostFromAssetsFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(UseAppHostFromAssetsFile)' == ''">

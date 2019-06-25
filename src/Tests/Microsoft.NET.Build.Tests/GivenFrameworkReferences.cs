@@ -839,7 +839,7 @@ namespace FrameworkReferenceTest
                     itemGroup.Add(knownAppHostPackUpdate);
 
                     string writeResolvedVersionsTarget = @"
-<Target Name=`WriteResolvedVersions` DependsOnTargets=`PrepareForBuild;ResolveFrameworkReferences`>
+<Target Name=`WriteResolvedVersions` DependsOnTargets=`PrepareForBuild;ProcessFrameworkReferences`>
     <ItemGroup>
       <LinesToWrite Include=`RuntimeFramework%09%(RuntimeFramework.Identity)%09%(RuntimeFramework.Version)`/>
       <LinesToWrite Include=`PackageDownload%09%(PackageDownload.Identity)%09%(PackageDownload.Version)`/>

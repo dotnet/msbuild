@@ -1071,7 +1071,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             /// <summary>
-            /// After netcoreapp3.0 apphost is resolved during ResolveFrameworkReferences. It should return nothing here
+            /// After netcoreapp3.0 apphost is resolved during ProcessFrameworkReferences. It should return nothing here
             /// </summary>
             private bool CanResolveApphostFromFrameworkReference()
             {
