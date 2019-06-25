@@ -21,7 +21,6 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, List<ReferenceInfo>> _compileReferences;
         private Dictionary<string, List<ResolvedFile>> _resolvedNuGetFiles;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
-        private IEnumerable<string> _excludeFromPublishPackageIds;
         private Dictionary<string, List<RuntimePackAssetInfo>> _runtimePackAssets;
         private CompilationOptions _compilationOptions;
         private string _referenceAssembliesPath;
@@ -157,12 +156,6 @@ namespace Microsoft.NET.Build.Tasks
         public DependencyContextBuilder WithMainProjectInDepsFile(bool includeMainProjectInDepsFile)
         {
             _includeMainProjectInDepsFile = includeMainProjectInDepsFile;
-            return this;
-        }
-
-        public DependencyContextBuilder WithExcludeFromPublishAssets(IEnumerable<string> excludeFromPublishPackageIds)
-        {
-            _excludeFromPublishPackageIds = excludeFromPublishPackageIds;
             return this;
         }
 
@@ -747,50 +740,6 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var packageToExcludeFromRuntime in runtimeExclusionList)
             {
                 _dependencyLibraries[packageToExcludeFromRuntime].ExcludeFromRuntime = true;
-            }
-
-            if (_excludeFromPublishPackageIds != null && _excludeFromPublishPackageIds.Any())
-            {
-                //  Include transitive dependencies of all top-level dependencies which are not
-                //  excluded from publish
-
-                Dictionary<string, DependencyLibrary> includedDependencies = new Dictionary<string, DependencyLibrary>(StringComparer.OrdinalIgnoreCase);
-
-                HashSet<string> excludeFromPublishPackageIds = new HashSet<string>(_excludeFromPublishPackageIds);
-
-                Stack<string> dependenciesToWalk = new Stack<string>(
-                    _mainProjectDependencies.Except(_excludeFromPublishPackageIds, StringComparer.OrdinalIgnoreCase));
-
-                while (dependenciesToWalk.Any())
-                {
-                    var dependencyName = dependenciesToWalk.Pop();
-                    if (!includedDependencies.ContainsKey(dependencyName))
-                    {
-                        //  There may not be a library in the assets file if a referenced project has
-                        //  PrivateAssets="all" for a package reference, and there is a package in the graph
-                        //  that depends on the same packge.
-                        if (_dependencyLibraries.TryGetValue(dependencyName, out var dependencyLibrary))
-                        {
-                            includedDependencies.Add(dependencyName, dependencyLibrary);
-                            foreach (var newDependency in _libraryDependencies[dependencyName])
-                            {
-                                dependenciesToWalk.Push(newDependency.Name);
-                            }
-                        }
-                    }
-                }
-
-                foreach (var dependencyLibrary in _dependencyLibraries.Values)
-                {
-                    //  Libraries explicitly marked as exclude from publish should be excluded from
-                    //  publish even if there are other transitive dependencies to them
-                    if (!includedDependencies.ContainsKey(dependencyLibrary.Name) ||
-                        excludeFromPublishPackageIds.Contains(dependencyLibrary.Name))
-                    {
-                        dependencyLibrary.ExcludeFromCompilation = true;
-                        dependencyLibrary.ExcludeFromRuntime = true;
-                    }
-                }
             }
         }
 

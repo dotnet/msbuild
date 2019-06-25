@@ -124,6 +124,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError ResourceName="NoBuildRequested" />
   </Target>
 
+  <Target Name="_ComputePackageReferencePublish">
+    <ItemGroup>
+
+      <!-- PrivateAssets="All" means exclude from publish, unless Publish metadata is specified separately -->
+      <PackageReference Publish="false"
+                        Condition="('%(PackageReference.PrivateAssets)' == 'All') And ('%(PackageReference.Publish)' == '')"/>
+
+      <_ExcludeFromPublishPackageReference Include="@(PackageReference)"
+                                           Condition="('%(PackageReference.Publish)' == 'false')" />
+    </ItemGroup>
+  </Target>
+
   <!--
     ============================================================
                                         GenerateBuildDependencyFile
@@ -136,7 +148,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _ComputeReferenceAssemblies;
-                            ResolveRuntimePackAssets"
+                            ResolveRuntimePackAssets;
+                            _ComputePackageReferencePublish"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition="'$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
@@ -168,7 +181,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       RuntimeFrameworks="@(RuntimeFramework)"
-                      FilesToSkip="@(_ConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       CompileReferences="@(ResolvedCompileFileDefinitions)"
                       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"

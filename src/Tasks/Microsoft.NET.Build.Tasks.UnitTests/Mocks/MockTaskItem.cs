@@ -58,10 +58,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             string metadataValue = null;
             if (_metadata.TryGetValue(metadataName, out metadataValue))
             {
-                return metadataValue;
+                return metadataValue ?? string.Empty;
             }
 
-            return null;
+            return string.Empty;
         }
 
         public void RemoveMetadata(string metadataName)
