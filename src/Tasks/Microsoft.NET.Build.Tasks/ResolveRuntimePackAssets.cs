@@ -68,7 +68,7 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                var runtimeListPath = Path.Combine(runtimePackRoot, "data", "RuntimeListList.xml");
+                var runtimeListPath = Path.Combine(runtimePackRoot, "data", "RuntimeList.xml");
 
                 if (File.Exists(runtimeListPath))
                 {
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    runtimePackAssets.AddRange(GetRuntimePackAssetsFromConvention(runtimePackRoot, runtimePack));
+                    throw new BuildErrorException("Runtime list not found: " + runtimeListPath);
                 }
             }
 
@@ -131,52 +131,6 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private IEnumerable<TaskItem> GetRuntimePackAssetsFromConvention(string runtimePackRoot, ITaskItem runtimePack)
-        {
-            List<TaskItem> runtimePackAssets = new List<TaskItem>();
-
-            string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
-
-            //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened
-            //  folder structure and a manifest indicating how the files should be used: https://github.com/dotnet/cli/issues/10442
-            string runtimeAssetsPath = GetRuntimeAssetsPath(runtimePackRoot, runtimeIdentifier);
-            string nativeAssetsPath = Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "native");
-
-            var runtimeAssets = Directory.Exists(runtimeAssetsPath) ? Directory.GetFiles(runtimeAssetsPath) : Array.Empty<string>();
-            var nativeAssets = Directory.Exists(nativeAssetsPath) ? Directory.GetFiles(nativeAssetsPath) : Array.Empty<string>();
-
-            void AddAsset(string assetPath, string assetType)
-            {
-                if (assetPath.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase) ||
-                    assetPath.EndsWith(".map", StringComparison.OrdinalIgnoreCase) ||
-                    assetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
-                    assetPath.EndsWith(".xml", StringComparison.OrdinalIgnoreCase) ||
-                    assetPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ||
-                    assetPath.EndsWith("._", StringComparison.Ordinal))
-                {
-                    //  Don't add assets for these files (shouldn't be necessary if/once we have a manifest in the runtime pack
-                    //  https://github.com/dotnet/cli/issues/10442
-                    return;
-                }
-
-                var assetItem = CreateAssetItem(assetPath, assetType, runtimePack, null);
-
-                runtimePackAssets.Add(assetItem);
-            }
-
-            foreach (var asset in runtimeAssets)
-            {
-                AddAsset(asset, "runtime");
-            }
-            foreach (var asset in nativeAssets)
-            {
-                AddAsset(asset, "native");
-            }
-
-            runtimePackAssets.AddRange(EnumerateResourceAssets(runtimePackRoot, runtimeIdentifier, runtimePack));
-            return runtimePackAssets;
-        }
-
         private static TaskItem CreateAssetItem(string assetPath, string assetType, ITaskItem runtimePack, string culture)
         {
             string runtimeIdentifier = runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier);
@@ -202,48 +156,6 @@ namespace Microsoft.NET.Build.Tasks
             assetItem.SetMetadata(MetadataKeys.IsTrimmable, runtimePack.GetMetadata(MetadataKeys.IsTrimmable));
 
             return assetItem;
-        }
-
-        private static string GetRuntimeAssetsPath(string runtimePackRoot, string runtimeIdentifier)
-        {
-            //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened structure
-            return Path.Combine(runtimePackRoot, "runtimes", runtimeIdentifier, "lib", "netcoreapp3.0");
-        }
-
-        private IEnumerable<TaskItem> EnumerateResourceAssets(string runtimePackRoot, string runtimeIdentifier, ITaskItem runtimePack)
-        {
-            //  These hard-coded paths are temporary until we have "real" runtime packs, which will likely have a flattened structure
-            var directory = GetRuntimeAssetsPath(runtimePackRoot, runtimeIdentifier);
-            if (!Directory.Exists(directory))
-            {
-                yield break;
-            }
-
-            foreach (var subdir in Directory.EnumerateDirectories(directory))
-            {
-                foreach (var asset in EnumerateCultureAssets(subdir, runtimeIdentifier, runtimePack))
-                {
-                    yield return asset;
-                }
-            }
-        }
-
-        private IEnumerable<TaskItem> EnumerateCultureAssets(string cultureDirectory, string runtimeIdentifier, ITaskItem runtimePack)
-        {
-            var culture = Path.GetFileName(cultureDirectory);
-
-            if (this.SatelliteResourceLanguages.Length > 1 &&
-                !this.SatelliteResourceLanguages.Any(lang => string.Equals(lang.ItemSpec, culture, StringComparison.OrdinalIgnoreCase)))
-            {
-                yield break;
-            }
-
-            foreach (var file in Directory.EnumerateFiles(cultureDirectory, "*.resources.dll"))
-            {
-                var item = CreateAssetItem(file, "resources", runtimePack, culture);
-
-                yield return item;
-            }
         }
     }
 }
