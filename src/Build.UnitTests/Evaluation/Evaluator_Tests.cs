@@ -4511,70 +4511,61 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLogging()
         {
-           string testtargets = ObjectModelHelpers.CleanupFileContents(@"
+           string testTargets = ObjectModelHelpers.CleanupFileContents(@"
                                 <Project>
                                      <PropertyGroup>
                                          <Prop>$(DOES_NOT_EXIST)</Prop>
-                                         <EnvVar>$(PATH)</EnvVar>
-                                         <LocalAppData>Overwritten!</LocalAppData>
-                                         <NotEnvVarRead>$(LocalAppData)</NotEnvVarRead>
+                                         <EnvVar>$(DEFINED_ENVIRONMENT_VARIABLE2)</EnvVar>
+                                         <DEFINED_ENVIRONMENT_VARIABLE>Overwritten!</DEFINED_ENVIRONMENT_VARIABLE>
+                                         <NotEnvVarRead>$(DEFINED_ENVIRONMENT_VARIABLE)</NotEnvVarRead>
                                          <Prop2>Value1</Prop2>
                                          <Prop2>Value2</Prop2>
                                      </PropertyGroup>
                                      <Target Name='Build' />
                                 </Project>");
 
-            string tempPath = Path.GetTempPath();
-            string targetDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
-            string testTargetPath = Path.Combine(targetDirectory, "test.proj");
-
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MsBuildLogPropertyTracking", "1");
+                env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE", "It's Defined!");
+                env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE2", "It's Defined!");
 
-                try
-                {
-                    BuildParameters.WarnOnUninitializedProperty = true;
-                    Directory.CreateDirectory(targetDirectory);
-                    File.WriteAllText(testTargetPath, testtargets);
+                var tempPath = env.CreateFile(Guid.NewGuid().ToString(), testTargets);
 
-                    MockLogger logger = new MockLogger();
-                    logger.Verbosity = LoggerVerbosity.Diagnostic;
-                    ProjectCollection pc = new ProjectCollection();
-                    pc.RegisterLogger(logger);
-                    Project project = pc.LoadProject(testTargetPath);
+                BuildParameters.WarnOnUninitializedProperty = true;
 
-                    bool result = project.Build();
-                    Assert.True(result);
+                MockLogger logger = new MockLogger();
+                logger.Verbosity = LoggerVerbosity.Diagnostic;
+                ProjectCollection pc = new ProjectCollection();
+                pc.RegisterLogger(logger);
+                Project project = pc.LoadProject(tempPath.Path);
 
-                    logger
-                        .AllBuildEvents
-                        .OfType<UninitializedPropertyReadEventArgs>()
-                        .Any(p => p.PropertyName == "DOES_NOT_EXIST")
-                        .ShouldBeTrue();
+                bool result = project.Build();
+                Assert.True(result);
 
-                    logger
-                        .AllBuildEvents
-                        .OfType<EnvironmentVariableReadEventArgs>()
-                        .Any(ev => ev.EnvironmentVariableName == "PATH")
-                        .ShouldBeTrue();
+                logger
+                    .AllBuildEvents
+                    .OfType<UninitializedPropertyReadEventArgs>()
+                    .Any(p => p.PropertyName == "DOES_NOT_EXIST")
+                    .ShouldBeTrue();
 
-                    logger
-                        .AllBuildEvents
-                        .OfType<EnvironmentVariableReadEventArgs>()
-                        .Any(ev => ev.EnvironmentVariableName == "LocalAppData")
-                        .ShouldBeFalse();
+                logger
+                    .AllBuildEvents
+                    .OfType<EnvironmentVariableReadEventArgs>()
+                    .Any(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE2")
+                    .ShouldBeTrue();
 
-                    logger
-                        .AllBuildEvents
-                        .OfType<PropertyReassignmentEventArgs>()
-                        .Any(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2")
-                        .ShouldBeTrue();
-                }
-                finally
-                {
-                    FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
-                }
+                logger
+                    .AllBuildEvents
+                    .OfType<EnvironmentVariableReadEventArgs>()
+                    .Any(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE")
+                    .ShouldBeFalse();
+
+                logger
+                    .AllBuildEvents
+                    .OfType<PropertyReassignmentEventArgs>()
+                    .Any(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2")
+                    .ShouldBeTrue();
             }
         }
 
