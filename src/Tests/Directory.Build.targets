@@ -37,11 +37,14 @@
   <Target Name="TestAsTool" DependsOnTargets="Pack;LayoutSdk;_InnerGetTestsToRun">
     <PropertyGroup>
       <TestLocalToolFolder>$(ArtifactsTmpDir)$(ToolCommandName)\</TestLocalToolFolder>
+      <TestLocalToolExecutionFolder>$(ArtifactsTmpDir)$(ToolCommandName)\w</TestLocalToolExecutionFolder>
       <DOTNET_CLI_HOME>$(ArtifactsTmpDir)DOTNET_CLI_HOME\</DOTNET_CLI_HOME>
     </PropertyGroup>
 
+    <RemoveDir Directories="$(TestLocalToolExecutionFolder)" />
     <RemoveDir Directories="$(TestLocalToolFolder)" />
     <MakeDir Directories="$(TestLocalToolFolder)" />
+    <MakeDir Directories="$(TestLocalToolExecutionFolder)" />
 
     <MakeDir Directories="$(ArtifactsTestResultsDir)" />
 
@@ -71,6 +74,7 @@
       <TestArgs>$(TestArgs) -xml "$(ResultsXmlPath)"</TestArgs>
       <TestArgs>$(TestArgs) -html "$(ResultsHtmlPath)" $(TestRunnerAdditionalArguments)</TestArgs>
       <TestArgs>$(TestArgs) &gt; $(ResultsStdOutPath)</TestArgs>
+      <TestArgs>$(TestArgs) -testExecutionDirectory $(TestLocalToolExecutionFolder)</TestArgs>
     </PropertyGroup>
 
     <Exec Command="dotnet tool run $(ToolCommandName) -- $(TestArgs)"
