@@ -2764,6 +2764,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       DependsOnTargets="ResolveComReferences" />
 
   <!--
+    ============================================================
+                                      ResolveFrameworkReferences
+
+    Overrridden by Microsoft.NET.Sdk to return
+    ResolvedFrameworkReference items in order to populate the
+    Frameworks node of the Solution Explorer in the IDE.
+  -->
+  <Target Name="ResolveFrameworkReferences" />
+  
+  <!--
     ***********************************************************************************************
     ***********************************************************************************************
                                                                 PrepareResources Section
