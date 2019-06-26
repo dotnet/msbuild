@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="translated">プロパティ ' {0} ' の値を文字列に変換できませんでした。</target>
+        <target state="translated">プロパティ '{0}' の値を文字列に変換できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
