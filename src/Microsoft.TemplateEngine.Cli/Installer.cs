@@ -105,7 +105,18 @@ namespace Microsoft.TemplateEngine.Cli
                     && descriptor.FactoryId == testDescriptor.FactoryId
                     && descriptor.DescriptorId != testDescriptor.DescriptorId)
                 {
-                    UninstallMountPoint(testDescriptor.MountPointId);
+                    if (descriptor.MountPointId != testDescriptor.MountPointId)
+                    {
+                        // Uninstalls the mount point and the descriptor(s) for packs that were installed under that mount point.
+                        UninstallMountPoint(testDescriptor.MountPointId);
+                    }
+                    else
+                    {
+                        // The new install is in the same place as the old install. Don't remove the mount point, just the old descriptor.
+                        // This is for when the exact same pack is installed over-the-top of an existing install of it.
+                        // Works for both zip/nupkg and for local file sources.
+                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.RemoveDescriptor(testDescriptor);
+                    }
                 }
             }
         }
