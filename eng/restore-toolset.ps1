@@ -28,9 +28,6 @@ function InitializeCustomSDKToolset {
   }
 
   $cli = InitializeDotnetCli -install:$true
-  InstallDotNetSharedFramework "1.1.2"
-  InstallDotNetSharedFramework "2.0.0"
-  InstallDotNetSharedFramework "2.2.0"
 
   CreateBuildEnvScript
   CreateTestEnvScript
