@@ -612,12 +612,11 @@ namespace Microsoft.Build.UnitTests
         {
             // Basic checks to make sure we're not deleting something very obviously wrong (e.g.
             // the entire temp drive).
-            Assert.NotNull(Path);
-            Assert.NotEqual(string.Empty, Path);
-            Assert.NotEqual(@"\", Path);
-            Assert.NotEqual(@"/", Path);
-            Assert.NotEqual(System.IO.Path.GetFullPath(System.IO.Path.GetTempPath()), System.IO.Path.GetFullPath(Path));
-            Assert.True(System.IO.Path.IsPathRooted(Path));
+            Path.ShouldNotBeNullOrEmpty();
+            Path.ShouldNotBe(@"\");
+            Path.ShouldNotBe(@"/");
+            System.IO.Path.GetFullPath(Path).ShouldNotBe(System.IO.Path.GetFullPath(System.IO.Path.GetTempPath()));
+            System.IO.Path.IsPathRooted(Path).ShouldBeTrue(() => $"{Path} is not rooted");
 
             FileUtilities.DeleteDirectoryNoThrow(Path, true);
         }

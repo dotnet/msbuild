@@ -3018,7 +3018,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <GenerateResourceMSBuildArchitecture Condition="'$(GenerateResourceMSBuildArchitecture)' == ''">$(PlatformTargetAsMSBuildArchitecture)</GenerateResourceMSBuildArchitecture>
-
+      
       <ResgenToolPath Condition="'$(ResgenToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</ResgenToolPath>
     </PropertyGroup>
 
@@ -3047,6 +3047,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Sources="@(EmbeddedResource)"
         UseSourcePath="$(UseSourcePath)"
         References="@(ReferencePathWithRefAssemblies)"
+        UsePreserializedResources="$(GenerateResourceUsePreserializedResources)"
         AdditionalInputs="$(MSBuildAllProjects)"
         NeverLockTypeAssemblies="$(GenerateResourceNeverLockTypeAssemblies)"
         StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.cache"
