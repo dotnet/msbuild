@@ -43,9 +43,9 @@
       <Sha>
       </Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview7.19323.2">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview7.19324.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>5257fac78182bc327fe0e66825b8b9591608f108</Sha>
+      <Sha>9a305ee4b3df0ee30bfd7b5333c18586f809f0fd</Sha>
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19324.1">
       <Uri>https://github.com/mono/linker</Uri>
