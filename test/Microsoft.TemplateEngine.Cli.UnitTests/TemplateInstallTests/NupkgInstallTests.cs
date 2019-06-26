@@ -67,6 +67,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             int secondInstallResult = New3Command.Run(CommandName, host, telemetryLogger, null, installArgs);
             Assert.Equal(0, secondInstallResult);
 
+            settingsLoader.Reload();
+
             // check that the template is still installed after the second install.
             IReadOnlyCollection<ITemplateMatchInfo> allTemplatesAfterSecondInstall = TemplateListResolver.PerformAllTemplatesQuery(settingsLoader.UserTemplateCache.TemplateInfo, hostDataLoader);
             Assert.Contains(checkTemplateName, allTemplatesAfterSecondInstall.Select(t => t.Info.ShortName));
