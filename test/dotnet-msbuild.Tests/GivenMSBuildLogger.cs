@@ -31,54 +31,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Fact]
-        public void ItMasksEventNameWithTargetframeworkevalOnTargetFrameworkVersionUseWindowsFormsOrWPF()
-        {
-            var fakeTelemetry = new FakeTelemetry();
-            var telemetryEventArgs = new TelemetryEventArgs
-            {
-                EventName = MSBuildLogger.TargetFrameworkTelemetryEventName,
-                Properties = new Dictionary<string, string>
-            {
-                { MSBuildLogger.TargetFrameworkVersionTelemetryPropertyKey, ".NETStandard,Version=v2.0"},
-                { MSBuildLogger.UseWindowsFormsTelemetryPropertyKey, "true"},
-                { MSBuildLogger.UseWPFTelemetryPropertyKey, "AnyNonTrueValue"},
-            }
-            };
-
-            MSBuildLogger.FormatAndSend(fakeTelemetry, telemetryEventArgs);
-
-            fakeTelemetry.LogEntry.EventName.Should().Be($"msbuild/{MSBuildLogger.TargetFrameworkTelemetryEventName}");
-            fakeTelemetry.LogEntry.Properties.Keys.Count.Should().Be(3);
-            fakeTelemetry.LogEntry.Properties[MSBuildLogger.TargetFrameworkVersionTelemetryPropertyKey].Should().Be(Sha256Hasher.Hash(".NETSTANDARD,VERSION=V2.0"));
-            fakeTelemetry.LogEntry.Properties[MSBuildLogger.UseWindowsFormsTelemetryPropertyKey].Should().Be("True");
-            fakeTelemetry.LogEntry.Properties[MSBuildLogger.UseWPFTelemetryPropertyKey]
-                .Should().Be(
-                "False",
-                "sanitize to avoid user input, and since in SDK prop and target non 'true' is effectively false");
-        }
-
-        [Fact]
-        public void ItMasksEventNameWithTargetframeworkevalOnTargetFrameworkVersionUseWindowsFormsOrWPFWhenFieldIsEmpty()
-        {
-            var fakeTelemetry = new FakeTelemetry();
-            var telemetryEventArgs = new TelemetryEventArgs
-            {
-                EventName = MSBuildLogger.TargetFrameworkTelemetryEventName,
-                Properties = new Dictionary<string, string>
-            {
-                { MSBuildLogger.UseWindowsFormsTelemetryPropertyKey, "null"},
-            }
-            };
-
-            MSBuildLogger.FormatAndSend(fakeTelemetry, telemetryEventArgs);
-
-            fakeTelemetry.LogEntry.Properties[MSBuildLogger.UseWindowsFormsTelemetryPropertyKey]
-                .Should().Be(
-                "null",
-                "MSBuild will throw when the task param contain empty and if the field is empty json will emit the entry, so it still need to be set to something.");
-        }
-
-        [Fact]
         public void ItDoesNotMasksExceptionTelemetry()
         {
             var fakeTelemetry = new FakeTelemetry();

@@ -21,9 +21,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
         internal const string SdkTaskBaseCatchExceptionTelemetryEventName = "taskBaseCatchException";
 
         internal const string TargetFrameworkVersionTelemetryPropertyKey = "TargetFrameworkVersion";
-        internal const string UseWindowsFormsTelemetryPropertyKey = "UseWindowsForms";
-        internal const string UseWPFTelemetryPropertyKey = "UseWPF";
-        internal const string StringToRepresentPropertyNotSet = "null";
 
         public MSBuildLogger()
         {
@@ -84,16 +81,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
                     maskedProperties.Add(TargetFrameworkVersionTelemetryPropertyKey, Sha256Hasher.HashWithNormalizedCasing(targetFrameworkVersionValue));
                 }
 
-                if (args.Properties.TryGetValue(UseWindowsFormsTelemetryPropertyKey, out string useWindowsFormsValue))
-                {
-                    maskedProperties.Add(UseWindowsFormsTelemetryPropertyKey, SanitizeToOnlyTrueFalseEmpty(useWindowsFormsValue));
-                }
-
-                if (args.Properties.TryGetValue(UseWPFTelemetryPropertyKey, out string useWPFValue))
-                {
-                    maskedProperties.Add(UseWPFTelemetryPropertyKey, SanitizeToOnlyTrueFalseEmpty(useWPFValue));
-                }
-
                 telemetry.TrackEvent(newEventName, maskedProperties, measurements: null);
             }
 
@@ -101,23 +88,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
             {
                 telemetry.TrackEvent(args.EventName, args.Properties, measurements: null);
             }
-        }
-
-        private static string SanitizeToOnlyTrueFalseEmpty(string value)
-        {
-            // MSBuild will throw when the task param contain empty
-            // and if the field is empty json will emit the entry, so it still need to be set to something.
-            if (value.Equals(StringToRepresentPropertyNotSet, StringComparison.Ordinal))
-            {
-                return StringToRepresentPropertyNotSet;
-            }
-
-            if (bool.TryParse(value, out bool boolValue))
-            {
-                return boolValue.ToString();
-            }
-
-            return false.ToString();
         }
 
         private void OnTelemetryLogged(object sender, TelemetryEventArgs args)
