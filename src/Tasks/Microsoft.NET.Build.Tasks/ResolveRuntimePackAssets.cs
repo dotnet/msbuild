@@ -89,7 +89,8 @@ namespace Microsoft.NET.Build.Tasks
             XDocument frameworkListDoc = XDocument.Load(runtimeListPath);
             foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
             {
-                string assetPath = Path.Combine(runtimePackRoot, fileElement.Attribute("Path").Value);
+                //  Call GetFullPath to normalize slashes
+                string assetPath = Path.GetFullPath(Path.Combine(runtimePackRoot, fileElement.Attribute("Path").Value));
 
                 string typeAttributeValue = fileElement.Attribute("Type").Value;
                 string assetType;
