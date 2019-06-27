@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview7-27826-04">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview7-27826-20">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>5c4d829254f40bca8a85ee11f03b2d90d71aa847</Sha>
+      <Sha>ee0c7ead1a46f06f98aff9102b785f532b71da9c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview7.19326.4">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview7.19326.4" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>0c7a6caea739553ceeb94b2e0d05c4354c79c8fe</Sha>
     </Dependency>

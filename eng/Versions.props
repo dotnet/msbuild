@@ -75,6 +75,10 @@
     <SystemSecurityCryptographyProtectedDataPackageVersion>4.6.0-preview7.19326.2</SystemSecurityCryptographyProtectedDataPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
+    <!-- Dependencies from https://github.com/dotnet/core-setup -->
+    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview7-27826-20</MicrosoftNETCoreAppPackageVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftDotNetCliUtilsPackageVersion>2.2.100-refac-20180613-1</MicrosoftDotNetCliUtilsPackageVersion>
     <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
