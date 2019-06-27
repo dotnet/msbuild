@@ -141,7 +141,7 @@ namespace Microsoft.Build.Evaluation
         public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem) => _wrapped.InitializeForEvaluation(toolsetProvider, fileSystem);
         public void FinishEvaluation() => _wrapped.FinishEvaluation();
         public void AddItem(I item) => _wrapped.AddItem(item);
-        public void AddItemIgnoringCondition(I item) => _wrapped.AddItem(item);
+        public void AddItemIgnoringCondition(I item) => _wrapped.AddItemIgnoringCondition(item);
         public IItemDefinition<M> AddItemDefinition(string itemType) => _wrapped.AddItemDefinition(itemType);
         public void AddToAllEvaluatedPropertiesList(P property) => _wrapped.AddToAllEvaluatedPropertiesList(property);
         public void AddToAllEvaluatedItemDefinitionMetadataList(M itemDefinitionMetadatum) => _wrapped.AddToAllEvaluatedItemDefinitionMetadataList(itemDefinitionMetadatum);
