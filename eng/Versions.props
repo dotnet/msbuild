@@ -31,7 +31,7 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>3.0.100-preview5-011568</DotNetCliVersion>
+    <DotNetCliVersion>3.0.100-preview6-012264</DotNetCliVersion>
   </PropertyGroup>
   <!-- Product Dependencies -->
   <PropertyGroup>
