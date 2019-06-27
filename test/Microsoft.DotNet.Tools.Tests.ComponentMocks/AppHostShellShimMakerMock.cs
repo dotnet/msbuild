@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
             _fileSystem.File.WriteAllText(
                 shimPath.Value,
-                JsonSerializer.ToString(shim));
+                JsonSerializer.Serialize(shim));
         }
 
         public class FakeShim

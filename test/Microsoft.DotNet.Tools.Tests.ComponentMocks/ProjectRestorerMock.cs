@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 fakeExecutablePath);
             _fileSystem.File.WriteAllText(
                 assetJsonOutput.WithFile(FakeCommandSettingsFileName).Value,
-                JsonSerializer.ToString(new {Name = feedPackage.ToolCommandName}));
+                JsonSerializer.Serialize(new {Name = feedPackage.ToolCommandName}));
         }
 
         public MockFeedPackage GetPackage(
