@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToBoolean">
         <source>Could not convert the value of property '{0}' to a boolean.</source>
-        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <target state="translated">Hodnotu vlastnosti {0} nejde převést na logickou hodnotu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <target state="translated">Hodnotu vlastnosti {0} nejde převést na řetězec.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
-        <target state="needs-review-translation">Sestavení se nezdařilo. Opravte prosím v sestavení chyby a spusťte ho znovu.</target>
+        <target state="translated">Sestavení se nepovedlo. Opravte v sestavení chyby a spusťte ho znovu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -50,8 +50,8 @@
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">Projekt nelze spustit.
-Cílem projektu je více architektur. Pomocí parametru {0} prosím určete, která architektura se má spustit.</target>
+        <target state="translated">Projekt nelze spustit.
+Cílem projektu je více architektur. Pomocí parametru {0} určete, která architektura se má spustit.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
@@ -59,7 +59,7 @@ Cílem projektu je více architektur. Pomocí parametru {0} prosím určete, kte
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Projekt nelze spustit.
+        <target state="translated">Projekt nelze spustit.
 Ověřte prosím, že máte spustitelný typ projektu, a zajistěte, aby tento projekt podporoval {0}.
 Cílem spustitelného projektu by mělo být TFM (například netcoreapp2.0) a jeho OutputType by měl být Exe.
 Aktuální {1} je {2}.</target>
@@ -163,7 +163,7 @@ Aktuální {1} je {2}.</target>
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">
         <source>The property '{0}' must be an object if it is specified.</source>
-        <target state="new">The property '{0}' must be an object if it is specified.</target>
+        <target state="translated">Vlastnost {0} musí být objektem, pokud je zadána.</target>
         <note />
       </trans-unit>
     </body>

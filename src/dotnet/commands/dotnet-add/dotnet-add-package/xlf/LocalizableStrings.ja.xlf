@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Specify one package reference to add.</source>
-        <target state="needs-review-translation">追加するパッケージ参照を 1 つ指定してください。</target>
+        <target state="translated">追加するパッケージ参照を 1 つ指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
         <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
-        <target state="needs-review-translation">プロジェクト '{0}' の一時ファイルを生成できません。パッケージ参照を追加できません。一時ディレクトリをクリアして、もう一度お試しください。</target>
+        <target state="translated">プロジェクト '{0}' の一時ファイルを生成できません。パッケージ参照を追加できません。一時ディレクトリをクリアして、もう一度お試しください。</target>
         <note />
       </trans-unit>
     </body>

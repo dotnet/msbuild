@@ -36,7 +36,6 @@ sdk-options:
   clean             {LocalizableStrings.CleanDefinition}
   help              {LocalizableStrings.HelpDefinition}
   list              {LocalizableStrings.ListDefinition}
-  migrate           {LocalizableStrings.MigrateDefinition}
   msbuild           {LocalizableStrings.MsBuildDefinition}
   new               {LocalizableStrings.NewDefinition}
   nuget             {LocalizableStrings.NugetDefinition}

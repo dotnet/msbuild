@@ -20,6 +20,5 @@
   <ItemGroup>
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(MicrosoftDotNetProjectJsonMigrationPackageVersion)" />
   </ItemGroup>
 </Project>

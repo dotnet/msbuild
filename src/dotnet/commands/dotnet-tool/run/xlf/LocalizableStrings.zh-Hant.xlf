@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOneCommandName">
         <source>Specify one command name to run.</source>
-        <target state="needs-review-translation">請指定一個要執行的命令名稱。</target>
+        <target state="translated">請指定一個要執行的命令名稱。</target>
         <note />
       </trans-unit>
     </body>

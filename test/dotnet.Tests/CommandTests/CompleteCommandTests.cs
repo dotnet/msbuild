@@ -32,7 +32,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 "fsi",
                 "help",
                 "list",
-                "migrate",
                 "msbuild",
                 "new",
                 "nuget",

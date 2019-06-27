@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
         <source>Add a NuGet package reference to the project.</source>
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Specify one package reference to add.</source>
-        <target state="needs-review-translation">请指定一个要添加的包引用。</target>
+        <target state="translated">请指定一个要添加的包引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
         <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
-        <target state="needs-review-translation">未能为项目“{0}”生成临时文件。无法添加包引用。请清除临时目录，再重试。</target>
+        <target state="translated">无法为项目“{0}”生成临时文件。无法添加包引用。请清除临时目录，然后再重试。</target>
         <note />
       </trans-unit>
     </body>

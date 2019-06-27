@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Update the tool and the local tool manifest.</source>
-        <target state="needs-review-translation">Обновление средства и обновление из локального манифеста средства.</target>
+        <target state="translated">Обновление средства и манифеста локального средства.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to update.</source>
-        <target state="needs-review-translation">Укажите один обновляемый идентификатор пакета инструмента.</target>
+        <target state="translated">Укажите один обновляемый идентификатор пакета инструмента.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
         <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
+        <target state="translated">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
-        <target state="needs-review-translation">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
+        <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -124,7 +124,12 @@ Tools are updated using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">Инструмент "{0}" сейчас не установлен.</target>
+        <target state="translated">Не удалось найти средство с идентификатором пакета "{0}". 
+
+Средства обновлены с помощью идентификатора пакета, который может отличаться 
+от имени средства, используемого при его вызове. Имена средств 
+и соответствующие идентификаторы пакетов для установленных средств можно найти с помощью команды
+"dotnet tool list".</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">

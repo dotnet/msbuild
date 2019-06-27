@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to uninstall.</source>
-        <target state="needs-review-translation">Especifique un id. de paquete de herramienta para desinstalar.</target>
+        <target state="translated">Especifique un id. de paquete de herramientas para desinstalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -64,7 +64,12 @@ Tools are uninstalled using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">La herramienta "{0}" no está instalada actualmente.</target>
+        <target state="translated">No se encontró ninguna herramienta con el identificador de paquete "{0}". 
+
+Para desinstalar las herramientas se usa su identificador de paquete, que puede ser distinto 
+del nombre de herramienta que se usa al llamarla. Para buscar los nombres de herramientas 
+y los identificadores de paquete correspondientes de las herramientas instaladas, use el comando
+"dotnet tool list".</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -79,7 +84,7 @@ and the corresponding package Ids for installed tools using the command
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
-        <target state="needs-review-translation">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de herramienta (--tool-path), solo pueden estar una cada vez. Especifique solo una de las opciones: {0}.</target>
+        <target state="translated">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de herramienta (--tool-path), solo pueden estar una cada vez. Especifique solo una de las opciones: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

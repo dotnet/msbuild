@@ -10,7 +10,7 @@
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid, contact tool author:
 {1}</source>
-        <target state="needs-review-translation">Avertissement : Le package d'outils '{0}' est non valide. Contactez l'auteur de l'outil :
+        <target state="translated">Avertissement : Le package d'outils '{0}' n'est pas valide. Contactez l'auteur de l'outil :
 {1}</target>
         <note />
       </trans-unit>

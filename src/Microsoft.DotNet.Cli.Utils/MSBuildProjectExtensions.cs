@@ -2,14 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.Tools.Common;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tools
+namespace Microsoft.DotNet.Cli.Utils
 {
-    internal static class MsbuildProjectExtensions
+    internal static class MSBuildProjectExtensions
     {
         public static bool IsConditionalOnFramework(this ProjectElement el, string framework)
         {
@@ -21,6 +20,26 @@ namespace Microsoft.DotNet.Tools
 
             var condChain = el.ConditionChain();
             return condChain.Count == 1 && condChain.First().Trim() == conditionStr;
+        }
+
+        public static ISet<string> ConditionChain(this ProjectElement projectElement)
+        {
+            var conditionChainSet = new HashSet<string>();
+
+            if (!string.IsNullOrEmpty(projectElement.Condition))
+            {
+                conditionChainSet.Add(projectElement.Condition);
+            }
+
+            foreach (var parent in projectElement.AllParents)
+            {
+                if (!string.IsNullOrEmpty(parent.Condition))
+                {
+                    conditionChainSet.Add(parent.Condition);
+                }
+            }
+
+            return conditionChainSet;
         }
 
         public static ProjectItemGroupElement LastItemGroup(this ProjectRootElement root)
@@ -86,6 +105,18 @@ namespace Microsoft.DotNet.Tools
 
             return false;
         }
+
+        public static IEnumerable<string> Includes(
+            this ProjectItemElement item)
+        {
+            return SplitSemicolonDelimitedValues(item.Include);
+        }
+
+        private static IEnumerable<string> SplitSemicolonDelimitedValues(string combinedValue)
+        {
+            return string.IsNullOrEmpty(combinedValue) ? Enumerable.Empty<string>() : combinedValue.Split(';');
+        }
+
 
         private static bool TryGetFrameworkConditionString(string framework, out string condition)
         {

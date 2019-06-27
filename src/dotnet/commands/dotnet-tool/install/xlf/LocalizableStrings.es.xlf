@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
-        <target state="needs-review-translation">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de herramienta (--tool-path), solo pueden estar una cada vez. Especifique solo una de las opciones: {0}.</target>
+        <target state="translated">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de herramienta (--tool-path), solo pueden estar una cada vez. Especifique solo una de las opciones: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -80,7 +80,7 @@ Si desea crear un manifiesto, utilice "dotnet new tool-manifest", normalmente en
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to install.</source>
-        <target state="needs-review-translation">Especifique un id. de paquete para instalar.</target>
+        <target state="translated">Especifique un id. de paquete para instalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -100,7 +100,7 @@ Si desea crear un manifiesto, utilice "dotnet new tool-manifest", normalmente en
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
-        <target state="needs-review-translation">No se pudo instalar la herramienta "{0}". Póngase en contacto con su creador para obtener asistencia.</target>
+        <target state="translated">No se pudo instalar la herramienta "{0}". Póngase en contacto con su creador para obtener asistencia.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">

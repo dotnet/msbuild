@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to uninstall.</source>
-        <target state="needs-review-translation">Especifique uma ID de Pacote da ferramenta a ser desinstalada.</target>
+        <target state="translated">Especifique uma ID de Pacote de ferramenta a ser desinstalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -64,7 +64,12 @@ Tools are uninstalled using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">A ferramenta '{0}' não está instalada no momento.</target>
+        <target state="translated">Não foi possível encontrar uma ferramenta com a ID '{0}' do pacote. 
+
+As ferramentas são desinstaladas usando a ID do pacote que pode ser diferente 
+do nome da ferramenta que você usa ao chamar a ferramenta. Você pode encontrar os nomes das ferramentas 
+e as Ids de pacote correspondentes para as ferramentas instaladas usando o comando
+'lista de ferramentas do dotnet'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -79,7 +84,7 @@ and the corresponding package Ids for installed tools using the command
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
-        <target state="needs-review-translation">As opções local (--local), global (--global) do caminho da ferramenta (--tool-path) só podem ocorrer uma por vez. Especifique apenas uma das opções: {0}.</target>
+        <target state="translated">As opções local (--local), global (--global) e do caminho da ferramenta (--tool-path) só podem ocorrer uma por vez. Especifique apenas uma das opções: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

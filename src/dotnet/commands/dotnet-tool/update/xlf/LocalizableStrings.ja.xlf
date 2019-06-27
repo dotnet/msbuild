@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Update the tool and the local tool manifest.</source>
-        <target state="needs-review-translation">ツールを更新し、ローカル ツール マニフェストから更新します。</target>
+        <target state="translated">ツールとローカル ツール マニフェストを更新します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to update.</source>
-        <target state="needs-review-translation">更新するツール パッケージ ID を 1 つ指定してください。</target>
+        <target state="translated">更新するツール パッケージの ID を 1 つ指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
         <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">グローバル オプション (--global) またはツール パス オプション (--tool-path) のいずれかを指定してください。</target>
+        <target state="translated">グローバル オプション (--global) またはツール パス オプション (--tool-path) のいずれかを指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
-        <target state="needs-review-translation">(--global) とツール パス オプション (--tool-path) は競合します。どちらか片方のオプションのみを指定してください。</target>
+        <target state="translated">(--global) とツール パス オプション (--tool-path) は競合します。どちらか片方のオプションのみを指定します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -124,7 +124,12 @@ Tools are updated using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">ツール '{0}' は現在、インストールされていません。</target>
+        <target state="translated">パッケージ Id が ' {0} ' のツールが見つかりませんでした。
+
+ツールは、異なるパッケージ Id を使用して更新されます
+ツールを呼び出すときに使用するツール名。ツール名が見つかります
+と、コマンドを使用してインストールされたツールの対応するパッケージ Id
+' dotnet tool list '。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">
