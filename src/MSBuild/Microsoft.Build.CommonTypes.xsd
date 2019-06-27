@@ -262,7 +262,7 @@ elementFormDefault="qualified">
               <xs:element name="TargetLatestRuntimePatch">
                 <xs:annotation>
                   <xs:documentation>
-                    <!-- _locID_text="FrameworkReference_TargetLatestRuntimePatch" _locComment="" -->Controls whether the app will target the latest patch of the runtime.  Defaults to true fro self-contained apps, false otherwise.
+                    <!-- _locID_text="FrameworkReference_TargetLatestRuntimePatch" _locComment="" -->Controls whether the app will target the latest patch of the runtime.  Defaults to true for self-contained apps, false otherwise.
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
@@ -278,7 +278,7 @@ elementFormDefault="qualified">
           <xs:attribute name="TargetLatestRuntimePatch" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>
-                <!-- _locID_text="FrameworkReference_Attribute_TargetLatestRuntimePatch" _locComment="" -->Controls whether the app will target the latest patch of the runtime.  Defaults to true fro self-contained apps, false otherwise.
+                <!-- _locID_text="FrameworkReference_Attribute_TargetLatestRuntimePatch" _locComment="" -->Controls whether the app will target the latest patch of the runtime.  Defaults to true for self-contained apps, false otherwise.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
@@ -2002,7 +2002,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="PackageLicenseExpression" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="PackageLicenseExpression" _locComment="" -->The project license's SPDX identifier. Only OSI and FSF approved licenses can use an identifier. Other licenses should use PackageLicenseFile. Read more about license metadata.</xs:documentation>
+        <xs:documentation><!-- _locID_text="PackageLicenseExpression" _locComment="" -->The project license's SPDX identifier. Only OSI and FSF approved licenses can use an identifier. Other licenses should use PackageLicenseFile.</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="PackageLicenseFile" type="msb:StringPropertyType" substitutionGroup="msb:Property">
