@@ -7,10 +7,10 @@
   </Target>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-                          and $(MicrosoftNETCoreAppRefPackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))">
+                          and $(MicrosoftNETCoreAppPackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))">
     <FrameworkReference
         Update="Microsoft.NETCore.App" 
-        TargetingPackVersion="$(MicrosoftNETCoreAppRefPackageVersion)" 
-        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRefPackageVersion)" />
+        TargetingPackVersion="$(MicrosoftNETCoreAppPackageVersion)" 
+        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppPackageVersion)" />
   </ItemGroup>
 </Project>
