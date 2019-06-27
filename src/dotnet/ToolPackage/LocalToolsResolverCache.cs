@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.ToolPackage
 
                     _fileSystem.File.WriteAllText(
                         packageCacheFile,
-                        JsonSerializer.ToString(existingCacheTable.Concat(diffedRow)));
+                        JsonSerializer.Serialize(existingCacheTable.Concat(diffedRow)));
                 }
                 else
                 {
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.ToolPackage
 
                     _fileSystem.File.WriteAllText(
                         packageCacheFile,
-                        JsonSerializer.ToString(rowsToAdd));
+                        JsonSerializer.Serialize(rowsToAdd));
                 }
             }
         }
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.ToolPackage
             try
             {
                 cacheTable =
-                    JsonSerializer.Parse<CacheRow[]>(_fileSystem.File.ReadAllText(packageCacheFile));
+                    JsonSerializer.Deserialize<CacheRow[]>(_fileSystem.File.ReadAllText(packageCacheFile));
             }
             catch (JsonException)
             {

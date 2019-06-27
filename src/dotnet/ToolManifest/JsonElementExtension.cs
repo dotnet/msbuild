@@ -15,12 +15,12 @@ namespace Microsoft.DotNet.ToolManifest
             value = null;
             if (element.TryGetProperty(name, out JsonElement jsonValue))
             {
-                if (jsonValue.Type != JsonValueType.String)
+                if (jsonValue.ValueKind != JsonValueKind.String)
                 {
                     throw new ToolManifestException(
                         string.Format(
                             LocalizableStrings.UnexpectedTypeInJson,
-                            JsonValueType.String.ToString(),
+                            JsonValueKind.String.ToString(),
                             name));
                 }
                 value = jsonValue.GetString();
@@ -35,12 +35,12 @@ namespace Microsoft.DotNet.ToolManifest
             value = default;
             if (element.TryGetProperty(name, out JsonElement jsonValue))
             {
-                if (jsonValue.Type != JsonValueType.Number)
+                if (jsonValue.ValueKind != JsonValueKind.Number)
                 {
                     throw new ToolManifestException(
                         string.Format(
                             LocalizableStrings.UnexpectedTypeInJson,
-                            JsonValueType.Number.ToString(),
+                            JsonValueKind.Number.ToString(),
                             name));
                 }
                 value = jsonValue.GetInt32();
@@ -55,12 +55,12 @@ namespace Microsoft.DotNet.ToolManifest
             value = default;
             if (element.TryGetProperty(name, out JsonElement jsonValue))
             {
-                if (!(jsonValue.Type == JsonValueType.True || jsonValue.Type == JsonValueType.False))
+                if (!(jsonValue.ValueKind == JsonValueKind.True || jsonValue.ValueKind == JsonValueKind.False))
                 {
                     throw new ToolManifestException(
                         string.Format(
                             LocalizableStrings.UnexpectedTypeInJson,
-                            JsonValueType.True.ToString() + "|" + JsonValueType.False.ToString(),
+                            JsonValueKind.True.ToString() + "|" + JsonValueKind.False.ToString(),
                             name));
                 }
                 value = jsonValue.GetBoolean();
