@@ -19,9 +19,14 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
-        public static string GetCompatibleRid(string targetFramework)
+        public static string GetCompatibleRid(string targetFramework = null)
         {
             string rid = DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
+
+            if (targetFramework == null)
+            {
+                return rid;
+            }
 
             if (string.Equals(targetFramework, "netcoreapp1.0", StringComparison.OrdinalIgnoreCase))
             {
