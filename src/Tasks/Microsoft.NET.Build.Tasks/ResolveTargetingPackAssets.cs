@@ -78,47 +78,19 @@ namespace Microsoft.NET.Build.Tasks
                         }
 
                         string targetingPackDataPath = Path.Combine(targetingPackRoot, "data");
-                        string[] possibleDllFolders = new[]
-                        {
-                            Path.Combine(targetingPackRoot, "ref", targetingPackTargetFramework),
-                            targetingPackDataPath
-                        };
 
-                        string[] possibleManifestPaths = new[]
-                        {
-                            Path.Combine(targetingPackRoot, "build", targetingPackTargetFramework,
-                                targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt"),
-                            Path.Combine(targetingPackDataPath, "PlatformManifest.txt"),
-                            Path.Combine(targetingPackDataPath,
-                                        targetingPack.GetMetadata(MetadataKeys.PackageName) + ".PlatformManifest.txt"),
-                        };
+                        string targetingPackDllFolder = Path.Combine(targetingPackRoot, "ref", targetingPackTargetFramework);
 
-                        string targetingPackDllFolder = possibleDllFolders.First(path =>
-                                    Directory.Exists(path) &&
-                                    Directory.GetFiles(path, "*.dll").Any());
-
-                        string platformManifestPath = possibleManifestPaths.FirstOrDefault(File.Exists);
+                        string platformManifestPath = Path.Combine(targetingPackDataPath, "PlatformManifest.txt");
 
                         string packageOverridesPath = Path.Combine(targetingPackDataPath, "PackageOverrides.txt");
 
                         string frameworkListPath = Path.Combine(targetingPackDataPath, "FrameworkList.xml");
 
-                        if (File.Exists(frameworkListPath))
-                        {
-                            AddReferencesFromFrameworkList(frameworkListPath, targetingPackDllFolder,
-                                                           targetingPack, referencesToAdd);
-                        }
-                        else
-                        {
-                            foreach (var dll in Directory.GetFiles(targetingPackDllFolder, "*.dll"))
-                            {
-                                var reference = CreateReferenceItem(dll, targetingPack);
+                        AddReferencesFromFrameworkList(frameworkListPath, targetingPackDllFolder,
+                                                        targetingPack, referencesToAdd);
 
-                                referencesToAdd.Add(reference);
-                            }
-                        }
-
-                        if (platformManifestPath != null)
+                        if (File.Exists(platformManifestPath))
                         {
                             platformManifests.Add(new TaskItem(platformManifestPath));
                         }
@@ -130,7 +102,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         if (targetingPack.ItemSpec.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
                         {
-                            //  Hardcode this for now.  Load this from the targeting pack once we have "real" targeting packs
+                            //  Hardcode this for now.  Once the targeting pack has PackageOverrides.txt, then delete this code
                             //  https://github.com/dotnet/cli/issues/10581
                             PackageConflictPreferredPackages = "Microsoft.NETCore.App;runtime.linux-x64.Microsoft.NETCore.App;runtime.linux-x64.Microsoft.NETCore.App;runtime.linux-musl-x64.Microsoft.NETCore.App;runtime.linux-musl-x64.Microsoft.NETCore.App;runtime.rhel.6-x64.Microsoft.NETCore.App;runtime.rhel.6-x64.Microsoft.NETCore.App;runtime.osx-x64.Microsoft.NETCore.App;runtime.osx-x64.Microsoft.NETCore.App;runtime.freebsd-x64.Microsoft.NETCore.App;runtime.freebsd-x64.Microsoft.NETCore.App;runtime.win-x86.Microsoft.NETCore.App;runtime.win-x86.Microsoft.NETCore.App;runtime.win-arm.Microsoft.NETCore.App;runtime.win-arm.Microsoft.NETCore.App;runtime.win-arm64.Microsoft.NETCore.App;runtime.win-arm64.Microsoft.NETCore.App;runtime.linux-arm.Microsoft.NETCore.App;runtime.linux-arm.Microsoft.NETCore.App;runtime.linux-arm64.Microsoft.NETCore.App;runtime.linux-arm64.Microsoft.NETCore.App;runtime.tizen.4.0.0-armel.Microsoft.NETCore.App;runtime.tizen.4.0.0-armel.Microsoft.NETCore.App;runtime.tizen.5.0.0-armel.Microsoft.NETCore.App;runtime.tizen.5.0.0-armel.Microsoft.NETCore.App;runtime.win-x64.Microsoft.NETCore.App;runtime.win-x64.Microsoft.NETCore.App";
                         }
