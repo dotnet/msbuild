@@ -7,12 +7,12 @@ using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {
-    public class ResolveFrameworkReferencesTests
+    public class ProcessFrameworkReferencesTests
     {
         [Fact]
         public void It_resolves_FrameworkReferences()
         {
-            var task = new ResolveFrameworkReferences();
+            var task = new ProcessFrameworkReferences();
 
             task.EnableTargetingPackDownload = true;
             task.TargetFrameworkIdentifier = ".NETCoreApp";
@@ -48,7 +48,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void It_does_not_resolve_FrameworkReferences_if_targetframework_doesnt_match()
         {
-            var task = new ResolveFrameworkReferences();
+            var task = new ProcessFrameworkReferences();
 
             task.TargetFrameworkIdentifier = ".NETCoreApp";
             task.TargetFrameworkVersion = "2.0";

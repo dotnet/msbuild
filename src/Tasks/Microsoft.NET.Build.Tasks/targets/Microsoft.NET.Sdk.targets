@@ -25,7 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="Microsoft.NET.Sdk.DefaultItems.targets" />
 
-  <Import Project="Microsoft.NET.Sdk.TargetingPackResolution.targets" />
+  <Import Project="Microsoft.NET.Sdk.FrameworkReferenceResolution.targets" />
 
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -379,7 +379,7 @@ Copyright (c) .NET Foundation. All rights reserved.
              FormatArguments="$(_DotNetAppHostExecutableName)" />
 
     <PropertyGroup>
-      <!-- AppHostSourcePath will be set from ResolveFrameworkReferences if not using the apphost from the assets file -->
+      <!-- AppHostSourcePath will be set from ProcessFrameworkReferences if not using the apphost from the assets file -->
       <AppHostSourcePath Condition="'$(UseAppHostFromAssetsFile)' == 'true'">@(_NativeRestoredAppHostNETCore)</AppHostSourcePath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(UseAppHostFromAssetsFile)' == 'false' Or '@(_NativeRestoredAppHostNETCore)' != ''">

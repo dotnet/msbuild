@@ -137,7 +137,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (projectContext.RuntimeFrameworks == null || projectContext.RuntimeFrameworks.Length == 0)
                 {
-                    //  If there are no RuntimeFrameworks (which would be set in the ResolveFrameworkReference task based
+                    //  If there are no RuntimeFrameworks (which would be set in the ProcessFrameworkReferences task based
                     //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
                     //  the runtimeconfig
                     RuntimeConfigFramework framework = new RuntimeConfigFramework();

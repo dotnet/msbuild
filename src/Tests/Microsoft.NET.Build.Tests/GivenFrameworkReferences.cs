@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
 using FluentAssertions;
+using Microsoft.Build.Construction;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -666,7 +667,76 @@ namespace FrameworkReferenceTest
             }
         }
 
-        //  TODO: convert to Theory with self-contained or not
+        [WindowsOnlyFact]
+        public void ResolvedFrameworkReferences_are_generated()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ResolvedFrameworkReferenceTest",
+                IsSdkProject = true,
+                IsExe = true,
+                TargetFrameworks = "netcoreapp3.0",
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+            testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, projectFolder);
+
+            var expectedMetadata = new[]
+            {
+                "OriginalItemSpec",
+                "IsImplicitlyDefined",
+                "TargetingPackName",
+                "TargetingPackVersion",
+                "TargetingPackPath",
+                "RuntimePackName",
+                "RuntimePackVersion",
+                "RuntimePackPath"
+            };
+
+            var getValuesCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks,
+                "ResolvedFrameworkReference", GetValuesCommand.ValueType.Item);
+            getValuesCommand.DependsOnTargets = "ResolveFrameworkReferences";
+            getValuesCommand.MetadataNames.AddRange(expectedMetadata);
+
+            getValuesCommand.Execute().Should().Pass();
+
+            var resolvedFrameworkReferences = getValuesCommand.GetValuesWithMetadata();
+
+            resolvedFrameworkReferences.Select(rfr => rfr.value)
+                .Should()
+                .BeEquivalentTo(
+                    "Microsoft.NETCore.App",
+                    "Microsoft.AspNetCore.App",
+                    "Microsoft.WindowsDesktop.App");
+
+            foreach (var resolvedFrameworkReference in resolvedFrameworkReferences)
+            {
+                foreach (var expectedMetadataName in expectedMetadata)
+                {
+                    if (expectedMetadataName == "IsImplicitlyDefined" &&
+                        resolvedFrameworkReference.value != "Microsoft.NETCore.App")
+                    {
+                        continue;
+                    }
+
+                    resolvedFrameworkReference.metadata[expectedMetadataName]
+                        .Should()
+                        .NotBeNullOrEmpty(because:
+                            $"ResolvedFrameworkReference for {resolvedFrameworkReference.value} should have " +
+                            $"{expectedMetadataName} metadata");
+                }
+            }
+
+        }
+
         [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
@@ -839,7 +909,7 @@ namespace FrameworkReferenceTest
                     itemGroup.Add(knownAppHostPackUpdate);
 
                     string writeResolvedVersionsTarget = @"
-<Target Name=`WriteResolvedVersions` DependsOnTargets=`PrepareForBuild;ResolveFrameworkReferences`>
+<Target Name=`WriteResolvedVersions` DependsOnTargets=`PrepareForBuild;ProcessFrameworkReferences`>
     <ItemGroup>
       <LinesToWrite Include=`RuntimeFramework%09%(RuntimeFramework.Identity)%09%(RuntimeFramework.Version)`/>
       <LinesToWrite Include=`PackageDownload%09%(PackageDownload.Identity)%09%(PackageDownload.Version)`/>

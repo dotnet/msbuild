@@ -59,14 +59,14 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            var normalizedTargetFrameworkVersion = ResolveFrameworkReferences.NormalizeVersion(new Version(TargetFrameworkVersion));
+            var normalizedTargetFrameworkVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(TargetFrameworkVersion));
 
             var knownAppHostPacksForTargetFramework = KnownAppHostPacks
                 .Where(appHostPack =>
                 {
                     var packTargetFramework = NuGetFramework.Parse(appHostPack.GetMetadata("TargetFramework"));
                     return packTargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
-                        ResolveFrameworkReferences.NormalizeVersion(packTargetFramework.Version) == normalizedTargetFrameworkVersion;
+                        ProcessFrameworkReferences.NormalizeVersion(packTargetFramework.Version) == normalizedTargetFrameworkVersion;
                 })
                 .ToList();
 
