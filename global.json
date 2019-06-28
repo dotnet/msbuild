@@ -1,6 +1,6 @@
 {
   "tools": {
-    "dotnet": "3.0.100-preview7-012358",
+    "dotnet": "3.0.100-preview7-012639",
     "runtimes": {
       "dotnet": [
         "$(MicrosoftNETCoreAppPackageVersion)"
