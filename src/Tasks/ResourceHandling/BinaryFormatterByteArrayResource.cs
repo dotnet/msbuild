@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
             else
             {
-                ErrorUtilities.ThrowInternalError($"{nameof(BinaryFormatterByteArrayResource)} was asked to serialize to a {writer.GetType().ToString()}");
+                throw new PreserializedResourceWriterRequiredException();
             }
         }
     }
