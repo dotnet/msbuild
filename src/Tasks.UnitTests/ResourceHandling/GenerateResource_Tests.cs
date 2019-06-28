@@ -424,6 +424,111 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public void WritingNonString_WithoutProperyOrSystemResourcesExtensions_FailsUnlessRunningOnFullFrameworkWithoutProperty(
+            bool usePreserialized,
+            bool useSystemResourcesExtensions)
+        {
+            string bitmap = Utilities.CreateWorldsSmallestBitmap();
+
+            string resxFile = Utilities.WriteTestResX(
+                useType: false,
+                bitmap,
+                extraToken: null,
+                useInvalidType: false);
+
+            GenerateResource t = Utilities.CreateTask(
+                _output,
+                usePreserialized,
+                _env,
+                useSystemResourcesExtensions);
+ 
+            try
+            {
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+#if NETFRAMEWORK
+                if (!usePreserialized)
+                {
+                    t.Execute().ShouldBeTrue();
+                    Utilities.AssertLogNotContainsResource(t, "GenerateResource.PreserializedResourcesRequiresProperty");
+                    Utilities.AssertLogNotContainsResource(t, "GenerateResource.PreserializedResourcesRequiresExtensions");
+                    return;
+                }
+#endif
+
+                t.Execute().ShouldBeFalse();
+
+                if (usePreserialized)
+                {
+                    Utilities.AssertLogNotContainsResource(t, "GenerateResource.PreserializedResourcesRequiresProperty");
+                }
+                else
+                {
+                    Utilities.AssertLogContainsResource(t, "GenerateResource.PreserializedResourcesRequiresProperty");
+                }
+
+                if (useSystemResourcesExtensions)
+                {
+                    Utilities.AssertLogNotContainsResource(t, "GenerateResource.PreserializedResourcesRequiresExtensions");
+                }
+                else
+                {
+                    Utilities.AssertLogContainsResource(t, "GenerateResource.PreserializedResourcesRequiresExtensions");
+                }
+            }
+            finally
+            {
+                File.Delete(t.Sources[0].ItemSpec);
+                File.Delete(bitmap);
+
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    File.Delete(item.ItemSpec);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WritingString_WithoutSystemResourcesExtensions_Succeeds(bool usePreserialized)
+        {
+            string resxFile = Utilities.WriteTestResX(
+                useType: false,
+                linkedBitmap: null,
+                extraToken: null,
+                useInvalidType: false);
+
+            GenerateResource t = Utilities.CreateTask(
+                _output,
+                usePreserialized,
+                _env,
+                useSystemResourcesExtensions: false);
+
+            try
+            {
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+                t.Execute().ShouldBeTrue();
+
+                Utilities.AssertLogNotContainsResource(t, "GenerateResource.PreserializedResourcesRequiresProperty");
+                Utilities.AssertLogNotContainsResource(t, "GenerateResource.PreserializedResourcesRequiresExtensions");
+            }
+            finally
+            {
+                File.Delete(t.Sources[0].ItemSpec);
+
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    File.Delete(item.ItemSpec);
+                }
+            }
+        }
+
+        [Theory]
         [MemberData(nameof(Utilities.UsePreserializedResourceStates), MemberType = typeof(Utilities))]
         public void ForceOutOfDateLinkedByDeletion(bool usePreserialized)
         {
@@ -3382,7 +3487,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// This method creates a GenerateResource task and performs basic setup on it, e.g. BuildEngine
         /// </summary>
         /// <param name="output"></param>
-        public static GenerateResource CreateTask(ITestOutputHelper output, bool usePreserialized = false, TestEnvironment env = null)
+        public static GenerateResource CreateTask(
+            ITestOutputHelper output,
+            bool usePreserialized = false,
+            TestEnvironment env = null,
+            bool? useSystemResourcesExtensions = null)
         {
             // always use the internal ctor that says don't perform separate app domain check
             GenerateResource t = new GenerateResource();
@@ -3394,7 +3503,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             if (usePreserialized)
             {
                 t.UsePreserializedResources = usePreserialized;
+            }
 
+            if (useSystemResourcesExtensions ?? usePreserialized)
+            {
                 // Synthesize a reference that looks close enough to System.Resources.Extensions
                 // to pass the "is it ok to use preserialized resources?" check
 

@@ -3360,30 +3360,7 @@ namespace Microsoft.Build.Tasks
                     break;
 
                 case Format.Binary:
-                    if (_usePreserializedResources)
-                    {
-                        // check TF/references and error if System.Resources.Extensions not available
-                        PopulateAssemblyNames();
-                        bool foundExtensions = false;
-                        foreach (var assemblyName in _assemblyNames)
-                        {
-                            if (assemblyName.Name == "System.Resources.Extensions")
-                            {
-                                foundExtensions = true;
-                            }
-                        }
-
-                        if (!foundExtensions)
-                        {
-                            _logger.LogErrorFromResources("GenerateResource.PreserializedResourcesRequiresExtensions");
-                        }
-
-                        WriteResources(reader, new PreserializedResourceWriter(File.OpenWrite(filename))); // closes writer for us
-                    }
-                    else
-                    {
-                        WriteResources(reader, new ResourceWriter(File.OpenWrite(filename))); // closes writer for us
-                    }
+                    WriteBinaryResources(reader, filename);
                     break;
 
                 default:
@@ -3393,6 +3370,67 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        private void WriteBinaryResources(ReaderInfo reader, string filename)
+        {
+            if (_usePreserializedResources && HaveSystemResourcesExtensionsReference)
+            {
+                WriteResources(reader, new PreserializedResourceWriter(File.OpenWrite(filename))); // closes writer for us
+                return;
+            }
+
+            try
+            {
+                WriteResources(reader, new ResourceWriter(File.OpenWrite(filename))); // closes writer for us
+            }
+            catch (PreserializedResourceWriterRequiredException)
+            {
+                if (!_usePreserializedResources)
+                { 
+                    _logger.LogErrorFromResources("GenerateResource.PreserializedResourcesRequiresProperty");
+                }
+
+                if (!HaveSystemResourcesExtensionsReference)
+                {
+                    _logger.LogErrorFromResources("GenerateResource.PreserializedResourcesRequiresExtensions");
+                }
+
+                // one of the above should have been logged as we would have used preserialized writer otherwise.
+                Debug.Assert(_logger.HasLoggedErrors);
+            }
+        }
+
+        private bool? _haveSystemResourcesExtensionsReference;
+
+        private bool HaveSystemResourcesExtensionsReference
+        {
+            get
+            {
+                if (_haveSystemResourcesExtensionsReference.HasValue)
+                {
+                    return _haveSystemResourcesExtensionsReference.Value;
+                }
+
+                if (_assemblyFiles == null)
+                {
+                    _haveSystemResourcesExtensionsReference = false;
+                    return false;
+                }
+
+                PopulateAssemblyNames();
+
+                foreach (var assemblyName in _assemblyNames)
+                {
+                    if (assemblyName.Name == "System.Resources.Extensions")
+                    {
+                        _haveSystemResourcesExtensionsReference = true;
+                        return true;
+                    }
+                }
+
+                _haveSystemResourcesExtensionsReference = false;
+                return false;
+            }
+        }
 
         /// <summary>
         /// Create a strongly typed resource class

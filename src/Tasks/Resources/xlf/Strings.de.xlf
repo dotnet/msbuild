@@ -1004,6 +1004,11 @@
         <target state="new">MSB3822: Preserialized resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</target>
         <note>{StrBegin="MSB3822: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresProperty">
+        <source>MSB3823: Preserialized resources require the property GenerateResourceUsePreserializedResources to be set to true.</source>
+        <target state="new">MSB3823: Preserialized resources require the property GenerateResourceUsePreserializedResources to be set to true.</target>
+        <note>{StrBegin="MSB3823: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
         <target state="translated">MSB3552: Die Ressourcendatei "{0}" wurde nicht gefunden.</target>
