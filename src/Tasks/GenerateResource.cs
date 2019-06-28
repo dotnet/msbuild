@@ -3420,7 +3420,7 @@ namespace Microsoft.Build.Tasks
 
                 foreach (var assemblyName in _assemblyNames)
                 {
-                    if (assemblyName.Name == "System.Resources.Extensions")
+                    if (string.Equals(assemblyName.Name, "System.Resources.Extensions", StringComparison.OrdinalIgnoreCase))
                     {
                         _haveSystemResourcesExtensionsReference = true;
                         return true;
