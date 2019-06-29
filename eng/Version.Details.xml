@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19326.2">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>bbddc61f0be0bb3379405005a01677f9c59d7193</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview7-27826-20">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>ee0c7ead1a46f06f98aff9102b785f532b71da9c</Sha>
-    </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19320.1">
-      <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>cd8a65408312bf4a92de7e97948782f9f88471e6</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview7.19328.4">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
