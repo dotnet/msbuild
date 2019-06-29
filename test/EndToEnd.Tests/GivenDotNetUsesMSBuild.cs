@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 {
     public class GivenDotNetUsesMSBuild : TestBase
     {
-        [Fact(Skip = "Won't work until Microsoft.TemplateSearch.Common problems are resolved")]
+        [Fact]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             using (DisposableDirectory directory = Temp.CreateDirectory())

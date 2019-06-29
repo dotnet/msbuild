@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.New.Tests
 {
     public class NewCommandTests : TestBase
     {
-        [Fact(Skip = "Won't work until Microsoft.TemplateSearch.Common problems are resolved")]
+        [Fact]
         public void WhenSwitchIsSkippedThenItPrintsError()
         {
             var cmd = new DotnetCommand().Execute("new Web1.1");
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.New.Tests
             }
         }
 
-        [Fact(Skip = "Won't work until Microsoft.TemplateSearch.Common problems are resolved")]
+        [Fact(Skip = "https://github.com/dotnet/templating/issues/1971")]
         public void WhenTemplateNameIsNotUniquelyMatchedThenItIndicatesProblemToUser()
         {
             var cmd = new DotnetCommand().Execute("new c");

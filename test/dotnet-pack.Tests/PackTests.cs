@@ -255,7 +255,7 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
             Assert.Equal("true", node.Value);
         }
 
-        [Fact(Skip = "Won't work until Microsoft.TemplateSearch.Common problems are resolved")]
+        [Fact]
         public void ItPacksAppWhenRestoringToSpecificPackageDirectory()
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
