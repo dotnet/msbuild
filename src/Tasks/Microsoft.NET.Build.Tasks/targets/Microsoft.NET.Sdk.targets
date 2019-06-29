@@ -522,7 +522,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <None Include="$(AppHostIntermediatePath)">
         <Link>$(AssemblyName)$(_NativeExecutableExtension)</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <!-- Always copy the AppHost because the contents of the apphost binary can change during the publish step (due to single-file bundling). 
+             Always copying the apphost ensures that that the sequence
+                 dotnet publish /p:PublishSingleFile=true 
+                 dotnet publish /p:PublishSingleFile=false
+             places the correct unbundled apphost in the publish directory. -->
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
       </None>
     </ItemGroup>
     

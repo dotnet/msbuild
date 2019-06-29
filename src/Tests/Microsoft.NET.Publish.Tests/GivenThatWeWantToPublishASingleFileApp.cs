@@ -227,5 +227,52 @@ namespace Microsoft.NET.Publish.Tests
             fileWriteTimeAfterSecondRun.Should().Be(fileWriteTimeAfterFirstRun);
         }
 
+        [Fact]
+        public void It_rewrites_the_apphost_for_single_file_publish()
+        {
+            var publishCommand = GetPublishCommand();
+            var appHostPath = Path.Combine(GetPublishDirectory(publishCommand).FullName, SingleFile);
+            var singleFilePath = appHostPath;
+
+            publishCommand
+                .Execute(RuntimeIdentifier, FrameworkDependent)
+                .Should()
+                .Pass();
+            var appHostSize = new FileInfo(appHostPath).Length;
+
+            WaitForUtcNowToAdvance();
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier, FrameworkDependent)
+                .Should()
+                .Pass();
+            var singleFileSize = new FileInfo(singleFilePath).Length;
+
+            singleFileSize.Should().BeGreaterThan(appHostSize);
+        }
+
+        [Fact]
+        public void It_rewrites_the_apphost_for_non_single_file_publish()
+        {
+            var publishCommand = GetPublishCommand();
+            var appHostPath = Path.Combine(GetPublishDirectory(publishCommand).FullName, SingleFile);
+            var singleFilePath = appHostPath;
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier, FrameworkDependent)
+                .Should()
+                .Pass();
+            var singleFileSize = new FileInfo(singleFilePath).Length;
+
+            WaitForUtcNowToAdvance();
+
+            publishCommand
+                .Execute(RuntimeIdentifier, FrameworkDependent)
+                .Should()
+                .Pass();
+            var appHostSize = new FileInfo(appHostPath).Length;
+
+            appHostSize.Should().BeLessThan(singleFileSize);
+        }
     }
 }
