@@ -116,6 +116,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
         [Theory]
         [InlineData("--self-contained=false")]
+        [InlineData("--no-self-contained")]
         public void ItPublishesFrameworkDependentWithRid(string args)
         {
             var testAppName = "MSBuildTestApp";
@@ -145,6 +146,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Theory]
         [InlineData("--self-contained=false")]
         [InlineData(null)]
+        [InlineData("--no-self-contained")]
         public void ItPublishesFrameworkDependentWithoutRid(string args)
         {
             var testAppName = "MSBuildTestApp";
@@ -162,6 +164,29 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Theory]
+        [InlineData("--self-contained --no-self-contained")]
+        [InlineData("--self-contained=true --no-self-contained")]
+        public void ItFailsToPublishWithConflictingArgument(string args)
+        {
+            var testAppName = "MSBuildTestApp";
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance($"PublishApp_{rid ?? "none"}_{args ?? "none"}")
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root;
+
+            new PublishCommand()
+                .WithRuntime(rid)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute(args)
+                .Should().Fail()
+                    .And.HaveStdErrContaining(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
         }
 
         private DirectoryInfo PublishApp(string testAppName, string rid, string args = null)

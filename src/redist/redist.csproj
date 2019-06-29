@@ -75,6 +75,12 @@
           DestinationFiles="@(SdksContent -> '$(PublishDir)Sdks/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
+  <Target Name="CopyRuntimeConfiguration"
+          AfterTargets="Publish">
+     <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)"
+           DestinationFiles="$(PublishDir)dotnet.runtimeconfig.json" />
+  </Target>
+
   <Target Name="ChmodPublishDir"
           AfterTargets="PublishMSBuildExtensions"
           Condition=" '$(OS)' != 'Windows_NT' ">

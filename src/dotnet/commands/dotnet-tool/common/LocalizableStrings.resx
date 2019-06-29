@@ -118,13 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="NoManifestGuide" xml:space="preserve">
-    <value>If you intended to perform an action on a global tool, use the `--global` option for the command.</value>
+    <value>If you intended to perform the action on a global tool, use the `--global` option for the command.</value>
   </data>
   <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
     <value>Specifying the tool manifest option (--tool-manifest) is only valid with the local option (--local or the default).</value>
   </data>
   <data name="SamePackageIdInOtherManifestFile" xml:space="preserve">
-    <value>Warning: there are other manifest files in the current directory that could affect local tools. The following files are not changed:
+    <value>Warning: There are other manifest files in the directory hierarchy that will affect this local tool. The following files have not been changed:
 {0}</value>
   </data>
 </root>

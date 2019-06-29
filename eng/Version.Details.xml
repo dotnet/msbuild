@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19303.2">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="1.0.2-beta5.19326.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>3f2e65dd99395dfb5741d943158243bc77c4ac80</Sha>
+      <Sha>bbddc61f0be0bb3379405005a01677f9c59d7193</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview7-27826-20">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>ee0c7ead1a46f06f98aff9102b785f532b71da9c</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview7.19328.5">
+      <Uri>https://github.com/aspnet/AspNetCore</Uri>
+      <Sha>bcb59fa5c9082de1a53234edfecd3b918c5340e6</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19301.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19327.39">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>8fd0b50b9d689e8d87ab202f11b7c9fbe81271c4</Sha>
+      <Sha>247c0290c554a68dd3e560dd88fb0da26353d9d7</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview6.19303.1">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview7.19326.5">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>9a92095d8ad0112291573385dc8f67adfdfe9322</Sha>
+      <Sha>bc5ef9f7d32f3e5d443100671b1f427fe738b318</Sha>
     </Dependency>
-    <!-- We don't want migrate being updated by DARC just yet due to the NuGet
-    discrepancy between it and the CLI. We will fix that for P3 -->
-    <!-- <Dependency Name="Microsoft.DotNet.ProjectJsonMigration" Version="1.3.2-preview.19074.1">
-      <Uri>https://github.com/dotnet/cli-migrate</Uri>
-      <Sha>37e3a01aa1df320a286b0a858876f9994fb6bb18</Sha>
-    </Dependency> -->
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
       <Uri>https://github.com/dotnet/cliCommandLineParser</Uri>
       <Sha>0e89c2116ad28e404ba56c14d1c3f938caa25a01</Sha>

@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToBoolean">
         <source>Could not convert the value of property '{0}' to a boolean.</source>
-        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <target state="translated">無法將屬性 '{0}' 的值轉換為布林值。</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <target state="translated">無法將屬性 '{0}' 的值轉換為字串。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
-        <target state="needs-review-translation">建置失敗。請修正建置錯誤後再執行一次。</target>
+        <target state="translated">建置失敗。請修正建置錯誤後，再執行一次。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -50,8 +50,8 @@
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">無法執行您的專案
-您的專案以多重架構為目標。請使用 '{0}' 來指定要執行的架構。</target>
+        <target state="translated">無法執行您的專案
+您的專案以多重架構為目標。請使用 '{0}' 指定要執行的架構。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
@@ -59,9 +59,9 @@ Your project targets multiple frameworks. Specify which framework to run using '
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">無法執行您的專案。
+        <target state="translated">無法執行您的專案。
 請確定您有可執行的專案類型，同時確定 '{0}' 支援此專案。
-可執行專案應該以可執行的 TFM (例如，netcoreapp2.0) 為目標，且具有 OutputType 'Exe'。
+可執行專案應以可執行的 TFM (例如，netcoreapp2.0) 為目標，且 OutputType 為 'Exe'。
 目前的 {1} 為 '{2}'。</target>
         <note />
       </trans-unit>
@@ -163,7 +163,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">
         <source>The property '{0}' must be an object if it is specified.</source>
-        <target state="new">The property '{0}' must be an object if it is specified.</target>
+        <target state="translated">如果屬性 '{0}' 受到指定，則其必須為物件。</target>
         <note />
       </trans-unit>
     </body>

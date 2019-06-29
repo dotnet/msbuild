@@ -19,6 +19,7 @@ using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Config;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Macros;
 using Microsoft.TemplateEngine.Utils;
+using Microsoft.TemplateSearch.Common.TemplateUpdate;
 
 namespace Microsoft.DotNet.Tools.New
 {
@@ -61,6 +62,7 @@ namespace Microsoft.DotNet.Tools.New
             {
                 typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,
                 typeof(ConditionalConfig).GetTypeInfo().Assembly,
+                typeof(NupkgUpdater).GetTypeInfo().Assembly
             });
 
             var preferences = new Dictionary<string, string>

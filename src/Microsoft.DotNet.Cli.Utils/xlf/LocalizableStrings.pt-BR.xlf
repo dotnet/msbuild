@@ -99,7 +99,7 @@ Possíveis motivos para isso incluem:
         <source>Cannot find command 'dotnet {0}', run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="needs-review-translation">Não é possível encontrar o comando 'dotnet {0}', execute o comando a seguir para instalar
+        <target state="translated">Não é possível encontrar o comando 'dotnet {0}'. Execute o comando a seguir para instalar
 
 dotnet tool install --global {1}</target>
         <note />

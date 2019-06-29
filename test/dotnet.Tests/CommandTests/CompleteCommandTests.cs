@@ -32,7 +32,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 "fsi",
                 "help",
                 "list",
-                "migrate",
                 "msbuild",
                 "new",
                 "nuget",
@@ -95,7 +94,9 @@ namespace Microsoft.DotNet.Tests.Commands
                 "-lang",
                 "-n",
                 "-o",
-                "-u"
+                "-u",
+                "--update-check",
+                "--update-apply"
             };
 
             var reporter = new BufferedReporter();

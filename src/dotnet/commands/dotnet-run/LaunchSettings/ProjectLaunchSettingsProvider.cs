@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                 }
                 else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.EnvironmentVariables), StringComparison.OrdinalIgnoreCase))
                 {
-                    if (property.Value.Type != JsonValueType.Object)
+                    if (property.Value.ValueKind != JsonValueKind.Object)
                     {
                         return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.ValueMustBeAnObject, property.Name));
                     }
@@ -88,15 +88,15 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         private static bool TryGetBooleanValue(JsonElement element, out bool value)
         {
-            switch (element.Type)
+            switch (element.ValueKind)
             {
-                case JsonValueType.True:
+                case JsonValueKind.True:
                     value = true;
                     return true;
-                case JsonValueType.False:
+                case JsonValueKind.False:
                     value = false;
                     return true;
-                case JsonValueType.Number:
+                case JsonValueKind.Number:
                     if (element.TryGetDouble(out var doubleValue))
                     {
                         value = doubleValue != 0;
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     }
                     value = false;
                     return false;
-                case JsonValueType.String:
+                case JsonValueKind.String:
                     return bool.TryParse(element.GetString(), out value);
                 default:
                     value = false;
@@ -114,21 +114,21 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         private static bool TryGetStringValue(JsonElement element, out string value)
         {
-            switch (element.Type)
+            switch (element.ValueKind)
             {
-                case JsonValueType.True:
+                case JsonValueKind.True:
                     value = bool.TrueString;
                     return true;
-                case JsonValueType.False:
+                case JsonValueKind.False:
                     value = bool.FalseString;
                     return true;
-                case JsonValueType.Null:
+                case JsonValueKind.Null:
                     value = string.Empty;
                     return true;
-                case JsonValueType.Number:
+                case JsonValueKind.Number:
                     value = element.GetRawText();
                     return false;
-                case JsonValueType.String:
+                case JsonValueKind.String:
                     value = element.GetString();
                     return true;
                 default:

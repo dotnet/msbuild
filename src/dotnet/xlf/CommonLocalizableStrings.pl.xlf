@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
-        <target state="needs-review-translation">Znaleziono więcej niż jeden projekt w lokalizacji „{0}”. Określ, który ma zostać użyty.</target>
+        <target state="translated">Znaleziono więcej niż jeden projekt w lokalizacji „{0}”. Określ, który ma zostać użyty.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
         <source>Specify at least one {0}.</source>
-        <target state="needs-review-translation">Określ co najmniej jeden element {0}.</target>
+        <target state="translated">Określ co najmniej jeden element {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConnectWithTheServer">
@@ -394,7 +394,7 @@
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
         <source>Specify a version of the package.</source>
-        <target state="needs-review-translation">Określ wersję pakietu.</target>
+        <target state="translated">Określ wersję pakietu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotExist">
@@ -489,12 +489,12 @@
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
         <source>Specify new version of the package.</source>
-        <target state="needs-review-translation">Określ nową wersję pakietu.</target>
+        <target state="translated">Określ nową wersję pakietu.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
         <source>Specify which package to update.</source>
-        <target state="needs-review-translation">Określ, który pakiet ma zostać zaktualizowany.</target>
+        <target state="translated">Określ, który pakiet ma zostać zaktualizowany.</target>
         <note />
       </trans-unit>
       <trans-unit id="NothingToUpdate">
@@ -524,7 +524,7 @@
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
         <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
-        <target state="needs-review-translation">Pomyślnie utworzono szablon {0}. Uruchom polecenie „dotnet restore”, aby rozpocząć pracę.</target>
+        <target state="translated">Pomyślnie utworzono szablon {0}. Uruchom polecenie „dotnet restore”, aby rozpocząć pracę.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInstalledSuccesfully">
@@ -544,12 +544,12 @@
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
         <source>Specified name {0} already exists. Specify a different name.</source>
-        <target state="needs-review-translation">Podana nazwa {0} już istnieje. Podaj inną nazwę.</target>
+        <target state="translated">Podana nazwa {0} już istnieje. Podaj inną nazwę.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
         <source>Specified alias {0} already exists. Specify a different alias.</source>
-        <target state="needs-review-translation">Podany alias {0} już istnieje. Podaj inny alias.</target>
+        <target state="translated">Podany alias {0} już istnieje. Podaj inny alias.</target>
         <note />
       </trans-unit>
       <trans-unit id="MandatoryParameterMissing">
@@ -569,7 +569,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Specify which one to use.</source>
-        <target state="needs-review-translation">Znaleziono więcej niż jeden plik rozwiązania w lokalizacji {0}. Określ, który ma zostać użyty.</target>
+        <target state="translated">Znaleziono więcej niż jeden plik rozwiązania w lokalizacji {0}. Określ, który ma zostać użyty.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -589,7 +589,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="needs-review-translation">Nie można dodać projektu „{0}” z powodu niezgodnych platform docelowych dwóch projektów. Sprawdź projekt, który próbujesz dodać, i zweryfikuj, czy jest zgodny z następującymi platformami docelowymi:</target>
+        <target state="translated">Nie można dodać projektu „{0}” z powodu niezgodnych platform docelowych dwóch projektów. Sprawdź projekt, który próbujesz dodać, i zweryfikuj, czy jest zgodny z następującymi platformami docelowymi:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -606,7 +606,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
-        <target state="needs-review-translation">Projekt „{0}” ma nieznany typ projektu i nie można go dodać do pliku rozwiązania. Skontaktuj się z dostawcą zestawu SDK w celu uzyskania pomocy technicznej.</target>
+        <target state="translated">Projekt „{0}” ma nieznany typ projektu i nie można go dodać do pliku rozwiązania. Skontaktuj się z dostawcą zestawu SDK w celu uzyskania pomocy technicznej.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -835,22 +835,22 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
         <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
-        <target state="needs-review-translation">Wersja formatu jest nowsza niż obsługiwana. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Zaktualizuj zestaw SDK.</target>
+        <target state="translated">Wersja formatu jest nowsza niż obsługiwana. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Zaktualizuj zestaw SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
         <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
-        <target state="needs-review-translation">Wersja formatu jest nieprawidłowo sformułowana. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Skontaktuj się z autorem narzędzia.</target>
+        <target state="translated">Wersja formatu jest nieprawidłowo sformułowana. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Skontaktuj się z autorem narzędzia.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
         <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
-        <target state="needs-review-translation">Brak wersji formatu. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Skontaktuj się z autorem narzędzia.</target>
+        <target state="translated">Brak wersji formatu. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Skontaktuj się z autorem narzędzia.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
         <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="needs-review-translation">Nie można dodać katalogu „{0}” do zmiennej środowiskowej PATH. Dodaj ten katalog do zmiennej PATH, aby używać narzędzi zainstalowanych za pomocą polecenia „dotnet tool install”.</target>
+        <target state="translated">Nie można dodać katalogu „{0}” do zmiennej środowiskowej PATH. Dodaj ten katalog do zmiennej PATH, aby używać narzędzi zainstalowanych za pomocą polecenia „dotnet tool install”.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">

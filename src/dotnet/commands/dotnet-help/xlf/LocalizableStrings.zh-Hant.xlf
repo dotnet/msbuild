@@ -97,11 +97,6 @@
         <target state="translated">建立 NuGet 套件。</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">將 project.json 專案移轉至 MSBuild 專案。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">專案修改命令</target>
@@ -159,7 +154,7 @@
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">指定的命令 '{0}' 並非有效的 SDK 命令。請指定有效的 SDK 命令。如需詳細資訊，請執行 dotnet help。</target>
+        <target state="translated">指定的命令 '{0}' 並非有效的 SDK 命令。請指定有效的 SDK 命令。如需詳細資訊，請執行 dotnet help。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">

@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="CouldNotConvertToBoolean">
         <source>Could not convert the value of property '{0}' to a boolean.</source>
-        <target state="new">Could not convert the value of property '{0}' to a boolean.</target>
+        <target state="translated">プロパティ ' {0} ' の値をブール値に変換できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConvertToString">
         <source>Could not convert the value of property '{0}' to a string.</source>
-        <target state="new">Could not convert the value of property '{0}' to a string.</target>
+        <target state="translated">プロパティ '{0}' の値を文字列に変換できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
-        <target state="needs-review-translation">ビルドに失敗しました。ビルド エラーを修正して、もう一度実行してください。</target>
+        <target state="translated">ビルドに失敗しました。ビルド エラーを修正して、もう一度実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
@@ -50,7 +50,7 @@
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">プロジェクトを実行できません
+        <target state="translated">プロジェクトを実行できません
 プロジェクトは複数のフレームワークを対象としています。'{0}' を使用して、実行するフレームワークを指定してください。</target>
         <note />
       </trans-unit>
@@ -59,8 +59,8 @@ Your project targets multiple frameworks. Specify which framework to run using '
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">プロジェクトを実行できません。
-プロジェクトの種類が実行可能であること、このプロジェクトが '{0}' でサポートされていることを確認してください。
+        <target state="translated">プロジェクトを実行できません。
+プロジェクト タイプが実行可能であること、このプロジェクトが '{0}' でサポートされていることを確認してください。
 実行可能なプロジェクトは実行可能な TFM (たとえば、netcoreapp2.0) を対象としている必要があり、OutputType 'Exe' が必要です。
 現在の {1} は '{2}' です。</target>
         <note />
@@ -163,7 +163,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="ValueMustBeAnObject">
         <source>The property '{0}' must be an object if it is specified.</source>
-        <target state="new">The property '{0}' must be an object if it is specified.</target>
+        <target state="translated">プロパティ ' {0} ' は、指定されている場合はオブジェクトである必要があります。</target>
         <note />
       </trans-unit>
     </body>
