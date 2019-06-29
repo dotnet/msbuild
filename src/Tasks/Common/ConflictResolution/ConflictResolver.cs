@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
@@ -169,8 +170,6 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             }
         }
 
-        readonly string SENTENCE_SPACING = "  ";
-
         private TConflictItem ResolveConflict(TConflictItem item1, TConflictItem item2, bool logUnresolvedConflicts)
         {
             var winner = _packageOverrideResolver.Resolve(item1, item2);
@@ -179,10 +178,9 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 return winner;
             }
 
-            string conflictMessage = string.Format(CultureInfo.CurrentCulture, Strings.EncounteredConflict,
+            string conflictMessage = string.Format(CultureInfo.CurrentCulture, Strings.EncounteredConflict_Info,
                 item1.DisplayName,
                 item2.DisplayName);
-
 
             var exists1 = item1.Exists;
             var exists2 = item2.Exists;
@@ -197,10 +195,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             {
                 if (logUnresolvedConflicts)
                 {
-                    string fileMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_DoesntExist,
+                    LogMessage(conflictMessage, Strings.CouldNotDetermineWinner_DoesNotExist_Info,
                         !exists1 ? item1.DisplayName : item2.DisplayName);
-
-                    _log.LogMessage(fileMessage);
                 }
                 return null;
             }
@@ -214,10 +210,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 if (logUnresolvedConflicts)
                 {
                     var nonAssembly = assemblyVersion1 == null ? item1.DisplayName : item2.DisplayName;
-                    string assemblyMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_NotAnAssembly,
+                    LogMessage(conflictMessage, Strings.CouldNotDetermineWinner_NotAnAssembly_Info,
                         nonAssembly);
-
-                    _log.LogMessage(assemblyMessage);
                 }
                 return null;
             }
@@ -242,12 +236,10 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 }
 
 
-                string assemblyMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingAssemblyVersion,
+                LogMessage(conflictMessage, Strings.ChoosingAssemblyVersion_Info,
                     winningDisplayName,
                     winningVersion,
                     losingVersion);
-
-                _log.LogMessage(assemblyMessage);
 
                 if (assemblyVersion1 > assemblyVersion2)
                 {
@@ -269,8 +261,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 if (logUnresolvedConflicts)
                 {
                     var nonVersion = fileVersion1 == null ? item1.DisplayName : item2.DisplayName;
-                    string fileVersionMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_FileVersion,
-                        nonVersion);
+                    LogMessage(conflictMessage, Strings.CouldNotDetermineWinner_NoFileVersion_Info, nonVersion);
                 }
                 return null;
             }
@@ -293,13 +284,10 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     losingVersion = fileVersion1;
                 }
 
-
-                string fileVersionMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingFileVersion,
+                LogMessage(conflictMessage, Strings.ChoosingFileVersion_Info, 
                     winningDisplayName,
                     winningVersion,
                     losingVersion);
-
-                _log.LogMessage(fileVersionMessage);
 
                 if (fileVersion1 > fileVersion2)
                 {
@@ -317,16 +305,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (packageRank1 < packageRank2)
             {
-                string packageRankMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPreferredPackage,
-                    item1.DisplayName);
-                _log.LogMessage(packageRankMessage);
+                LogMessage(conflictMessage, Strings.ChoosingPreferredPackage_Info, item1.DisplayName);
+
                 return item1;
             }
 
             if (packageRank2 < packageRank1)
             {
-                string packageRankMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPreferredPackage,
-                    item2.DisplayName);
+                LogMessage(conflictMessage, Strings.ChoosingPreferredPackage_Info, item2.DisplayName);
                 return item2;
             }
 
@@ -335,27 +321,49 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (isPlatform1 && !isPlatform2)
             {
-                string platformMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPlatformItem,
-                    item1.DisplayName);
-                _log.LogMessage(platformMessage);
+                LogMessage(conflictMessage, Strings.ChoosingPlatformItem_Info, item1.DisplayName);
                 return item1;
             }
 
             if (!isPlatform1 && isPlatform2)
             {
-                string platformMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPlatformItem,
-                    item2.DisplayName);
-                _log.LogMessage(platformMessage);
+                LogMessage(conflictMessage, Strings.ChoosingPlatformItem_Info, item2.DisplayName);
                 return item2;
+            }
+
+            if (item1.ItemType == ConflictItemType.CopyLocal && item2.ItemType == ConflictItemType.CopyLocal)
+            {
+                // If two items are copy local, we must pick one even if versions are identical, as only 
+                // one of them can be copied locally. The policy here must be deterministic, but it can
+                // be chosen arbitrarily. The assumption is that the assemblies are fully semantically 
+                // equivalent.
+                //
+                // We choose ordinal string comparison of package id as a final tie-breaker for this case. 
+                // We will get here in the real case of frameworks with overlapping assemblies (including 
+                // version) and self-contained apps. The assembly we choose here is not guaranteed to match
+                // the assembly that would be chosen by the host for a framework-dependent app. The host
+                // is free to make its own deterministic but arbitrary choice.
+                int cmp = string.CompareOrdinal(item1.PackageId, item2.PackageId);
+                if (cmp != 0)
+                {
+                    var arbitraryWinner = cmp < 0 ? item1 : item2;
+                    LogMessage(conflictMessage, Strings.ChoosingCopyLocalArbitrarily_Info, arbitraryWinner.DisplayName);
+                    return arbitraryWinner;
+                }
             }
 
             if (logUnresolvedConflicts)
             {
-                string message = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ConflictCouldNotDetermineWinner);
-
-                _log.LogMessage(message);
+                 LogMessage(conflictMessage, Strings.CouldNotDetermineWinner_EqualVersions_Info);
             }
             return null;
+        }
+
+        private void LogMessage(string conflictMessage, string format, params object[] args)
+        {
+            _log.LogMessage(
+                MessageImportance.Low, 
+                conflictMessage + " " + string.Format(format, args));
         }
     }
 }

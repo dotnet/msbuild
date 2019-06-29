@@ -6,7 +6,7 @@
     <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Sdk</PackageId>
-    <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net472</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,14 +17,11 @@
     <OutDirName>$(Configuration)\Sdks\$(PackageId)\tools</OutDirName>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- MSBuild Task DLLs need to be versioned with every build -->
+    <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-
-  <PropertyGroup>
-    <!-- MSBuild Task DLLs need to be versioned with every build -->
-    <AssemblyVersion>$(FileVersion)</AssemblyVersion>
-  </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>$(BaseOutputPath)</OutputPath>
@@ -81,6 +78,7 @@
     <None Include="sdk\**\*" PackagePath="Sdk\" />
     <None Include="..\Common\targets\**\*" PackagePath="targets\" LinkBase="targets" />
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
+    <UpToDateCheckInput Include="@(None)" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
@@ -124,13 +122,6 @@
     </ItemGroup>
   </Target>
 
-  <!-- TODO: remove this target when building with a newer 3.0 toolset as this workaround is no longer needed. -->
-  <Target Name="FilterCopyLocal" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
-    <ItemGroup>
-      <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
-      <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
-    </ItemGroup>
-  </Target>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 

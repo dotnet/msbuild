@@ -186,7 +186,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             {
                 packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"Microsoft.NETFramework.ReferenceAssemblies"),
-                    new XAttribute("Version", $"1.0.0-alpha-5")));
+                    new XAttribute("Version", $"1.0.0-preview.2")));
 
                 propertyGroup.Add(new XElement(ns + "RestoreAdditionalProjectSources", "$(RestoreAdditionalProjectSources);https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json"));
             }

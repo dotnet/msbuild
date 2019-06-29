@@ -21,7 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Handles package file conflict resolution for build.
     This will differ from the conflict resolution at publish time if the publish assets differ from build.
   -->
-  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;ResolveTargetingPacks">
+  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;ResolveTargetingPackAssets">
 
     <ItemGroup>
       <!--

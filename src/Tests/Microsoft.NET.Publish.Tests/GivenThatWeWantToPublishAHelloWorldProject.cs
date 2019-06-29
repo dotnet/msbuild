@@ -501,8 +501,14 @@ public static class Program
                 .HaveStdOutContaining("NETSDK1085");
         }
 
-        [Fact]
-        public void It_contains_no_duplicates_in_resolved_publish_assets()
+        [WindowsOnlyFact]
+        public void It_contains_no_duplicates_in_resolved_publish_assets_on_windows()
+            => It_contains_no_duplicates_in_resolved_publish_assets("windows");
+
+        [Theory]
+        [InlineData("console")]
+        [InlineData("web")]
+        public void It_contains_no_duplicates_in_resolved_publish_assets(string type)
         {
             // Use a specific RID to guarantee a consistent set of assets
             var testProject = new TestProject()
@@ -514,9 +520,25 @@ public static class Program
                 IsExe = true
             };
 
+            switch (type)
+            {
+                case "windows":
+                    testProject.ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop";
+                    testProject.AdditionalProperties.Add("UseWpf", "true");
+                    testProject.AdditionalProperties.Add("UseWindowsForms", "true");
+                    break;
+               case "console":
+                    break;
+                case "web":
+                    testProject.ProjectSdk = "Microsoft.NET.Sdk.Web";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type));
+            }
+
             testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "9.0.1"));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: type)
                 .WithProjectChanges(project =>
                 {
                     project.Root.Add(XElement.Parse(@"
@@ -526,12 +548,12 @@ public static class Program
     </RemoveDuplicates>
     <Message Condition=""'@(_ResolvedCopyLocalPublishAssets)' != '@(FilteredAssets)'"" Importance=""High"" Text=""Duplicate items are present in: @(_ResolvedCopyLocalPublishAssets)!"" />
     <ItemGroup>
-        <AssetFilenames Include=""@(_ResolvedCopyLocalPublishAssets->'%(Filename)%(Extension)')"" />
+        <AssetDestinationSubPaths Include=""@(_ResolvedCopyLocalPublishAssets->'%(DestinationSubPath)')"" />
     </ItemGroup>
-    <RemoveDuplicates Inputs=""@(AssetFilenames)"">
-        <Output TaskParameter=""Filtered"" ItemName=""FilteredAssetFilenames""/>
+    <RemoveDuplicates Inputs=""@(AssetDestinationSubPaths)"">
+        <Output TaskParameter=""Filtered"" ItemName=""FilteredAssetDestinationSubPaths""/>
     </RemoveDuplicates>
-    <Message Condition=""'@(AssetFilenames)' != '@(FilteredAssetFilenames)'"" Importance=""High"" Text=""Duplicate filenames are present in: @(_ResolvedCopyLocalPublishAssets)!"" />
+    <Message Condition=""'@(AssetDestinationSubPaths)' != '@(FilteredAssetDestinationSubPaths)'"" Importance=""High"" Text=""Duplicate DestinationSubPaths are present in: @(AssetDestinationSubPaths)!"" />
 </Target>"));
                 })
                 .Restore(Log, testProject.Name);

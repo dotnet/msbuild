@@ -157,7 +157,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ApplyImplicitVersions" 
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;ResolveFrameworkReferences"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;ProcessFrameworkReferences"
           DependsOnTargets="UpdateAspNetToFrameworkReference;CheckForImplicitPackageReferenceOverrides"
           Condition="'@(PackageReference)' != ''">
     
@@ -332,5 +332,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Content Include="@(DeduplicatedContentItems)" />
     </ItemGroup>
     
+  </Target>
+
+  <Target Name="CheckWindowsDesktopSdkInUse" 
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform" 
+          Condition="'$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true'">
+    <NetSdkWarning Condition="'$(_MicrosoftNetSdkWindowsDesktop)' != 'true'" 
+                   ResourceName="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework" />
   </Target>
 </Project>

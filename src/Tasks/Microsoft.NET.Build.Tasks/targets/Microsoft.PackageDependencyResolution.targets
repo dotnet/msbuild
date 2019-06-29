@@ -32,11 +32,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
                                             '$(TargetFrameworkIdentifier)' == '.NETStandard'">false</CopyLocalLockFileAssemblies>
 
-    <!-- Don't copy local for netcoreapp projects before 3.0 or non-exe projects. -->
+    <!-- Don't copy local for netcoreapp projects before 3.0 or non-exe and non-component projects. -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == '' and
                                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                                             ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0' or
-                                             '$(HasRuntimeOutput)' != 'true')">false</CopyLocalLockFileAssemblies>
+                                             ('$(HasRuntimeOutput)' != 'true' and '$(EnableDynamicLoading)' != 'true'))">false</CopyLocalLockFileAssemblies>
 
     <!-- All other project types should copy local. -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
@@ -197,12 +197,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ResolvePackageAssets" 
           Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
-          DependsOnTargets="ResolveFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary">
+          DependsOnTargets="ProcessFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary;_ComputePackageReferencePublish">
 
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                           and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'
                           and '$(UseAppHostFromAssetsFile)' == ''">
-      <!-- For .NET Core 3.0 and higher, we'll get the apphost from an apphost pack (via ResolveFrameworkReferences) -->
+      <!-- For .NET Core 3.0 and higher, we'll get the apphost from an apphost pack (via ProcessFrameworkReferences) -->
       <UseAppHostFromAssetsFile>false</UseAppHostFromAssetsFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(UseAppHostFromAssetsFile)' == ''">
@@ -216,9 +216,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <EnsureRuntimePackageDependencies>true</EnsureRuntimePackageDependencies>
     </PropertyGroup>
 
-    <!-- Disable resolution of runtime target assets if not targeting .NETCoreApp -->
-    <PropertyGroup Condition="'$(DisableRuntimeTargets)' == '' and '$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
-      <DisableRuntimeTargets>true</DisableRuntimeTargets>
+    <!-- Only copy local runtime target assets if targeting netcoreapp -->
+    <PropertyGroup Condition="'$(CopyLocalRuntimeTargetAssets)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+      <CopyLocalRuntimeTargetAssets>true</CopyLocalRuntimeTargetAssets>
     </PropertyGroup>
 
     <ItemGroup>
@@ -245,7 +245,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"
       DisablePackageAssetsCache="$(DisablePackageAssetsCache)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
-      DisableRuntimeTargets="$(DisableRuntimeTargets)"
+      CopyLocalRuntimeTargetAssets="$(CopyLocalRuntimeTargetAssets)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
       DisableTransitiveFrameworkReferences="$(DisableTransitiveFrameworkReferences)"
       DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
@@ -254,7 +254,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
       ExpectedPlatformPackages="@(ExpectedPlatformPackages)"
       SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
-      DesignTimeBuild="$(DesignTimeBuild)">
+      DesignTimeBuild="$(DesignTimeBuild)"
+      PackageReferences="@(PackageReference)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->
@@ -453,8 +454,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       </Reference>
 
       <!-- Add framework references from NuGet packages here, so that if there is also a matching reference from a NuGet package,
-           it will be treated the same as a reference from the project file. -->
-      <Reference Include="@(ResolvedFrameworkAssemblies)" />
+           it will be treated the same as a reference from the project file.  If there is already an explicit Reference from the
+           project, use that, in order to preserve metadata (such as aliases). -->
+      <Reference Include="@(ResolvedFrameworkAssemblies)" 
+                 Exclude="@(Reference)" />
+      
     </ItemGroup>
     
     <!-- If there are any references from a NuGet package that match a simple reference which
@@ -462,7 +466,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          simple name as the ItemSpec.  This will prevent the VS project system from marking
          a reference with a warning.  See https://github.com/dotnet/sdk/issues/1499 -->
     <JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="FileName" LeftMetadata="*"
-               Right="@(Reference)" RightKey="" RightMetadata="">
+               Right="@(Reference)" RightKey="" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_JoinedResolvedCompileFileDefinitions" />
     </JoinItems>
 

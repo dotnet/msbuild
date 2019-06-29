@@ -50,6 +50,7 @@ namespace Microsoft.NET.Build.Tests
             var projectDirectory = Path.Combine(testAsset.TestRoot, relativeProjectPath);
 
             var command = new MSBuildCommand(Log, "ResolveAssemblyReferencesDesignTime", projectDirectory);
+            command.WorkingDirectory = projectDirectory;
             var result = command.Execute(args);
 
             result.Should().Pass();
@@ -94,6 +95,10 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 IsExe = true
             };
+
+            //  Add some package references to test more code paths (such as in ResolvePackageAssets)
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(p =>
@@ -168,7 +173,9 @@ namespace Microsoft.NET.Build.Tests
                 "/t:CollectUpToDateCheckBuiltDesignTime;CollectPackageDownloads;ResolveAssemblyReferencesDesignTime",
                 "/t:CollectAnalyzersDesignTime;CollectSDKReferencesDesignTime;CollectUpToDateCheckInputDesignTime",
                 "/t:CollectUpToDateCheckOutputDesignTime;ResolvePackageDependenciesDesignTime;CompileDesignTime",
-                "/t:CollectResolvedCompilationReferencesDesignTime",
+                "/t:CollectResolvedCompilationReferencesDesignTime;ResolveFrameworkReferences",
+                //  Set targeting pack folder to nonexistant folder so the project won't use installed targeting packs
+                "/p:NetCoreTargetingPackRoot=" + Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()),
                 "/bl:designtime.binlog"
             };
 

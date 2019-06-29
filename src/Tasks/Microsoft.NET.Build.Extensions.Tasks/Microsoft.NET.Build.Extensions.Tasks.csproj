@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Build.Extensions</PackageId>
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
-    <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net472</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,14 +19,11 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <OutDirName>$(Configuration)\Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <!-- MSBuild Task DLLs need to be versioned with every build -->
+    <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-
-  <PropertyGroup>
-    <!-- MSBuild Task DLLs need to be versioned with every build -->
-    <AssemblyVersion>$(FileVersion)</AssemblyVersion>
-  </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>$(BaseOutputPath)</OutputPath>
@@ -68,6 +65,7 @@
     <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
     <None Include="..\Common\targets\**\*" PackagePath="msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\" LinkBase="%(PackagePath)" />
+    <UpToDateCheckInput Include="@(None)" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
@@ -94,14 +92,6 @@
   <Target Name="PackLayout" DependsOnTargets="CopyAdditionalFilesToLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
     <ItemGroup>
       <Content Include="$(PackageLayoutOutputPath)**\*" PackagePath="\" />
-    </ItemGroup>
-  </Target>
-
-  <!-- TODO: remove this target when building with a newer 3.0 toolset as this workaround is no longer needed. -->
-  <Target Name="FilterCopyLocal" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
-    <ItemGroup>
-      <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
-      <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
     </ItemGroup>
   </Target>
 
