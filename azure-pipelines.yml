@@ -99,47 +99,41 @@ jobs:
           $(_ValidateSdkArgs)
         displayName: Windows Build / Publish
 
-- template: /eng/common/templates/job/job.yml
-  parameters:
-    name: OSX
-    enableTelemetry: true
-    enablePublishBuildArtifacts: true
-    helixRepo: aspnet/websdk
-    pool:
-      name: Hosted macOS
-    strategy:
-      matrix:
-        debug_configuration:
-          _BuildConfig: Debug
-        release_configuration:
-          _BuildConfig: Release
-    steps:
-    - script: eng/common/cibuild.sh
-        --configuration $(_BuildConfig)
-        --prepareMachine
-      name: Build
-      displayName: Build
-      condition: succeeded()
-
-- template: /eng/common/templates/job/job.yml
-  parameters:
-    name: Linux
-    enableTelemetry: true
-    enablePublishBuildArtifacts: true
-    helixRepo: aspnet/websdk
-    pool:
-      name: Hosted Ubuntu 1604
-    container: LinuxContainer
-    strategy:
-      matrix:
-        debug_configuration:
-          _BuildConfig: Debug
-        release_configuration:
-          _BuildConfig: Release
-    steps:
-    - script: eng/common/cibuild.sh
-        --configuration $(_BuildConfig)
-        --prepareMachine
-      name: Build
-      displayName: Build
-      condition: succeeded()
+    - job: OSX
+      pool:
+        name: Hosted macOS
+      strategy:
+        matrix:
+          debug_configuration:
+            _BuildConfig: Debug
+          release_configuration:
+            _BuildConfig: Release
+      steps:
+      - checkout: self
+        clean: true
+      - script: eng/common/cibuild.sh
+          --configuration $(_BuildConfig)
+          --prepareMachine
+        name: Build
+        displayName: Build
+        condition: succeeded()
+        
+    - job: Linux
+      pool:
+        name: Hosted Ubuntu 1604
+      container: LinuxContainer
+      strategy:
+        matrix:
+          debug_configuration:
+            _BuildConfig: Debug
+          release_configuration:
+            _BuildConfig: Release
+      steps:
+      - checkout: self
+        clean: true
+      - script: eng/common/cibuild.sh
+          --configuration $(_BuildConfig)
+          --prepareMachine
+        name: Build
+        displayName: Build
+        condition: succeeded()
