@@ -9,9 +9,9 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>ee0c7ead1a46f06f98aff9102b785f532b71da9c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview7.19328.4">
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview7.19328.5">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>5c81754badb37cd44506e991bad53a70cc9226cc</Sha>
+      <Sha>bcb59fa5c9082de1a53234edfecd3b918c5340e6</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
