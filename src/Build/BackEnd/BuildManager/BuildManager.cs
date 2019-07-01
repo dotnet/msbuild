@@ -757,7 +757,7 @@ namespace Microsoft.Build.Execution
                 }
 #endif
 
-                if (!_buildParameters.CacheBuildResults)
+                if (!_buildParameters.SaveBuildResults)
                 {
                     _resultsCache.ClearResults();
                 }

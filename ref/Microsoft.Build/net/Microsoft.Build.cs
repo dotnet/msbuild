@@ -946,7 +946,6 @@ namespace Microsoft.Build.Execution
         public BuildParameters(Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.IDictionary<string, string> BuildProcessEnvironment { get { throw null; } }
         public System.Threading.ThreadPriority BuildThreadPriority { get { throw null; } set { } }
-        public bool CacheBuildResults { get { throw null; } set { } }
         public System.Globalization.CultureInfo Culture { get { throw null; } set { } }
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DetailedSummary { get { throw null; } set { } }
@@ -970,6 +969,7 @@ namespace Microsoft.Build.Execution
         public string OutputResultsCacheFile { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings ProjectLoadSettings { get { throw null; } set { } }
         public bool ResetCaches { get { throw null; } set { } }
+        public bool SaveBuildResults { get { throw null; } set { } }
         public bool SaveOperatingEnvironment { get { throw null; } set { } }
         public bool ShutdownInProcNodeOnBuildFinish { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ToolsetDefinitionLocations ToolsetDefinitionLocations { get { throw null; } set { } }
