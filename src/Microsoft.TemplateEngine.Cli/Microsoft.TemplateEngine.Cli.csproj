@@ -13,6 +13,7 @@
         <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
         <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Abstractions\Microsoft.TemplateEngine.Abstractions.csproj" />
         <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
+        <ProjectReference Include="$(SrcDir)Microsoft.TemplateSearch.Common\Microsoft.TemplateSearch.Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>

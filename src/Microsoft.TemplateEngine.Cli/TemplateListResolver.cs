@@ -335,36 +335,36 @@ namespace Microsoft.TemplateEngine.Cli
                             // key is the value user should provide, value is description
                             if (string.IsNullOrEmpty(paramValue))
                             {
-                                template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                                template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, InputParameterName = paramName, ParameterValue = paramValue });
                             }
                             else if (paramDetails.ChoicesAndDescriptions.ContainsKey(paramValue))
                             {
-                                template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                                template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, InputParameterName = paramName, ParameterValue = paramValue });
                             }
                             else
                             {
                                 int startsWithCount = paramDetails.ChoicesAndDescriptions.Count(x => x.Key.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase));
                                 if (startsWithCount == 1)
                                 {
-                                    template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.SingleStartsWith, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                                    template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.SingleStartsWith, InputParameterName = paramName, ParameterValue = paramValue });
                                 }
                                 else if (startsWithCount > 1)
                                 {
-                                    template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.AmbiguousParameterValue, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                                    template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.AmbiguousParameterValue, InputParameterName = paramName, ParameterValue = paramValue });
                                 }
                                 else
                                 {
-                                    template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                                    template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, InputParameterName = paramName, ParameterValue = paramValue });
                                 }
                             }
                         }
                         else if (template.Info.CacheParameters.ContainsKey(paramName))
                         {
-                            template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                            template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, InputParameterName = paramName, ParameterValue = paramValue });
                         }
                         else
                         {
-                            template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                            template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, InputParameterName = paramName, ParameterValue = paramValue });
                         }
                     }
 
@@ -374,13 +374,13 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             // the name is a known template param, it must have not parsed due to an invalid value
                             // Note (scp 2017-02-27): This probably can't happen, the param parsing doesn't check the choice values.
-                            template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = unmatchedParamName });
+                            template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, InputParameterName = unmatchedParamName });
                         }
                         else
                         {
                             // the name is not known
                             // TODO: reconsider storing the canonical in this situation. It's not really a canonical since the param is unknown.
-                            template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = unmatchedParamName });
+                            template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = unmatchedParamName });
                         }
                     }
                 }

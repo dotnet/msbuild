@@ -152,7 +152,7 @@ namespace Microsoft.TemplateEngine.Cli
             HashSet<string> singleStartsWithParamNames = new HashSet<string>();
             foreach (ITemplateMatchInfo checkTemplate in languageFilteredInvokableMatches)
             {
-                IList<string> singleStartParamNames = checkTemplate.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.SingleStartsWith).Select(x => x.ChoiceIfLocationIsOtherChoice).ToList();
+                IList<string> singleStartParamNames = checkTemplate.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.SingleStartsWith).Select(x => x.InputParameterName).ToList();
                 foreach (string paramName in singleStartParamNames)
                 {
                     if (!singleStartsWithParamNames.Add(paramName))

@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
-            ITemplateInfo template = new MockTemplate()
+            ITemplateInfo template = new MockTemplateInfo()
             {
                 Parameters = parametersForTemplate
             };
@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
-            ITemplateInfo template = new MockTemplate()
+            ITemplateInfo template = new MockTemplateInfo()
             {
                 Parameters = parametersForTemplate
             };
@@ -59,7 +59,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
-            ITemplateInfo template = new MockTemplate()
+            ITemplateInfo template = new MockTemplateInfo()
             {
                 Parameters = parametersForTemplate
             };
@@ -82,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
-            ITemplateInfo template = new MockTemplate()
+            ITemplateInfo template = new MockTemplateInfo()
             {
                 Parameters = parametersForTemplate
             };
@@ -105,7 +105,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
-            ITemplateInfo template = new MockTemplate()
+            ITemplateInfo template = new MockTemplateInfo()
             {
                 Parameters = parametersForTemplate
             };
@@ -129,7 +129,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
-            ITemplateInfo template = new MockTemplate()
+            ITemplateInfo template = new MockTemplateInfo()
             {
                 Parameters = parametersForTemplate
             };
@@ -152,7 +152,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
-            ITemplateInfo template = new MockTemplate()
+            ITemplateInfo template = new MockTemplateInfo()
             {
                 Parameters = parametersForTemplate
             };
@@ -177,7 +177,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
-            ITemplateInfo template = new MockTemplate()
+            ITemplateInfo template = new MockTemplateInfo()
             {
                 Parameters = parametersForTemplate
             };
