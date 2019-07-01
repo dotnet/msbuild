@@ -9,9 +9,9 @@
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>6b0885139c1f37093ba4d3797f46fe90bf093883</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview7.19326.5">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview7.19351.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>bc5ef9f7d32f3e5d443100671b1f427fe738b318</Sha>
+      <Sha>46e1f004a34fe8ed6f608d20d5f8b0b862a245c1</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.3.0-preview-19329-01">
       <Uri>https://github.com/Microsoft/msbuild</Uri>
@@ -30,9 +30,9 @@
       <Sha>87c12a116c724696783b62e5552d1ea4862e5715</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview7.19324.12" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview7.19326.12" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>f207fe697fe2a72cc27a2cb745393fd5b24ed9c7</Sha>
+      <Sha>214d5f749dd3c5ff79579e9395ccd817d23134d8</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.1.0-rtm.5921">
       <Uri>https://github.com/nuget/nuget.client</Uri>
@@ -51,17 +51,17 @@
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>3dd5e55dc9cb7a7c5eaa73aefc70c3655e75f97b</Sha>
     </Dependency>
-    <Dependency Name="System.CodeDom" Version="4.6.0-preview7.19326.2" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.CodeDom" Version="4.6.0-preview7.19326.13" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>219b67118e3a2d539afc1ff3bb2c10e1bc7b03d2</Sha>
+      <Sha>72da80db3fd14b84fefeef54ac0930c711f306f4</Sha>
     </Dependency>
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-preview7.19326.2" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-preview7.19326.13" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>219b67118e3a2d539afc1ff3bb2c10e1bc7b03d2</Sha>
+      <Sha>72da80db3fd14b84fefeef54ac0930c711f306f4</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-preview7.19326.2" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-preview7.19326.13" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>219b67118e3a2d539afc1ff3bb2c10e1bc7b03d2</Sha>
+      <Sha>72da80db3fd14b84fefeef54ac0930c711f306f4</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>

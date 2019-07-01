@@ -17,7 +17,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview7.19326.5</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-preview7.19351.1</MicrosoftNETSdkPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
@@ -48,7 +48,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted -->
-    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-preview7.19324.12</MicrosoftNETSdkWindowsDesktopPackageVersion>
+    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-preview7.19326.12</MicrosoftNETSdkWindowsDesktopPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/nuget/nuget.client -->
@@ -70,9 +70,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/corefx -->
-    <SystemCodeDomPackageVersion>4.6.0-preview7.19326.2</SystemCodeDomPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>4.6.0-preview7.19326.2</SystemTextEncodingCodePagesPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>4.6.0-preview7.19326.2</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemCodeDomPackageVersion>4.6.0-preview7.19326.13</SystemCodeDomPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>4.6.0-preview7.19326.13</SystemTextEncodingCodePagesPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>4.6.0-preview7.19326.13</SystemSecurityCryptographyProtectedDataPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
