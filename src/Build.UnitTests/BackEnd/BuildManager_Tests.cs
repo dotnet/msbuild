@@ -4088,8 +4088,8 @@ $@"<Project InitialTargets=`Sleep`>
 
             GraphBuildResult result = _buildManager.Build(_parameters, data);
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
-            result.Exception.ShouldBeOfType<AggregateException>().InnerExceptions.Count.ShouldBe(1);
-            result.Exception.ShouldBeOfType<AggregateException>().InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBe(project2);
+            result.Exception.ShouldBeOfType<InvalidProjectFileException>();
+            result.Exception.ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBe(project2);
         }
 
         [Fact]
