@@ -749,6 +749,54 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             }
         }
 
+        [Fact]
+        public void AddTargetAddsNewTarget()
+        {
+            string projectFileContent = @"
+                    <Project>
+                        <Target Name='a' />
+                    </Project>";
+            ProjectRootElement rootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            ProjectInstance projectInstance = new ProjectInstance(rootElement);
+
+            ProjectTargetInstance targetInstance = projectInstance.AddTarget("b", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true);
+
+            Assert.Equal(2, projectInstance.Targets.Count);
+            Assert.Equal(targetInstance, projectInstance.Targets["b"]);
+            Assert.Equal("b", targetInstance.Name);
+            Assert.Equal("1==1", targetInstance.Condition);
+            Assert.Equal("inputs", targetInstance.Inputs);
+            Assert.Equal("outputs", targetInstance.Outputs);
+            Assert.Equal("returns", targetInstance.Returns);
+            Assert.Equal("keepDuplicateOutputs", targetInstance.KeepDuplicateOutputs);
+            Assert.Equal("dependsOnTargets", targetInstance.DependsOnTargets);
+            Assert.Equal("beforeTargets", targetInstance.BeforeTargets);
+            Assert.Equal("afterTargets", targetInstance.AfterTargets);
+            Assert.Equal(projectInstance.ProjectFileLocation, targetInstance.Location);
+            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.ConditionLocation);
+            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.InputsLocation);
+            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.OutputsLocation);
+            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.ReturnsLocation);
+            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.KeepDuplicateOutputsLocation);
+            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.DependsOnTargetsLocation);
+            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.BeforeTargetsLocation);
+            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.AfterTargetsLocation);
+            Assert.True(targetInstance.ParentProjectSupportsReturnsAttribute);
+        }
+
+        [Fact]
+        public void AddTargetThrowsWithExistingTarget()
+        {
+            string projectFileContent = @"
+                    <Project>
+                        <Target Name='a' />
+                    </Project>";
+            ProjectRootElement rootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            ProjectInstance projectInstance = new ProjectInstance(rootElement);
+
+            Assert.Throws<InternalErrorException>(() => projectInstance.AddTarget("a", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true));
+        }
+
         /// <summary>
         /// Create a ProjectInstance from provided project content
         /// </summary>
