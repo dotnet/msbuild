@@ -156,7 +156,8 @@ namespace Microsoft.NET.Publish.Tests
             string[] expectedFiles = { SingleFile, PdbFile, NiPdbFile };
             GetPublishDirectory(publishCommand)
                 .Should()
-                .OnlyHaveFiles(expectedFiles);
+                //  TODO: Change HaveFiles to OnlyHaveFiles, once https://github.com/dotnet/coreclr/issues/25522 is fixed
+                .HaveFiles(expectedFiles);
         }
 
         [WindowsOnlyFact]
