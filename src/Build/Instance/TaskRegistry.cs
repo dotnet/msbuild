@@ -145,13 +145,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The cache to load the *.tasks files into
         /// </summary>
-        internal ProjectRootElementCache RootElementCache { get; set; }
+        internal ProjectRootElementCacheBase RootElementCache { get; set; }
 
         /// <summary>
         /// Creates a task registry that does not fall back to any other task registry.
         /// Default constructor does no work because the tables are initialized lazily when a task is registered
         /// </summary>
-        internal TaskRegistry(ProjectRootElementCache projectRootElementCache)
+        internal TaskRegistry(ProjectRootElementCacheBase projectRootElementCache)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
 
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="toolset">The Toolset containing the toolser task registry</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
-        internal TaskRegistry(Toolset toolset, ProjectRootElementCache projectRootElementCache)
+        internal TaskRegistry(Toolset toolset, ProjectRootElementCacheBase projectRootElementCache)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
             ErrorUtilities.VerifyThrowInternalNull(toolset, "toolset");

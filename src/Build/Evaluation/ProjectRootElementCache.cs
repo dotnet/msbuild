@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
 
@@ -14,7 +12,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System.Globalization;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
@@ -56,10 +53,8 @@ namespace Microsoft.Build.Evaluation
     /// collection.
     /// 
     /// </summary>
-    internal class ProjectRootElementCache
+    internal class ProjectRootElementCache : ProjectRootElementCacheBase
     {
-        public bool LoadProjectsReadOnly { get; }
-
         /// <summary>
         /// The maximum number of entries to keep strong references to.
         /// This has to be strong enough to make sure that key .targets files aren't pushed
@@ -136,40 +131,7 @@ namespace Microsoft.Build.Evaluation
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
 
-        /// <summary>
-        /// Handler for which project root element just got added to the cache
-        /// </summary>
-        internal delegate void ProjectRootElementCacheAddEntryHandler(object sender, ProjectRootElementCacheAddEntryEventArgs e);
 
-        /// <summary>
-        /// Delegate for StrongCacheEntryRemoved event
-        /// </summary>
-        internal delegate void StrongCacheEntryRemovedDelegate(object sender, ProjectRootElement projectRootElement);
-
-        /// <summary>
-        /// Callback to create a ProjectRootElement if need be
-        /// </summary>
-        internal delegate ProjectRootElement OpenProjectRootElement(string path, ProjectRootElementCache cache);
-
-        /// <summary>
-        /// Event that is fired when an entry in the Strong Cache is removed.
-        /// </summary>
-        internal static event StrongCacheEntryRemovedDelegate StrongCacheEntryRemoved;
-
-        /// <summary>
-        /// Event which is fired when a project root element is added to this cache.
-        /// </summary>
-        internal event ProjectRootElementCacheAddEntryHandler ProjectRootElementAddedHandler;
-
-        /// <summary>
-        /// Event which is fired when a project root element in this cache is dirtied.
-        /// </summary>
-        internal event EventHandler<ProjectXmlChangedEventArgs> ProjectRootElementDirtied;
-
-        /// <summary>
-        /// Event which is fired when a project is marked dirty.
-        /// </summary>
-        internal event EventHandler<ProjectChangedEventArgs> ProjectDirtied;
 
         /// <summary>
         /// Returns an existing ProjectRootElement for the specified file path, if any.
@@ -192,7 +154,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="isExplicitlyLoaded"><code>true</code> if the project is explicitly loaded, otherwise <code>false</code>.</param>
         /// <param name="preserveFormatting"><code>true</code> to the project was loaded with the formated preserved, otherwise <code>false</code>.</param>
         /// <returns>The ProjectRootElement instance if one exists.  Null otherwise.</returns>
-        internal ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement, bool isExplicitlyLoaded,
+        internal override ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement, bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
             // Should already have been canonicalized
@@ -288,7 +250,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Add an entry to the cache.
         /// </summary>
-        internal void AddEntry(ProjectRootElement projectRootElement)
+        internal override void AddEntry(ProjectRootElement projectRootElement)
         {
             lock (_locker)
             {
@@ -299,38 +261,10 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Raises the <see cref="ProjectRootElementDirtied"/> event.
-        /// </summary>
-        /// <param name="sender">The dirtied project root element.</param>
-        /// <param name="e">Details on the PRE and the nature of the change.</param>
-        internal void OnProjectRootElementDirtied(ProjectRootElement sender, ProjectXmlChangedEventArgs e)
-        {
-            var cacheDirtied = this.ProjectRootElementDirtied;
-            if (cacheDirtied != null)
-            {
-                cacheDirtied(sender, e);
-            }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="ProjectDirtied"/> event.
-        /// </summary>
-        /// <param name="sender">The dirtied project.</param>
-        /// <param name="e">Details on the Project and the change.</param>
-        internal void OnProjectDirtied(Project sender, ProjectChangedEventArgs e)
-        {
-            var projectDirtied = this.ProjectDirtied;
-            if (projectDirtied != null)
-            {
-                projectDirtied(sender, e);
-            }
-        }
-
-        /// <summary>
         /// Rename an entry in the cache.
         /// Entry must already be in the cache.
         /// </summary>
-        internal void RenameEntry(string oldFullPath, ProjectRootElement projectRootElement)
+        internal override void RenameEntry(string oldFullPath, ProjectRootElement projectRootElement)
         {
             lock (_locker)
             {
@@ -343,7 +277,7 @@ namespace Microsoft.Build.Evaluation
         /// Returns any a ProjectRootElement in the cache with the provided full path,
         /// otherwise null.
         /// </summary>
-        internal ProjectRootElement TryGet(string projectFile)
+        internal override ProjectRootElement TryGet(string projectFile)
         {
             return TryGet(projectFile, preserveFormatting: null);
         }
@@ -352,7 +286,7 @@ namespace Microsoft.Build.Evaluation
         /// Returns any a ProjectRootElement in the cache with the provided full path,
         /// otherwise null.
         /// </summary>
-        internal ProjectRootElement TryGet(string projectFile, bool? preserveFormatting)
+        internal override ProjectRootElement TryGet(string projectFile, bool? preserveFormatting)
         {
             ProjectRootElement result = Get(
                 projectFile,
@@ -371,7 +305,7 @@ namespace Microsoft.Build.Evaluation
         /// has two ProjectRootElement's for a particular file. Attempts to clear out the weak cache
         /// resulted in this guarantee being broken and subtle bugs popping up everywhere.
         /// </remarks>
-        internal void DiscardStrongReferences()
+        internal override void DiscardStrongReferences()
         {
             lock (_locker)
             {
@@ -394,7 +328,7 @@ namespace Microsoft.Build.Evaluation
         /// Clears out the cache.
         /// Called when all projects are unloaded and possibly when a build is done.
         /// </summary>
-        internal void Clear()
+        internal override void Clear()
         {
             lock (_locker)
             {
@@ -412,7 +346,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Discard any entries (weak and strong) which do not have the explicitlyLoaded flag set.
         /// </summary>
-        internal void DiscardImplicitReferences()
+        internal override void DiscardImplicitReferences()
         {
             lock (_locker)
             {
@@ -460,7 +394,7 @@ namespace Microsoft.Build.Evaluation
         /// The assumption is that when they instruct the project collection to unload it, which
         /// leads to this being called, they are releasing their strong references too (or it doesn't matter)
         /// </remarks>
-        internal void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
+        internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, "projectRootElement");
 
@@ -471,29 +405,6 @@ namespace Microsoft.Build.Evaluation
                 {
                     _weakCache.Remove(projectRootElement.FullPath);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Raises an event which is raised when a project root element is added to the cache.
-        /// </summary>
-        private void RaiseProjectRootElementAddedToCacheEvent(ProjectRootElement rootElement)
-        {
-            if (ProjectRootElementAddedHandler != null)
-            {
-                ProjectRootElementAddedHandler(this, new ProjectRootElementCacheAddEntryEventArgs(rootElement));
-            }
-        }
-
-        /// <summary>
-        /// Raises an event which is raised when a project root element is removed from the strong cache.
-        /// </summary>
-        private void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
-        {
-            StrongCacheEntryRemovedDelegate removedEvent = StrongCacheEntryRemoved;
-            if (null != removedEvent)
-            {
-                removedEvent(this, projectRootElement);
             }
         }
 
@@ -632,33 +543,6 @@ namespace Microsoft.Build.Evaluation
             {
                 string prefix = OutOfProcNode.IsOutOfProcNode ? "C" : "P";
                 Trace.WriteLine(prefix + " " + Process.GetCurrentProcess().Id + " | " + message + param1);
-            }
-        }
-
-        /// <summary>
-        /// This class is an event that holds which ProjectRootElement was added to the root element cache.
-        /// </summary>
-        internal class ProjectRootElementCacheAddEntryEventArgs : EventArgs
-        {
-            /// <summary>
-            /// Root element which was just added to the cache.
-            /// </summary>
-            private ProjectRootElement _rootElement;
-
-            /// <summary>
-            /// Takes the root element which was added to the results cache.
-            /// </summary>
-            internal ProjectRootElementCacheAddEntryEventArgs(ProjectRootElement element)
-            {
-                _rootElement = element;
-            }
-
-            /// <summary>
-            /// Root element which was just added to the cache.
-            /// </summary>
-            public ProjectRootElement RootElement
-            {
-                get { return _rootElement; }
             }
         }
     }
