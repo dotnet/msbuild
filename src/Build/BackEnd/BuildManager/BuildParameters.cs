@@ -766,7 +766,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
         /// </summary>
-        public bool SaveBuildResults { get; set; } = true;
+        public bool DiscardBuildResults { get; set; } = false;
 
         /// <summary>
         /// Retrieves a toolset.
