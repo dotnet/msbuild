@@ -1233,7 +1233,7 @@ namespace Microsoft.Build.Construction
                 outputItemAsItem = "@(" + outputItem + ")";
             }
 
-            ProjectTargetInstance target = metaprojectInstance.AddTarget(targetName ?? "Build", String.Empty, String.Empty, outputItemAsItem, null, String.Empty, String.Empty, false /* legacy target returns behaviour */);
+            ProjectTargetInstance target = metaprojectInstance.AddTarget(targetName ?? "Build", String.Empty, String.Empty, outputItemAsItem, null, String.Empty, String.Empty, String.Empty, String.Empty, false /* legacy target returns behaviour */);
 
             AddReferencesBuildTask(target, targetName, null /* No need to capture output */);
 
@@ -1298,7 +1298,7 @@ namespace Microsoft.Build.Construction
             // Add a supporting target called "GetFrameworkPathAndRedistList".
             AddTargetForGetFrameworkPathAndRedistList(metaprojectInstance);
 
-            ProjectTargetInstance newTarget = metaprojectInstance.AddTarget(targetName ?? "Build", ComputeTargetConditionForWebProject(project), null, null, null, null, "GetFrameworkPathAndRedistList", false /* legacy target returns behaviour */);
+            ProjectTargetInstance newTarget = metaprojectInstance.AddTarget(targetName ?? "Build", ComputeTargetConditionForWebProject(project), null, null, null, null, "GetFrameworkPathAndRedistList", null, null, false /* legacy target returns behaviour */);
 
             // Build the references
             AddReferencesBuildTask(newTarget, targetName, null /* No need to capture output */);
@@ -1718,7 +1718,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            ProjectTargetInstance frameworkPathAndRedistListTarget = metaprojectInstance.AddTarget("GetFrameworkPathAndRedistList", String.Empty, null, null, null, null, null, false /* legacy target returns behaviour */);
+            ProjectTargetInstance frameworkPathAndRedistListTarget = metaprojectInstance.AddTarget("GetFrameworkPathAndRedistList", String.Empty, null, null, null, null, null, null, null, false /* legacy target returns behaviour */);
 
             ProjectTaskInstance getFrameworkPathTask = frameworkPathAndRedistListTarget.AddTask("GetFrameworkPath", String.Empty, null);
 
@@ -1764,7 +1764,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddMetaprojectTargetForUnknownProjectType(ProjectInstance traversalProject, ProjectInstance metaprojectInstance, ProjectInSolution project, string targetName, string unknownProjectTypeErrorMessage)
         {
-            ProjectTargetInstance newTarget = metaprojectInstance.AddTarget(targetName ?? "Build", "'$(CurrentSolutionConfigurationContents)' != ''", null, null, null, null, null, false /* legacy target returns behaviour */);
+            ProjectTargetInstance newTarget = metaprojectInstance.AddTarget(targetName ?? "Build", "'$(CurrentSolutionConfigurationContents)' != ''", null, null, null, null, null, null, null, false /* legacy target returns behaviour */);
 
             foreach (SolutionConfigurationInSolution solutionConfiguration in _solutionFile.SolutionConfigurations)
             {
@@ -1842,7 +1842,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddValidateProjectsTarget(ProjectInstance traversalProject, List<ProjectInSolution> projects)
         {
-            ProjectTargetInstance newTarget = traversalProject.AddTarget("ValidateProjects", null, null, null, null, null, null, false /* legacy target returns behaviour */);
+            ProjectTargetInstance newTarget = traversalProject.AddTarget("ValidateProjects", null, null, null, null, null, null, null, null, false /* legacy target returns behaviour */);
 
             foreach (ProjectInSolution project in projects)
             {
@@ -1894,7 +1894,7 @@ namespace Microsoft.Build.Construction
                 outputItemAsItem = "@(" + outputItem + ")";
             }
 
-            ProjectTargetInstance target = traversalProject.AddTarget(targetName ?? "Build", String.Empty, String.Empty, outputItemAsItem, null, String.Empty, String.Empty, false /* legacy target returns behaviour */);
+            ProjectTargetInstance target = traversalProject.AddTarget(targetName ?? "Build", String.Empty, String.Empty, outputItemAsItem, null, String.Empty, String.Empty, String.Empty, String.Empty, false /* legacy target returns behaviour */);
             AddReferencesBuildTask(target, targetName, outputItem);
         }
 
@@ -1963,7 +1963,7 @@ namespace Microsoft.Build.Construction
                 outputItemAsItem = "@(" + outputItemName + ")";
             }
 
-            ProjectTargetInstance targetElement = traversalProject.AddTarget(actualTargetName, null, null, outputItemAsItem, null, null, null, false /* legacy target returns behaviour */);
+            ProjectTargetInstance targetElement = traversalProject.AddTarget(actualTargetName, null, null, outputItemAsItem, null, null, null, null, null, false /* legacy target returns behaviour */);
             if (canBuildDirectly)
             {
                 AddProjectBuildTask(traversalProject, projectConfiguration, targetElement, targetToBuild, "@(ProjectReference)", "'%(ProjectReference.Identity)' == '" + EscapingUtilities.Escape(project.AbsolutePath) + "'", outputItemName);
@@ -2275,7 +2275,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddValidateSolutionConfigurationTarget(ProjectInstance traversalProject)
         {
-            ProjectTargetInstance initialTarget = traversalProject.AddTarget("ValidateSolutionConfiguration", null, null, null, null, null, null, false /* legacy target returns behaviour */);
+            ProjectTargetInstance initialTarget = traversalProject.AddTarget("ValidateSolutionConfiguration", null, null, null, null, null, null, null, null, false /* legacy target returns behaviour */);
 
             if (_solutionFile.SolutionConfigurations.Count > 0)
             {
@@ -2316,7 +2316,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddValidateToolsVersionsTarget(ProjectInstance traversalProject)
         {
-            ProjectTargetInstance validateToolsVersionsTarget = traversalProject.AddTarget("ValidateToolsVersions", null, null, null, null, null, null, false /* legacy target returns behaviour */);
+            ProjectTargetInstance validateToolsVersionsTarget = traversalProject.AddTarget("ValidateToolsVersions", null, null, null, null, null, null, null, null, false /* legacy target returns behaviour */);
             ProjectTaskInstance toolsVersionErrorTask = AddErrorWarningMessageInstance
                 (
                 validateToolsVersionsTarget,
@@ -2339,6 +2339,8 @@ namespace Microsoft.Build.Construction
                 returns: null,
                 keepDuplicateOutputs: null,
                 dependsOnTargets: null,
+                beforeTargets: null,
+                afterTargets: null,
                 parentProjectSupportsReturnsAttribute: false);
 
             var property = new ProjectPropertyGroupTaskPropertyInstance(
