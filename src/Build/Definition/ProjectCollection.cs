@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -309,7 +309,15 @@ namespace Microsoft.Build.Evaluation
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
             MaxNodeCount = maxNodeCount;
-            ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */, loadProjectsReadOnly);
+
+            if (Traits.Instance.UseSimpleProjectRootElementCacheConcurrency)
+            {
+                ProjectRootElementCache = new SimpleProjectRootElementCache();
+            }
+            else
+            {
+                ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */, loadProjectsReadOnly);
+            }
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
