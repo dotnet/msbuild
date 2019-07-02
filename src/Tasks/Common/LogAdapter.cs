@@ -48,17 +48,28 @@ namespace Microsoft.NET.Build.Tasks
                 case MessageLevel.HighImportance:
                 case MessageLevel.NormalImportance:
                 case MessageLevel.LowImportance:
-                    _taskLogger.LogMessage(
-                        subcategory: default,
-                        code: message.Code,
-                        helpKeyword: default,
-                        file: message.File,
-                        lineNumber: default,
-                        columnNumber: default,
-                        endLineNumber: default,
-                        endColumnNumber: default,
-                        importance: message.Level.ToImportance(),
-                        message: message.Text);
+                    if (message.Code == null && message.File == null)
+                    {
+                        // use shorter overload when there is no code and no file. Otherwise, msbuild 
+                        // will display:
+                        //
+                        // <project file>(<line>,<colunmn>): message : <text>
+                        _taskLogger.LogMessage(message.Level.ToImportance(), message.Text);
+                    }
+                    else
+                    {
+                        _taskLogger.LogMessage(
+                            subcategory: default,
+                            code: message.Code,
+                            helpKeyword: default,
+                            file: message.File,
+                            lineNumber: default,
+                            columnNumber: default,
+                            endLineNumber: default,
+                            endColumnNumber: default,
+                            importance: message.Level.ToImportance(),
+                            message: message.Text);
+                    }
                     break;
 
                 default:

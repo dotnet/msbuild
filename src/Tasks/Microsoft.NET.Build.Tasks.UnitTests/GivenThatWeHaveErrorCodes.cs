@@ -21,9 +21,21 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         private static readonly IReadOnlyList<int> _deletedCodes = new int[]
         {
-            // Put deleted numeric error codes here. 
-            // For example, if NETSDK1001 is deleted, add 1001 to this list.
+            1026,
+            1027,
+            1033,
+            1034,
+            1035,
+            1036,
+            1037,
+            1038,
+            1039,
+            1040,
+            1041,
+            1057,
+            1062,
             1066,
+            1101,
         };
 
         [Fact]
@@ -33,17 +45,25 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             foreach (var (key, message) in GetMessages())
             {
-                // NB: if we ever need strings that don't have error codes (say because they are not sent to MSBuild),
-                //     we should use a separate .resx file so that we can preserve this enforcement.
                 var match = Regex.Match(message, "^NETSDK([0-9]{4}): ");
-                match.Success
-                    .Should()
-                    .BeTrue(because: $"all messages should have correctly formatted error codes ({key} does not)");
 
-                int code = int.Parse(match.Groups[1].Value);
-                codes.Add(code)
-                    .Should()
-                    .BeTrue(because: $"error codes should not be duplicated (NETSDK{code} is used more than once)");
+                if (key.EndsWith("_Info"))
+                {
+                    match.Success
+                        .Should()
+                        .BeFalse(because: "informational messages should not have error codes.");
+                }
+                else
+                {
+                    match.Success
+                        .Should()
+                        .BeTrue(because: $"all non-informational should have correctly formatted error codes ({key} does not).");
+
+                    int code = int.Parse(match.Groups[1].Value);
+                    codes.Add(code)
+                        .Should()
+                        .BeTrue(because: $"error codes should not be duplicated (NETSDK{code} is used more than once)");
+                }
             }
 
             for (int i = 0; i < codes.Count; i++)
@@ -63,11 +83,21 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             foreach (var data in doc.Root.Elements(ns + "data"))
             {
+                var name = data.Attribute("name").Value;
                 var value = data.Element(ns + "value").Value;
                 var comment = data.Element(ns + "comment")?.Value ?? "";
                 var prefix = value.Substring(0, value.IndexOf(' '));
                 
-                comment.Should().StartWith($@"{{StrBegin=""{prefix} ""}}");
+                if (name.EndsWith("_Info"))
+                { 
+                    comment.Should().NotContain("StrBegin",
+                        because: "informational messages should not have error codes.");
+                }
+                else
+                {
+                    comment.Should().StartWith($@"{{StrBegin=""{prefix} ""}}",
+                        because: "localization instructions should indicate invariant error code as preceding translatable message.");
+                }
             }
         }
 

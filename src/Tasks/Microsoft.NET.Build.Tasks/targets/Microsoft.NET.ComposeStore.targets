@@ -53,8 +53,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                              SkipUnchangedFiles=$(SkipUnchangedFiles);
                              PreserveStoreLayout=$(PreserveStoreLayout);
                              CreateProfilingSymbols=$(CreateProfilingSymbols);
-                             StoreSymbolsStagingDir=$(StoreSymbolsStagingDir)"
-                 ContinueOnError="WarnAndContinue">
+                             StoreSymbolsStagingDir=$(StoreSymbolsStagingDir)">
       <Output ItemName="AllResolvedPackagesPublished" TaskParameter="TargetOutputs" />
     </MSBuild>
   </Target>
@@ -71,6 +70,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <PackageReferencesToStore Include="$(MSBuildProjectFullPath)">
+        <PackageName>%(PackageReference.Identity)</PackageName>
+        <PackageVersion>%(PackageReference.Version)</PackageVersion>
         <AdditionalProperties>
           StorePackageName=%(PackageReference.Identity);
           StorePackageVersion=%(PackageReference.Version);
@@ -93,17 +94,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 <!-- Restore phase -->
     <MSBuild Projects="@(PackageReferencesToStore)"
                  Targets="RestoreForComposeStore"
-                 BuildInParallel="$(BuildInParallel)"
-                 ContinueOnError="WarnAndContinue">
+                 BuildInParallel="$(BuildInParallel)">
     </MSBuild>
     
     
 <!-- Resolve phase-->
     <MSBuild Projects="@(PackageReferencesToStore)"
                  Targets="StoreResolver"
-                 Properties="MSBuildProjectExtensionsPath=$(ComposeWorkingDir)\%(PackageReference.Identity)_$([System.String]::Copy('%(PackageReference.Version)').Replace('*','-'))\;"
-                 BuildInParallel="$(BuildInParallel)"
-                 ContinueOnError="WarnAndContinue">
+                 Properties="SelfContained=false;MSBuildProjectExtensionsPath=$(ComposeWorkingDir)\%(PackageReferencesToStore.PackageName)_$([System.String]::Copy('%(PackageReferencesToStore.PackageVersion)').Replace('*','-'))\;"
+                 BuildInParallel="$(BuildInParallel)">
       <Output ItemName="ResolvedPackagesFromMapper" TaskParameter="TargetOutputs" />
     </MSBuild>
   </Target>
@@ -157,8 +156,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  Importance="high"/>
     <RemoveDir
         Condition="'$(PreserveComposeWorkingDir)' != 'true'"
-        Directories="$(ComposeWorkingDir)"
-        ContinueOnError="WarnAndContinue"/>
+        Directories="$(ComposeWorkingDir)" />
   </Target>
 
   <!--
@@ -177,7 +175,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <Copy SourceFiles = "@(_OptimizedResolvedFileToPublish)"
-          DestinationFolder="$(PublishDir)%(RecursiveDir)"
+          DestinationFolder="$(PublishDir)%(_OptimizedResolvedFileToPublish.RecursiveDir)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
@@ -189,7 +187,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Copy>
 
     <Copy SourceFiles="@(_OptimizedSymbolFileToPublish)"
-          DestinationFolder="$(ProfilingSymbolsDir)%(RecursiveDir)"
+          DestinationFolder="$(ProfilingSymbolsDir)%(_OptimizedSymbolFileToPublish.RecursiveDir)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"

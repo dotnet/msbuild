@@ -297,6 +297,65 @@ namespace Microsoft.NET.Build.Tests
             }.Concat(net471Shims));
         }
 
+        
+        [WindowsOnlyFact]
+        public void Aliases_are_preserved_for_replaced_references()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "Net471AliasTest",
+                TargetFrameworks = "net471",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var netStandardProject = new TestProject()
+            {
+                Name = "NetStandard20_Library",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true
+            };
+
+            testProject.SourceFiles["Program.cs"] = $@"
+extern alias snh;
+using System;
+public static class Program
+{{
+    public static void Main()
+    {{
+        new snh::System.Net.Http.HttpClient();
+        Console.WriteLine(""Hello, World!"");
+        Console.WriteLine({netStandardProject.Name}.{netStandardProject.Name}Class.Name);
+    }}
+}}
+";
+
+            testProject.ReferencedProjects.Add(netStandardProject);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (Path.GetFileNameWithoutExtension(projectPath) == testProject.Name)
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        var referenceElement = new XElement(ns + "Reference",
+                                                            new XAttribute("Include", "System.Net.Http"),
+                                                            new XAttribute("Aliases", "snh"));
+
+                        project.Root.Add(new XElement(ns + "ItemGroup", referenceElement));
+                    }
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         [FullMSBuildOnlyFact]
         public void ZipFileCanBeSharedWithNetStandard16()
         {

@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tasks
                 BuildEngine4.GetRegisteredTaskObject(previewMessageKey, RegisteredTaskObjectLifetime.Build);
             if (messageDisplayed == null)
             {
-                Log.LogMessage(MessageImportance.High, Strings.UsingPreviewSdkWarning);
+                Log.LogMessage(MessageImportance.High, Strings.UsingPreviewSdk_Info);
 
                 BuildEngine4.RegisterTaskObject(
                     previewMessageKey,

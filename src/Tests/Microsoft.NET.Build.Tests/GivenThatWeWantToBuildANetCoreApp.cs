@@ -696,8 +696,29 @@ class Program
             packageReferences
                 .Should()
                 .BeEmpty();
+        }
 
+        [WindowsOnlyFact]
+        public void It_builds_with_unicode_characters_in_path()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "Prj_すおヸょー",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true,
+            };
 
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

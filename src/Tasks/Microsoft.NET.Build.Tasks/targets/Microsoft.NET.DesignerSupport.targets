@@ -57,7 +57,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       AssemblyVersion="_"
       AssetsFilePath="$(ProjectAssetsFile)"
       DepsFilePath="$(_DesignerDepsFilePath)"
-      FilesToSkip="@(_ConflictPackageFiles)"
       IncludeMainProject="false"
       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
       IsSelfContained="false"
@@ -68,7 +67,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
       TargetFramework="$(TargetFrameworkMoniker)"
-      DepsFileGenerationMode="$(DepsFileGenerationMode)"
       />
 
     <ItemGroup>

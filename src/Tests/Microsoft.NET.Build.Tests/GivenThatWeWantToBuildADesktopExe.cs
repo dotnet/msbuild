@@ -488,8 +488,7 @@ namespace DefaultReferences
         {
             Test_inbox_assembly_wins_conflict_resolution(true, httpPackageVersion);
         }
-
-        void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject, string httpPackageVersion)
+        void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject, string httpPackageVersion, bool useAlias = false)
         {
             var testProject = new TestProject()
             {
@@ -510,27 +509,43 @@ namespace DefaultReferences
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", httpPackageVersion));
 
-            testProject.SourceFiles["Program.cs"] = @"using System;
-using System.Net.Http;
+            testProject.SourceFiles["Program.cs"] = 
+                (useAlias ? "extern alias snh;" + Environment.NewLine : "") +
+
+                @"using System;
+
 
 class Program
 {
     static void Main(string[] args)
     {
-        HttpClient client = new HttpClient();
+" +
+        (useAlias ? "var client = new snh::System.Net.Http.HttpClient();" :
+                    "var client = new System.Net.Http.HttpClient();") +
+@"
     }
 }";
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name,
-                                                                 identifier: (useSdkProject ? "_SDK_" : "_") + httpPackageVersion)
+            string identifier = (useSdkProject ? "_SDK_" : "_") +
+                                (useAlias ? "alias" : "") +
+                                httpPackageVersion;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
-                    itemGroup.Add(new XElement(ns + "Reference",
-                                    new XAttribute("Include", "System.Net.Http")));
+                    var httpReference = new XElement(ns + "Reference",
+                                                     new XAttribute("Include", "System.Net.Http"));
+
+                    if (useAlias)
+                    {
+                        httpReference.SetAttributeValue("Aliases", "snh");
+                    }
+
+                    itemGroup.Add(httpReference);
                 })
                 .Restore(Log, testProject.Name);
 
@@ -543,6 +558,71 @@ class Program
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
                 .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
+        }
+
+        [FullMSBuildOnlyTheory(Skip = "https://github.com/NuGet/Home/issues/8238")]
+        [InlineData("4.3.3")]
+        [InlineData("4.1.0")]
+        public void Aliases_are_preserved_if_inbox_assembly_wins_conflict_resolution(string httpPackageVersion)
+        {
+            Test_inbox_assembly_wins_conflict_resolution(false, httpPackageVersion, useAlias: true);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("4.3.3")]
+        [InlineData("4.1.0")]
+        public void Aliases_are_preserved_if_inbox_assembly_wins_conflict_resolution_sdk(string httpPackageVersion)
+        {
+            Test_inbox_assembly_wins_conflict_resolution(true, httpPackageVersion, useAlias: true);
+        }
+
+        [WindowsOnlyFact]
+        public void Aliases_are_preserved_if_framework_reference_is_overridden_by_package()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "OverriddenAlias",
+                IsExe = true,
+                IsSdkProject = true,
+                TargetFrameworks = "net461"
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", "4.3.3"));
+
+            testProject.SourceFiles["Program.cs"] = @"
+extern alias snh;
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var client = new snh::System.Net.Http.HttpClient();
+    }
+}";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    var httpReference = new XElement(ns + "Reference",
+                                                     new XAttribute("Include", "System.Net.Http"));
+
+                    httpReference.SetAttributeValue("Aliases", "snh");
+                    itemGroup.Add(httpReference);
+                })
+                .Restore(Log, testProject.Name);
+
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
 
         [WindowsOnlyFact]

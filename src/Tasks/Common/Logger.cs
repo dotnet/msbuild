@@ -97,8 +97,9 @@ namespace Microsoft.NET.Build.Tasks
             else
             {
                 code = null;
-                DebugThrowMissingOrIncorrectCode(format);
             }
+
+            DebugThrowMissingOrIncorrectCode(code, format, level);
 
             return new Message(
                 level, 
@@ -107,15 +108,33 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         [Conditional("DEBUG")]
-        private static void DebugThrowMissingOrIncorrectCode(string message)
+        private static void DebugThrowMissingOrIncorrectCode(string code, string message, MessageLevel level)
         {
             // NB: This is not localized because it represents a bug in our code base, not a user error.
             //     To log message with external codes, use Log.Log(in Message, string[]) directly.
             //     It is not a Debug.Assert because it doesn't render well in unit tests.
-            throw new ArgumentException(
-                 "Message is not prefixed with NETSDK error code or error code is formatted incorrectly: "
-                 + message,
-                 paramName: nameof(message));
+
+            switch (level)
+            {
+                case MessageLevel.Error:
+                case MessageLevel.Warning:
+                    if (code == null)
+                    {
+                        throw new ArgumentException(
+                            "Message is not prefixed with NETSDK error code or error code is formatted incorrectly: "
+                            + message);
+                    }
+                    break;
+
+                default:
+                    if (code != null)
+                    {
+                       throw new ArgumentException(
+                           "Message is prefixed with NETSDK error, but error codes should not be used for informational messages: "
+                           + $"{code}:{message}");
+                    }
+                    break;
+            }
         }
 
         private static bool IsAsciiDigit(char c)

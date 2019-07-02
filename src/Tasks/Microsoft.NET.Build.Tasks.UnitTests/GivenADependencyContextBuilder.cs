@@ -8,7 +8,10 @@ using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
+using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,7 +34,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             string runtime,
             ITaskItem[] assemblySatelliteAssemblies,
             ITaskItem[] referencePaths,
-            ITaskItem[] referenceSatellitePaths)
+            ITaskItem[] referenceSatellitePaths,
+            object[] resolvedNuGetFiles)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
 
@@ -54,9 +58,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 runtimeFrameworks: null,
                 isSelfContained: !string.IsNullOrEmpty(runtime));
 
+            if (resolvedNuGetFiles == null)
+            {
+                resolvedNuGetFiles = Array.Empty<ResolvedFile>();
+            }
+
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions: false)
                 .WithDirectReferences(directReferences)
                 .WithCompilationOptions(compilationOptions)
+                .WithResolvedNuGetFiles((ResolvedFile[]) resolvedNuGetFiles)
                 .Build();
 
             JObject result = Save(dependencyContext);
@@ -87,8 +97,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             get
             {
-                CompilationOptions compilationOptions = CreateCompilationOptions();
-
                 ITaskItem[] dotnetNewSatelliteAssemblies = new ITaskItem[]
                 {
                     new MockTaskItem(
@@ -107,43 +115,33 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         }),
                 };
 
-                ITaskItem[] referencePaths = new ITaskItem[]
+                var resolvedNuGetFiles = new[]
                 {
-                    new MockTaskItem(
-                        "/usr/Path/RandomLooseLibrary.dll",
-                        new Dictionary<string, string>
-                        {
-                            { "CopyLocal", "true" },
-                            { "FusionName", "RandomLooseLibrary, Version=1.2.0.4, Culture=neutral, PublicKeyToken=null" },
-                            { "ReferenceSourceTarget", "ResolveAssemblyReference" },
-                            { "Version", "" },
-                        }),
-                };
+                    new ResolvedFile("Newtonsoft.Json.dll", "",
+                        new PackageIdentity("Newtonsoft.Json", new NuGetVersion("9.0.1")),
+                        AssetType.Runtime,
+                        "lib/netstandard1.0/Newtonsoft.Json.dll"),
 
-                ITaskItem[] referenceSatellitePaths = new ITaskItem[]
-                {
-                    new MockTaskItem(
-                        @"/usr/Path/fr/RandomLooseLibrary.resources.dll",
-                        new Dictionary<string, string>
-                        {
-                            { "CopyLocal", "true" },
-                            { "DestinationSubDirectory", "fr/" },
-                            { "OriginalItemSpec", "/usr/Path/RandomLooseLibrary.dll" },
-                            { "ResolvedFrom", "{RawFileName}" },
-                            { "Version", "" },
-                        }),
+                    new ResolvedFile("System.Collections.NonGeneric.dll", "",
+                        new PackageIdentity("System.Collections.NonGeneric", new NuGetVersion("4.0.1")),
+                        AssetType.Runtime,
+                        "lib/netstandard1.3/System.Collections.NonGeneric.dll"),
+
+                    new ResolvedFile("System.Runtime.Serialization.Primitives.dll", "",
+                        new PackageIdentity("System.Runtime.Serialization.Primitives", new NuGetVersion("4.1.1")),
+                        AssetType.Runtime,
+                        "lib/netstandard1.3/System.Runtime.Serialization.Primitives.dll")
                 };
 
                 return new[]
                 {
-                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new", null, null, null, null},
-                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new.resources", null, dotnetNewSatelliteAssemblies, null, null },
-                    new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies", null, null, null, null },
-                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.compilerOptions", null, null, null, null},
-                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.directReference", null, null, referencePaths, referenceSatellitePaths},
-                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.portable", null, null, null, null },
-                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.osx", "osx.10.11-x64", null, null, null },
+                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new", null, null, null, null, null},
+                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new.resources", null, dotnetNewSatelliteAssemblies, null, null, null },
+                    new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies", null, null, null, null, resolvedNuGetFiles },
                 };
+
+
+
             }
         }
 

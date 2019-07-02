@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -16,15 +17,24 @@ namespace Microsoft.NET.Build.Tasks
 
         public string[] PackageFolders { get; set; } = Array.Empty<string>();
 
+        public string AssetsFileWithAdditionalPackageFolders { get; set; }
+
         [Output]
         public ITaskItem[] Output { get; set; }
 
         protected override void ExecuteCore()
         {
-            if (Items.Length == 0 || PackageFolders.Length == 0)
+            if (Items.Length == 0 || (PackageFolders.Length == 0 && string.IsNullOrEmpty(AssetsFileWithAdditionalPackageFolders)))
             {
                 Output = Items;
                 return;
+            }
+
+            if (!string.IsNullOrEmpty(AssetsFileWithAdditionalPackageFolders))
+            {
+                var lockFileCache = new LockFileCache(this);
+                var lockFile = lockFileCache.GetLockFile(AssetsFileWithAdditionalPackageFolders);
+                PackageFolders = PackageFolders.Concat(lockFile.PackageFolders.Select(p => p.Path)).ToArray();
             }
 
             var packageResolver = NuGetPackageResolver.CreateResolver(PackageFolders);

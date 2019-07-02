@@ -100,15 +100,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_CollectTargetFrameworkForTelemetry" AfterTargets="_CheckForUnsupportedTargetFramework">
-    <PropertyGroup>
-      <_TelemetryUseWindowsForms>null</_TelemetryUseWindowsForms>
-      <_TelemetryUseWindowsForms Condition="'$(UseWindowsForms)' != ''">$(UseWindowsForms)</_TelemetryUseWindowsForms>
-
-      <_TelemetryUseWPF>null</_TelemetryUseWPF>
-      <_TelemetryUseWPF Condition="'$(UseWPF)' != ''">$(UseWPF)</_TelemetryUseWPF>
-
-    </PropertyGroup>
-    <Telemetry EventName="targetframeworkeval" EventData="TargetFrameworkVersion=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'));UseWindowsForms=$(_TelemetryUseWindowsForms);UseWPF=$(_TelemetryUseWPF)" />
+    <Telemetry EventName="targetframeworkeval" EventData="TargetFrameworkVersion=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'))" />
   </Target>
 
   <!--
