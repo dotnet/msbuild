@@ -520,13 +520,16 @@ namespace Microsoft.Build.Logging
         private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
+            var importance = (MessageImportance)ReadInt32();
+
             var environmentVariableName = ReadString();
 
             var e = new EnvironmentVariableReadEventArgs(
                 environmentVariableName,
                 fields.Message,
                 fields.HelpKeyword,
-                fields.SenderName);
+                fields.SenderName,
+                importance);
             SetCommonFields(e, fields);
 
             return e;
@@ -535,6 +538,7 @@ namespace Microsoft.Build.Logging
         private BuildEventArgs ReadPropertyReassignmentEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
+            var importance = (MessageImportance)ReadInt32();
             string propertyName = ReadString();
             string previousValue = ReadString();
             string newValue = ReadString();
@@ -547,7 +551,8 @@ namespace Microsoft.Build.Logging
                 location,
                 fields.Message,
                 fields.HelpKeyword,
-                fields.SenderName);
+                fields.SenderName,
+                importance);
             SetCommonFields(e, fields);
 
             return e;
@@ -556,13 +561,15 @@ namespace Microsoft.Build.Logging
         private BuildEventArgs ReadUninitializedPropertyReadEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
+            var importance = (MessageImportance)ReadInt32();
             string propertyName = ReadString();
 
             var e = new UninitializedPropertyReadEventArgs(
                 propertyName,
                 fields.Message,
                 fields.HelpKeyword,
-                fields.SenderName);
+                fields.SenderName,
+                importance);
             SetCommonFields(e, fields);
 
             return e;

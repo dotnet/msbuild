@@ -143,10 +143,10 @@ namespace Microsoft.Build.Framework
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
     }
     public delegate void CustomBuildEventHandler(object sender, Microsoft.Build.Framework.CustomBuildEventArgs e);
-    public partial class EnvironmentVariableReadEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
+    public partial class EnvironmentVariableReadEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
         public EnvironmentVariableReadEventArgs() { }
-        public EnvironmentVariableReadEventArgs(string environmentVariableName, string message, string helpKeyword=null, string senderName=null) { }
+        public EnvironmentVariableReadEventArgs(string environmentVariableName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
         public string EnvironmentVariableName { get { throw null; } set { } }
     }
     public partial class ExternalProjectFinishedEventArgs : Microsoft.Build.Framework.CustomBuildEventArgs
@@ -408,10 +408,10 @@ namespace Microsoft.Build.Framework
         public string ToolsVersion { get { throw null; } }
     }
     public delegate void ProjectStartedEventHandler(object sender, Microsoft.Build.Framework.ProjectStartedEventArgs e);
-    public partial class PropertyReassignmentEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
+    public partial class PropertyReassignmentEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
         public PropertyReassignmentEventArgs() { }
-        public PropertyReassignmentEventArgs(string propertyName, string previousValue, string newValue, string location, string message, string helpKeyword=null, string senderName=null) { }
+        public PropertyReassignmentEventArgs(string propertyName, string previousValue, string newValue, string location, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
         public string Location { get { throw null; } set { } }
         public string NewValue { get { throw null; } set { } }
         public string PreviousValue { get { throw null; } set { } }
@@ -577,10 +577,10 @@ namespace Microsoft.Build.Framework
         public System.Collections.Generic.IDictionary<string, string> Properties { get { throw null; } set { } }
     }
     public delegate void TelemetryEventHandler(object sender, Microsoft.Build.Framework.TelemetryEventArgs e);
-    public partial class UninitializedPropertyReadEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
+    public partial class UninitializedPropertyReadEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
         public UninitializedPropertyReadEventArgs() { }
-        public UninitializedPropertyReadEventArgs(string propertyName, string message, string helpKeyword=null, string senderName=null) { }
+        public UninitializedPropertyReadEventArgs(string propertyName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
         public string PropertyName { get { throw null; } set { } }
     }
 }

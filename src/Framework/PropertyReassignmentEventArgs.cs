@@ -9,7 +9,7 @@ namespace Microsoft.Build.Framework
     /// The argument for a property reassignment event.
     /// </summary>
     [Serializable]
-    public class PropertyReassignmentEventArgs : BuildStatusEventArgs
+    public class PropertyReassignmentEventArgs : BuildMessageEventArgs
     {
         /// <summary>
         /// Creates an instance of the PropertyReassignmentEventArgs class.
@@ -32,7 +32,8 @@ namespace Microsoft.Build.Framework
             string location,
             string message,
             string helpKeyword = null,
-            string senderName = null) : base(message, helpKeyword, senderName)
+            string senderName = null,
+            MessageImportance importance = MessageImportance.Low) : base(message, helpKeyword, senderName, importance)
         {
             this.PropertyName = propertyName;
             this.PreviousValue = previousValue;

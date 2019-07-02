@@ -9,7 +9,7 @@ namespace Microsoft.Build.Framework
     /// Arguments for the environment variable read event.
     /// </summary>
     [Serializable]
-    public class EnvironmentVariableReadEventArgs : BuildStatusEventArgs
+    public class EnvironmentVariableReadEventArgs : BuildMessageEventArgs
     {
         /// <summary>
         /// Initializes an instance of the EnvironmentVariableReadEventArgs class.
@@ -26,7 +26,8 @@ namespace Microsoft.Build.Framework
             string environmentVariableName,
             string message,
             string helpKeyword = null,
-            string senderName = null) : base(message, helpKeyword, senderName)
+            string senderName = null,
+            MessageImportance importance = MessageImportance.Low) : base(message, helpKeyword, senderName, importance)
         {
             this.EnvironmentVariableName = environmentVariableName;
         }
