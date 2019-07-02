@@ -97,11 +97,6 @@
         <target state="translated">Utwórz pakiet NuGet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Migruj projekt project.json do projektu programu MSBuild.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Polecenia modyfikacji projektu</target>
@@ -159,7 +154,7 @@
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">Określone polecenie („{0}”) nie jest prawidłowym poleceniem zestawu SDK. Określ prawidłowe polecenie zestawu SDK. Aby uzyskać więcej informacji, uruchom polecenie dotnet help.</target>
+        <target state="translated">Określone polecenie („{0}”) nie jest prawidłowym poleceniem zestawu SDK. Określ prawidłowe polecenie zestawu SDK. Aby uzyskać więcej informacji, uruchom polecenie dotnet help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">

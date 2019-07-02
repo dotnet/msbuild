@@ -3,7 +3,7 @@
 
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
             _fileSystem.File.WriteAllText(
                 shimPath.Value,
-                JsonSerializer.ToString(shim));
+                JsonSerializer.Serialize(shim));
         }
 
         public class FakeShim

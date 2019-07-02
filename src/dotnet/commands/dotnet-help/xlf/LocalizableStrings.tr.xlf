@@ -97,11 +97,6 @@
         <target state="translated">Bir NuGet paketi oluşturur.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Bir project.json projesini MSBuild projesine geçirir.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Projede değişiklik komutları</target>
@@ -159,7 +154,7 @@
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">Belirtilen '{0}' komutu geçerli bir SDK komutu değil. Lütfen geçerli bir SDK komutu belirtin. Daha fazla bilgi için dotnet yardımını çalıştırın.</target>
+        <target state="translated">Belirtilen '{0}' komutu geçerli bir SDK komutu değil. Geçerli bir SDK komutu belirtin. Daha fazla bilgi için dotnet help komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">

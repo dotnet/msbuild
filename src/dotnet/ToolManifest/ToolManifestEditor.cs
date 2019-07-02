@@ -164,11 +164,11 @@ namespace Microsoft.DotNet.ToolManifest
                         serializableLocalToolsManifest.Tools =
                             new List<SerializableLocalToolSinglePackage>();
 
-                        if (tools.Type != JsonValueType.Object)
+                        if (tools.ValueKind != JsonValueKind.Object)
                         {
                             throw new ToolManifestException(
                                 string.Format(LocalizableStrings.UnexpectedTypeInJson,
-                                    JsonValueType.Object.ToString(),
+                                    JsonValueKind.Object.ToString(),
                                     JsonPropertyTools));
                         }
 
@@ -184,21 +184,21 @@ namespace Microsoft.DotNet.ToolManifest
                             var commands = new List<string>();
                             if (toolJson.Value.TryGetProperty(JsonPropertyCommands, out var commandsJson))
                             {
-                                if (commandsJson.Type != JsonValueType.Array)
+                                if (commandsJson.ValueKind != JsonValueKind.Array)
                                 {
                                     throw new ToolManifestException(
                                         string.Format(LocalizableStrings.UnexpectedTypeInJson,
-                                            JsonValueType.Array.ToString(),
+                                            JsonValueKind.Array.ToString(),
                                             JsonPropertyCommands));
                                 }
 
                                 foreach (var command in commandsJson.EnumerateArray())
                                 {
-                                    if (command.Type != JsonValueType.String)
+                                    if (command.ValueKind != JsonValueKind.String)
                                     {
                                         throw new ToolManifestException(
                                             string.Format(LocalizableStrings.UnexpectedTypeInJson,
-                                                JsonValueType.String.ToString(),
+                                                JsonValueKind.String.ToString(),
                                                 "command"));
                                     }
 
@@ -216,7 +216,7 @@ namespace Microsoft.DotNet.ToolManifest
                 return serializableLocalToolsManifest;
             }
             catch (Exception e) when (
-                e is JsonException)
+                e is JsonException || e is FormatException)
             {
                 throw new ToolManifestException(string.Format(LocalizableStrings.JsonParsingError,
                     possibleManifest.Value, e.Message));

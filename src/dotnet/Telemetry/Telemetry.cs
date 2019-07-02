@@ -148,6 +148,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 Dictionary<string, string> eventProperties = GetEventProperties(properties);
                 Dictionary<string, double> eventMeasurements = GetEventMeasures(measurements);
 
+                eventProperties.Add("event id", Guid.NewGuid().ToString());
+
                 _client.TrackEvent(PrependProducerNamespace(eventName), eventProperties, eventMeasurements);
             }
             catch (Exception e)

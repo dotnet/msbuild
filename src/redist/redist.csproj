@@ -13,6 +13,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\dotnet\dotnet.csproj" />
+
+    <!--
+      We will run tests with dotnet.deps.json from stage 0 as we do not have enough here
+      to regerate a full deps.json. To avoid a cycle where we have to update stage 0
+      when a new dll is added, set the runtimeconfig option to allow additional dlls in
+      app base to load. 
+    -->
+    <RuntimeHostConfigurationOption 
+      Include="Microsoft.NETCore.DotNetHostPolicy.SetAppPaths"
+      Value="true" />
   </ItemGroup>
 
   <Target Name="GetCustomPackageFiles"
@@ -73,6 +83,12 @@
           DestinationFiles="@(MSBuildExtensionsContent -> '$(PublishDir)%(DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(SdksContent)"
           DestinationFiles="@(SdksContent -> '$(PublishDir)Sdks/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="CopyRuntimeConfiguration"
+          AfterTargets="Publish">
+     <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)"
+           DestinationFiles="$(PublishDir)dotnet.runtimeconfig.json" />
   </Target>
 
   <Target Name="ChmodPublishDir"

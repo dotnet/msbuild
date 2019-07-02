@@ -38,10 +38,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut
-                    .Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.", "because .NET 4.6 tests will pass")
-                         .And.Contain("Passed   VSTestPassTestDesktop", "because .NET 4.6 tests will pass")
-                         .And.Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.", "because netcoreapp2.0 tests will fail")
-                         .And.Contain("Failed   VSTestFailTestNetCoreApp", "because netcoreapp2.0 tests will fail");
+                    .Should().Contain("Total tests: 3")
+                         .And.Contain("Passed: 2")
+                         .And.Contain("Failed: 1")
+                         .And.Contain("\u221a VSTestPassTestDesktop", "because .NET 4.6 tests will pass")
+                         .And.Contain("Total tests: 3")
+                         .And.Contain("Passed: 1")
+                         .And.Contain("Failed: 2")
+                         .And.Contain("X VSTestFailTestNetCoreApp", "because netcoreapp2.0 tests will fail");
             }
             result.ExitCode.Should().Be(1);
         }
@@ -73,12 +77,16 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 // for target framework net46
-                result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTestDesktop");
+                result.StdOut.Should().Contain("Total tests: 3");
+                result.StdOut.Should().Contain("Passed: 2");
+                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("\u221a TestNamespace.VSTestXunitTests.VSTestXunitPassTestDesktop");
 
                 // for target framework netcoreapp1.0
-                result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTestNetCoreApp");
+                result.StdOut.Should().Contain("Total tests: 3");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Failed: 2");
+                result.StdOut.Should().Contain("X TestNamespace.VSTestXunitTests.VSTestXunitFailTestNetCoreApp");
             }
 
             result.ExitCode.Should().Be(1);

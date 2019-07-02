@@ -97,11 +97,6 @@
         <target state="translated">NuGet パッケージを作成します。</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">project.json プロジェクトを MSBuild プロジェクトに移行します。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">プロジェクト変更コマンド</target>
@@ -159,7 +154,7 @@
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">指定されたコマンド '{0}' は、有効な SDK コマンドではありません。有効な SDK コマンドを指定してください。詳細については、dotnet のヘルプを実行してください。</target>
+        <target state="translated">指定されたコマンド '{0}' は、有効な SDK コマンドではありません。有効な SDK コマンドを指定してください。詳細については、dotnet のヘルプを実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">

@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                 {
                     var model = document.RootElement;
 
-                    if (model.Type != JsonValueType.Object || !model.TryGetProperty(ProfilesKey, out var profilesObject) || profilesObject.Type != JsonValueType.Object)
+                    if (model.ValueKind != JsonValueKind.Object || !model.TryGetProperty(ProfilesKey, out var profilesObject) || profilesObject.ValueKind != JsonValueKind.Object)
                     {
                         return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfilesCollectionIsNotAJsonObject);
                     }
@@ -43,19 +43,19 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     }
                     else
                     {
-                        if (!profilesObject.TryGetProperty(profileName, out profileObject) || profileObject.Type != JsonValueType.Object)
+                        if (!profilesObject.TryGetProperty(profileName, out profileObject) || profileObject.ValueKind != JsonValueKind.Object)
                         {
                             return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
                         }
                     }
 
-                    if (profileObject.Type == default)
+                    if (profileObject.ValueKind == default)
                     {
                         foreach (var prop in profilesObject.EnumerateObject())
                         {
-                            if (prop.Value.Type == JsonValueType.Object)
+                            if (prop.Value.ValueKind == JsonValueKind.Object)
                             {
-                                if (prop.Value.TryGetProperty(CommandNameKey, out var commandNameElement) && commandNameElement.Type == JsonValueType.String)
+                                if (prop.Value.TryGetProperty(CommandNameKey, out var commandNameElement) && commandNameElement.ValueKind == JsonValueKind.String)
                                 {
                                     if (_providers.ContainsKey(commandNameElement.GetString()))
                                     {
@@ -67,13 +67,13 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                         }
                     }
 
-                    if (profileObject.Type == default)
+                    if (profileObject.ValueKind == default)
                     {
                         return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
                     }
 
                     if (!profileObject.TryGetProperty(CommandNameKey, out var finalCommandNameElement)
-                        || finalCommandNameElement.Type != JsonValueType.String)
+                        || finalCommandNameElement.ValueKind != JsonValueKind.String)
                     {
                         return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
                     }
@@ -100,9 +100,9 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         private static bool IsDefaultProfileType(JsonProperty profileProperty)
         {
-            if (profileProperty.Value.Type != JsonValueType.Object
+            if (profileProperty.Value.ValueKind != JsonValueKind.Object
                 || !profileProperty.Value.TryGetProperty(CommandNameKey, out var commandNameElement)
-                || commandNameElement.Type != JsonValueType.String)
+                || commandNameElement.ValueKind != JsonValueKind.String)
             {
                 return false;
             }

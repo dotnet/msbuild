@@ -8,33 +8,33 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionPrefix>3.0.100</VersionPrefix>
-    <PreReleaseVersionLabel>preview6</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>preview7</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <DotNetCoreSdkLKGVersion>3.0.100-preview6-012021</DotNetCoreSdkLKGVersion>
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.2.0</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview8-27901-07</MicrosoftNETCoreAppPackageVersion>
+    <DotNetCoreSdkLKGVersion>3.0.100-preview7-012712</DotNetCoreSdkLKGVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>3.0.0-preview7.19351.4</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>2.2.1</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftApplicationInsightsPackageVersion>2.0.0</MicrosoftApplicationInsightsPackageVersion>
     <MicrosoftBuildPackageVersion>16.2.0-preview.19261.3</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview6.19303.1</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-preview7.19351.3</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-alpha1-10062</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta5.19303.2</MicrosoftTemplateEngineCliPackageVersion>
+    <MicrosoftTemplateEngineCliPackageVersion>2.0.0-preview.19330.1</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
     <MicrosoftTemplateEngineUtilsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineUtilsPackageVersion>
+    <MicrosoftTemplateEngineTemplateSearchCommonVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineTemplateSearchCommonVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>2.2.0-preview1-26620-03</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftDotNetCliCommandLinePackageVersion>1.0.0-preview.19208.1</MicrosoftDotNetCliCommandLinePackageVersion>
-    <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.2-preview.19074.1</MicrosoftDotNetProjectJsonMigrationPackageVersion>
-    <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
     <NewtonsoftJsonPackageVersion>10.0.3</NewtonsoftJsonPackageVersion>
-    <NuGetBuildTasksPackageVersion>5.2.0-preview2.6020</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>5.2.0-rtm.6067</NuGetBuildTasksPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
     <NuGetConfigurationPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetConfigurationPackageVersion>
     <NuGetFrameworksPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetFrameworksPackageVersion>

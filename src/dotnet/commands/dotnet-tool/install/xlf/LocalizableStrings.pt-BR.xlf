@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
-        <target state="needs-review-translation">As opções local (--local), global (--global) do caminho da ferramenta (--tool-path) só podem ocorrer uma por vez. Especifique apenas uma das opções: {0}.</target>
+        <target state="translated">As opções local (--local), global (--global) e do caminho da ferramenta (--tool-path) só podem ocorrer uma por vez. Especifique apenas uma das opções: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -80,7 +80,7 @@ Se quiser criar um manifesto, use `dotnet new tool-manifest`, normalmente no dir
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to install.</source>
-        <target state="needs-review-translation">Especifique uma ID de Pacote da ferramenta a ser instalada.</target>
+        <target state="translated">Especifique uma ID de Pacote de ferramenta a ser instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -100,7 +100,7 @@ Se quiser criar um manifesto, use `dotnet new tool-manifest`, normalmente no dir
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
-        <target state="needs-review-translation">Não foi possível instalar a ferramenta '{0}'. Entre em contato com o autor da ferramenta para obter assistência.</target>
+        <target state="translated">Não foi possível instalar a ferramenta '{0}'. Entre em contato com o autor para obter assistência.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">

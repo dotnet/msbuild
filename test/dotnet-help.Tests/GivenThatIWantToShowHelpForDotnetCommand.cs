@@ -46,7 +46,6 @@ SDK commands:
   clean             Clean build outputs of a .NET project.
   help              Show command line help.
   list              List project references of a .NET project.
-  migrate           Migrate a project.json project to an MSBuild project.
   msbuild           Run Microsoft Build Engine (MSBuild) commands.
   new               Create a new .NET project or file.
   nuget             Provides additional NuGet commands.

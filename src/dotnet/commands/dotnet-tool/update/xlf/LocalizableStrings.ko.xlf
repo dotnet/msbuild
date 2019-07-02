@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Update the tool and the local tool manifest.</source>
-        <target state="needs-review-translation">로컬 도구 매니페스트에서 도구를 업데이트합니다.</target>
+        <target state="translated">도구와 로컬 도구 매니페스트를 업데이트합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to update.</source>
-        <target state="needs-review-translation">업데이트할 도구 패키지 ID를 하나 지정하세요.</target>
+        <target state="translated">업데이트할 도구 패키지 ID를 하나 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
         <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
+        <target state="translated">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
-        <target state="needs-review-translation">(-global)이 도구 경로 옵션(--tool-path)과 충돌합니다. 옵션 중 하나만 지정하세요.</target>
+        <target state="translated">(-global)이 도구 경로 옵션(--tool-path)과 충돌합니다. 옵션 중 하나만 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -124,7 +124,12 @@ Tools are updated using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">도구 '{0}'이(가) 현재 설치되어 있지 않습니다.</target>
+        <target state="translated">패키지 ID가 '{0}'인 도구를 찾을 수 없습니다. 
+
+도구를 호출할 때 사용한 도구 이름과 다를 수 있는 패키지 ID를 사용하여 
+도구가 업데이트되었습니다. 'dotnet tool list' 명령을 사용하여 설치된 도구의 
+도구 이름 및 해당 패키지 ID를
+확인할 수 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">

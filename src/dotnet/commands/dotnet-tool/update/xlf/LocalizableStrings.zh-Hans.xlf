@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Update the tool and the local tool manifest.</source>
-        <target state="needs-review-translation">更新工具并从本地工具清单中更新。</target>
+        <target state="translated">更新工具和本地工具清单。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one tool Package Id to update.</source>
-        <target state="needs-review-translation">请指定一个要更新的工具包 ID。</target>
+        <target state="translated">请指定一个要更新的工具包 ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
         <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">请指定全局选项(--global)或工具路径选项(--tool-path)。</target>
+        <target state="translated">请指定全局选项(--global)或工具路径选项(--tool-path)。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
-        <target state="needs-review-translation">(--global)与工具路径选项(--tool-path)冲突。请仅指定其中一种选项。</target>
+        <target state="translated">(--global)与工具路径选项(--tool-path)冲突。请仅指定其中一种选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -124,7 +124,12 @@ Tools are updated using their package Id which may be different
 from the tool name you use when calling the tool. You can find the tool names 
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</source>
-        <target state="needs-review-translation">工具“{0}”目前尚未安装。</target>
+        <target state="translated">找不到具有包 ID“{0}”的工具。
+
+工具是使用其包 ID 更新的，该 ID 可能
+与调用工具时使用的工具名称不同。可使用 "dotnet tool list" 命令查找
+已安装工具的工具名称和
+对应的包 ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">
