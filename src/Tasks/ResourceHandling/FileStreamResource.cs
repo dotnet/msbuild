@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
             else
             {
-                ErrorUtilities.ThrowInternalError($"{nameof(FileStreamResource)} was asked to serialize to a {writer.GetType().ToString()}");
+                throw new PreserializedResourceWriterRequiredException();
             }
         }
     }

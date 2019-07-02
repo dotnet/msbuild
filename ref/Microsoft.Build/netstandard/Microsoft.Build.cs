@@ -1265,7 +1265,9 @@ namespace Microsoft.Build.Execution
     public sealed partial class ProjectTargetInstance
     {
         internal ProjectTargetInstance() { }
+        public string AfterTargets { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation AfterTargetsLocation { get { throw null; } }
+        public string BeforeTargets { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation BeforeTargetsLocation { get { throw null; } }
         public System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectTargetInstanceChild> Children { get { throw null; } }
         public string Condition { get { throw null; } }
