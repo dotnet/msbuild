@@ -311,7 +311,7 @@ namespace Microsoft.Build.Experimental.Graph
                 entryPoints,
                 projectCollection,
                 projectInstanceFactory,
-                Environment.ProcessorCount - 1,
+                Environment.ProcessorCount,
                 CancellationToken.None)
         {
         }
