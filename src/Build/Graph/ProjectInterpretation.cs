@@ -123,7 +123,7 @@ namespace Microsoft.Build.Experimental.Graph
         /// OuterAsRoot -> Inner stays the same
         /// Node -> Outer -> Inner goes to: Node -> Outer; Node->Inner; Outer -> empty
         /// </summary>
-        public void PostProcess(ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allNodes, GraphBuilder graphBuilder)
+        public void PostProcess(Dictionary<ConfigurationMetadata, ProjectGraphNode> allNodes, GraphBuilder graphBuilder)
         {
             foreach (var nodeKvp in allNodes)
             {

@@ -161,6 +161,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="Graph\GraphBuilder.cs" />
+    <Compile Include="Graph\ParallelWorkSet.cs" />
     <Compile Include="Graph\ProjectInterpretation.cs" />
     <Compile Include="Graph\GraphBuildResult.cs" />
     <Compile Include="Graph\GraphBuildSubmission.cs" />

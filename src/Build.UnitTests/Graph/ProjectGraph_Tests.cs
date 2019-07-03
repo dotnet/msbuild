@@ -183,10 +183,10 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             {
                 TransientTestFile entryProject = CreateProjectFile(env, 1);
 
-                Should.Throw<AggregateException>(() => new ProjectGraph(
+                Should.Throw<InvalidOperationException>(() => new ProjectGraph(
                     entryProject.Path,
                     ProjectCollection.GlobalProjectCollection,
-                    (projectPath, globalProperties, projectCollection) => null)).InnerException.ShouldBeOfType<InvalidOperationException>();
+                    (projectPath, globalProperties, projectCollection) => null));
             }
         }
         
@@ -500,7 +500,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 </Project>");
                 CreateProjectFile(env, 3);
 
-                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<InvalidProjectFileException>();
+                Should.Throw<InvalidProjectFileException>(() => new ProjectGraph(entryProject.Path));
             }
         }
 
