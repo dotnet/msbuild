@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.Graph
+namespace Microsoft.Build.Experimental.Graph
 {
     /// <summary>
     /// Provides deduping of expensive work by a key, or modeling of a set of deduped work that
