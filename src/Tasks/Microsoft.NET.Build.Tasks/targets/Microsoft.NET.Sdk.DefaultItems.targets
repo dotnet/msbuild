@@ -237,6 +237,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       <LinkBase Condition="'%(LinkBase)' != ''">$([MSBuild]::EnsureTrailingSlash(%(LinkBase)))</LinkBase>
       <Link Condition="'%(Link)' == '' And '%(DefiningProjectExtension)' != '.projitems' And !$([MSBuild]::ValueOrDefault('%(FullPath)', '').StartsWith($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))))">%(LinkBase)%(RecursiveDir)%(Filename)%(Extension)</Link>
     </EmbeddedResource>
+
+    <Page Update="@(Page)">
+      <LinkBase Condition="'%(LinkBase)' != ''">$([MSBuild]::EnsureTrailingSlash(%(LinkBase)))</LinkBase>
+      <Link Condition="'%(Link)' == '' And '%(DefiningProjectExtension)' != '.projitems' And !$([MSBuild]::ValueOrDefault('%(FullPath)', '').StartsWith($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))))">%(LinkBase)%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Page>
+
+    <Resource Update="@(Resource)">
+      <LinkBase Condition="'%(LinkBase)' != ''">$([MSBuild]::EnsureTrailingSlash(%(LinkBase)))</LinkBase>
+      <Link Condition="'%(Link)' == '' And '%(DefiningProjectExtension)' != '.projitems' And !$([MSBuild]::ValueOrDefault('%(FullPath)', '').StartsWith($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))))">%(LinkBase)%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Resource>
   </ItemGroup>
 
   <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
