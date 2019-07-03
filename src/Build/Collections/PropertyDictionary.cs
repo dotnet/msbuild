@@ -493,7 +493,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Helper to convert into a read-only dictionary of string, string.
         /// </summary>
-        internal IDictionary<string, string> ToDictionary()
+        internal Dictionary<string, string> ToDictionary()
         {
             Dictionary<string, string> dictionary;
 

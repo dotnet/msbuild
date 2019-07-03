@@ -80,21 +80,10 @@ namespace Microsoft.Build.Internal
 
             XmlReader reader;
 
-            if (loadAsReadOnly)
-            {
-                XmlReaderSettings xrs = new XmlReaderSettings
-                {
-                    DtdProcessing = DtdProcessing.Ignore,
-                    IgnoreComments = true,
-                    IgnoreWhitespace = true,
-                };
-                reader = XmlReader.Create(input, xrs, uri);
-            }
-            else
-            {
-                reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
-            }
-
+            // Ignore loadAsReadOnly for now; using XmlReader.Create results in whitespace changes
+            // of attribute text, specifically newline removal.
+            // https://github.com/Microsoft/msbuild/issues/4210
+            reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
 
             reader.Read();
             encoding = input.CurrentEncoding;

@@ -27,8 +27,8 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
             Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
@@ -49,8 +49,8 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
             Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
@@ -73,8 +73,8 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
             Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
@@ -98,8 +98,8 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
             Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal("My Random String", t.AssignedFiles[0].GetMetadata("MyAttribute"));
             Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
@@ -122,8 +122,8 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
             Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal("MyResource.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
@@ -143,8 +143,8 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
             Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal("MyResource", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource", t.CultureNeutralAssignedFiles[0].ItemSpec);
@@ -165,8 +165,8 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
             Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal("MyResource..resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource..resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
@@ -188,9 +188,9 @@ namespace Microsoft.Build.UnitTests
 
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(0, t.AssignedFilesWithCulture.Length);
-            Assert.Equal(1, t.AssignedFilesWithNoCulture.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Empty(t.AssignedFilesWithCulture);
+            Assert.Single(t.AssignedFilesWithNoCulture);
         }
 
         /*
@@ -212,8 +212,8 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
             Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);

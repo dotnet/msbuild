@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Project p = new Project();
             ProjectInstance i = p.CreateProjectInstance();
 
-            Assert.Equal(true, i.GetPropertyValue("username") != null);
+            Assert.True(i.GetPropertyValue("username") != null);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal("i", items[0].ItemType);
             Assert.Equal("i0", items[0].EvaluatedInclude);
             Assert.Equal(String.Empty, items[0].GetMetadataValue("m"));
-            Assert.Equal(null, items[0].GetMetadata("m"));
+            Assert.Null(items[0].GetMetadata("m"));
             Assert.Equal("i1", items[1].EvaluatedInclude);
             Assert.Equal("m1", items[1].GetMetadataValue("m"));
             Assert.Equal("m1", items[1].GetMetadata("m").EvaluatedValue);
@@ -79,12 +79,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.Equal("i", returned.ItemType);
             Assert.Equal("i1", returned.EvaluatedInclude);
-            Assert.Equal(false, returned.Metadata.GetEnumerator().MoveNext());
+            Assert.False(returned.Metadata.GetEnumerator().MoveNext());
 
             foreach (ProjectItemInstance item in p.Items)
             {
                 Assert.Equal("i1", item.EvaluatedInclude);
-                Assert.Equal(false, item.Metadata.GetEnumerator().MoveNext());
+                Assert.False(item.Metadata.GetEnumerator().MoveNext());
             }
         }
 
@@ -100,12 +100,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.Equal("i", returned.ItemType);
             Assert.Equal("i;1", returned.EvaluatedInclude);
-            Assert.Equal(false, returned.Metadata.GetEnumerator().MoveNext());
+            Assert.False(returned.Metadata.GetEnumerator().MoveNext());
 
             foreach (ProjectItemInstance item in p.Items)
             {
                 Assert.Equal("i;1", item.EvaluatedInclude);
-                Assert.Equal(false, item.Metadata.GetEnumerator().MoveNext());
+                Assert.False(item.Metadata.GetEnumerator().MoveNext());
             }
         }
 
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance p = GetEmptyProjectInstance();
             ProjectItemInstance item = p.AddItem("i", "i1", null);
 
-            Assert.Equal(false, item.Metadata.GetEnumerator().MoveNext());
+            Assert.False(item.Metadata.GetEnumerator().MoveNext());
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.False(Object.ReferenceEquals(first.GetProperty("p1"), second.GetProperty("p1")));
 
             ProjectPropertyInstance newProperty = first.SetProperty("p1", "v1b");
-            Assert.Equal(true, Object.ReferenceEquals(newProperty, first.GetProperty("p1")));
+            Assert.True(Object.ReferenceEquals(newProperty, first.GetProperty("p1")));
             Assert.Equal("v1b", first.GetPropertyValue("p1"));
             Assert.Equal("v1", second.GetPropertyValue("p1"));
         }
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectInstance project = GetProjectInstance(content);
 
-            Assert.Equal(1, Helpers.MakeList(project.GetItems("j")).Count);
+            Assert.Single(Helpers.MakeList(project.GetItems("j")));
             Assert.Equal("i1", Helpers.MakeList(project.GetItems("j"))[0].EvaluatedInclude);
             Assert.Equal("m1", Helpers.MakeList(project.GetItems("j"))[0].GetMetadataValue("m"));
             Assert.Equal("n;;", Helpers.MakeList(project.GetItems("j"))[0].GetMetadataValue("n"));
@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             BuildManager.DefaultBuildManager.Build(new BuildParameters(), buildRequestData1);
 
-            ProjectInstance instance2 = new Project().CreateProjectInstance();
+            new Project().CreateProjectInstance();
 
             BuildRequestData buildRequestData2 = new BuildRequestData(instance1, new string[] { });
 
@@ -438,7 +438,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.True(projAInstanceItem.HasMetadata(CapturedMetadataName));
             Assert.False(projAInstanceItem.Metadata.Any());
-            Assert.True(projAInstanceItem.MetadataNames.Contains(CapturedMetadataName, StringComparer.OrdinalIgnoreCase));
+            Assert.Contains(CapturedMetadataName, projAInstanceItem.MetadataNames);
             Assert.Equal(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
         }
 
@@ -473,7 +473,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.True(projAInstanceItem.HasMetadata(CapturedMetadataName));
             Assert.False(projAInstanceItem.Metadata.Any());
-            Assert.True(projAInstanceItem.MetadataNames.Contains(CapturedMetadataName, StringComparer.OrdinalIgnoreCase));
+            Assert.Contains(CapturedMetadataName, projAInstanceItem.MetadataNames);
             Assert.Equal(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
         }
 

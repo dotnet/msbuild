@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
             // Directory.Build.props
             // ---------------------
-            string directoryBuildProjectFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(DirectoryBuildProjectFile, BasicDirectoryBuildProjectContents);
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(DirectoryBuildProjectFile, BasicDirectoryBuildProjectContents);
 
             // ---------------------
             // src\Foo\Foo.csproj
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ImportsDirectoryBuildProjectIfExists()
         {
-            string directoryBuildProjectFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(DirectoryBuildProjectFile, BasicDirectoryBuildProjectContents);
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(DirectoryBuildProjectFile, BasicDirectoryBuildProjectContents);
 
             // ---------------------
             // src\Foo\Foo.csproj

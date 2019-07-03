@@ -11,6 +11,7 @@ using System.Xml;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -89,14 +90,14 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        internal ResXFile GetResXFileInfo(string resxFile)
+        internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader)
         {
             // First, try to retrieve the resx information from our hashtable.
             var retVal = (ResXFile)resXFiles.GetDependencyFile(resxFile);
             if (retVal == null)
             {
                 // Ok, the file wasn't there.  Add it to our cache and return it to the caller.  
-                retVal = AddResxFile(resxFile);
+                retVal = AddResxFile(resxFile, useMSBuildResXReader);
             }
             else
             {
@@ -106,19 +107,19 @@ namespace Microsoft.Build.Tasks
                 {
                     resXFiles.RemoveDependencyFile(resxFile);
                     _isDirty = true;
-                    retVal = AddResxFile(resxFile);
+                    retVal = AddResxFile(resxFile, useMSBuildResXReader);
                 }
             }
 
             return retVal;
         }
 
-        private ResXFile AddResxFile(string file)
+        private ResXFile AddResxFile(string file, bool useMSBuildResXReader)
         {
             // This method adds a .resx file "file" to our .resx cache.  The method causes the file
             // to be cracked for contained files.
 
-            var resxFile = new ResXFile(file, BaseLinkedFileDirectory);
+            var resxFile = new ResXFile(file, BaseLinkedFileDirectory, useMSBuildResXReader);
             resXFiles.AddDependencyFile(file, resxFile);
             _isDirty = true;
             return resxFile;
@@ -195,7 +196,7 @@ namespace Microsoft.Build.Tasks
 
             internal string[] LinkedFiles => linkedFiles;
 
-            internal ResXFile(string filename, string baseLinkedFileDirectory) : base(filename)
+            internal ResXFile(string filename, string baseLinkedFileDirectory, bool useMSBuildResXReader) : base(filename)
             {
                 // Creates a new ResXFile object and populates the class member variables
                 // by computing a list of linked files within the .resx that was passed in.
@@ -204,7 +205,7 @@ namespace Microsoft.Build.Tasks
 
                 if (FileSystems.Default.FileExists(FileName))
                 {
-                    linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory);
+                    linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory, useMSBuildResXReader);
                 }
             }
 
@@ -213,7 +214,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             /// <exception cref="ArgumentException">May be thrown if Resx is invalid. May contain XmlException.</exception>
             /// <exception cref="XmlException">May be thrown if Resx is invalid</exception>
-            private static string[] GetLinkedFiles(string filename, string baseLinkedFileDirectory)
+            private static string[] GetLinkedFiles(string filename, string baseLinkedFileDirectory, bool useMSBuildResXReader)
             {
                 // This method finds all linked .resx files for the .resx file that is passed in.
                 // filename is the filename of the .resx file that is to be examined.
@@ -221,36 +222,53 @@ namespace Microsoft.Build.Tasks
                 // Construct the return array
                 var retVal = new List<string>();
 
-                using (var resxReader = new ResXResourceReader(filename))
+                if (useMSBuildResXReader)
                 {
-                    // Tell the reader to return ResXDataNode's instead of the object type
-                    // the resource becomes at runtime so we can figure out which files
-                    // the .resx references
-                    resxReader.UseResXDataNodes = true;
-
-                    // First we need to figure out where the linked file resides in order
-                    // to see if it exists & compare its timestamp, and we need to do that
-                    // comparison in the same way ResGen does it. ResGen has two different
-                    // ways for resolving relative file-paths in linked files. The way
-                    // that ResGen resolved relative paths before Whidbey was always to
-                    // resolve from the current working directory. In Whidbey a new command-line
-                    // switch "/useSourcePath" instructs ResGen to use the folder that
-                    // contains the .resx file as the path from which it should resolve
-                    // relative paths. So we should base our timestamp/existence checking
-                    // on the same switch & resolve in the same manner as ResGen.
-                    resxReader.BasePath = (baseLinkedFileDirectory == null) ? Path.GetDirectoryName(filename) : baseLinkedFileDirectory;
-
-                    foreach (DictionaryEntry dictEntry in resxReader)
+                    foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null))
                     {
-                        if (dictEntry.Value is ResXDataNode node)
+                        if (resource is FileStreamResource linkedResource)
                         {
-                            ResXFileRef resxFileRef = node.FileRef;
-                            if (resxFileRef != null)
+                            retVal.Add(linkedResource.FileName);
+                        }
+                    }
+                }
+                else
+                {
+#if FEATURE_RESX_RESOURCE_READER
+                    using (var resxReader = new ResXResourceReader(filename))
+                    {
+                        // Tell the reader to return ResXDataNode's instead of the object type
+                        // the resource becomes at runtime so we can figure out which files
+                        // the .resx references
+                        resxReader.UseResXDataNodes = true;
+
+                        // First we need to figure out where the linked file resides in order
+                        // to see if it exists & compare its timestamp, and we need to do that
+                        // comparison in the same way ResGen does it. ResGen has two different
+                        // ways for resolving relative file-paths in linked files. The way
+                        // that ResGen resolved relative paths before Whidbey was always to
+                        // resolve from the current working directory. In Whidbey a new command-line
+                        // switch "/useSourcePath" instructs ResGen to use the folder that
+                        // contains the .resx file as the path from which it should resolve
+                        // relative paths. So we should base our timestamp/existence checking
+                        // on the same switch & resolve in the same manner as ResGen.
+                        resxReader.BasePath = (baseLinkedFileDirectory == null) ? Path.GetDirectoryName(filename) : baseLinkedFileDirectory;
+
+                        foreach (DictionaryEntry dictEntry in resxReader)
+                        {
+                            if (dictEntry.Value is ResXDataNode node)
                             {
-                                retVal.Add(FileUtilities.MaybeAdjustFilePath(resxFileRef.FileName));
+                                ResXFileRef resxFileRef = node.FileRef;
+                                if (resxFileRef != null)
+                                {
+                                    retVal.Add(FileUtilities.MaybeAdjustFilePath(resxFileRef.FileName));
+                                }
                             }
                         }
                     }
+#else
+                    // mimic Core behavior prior to MSBuildResXReader: just don't check for linked files
+#endif
                 }
 
                 return retVal.ToArray();

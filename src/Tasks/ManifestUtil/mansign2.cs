@@ -26,6 +26,7 @@ namespace System.Deployment.Internal.CodeSigning
         //
         // PInvoke dll's.
         //
+        internal const String CRYPT32 = "crypt32.dll";
         internal const String KERNEL32 = "kernel32.dll";
 #if (true)
 
@@ -179,6 +180,65 @@ namespace System.Deployment.Internal.CodeSigning
         int _AxlPublicKeyBlobToPublicKeyToken(
             [In]     ref CRYPT_DATA_BLOB pCspPublicKeyBlob,
             [In, Out] ref IntPtr ppwszPublicKeyToken);
+
+        // RFC3161 timestamp support
+
+        // hash algorithm OIDs
+        internal const string szOID_OIWSEC_sha1 = "1.3.14.3.2.26";
+        internal const string szOID_NIST_sha256 = "2.16.840.1.101.3.4.2.1";
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct CRYPT_TIMESTAMP_CONTEXT
+        {
+            internal uint cbEncoded;      // DWORD->unsigned int
+            internal IntPtr pbEncoded;      // BYTE*
+            internal IntPtr pTimeStamp;     // PCRYPT_TIMESTAMP_INFO->_CRYPT_TIMESTAMP_INFO*
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct CRYPTOAPI_BLOB
+        {
+            internal uint cbData;
+            internal IntPtr pbData;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct CRYPT_TIMESTAMP_PARA
+        {
+            internal IntPtr pszTSAPolicyId;
+            internal bool fRequestCerts;
+            internal CRYPTOAPI_BLOB Nonce;
+            internal int cExtension;
+            internal IntPtr rgExtension;
+        }
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [DllImport(CRYPT32, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal extern static
+        bool CryptRetrieveTimeStamp(
+            [In]     [MarshalAs(UnmanagedType.LPWStr)]  string wszUrl,
+            [In]     uint dwRetrievalFlags,
+            [In]     int dwTimeout,
+            [In]     [MarshalAs(UnmanagedType.LPStr)]   string pszHashId,
+            [In, Out] ref CRYPT_TIMESTAMP_PARA pPara,
+            [In]     byte[] pbData,
+            [In]     int cbData,
+            [In, Out] ref IntPtr ppTsContext,
+            [In, Out] ref IntPtr ppTsSigner,
+            [In, Out] ref IntPtr phStore);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [DllImport(CRYPT32, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        internal static extern bool CertFreeCertificateContext(IntPtr pCertContext);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [DllImport(CRYPT32, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+        internal static extern bool CertCloseStore(IntPtr pCertContext, int dwFlags);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [DllImport(CRYPT32, CallingConvention = CallingConvention.Winapi)]
+        internal static extern void CryptMemFree(IntPtr pv);
     }
 
     internal class ManifestSignedXml2 : SignedXml
@@ -255,6 +315,8 @@ namespace System.Deployment.Internal.CodeSigning
 
         private const string Sha256SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha256";
         private const string Sha256DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha256";
+        private const string Sha1SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+        private const string Sha1DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha1";
 
         private const string wintrustPolicyFlagsRegPath = "Software\\Microsoft\\Windows\\CurrentVersion\\WinTrust\\Trust Providers\\Software Publishing";
         private const string wintrustPolicyFlagsRegName = "State";
@@ -646,7 +708,13 @@ namespace System.Deployment.Internal.CodeSigning
             signedXml.SigningKey = rsaCsp;
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
             if (signer.UseSha256)
+            {
                 signedXml.SignedInfo.SignatureMethod = Sha256SignatureMethodUri;
+            }
+            else
+            {
+                signedXml.SignedInfo.SignatureMethod = Sha1SignatureMethodUri;
+            }
 
             // Add the key information.
             signedXml.KeyInfo.AddClause(new RSAKeyValue(rsaCsp));
@@ -656,7 +724,13 @@ namespace System.Deployment.Internal.CodeSigning
             Reference reference = new Reference();
             reference.Uri = "";
             if (signer.UseSha256)
+            {
                 reference.DigestMethod = Sha256DigestMethod;
+            }
+            else
+            {
+                reference.DigestMethod = Sha1DigestMethod;
+            }
 
             // Add an enveloped and an Exc-C14N transform.
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
@@ -684,7 +758,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Time stamp it if requested.
             if (timeStampUrl != null && timeStampUrl.Length != 0)
             {
-                TimestampSignedLicenseDom(licenseDom, timeStampUrl);
+                TimestampSignedLicenseDom(licenseDom, timeStampUrl, useSha256);
             }
 
             // Wrap it inside a RelData element.
@@ -693,40 +767,129 @@ namespace System.Deployment.Internal.CodeSigning
                                                              licenseDom.OuterXml + "</msrel:RelData>";
         }
 
-        private static void TimestampSignedLicenseDom(XmlDocument licenseDom, string timeStampUrl)
+        //
+        // ObtainRFC3161Timestamp
+        //
+        // This function is from mage.exe in .NET FX and is used to implement RFC 3161 timestamping.
+        //
+        private static string ObtainRFC3161Timestamp(string timeStampUrl, string signatureValue, bool useSha256)
         {
-            Win32.CRYPT_DATA_BLOB timestampBlob = new Win32.CRYPT_DATA_BLOB();
+            byte[] sigValueBytes = Convert.FromBase64String(signatureValue);
+            string timestamp = String.Empty;
 
+            string algId = useSha256 ? Win32.szOID_NIST_sha256 : Win32.szOID_OIWSEC_sha1;
+
+            unsafe
+            {
+                IntPtr ppTsContext = IntPtr.Zero;
+                IntPtr ppTsSigner = IntPtr.Zero;
+                IntPtr phStore = IntPtr.Zero;
+
+                try
+                {
+                    byte[] nonce = new byte[24];
+
+                    using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+                    {
+                        rng.GetBytes(nonce);
+                    }
+
+                    Win32.CRYPT_TIMESTAMP_PARA para = new Win32.CRYPT_TIMESTAMP_PARA()
+                    {
+                        fRequestCerts = true,
+                        pszTSAPolicyId = IntPtr.Zero,
+                    };
+
+                    fixed (byte* pbNonce = nonce)
+                    {
+                        para.Nonce.cbData = (uint)nonce.Length;
+                        para.Nonce.pbData = (IntPtr)pbNonce;
+
+                        if (!Win32.CryptRetrieveTimeStamp(
+                            timeStampUrl,
+                            0,
+                            60 * 1000,  // 1 minute timeout
+                            algId,
+                            ref para,
+                            sigValueBytes,
+                            sigValueBytes.Length,
+                            ref ppTsContext,
+                            ref ppTsSigner,
+                            ref phStore))
+                        {
+                            throw new CryptographicException(Marshal.GetLastWin32Error());
+                        }
+                    }
+
+                    var timestampContext = (Win32.CRYPT_TIMESTAMP_CONTEXT)Marshal.PtrToStructure(ppTsContext, typeof(Win32.CRYPT_TIMESTAMP_CONTEXT));
+                    byte[] encodedBytes = new byte[(int)timestampContext.cbEncoded];
+                    Marshal.Copy(timestampContext.pbEncoded, encodedBytes, 0, (int)timestampContext.cbEncoded);
+                    timestamp = Convert.ToBase64String(encodedBytes);
+                }
+                finally
+                {
+                    if (ppTsContext != IntPtr.Zero)
+                        Win32.CryptMemFree(ppTsContext);
+
+                    if (ppTsSigner != IntPtr.Zero)
+                        Win32.CertFreeCertificateContext(ppTsSigner);
+
+                    if (phStore != IntPtr.Zero)
+                        Win32.CertCloseStore(phStore, 0);
+                }
+            }
+
+            return timestamp;
+        }
+
+        private static void TimestampSignedLicenseDom(XmlDocument licenseDom, string timeStampUrl, bool useSha256)
+        {
             XmlNamespaceManager nsm = new XmlNamespaceManager(licenseDom.NameTable);
             nsm.AddNamespace("r", LicenseNamespaceUri);
             nsm.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
             nsm.AddNamespace("as", AuthenticodeNamespaceUri);
 
-            byte[] licenseXml = Encoding.UTF8.GetBytes(licenseDom.OuterXml);
+            string timestamp = String.Empty;
 
-            unsafe
+            try
             {
-                fixed (byte* pbLicense = licenseXml)
-                {
-                    Win32.CRYPT_DATA_BLOB licenseBlob = new Win32.CRYPT_DATA_BLOB();
-                    IntPtr pvLicense = new IntPtr(pbLicense);
-                    licenseBlob.cbData = (uint)licenseXml.Length;
-                    licenseBlob.pbData = pvLicense;
+                // Try RFC3161 first
+                XmlElement signatureValueNode = licenseDom.SelectSingleNode("r:license/r:issuer/ds:Signature/ds:SignatureValue", nsm) as XmlElement;
+                string signatureValue = signatureValueNode.InnerText;
+                timestamp = ObtainRFC3161Timestamp(timeStampUrl, signatureValue, useSha256);
+            }
+            // Catch CryptographicException to ensure fallback to old code (non-RFC3161)
+            catch (CryptographicException)
+            {
+                Win32.CRYPT_DATA_BLOB timestampBlob = new Win32.CRYPT_DATA_BLOB();
 
-                    int hr = Win32.CertTimestampAuthenticodeLicense(ref licenseBlob, timeStampUrl, ref timestampBlob);
-                    if (hr != Win32.S_OK)
+                byte[] licenseXml = Encoding.UTF8.GetBytes(licenseDom.OuterXml);
+
+                unsafe
+                {
+                    fixed (byte* pbLicense = licenseXml)
                     {
-                        throw new CryptographicException(hr);
+                        Win32.CRYPT_DATA_BLOB licenseBlob = new Win32.CRYPT_DATA_BLOB();
+                        IntPtr pvLicense = new IntPtr(pbLicense);
+                        licenseBlob.cbData = (uint)licenseXml.Length;
+                        licenseBlob.pbData = pvLicense;
+
+                        int hr = Win32.CertTimestampAuthenticodeLicense(ref licenseBlob, timeStampUrl, ref timestampBlob);
+                        if (hr != Win32.S_OK)
+                        {
+                            throw new CryptographicException(hr);
+                        }
                     }
                 }
+
+                byte[] timestampSignature = new byte[timestampBlob.cbData];
+                Marshal.Copy(timestampBlob.pbData, timestampSignature, 0, timestampSignature.Length);
+                Win32.HeapFree(Win32.GetProcessHeap(), 0, timestampBlob.pbData);
+                timestamp = Encoding.UTF8.GetString(timestampSignature);
             }
 
-            byte[] timestampSignature = new byte[timestampBlob.cbData];
-            Marshal.Copy(timestampBlob.pbData, timestampSignature, 0, timestampSignature.Length);
-            Win32.HeapFree(Win32.GetProcessHeap(), 0, timestampBlob.pbData);
-
             XmlElement asTimestamp = licenseDom.CreateElement("as", "Timestamp", AuthenticodeNamespaceUri);
-            asTimestamp.InnerText = Encoding.UTF8.GetString(timestampSignature);
+            asTimestamp.InnerText = timestamp;
 
             XmlElement dsObject = licenseDom.CreateElement("Object", SignedXml.XmlDsigNamespaceUrl);
             dsObject.AppendChild(asTimestamp);
@@ -773,7 +936,13 @@ namespace System.Deployment.Internal.CodeSigning
             }
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
             if (signer.UseSha256)
+            {
                 signedXml.SignedInfo.SignatureMethod = Sha256SignatureMethodUri;
+            }
+            else
+            {
+                signedXml.SignedInfo.SignatureMethod = Sha1SignatureMethodUri;
+            }
 
             // Add the key information.
             signedXml.KeyInfo.AddClause(new RSAKeyValue(snKey));
@@ -787,7 +956,13 @@ namespace System.Deployment.Internal.CodeSigning
             Reference enveloped = new Reference();
             enveloped.Uri = "";
             if (signer.UseSha256)
+            {
                 enveloped.DigestMethod = Sha256DigestMethod;
+            }
+            else
+            {
+                enveloped.DigestMethod = Sha1DigestMethod;
+            }
 
             // Add an enveloped then Exc-C14N transform.
             enveloped.AddTransform(new XmlDsigEnvelopedSignatureTransform());

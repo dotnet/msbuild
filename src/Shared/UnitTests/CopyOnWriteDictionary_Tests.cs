@@ -33,8 +33,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Now look for the same key we inserted
             object v2 = dictionary[k1];
 
-            Assert.Equal(true, Object.ReferenceEquals(v1, v2));
-            Assert.Equal(true, dictionary.ContainsKey(k1));
+            Assert.True(Object.ReferenceEquals(v1, v2));
+            Assert.True(dictionary.ContainsKey(k1));
         }
 
         /// <summary>
@@ -66,8 +66,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             object v2;
             bool result = dictionary.TryGetValue(k1, out v2);
 
-            Assert.Equal(true, result);
-            Assert.Equal(true, Object.ReferenceEquals(v1, v2));
+            Assert.True(result);
+            Assert.True(Object.ReferenceEquals(v1, v2));
         }
 
         /// <summary>
@@ -81,9 +81,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             object v;
             bool result = dictionary.TryGetValue(new Object(), out v);
 
-            Assert.Equal(false, result);
-            Assert.Equal(null, v);
-            Assert.Equal(false, dictionary.ContainsKey(new Object()));
+            Assert.False(result);
+            Assert.Null(v);
+            Assert.False(dictionary.ContainsKey(new Object()));
         }
 
         /// <summary>
@@ -102,11 +102,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Don't create it with a literal or the compiler will intern it!
             string k2 = String.Concat("k", "ey");
 
-            Assert.Equal(false, Object.ReferenceEquals(k1, k2));
+            Assert.False(Object.ReferenceEquals(k1, k2));
 
             object v2 = dictionary[k2];
 
-            Assert.Equal(true, Object.ReferenceEquals(v1, v2));
+            Assert.True(Object.ReferenceEquals(v1, v2));
         }
 
         /// <summary>
@@ -117,11 +117,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             var dictionary = new CopyOnWriteDictionary<string, string>();
             dictionary["test"] = "1";
-            Assert.Equal(dictionary["test"], "1");
+            Assert.Equal("1", dictionary["test"]);
 
             var clone = dictionary.Clone();
 
-            Assert.Equal(clone["test"], "1");
+            Assert.Equal("1", clone["test"]);
             Assert.Equal(clone.Count, dictionary.Count);
         }
 
@@ -133,11 +133,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             var dictionary = new CopyOnWriteDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             dictionary["test"] = "1";
-            Assert.Equal(dictionary["test"], "1");
+            Assert.Equal("1", dictionary["test"]);
 
             var clone = dictionary.Clone();
 
-            Assert.Equal(clone["TEST"], "1");
+            Assert.Equal("1", clone["TEST"]);
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             var dictionary = new CopyOnWriteDictionary<string, string>();
             dictionary["test"] = "1";
-            Assert.Equal(dictionary["test"], "1");
+            Assert.Equal("1", dictionary["test"]);
 
             var clone = dictionary.Clone();
             var clone2 = dictionary.Clone();
@@ -162,8 +162,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.False(dictionary.HasSameBacking(clone2));
             Assert.True(clone.HasSameBacking(clone2));
 
-            Assert.Equal(clone["test"], "1");
-            Assert.Equal(clone2["test"], "1");
+            Assert.Equal("1", clone["test"]);
+            Assert.Equal("1", clone2["test"]);
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             var dictionary = new CopyOnWriteDictionary<string, string>();
             dictionary["test"] = "1";
-            Assert.Equal(dictionary["test"], "1");
+            Assert.Equal("1", dictionary["test"]);
 
             var clone = dictionary.Clone();
             var clone2 = dictionary.Clone();
@@ -190,8 +190,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             clone2["test"] = "3";
             Assert.False(dictionary.HasSameBacking(clone2));
 
-            Assert.Equal(dictionary["test"], "1");
-            Assert.Equal(clone["test"], "2");
+            Assert.Equal("1", dictionary["test"]);
+            Assert.Equal("2", clone["test"]);
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 CopyOnWriteDictionary<string, string> dictionary2 = (CopyOnWriteDictionary<string, string>)formatter.Deserialize(stream);
 
                 Assert.Equal(dictionary.Count, dictionary2.Count);
-                Assert.Equal(typeof(MSBuildNameIgnoreCaseComparer), dictionary2.Comparer.GetType());
+                Assert.IsType<MSBuildNameIgnoreCaseComparer>(dictionary2.Comparer);
             }
         }
     }

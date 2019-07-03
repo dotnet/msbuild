@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             // Make sure the log contains the correct strings.
-            Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3."
+            Assert.Contains("MSB4130:", ml.FullLog); // "Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             // Make sure the log contains the correct strings.
-            Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - (a) == 1 or $(b) == 2 and $(c) == 3."
+            Assert.Contains("MSB4130:", ml.FullLog); // "Need to warn for this expression - (a) == 1 or $(b) == 2 and $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -483,7 +483,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             // Make sure the log contains the correct strings.
-            Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - ($(a) == 1 or $(b) == 2 and $(c) == 3) or $(d) == 4."
+            Assert.Contains("MSB4130:", ml.FullLog); // "Need to warn for this expression - ($(a) == 1 or $(b) == 2 and $(c) == 3) or $(d) == 4."
         }
 
         /// <summary>
@@ -503,7 +503,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             // Make sure the log contains the correct strings.
-            Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - (a) == 1 and $(b) == 2 and $(c) == 3."
+            Assert.DoesNotContain("MSB4130:", ml.FullLog); // "No need to warn for this expression - (a) == 1 and $(b) == 2 and $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -514,7 +514,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             // Make sure the log contains the correct strings.
-            Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - (a) == 1 or $(b) == 2 or $(c) == 3."
+            Assert.DoesNotContain("MSB4130:", ml.FullLog); // "No need to warn for this expression - (a) == 1 or $(b) == 2 or $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -525,7 +525,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             // Make sure the log contains the correct strings.
-            Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - ($(a) == 1 and $(b) == 2) or $(c) == 3."
+            Assert.DoesNotContain("MSB4130:", ml.FullLog); // "No need to warn for this expression - ($(a) == 1 and $(b) == 2) or $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -536,7 +536,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             // Make sure the log contains the correct strings.
-            Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3."
+            Assert.DoesNotContain("MSB4130:", ml.FullLog); // "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3."
         }
     }
 }

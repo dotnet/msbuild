@@ -263,11 +263,6 @@ namespace Microsoft.Build.Shared
 
 #if DEBUG
             /// <summary>
-            /// Flag to help expose bugs
-            /// </summary>
-            private static bool s_stress = String.Equals(Environment.GetEnvironmentVariable("MSBUILDRSBSTRESS"), "1", StringComparison.Ordinal);
-
-            /// <summary>
             /// Count of successful reuses
             /// </summary>
             private static int s_hits = 0;

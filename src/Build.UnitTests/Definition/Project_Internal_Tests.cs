@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)), null, null, collection);
 
-                Assert.Equal(project.ToolsVersion, "x");
+                Assert.Equal("x", project.ToolsVersion);
             }
             finally
             {

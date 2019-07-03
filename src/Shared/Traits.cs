@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -140,6 +140,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool UseCaseSensitiveItemNames = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1";
 
         /// <summary>
+        /// Disable the use of paths longer than Windows MAX_PATH limits (260 characters) when running on a long path enabled OS.
+        /// </summary>
+        public readonly bool DisableLongPaths = Environment.GetEnvironmentVariable("MSBUILDDISABLELONGPATHS") == "1";
+
+        /// <summary>
         /// Disable the use of any caching when resolving SDKs.
         /// </summary>
         public readonly bool DisableSdkResolutionCache = Environment.GetEnvironmentVariable("MSBUILDDISABLESDKCACHE") == "1";
@@ -158,6 +163,14 @@ namespace Microsoft.Build.Utilities
         /// Workaround for https://github.com/Microsoft/vstest/issues/1503.
         /// </summary>
         public readonly bool EnsureStdOutForChildNodesIsPrimaryStdout = Environment.GetEnvironmentVariable("MSBUILDENSURESTDOUTFORTASKPROCESSES") == "1";
+
+        /// <summary>
+        /// Use the original, string-only resx parsing in .NET Core scenarios.
+        /// </summary>
+        /// <remarks>
+        /// Escape hatch for problems arising from https://github.com/microsoft/msbuild/pull/4420.
+        /// </remarks>
+        public readonly bool UseMinimalResxParsingInCoreScenarios = Environment.GetEnvironmentVariable("MSBUILDUSEMINIMALRESX") == "1";
 
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {

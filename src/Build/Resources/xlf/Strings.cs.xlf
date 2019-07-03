@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <target state="translated">MSB4249: Nejde sestavit projekt webu {0}. Kompilátor ASP.NET je k dispozici jen ve verzi MSBuildu pro .NET Framework.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -31,22 +31,104 @@
         <target state="translated">Operaci nebylo možno dokončit, protože sestavení již probíhá.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </source>
+        <target state="translated">MSB4252: Projekt {0} má odkaz na {1} (počet cílů: {2}), ale výsledky sestavení pro tento odkaz v mezipaměti modulu chybí. V izolovaných buildech by to mohlo znamenat následující:
+    - Odkaz nebyl explicitně zadán jako položka ProjectReference v: {0}.
+    - Odkaz nebyl zahrnut do poskytnutých vstupních mezipamětí.
+    - Odkaz byl volán s cílem, který není zadán v položce ProjectReferenceTargets v: {0}.
+    </target>
+        <note>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <target state="translated">MSB4248: Nejde rozbalit metadata ve výrazu {0}. {1}</target>
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="translated">MSB4251: Následující projekty jsou na sobě cyklicky závislé: {0}.</target>
+        <note>
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </note>
+      </trans-unit>
+      <trans-unit id="EmptyOutputCacheFile">
+        <source>MSB4257: The specified output result cache file is empty.</source>
+        <target state="translated">MSB4257: Zadaný výstupní soubor mezipaměti pro výsledky je prázdný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingCacheFile">
+        <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4256: Při čtení vstupních souborů mezipaměti pro výsledky z cesty {0} byla zjištěna chyba: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingCacheFile">
+        <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4258: Při zápisu do výstupních souborů mezipaměti pro výsledky v cestě {0} byla zjištěna chyba: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InputCacheFilesDoNotExist">
+        <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
+        <target state="translated">MSB4255: Následující vstupní soubory mezipaměti pro výsledky neexistují: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
-        <target state="new">Metaproject "{0}" generated.</target>
+        <target state="translated">Metaprojekt {0} byl vygenerován.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">Operaci nelze dokončit, protože funkce BeginBuild ještě nebyla zavolána.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="NullReferenceFromProjectInstanceFactory">
+        <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
+        <target state="translated">MSB4253: Uživatelem zadané zpětné volání ProjectInstanceFactoryFunc vrátilo odkaz null. To není přípustné.</target>
+        <note>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
+        <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
+        <target state="translated">MSB4250: ProjectGraph nepodporuje položky ProjectReference s nastavenými metadaty ToolsVersion. V souboru {1} byla nalezena položka ProjectReference {0} s metadaty ToolsVersion.</target>
+        <note>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
+      </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
+      <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: Úloha MSBuild sestavuje projekty {0}, které nejsou zadané v položce ProjectReference. V izolovaných sestaveních to pravděpodobně znamená, že tyto odkazy nejsou v {1} explicitně zadané jako položka ProjectReference.</target>
+        <note>
+      {StrBegin="MSB4254:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
+    </note>
+      </trans-unit>
+      <trans-unit id="UsingInputCaches">
+        <source>Using input build results caches: {0}</source>
+        <target state="translated">Použití vstupních mezipamětí pro výsledky sestavení: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
+    </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
@@ -191,7 +273,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
-        <target state="needs-review-translation">MSB4166: Podřízený uzel {0} skončil předčasně. Probíhá ukončení práce. Diagnostické informace naleznete v souborech v {1}, budou mít názvy MSBuild_*.failure.txt. Toto umístění je možné změnit nastavením proměnné prostředí MSBUILDDEBUGPATH na jiný adresář.</target>
+        <target state="translated">MSB4166: Podřízený uzel {0} skončil předčasně. Probíhá vypínání. Diagnostické informace najdete v souborech v adresáři {1} pod názvem MSBuild_*.failure.txt. Toto umístění je možné změnit nastavením proměnné prostředí MSBUILDDEBUGPATH na jiný adresář.{2}</target>
         <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -372,7 +454,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Značka &lt;{0}&gt; už není podporovaná jako podřízený element elementu &lt;Project&gt;. Umístěte tuto značku v rámci cíle a přidejte název cíle do atributu InitialTargets elementu &lt;Project&gt;.</target>
+        <target state="translated">Značka &lt;{0}&gt; již není podporována jako podřízený element elementu &lt;Project&gt;. Umístěte tuto značku v rámci cíle a přidejte název cíle do atributu InitialTargets elementu &lt;Project&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -471,17 +553,17 @@
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: Naimportovaný projekt {0} nebyl nalezen. Zkontrolujte, jestli je cesta v deklaraci &lt;Import&gt; správná a jestli soubor na disku existuje.</target>
+        <target state="translated">MSB4019: Naimportovaný projekt {0} nebyl nalezen. Zkontrolujte, zda je cesta v deklaraci &lt;Import&gt; správná a zda soubor na disku existuje.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: Naimportovaný projekt {0} nebyl nalezen. Zkuste také najít {1} v náhradních vyhledávacích cestách pro {2} - {3} . Tyto vyhledávací cesty jsou definované v {4}. Zkontrolujte, jestli je cesta v deklaraci &lt;Import&gt; správná a jestli soubor na disku v jedné z vyhledávacích cest existuje.</target>
+        <target state="translated">MSB4226: Importovaný projekt {0} se nenašel. Kromě toho proběhl pokus najít {1} na záložních cestách pro hledání pro {2} – {3}. Tyto cesty pro hledání jsou definované v {4}. Potvrďte, že cesta v deklaraci &lt;Import&gt; je správná a že soubor existuje na disku na jedné z cest pro hledání.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: Naimportovaný projekt {0} nebyl nalezen. Zkuste také najít {1} v náhradních vyhledávacích cestách pro {2} - {3} . Zkontrolujte, jestli je cesta v deklaraci &lt;Import&gt; správná a jestli soubor na disku v jedné z vyhledávacích cest existuje.</target>
+        <target state="translated">MSB4226: Importovaný projekt {0} se nenašel. Kromě toho proběhl pokus najít {1} na záložních cestách pro hledání pro {2} – {3}. Potvrďte, že cesta v deklaraci &lt;Import&gt; je správná a že soubor existuje na disku na jedné z cest pro hledání.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
@@ -586,8 +668,8 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
-        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). </source>
-        <target state="translated">MSB4186: Syntaxe volání statické metody je neplatná: {0}. {1} Volání statické metody by mělo mít tento tvar: $([FullTypeName]::Method()), např. $([System.IO.Path]::Combine(`a`, `b`)) </target>
+        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
+        <target state="translated">MSB4186: Syntaxe volání statické metody je neplatná: {0}. {1} Volání statické metody by mělo mít tento tvar: $([FullTypeName]::Method()), např. $([System.IO.Path]::Combine(`a`, `b`)). Zkontrolujte, jestli jsou definovány všechny parametry, jestli jsou správného typu a jestli jsou zadané ve správném pořadí.</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -823,7 +905,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: Výchozí obor názvů XML projektu musí být oborem názvů XML nástroje MSBuild nebo nesmí být žádným oborem názvů. Pokud je projekt vytvořený ve formátu MSBuild 2003, přidejte do elementu atribut xmlns="{0}". Jestliže byl projekt vytvořený ve starém formátu 1.0 nebo 1.2, převeďte ho na formát MSBuild 2003.</target>
+        <target state="translated">MSB4041: Výchozí obor názvů XML projektu musí být oborem názvů XML nástroje MSBuild, nebo se obor názvů musí vynechat. Pokud se projekt vytvořil ve formátu MSBuild 2003, přidejte prosím do elementu &lt;Project&gt; atribut xmlns="{0}". Pokud se projekt vytvořil ve starém formátu 1.0 nebo 1.2, převeďte ho na formát MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1512,7 +1594,7 @@
       </trans-unit>
       <trans-unit id="ProjectStackWithTargetNames">
         <source>"{0}" ({1} target) ({2}) -&gt;</source>
-        <target state="translated">"{0}" ({1} cíl) ({2}) -&gt;</target>
+        <target state="translated">{0} ({1} cíl) ({2}) -&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectStackWithDefaultTargets">
@@ -1554,6 +1636,13 @@
         <source>The property "{0}" with value "{1}" is being overridden by another batch. The property is now: "{2}"</source>
         <target state="translated">Probíhá přepsání vlastnosti {0} s hodnotou {1} jinou dávkou. Nová hodnota vlastnosti: {2}.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="WritingToOutputCache">
+        <source>Writing build results caches to: {0}</source>
+        <target state="translated">Zápis mezipamětí pro výsledky sestavení do: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a file path
+    </note>
       </trans-unit>
       <trans-unit id="logfilePathNullOrEmpty">
         <source>The log file path cannot be null or empty.</source>
@@ -1935,17 +2024,17 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="translated">MSB4227: Atribut {0} u elementu &lt;{1}&gt; je neplatný, protože atribut s tímto názvem už existuje.</target>
+        <target state="translated">MSB4227: Atribut {0} v elementu &lt;{1}&gt; není platný, protože atribut se stejným názvem už existuje.</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="translated">MSB4228: Název {0} není platný pro metadata vyjádřená jako atribut (u elementu &lt;{1}&gt;).</target>
+        <target state="translated">MSB4228: Název {0} není platný pro metadata vyjádřená jako atribut (v elementu &lt;{1}&gt;).</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="translated">Element &lt;{0}&gt; musí mít atribut {1}, {2} nebo {3}, ale ne více než jeden.</target>
+        <target state="translated">Element &lt;{0}&gt; musí mít buď atribut {1}, atribut {2}, nebo atribut {3}, ale ne více než jeden z nich.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
@@ -2100,7 +2189,7 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD: chyba MSB4239: Při zápisu sestavy profilace došlo k chybě. {0}</target>
+        <target state="translated">MSBUILD : error MSB4239: Při zápisu sestavy profilace došlo k chybě. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">

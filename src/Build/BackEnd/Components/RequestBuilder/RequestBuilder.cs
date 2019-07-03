@@ -355,8 +355,14 @@ namespace Microsoft.Build.BackEnd
 
                 BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion);
 
-                requests[i] = new FullyQualifiedBuildRequest(config, targets, waitForResults,
-                    flags: skipNonexistentTargets ? BuildRequestDataFlags.SkipNonexistentTargets : BuildRequestDataFlags.None);
+                requests[i] = new FullyQualifiedBuildRequest(
+                    config: config,
+                    targets: targets,
+                    resultsNeeded: waitForResults,
+                    skipStaticGraphIsolationConstraints: _componentHost.BuildParameters.IsolateProjects && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath),
+                    flags: skipNonexistentTargets
+                        ? BuildRequestDataFlags.SkipNonexistentTargets
+                        : BuildRequestDataFlags.None);
             }
 
             // Send the requests off
@@ -1174,7 +1180,7 @@ namespace Microsoft.Build.BackEnd
                 _componentHost.BuildParameters,
                 _nodeLoggingContext.LoggingService,
                 new BuildEventContext(
-                    _requestEntry.Request.BuildEventContext.SubmissionId,
+                    _requestEntry.Request.SubmissionId,
                     _nodeLoggingContext.BuildEventContext.NodeId,
                     BuildEventContext.InvalidEvaluationId,
                     BuildEventContext.InvalidProjectInstanceId,

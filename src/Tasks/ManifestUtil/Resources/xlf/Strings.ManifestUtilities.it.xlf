@@ -81,16 +81,16 @@
          compatibility then delete the requestedExecutionLevel node.
     </source>
         <target state="translated">
-          Opzioni manifesto di Controllo dell'account utente
-          Per modificare il livello di Controllo dell'account utente Windows sostituire il
+          Opzioni manifesto Controllo dell'account utente
+          Se si vuole modificare il livello di Controllo dell'account utente di Windows, sostituire il
           nodo requestedExecutionLevel con uno dei seguenti.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Se si vuole usare Virtualizzazione file system e registro di sistema per la compatibilità
-         con le versioni precedenti, eliminare il nodo requestedExecutionLevel.
+         Se si vuole usare Virtualizzazione file system e registro di sistema per la 
+         compatibilità con le versioni precedenti, eliminare il nodo requestedExecutionLevel.
     </target>
         <note />
       </trans-unit>

@@ -84,9 +84,10 @@ namespace Microsoft.Build.Shared
         private const string dotNetFrameworkSetupRegistryInstalledName = "Install";
 
         internal const string fullDotNetFrameworkRegistryKey = "HKEY_LOCAL_MACHINE\\" + dotNetFrameworkRegistryPath;
+#if FEATURE_WIN32_REGISTRY
         private const string dotNetFrameworkAssemblyFoldersRegistryPath = dotNetFrameworkRegistryPath + "\\AssemblyFolders";
         private const string referenceAssembliesRegistryValueName = "All Assemblies In";
-
+#endif // FEATURE_WIN32_REGISTRY
         internal const string dotNetFrameworkSdkInstallKeyValueV11 = "SDKInstallRootv1.1";
         internal static string dotNetFrameworkVersionFolderPrefixV11 = NativeMethodsShared.IsWindows ? "v1.1" : "1.1"; // v1.1 is for Everett.
         private const string dotNetFrameworkVersionV11 = "v1.1.4322"; // full Everett version to pass to NativeMethodsShared.GetRequestedRuntimeInfo().
@@ -100,7 +101,9 @@ namespace Microsoft.Build.Shared
         internal static string dotNetFrameworkVersionFolderPrefixV30 = NativeMethodsShared.IsWindows ? "v3.0" : "3.0"; // v3.0 is for WinFx.
         private static string s_dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 + "\\Setup";
 
+#if FEATURE_WIN32_REGISTRY
         private const string fallbackDotNetFrameworkSdkRegistryInstallPath = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows";
+#endif // FEATURE_WIN32_REGISTRY
         internal const string fallbackDotNetFrameworkSdkInstallKeyValue = "CurrentInstallFolder";
 
         private const string dotNetFrameworkSdkRegistryPathForV35ToolsOnWinSDK70A = @"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.0A\WinSDK-NetFx35Tools-x86";
@@ -118,14 +121,16 @@ namespace Microsoft.Build.Shared
         internal static string dotNetFrameworkVersionFolderPrefixV40 = NativeMethodsShared.IsWindows ? "v4.0" : "4.0";
         internal static string dotNetFrameworkVersionFolderPrefixV45 = NativeMethodsShared.IsWindows ? "v4.5" : "4.5";
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Path to the ToolsVersion definitions in the registry
         /// </summary>
         private const string ToolsVersionsRegistryPath = @"SOFTWARE\Microsoft\MSBuild\ToolsVersions";
+#endif // FEATURE_WIN32_REGISTRY
 
-        #endregion // Constants
+#endregion // Constants
 
-        #region Static member variables
+#region Static member variables
 
         /// <summary>
         /// By default when a root path is not specified we would like to use the program files directory \ reference assemblies\framework as the root location
@@ -288,6 +293,7 @@ namespace Microsoft.Build.Shared
             }),
         };
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Define explicit fallback rules for the request to get path of .net framework sdk tools folder.
         /// The default rule is fallback to previous VS. However, there are some special cases that need
@@ -319,11 +325,12 @@ namespace Microsoft.Build.Shared
             { Tuple.Create(dotNetFrameworkVersion471, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion47, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion472, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion471, visualStudioVersion150) },
        };
+#endif // FEATURE_WIN32_REGISTRY
 
         private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict;
         private static readonly IReadOnlyDictionary<Version, VisualStudioSpec> s_visualStudioSpecDict;
 
-        #endregion // Static member variables
+#endregion // Static member variables
 
         static FrameworkLocationHelper()
         {
@@ -331,7 +338,7 @@ namespace Microsoft.Build.Shared
             s_visualStudioSpecDict = s_visualStudioSpecs.ToDictionary(spec => spec.Version);
         }
 
-        #region Static properties
+#region Static properties
 
         internal static string PathToDotNetFrameworkV11
         {
@@ -554,9 +561,9 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        #endregion // Static properties
+#endregion // Static properties
 
-        #region Internal methods
+#region Internal methods
 
         internal static string GetDotNetFrameworkSdkRootRegistryKey(Version dotNetFrameworkVersion, Version visualStudioVersion)
         {
@@ -1029,9 +1036,9 @@ namespace Microsoft.Build.Shared
         }
 #endif
 
-        #endregion // Internal methods
+#endregion // Internal methods
 
-        #region Private methods
+#region Private methods
 
         /// <summary>
         /// Will return the path to the dot net framework reference assemblies if they exist under the program files\reference assembies\microsoft\framework directory
@@ -1515,6 +1522,7 @@ namespace Microsoft.Build.Shared
 #endif
             }
 
+#if FEATURE_WIN32_REGISTRY
             private static string FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(Version dotNetFrameworkVersion, Version visualStudioVersion)
             {
                 VisualStudioSpec visualStudioSpec;
@@ -1528,6 +1536,7 @@ namespace Microsoft.Build.Shared
 
                 return null;
             }
+#endif // FEATURE_WIN32_REGISTRY
 
             private static string FallbackToDefaultPathToDotNetFrameworkSdkTools(Version dotNetFrameworkVersion)
             {

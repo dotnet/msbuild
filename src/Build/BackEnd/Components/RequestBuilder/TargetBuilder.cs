@@ -129,9 +129,8 @@ namespace Microsoft.Build.BackEnd
             _projectInstance = configuration.Project;
 
             // Now get the current results cache entry.
-            ResultsCache resultsCache = (ResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
-            BuildResult existingBuildResult = null;
-            resultsCache.ResultsDictionary.TryGetValue(_requestEntry.Request.ConfigurationId, out existingBuildResult);
+            IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
+            BuildResult existingBuildResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
 
             _buildResult = new BuildResult(entry.Request, existingBuildResult, null);
 

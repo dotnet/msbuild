@@ -348,15 +348,15 @@ namespace Microsoft.Build.UnitTests
             List<string> properties = null;
 
             AssertParseEvaluate(p, "'0' == '1'", expander, false, state);
-            Assert.Equal(0, conditionedProperties.Count);
+            Assert.Empty(conditionedProperties);
 
             AssertParseEvaluate(p, "$(foo) == foo", expander, false, state);
-            Assert.Equal(1, conditionedProperties.Count);
+            Assert.Single(conditionedProperties);
             properties = conditionedProperties["foo"];
-            Assert.Equal(1, properties.Count);
+            Assert.Single(properties);
 
             AssertParseEvaluate(p, "'$(foo)' != 'bar'", expander, true, state);
-            Assert.Equal(1, conditionedProperties.Count);
+            Assert.Single(conditionedProperties);
             properties = conditionedProperties["foo"];
             Assert.Equal(2, properties.Count);
 
@@ -365,11 +365,11 @@ namespace Microsoft.Build.UnitTests
             properties = conditionedProperties["foo"];
             Assert.Equal(2, properties.Count);
             properties = conditionedProperties["branch"];
-            Assert.Equal(1, properties.Count);
+            Assert.Single(properties);
             properties = conditionedProperties["build"];
-            Assert.Equal(1, properties.Count);
+            Assert.Single(properties);
             properties = conditionedProperties["platform"];
-            Assert.Equal(1, properties.Count);
+            Assert.Single(properties);
 
             AssertParseEvaluate(p, "'$(branch)|$(build)|$(platform)' == 'lab21|debug|x86'", expander, false, state);
             Assert.Equal(4, conditionedProperties.Count);
@@ -378,9 +378,9 @@ namespace Microsoft.Build.UnitTests
             properties = conditionedProperties["branch"];
             Assert.Equal(2, properties.Count);
             properties = conditionedProperties["build"];
-            Assert.Equal(1, properties.Count);
+            Assert.Single(properties);
             properties = conditionedProperties["platform"];
-            Assert.Equal(1, properties.Count);
+            Assert.Single(properties);
 
             AssertParseEvaluate(p, "'$(branch)|$(build)|$(platform)' == 'lab23|retail|ia64'", expander, false, state);
             Assert.Equal(4, conditionedProperties.Count);

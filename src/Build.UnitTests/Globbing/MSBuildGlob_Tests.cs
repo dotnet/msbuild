@@ -117,11 +117,11 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var expectedFixedDirectory = Path.Combine(globRoot, "b").WithTrailingSlash();
 
             Assert.True(glob.IsLegal);
-            Assert.Equal(true, glob.TestOnlyNeedsRecursion);
+            Assert.True(glob.TestOnlyNeedsRecursion);
             Assert.Equal(fileSpec, glob.TestOnlyFileSpec);
 
             Assert.Equal(globRoot.WithTrailingSlash(), glob.TestOnlyGlobRoot);
-            Assert.True(glob.FixedDirectoryPart.StartsWith(glob.TestOnlyGlobRoot));
+            Assert.StartsWith(glob.TestOnlyGlobRoot, glob.FixedDirectoryPart);
 
             Assert.Equal(expectedFixedDirectory, glob.FixedDirectoryPart);
             Assert.Equal("**/", glob.WildcardDirectoryPart);
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var glob = MSBuildGlob.Parse(globRoot, illegalFileSpec);
 
             Assert.False(glob.IsLegal);
-            Assert.Equal(false, glob.TestOnlyNeedsRecursion);
+            Assert.False(glob.TestOnlyNeedsRecursion);
             Assert.Equal(illegalFileSpec, glob.TestOnlyFileSpec);
 
             Assert.Equal(globRoot.WithTrailingSlash(), glob.TestOnlyGlobRoot);
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var glob = MSBuildGlob.Parse("%42/%42");
 
             Assert.True(glob.IsLegal);
-            Assert.True(glob.FixedDirectoryPart.EndsWith("%42" + Path.DirectorySeparatorChar));
+            Assert.EndsWith("%42" + Path.DirectorySeparatorChar, glob.FixedDirectoryPart);
             Assert.Equal(string.Empty, glob.WildcardDirectoryPart);
             Assert.Equal("%42", glob.FilenamePart);
         }

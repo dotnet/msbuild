@@ -24,7 +24,6 @@ namespace Microsoft.Build.Shared
     {
         private readonly IFileSystem _fileSystem;
         private const string recursiveDirectoryMatch = "**";
-        private const string dotdot = "..";
 
         private static readonly string s_directorySeparator = new string(Path.DirectorySeparatorChar, 1);
 
@@ -1921,25 +1920,8 @@ namespace Microsoft.Build.Shared
             Debug.Assert(filespecUnescaped != null);
             Debug.Assert(Path.IsPathRooted(projectDirectoryUnescaped));
 
-            var pathValidityExceptionTriggered = false;
-
-            // Ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
-            // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
-
-            try
-            {
-                filespecUnescaped = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
-
-                // increase the chance of cache hits when multiple relative globs refer to the same base directory
-                if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
-                {
-                    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
-                }
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                pathValidityExceptionTriggered = true;
-            }
+            const string projectPathPrependedToken = "p";
+            const string pathValityExceptionTriggeredToken = "e";
 
             var excludeSize = 0;
 
@@ -1953,12 +1935,47 @@ namespace Microsoft.Build.Shared
 
             using (var sb = new ReuseableStringBuilder(projectDirectoryUnescaped.Length + filespecUnescaped.Length + excludeSize))
             {
-                if (pathValidityExceptionTriggered)
+                var pathValidityExceptionTriggered = false;
+
+                try
                 {
-                    sb.Append(projectDirectoryUnescaped);
+                    // Ideally, ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
+                    // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
+
+                    var filespecUnescapedFullyQualified = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
+
+                    if (filespecUnescapedFullyQualified.Equals(filespecUnescaped, StringComparison.Ordinal))
+                    {
+                        // filespec is absolute, don't include the project directory path
+                        sb.Append(filespecUnescaped);
+                    }
+                    else
+                    {
+                        // filespec is not absolute, include the project directory path
+                        // differentiate fully qualified filespecs vs relative filespecs that got prepended with the project directory
+                        sb.Append(projectPathPrependedToken);
+                        sb.Append(filespecUnescapedFullyQualified);
+                    }
+
+                    // increase the chance of cache hits when multiple relative globs refer to the same base directory
+                    // todo https://github.com/Microsoft/msbuild/issues/3889
+                    //if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
+                    //{
+                    //    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+                    //}
+                }
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                {
+                    pathValidityExceptionTriggered = true;
                 }
 
-                sb.Append(filespecUnescaped);
+                if (pathValidityExceptionTriggered)
+                {
+                    sb.Append(pathValityExceptionTriggeredToken);
+                    sb.Append(projectPathPrependedToken);
+                    sb.Append(projectDirectoryUnescaped);
+                    sb.Append(filespecUnescaped);
+                }
 
                 if (excludes != null)
                 {
@@ -2288,7 +2305,7 @@ namespace Microsoft.Build.Shared
                         }
                         else if (excludeBaseDirectory.Length > includeBaseDirectory.Length)
                         {
-                            if (!excludeBaseDirectory.StartsWith(includeBaseDirectory, StringComparison.OrdinalIgnoreCase))
+                            if (!IsSubdirectoryOf(excludeBaseDirectory, includeBaseDirectory))
                             {
                                 //  Exclude path is longer, but doesn't start with include path.  So ignore it.
                                 continue;
@@ -2317,7 +2334,7 @@ namespace Microsoft.Build.Shared
                         else
                         {
                             //  Exclude base directory length is less than include base directory length.
-                            if (!state.BaseDirectory.StartsWith(excludeState.BaseDirectory, StringComparison.OrdinalIgnoreCase))
+                            if (!IsSubdirectoryOf(state.BaseDirectory, excludeState.BaseDirectory))
                             {
                                 //  Include path is longer, but doesn't start with the exclude path.  So ignore exclude path
                                 //  (since it won't match anything under the include path)
@@ -2421,6 +2438,33 @@ namespace Microsoft.Build.Shared
                 : listOfFiles.SelectMany(list => list).ToArray();
 
             return files;
+        }
+
+        private static bool IsSubdirectoryOf(string possibleChild, string possibleParent)
+        {
+            if (possibleParent == string.Empty)
+            {
+                // Something is always possibly a child of nothing
+                return true;
+            }
+
+            bool prefixMatch = possibleChild.StartsWith(possibleParent, StringComparison.OrdinalIgnoreCase);
+
+            if (!prefixMatch)
+            {
+                return false;
+            }
+
+            // Ensure that the prefix match wasn't to a distinct directory, so that
+            // x\y\prefix doesn't falsely match x\y\prefixmatch.
+            if (directorySeparatorCharacters.Contains(possibleParent[possibleParent.Length-1]))
+            {
+                return true;
+            }
+            else
+            {
+                return directorySeparatorCharacters.Contains(possibleChild[possibleParent.Length]);
+            }
         }
 
         private static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;

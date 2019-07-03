@@ -62,7 +62,7 @@
       </trans-unit>
       <trans-unit id="Shared.PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
-        <target state="new">Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</target>
+        <target state="translated">La ruta de acceso {0} supera el límite máximo para la ruta de acceso del sistema operativo. El nombre de archivo completo debe ser inferior a {1} caracteres.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
@@ -276,7 +276,7 @@
       <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
         <target state="translated">MSB5024: No se pudo determinar una ubicación válida para MSBuild. Intente ejecutar este proceso desde el Símbolo del sistema para desarrolladores de Visual Studio.</target>
-        <note>{StrBegin="MSB5021: "}</note>
+        <note>{StrBegin="MSB5024: "}</note>
       </trans-unit>
       <trans-unit id="InvalidLogFileFormat">
         <source>MSB4233: There was an exception while reading the log file: {0}</source>

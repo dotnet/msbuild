@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             AssertWhiteSpacePreservation(projectContents, updatedProject, (pe, p) =>
             {
-                var itemGroup = pe.AddItemGroup();
+                pe.AddItemGroup();
 
                 Assert.True(p.IsDirty);
             });
@@ -448,8 +448,8 @@ multi-line comment here
             // Each OS uses its own line endings. Using WSL on Windows leads to LF on Windows which messes up the tests. This happens due to git LF <-> CRLF conversions.
             if (NativeMethodsShared.IsWindows)
             {
-                projectContents = Regex.Replace(projectContents, @"[^\r]\n", "\r\n", RegexOptions.Multiline);
-                updatedProject = Regex.Replace(updatedProject, @"[^\r]\n", "\r\n", RegexOptions.Multiline);
+                projectContents = Regex.Replace(projectContents, @"(?<!\r)\n", "\r\n", RegexOptions.Multiline);
+                updatedProject = Regex.Replace(updatedProject, @"(?<!\r)\n", "\r\n", RegexOptions.Multiline);
             }
             else
             {
@@ -512,7 +512,7 @@ multi-line comment here
             else
             {
                 // Ensure we did not add \r\n
-                Assert.Equal(0, Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline).Count);
+                Assert.Empty(Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline));
             }
         }
     }

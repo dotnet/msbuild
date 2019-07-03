@@ -136,11 +136,6 @@ namespace Microsoft.Build.BackEnd
         private Stack<Lookup.Scope> _legacyCallTargetScopes;
 
         /// <summary>
-        /// The lock taken when dealing with cancel-synchronized objects
-        /// </summary>
-        private Object _cancelLock = new Object();
-
-        /// <summary>
         /// The cancellation token.
         /// </summary>
         private CancellationToken _cancellationToken;

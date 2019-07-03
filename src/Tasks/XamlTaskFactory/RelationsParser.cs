@@ -389,7 +389,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 {
                     if (String.Equals(attribute.Name, tasksAttribute, StringComparison.OrdinalIgnoreCase))
                     {
-                        importTasks = attribute.InnerText.Split(';');
+                        importTasks = attribute.InnerText.Split(MSBuildConstants.SemicolonChar);
                     }
                 }
                 _isImport = true;

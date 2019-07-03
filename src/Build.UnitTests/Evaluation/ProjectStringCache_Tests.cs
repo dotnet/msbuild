@@ -143,8 +143,8 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 Assert.NotNull(node1);
                 Assert.NotNull(node2);
                 Assert.NotSame(node1, node2);
-                Assert.Equal(1, node1.Attributes.Count);
-                Assert.Equal(1, node2.Attributes.Count);
+                Assert.Single(node1.Attributes);
+                Assert.Single(node2.Attributes);
                 Assert.Same(node1.Attributes[0].Value, node2.Attributes[0].Value);
 
                 node2.Attributes[0].Value = "attr1value";
@@ -386,7 +386,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             Assert.Equal(1, cache.Count);
 
             XmlDocument document2 = new XmlDocument();
-            string return2 = cache.Add(stringToAdd, document2);
+            cache.Add(stringToAdd, document2);
             Assert.Equal(1, cache.Count);
 
             cache.Clear(document2);
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             XmlDocument document = new XmlDocument();
 
             string stringToAdd = "Test1";
-            string return1 = cache.Add(stringToAdd, document);
+            cache.Add(stringToAdd, document);
             Assert.Equal(1, cache.Count);
 
             stringToAdd = "Test2";
@@ -453,7 +453,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             XmlDocument document = new XmlDocument();
 
             string stringToAdd = "Test1";
-            string return1 = cache.Add(stringToAdd, document);
+            cache.Add(stringToAdd, document);
             Assert.Equal(1, cache.Count);
 
             stringToAdd = "Test2";

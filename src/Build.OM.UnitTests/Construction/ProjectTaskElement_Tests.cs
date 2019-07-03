@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectTaskElement task = GetTaskFromContent(content);
             var parameters = Helpers.MakeDictionary(task.Parameters);
             Assert.Equal("t1", task.Name);
-            Assert.Equal(0, parameters.Count);
+            Assert.Empty(parameters);
             Assert.Equal(0, Helpers.Count(task.Outputs));
             Assert.Equal(String.Empty, task.ContinueOnError);
         }
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
 
-            Assert.Equal(1, parameters.Count);
+            Assert.Single(parameters);
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
             Assert.Equal("v1b", parameters["p1"]);
-            Assert.Equal(true, task.ContainingProject.HasUnsavedChanges);
+            Assert.True(task.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
             Assert.Equal("v2", parameters["p2"]);
-            Assert.Equal(true, task.ContainingProject.HasUnsavedChanges);
+            Assert.True(task.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -247,8 +247,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             task.RemoveParameter("p1");
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
-            Assert.Equal(0, parameters.Count);
-            Assert.Equal(true, task.ContainingProject.HasUnsavedChanges);
+            Assert.Empty(parameters);
+            Assert.True(task.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             task.RemoveParameter("XX");
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
-            Assert.Equal(1, parameters.Count);
+            Assert.Single(parameters);
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             task.ContinueOnError = "true";
             Assert.Equal("true", task.ContinueOnError);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             task.Condition = "c";
             Assert.Equal("c", task.Condition);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
 
         /// <summary>

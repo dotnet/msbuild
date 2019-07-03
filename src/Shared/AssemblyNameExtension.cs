@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -741,7 +741,7 @@ namespace Microsoft.Build.Shared
             }
 
             // Do the names match?
-            if (0 != string.Compare(Name, that.Name, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(Name, that.Name, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }

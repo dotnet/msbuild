@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
@@ -31,6 +32,7 @@ namespace Microsoft.Build.UnitTests
         private StringBuilder _fullLog = new StringBuilder();
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly bool _profileEvaluation;
+        private readonly bool _printEventsToStdout;
 
         /// <summary>
         /// Should the build finished event be logged in the log file. This is to work around the fact we have different
@@ -212,10 +214,11 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false)
+        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false, bool printEventsToStdout = true)
         {
             _testOutputHelper = testOutputHelper;
             _profileEvaluation = profileEvaluation;
+            _printEventsToStdout = printEventsToStdout;
         }
 
         public List<Action<object, BuildEventArgs>> AdditionalHandlers { get; set; } = new List<Action<object, BuildEventArgs>>();
@@ -347,10 +350,20 @@ namespace Microsoft.Build.UnitTests
                         // Console.Write in the context of a unit test is very expensive.  A hundred
                         // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
                         // do the Console.Write once at the end of the build.
-                        Console.Write(FullLog);
+
+                        PrintFullLog();
+
                         break;
                     }
                 }
+            }
+        }
+
+        private void PrintFullLog()
+        {
+            if (_printEventsToStdout)
+            {
+                Console.Write(FullLog);
             }
         }
 
@@ -417,7 +430,7 @@ namespace Microsoft.Build.UnitTests
                     }
                     else
                     {
-                        Console.WriteLine(FullLog);
+                        PrintFullLog();
                     }
 
                     Assert.True(
@@ -428,7 +441,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Assert that the log file contains the given string.
+        /// Assert that the log file does not contain the given string.
         /// </summary>
         /// <param name="contains"></param>
         internal void AssertLogDoesntContain(string contains)
@@ -443,7 +456,7 @@ namespace Microsoft.Build.UnitTests
                     }
                     else
                     {
-                        Console.WriteLine(FullLog);
+                        PrintFullLog();
                     }
 
                     Assert.True(false, $"Log was not expected to contain '{contains}', but did.");
@@ -460,5 +473,11 @@ namespace Microsoft.Build.UnitTests
         /// Assert that no warnings were logged
         /// </summary>
         internal void AssertNoWarnings() => Assert.Equal(0, WarningCount);
+
+        internal void AssertMessageCount(string message, int expectedCount)
+        {
+            var matches = Regex.Matches(FullLog, message);
+            matches.Count.ShouldBe(expectedCount);
+        }
     }
 }

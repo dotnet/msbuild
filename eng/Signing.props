@@ -1,0 +1,5 @@
+<Project>
+    <ItemGroup>
+		<ItemsToSign Include="$(VisualStudioSetupOutputPath)DevDivPackages\*.nupkg" />
+	</ItemGroup>
+</Project>

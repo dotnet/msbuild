@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        private BuildRequestConfigurationResponse(INodePacketTranslator translator)
+        private BuildRequestConfigurationResponse(ITranslator translator)
         {
             Translate(translator);
         }
@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Reads/writes this packet
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref _nodeConfigId);
             translator.Translate(ref _globalConfigId);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslator translator)
         {
             return new BuildRequestConfigurationResponse(translator);
         }

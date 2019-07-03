@@ -547,6 +547,7 @@ namespace Microsoft.Build.Tasks
         public string TrackerLogDirectory { get { throw null; } set { } }
         public string TrackerSdkPath { get { throw null; } set { } }
         public bool TrackFileAccess { get { throw null; } set { } }
+        public bool UsePreserializedResources { get { throw null; } set { } }
         public bool UseSourcePath { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
@@ -703,6 +704,7 @@ namespace Microsoft.Build.Tasks
         public Hash() { }
         [Microsoft.Build.Framework.OutputAttribute]
         public string HashResult { get { throw null; } set { } }
+        public bool IgnoreCase { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] ItemsToHash { get { throw null; } set { } }
         public override bool Execute() { throw null; }

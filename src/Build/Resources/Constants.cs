@@ -148,14 +148,7 @@ namespace Microsoft.Build.Internal
         {
             get
             {
-#if STANDALONEBUILD
-                return MSBuildConstants.CurrentToolsVersion;
-#else
-                Version version = new Version(ThisAssembly.Version);
-
-                // "4.0.0.0" --> "4.0"
-                return version.Major + "." + version.Minor;
-#endif
+                return MSBuildConstants.CurrentProductVersion;
             }
         }
 

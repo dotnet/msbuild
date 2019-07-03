@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// An interfacing representing a build request configuration cache.
     /// </summary>
-    internal interface IConfigCache : IBuildComponent, IEnumerable<BuildRequestConfiguration>
+    internal interface IConfigCache : IBuildComponent, IEnumerable<BuildRequestConfiguration>, ITranslatable
     {
         /// <summary>
         /// Returns the configuration with the specified id.

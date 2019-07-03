@@ -83,9 +83,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectMetadata> metadataList = Helpers.MakeList(metadataCollection);
 
-            Assert.Equal(0, metadataList.Count);
+            Assert.Empty(metadataList);
 
-            Assert.Equal(null, itemDefinition.GetMetadata("m"));
+            Assert.Null(itemDefinition.GetMetadata("m"));
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectMetadata> metadataList = Helpers.MakeList(metadataCollection);
 
-            Assert.Equal(1, metadataList.Count);
+            Assert.Single(metadataList);
             Assert.Equal("m", metadataList[0].Name);
             Assert.Equal("m0", metadataList[0].EvaluatedValue);
         }
@@ -216,7 +216,7 @@ ObjectModelHelpers.CleanupFileContents(
 
             MockLogger logger = new MockLogger();
             List<ILogger> loggers = new List<ILogger>() { logger };
-            Assert.Equal(true, project.Build(loggers));
+            Assert.True(project.Build(loggers));
 
             logger.AssertLogContains("a.foo;a.bar/m1");
             logger.AssertNoErrors();

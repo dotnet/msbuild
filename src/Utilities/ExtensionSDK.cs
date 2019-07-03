@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {
@@ -147,11 +148,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private void ParseMoniker(string moniker)
         {
-            string[] properties = moniker.Split(',');
+            string[] properties = moniker.Split(MSBuildConstants.CommaChar);
 
             foreach (string property in properties)
             {
-                string[] words = property.Split('=');
+                string[] words = property.Split(MSBuildConstants.EqualsChar);
 
                 if (words[0].Trim().StartsWith("Version", StringComparison.OrdinalIgnoreCase))
                 {

@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             LoggingServiceFactory factory = new LoggingServiceFactory(LoggerMode.Synchronous, 1);
             LoggingService loggingService = (LoggingService)factory.CreateInstance(BuildComponentType.LoggingService);
-            Assert.Equal(loggingService.LoggingMode, LoggerMode.Synchronous); // "Expected to create a Synchronous LoggingService"
+            Assert.Equal(LoggerMode.Synchronous, loggingService.LoggingMode); // "Expected to create a Synchronous LoggingService"
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             LoggingServiceFactory factory = new LoggingServiceFactory(LoggerMode.Asynchronous, 1);
             LoggingService loggingService = (LoggingService)factory.CreateInstance(BuildComponentType.LoggingService);
-            Assert.Equal(loggingService.LoggingMode, LoggerMode.Asynchronous); // "Expected to create an Asynchronous LoggingService"
+            Assert.Equal(LoggerMode.Asynchronous, loggingService.LoggingMode); // "Expected to create an Asynchronous LoggingService"
         }
     }
 }

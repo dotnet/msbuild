@@ -75,7 +75,7 @@ bar", false)]
 
                 Assert.False(xml.XmlDocument.IsReadOnly);
                 var children = xml.XmlDocument.ChildNodes;
-                Assert.Equal(1, children.Count);
+                Assert.Single(children);
                 Assert.Equal("Project", children[0].Name);
                 Assert.Equal(2, children[0].ChildNodes.Count);
                 Assert.Equal("Initial Comment", children[0].ChildNodes[0].Value);
@@ -107,7 +107,7 @@ bar", false)]
 
                 Assert.True(xml.XmlDocument.IsReadOnly);
                 var children = xml.XmlDocument.ChildNodes;
-                Assert.Equal(1, children.Count);
+                Assert.Single(children);
                 Assert.Equal("Project", children[0].Name);
                 Assert.Equal(2, children[0].ChildNodes.Count);
                 Assert.Equal(string.Empty, children[0].ChildNodes[0].Value);

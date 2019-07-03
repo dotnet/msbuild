@@ -69,7 +69,7 @@ namespace Microsoft.Build.Shared
                     return assembly;
                 }
 
-                return LoadAndCache(fullPath);
+                return LoadAndCache(AssemblyLoadContext.Default, fullPath);
             }
         }
 
@@ -80,9 +80,12 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
+            // Ensure we are attempting to load a matching version
+            // of the Microsoft.Build.* assembly.
             assemblyName.Version = _currentAssemblyVersion;
 
-            return context.LoadFromAssemblyName(assemblyName);
+            var searchPaths = new[] { Assembly.GetExecutingAssembly().Location };
+            return TryResolveAssemblyFromPaths(context, assemblyName, searchPaths);
         }
 
         private Assembly TryResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
@@ -101,49 +104,55 @@ namespace Microsoft.Build.Shared
                     return assembly;
                 }
 
-                foreach (var cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
-                    // If no culture is specified, attempt to load directly from
-                    // the known dependency paths.
-                    ? new[] {string.Empty}
-                    // Search for satellite assemblies in culture subdirectories
-                    // of the assembly search directories, but fall back to the
-                    // bare search directory if that fails.
-                    : new[] {assemblyName.CultureName, string.Empty})
+                return TryResolveAssemblyFromPaths(context, assemblyName, _dependencyPaths);
+            }
+        }
+
+        private Assembly TryResolveAssemblyFromPaths(AssemblyLoadContext context, AssemblyName assemblyName, IEnumerable<string> searchPaths)
+        {
+            foreach (var cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
+                // If no culture is specified, attempt to load directly from
+                // the known dependency paths.
+                ? new[] { string.Empty }
+                // Search for satellite assemblies in culture subdirectories
+                // of the assembly search directories, but fall back to the
+                // bare search directory if that fails.
+                : new[] { assemblyName.CultureName, string.Empty })
+            {
+                foreach (var searchPath in searchPaths)
                 {
-                    foreach (var dependencyPath in _dependencyPaths)
+                    foreach (var extension in _extensions)
                     {
-                        foreach (var extension in _extensions)
+                        var candidatePath = Path.Combine(searchPath,
+                            cultureSubfolder,
+                            $"{assemblyName.Name}.{extension}");
+
+                        if (IsAssemblyAlreadyLoaded(candidatePath) ||
+                            !FileSystems.Default.FileExists(candidatePath))
                         {
-                            var candidatePath = Path.Combine(dependencyPath,
-                                cultureSubfolder,
-                                $"{assemblyName.Name}.{extension}");
-                            if (IsAssemblyAlreadyLoaded(candidatePath) ||
-                                !FileSystems.Default.FileExists(candidatePath))
-                            {
-                                continue;
-                            }
-
-                            AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                            if (candidateAssemblyName.Version != assemblyName.Version)
-                            {
-                                continue;
-                            }
-
-                            return LoadAndCache(candidatePath);
+                            continue;
                         }
+
+                        AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                        if (candidateAssemblyName.Version != assemblyName.Version)
+                        {
+                            continue;
+                        }
+
+                        return LoadAndCache(context, candidatePath);
                     }
                 }
-
-                return null;
             }
+
+            return null;
         }
 
         /// <remarks>
         /// Assumes we have a lock on _guard
         /// </remarks>
-        private Assembly LoadAndCache(string fullPath)
+        private Assembly LoadAndCache(AssemblyLoadContext context, string fullPath)
         {
-            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullPath);
+            var assembly = context.LoadFromAssemblyPath(fullPath);
             var name = assembly.FullName;
 
             _pathsToAssemblies[fullPath] = assembly;

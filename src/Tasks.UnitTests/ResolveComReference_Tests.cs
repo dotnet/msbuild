@@ -374,7 +374,7 @@ namespace Microsoft.Build.UnitTests
             string path;
             IComReferenceResolver resolver = (IComReferenceResolver)rcr;
             Assert.False(resolver.ResolveComAssemblyReference("MyAssembly", out path));
-            Assert.Equal(null, path);
+            Assert.Null(path);
         }
 
         /// <summary>
@@ -571,18 +571,18 @@ namespace Microsoft.Build.UnitTests
             rcr.SetCopyLocalToFalseOnGacOrNoPIAAssemblies(taskItems, gacPath);
 
             // if Private is missing, by default GAC items are CopyLocal=false, non GAC CopyLocal=true
-            Assert.Equal(nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), "true"); // "Non Gac assembly, missing Private, should be TRUE"
+            Assert.Equal("true", nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, missing Private, should be TRUE"
 
-            Assert.Equal(gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), "false"); // "Gac assembly, missing Private, should be FALSE"
+            Assert.Equal("false", gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, missing Private, should be FALSE"
 
             // if Private is set, it takes precedence
-            Assert.Equal(nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), "false"); // "Non Gac assembly, Private false, should be FALSE"
+            Assert.Equal("false", nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, Private false, should be FALSE"
 
-            Assert.Equal(gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), "false"); // "Gac assembly, Private false, should be FALSE"
+            Assert.Equal("false", gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, Private false, should be FALSE"
 
-            Assert.Equal(nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), "true"); // "Non Gac assembly, Private true, should be TRUE"
+            Assert.Equal("true", nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, Private true, should be TRUE"
 
-            Assert.Equal(gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), "true"); // "Gac assembly, Private true, should be TRUE"
+            Assert.Equal("true", gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, Private true, should be TRUE"
         }
 
         /// <summary>
@@ -639,9 +639,9 @@ namespace Microsoft.Build.UnitTests
 
             // ... and conflicting references should have been removed
             Assert.Equal(7, rcr.allProjectRefs.Count);
-            Assert.False(rcr.allProjectRefs.Contains(conflictTlb));
-            Assert.False(rcr.allProjectRefs.Contains(conflictAx));
-            Assert.True(rcr.allProjectRefs.Contains(piaRef));
+            Assert.DoesNotContain(conflictTlb, rcr.allProjectRefs);
+            Assert.DoesNotContain(conflictAx, rcr.allProjectRefs);
+            Assert.Contains(piaRef, rcr.allProjectRefs);
         }
 
         /// <summary>

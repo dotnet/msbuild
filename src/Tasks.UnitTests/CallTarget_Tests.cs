@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoTargets()
         {
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
+            ObjectModelHelpers.BuildProjectExpectSuccess(@"
 
                 <Project DefaultTargets=`build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <Target Name=`build` >

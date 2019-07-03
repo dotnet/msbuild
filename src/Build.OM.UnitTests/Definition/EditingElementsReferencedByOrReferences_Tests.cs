@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.ReevaluateIfNecessary();
             IEnumerable<ProjectItem> items = project.GetItems("I");
 
-            Assert.Equal(1, items.Count()); // "Wrong number of items after changing type"
+            Assert.Single(items); // "Wrong number of items after changing type"
             Assert.Equal("Y", items.First().EvaluatedInclude); // "Wrong evaluated include after changing type"
         }
 

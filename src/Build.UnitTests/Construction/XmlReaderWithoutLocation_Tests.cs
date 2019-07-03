@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ));
             XmlReader noLineInfoReader = new XmlReaderNoIXmlLineInfo(reader);
             Project project = new Project(noLineInfoReader);
-            Assert.Equal(1, project.Targets.Count);
+            Assert.Single(project.Targets);
         }
     }
 }

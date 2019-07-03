@@ -4,9 +4,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
@@ -541,7 +544,7 @@ namespace Microsoft.Build.BackEnd
         {
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             Thread staThread = null;
-            Exception exceptionFromExecution = null;
+            ExceptionDispatchInfo exceptionFromExecution = null;
             ManualResetEvent taskRunnerFinished = new ManualResetEvent(false);
             try
             {
@@ -552,14 +555,9 @@ namespace Microsoft.Build.BackEnd
                     {
                         taskResult = InitializeAndExecuteTask(taskLoggingContext, bucket, taskIdentityParameters, taskHost, howToExecuteTask).Result;
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
-                        exceptionFromExecution = e;
+                        exceptionFromExecution = ExceptionDispatchInfo.Capture(e);
                     }
                     finally
                     {
@@ -586,8 +584,7 @@ namespace Microsoft.Build.BackEnd
 
             if (exceptionFromExecution != null)
             {
-                // Unfortunately this will reset the callstack
-                throw exceptionFromExecution;
+                exceptionFromExecution.Throw();
             }
 
             return taskResult;
@@ -759,15 +756,39 @@ namespace Microsoft.Build.BackEnd
                     {
                         MSBuild msbuildTask = host.TaskInstance as MSBuild;
                         ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
-                        _targetBuilderCallback.EnterMSBuildCallbackState();
 
-                        try
+                        var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
+
+                        if (undeclaredProjects != null && undeclaredProjects.Count != 0)
                         {
-                            taskResult = await msbuildTask.ExecuteInternal();
+                            _continueOnError = ContinueOnError.ErrorAndStop;
+
+                            taskException = new InvalidProjectFileException(
+                                taskHost.ProjectFileOfTaskNode,
+                                taskHost.LineNumberOfTaskNode,
+                                taskHost.ColumnNumberOfTaskNode,
+                                0,
+                                0,
+                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                    "UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds",
+                                    string.Join(";", undeclaredProjects.Select(p => $"\"{p}\"")),
+                                    taskExecutionHost.ProjectInstance.FullPath),
+                                null,
+                                null,
+                                null);
                         }
-                        finally
+                        else
                         {
-                            _targetBuilderCallback.ExitMSBuildCallbackState();
+                            _targetBuilderCallback.EnterMSBuildCallbackState();
+
+                            try
+                            {
+                                taskResult = await msbuildTask.ExecuteInternal();
+                            }
+                            finally
+                            {
+                                _targetBuilderCallback.ExitMSBuildCallbackState();
+                            }
                         }
                     }
                     else if (taskType == typeof(CallTarget))
@@ -807,7 +828,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    Type type = taskException.GetType();
+                    var type = taskException.GetType();
 
                     if (type == typeof(LoggerException))
                     {
@@ -960,6 +981,47 @@ namespace Microsoft.Build.BackEnd
             WorkUnitResult result = new WorkUnitResult(resultCode, actionCode, null);
 
             return result;
+        }
+
+        private List<string> GetUndeclaredProjects(MSBuild msbuildTask)
+        {
+            if (!_componentHost.BuildParameters.IsolateProjects)
+            {
+                return null;
+            }
+
+            var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
+
+            var declaredProjects = new HashSet<string>(projectReferenceItems.Count);
+
+            foreach (var projectReferenceItem in projectReferenceItems)
+            {
+                declaredProjects.Add(FileUtilities.NormalizePath(projectReferenceItem.EvaluatedInclude));
+            }
+
+            // allow a project to msbuild itself
+            declaredProjects.Add(_taskExecutionHost.ProjectInstance.FullPath);
+
+            List<string> undeclaredProjects = null;
+
+            foreach (var msbuildProject in msbuildTask.Projects)
+            {
+                var normalizedMSBuildProject = FileUtilities.NormalizePath(msbuildProject.ItemSpec);
+
+                if (
+                    !(declaredProjects.Contains(normalizedMSBuildProject)
+                      || _buildRequestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(normalizedMSBuildProject)))
+                {
+                    if (undeclaredProjects == null)
+                    {
+                        undeclaredProjects = new List<string>(projectReferenceItems.Count);
+                    }
+
+                    undeclaredProjects.Add(normalizedMSBuildProject);
+                }
+            }
+
+            return undeclaredProjects;
         }
 
         /// <summary>

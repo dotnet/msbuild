@@ -32,6 +32,7 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
+        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -204,7 +205,7 @@ namespace Microsoft.Build.UnitTests
 
             MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj");
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
-            Assert.True(logger.FullLog.Contains(error));
+            Assert.Contains(error, logger.FullLog);
         }
 
         /// <summary>
@@ -227,7 +228,7 @@ namespace Microsoft.Build.UnitTests
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(1, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains(error));
+            Assert.Contains(error, logger.FullLog);
         }
 
         /// <summary>
@@ -262,8 +263,8 @@ namespace Microsoft.Build.UnitTests
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(0, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains(message)); // for the missing project
-            Assert.False(logger.FullLog.Contains(error));
+            Assert.Contains(message, logger.FullLog); // for the missing project
+            Assert.DoesNotContain(error, logger.FullLog);
         }
 
         /// <summary>
@@ -299,8 +300,8 @@ namespace Microsoft.Build.UnitTests
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(0, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains(message)); // for the missing project
-            Assert.False(logger.FullLog.Contains(error));
+            Assert.Contains(message, logger.FullLog); // for the missing project
+            Assert.DoesNotContain(error, logger.FullLog);
         }
 
         [Fact]
@@ -341,7 +342,7 @@ namespace Microsoft.Build.UnitTests
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectUpgradeNeededToVcxProj"), "blah.vcproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(1, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains(error));
+            Assert.Contains(error, logger.FullLog);
         }
 
 #if FEATURE_COMPILE_IN_TESTS
@@ -691,7 +692,7 @@ namespace Microsoft.Build.UnitTests
                     ", projectFile2);
 
                 Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Equal(1, targetOutputs["Build"].Items.Length);
+                Assert.Single(targetOutputs["Build"].Items);
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, targetOutputs["Build"].Items, false /* order of items not enforced */);
             }
             finally

@@ -7,6 +7,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -29,6 +30,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private GetPathFromFusionName _getPathFromFusionName = new GetPathFromFusionName(MockGetPathFromFusionName);
         private GetGacEnumerator _gacEnumerator = new GetGacEnumerator(MockAssemblyCacheEnumerator);
 
+        public GlobalAssemblyCacheTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Verify when the GAC enumerator returns
         ///
@@ -49,7 +54,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("2.0.57027"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, false);
             Assert.NotNull(path);
-            Assert.True(path.Equals(system2Path, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(system2Path, path);
         }
 
 
@@ -74,7 +79,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("2.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
             Assert.NotNull(path);
-            Assert.True(path.Equals(system4Path, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(system4Path, path);
         }
 
         /// <summary>
@@ -97,7 +102,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("2.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
             Assert.NotNull(path);
-            Assert.True(path.Equals(system2Path, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(system2Path, path);
         }
 
         /// <summary>
@@ -120,7 +125,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("4.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, false);
             Assert.NotNull(path);
-            Assert.True(path.Equals(system4Path, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(system4Path, path);
         }
 
         /// <summary>
@@ -144,7 +149,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("4.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
             Assert.NotNull(path);
-            Assert.True(path.Equals(system4Path, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(system4Path, path);
         }
 
         /// <summary>
@@ -165,7 +170,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("4.0.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
             Assert.NotNull(path);
-            Assert.True(path.Equals(system4Path, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(system4Path, path);
         }
 
         /// <summary>
@@ -264,7 +269,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -300,8 +305,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "false", StringComparison.OrdinalIgnoreCase)); //                 "Expected no System.Runtime dependency found during build."
-            Assert.True(string.Equals(t.DependsOnNETStandard, "false", StringComparison.OrdinalIgnoreCase)); //                   "Expected no netstandard dependency found during build."
+            Assert.Equal("false", t.DependsOnSystemRuntime, true); //                 "Expected no System.Runtime dependency found during build."
+            Assert.Equal("false", t.DependsOnNETStandard, true); //                   "Expected no netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -328,8 +333,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "false", StringComparison.OrdinalIgnoreCase)); //                 "Expected no System.Runtime dependency found during intellibuild."
-            Assert.True(string.Equals(t.DependsOnNETStandard, "false", StringComparison.OrdinalIgnoreCase)); //                   "Expected no netstandard dependency found during intellibuild."
+            Assert.Equal("false", t.DependsOnSystemRuntime, true); //                 "Expected no System.Runtime dependency found during intellibuild."
+            Assert.Equal("false", t.DependsOnNETStandard, true); //                   "Expected no netstandard dependency found during intellibuild."
         }
 
 
@@ -339,7 +344,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -376,7 +381,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -403,7 +408,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
         }
 
         // Indirect dependency
@@ -413,7 +418,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -450,7 +455,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -477,7 +482,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 )
             );
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
         }
 
         [Fact]
@@ -485,7 +490,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -519,7 +524,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -541,7 +546,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 checkIfAssemblyIsInGac, isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
         }
 
         [Fact]
@@ -549,7 +554,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -582,7 +587,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -605,7 +610,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected System.Runtime dependency found during intellibuild."
         }
 
         [Fact]
@@ -613,7 +618,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -646,8 +651,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Console.WriteLine (((MockEngine)t.BuildEngine).Log);
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected netstandard dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -670,7 +674,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected netstandard dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected netstandard dependency found during intellibuild."
         }
 
 
@@ -679,7 +683,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -713,7 +717,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected netstandard dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -736,7 +740,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected netstandard dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                 "Expected netstandard dependency found during intellibuild."
         }
 
         [Fact]
@@ -744,7 +748,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -779,8 +783,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                   "Expected netstandard dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -803,8 +807,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                   "Expected netstandard dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during intellibuild."
         }
 
         [Fact]
@@ -812,7 +816,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -849,8 +853,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                   "Expected netstandard dependency found during build."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during build."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
@@ -873,8 +877,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
-            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                   "Expected netstandard dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnSystemRuntime, true); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during intellibuild."
         }
 
         #region HelperDelegates

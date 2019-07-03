@@ -104,6 +104,7 @@ namespace Xunit.NetCore.Extensions
                         new ExecutionErrorTestCase(
                             diagnosticMessageSink,
                             discoveryOptions.MethodDisplayOrDefault(),
+                            TestMethodDisplayOptions.None,
                             testMethod,
                             GetFailedLookupString(conditionMemberName, declaringType))
                     };

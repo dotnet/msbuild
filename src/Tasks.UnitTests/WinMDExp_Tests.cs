@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
 
             t.AddResponseFileCommands(c);
 
-            string[] actual = c.ToString().Split(new [] { Environment.NewLine }, StringSplitOptions.None);
+            string[] actual = c.ToString().Split(MSBuildConstants.EnvironmentNewLine, StringSplitOptions.None);
             string[] expected =
             {
                 "/d:sp ace",

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
     <body>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <target state="translated">MSB4249: 無法建置網站專案 "{0}"。ASP.NET 編譯器只適用於 NET Framework 版本的 MSBuild。</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -22,7 +22,7 @@
       </trans-unit>
       <trans-unit id="BadlyCasedSpecialTaskAttribute">
         <source>MSB4003: "{0}" is a reserved attribute of the &lt;{1}&gt; element, and must be spelled with the correct casing. This attribute cannot be used as a parameter to the "{2}" task.</source>
-        <target state="translated">MSB4003: "{0}" 是 &lt;{1}&gt; 項目的保留屬性，必須使用正確的大小寫拼寫。此屬性不能當作 "{2}" 工作的參數。</target>
+        <target state="translated">MSB4003: "{0}" 是 &lt;{1}&gt; 項目的保留屬性，必須使用正確的大小寫拼寫。這個屬性不能當做 "{2}" 工作的參數。</target>
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
@@ -31,22 +31,104 @@
         <target state="translated">無法完成作業，因為建置已經在進行中。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </source>
+        <target state="translated">MSB4252: 專案 "{0}" 具有對 "{1}" 的參考 ({2} 目標)，但是參考的組建結果不在引擎快取中。這在隔離組建中可能表示下列其一：
+    - 未將參考明確指定為 "{0}" 中的 ProjectReference 項目
+    - 參考未包含在提供的輸入快取中
+    - 使用未在 "{0}" 中 ProjectReferenceTargets 項目內指定的目標呼叫參考
+    </target>
+        <note>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <target state="translated">MSB4248: 無法在運算式 "{0}" 中展開中繼資料。{1}</target>
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="translated">MSB4251: 有循環相依性涉及下列專案: {0}</target>
+        <note>
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </note>
+      </trans-unit>
+      <trans-unit id="EmptyOutputCacheFile">
+        <source>MSB4257: The specified output result cache file is empty.</source>
+        <target state="translated">MSB4257: 指定的輸出結果快取檔案是空的。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingCacheFile">
+        <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4256: 從路徑 "{0}" 讀取輸入結果快取檔案發生錯誤: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingCacheFile">
+        <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4258: 在路徑 "{0}" 中寫入輸出結果快取檔案發生錯誤: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InputCacheFilesDoNotExist">
+        <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
+        <target state="translated">MSB4255: 下列輸入結果快取檔案不存在: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
-        <target state="new">Metaproject "{0}" generated.</target>
+        <target state="translated">已產生中繼專案 "{0}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">無法完成作業，因為尚未呼叫 BeginBuild。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="NullReferenceFromProjectInstanceFactory">
+        <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
+        <target state="translated">MSB4253: 使用者提供的 ProjectInstanceFactoryFunc 回呼傳回了 null 參考。這是不允許的情況。</target>
+        <note>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
+        <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
+        <target state="translated">MSB4250: ProjectGraph 不支援設有 ToolsVersion 中繼資料的 ProjectReference 項目。在檔案 "{1}" 中找到具有 ToolsVersion 的 ProjectReference "{0}"</target>
+        <note>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
+      </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
+      <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: MSBuild 工作建置的專案 {0} 未在 ProjectReference 項目中指定。在隔離式組建中，這可能代表未在 "{1}" 中將該參考明確指定為 ProjectReference 項目</target>
+        <note>
+      {StrBegin="MSB4254:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
+    </note>
+      </trans-unit>
+      <trans-unit id="UsingInputCaches">
+        <source>Using input build results caches: {0}</source>
+        <target state="translated">使用輸入組建結果快取: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
+    </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
@@ -191,7 +273,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
-        <target state="needs-review-translation">MSB4166: 子節點 "{0}" 已永久結束。正在關閉。診斷資訊可在 "{1}" 中的檔案內找到，且會命名為 MSBuild_*.failure.txt。您可將 MSBUILDDEBUGPATH 環境變數設定為其他目錄來變更此位置。</target>
+        <target state="translated">MSB4166: 子節點 "{0}" 已永久結束。正在關閉。診斷資訊可在 "{1}" 中的檔案內找到，且會命名為 MSBuild_*.failure.txt。您可將 MSBUILDDEBUGPATH 環境變數設定為其他目錄來變更此位置。{2}</target>
         <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -372,7 +454,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">不再支援 &lt;{0}&gt; 標記為 &lt;Project&gt; 項目的子系。請將此標記置於目標中，然後將目標的名稱加入 &lt;Project&gt; 項目的 "InitialTargets" 屬性中。</target>
+        <target state="translated">不再支援 &lt;{0}&gt; 標記做為 &lt;Project&gt; 項目的子系。請將這個標記置放於目標中，然後將目標的名稱加入 &lt;Project&gt; 項目的 "InitialTargets" 屬性中。</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -471,17 +553,17 @@
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: 找不到匯入的專案 "{0}"。請確認 &lt;Import&gt; 宣告中的路徑正確，而且檔案位於磁碟上。</target>
+        <target state="translated">MSB4019: 找不到匯入的專案 "{0}"。請確認 &lt;Import&gt; 宣告中的路徑正確，而且檔案存在於磁碟上。</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: 找不到匯入的專案 "{0}"。同時，嘗試在 {2} - {3} 的後援搜尋路徑中尋找 "{1}"。這些搜尋路徑定義於 "{4}" 中。請確認 &lt;Import&gt; 宣告中的路徑正確，而且檔案位於其中一個搜尋路徑的磁碟上。</target>
+        <target state="translated">MSB4226: 找不到匯入的專案 "{0}"。同時，請嘗試在 {2} - {3} 的後援搜尋路徑中尋找 "{1}"。這些搜尋路徑定義在 "{4}" 中。請確認 &lt;Import&gt; 宣告中的路徑正確，且該檔案存在於其中一個搜尋路徑的磁碟上。</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: 找不到匯入的專案 "{0}"。同時，嘗試在 {2} - {3} 的後援搜尋路徑中尋找 "{1}"。請確認 &lt;Import&gt; 宣告中的路徑正確，而且檔案位於其中一個搜尋路徑的磁碟上。</target>
+        <target state="translated">MSB4226: 找不到匯入的專案 "{0}"。同時，請嘗試在 {2} - {3} 的後援搜尋路徑中尋找 "{1}"。請確認 &lt;Import&gt; 宣告中的路徑正確，且該檔案存在於其中一個搜尋路徑的磁碟上。</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
@@ -586,8 +668,8 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
-        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). </source>
-        <target state="translated">MSB4186: 無效的靜態方法引動過程語法: "{0}"。{1} 靜態方法引動過程的格式應為: $([FullTypeName]::Method())，例如 $([System.IO.Path]::Combine(`a`, `b`))。 </target>
+        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
+        <target state="translated">MSB4186: 靜態方法引動過程語法無效: "{0}"。{1} 靜態方法引動過程的格式應為: $([FullTypeName]::Method())，例如 $([System.IO.Path]::Combine(`a`, `b`))。請檢查全部的參數是否已定義、為正確的類型，且以正確的順序指定。</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -743,7 +825,7 @@
       </trans-unit>
       <trans-unit id="NodeMustBeLastUnderElement">
         <source>MSB4038: The element &lt;{0}&gt; must be last under element &lt;{1}&gt;. Found element &lt;{2}&gt; instead.</source>
-        <target state="translated">MSB4038: 項目 &lt;{0}&gt; 必須是項目 &lt;{1}&gt; 下的最後一個項目。卻找到項目 &lt;{2}&gt;。</target>
+        <target state="translated">MSB4038: 項目 &lt;{0}&gt; 必須是項目 &lt;{1}&gt; 下的最後一個項目。反而找到項目 &lt;{2}&gt;。</target>
         <note>{StrBegin="MSB4038: "}</note>
       </trans-unit>
       <trans-unit id="NonStringDataInRegistry">
@@ -823,7 +905,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: 專案的預設 XML 命名空間必須是 MSBuild XML 命名空間或沒有命名空間。若使用 MSBuild 2003 格式設計專案，請將 xmlns="{0}" 新增至 &lt;Project&gt; 項目。若是使用舊版的 1.0 或 1.2 格式設計專案，請將專案轉換為 MSBuild 2003 格式。</target>
+        <target state="translated">MSB4041: 專案的預設 XML 命名空間必須是 MSBuild XML 命名空間，或是沒有任何命名空間。如果使用 MSBuild 2003 格式設計專案，請將 xmlns="{0}" 新增至 &lt;Project&gt; 元素。若是使用舊版 1.0 或 1.2 的格式設計專案，請將其轉換為 MSBuild 2003 格式。</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1046,7 +1128,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">將略過，因為此 Web 專案不支援 "$(AspNetConfiguration)" 組態。您可以透過將 /p:AspNetConfiguration=&lt;value&gt; 加入命令列中，使用 AspNetConfiguration 屬性覆寫用來建置 Web 專案的組態。目前 Web 專案僅支援偵錯和發行組態。</target>
+        <target state="translated">將略過，因為此 Web 專案不支援 "$(AspNetConfiguration)" 組態。您可以將 /p:AspNetConfiguration=&lt;value&gt; 加入至命令列，藉此使用 AspNetConfiguration 屬性覆寫用來建置 Web 專案的組態。目前 Web 專案僅支援偵錯和發行組態。</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1555,6 +1637,13 @@
         <target state="translated">另一個批次正在覆寫值為 "{1}" 的屬性 "{0}"。此屬性現在是: "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="WritingToOutputCache">
+        <source>Writing build results caches to: {0}</source>
+        <target state="translated">將組建結果快取寫入: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a file path
+    </note>
+      </trans-unit>
       <trans-unit id="logfilePathNullOrEmpty">
         <source>The log file path cannot be null or empty.</source>
         <target state="translated">記錄檔路徑不可為 null 或空白。</target>
@@ -1897,7 +1986,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: "{0}" 參數的語法無效 ({1})。正確的語法為 {0}="&lt;name&gt; =&lt;value&gt;"。</target>
+        <target state="translated">MSB3100: "{0}" 參數的語法不是有效的 ({1})。正確的語法為 {0}="&lt;name&gt;=&lt;value&gt;"。</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -1935,17 +2024,17 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="translated">MSB4227: 元素 &lt;{1}&gt; 的屬性 "{0}" 無效，因為已存在同名的屬性</target>
+        <target state="translated">MSB4227: 因為具有該名稱的屬性已存在，所以元素 &lt;{1}&gt; 上的屬性 "{0}" 無效</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="translated">MSB4228: 名稱 "{0}" 對表示為屬性的中繼資料 (在元素 &lt;{1}&gt; 上) 而言無效</target>
+        <target state="translated">MSB4228: 名稱 "{0}" 對於表示為屬性 (元素 &lt;{1}&gt; 上) 的中繼資料無效</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="translated">&lt;{0}&gt; 元素必須有 "{1}" 屬性、"{2}" 屬性或 "{3}" 屬性，但只能有其中一個。</target>
+        <target state="translated">&lt;{0}&gt;元素必須是 "{1}" 屬性、"{2}" 屬性或 "{3}" 屬性，但不能超過一個以上。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
@@ -2100,7 +2189,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD : 錯誤 MSB4239: 寫入分析報告時發生錯誤。{0}</target>
+        <target state="translated">MSBUILD : error MSB4239: 寫入分析報告時發生錯誤。{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">

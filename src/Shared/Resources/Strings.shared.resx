@@ -256,7 +256,7 @@
   </data>
   <data name="Shared.CanNotFindValidMSBuildLocation">
     <value>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</value>
-    <comment>{StrBegin="MSB5021: "}</comment>
+    <comment>{StrBegin="MSB5024: "}</comment>
   </data>
   <data name="Shared.PathTooLong">
     <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>

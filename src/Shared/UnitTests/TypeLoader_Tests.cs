@@ -203,13 +203,13 @@ namespace Microsoft.Build.UnitTests
             TypeLoader loader = new TypeLoader(IsForwardingLoggerClass);
             LoadedType loadedType = loader.Load("ConfigurableForwardingLogger", AssemblyLoadInfo.Create(null, forwardingLoggerLocation));
             Assert.NotNull(loadedType);
-            Assert.True(loadedType.Assembly.AssemblyLocation.Equals(forwardingLoggerLocation, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(forwardingLoggerLocation, loadedType.Assembly.AssemblyLocation);
 
             string fileLoggerLocation = typeof(Microsoft.Build.Logging.FileLogger).Assembly.Location;
             loader = new TypeLoader(IsLoggerClass);
             loadedType = loader.Load("FileLogger", AssemblyLoadInfo.Create(null, fileLoggerLocation));
             Assert.NotNull(loadedType);
-            Assert.True(loadedType.Assembly.AssemblyLocation.Equals(fileLoggerLocation, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(fileLoggerLocation, loadedType.Assembly.AssemblyLocation);
         }
 
         /// <summary>
@@ -224,14 +224,14 @@ namespace Microsoft.Build.UnitTests
             TypeLoader loader = new TypeLoader(IsForwardingLoggerClass);
             LoadedType loadedType = loader.Load(forwardingLoggerType.FullName, AssemblyLoadInfo.Create(null, forwardingLoggerLocation));
             Assert.NotNull(loadedType);
-            Assert.True(loadedType.Assembly.AssemblyLocation.Equals(forwardingLoggerLocation, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(forwardingLoggerLocation, loadedType.Assembly.AssemblyLocation);
 
             Type fileLoggerType = typeof(Microsoft.Build.Logging.FileLogger);
             string fileLoggerLocation = fileLoggerType.Assembly.Location;
             loader = new TypeLoader(IsLoggerClass);
             loadedType = loader.Load(fileLoggerType.FullName, AssemblyLoadInfo.Create(null, fileLoggerLocation));
             Assert.NotNull(loadedType);
-            Assert.True(loadedType.Assembly.AssemblyLocation.Equals(fileLoggerLocation, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(fileLoggerLocation, loadedType.Assembly.AssemblyLocation);
         }
 
 
@@ -251,8 +251,8 @@ namespace Microsoft.Build.UnitTests
             TypeLoader loader = new TypeLoader(forwardingLoggerfilter);
             LoadedType loadedType = loader.Load(String.Empty, AssemblyLoadInfo.Create(null, forwardingLoggerAssemblyLocation));
             Assert.NotNull(loadedType);
-            Assert.True(loadedType.Assembly.AssemblyLocation.Equals(forwardingLoggerAssemblyLocation, StringComparison.OrdinalIgnoreCase));
-            Assert.True(loadedType.Type.Equals(firstPublicType));
+            Assert.Equal(forwardingLoggerAssemblyLocation, loadedType.Assembly.AssemblyLocation);
+            Assert.Equal(firstPublicType, loadedType.Type);
 
 
             Type fileLoggerType = typeof(Microsoft.Build.Logging.FileLogger);
@@ -263,8 +263,8 @@ namespace Microsoft.Build.UnitTests
             loader = new TypeLoader(fileLoggerfilter);
             loadedType = loader.Load(String.Empty, AssemblyLoadInfo.Create(null, fileLoggerAssemblyLocation));
             Assert.NotNull(loadedType);
-            Assert.True(loadedType.Assembly.AssemblyLocation.Equals(fileLoggerAssemblyLocation, StringComparison.OrdinalIgnoreCase));
-            Assert.True(loadedType.Type.Equals(firstPublicType));
+            Assert.Equal(fileLoggerAssemblyLocation, loadedType.Assembly.AssemblyLocation);
+            Assert.Equal(firstPublicType, loadedType.Type);
         }
 
 

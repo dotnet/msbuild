@@ -360,7 +360,7 @@ namespace Microsoft.Build.BackEnd
 
                     // Note: In this case we do not need to log that we got the results from the cache because we are only using the cache 
                     // for filtering the targets for the result instead rather than using the cache as the location where this result came from.
-                    ScheduleResponse response = TrySatisfyRequestFromCache(request.Parent.AssignedNode, request.BuildRequest, skippedResultsAreOK: false);
+                    ScheduleResponse response = TrySatisfyRequestFromCache(request.Parent.AssignedNode, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
 
                     // response may be null if the result was never added to the cache. This can happen if the result has an exception in it
                     // or the results could not be satisfied because the initial or default targets have been skipped. If that is the case
@@ -403,7 +403,7 @@ namespace Microsoft.Build.BackEnd
                         // its configuration and set of targets are identical -- from MSBuild's perspective, it's the same.  So since 
                         // we're not going to attempt to re-execute it, if there are skipped targets in the result, that's fine. We just 
                         // need to know what the target results are so that we can log them. 
-                        ScheduleResponse response = TrySatisfyRequestFromCache(parentNode, unscheduledRequest.BuildRequest, skippedResultsAreOK: true);
+                        ScheduleResponse response = TrySatisfyRequestFromCache(parentNode, unscheduledRequest.BuildRequest, skippedResultsDoNotCauseCacheMiss: true);
 
                         // If we have a response we need to tell the loggers that we satisified that request from the cache.
                         if (response != null)
@@ -1565,7 +1565,7 @@ namespace Microsoft.Build.BackEnd
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
                 // comes back up as schedulable, but we prefer to send the results back immediately so this request can (potentially) continue uninterrupted.
-                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsAreOK: false);
+                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
                 if (null != response)
                 {
                     TraceScheduler("Request {0} (node request {1}) satisfied from the cache.", request.GlobalRequestId, request.NodeRequestId);
@@ -1582,8 +1582,10 @@ namespace Microsoft.Build.BackEnd
                         abortRequestBatch = true;
                     }
                 }
-                else
+                else if (CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(nodeForResults, request, responses, out var emitNonErrorLogs))
                 {
+                    emitNonErrorLogs(_componentHost.LoggingService);
+
                     // Ensure there is no affinity mismatch between this request and a previous request of the same configuration.
                     NodeAffinity requestAffinity = GetNodeAffinityForRequest(request);
                     NodeAffinity existingRequestAffinity = NodeAffinity.Any;
@@ -1695,7 +1697,7 @@ namespace Microsoft.Build.BackEnd
             int nodeForResults = (request.Parent != null) ? request.Parent.AssignedNode : InvalidNodeId;
 
             // Do we already have results?  If so, just return them.
-            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsAreOK: false);
+            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
             if (response != null)
             {
                 if (response.Action == ScheduleActionType.SubmissionComplete)
@@ -1727,6 +1729,10 @@ namespace Microsoft.Build.BackEnd
                         ResumeReadyRequestIfAny(response.NodeId, responses);
                     }
                 }
+            }
+            else
+            {
+                CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(nodeForResults, request.BuildRequest, responses, out _);
             }
         }
 
@@ -1769,16 +1775,108 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to get a result from the cache to satisfy the request, and returns the appropriate response if possible.
         /// </summary>
-        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsAreOK)
+        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss)
         {
             BuildRequestConfiguration config = _configCache[request.ConfigurationId];
-            ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, config.GetAfterTargetsForDefaultTargets(request), skippedResultsAreOK);
+            ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, config.GetAfterTargetsForDefaultTargets(request), skippedResultsDoNotCauseCacheMiss);
+
             if (resultsResponse.Type == ResultsCacheResponseType.Satisfied)
             {
                 return GetResponseForResult(nodeForResults, request, resultsResponse.Results);
             }
 
             return null;
+        }
+
+        /// <returns>True if caches misses are allowed, false otherwise</returns>
+        private bool CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(int nodeForResults, BuildRequest request, List<ScheduleResponse> responses, out Action<ILoggingService> emitNonErrorLogs)
+        {
+            emitNonErrorLogs = _ => { };
+
+            var isIsolatedBuild = _componentHost.BuildParameters.IsolateProjects;
+            var configCache = (IConfigCache) _componentHost.GetComponent(BuildComponentType.ConfigCache);
+
+            // do not check root requests as nothing depends on them
+            if (!isIsolatedBuild || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
+            {
+                if (isIsolatedBuild && request.SkipStaticGraphIsolationConstraints)
+                {
+                    // retrieving the configs is not quite free, so avoid computing them eagerly
+                    var configs = GetConfigurations();
+
+                    emitNonErrorLogs = ls => ls.LogComment(
+                            NewBuildEventContext(),
+                            MessageImportance.Normal,
+                            "SkippedConstraintsOnRequest",
+                            configs.parentConfig.ProjectFullPath,
+                            configs.requestConfig.ProjectFullPath);
+                }
+
+                return true;
+            }
+
+            var (requestConfig, parentConfig) = GetConfigurations();
+
+            // allow self references (project calling the msbuild task on itself, potentially with different global properties)
+            if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            var errorMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                "CacheMissesNotAllowedInIsolatedGraphBuilds",
+                parentConfig.ProjectFullPath,
+                requestConfig.ProjectFullPath,
+                request.Targets.Count == 0
+                    ? "default"
+                    : string.Join(";", request.Targets));
+
+            // Issue a failed build result to have the msbuild task marked as failed and thus stop the build
+            BuildResult result = new BuildResult(request, new InvalidOperationException(errorMessage));
+            result.SetOverallResult(false);
+
+            var response = GetResponseForResult(nodeForResults, request, result);
+            responses.Add(response);
+
+            // Log an error to have something displayed to the user and to avoid having a failed build with 0 errors
+            // todo Search if there's a way to have the error automagically logged in response to the failed build result
+            _componentHost.LoggingService.LogErrorFromText(
+                NewBuildEventContext(),
+                null,
+                null,
+                null,
+                new BuildEventFileInfo(requestConfig.ProjectFullPath),
+                errorMessage);
+
+            return false;
+
+            BuildEventContext NewBuildEventContext()
+            {
+                return new BuildEventContext(
+                    request.SubmissionId,
+                    1,
+                    BuildEventContext.InvalidProjectInstanceId,
+                    BuildEventContext.InvalidProjectContextId,
+                    BuildEventContext.InvalidTargetId,
+                    BuildEventContext.InvalidTaskId);
+            }
+
+            (BuildRequestConfiguration requestConfig, BuildRequestConfiguration parentConfig) GetConfigurations()
+            {
+                var buildRequestConfiguration = configCache[request.ConfigurationId];
+
+                // Need the parent request. It might be blocked or executing; check both.
+                var parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
+                                    ?? _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
+
+                ErrorUtilities.VerifyThrowInternalNull(parentRequest, nameof(parentRequest));
+                ErrorUtilities.VerifyThrow(
+                    configCache.HasConfiguration(parentRequest.BuildRequest.ConfigurationId),
+                    "All non root requests should have a parent with a loaded configuration");
+
+                var parentConfiguration = configCache[parentRequest.BuildRequest.ConfigurationId];
+                return (buildRequestConfiguration, parentConfiguration);
+            }
         }
 
         /// <summary>
@@ -1812,6 +1910,12 @@ namespace Microsoft.Build.BackEnd
             int nodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
             NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, nodeId, true);
             nodeContext.LogRequestHandledFromCache(request, configuration, result);
+
+            TraceScheduler(
+                "Request {0} (node request {1}) with targets ({2}) satisfied from cache",
+                request.GlobalRequestId,
+                request.NodeRequestId,
+                string.Join(";", request.Targets));
         }
 
         /// <summary>
@@ -2127,7 +2231,34 @@ namespace Microsoft.Build.BackEnd
                 accumulatedDuration += duration;
             }
 
-            string durationBar = new String('#', (int)(duration / 0.05));
+            // Limit the number of histogram bar segments. For long runs the number of segments can be counted in
+            // hundreds of thousands (for instance a build which took 8061.7s would generate a line 161,235 characters
+            // long) which is a bit excessive. The scales implemented below limit the generated line length to
+            // manageable proportions even for very long runs.
+            int durationElementCount = (int)(duration / 0.05);
+            int scale;
+            char barSegment;
+            if (durationElementCount <= 100)
+            {
+                barSegment = '.';
+                scale = 1;
+            }
+            else if (durationElementCount <= 1000)
+            {
+                barSegment = '+';
+                scale = 100;
+            }
+            else
+            {
+                barSegment = '#';
+                scale = 1000;
+            }
+
+            string durationBar = new string(barSegment, durationElementCount / scale);
+            if (scale > 1)
+            {
+                durationBar = $"{durationBar} (scale 1:{scale})";
+            }
             if (haveNonIdleNode)
             {
                 loggingService.LogComment(context, MessageImportance.Normal, "NodeUtilizationEntry", stringBuilder, duration, accumulatedDuration, durationBar);
@@ -2207,6 +2338,8 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
+                FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
                 StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
                 file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
                 file.WriteLine(format, stuff);
@@ -2224,6 +2357,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
+                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
                     using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
                     {
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
@@ -2231,7 +2365,18 @@ namespace Microsoft.Build.BackEnd
 
                         foreach (int nodeId in _availableNodes.Keys)
                         {
-                            file.WriteLine("Node {0} {1} ({2} assigned requests, {3} configurations)", nodeId, _schedulingData.IsNodeWorking(nodeId) ? String.Format(CultureInfo.InvariantCulture, "Active ({0} executing)", _schedulingData.GetExecutingRequestByNode(nodeId).BuildRequest.GlobalRequestId) : "Idle", _schedulingData.GetScheduledRequestsCountByNode(nodeId), _schedulingData.GetConfigurationsCountByNode(nodeId, false, null));
+                            file.WriteLine(
+                                "Node {0} {1} ({2} assigned requests, {3} configurations)",
+                                nodeId,
+                                _schedulingData.IsNodeWorking(nodeId)
+                                    ? string.Format(
+                                        CultureInfo.InvariantCulture,
+                                        "Active ({0} executing)",
+                                        _schedulingData.GetExecutingRequestByNode(nodeId)
+                                            .BuildRequest.GlobalRequestId)
+                                    : "Idle",
+                                _schedulingData.GetScheduledRequestsCountByNode(nodeId),
+                                _schedulingData.GetConfigurationsCountByNode(nodeId, false, null));
 
                             List<SchedulableRequest> scheduledRequestsByNode = new List<SchedulableRequest>(_schedulingData.GetScheduledRequestsByNode(nodeId));
 
@@ -2407,7 +2552,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void DumpRequestSpec(StreamWriter file, SchedulableRequest request, int indent, string prefix)
         {
-            file.WriteLine("{0}{1}{2}: [{3}] {4}{5} ({6}){7} ({8})", new String(' ', indent * 2), (prefix == null) ? "" : prefix, request.BuildRequest.GlobalRequestId, _schedulingData.GetAssignedNodeForRequestConfiguration(request.BuildRequest.ConfigurationId), _schedulingData.IsRequestScheduled(request) ? "RUNNING " : "", request.State, request.BuildRequest.ConfigurationId, _configCache[request.BuildRequest.ConfigurationId].ProjectFullPath, String.Join(", ", request.BuildRequest.Targets.ToArray()));
+            var buildRequest = request.BuildRequest;
+
+            file.WriteLine(
+                "{0}{1}{2}: [{3}] {4}{5} ({6}){7} ({8})",
+                new string(' ', indent * 2),
+                prefix ?? "",
+                buildRequest.GlobalRequestId,
+                _schedulingData.GetAssignedNodeForRequestConfiguration(buildRequest.ConfigurationId),
+                _schedulingData.IsRequestScheduled(request)
+                    ? "RUNNING "
+                    : "",
+                request.State,
+                buildRequest.ConfigurationId,
+                _configCache[buildRequest.ConfigurationId].ProjectFullPath,
+                string.Join(", ", buildRequest.Targets.ToArray()));
         }
 
         /// <summary>

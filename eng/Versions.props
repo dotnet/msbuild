@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+  <Import Project="$(DotNetRestoreSourcePropsPath)" Condition="'$(DotNetRestoreSourcePropsPath)' != ''" />
+  <PropertyGroup>
+    <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
+    <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
+        $(RestoreSources);
+        https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+        https://dotnet.myget.org/F/roslyn/api/v3/index.json;
+        https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
+        https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
+        https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
+    </RestoreSources>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VersionPrefix>16.3.0</VersionPrefix>
+    <AssemblyVersion>15.1.0.0</AssemblyVersion>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
+    <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
+    <SemanticVersioningV1>true</SemanticVersioningV1>
+  </PropertyGroup>
+  <!-- Repo Toolset Features -->
+  <PropertyGroup>
+    <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
+    <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
+    <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
+    <UsingToolVSSDK>true</UsingToolVSSDK>
+  </PropertyGroup>
+  <!-- Toolset Dependencies -->
+  <PropertyGroup>
+    <DotNetCliVersion>3.0.100-preview5-011568</DotNetCliVersion>
+  </PropertyGroup>
+  <!-- Product Dependencies -->
+  <PropertyGroup>
+    <SystemResourcesExtensionsVersion>4.6.0-preview7.19311.1</SystemResourcesExtensionsVersion>
+  </PropertyGroup>
+</Project>

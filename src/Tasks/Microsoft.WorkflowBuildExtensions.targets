@@ -24,4 +24,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
    <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets" Condition="Exists('$(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets')" />
 
+   <!--
+         This target in $(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets does bad
+         things to builds inside Visual Studio. Specifically, it generates files *only* when building from
+         within VS, for both real and design-time builds. This leads to all kinds of build problems.
+
+         In Dev16 we no longer need these files to exist on disk for Workflow Designer scenarios. We can't
+         modify $(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets because that would
+         break the Workflow Designer for older versions of VS. Instead, we effectively turn it off by
+         overriding it with a no-op implementation here.
+   -->
+   <Target Name="GenerateCompiledExpressionsTempFile" />
 </Project>

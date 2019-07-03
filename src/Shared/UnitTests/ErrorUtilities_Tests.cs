@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (InternalErrorException e)
             {
-                Assert.True(e.Message.Contains("msbuild rules")); // "exception message"
+                Assert.Contains("msbuild rules", e.Message); // "exception message"
                 return;
             }
 

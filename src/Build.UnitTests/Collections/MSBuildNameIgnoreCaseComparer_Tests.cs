@@ -22,16 +22,16 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void DefaultEquals()
         {
-            Assert.Equal(true, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "foo"));
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", " FOO"));
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOOA", "FOOB"));
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("AFOO", "BFOO"));
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "FOO "));
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("a", "b"));
-            Assert.Equal(true, MSBuildNameIgnoreCaseComparer.Default.Equals("", ""));
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
-            Assert.Equal(true, MSBuildNameIgnoreCaseComparer.Default.Equals((string)null, (string)null));
+            Assert.True(MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "foo"));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", " FOO"));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals("FOOA", "FOOB"));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals("AFOO", "BFOO"));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "FOO "));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals("a", "b"));
+            Assert.True(MSBuildNameIgnoreCaseComparer.Default.Equals("", ""));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
+            Assert.True(MSBuildNameIgnoreCaseComparer.Default.Equals((string)null, (string)null));
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void Null1()
         {
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void Null2()
         {
-            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
+            Assert.False(MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void DefaultGetHashcode()
         {
-            Assert.Equal(true, 0 == MSBuildNameIgnoreCaseComparer.Default.GetHashCode((string)null));
+            Assert.True(0 == MSBuildNameIgnoreCaseComparer.Default.GetHashCode((string)null));
 
             MSBuildNameIgnoreCaseComparer.Default.GetHashCode(""); // doesn't throw            
             Assert.Equal(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("aBc"), MSBuildNameIgnoreCaseComparer.Default.GetHashCode("AbC"));
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             comparer.GetHashCode(""); // does not crash
 
-            Assert.Equal(true, 0 == comparer.GetHashCode((string)null));
+            Assert.True(0 == comparer.GetHashCode((string)null));
             Assert.Equal(comparer.GetHashCode("aBc"), comparer.GetHashCode("AbC"));
             Assert.Equal(comparer.GetHashCode("xyz", 0, 1), comparer.GetHashCode("x"));
         }

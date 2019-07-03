@@ -88,9 +88,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestTranslation()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(1, 2, 3);
-            Assert.Equal(response.Type, NodePacketType.BuildRequestConfigurationResponse);
+            Assert.Equal(NodePacketType.BuildRequestConfigurationResponse, response.Type);
 
-            ((INodePacketTranslatable)response).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)response).Translate(TranslationHelpers.GetWriteTranslator());
 
             INodePacket deserializedPacket = BuildRequestConfigurationResponse.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
             BuildRequestConfigurationResponse deserializedResponse = deserializedPacket as BuildRequestConfigurationResponse;

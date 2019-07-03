@@ -459,7 +459,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.IsAssignableFrom(typeof(TaskHostTask), createdTask);
+                Assert.IsType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -491,7 +491,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.IsAssignableFrom(typeof(TaskHostTask), createdTask);
+                Assert.IsType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -527,7 +527,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.IsAssignableFrom(typeof(TaskHostTask), createdTask);
+                Assert.IsType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -556,7 +556,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.IsAssignableFrom(typeof(TaskHostTask), createdTask);
+                Assert.IsType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -590,7 +590,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.IsAssignableFrom(typeof(TaskHostTask), createdTask);
+                Assert.IsType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -624,7 +624,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.IsAssignableFrom(typeof(TaskHostTask), createdTask);
+                Assert.IsType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -659,7 +659,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.False(createdTask is TaskHostTask);
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -682,7 +682,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.IsAssignableFrom(typeof(TaskHostTask), createdTask);
+                Assert.IsType<TaskHostTask>(createdTask);
             }
             finally
             {

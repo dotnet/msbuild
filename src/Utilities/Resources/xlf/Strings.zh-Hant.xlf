@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
     <body>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
@@ -66,6 +66,11 @@
         <source>MSB6004: The specified task executable location "{0}" is invalid.</source>
         <target state="translated">MSB6004: 指定的工作可執行檔位置 "{0}" 無效。</target>
         <note>{StrBegin="MSB6004: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.ValidateParametersFailed">
+        <source>MSB6011: Invalid parameters passed to the {0} task.</source>
+        <target state="translated">MSB6011: 傳遞至 {0} 工作的參數無效。</target>
+        <note>{StrBegin="MSB6011: "}</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>

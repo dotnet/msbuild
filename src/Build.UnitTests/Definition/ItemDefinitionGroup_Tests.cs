@@ -1073,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     </Project>
                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
 
-            Assert.True(ml.FullLog.Contains("In ItemDefinitionGroup task."));
+            Assert.Contains("In ItemDefinitionGroup task.", ml.FullLog);
         }
 #endif
 

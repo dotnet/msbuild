@@ -272,7 +272,7 @@ namespace Microsoft.Build.UnitTests
 
             MockLogger logger = new MockLogger();
             Project proj = ObjectModelHelpers.CreateInMemoryProject(fullProjectFile, logger);
-            Assert.Equal(false, proj.Build(logger));
+            Assert.False(proj.Build(logger));
 
             Assert.Equal(3, logger.ExternalProjectStartedEvents.Count);
             Assert.Equal(3, logger.ExternalProjectFinishedEvents.Count);
@@ -285,13 +285,13 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("/WebSite2", logger.ExternalProjectFinishedEvents[1].ProjectFile);
             Assert.Equal("/LM/W3SVC/1/Root/MyApp", logger.ExternalProjectFinishedEvents[2].ProjectFile);
 
-            Assert.Equal(null, logger.ExternalProjectStartedEvents[0].TargetNames);
+            Assert.Null(logger.ExternalProjectStartedEvents[0].TargetNames);
             Assert.Equal("Clean", logger.ExternalProjectStartedEvents[1].TargetNames);
-            Assert.Equal(null, logger.ExternalProjectStartedEvents[2].TargetNames);
+            Assert.Null(logger.ExternalProjectStartedEvents[2].TargetNames);
 
-            Assert.Equal(false, logger.ExternalProjectFinishedEvents[0].Succeeded);
-            Assert.Equal(false, logger.ExternalProjectFinishedEvents[1].Succeeded);
-            Assert.Equal(false, logger.ExternalProjectFinishedEvents[2].Succeeded);
+            Assert.False(logger.ExternalProjectFinishedEvents[0].Succeeded);
+            Assert.False(logger.ExternalProjectFinishedEvents[1].Succeeded);
+            Assert.False(logger.ExternalProjectFinishedEvents[2].Succeeded);
         }
     }
 }

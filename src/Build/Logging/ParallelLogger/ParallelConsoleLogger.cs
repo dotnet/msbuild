@@ -15,6 +15,7 @@ using Microsoft.Build.Shared;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
+using Microsoft.Build.Exceptions;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -727,7 +728,17 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 foreach (DictionaryEntry metadatum in metadata)
                 {
-                    WriteMessageAligned(new String(' ', 4 * tabWidth) + metadatum.Key + " = " + item.GetMetadata(metadatum.Key as string), false);
+                    string valueOrError;
+                    try
+                    {
+                        valueOrError = item.GetMetadata(metadatum.Key as string);
+                    }
+                    catch (InvalidProjectFileException e)
+                    {
+                        valueOrError = e.Message;
+                    }
+
+                    WriteMessageAligned($"{new string(' ', 4 * tabWidth)}{metadatum.Key} = {valueOrError}", false);
                 }
             }
             resetColor();

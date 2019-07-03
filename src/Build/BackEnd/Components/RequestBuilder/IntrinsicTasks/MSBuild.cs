@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -148,9 +149,7 @@ namespace Microsoft.Build.BackEnd
         public bool UnloadProjectsOnCompletion { get; set; } = false;
 
         /// <summary>
-        /// If true the cached result will be returned if present and a if MSBuild
-        /// task is run its result will be cached in a scope (ProjectFileName, GlobalProperties)[TargetNames]
-        /// as a list of build items
+        /// Deprecated. Does nothing.
         /// </summary>
         public bool UseResultsCache { get; set; } = true;
 
@@ -243,6 +242,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Parse the global properties into a hashtable.
+            // The behavior of parsing global properties to define and undefine (below) combined with the behavior in Microsoft.Common.CurrentVersion.targets should match the logic in ProjectGraph.
             if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", Properties, out Dictionary<string, string> propertiesTable))
             {
                 return false;
@@ -253,7 +253,7 @@ namespace Microsoft.Build.BackEnd
             if (!String.IsNullOrEmpty(RemoveProperties))
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties");
-                undefinePropertiesArray = RemoveProperties.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                undefinePropertiesArray = RemoveProperties.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string property in undefinePropertiesArray)
                 {
                     Log.LogMessageFromText(String.Format(CultureInfo.InvariantCulture, "  {0}", property), MessageImportance.Low);
@@ -347,7 +347,6 @@ namespace Microsoft.Build.BackEnd
                                                 BuildEngine3,
                                                 Log,
                                                 _targetOutputs,
-                                                UseResultsCache,
                                                 UnloadProjectsOnCompletion,
                                                 ToolsVersion,
                                                 SkipNonexistentTargets
@@ -418,7 +417,6 @@ namespace Microsoft.Build.BackEnd
                 BuildEngine3,
                 Log,
                 _targetOutputs,
-                UseResultsCache,
                 UnloadProjectsOnCompletion,
                 ToolsVersion,
                 SkipNonexistentTargets
@@ -514,7 +512,6 @@ namespace Microsoft.Build.BackEnd
             IBuildEngine3 buildEngine,
             TaskLoggingHelper log,
             List<ITaskItem> targetOutputs,
-            bool useResultsCache,
             bool unloadProjectsOnCompletion,
             string toolsVersion,
             bool skipNonexistentTargets)
@@ -545,12 +542,16 @@ namespace Microsoft.Build.BackEnd
 
                     // If the user specified a different set of global properties for this project, then
                     // parse the string containing the properties
-                    if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
+                    if (!String.IsNullOrEmpty(projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName)))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
-                              out Dictionary<string, string> preProjectPropertiesTable)
-                           )
+                            (
+                                log,
+                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]),
+                                ItemMetadataNames.PropertiesMetadataName,
+                                projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
+                                out Dictionary<string, string> preProjectPropertiesTable)
+                            )
                         {
                             return false;
                         }
@@ -565,10 +566,10 @@ namespace Microsoft.Build.BackEnd
 
                     // If the user wanted to undefine specific global properties for this project, parse
                     // that string and remove them now.
-                    string projectUndefineProperties = projects[i].GetMetadata("UndefineProperties");
+                    string projectUndefineProperties = projects[i].GetMetadata(ItemMetadataNames.UndefinePropertiesMetadataName);
                     if (!String.IsNullOrEmpty(projectUndefineProperties))
                     {
-                        string[] propertiesToUndefine = projectUndefineProperties.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] propertiesToUndefine = projectUndefineProperties.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
                         if (undefinePropertiesPerProject[i] == null)
                         {
                             undefinePropertiesPerProject[i] = new List<string>(propertiesToUndefine.Length);
@@ -587,11 +588,15 @@ namespace Microsoft.Build.BackEnd
 
                     // If the user specified a different set of global properties for this project, then
                     // parse the string containing the properties
-                    if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
+                    if (!String.IsNullOrEmpty(projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName)))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
-                              out Dictionary<string, string> additionalProjectPropertiesTable)
+                            (
+                                log,
+                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]),
+                                ItemMetadataNames.AdditionalPropertiesMetadataName,
+                                projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
+                                out Dictionary<string, string> additionalProjectPropertiesTable)
                            )
                         {
                             return false;

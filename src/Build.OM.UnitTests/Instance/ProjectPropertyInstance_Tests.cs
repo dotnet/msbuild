@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void ImmutableGetterFalse()
         {
             ProjectPropertyInstance property = GetPropertyInstance();
-            Assert.Equal(false, property.IsImmutable);
+            Assert.False(property.IsImmutable);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             project.SetProperty("p", "v1");
             var snapshot = project.CreateProjectInstance(ProjectInstanceSettings.Immutable);
             var property = snapshot.GetProperty("p");
-            Assert.Equal(true, property.IsImmutable);
+            Assert.True(property.IsImmutable);
         }
 
         /// <summary>

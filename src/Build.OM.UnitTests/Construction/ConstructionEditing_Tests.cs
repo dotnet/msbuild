@@ -40,13 +40,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   <Target Name=""t"" />
 </Project>");
 
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
             Assert.Equal(1, project.Count);
             Assert.Equal(0, target.Count);
             Assert.Equal(1, Helpers.Count(project.Children));
             Assert.Equal(0, Helpers.Count(target.Children));
-            Assert.Equal(null, project.Parent);
+            Assert.Null(project.Parent);
             Assert.Equal(project, target.Parent);
         }
 
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create();
             Helpers.ClearDirtyFlag(project);
             ProjectTargetElement target = project.CreateTargetElement("t");
-            Assert.Equal(false, project.HasUnsavedChanges);
+            Assert.False(project.HasUnsavedChanges);
 
             project.AppendChild(target);
 
@@ -398,7 +398,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   <Target Name=""t"" Inputs=""i"" Outputs=""o"" DependsOnTargets=""d"" Condition=""c"" />
 </Project>");
 
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
         }
 
@@ -440,12 +440,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   <ItemGroup />
 </Project>");
 
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
 
             Assert.Equal(1, project.Count);
             var children = Helpers.MakeList(project.Children);
-            Assert.Equal(1, children.Count);
+            Assert.Single(children);
             Assert.Equal(itemGroup, children[0]);
         }
 
@@ -572,7 +572,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Assert.Equal(1, project.Count);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
         }
 
@@ -593,7 +593,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Assert.Equal(1, project.Count);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
         }
 
@@ -629,7 +629,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create();
 
             ProjectTargetElement target = project.AddTarget("t");
-            ProjectTaskElement task = target.AddTask("tt");
+            target.AddTask("tt");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -638,7 +638,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </Target>
 </Project>");
 
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
         }
 
@@ -1204,7 +1204,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" />");
 
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
             Assert.Equal(0, Helpers.Count(project.Children));
         }
@@ -1375,7 +1375,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Assert.Equal(1, project.Count);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
             Assert.Equal(1, Helpers.Count(project.Children));
             Assert.Equal(target1, Helpers.GetFirst(project.Children));
@@ -1399,7 +1399,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Assert.Equal(1, project.Count);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
             Assert.Equal(1, Helpers.Count(project.Children));
             Assert.Equal(target2, Helpers.GetFirst(project.Children));
@@ -1418,8 +1418,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             project.RemoveAllChildren();
 
             Assert.Equal(0, project.Count);
-            Assert.Equal(null, target1.Parent);
-            Assert.Equal(null, target2.Parent);
+            Assert.Null(target1.Parent);
+            Assert.Null(target2.Parent);
         }
 
         /// <summary>
@@ -1456,7 +1456,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Assert.Equal(2, project.Count);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
             Helpers.VerifyAssertProjectContent(expected, project);
             Assert.Equal(2, Helpers.Count(project.Children));
             Assert.Equal(target2, Helpers.GetFirst(project.Children));
@@ -1470,7 +1470,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             ProjectTargetElement target1 = project.AddTarget("t1");
-            ProjectTargetElement target2 = project.AddTarget("t2");
+            project.AddTarget("t2");
 
             project.RemoveChild(target1);
             project.PrependChild(target1);
@@ -1493,7 +1493,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             ProjectTargetElement target1 = project.AddTarget("t1");
-            ProjectTargetElement target2 = project.AddTarget("t2");
+            project.AddTarget("t2");
 
             project.RemoveAllChildren();
             project.AppendChild(target1);
@@ -1713,7 +1713,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddItem_EmptyProject()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            ProjectItemElement item = project.AddItem("i", "i1");
+            project.AddItem("i", "i1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1734,7 +1734,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             project.AddItemGroup();
-            ProjectItemElement item = project.AddItem("i", "i1");
+            project.AddItem("i", "i1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1756,7 +1756,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create();
             ProjectItemGroupElement itemGroup = project.AddItemGroup();
             itemGroup.Condition = "c";
-            ProjectItemElement item = project.AddItem("i", "i1");
+            project.AddItem("i", "i1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1780,7 +1780,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemGroupElement itemGroup = project.AddItemGroup();
             itemGroup.AddItem("h", "h1");
             project.AddItemGroup();
-            ProjectItemElement item = project.AddItem("i", "i1");
+            project.AddItem("i", "i1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2172,7 +2172,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             project.AddPropertyGroup();
-            ProjectPropertyElement property = project.AddProperty("p", "v1");
+            project.AddProperty("p", "v1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2195,7 +2195,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement propertyGroup = project.AddPropertyGroup();
             propertyGroup.Condition = "c";
 
-            ProjectPropertyElement property = project.AddProperty("p", "v1");
+            project.AddProperty("p", "v1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2228,7 +2228,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.Equal(true, Object.ReferenceEquals(property1, property2));
+            Assert.True(Object.ReferenceEquals(property1, property2));
         }
 
         /// <summary>
@@ -2242,7 +2242,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyElement property1 = project.AddProperty("p", "v1");
             property1.Condition = "c";
 
-            ProjectPropertyElement property2 = project.AddProperty("p", "v2");
+            project.AddProperty("p", "v2");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2266,7 +2266,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyElement property1 = project.AddProperty("p", "v1");
             property1.Parent.Condition = "c";
 
-            ProjectPropertyElement property2 = project.AddProperty("p", "v2");
+            project.AddProperty("p", "v2");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2393,7 +2393,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             project.ReevaluateIfNecessary();
             metadatum = Helpers.GetFirst(project.Items).GetMetadata("m");
 
-            Assert.Equal(null, metadatum);
+            Assert.Null(metadatum);
         }
 
         /// <summary>
@@ -2534,9 +2534,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Helpers.AssertListsValueEqual(allChildren, new List<ProjectElement> { item1, item2 });
             Assert.Equal(1, group1.Count);
-            Assert.Equal(true, item3.PreviousSibling == null && item3.NextSibling == null);
-            Assert.Equal(true, item2.PreviousSibling == item1 && item1.NextSibling == item2);
-            Assert.Equal(true, item1.PreviousSibling == null && item2.NextSibling == null);
+            Assert.True(item3.PreviousSibling == null && item3.NextSibling == null);
+            Assert.True(item2.PreviousSibling == item1 && item1.NextSibling == item2);
+            Assert.True(item1.PreviousSibling == null && item2.NextSibling == null);
         }
 
         /// <summary>
@@ -3218,7 +3218,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 var testProject = env.CreateTestProjectWithFiles(@"
                     <Project Sdk='MSBuildUnitTestSdk'>
-                    </Project>", null);
+                    </Project>");
                 env.SetEnvironmentVariable("MSBuildSDKsPath", testSdkRoot);
 
                 string content = @"
@@ -3229,7 +3229,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 var p = new Project(testProject.ProjectFile);
 
-                var addedProperty = p.Xml.AddProperty("propName", "propValue");
+                p.Xml.AddProperty("propName", "propValue");
 
                 var updated = Path.Combine(testProject.TestRoot, "updated.proj");
 
@@ -3237,32 +3237,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 var updatedContents = File.ReadAllText(updated);
 
-                Assert.False(updatedContents.Contains("<Import"));
+                Assert.DoesNotContain("<Import", updatedContents);
             }
-        }
-
-        public void UpdateSdkImportProperty()
-        {
-            ProjectRootElement project = ProjectRootElement.Create();
-            ProjectImportElement import = project.AddImport("file");
-
-            // Add properties and assert that the SdkReference is updated accordingly.
-            import.Sdk = "Name";
-            AssertSdkEquals(import, "Name", null, null);
-
-            import.Version = "Version";
-            AssertSdkEquals(import, "Name", "Version", null);
-
-            import.MinimumVersion = "Min";
-            AssertSdkEquals(import, "Name", "Version", "Min");
-
-            import.MinimumVersion = null;
-            AssertSdkEquals(import, "Name", "Version", null);
-
-            import.Version = null;
-            AssertSdkEquals(import, "Name", "Version", null);
-
-            Assert.Throws<ArgumentException>(() => import.Sdk = null);
         }
 
         private static string AdjustSpacesForItem(string expectedItem)
@@ -3272,7 +3248,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             var itemSpace = "    ";
             var metadataSpace = itemSpace + "  ";
 
-            var splits = expectedItem.Split('\n');
+            var splits = expectedItem.Split(MSBuildConstants.NewlineChar);
             splits = splits.Select(s => s.Trim()).ToArray();
 
             Assert.True(splits.Length >= 1);
@@ -3297,17 +3273,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             expectedItem = sb.ToString();
             return expectedItem;
-        }
-
-        private void AssertSdkEquals(ProjectImportElement importElement, string name, string version, string minimumVersion)
-        {
-            // Use reflection to verify the value. The property is not public and we do not have InternalsVisibleTo (by design).
-            PropertyInfo pi = importElement.GetType().GetProperty("ParsedSdkReference");
-
-            var expected = new SdkReference(name, version, minimumVersion);
-            var actual = (SdkReference) pi.GetValue(importElement);
-
-            Assert.Equal(expected, actual);
         }
     }
 }

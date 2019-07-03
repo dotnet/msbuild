@@ -66,12 +66,6 @@ namespace Microsoft.Build.UnitTests
                 _simulatedConsole.Append(s);
             }
 
-            internal void WriteLine(string s)
-            {
-                Write(s);
-                Write(Environment.NewLine);
-            }
-
             internal void SetColor(ConsoleColor c)
             {
                 switch (c)
@@ -115,12 +109,6 @@ namespace Microsoft.Build.UnitTests
 
         private sealed class MyCustomBuildEventArgs : CustomBuildEventArgs
         {
-            internal MyCustomBuildEventArgs()
-                : base()
-            {
-                // do nothing
-            }
-
             internal MyCustomBuildEventArgs(string message)
                 : base(message, null, null)
             {
@@ -194,6 +182,30 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             sc.ToString().ShouldContain("XXX:");
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Minimal path validation in Core allows expanding path containing quoted slashes.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "Minimal path validation in Mono allows expanding path containing quoted slashes.")]
+        public void TestItemsWithUnexpandableMetadata()
+        {
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            ObjectModelHelpers.BuildProjectExpectSuccess(@"
+<Project>
+<ItemDefinitionGroup>
+  <F>
+   <MetadataFileName>a\b\%(Filename).c</MetadataFileName>
+  </F>
+ </ItemDefinitionGroup>
+ <ItemGroup>
+  <F Include=""-in &quot;x\y\z&quot;"" />
+ </ItemGroup>
+ <Target Name=""X"" />
+</Project>", logger);
+
+            sc.ToString().ShouldContain("\"a\\b\\%(Filename).c\"");
+
         }
 
         /// <summary>
@@ -496,18 +508,14 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [InlineData("error", "red", false, MessageImportance.Normal)]
-        [InlineData("error", "red", true, MessageImportance.Normal)]
-        [InlineData("warning", "yellow", false, MessageImportance.Normal)]
-        [InlineData("warning", "yellow", true, MessageImportance.Normal)]
-        [InlineData("message", "darkgray", false, MessageImportance.High)]
-        [InlineData("message", "darkgray", true, MessageImportance.High)]
-        [InlineData("message", "darkgray", false, MessageImportance.Normal)]
-        [InlineData("message", "darkgray", true, MessageImportance.Normal)]
-        [InlineData("message", "darkgray", false, MessageImportance.Low)]
-        [InlineData("message", "darkgray", true, MessageImportance.Low)]
+        [InlineData("error", "red", false)]
+        [InlineData("error", "red", true)]
+        [InlineData("warning", "yellow", false)]
+        [InlineData("warning", "yellow", true)]
+        [InlineData("message", "darkgray", false)]
+        [InlineData("message", "darkgray", true)]
         [Theory]
-        public void ColorTest(string expectedMessageType, string expectedColor, bool parallel, MessageImportance messageImportance)
+        public void ColorTest(string expectedMessageType, string expectedColor, bool parallel)
         {
             const string subcategory = "VBC";
             const string code = "31415";

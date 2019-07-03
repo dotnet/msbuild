@@ -244,13 +244,6 @@ namespace Microsoft.Build.Execution
         {
             if (_propertyInfoCache == null)
             {
-                _propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
-
-                // Use a HybridDictionary because these are usually very small
-                _namesOfPropertiesWithRequiredAttribute = new HybridDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                _namesOfPropertiesWithOutputAttribute = new HybridDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                _namesOfPropertiesWithAmbiguousMatches = new HybridDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
                 bool taskTypeImplementsIGeneratedTask = typeof(IGeneratedTask).IsAssignableFrom(_taskFactory.TaskType);
                 TaskPropertyInfo[] propertyInfos = _taskFactory.GetTaskParameters();
 
@@ -267,6 +260,11 @@ namespace Microsoft.Build.Execution
 
                     try
                     {
+                        if (_propertyInfoCache == null)
+                        {
+                            _propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
+                        }
+
                         _propertyInfoCache.Add(propertyInfo.Name, propertyInfo);
                     }
                     catch (ArgumentException)
@@ -276,27 +274,42 @@ namespace Microsoft.Build.Execution
                         // that wouldn't have been thrown unless and until the project actually tried to set this ambiguous parameter.
                         // So rather than fail here, we store a list of ambiguous names and throw later, when one of them
                         // is requested.
+                        if (_namesOfPropertiesWithAmbiguousMatches == null)
+                        {
+                            _namesOfPropertiesWithAmbiguousMatches = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        }
+
                         _namesOfPropertiesWithAmbiguousMatches[propertyInfo.Name] = String.Empty;
                     }
 
                     if (propertyInfos[i].Required)
                     {
+                        if (_namesOfPropertiesWithRequiredAttribute == null)
+                        {
+                            _namesOfPropertiesWithRequiredAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        }
+
                         // we have a require attribute defined, keep a record of that
                         _namesOfPropertiesWithRequiredAttribute[propertyInfo.Name] = String.Empty;
                     }
 
                     if (propertyInfos[i].Output)
                     {
+                        if (_namesOfPropertiesWithOutputAttribute == null)
+                        {
+                            _namesOfPropertiesWithOutputAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        }
+
                         // we have a output attribute defined, keep a record of that
                         _namesOfPropertiesWithOutputAttribute[propertyInfo.Name] = String.Empty;
                     }
                 }
 
-                // Toss the dictionaries if we can as often they are empty (at least the last three are)
-                _propertyInfoCache = (_propertyInfoCache.Count == 0) ? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance : _propertyInfoCache;
-                _namesOfPropertiesWithRequiredAttribute = (_namesOfPropertiesWithRequiredAttribute.Count == 0) ? ReadOnlyEmptyDictionary<string, string>.Instance : _namesOfPropertiesWithRequiredAttribute;
-                _namesOfPropertiesWithOutputAttribute = (_namesOfPropertiesWithOutputAttribute.Count == 0) ? ReadOnlyEmptyDictionary<string, string>.Instance : _namesOfPropertiesWithOutputAttribute;
-                _namesOfPropertiesWithAmbiguousMatches = (_namesOfPropertiesWithAmbiguousMatches.Count == 0) ? ReadOnlyEmptyDictionary<string, string>.Instance : _namesOfPropertiesWithAmbiguousMatches;
+                _propertyInfoCache = _propertyInfoCache ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
+
+                _namesOfPropertiesWithRequiredAttribute = _namesOfPropertiesWithRequiredAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithOutputAttribute = _namesOfPropertiesWithOutputAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithAmbiguousMatches = _namesOfPropertiesWithAmbiguousMatches ?? ReadOnlyEmptyDictionary<string, string>.Instance;
             }
         }
         #endregion

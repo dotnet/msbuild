@@ -6,6 +6,8 @@
 
     <!-- Don't regulate package versions for samples -->
     <EnableCentralPackageVersions>false</EnableCentralPackageVersions>
+
+    <IsShipping>false</IsShipping>
   </PropertyGroup>
 
   <!-- Import parent props -->

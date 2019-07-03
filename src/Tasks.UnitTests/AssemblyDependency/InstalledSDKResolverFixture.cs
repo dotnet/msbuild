@@ -3,6 +3,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -11,6 +12,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class InstalledSDKResolverFixture : ResolveAssemblyReferenceTestFixture
     {
+        public InstalledSDKResolverFixture(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Verify that we do not find the winmd file even if it on the search path if the sdkname does not match something passed into the ResolvedSDKs property.
         /// </summary>
@@ -18,7 +23,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void SDkNameNotInResolvedSDKListButOnSearchPath()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem taskItem = new TaskItem(@"SDKWinMD");
             taskItem.SetMetadata("SDKName", "NotInstalled, Version=1.0");
 
@@ -33,7 +38,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(0, t.ResolvedFiles.Length);
+            Assert.Empty(t.ResolvedFiles);
 
             Assert.Equal(0, engine.Errors);
             Assert.Equal(1, engine.Warnings);
@@ -46,21 +51,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void SDkNameMatchInRADirectory()
         {
-            ResolveSDKFromRefereneAssemblyLocation("DebugX86SDKWinMD", @"C:\FakeSDK\References\Debug\X86\DebugX86SDKWinMD.Winmd");
-            ResolveSDKFromRefereneAssemblyLocation("DebugNeutralSDKWinMD", @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKWinMD.Winmd");
-            ResolveSDKFromRefereneAssemblyLocation("x86SDKWinMD", @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKWinMD.Winmd");
-            ResolveSDKFromRefereneAssemblyLocation("NeutralSDKWinMD", @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKWinMD.Winmd");
-            ResolveSDKFromRefereneAssemblyLocation("SDKReference", @"C:\FakeSDK\References\Debug\X86\SDKReference.dll");
-            ResolveSDKFromRefereneAssemblyLocation("DebugX86SDKRA", @"C:\FakeSDK\References\Debug\X86\DebugX86SDKRA.dll");
-            ResolveSDKFromRefereneAssemblyLocation("DebugNeutralSDKRA", @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKRA.dll");
-            ResolveSDKFromRefereneAssemblyLocation("x86SDKRA", @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKRA.dll");
-            ResolveSDKFromRefereneAssemblyLocation("NeutralSDKRA", @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKRA.dll");
+            ResolveSDKFromRefereneAssemblyLocation("DebugX86SDKWinMD", @"C:\FakeSDK\References\Debug\X86\DebugX86SDKWinMD.Winmd", _output);
+            ResolveSDKFromRefereneAssemblyLocation("DebugNeutralSDKWinMD", @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKWinMD.Winmd", _output);
+            ResolveSDKFromRefereneAssemblyLocation("x86SDKWinMD", @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKWinMD.Winmd", _output);
+            ResolveSDKFromRefereneAssemblyLocation("NeutralSDKWinMD", @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKWinMD.Winmd", _output);
+            ResolveSDKFromRefereneAssemblyLocation("SDKReference", @"C:\FakeSDK\References\Debug\X86\SDKReference.dll", _output);
+            ResolveSDKFromRefereneAssemblyLocation("DebugX86SDKRA", @"C:\FakeSDK\References\Debug\X86\DebugX86SDKRA.dll", _output);
+            ResolveSDKFromRefereneAssemblyLocation("DebugNeutralSDKRA", @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKRA.dll", _output);
+            ResolveSDKFromRefereneAssemblyLocation("x86SDKRA", @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKRA.dll", _output);
+            ResolveSDKFromRefereneAssemblyLocation("NeutralSDKRA", @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKRA.dll", _output);
         }
 
-        private static void ResolveSDKFromRefereneAssemblyLocation(string referenceName, string expectedPath)
+        private static void ResolveSDKFromRefereneAssemblyLocation(string referenceName, string expectedPath, ITestOutputHelper output)
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(output);
             TaskItem taskItem = new TaskItem(referenceName);
             taskItem.SetMetadata("SDKName", "FakeSDK, Version=1.0");
 
@@ -81,10 +86,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(expectedPath, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(expectedPath, t.ResolvedFiles[0].ItemSpec, true);
         }
     }
 }

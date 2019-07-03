@@ -469,10 +469,10 @@ namespace Microsoft.Build.UnitTests.Logging
                 msbuildProject.Build(mockLogger);
 
                 List<BuildErrorEventArgs> errors = mockLogger.Errors;
-                Assert.Equal(1, errors.Count);
+                Assert.Single(errors);
                 BuildErrorEventArgs error = errors[0];
-                Assert.True(String.Equals(error.File, targetsFile));
-                Assert.True(String.Equals(error.ProjectFile, projectFile));
+                Assert.Equal(targetsFile, error.File);
+                Assert.Equal(projectFile, error.ProjectFile);
             }
             finally
             {
@@ -1131,7 +1131,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     properties: new Dictionary<string, string>());;
             });
 
-            Assert.True(exception.Message.Contains("eventName is null"));
+            Assert.Contains("eventName is null", exception.Message);
         }
 
         [Fact]
@@ -1278,7 +1278,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (InternalErrorException ex)
             {
-                Assert.True(ex.Message.Contains("ContextID " + s_buildEventContext.ProjectContextId));
+                Assert.Contains("ContextID " + s_buildEventContext.ProjectContextId, ex.Message);
             }
             finally
             {

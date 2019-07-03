@@ -51,7 +51,7 @@ namespace Microsoft.Build.Construction
         private const string EmptyProjectFileContent = "{0}<Project{1}{2}>\r\n</Project>";
         private const string EmptyProjectFileXmlDeclaration = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
         private const string EmptyProjectFileToolsVersion = " ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\"";
-        private const string EmptyProjectFileXmlNamespace = " xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\"";
+        internal const string EmptyProjectFileXmlNamespace = " xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\"";
 
         /// <summary>
         /// The singleton delegate that loads projects into the ProjectRootElement
@@ -1834,7 +1834,7 @@ namespace Microsoft.Build.Construction
 
         private static IEnumerable<SdkReference> ParseSdks(string sdks, IElementLocation sdkLocation)
         {
-            foreach (string sdk in sdks.Split(';').Select(i => i.Trim()))
+            foreach (string sdk in sdks.Split(MSBuildConstants.SemicolonChar).Select(i => i.Trim()))
             {
                 if (!SdkReference.TryParse(sdk, out SdkReference sdkReference))
                 {

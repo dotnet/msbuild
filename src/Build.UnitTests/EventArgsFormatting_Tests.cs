@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
         public void NullMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
-            string s = EventArgsFormatting.FormatEventMessage("error", "CS",
+            EventArgsFormatting.FormatEventMessage("error", "CS",
                       null, "312", "source.cs", 233, 236, 4, 8, 0);
             // No exception was thrown
 

@@ -7,6 +7,7 @@ using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnif
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -15,6 +16,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class Perf : ResolveAssemblyReferenceTestFixture
     {
+        public Perf(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Theory]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "mono-windows-failing")]
@@ -27,7 +32,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing Perf.AutoUnifyUsesMinimumIO() test");
 
-            StronglyNamedDependencyAutoUnify t = new StronglyNamedDependencyAutoUnify();
+            StronglyNamedDependencyAutoUnify t = new StronglyNamedDependencyAutoUnify(_output);
 
             try
             {
@@ -53,7 +58,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 StartIOMonitoring();
 
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
 
                 ITaskItem[] assemblyNames =
                 {
@@ -94,7 +99,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 StartIOMonitoring();
 
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
 
                 ITaskItem[] assemblyNames =
                 {

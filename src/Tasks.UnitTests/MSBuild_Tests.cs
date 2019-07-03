@@ -14,13 +14,17 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     sealed public class MSBuildTask_Tests : IDisposable
     {
-        public MSBuildTask_Tests()
+        private readonly ITestOutputHelper _testOutput;
+
+        public MSBuildTask_Tests(ITestOutputHelper testOutput)
         {
+            _testOutput = testOutput;
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
@@ -34,6 +38,7 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
+        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -70,13 +75,14 @@ namespace Microsoft.Build.UnitTests
                 projectFile1 += Path.Combine(tempPathNoRoot, fileName);
                 try
                 {
-                    MSBuild msbuildTask = new MSBuild();
-                    msbuildTask.BuildEngine = new MockEngine();
+                    MSBuild msbuildTask = new MSBuild
+                    {
+                        BuildEngine = new MockEngine(_testOutput),
 
-                    msbuildTask.Projects = new ITaskItem[] { new TaskItem(projectFile1) };
+                        Projects = new ITaskItem[] { new TaskItem(projectFile1) }
+                    };
 
-                    bool success = msbuildTask.Execute();
-                    Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                    msbuildTask.Execute().ShouldBeTrue("Build failed.  See 'Standard Out' tab for details.");
                 }
                 finally
                 {
@@ -185,7 +191,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj");
-            Assert.True(logger.FullLog.Contains("MSB3202")); // project file not found
+            Assert.Contains("MSB3202", logger.FullLog); // project file not found
         }
 
         /// <summary>
@@ -207,7 +213,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(1, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("MSB3202")); // project file not found
+            Assert.Contains("MSB3202", logger.FullLog); // project file not found
         }
 
         /// <summary>
@@ -240,8 +246,8 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(0, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("this_project_does_not_exist.csproj")); // for the missing project
-            Assert.False(logger.FullLog.Contains("MSB3202")); // project file not found error
+            Assert.Contains("this_project_does_not_exist.csproj", logger.FullLog); // for the missing project
+            Assert.DoesNotContain("MSB3202", logger.FullLog); // project file not found error
         }
 
         /// <summary>
@@ -275,8 +281,8 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(0, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("this_project_does_not_exist.csproj")); // for the missing project
-            Assert.False(logger.FullLog.Contains("MSB3202")); // project file not found error
+            Assert.Contains("this_project_does_not_exist.csproj", logger.FullLog); // for the missing project
+            Assert.DoesNotContain("MSB3202", logger.FullLog); // project file not found error
         }
 
         [Fact]
@@ -316,7 +322,7 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(1, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("MSB3204")); // upgrade to vcxproj needed
+            Assert.Contains("MSB3204", logger.FullLog); // upgrade to vcxproj needed
         }
 
         /// <summary>

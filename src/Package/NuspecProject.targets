@@ -10,10 +10,10 @@
 
   </PropertyGroup>
 
-  <Target Name="SetNuspecProperties" DependsOnTargets="GetNuGetPackageVersionEx">
+  <Target Name="SetNuspecProperties">
     <PropertyGroup>
       <NuspecProperties>$(NuspecProperties);version=$(PackageVersion)</NuspecProperties>
-      <NuspecProperties>$(NuspecProperties);licenseUrl=$(PackageLicenseUrl)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);licenseExpression=$(PackageLicenseExpression)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);projectUrl=$(PackageProjectUrl)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);iconUrl=$(PackageIconUrl)</NuspecProperties>
       <NuspecBasePath>$(OutDir)</NuspecBasePath>

@@ -25,17 +25,11 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal static class IntrinsicFunctions
     {
-        private static Lazy<string> _validOsPlatforms = new Lazy<string>(
-            () => typeof(OSPlatform).GetTypeInfo()
-                .GetProperties(BindingFlags.Static | BindingFlags.Public)
-                .Where(pi => pi.PropertyType == typeof(OSPlatform))
-                .Select(pi => pi.Name)
-                .Aggregate("", (a, b) => string.IsNullOrEmpty(a) ? b : $"{a}, {b}"),
-            true);
-
+#if FEATURE_WIN32_REGISTRY
         private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
 
         private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
+#endif // FEATURE_WIN32_REGISTRY
 
         /// <summary>
         /// Add two doubles
@@ -495,7 +489,7 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
         }
 
-        #region Debug only intrinsics
+#region Debug only intrinsics
 
         /// <summary>
         /// returns if the string contains escaped wildcards
@@ -505,7 +499,7 @@ namespace Microsoft.Build.Evaluation
             return new List<string> { "A", "B", "C", "D" };
         }
 
-        #endregion
+#endregion
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>

@@ -88,9 +88,7 @@ namespace Microsoft.Build.UnitTests
             // Path we expect to get out of the method
             string expectedPath = Path.Combine(_defaultSdkToolsPath, _toolName);
 
-            // Message to show when the test fails.
-            string message = "Expected to find the tool in the defaultSdkToolsPath but the method returned:" + toolPath;
-            Assert.True(string.Equals(expectedPath, toolPath, StringComparison.OrdinalIgnoreCase), message);
+            Assert.Equal(expectedPath, toolPath);
             Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
         }
 
@@ -110,9 +108,7 @@ namespace Microsoft.Build.UnitTests
             string expectedPath = Path.Combine(_defaultSdkToolsPath, "x64");
             expectedPath = Path.Combine(expectedPath, _toolName);
 
-            // Message to show when the test fails.
-            string message = "Expected to find the tool in " + expectedPath + " but the method returned:" + toolPath;
-            Assert.True(string.Equals(expectedPath, toolPath, StringComparison.OrdinalIgnoreCase), message);
+            Assert.Equal(expectedPath, toolPath);
             Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
         }
 
@@ -127,9 +123,7 @@ namespace Microsoft.Build.UnitTests
             // Path we expect to get out of the method
             string expectedPath = Path.Combine(_defaultSdkToolsPath, _toolName);
 
-            // Message to show when the test fails.
-            string message = "Expected to find the tool in " + expectedPath + " but the method returned:" + toolPath;
-            Assert.True(string.Equals(expectedPath, toolPath, StringComparison.OrdinalIgnoreCase), message);
+            Assert.Equal(expectedPath, toolPath);
             Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
         }
         #endregion
@@ -147,9 +141,7 @@ namespace Microsoft.Build.UnitTests
             string expectedPath = Path.Combine(_defaultSdkToolsPath, "ia64");
             expectedPath = Path.Combine(expectedPath, _toolName);
 
-            // Message to show when the test fails.
-            string message = "Expected to find the tool in " + expectedPath + " but the method returned:" + toolPath;
-            Assert.True(string.Equals(expectedPath, toolPath, StringComparison.OrdinalIgnoreCase), message);
+            Assert.Equal(expectedPath, toolPath);
             Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
         }
 
@@ -164,9 +156,7 @@ namespace Microsoft.Build.UnitTests
             // Path we expect to get out of the method
             string expectedPath = Path.Combine(_defaultSdkToolsPath, _toolName);
 
-            // Message to show when the test fails.
-            string message = "Expected to find the tool in " + expectedPath + " but the method returned:" + toolPath;
-            Assert.True(string.Equals(expectedPath, toolPath, StringComparison.OrdinalIgnoreCase), message);
+            Assert.Equal(expectedPath, toolPath);
             Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
         }
         #endregion

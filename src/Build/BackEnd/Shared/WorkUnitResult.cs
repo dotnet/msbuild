@@ -50,7 +50,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// A result of executing a target or task.
     /// </summary>
-    internal class WorkUnitResult : INodePacketTranslatable
+    internal class WorkUnitResult : ITranslatable
     {
         /// <summary>
         /// The result.
@@ -90,9 +90,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Translator constructor
         /// </summary>
-        private WorkUnitResult(INodePacketTranslator translator)
+        private WorkUnitResult(ITranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Translator.
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.TranslateEnum(ref _resultCode, (int)_resultCode);
             translator.TranslateEnum(ref _actionCode, (int)_actionCode);
@@ -131,7 +131,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static WorkUnitResult FactoryForDeserialization(INodePacketTranslator translator)
+        internal static WorkUnitResult FactoryForDeserialization(ITranslator translator)
         {
             return new WorkUnitResult(translator);
         }

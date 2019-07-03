@@ -6,11 +6,19 @@ For more information on MSBuild, see the [MSBuild documentation](https://docs.mi
 
 ### Build Status
 
-The current development branch is `master`. It builds for .NET Core and the full desktop .NET framework. Changes in `master` will go into the next "major" update of MSBuild.
+The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.3 and .NET Core SDK 3.0.100.
 
-[![Build Status](https://dnceng.visualstudio.com/9ee6d478-d288-47f7-aacc-f6e6d082ae6d/_apis/build/status/86?branchname=master)](https://dnceng.visualstudio.com/public/public%20Team/_build?definitionId=86&_a=summary&branchName=master)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=master)
 
-We have forked for MSBuild 15.9 in the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9).
+We have forked for MSBuild 16.2 in the branch [`vs16.2`](https://github.com/Microsoft/msbuild/tree/vs16.2). Changes to that branch need special approval.
+
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.2)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.2)
+
+MSBuild 16.0 builds from the branch [`vs16.0`](https://github.com/Microsoft/msbuild/tree/vs16.0). Only high-priority bugfixes will be considered for servicing 16.0.
+
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.0)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.0)
+
+MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
 
 | Runtime\OS | Windows | Ubuntu 16.04 |Mac OS X|
 |:------|:------:|:------:|:------:|
@@ -23,20 +31,22 @@ We have forked for MSBuild 15.9 in the branch [`vs15.9`](https://github.com/Micr
 
 ## Building
 
-### Building MSBuild with Visual Studio 2017
+### Building MSBuild with Visual Studio 2019
 
-For the full supported experience, you will need to have Visual Studio 2017 Update 7 or higher.
+For the full supported experience, you will need to have Visual Studio 2019 or higher.
 
-To get started on **Visual Studio 2017**:
+To get started on **Visual Studio 2019**:
 
-1. [Install Visual Studio 2017](https://www.visualstudio.com/vs/).  Select the following Workloads:
+1. [Install Visual Studio 2019](https://www.visualstudio.com/vs/).  Select the following Workloads:
   - _.NET desktop development_
   - _.NET Core cross-platform development_
 2. [Install the .NET Core 2.1 SDK](https://www.microsoft.com/net/learn/get-started/windows).
 2. Clone the source code (see above).
-2. Open a `Developer Command Prompt for VS 2017` prompt.
-3. Build the code using the `build.cmd` script. This also restores packages needed to open the projects in Visual Studio.
-5. Open `MSBuild.sln` in Visual Studio 2017.
+2. Open a `Developer Command Prompt for VS 2019` prompt.
+3. Build the code using the `build.cmd` script at the root of the repo. This also restores packages needed to open the projects in Visual Studio.
+5. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2019.
+
+Note: To produce a "bootstrap" build, run `.\build.cmd /p:CreateBootstrap=true`.
 
 ### Building MSBuild in Unix (Mac & Linux)
 

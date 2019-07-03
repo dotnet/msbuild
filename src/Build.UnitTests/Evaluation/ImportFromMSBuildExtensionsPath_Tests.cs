@@ -482,7 +482,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
-                var configFilePath = ToolsetConfigurationReaderTestHelper.WriteConfigFile(String.Format(configFileContents, extnDir1, extnDir2, extnDir3));
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(String.Format(configFileContents, extnDir1, extnDir2, extnDir3));
                 var reader = GetStandardConfigurationReader();
 
                 var projColln = new ProjectCollection();

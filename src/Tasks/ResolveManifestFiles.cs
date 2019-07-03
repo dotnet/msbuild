@@ -621,7 +621,7 @@ namespace Microsoft.Build.Tasks
             // OpenScope and returns null if not an assembly, which is much faster.
 
             AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
-            if(identity == null)
+            if (item.ItemSpec.EndsWith(".dll") && identity == null)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
                 // in a referenced nuget package, which will yield null here. We just need to ignore those, 
@@ -629,7 +629,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (identity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
+            if (identity != null && identity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
             {
                 return true;
             }

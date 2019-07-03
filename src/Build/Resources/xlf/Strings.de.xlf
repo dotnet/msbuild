@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <target state="translated">MSB4249: Das Websiteprojekt "{0}" kann nicht erstellt werden. Der ASP.NET-Compiler steht nur in der .NET Framework-Version von MSBuild zur Verfügung.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -22,7 +22,7 @@
       </trans-unit>
       <trans-unit id="BadlyCasedSpecialTaskAttribute">
         <source>MSB4003: "{0}" is a reserved attribute of the &lt;{1}&gt; element, and must be spelled with the correct casing. This attribute cannot be used as a parameter to the "{2}" task.</source>
-        <target state="translated">MSB4003: "{0}" ist ein reserviertes Attribut des &lt; {1}&gt;-Elements, bei dem die Groß-/Kleinschreibung beachtet werden muss. Dieses Attribut kann nicht als Parameter für die "{2}"-Aufgabe verwendet werden.</target>
+        <target state="translated">MSB4003: {0} ist ein reserviertes Attribut des &lt;{1}&gt;-Elements, bei dem die Groß-/Kleinschreibung beachtet werden muss. Dieses Attribut kann nicht als Parameter für die {2}-Aufgabe verwendet werden.</target>
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
@@ -31,22 +31,104 @@
         <target state="translated">Der Vorgang kann nicht abgeschlossen werden, da bereits ein Buildvorgang stattfindet.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </source>
+        <target state="translated">MSB4252: Das Projekt "{0}" enthält einen Verweis auf "{1}" ({2} Ziel(e)), aber das Buildergebnis für den Verweis befindet sich nicht im Enginecache. In isolierten Builds kann dies eine der folgenden Ursachen haben:
+    – Der Verweis wurde nicht explizit als ProjectReference-Element in "{0}" angegeben.
+    – Der Verweis wurde nicht in die angegebenen Eingabecaches aufgenommen.
+    – Der Verweis wurde mit einem Ziel aufgerufen, das nicht im ProjectReferenceTargets-Element in "{0}" angegeben ist.
+    </target>
+        <note>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <target state="translated">MSB4248: Metadaten können im Ausdruck "{0}" nicht erweitert werden. {1}</target>
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="translated">MSB4251: Es liegt eine Ringabhängigkeit zwischen den folgenden Projekten vor: {0}</target>
+        <note>
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </note>
+      </trans-unit>
+      <trans-unit id="EmptyOutputCacheFile">
+        <source>MSB4257: The specified output result cache file is empty.</source>
+        <target state="translated">MSB4257: Die angegebene Cachedatei für Ausgabeergebnisse ist leer.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingCacheFile">
+        <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4256: Beim Lesen der Cachedateien für Eingabeergebnisse aus dem Pfad "{0}" wurde ein Fehler festgestellt: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingCacheFile">
+        <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
+        <target state="translated">MSB4258: Beim Schreiben der Cachedatei für Ausgabeergebnisse im Pfad "{0}" wurde ein Fehler festgestellt: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InputCacheFilesDoNotExist">
+        <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
+        <target state="translated">MSB4255: Die folgenden Cachedateien für Eingabeergebnisse sind nicht vorhanden: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
-        <target state="new">Metaproject "{0}" generated.</target>
+        <target state="translated">Das Metaprojekt "{0}" wurde generiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">Der Vorgang kann nicht abgeschlossen werden, da BeginBuild noch nicht aufgerufen wurde.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="NullReferenceFromProjectInstanceFactory">
+        <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
+        <target state="translated">MSB4253: Ein benutzerseitig angegebener ProjectInstanceFactoryFunc-Rückruf hat einen NULL-Verweis zurückgegeben. Dies ist nicht zulässig.</target>
+        <note>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
+        <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
+        <target state="translated">MSB4250: ProjectGraph bietet keine Unterstützung für ProjectReference-Elemente mit dem ToolsVersion-Metadatensatz. In der Datei "{1}" wurde ProjectReference "{0}" mit "ToolsVersion" gefunden.</target>
+        <note>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
+      </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
+      <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: Mit der MSBuild-Aufgabe werden die Projekte "{0}" erstellt, die nicht im ProjectReference-Element angegeben wurden. In isolierten Builds bedeutet dies wahrscheinlich, dass der Verweis nicht explizit als ProjectReference-Element in "{1}" angegeben wurde.</target>
+        <note>
+      {StrBegin="MSB4254:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
+    </note>
+      </trans-unit>
+      <trans-unit id="UsingInputCaches">
+        <source>Using input build results caches: {0}</source>
+        <target state="translated">Verwendete Eingabecaches für Buildergebnisse: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a list of semicolon separated file paths
+    </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
@@ -191,7 +273,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
-        <target state="needs-review-translation">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Vorgang zum Herunterfahren wird durchgeführt. Diagnoseinformationen finden Sie in den Dateien namens "MSBuild_*.failure.txt" unter "{1}". Dieser Speicherort kann geändert werden, indem Sie die Umgebungsvariable MSBUILDDEBUGPATH auf ein anderes Verzeichnis festlegen.</target>
+        <target state="translated">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Vorgang zum Herunterfahren wird ausgeführt. Diagnoseinformationen finden Sie in den Dateien namens "MSBuild_*.failure.txt" unter "{1}". Dieser Speicherort kann geändert werden, indem Sie die Umgebungsvariable MSBUILDDEBUGPATH auf ein anderes Verzeichnis festlegen.{2}</target>
         <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -372,7 +454,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Das &lt;{0}&gt;-Tag wird nicht mehr als untergeordnetes Element des &lt;Project&gt;-Elements unterstützt. Platzieren Sie dieses Tag in einem Ziel, und fügen Sie den Namen des Ziels dem "InitialTargets"-Attribut des &lt;Project&gt;-Elements hinzu.</target>
+        <target state="translated">Die &lt;{0}&gt;-Kennung wird nicht mehr als untergeordnetes Element des &lt;Project&gt;-Elements unterstützt. Platzieren Sie diese Kennung in einem Ziel, und fügen Sie den Namen des Ziels dem InitialTargets-Attribut des &lt;Project&gt;-Elements hinzu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -476,12 +558,12 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: Das importierte Projekt "{0}" wurde nicht gefunden. Es wurde versucht "{1}" in den Ausweichsuchpfaden für {2} - {3} zu finden. Diese Suchpfade werden in "{4}" definiert. Vergewissern Sie sich, dass der Pfad in der &lt;Import&gt;-Deklaration korrekt und die Datei auf einem Datenträger in einem der Suchpfade vorhanden ist.</target>
+        <target state="translated">MSB4226: Das importierte Projekt "{0}" wurde nicht gefunden. Es wurde außerdem versucht, "{1}" in den Fallbacksuchpfaden für {2} – {3} zu finden. Diese Suchpfade werden in "{4}" definiert. Stellen Sie sicher, dass der Pfad in der &lt;Import&gt;-Deklaration korrekt ist und dass die Datei auf dem Datenträger in einem der Suchpfade vorhanden ist.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: Das importierte Projekt "{0}" wurde nicht gefunden. Es wurde versucht "{1}" in den Ausweichsuchpfaden für {2} - {3} zu finden. Vergewissern Sie sich, dass der Pfad in der &lt;Import&gt;-Deklaration korrekt und die Datei auf einem Datenträger in einem der Suchpfade vorhanden ist.</target>
+        <target state="translated">MSB4226: Das importierte Projekt "{0}" wurde nicht gefunden. Es wurde außerdem versucht, "{1}" in den Fallbacksuchpfaden für {2} – {3} zu finden. Stellen Sie sicher, dass der Pfad in der &lt;Import&gt;-Deklaration korrekt ist und dass die Datei auf dem Datenträger in einem der Suchpfade vorhanden ist.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
@@ -586,8 +668,8 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
-        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). </source>
-        <target state="translated">MSB4186: Ungültige Aufrufsyntax für statische Methode: "{0}". {1} Für den Aufruf statischer Methoden muss folgendes Format verwendet werden: $([vollständiger Typname]::Methode()), z. B. $([System.IO.Path]::Combine(`a`, `b`)) </target>
+        <source>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</source>
+        <target state="translated">MSB4186: Ungültige Aufrufsyntax für statische Methode: "{0}". {1} Für den Aufruf statischer Methoden muss folgendes Format verwendet werden: $([vollständiger Typname]::Methode()). Beispiel: $([System.IO.Path]::Combine(`a`, `b`)). Stellen Sie sicher, dass alle Parameter definiert sind, den richtigen Typ aufweisen und in der richtigen Reihenfolge angegeben werden.</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -708,7 +790,7 @@
       </trans-unit>
       <trans-unit id="MissingTaskError">
         <source>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</source>
-        <target state="translated">MSB4036: Die Aufgabe "{0}" wurde nicht gefunden. Überprüfen Sie Folgendes: 1.) Der Name der Aufgabe in der Projektdatei entspricht dem Namen in der Aufgabenklasse. 2.) Die Aufgabenklasse ist "public" und implementiert die Microsoft.Build.Framework.ITask-Schnittstelle. 3.) Die Aufgabe ist in der Projektdatei oder in den *.task-Dateien im Verzeichnis "{1}" mit &lt;UsingTask&gt; richtig deklariert.</target>
+        <target state="translated">MSB4036: Die {0}-Aufgabe wurde nicht gefunden. Überprüfen Sie Folgendes: 1.) Der Name der Aufgabe in der Projektdatei entspricht dem Namen der Aufgabenklasse. 2.) Die Aufgabenklasse ist "public" und implementiert die Microsoft.Build.Framework.ITask-Schnittstelle. 3.) Die Aufgabe ist in der Projektdatei oder in den TASKS-Dateien im Verzeichnis "{1}" mit &lt;UsingTask&gt; richtig deklariert.</target>
         <note>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MSBuildToolsPathIsNotSpecified">
@@ -743,7 +825,7 @@
       </trans-unit>
       <trans-unit id="NodeMustBeLastUnderElement">
         <source>MSB4038: The element &lt;{0}&gt; must be last under element &lt;{1}&gt;. Found element &lt;{2}&gt; instead.</source>
-        <target state="translated">MSB4038: Das &lt;{0}&gt;-Element muss das letzte Element unterhalb des &lt;{1}&gt;-Elements sein. Stattdessen wurde das Element &lt;{2}&gt; gefunden.</target>
+        <target state="translated">MSB4038: Das &lt;{0}&gt;-Element muss das letzte Element unterhalb des &lt;{1}&gt;-Elements sein. Stattdessen wurde das &lt;{2}&gt;-Element gefunden.</target>
         <note>{StrBegin="MSB4038: "}</note>
       </trans-unit>
       <trans-unit id="NonStringDataInRegistry">
@@ -823,7 +905,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: Der Standard-XML-Namespace des Projekts muss entweder der MSBuild-XML-Namespace sein, oder es wird kein Namespace festgelegt. Wenn das Projekt im MSBuild 2003-Format erstellt wurde, fügen Sie dem &lt;Project&gt;-Element xmlns="{0}" hinzu. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
+        <target state="translated">MSB4041: Der XML-Standardnamespace des Projekts muss entweder der MSBuild-XML-Namespace oder kein Namespace sein. Wenn das Projekt im MSBuild 2003-Format erstellt wurde, fügen Sie dem &lt;Project&gt;-Element "xmlns="{0}"" hinzu. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1046,7 +1128,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Wird übersprungen, da die Konfiguration "$(AspNetConfiguration)" für dieses Webprojekt nicht unterstützt wird.  Sie können die zum Erstellen von Webprojekten verwendete Konfiguration mit der AspNetConfiguration-Eigenschaft außer Kraft setzen, indem Sie an der Befehlszeile "/p:AspNetConfiguration=&lt;Wert&gt;" hinzufügen. Zurzeit unterstützen Webprojekte nur Debug- und Release-Konfigurationen.</target>
+        <target state="translated">Wird übersprungen, da die Konfiguration "$(AspNetConfiguration)" für dieses Webprojekt nicht unterstützt wird. Sie können die zum Erstellen von Webprojekten verwendete Konfiguration mit der AspNetConfiguration-Eigenschaft außer Kraft setzen, indem Sie an der Befehlszeile "/p:AspNetConfiguration=&lt;Wert&gt;" hinzufügen. Zurzeit unterstützen Webprojekte nur Debug- und Release-Konfigurationen.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1332,7 +1414,7 @@
       </trans-unit>
       <trans-unit id="InvalidTaskHostFactoryParameter">
         <source>"{0}" is an invalid value for the task host parameter "{1}". Valid values are: "{2}", "{3}", "{4}", and "{5}"; not specifying a value is also valid.</source>
-        <target state="translated">"\{0\}" ist ein ungültiger Wert für den Aufgabenhost-Parameter "{1}". Gültige Werte sind: "{2}", "{3}", "{4}" und "{5}"; außerdem ist es zulässig, keinen Wert anzugeben.</target>
+        <target state="translated">"{0}" ist ein ungültiger Wert für den Aufgabenhost-Parameter "{1}". Gültige Werte sind: "{2}", "{3}", "{4}" und "{5}"; außerdem ist es zulässig, keinen Wert anzugeben.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
@@ -1554,6 +1636,13 @@
         <source>The property "{0}" with value "{1}" is being overridden by another batch. The property is now: "{2}"</source>
         <target state="translated">Die Eigenschaft "{0}" mit dem Wert "{1}" wird von einem anderen Batch überschrieben. Die Eigenschaft ist jetzt: "{2}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="WritingToOutputCache">
+        <source>Writing build results caches to: {0}</source>
+        <target state="translated">Schreibziel für Caches der Buildergebnisse: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a file path
+    </note>
       </trans-unit>
       <trans-unit id="logfilePathNullOrEmpty">
         <source>The log file path cannot be null or empty.</source>
@@ -1897,7 +1986,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: Die Syntax für den "{0}"-Parameter ist ungültig ({1}). Die korrekte Syntax lautet {0}="&lt;Name&gt;=&lt;Wert&gt;".</target>
+        <target state="translated">MSB3100: Die Syntax für den {0}-Parameter ist ungültig ({1}). Die korrekte Syntax lautet {0}="&lt;Name&gt;=&lt;Wert&gt;".</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -1935,17 +2024,17 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="translated">MSB4227: Das Attribut "{0}" im Element "&lt;{1}&gt;" ist ungültig, weil bereits ein Attribut mit diesem Namen vorhanden ist.</target>
+        <target state="translated">MSB4227: Das Attribut "{0}" für das Element &lt;{1}&gt; ist ungültig, weil ein Attribut dieses Namens bereits vorhanden ist.</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="translated">MSB4228: Der Name "{0}" ist für Metadaten ungültig, die als Attribut ausgedrückt werden (in Element "&lt;{1}&gt;").</target>
+        <target state="translated">MSB4228: Der Name "{0}" ist ungültig für Metadaten, die als Attribut (für das Element &lt;{1}&gt;) ausgedrückt werden.</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="translated">Das Element "&lt;{0}&gt;" muss eines der Attribute "{1}", "{2}" oder "{3}" umfassen, nicht jedoch mehrere dieser Attribute.</target>
+        <target state="translated">Für das &lt;{0}&gt;-Element ist genau eines der Attribute "{1}", "{2}" oder "{3}" erforderlich.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
@@ -2100,7 +2189,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD: Fehler MSB4239: Fehler beim Schreiben des Profilerstellungsberichts. {0}</target>
+        <target state="translated">MSBUILD : error MSB4239: Fehler beim Schreiben des Profilerstellungsberichts. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">

@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
             f.SecondaryList = new ITaskItem[] { new TaskItem("iii"), new TaskItem("xxx") };
             f.TargetPath = "targetpath";
             Assert.True(f.Execute());
-            Assert.Equal(null, f.AppConfigFile);
+            Assert.Null(f.AppConfigFile);
         }
 
         [Fact]

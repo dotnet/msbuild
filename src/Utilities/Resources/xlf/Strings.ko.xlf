@@ -67,6 +67,11 @@
         <target state="translated">MSB6004: 지정한 작업 실행 파일의 위치 "{0}"이(가) 잘못되었습니다.</target>
         <note>{StrBegin="MSB6004: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.ValidateParametersFailed">
+        <source>MSB6011: Invalid parameters passed to the {0} task.</source>
+        <target state="translated">MSB6011: {0} 작업에 잘못된 매개 변수가 전달되었습니다.</target>
+        <note>{StrBegin="MSB6011: "}</note>
+      </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
         <target state="translated">재배포 목록 파일 "{0}"을(를) 읽는 동안 오류가 발생했습니다. {1}</target>
