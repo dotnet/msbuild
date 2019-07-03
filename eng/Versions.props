@@ -14,7 +14,7 @@
   <PropertyGroup>
     <MicrosoftNETCoreAppPackageVersion>3.0.0-preview7-27902-11</MicrosoftNETCoreAppPackageVersion>
     <DotNetCoreSdkLKGVersion>3.0.100-preview7-012712</DotNetCoreSdkLKGVersion>
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>3.0.0-preview7.19351.10</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>3.0.0-preview7.19352.4</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>2.2.1</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftApplicationInsightsPackageVersion>2.0.0</MicrosoftApplicationInsightsPackageVersion>
     <MicrosoftBuildPackageVersion>16.2.0-preview.19261.3</MicrosoftBuildPackageVersion>
