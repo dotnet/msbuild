@@ -74,6 +74,53 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
         }
 
+        [CoreMSBuildAndWindowsOnlyFact]
+        public void DuplicateFrameworksAreNotWrittenToRuntimeConfigWhenThereAreDifferentProfiles()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MultipleProfileFrameworkReferenceTest",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App.WPF");
+            testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App.WindowsForms");
+
+            testProject.SourceFiles.Add("Program.cs", @"
+using System;
+
+namespace FrameworkReferenceTest
+{
+    public class Program
+    {
+        public static void Main(string [] args)
+        {
+        }
+    }
+}");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+            var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
+
+            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
+            //  Microsoft.NETCore.App will need to be added to this list
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.WindowsDesktop.App");
+        }
+
         [CoreMSBuildOnlyFact]
         public void The_build_fails_when_there_is_an_unknown_FrameworkReference()
         {
