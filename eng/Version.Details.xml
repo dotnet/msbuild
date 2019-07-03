@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview7-27902-16">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview7-27902-19">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>207a304ed4a9a6d1da67b242fe3ebb897586da34</Sha>
+      <Sha>fbe9466dddee8b3bbde6b706598d8f83802d08ce</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview7.19352.13">
       <Uri>https://github.com/dotnet/cli</Uri>
@@ -51,17 +51,17 @@
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>3dd5e55dc9cb7a7c5eaa73aefc70c3655e75f97b</Sha>
     </Dependency>
-    <Dependency Name="System.CodeDom" Version="4.6.0-preview7.19352.5" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.CodeDom" Version="4.6.0-preview7.19352.8" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>e4f1f8f1597b62ae8095e815f0ae620d1898885e</Sha>
+      <Sha>9c3c40ac8b4f9b56791bc3c18c540079dad8a812</Sha>
     </Dependency>
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-preview7.19352.5" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-preview7.19352.8" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>e4f1f8f1597b62ae8095e815f0ae620d1898885e</Sha>
+      <Sha>9c3c40ac8b4f9b56791bc3c18c540079dad8a812</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-preview7.19352.5" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-preview7.19352.8" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>e4f1f8f1597b62ae8095e815f0ae620d1898885e</Sha>
+      <Sha>9c3c40ac8b4f9b56791bc3c18c540079dad8a812</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
