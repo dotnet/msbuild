@@ -969,10 +969,45 @@
         <target state="translated">MSB3190: ClickOnce non supporta il livello di esecuzione richieste '{0}'.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.InputDoesntExist">
+        <source>Input file "{0}" does not exist.</source>
+        <target state="translated">Il file di input "{0}" non esiste.</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.InputNewer">
+        <source>Input file "{0}" is newer than output file "{1}".</source>
+        <target state="translated">Il file di input "{0}" è più recente del file di output "{1}".</target>
+        <note>{0} and {1} are filenames on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.LinkedInputDoesntExist">
+        <source>Linked input file "{0}" does not exist.</source>
+        <target state="translated">Il file di input collegato "{0}" non esiste.</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.LinkedInputNewer">
+        <source>Linked input file "{0}" is newer than output file "{1}".</source>
+        <target state="translated">Il file di input collegato "{0}" è più recente del file di output "{1}".</target>
+        <note>{0} and {1} are filenames on disk.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: non è stato possibile elaborare il file {0} perché si trova nell'area Internet o Siti con restrizioni o presenta il contrassegno del Web. Rimuovere il contrassegno del Web se si intende elaborare questi file.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.OutputDoesntExist">
+        <source>Output file "{0}" does not exist.</source>
+        <target state="translated">Il file di output "{0}" non esiste.</target>
+        <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresExtensions">
+        <source>MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</source>
+        <target state="new">MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</target>
+        <note>{StrBegin="MSB3822: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresProperty">
+        <source>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</source>
+        <target state="new">MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</target>
+        <note>{StrBegin="MSB3823: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
@@ -2464,8 +2499,8 @@
         <note>{StrBegin="MSB3643: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-        <source>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</source>
-        <target state="translated">MSB3644: gli assembly di riferimento per il framework "{0}" non sono stati trovati. Per risolvere il problema, installare l'SDK o il Targeting Pack per questa versione del framework oppure reindirizzare l'applicazione a una versione del framework per la quale è installato l'SDK o il Targeting Pack. Gli assembly verranno risolti dalla Global Assembly Cache e verranno usati in sostituzione degli assembly di riferimento. Di conseguenza, gli assembly potrebbero non essere indirizzati correttamente al framework desiderato.</target>
+        <source>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</source>
+        <target state="translated">MSB3644: gli assembly di riferimento per {0} non sono stati trovati. Per risolvere il problema, installare Developer Pack (SDK/Targeting Pack) per questa versione del framework o ridestinare l'applicazione. È possibile scaricare .NET Framework Developer Pack all'indirizzo https://aka.ms/msbuild/developerpacks</target>
         <note>{StrBegin="MSB3644: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">
@@ -2510,7 +2545,7 @@
       </trans-unit>
       <trans-unit id="Xaml.MissingTaskBody">
         <source>MSB3692: Unable to create Xaml task.  The &lt;UsingTask&gt; does not contain a &lt;Task&gt; definition.</source>
-        <target state="translated">MSB3692: non è possibile creare l'attività XAML.  &lt;UsingTask&gt; non contiene una definizione di &lt;Task&gt;.</target>
+        <target state="translated">MSB3692: non è possibile creare l'attività XAML. &lt;UsingTask&gt; non contiene una definizione di &lt;Task&gt;.</target>
         <note>{StrBegin="MSB3692: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.ArgumentOutOfRange">
@@ -2630,7 +2665,7 @@
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputFileError">
         <source>MSB3733: Input file "{0}" cannot be opened. {1}</source>
-        <target state="translated">MSB3733: non è possibile aprire il file "{0}" di input. {1}</target>
+        <target state="translated">MSB3733: non è possibile aprire il file di input "{0}". {1}</target>
         <note>{StrBegin="MSB3733: "}</note>
       </trans-unit>
       <trans-unit id="XmlPeekPoke.XPathError">
@@ -2725,7 +2760,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CodeElementIsMissing">
         <source>MSB3751: The &lt;Code&gt; element is missing for the "{0}" task. This element is required.</source>
-        <target state="translated">MSB3751: l'elemento &lt;Code&gt; non è presente per l'attività "{0}". Questo elemento è obbligatorio.</target>
+        <target state="translated">MSB3751: elemento &lt;Code&gt; mancante per l'attività "{0}". Tale elemento è obbligatorio.</target>
         <note>{StrBegin="MSB3751: "} &lt;Code&gt; should not be localized it is the name of an xml element</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmpty">
@@ -2860,7 +2895,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKReferenceIncorrectFormat">
         <source>MSB3776: The SDK Reference "{0}" is incorrectly formatted. It must be in the following format "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;. For example: "MySDK, Version=2.0"</source>
-        <target state="translated">MSB3776: il formato del riferimento SDK "{0}" non corretto. Il formato corretto è: "&lt;NomeSDK&gt;, Version=&lt;VersioneSDK&gt;, ad esempio: "MySDK, versione=2.0"</target>
+        <target state="translated">MSB3776: formato del riferimento SDK "{0}" non corretto. Il formato corretto è: "&lt;NomeSDK&gt;, Version=&lt;VersioneSDK&gt;, ad esempio: "MySDK, Version=2.0"</target>
         <note>{StrBegin="MSB3776: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoMatchingFrameworkIdentity">
@@ -3086,7 +3121,7 @@
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
         <target state="translated">MSB3492: non è stato possibile leggere il file esistente "{0}" per determinare se il relativo contenuto è aggiornato. Verrà sovrascritto.</target>
-        <note>{StrBegin="MSB3491: "}</note>
+        <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>

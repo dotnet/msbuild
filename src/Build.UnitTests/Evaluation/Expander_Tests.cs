@@ -590,6 +590,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -1056,6 +1057,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "new enough dotnet.exe transparently opts into long paths")]
         public void PathTooLongInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
@@ -3709,6 +3711,62 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionGuidNewGuid()
+        {
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
+
+            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Guid]::NewGuid())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.True(Guid.TryParse(result, out Guid guid));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetCurrentToolsDirectory()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetCurrentToolsDirectory())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetCurrentToolsDirectory()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetToolsDirectory32()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetToolsDirectory32())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetToolsDirectory32()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetToolsDirectory64()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetToolsDirectory64())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetToolsDirectory64()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetMSBuildSDKsPath()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetMSBuildSDKsPath())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetMSBuildSDKsPath()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetVsInstallRoot()
+        {
+            string vsInstallRoot = EscapingUtilities.Escape(IntrinsicFunctions.GetVsInstallRoot());
+
+            vsInstallRoot = (vsInstallRoot == null) ? "" : vsInstallRoot;
+
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetVsInstallRoot())", "X", "_", vsInstallRoot);
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetMSBuildExtensionsPath()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetMSBuildExtensionsPath())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetMSBuildExtensionsPath()));
+        }
+
+        [Fact]
+        public void PropertyFunctionIntrinsicFunctionGetProgramFiles32()
+        {
+            TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetProgramFiles32())", "X", "_", EscapingUtilities.Escape(IntrinsicFunctions.GetProgramFiles32()));
+        }
+
+        [Fact]
         public void PropertyFunctionStringArrayIndexerGetter()
         {
             TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");
@@ -3904,10 +3962,55 @@ $(
                 ICollection<ProjectItemInstance> myDirectories = projectInstance.GetItems("MyDirectories");
 
                 var includes = myDirectories.Select(i => i.EvaluatedInclude);
+                includes.ShouldBeUnique();
                 includes.ShouldContain(root.Path);
                 includes.ShouldContain(alpha.Path);
                 includes.ShouldContain(beta.Path);
                 includes.ShouldNotContain(gamma.Path);
+            }
+        }
+
+        [Fact]
+        public void ExpandItemVectorFunctions_GetPathsOfAllDirectoriesAbove_ReturnCanonicalPaths()
+        {
+            // Directory structure:
+            // <temp>\
+            //    alpha\
+            //        .proj
+            //        One.cs
+            //        beta\
+            //            Two.cs
+            //    gamma\
+            //        Three.cs
+            using (var env = TestEnvironment.Create())
+            {
+                var root = env.CreateFolder();
+
+                var alpha = root.CreateDirectory("alpha");
+                var projectFile = env.CreateFile(alpha, ".proj",
+                    @"<Project>
+  <ItemGroup>
+    <Compile Include=""One.cs"" />
+    <Compile Include=""beta\Two.cs"" />
+    <Compile Include=""..\gamma\Three.cs"" />
+  </ItemGroup>
+  <ItemGroup>
+    <MyDirectories Include=""@(Compile->GetPathsOfAllDirectoriesAbove())"" />
+  </ItemGroup>
+</Project>");
+
+                var beta = alpha.CreateDirectory("beta");
+                var gamma = root.CreateDirectory("gamma");
+
+                ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                ICollection<ProjectItemInstance> myDirectories = projectInstance.GetItems("MyDirectories");
+
+                var includes = myDirectories.Select(i => i.EvaluatedInclude);
+                includes.ShouldBeUnique();
+                includes.ShouldContain(root.Path);
+                includes.ShouldContain(alpha.Path);
+                includes.ShouldContain(beta.Path);
+                includes.ShouldContain(gamma.Path);
             }
         }
 

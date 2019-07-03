@@ -64,6 +64,12 @@ Once you have the `StructuredLogger.dll` on disk you can pass it to MSBuild like
 You can use the MSBuild Structured Log Viewer tool to view `.binlog` files:
 http://msbuildlog.com
 
+# Collecting binary logs from Visual Studio builds
+
+If you need to capture a binary log in Visual Studio, instead of the command line, you'll need a Visual Studio plugin: https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.ProjectSystemTools
+
+After installing that, enable logging and run your build ([more details](https://github.com/dotnet/project-system-tools)).
+
 # Binary log file format
 
 The implementation of the binary logger is here:

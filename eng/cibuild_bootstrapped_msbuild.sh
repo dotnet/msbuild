@@ -54,6 +54,7 @@ then
 
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
   _InitializeBuildToolCommand="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
+  _InitializeBuildToolFramework="netcoreapp2.1"
 else
   echo "Unsupported hostType ($host_type)"
   exit 1

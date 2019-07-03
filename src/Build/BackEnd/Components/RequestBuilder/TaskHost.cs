@@ -285,7 +285,7 @@ namespace Microsoft.Build.BackEnd
 
             // If the caller supplies an array to put the target outputs in, it must have the same length as the array of project file names they provided, too.
             // "MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items."
-            ErrorUtilities.VerifyThrowArgument((targetOutputsPerProject == null) || (projectFileNames.Length == targetOutputsPerProject.Length), "General.TwoVectorsMustHaveSameLength", projectFileNames.Length, targetOutputsPerProject.Length, "projectFileNames", "targetOutputsPerProject");
+            ErrorUtilities.VerifyThrowArgument((targetOutputsPerProject == null) || (projectFileNames.Length == targetOutputsPerProject.Length), "General.TwoVectorsMustHaveSameLength", projectFileNames.Length, targetOutputsPerProject?.Length ?? 0, "projectFileNames", "targetOutputsPerProject");
 
             BuildEngineResult result = BuildProjectFilesInParallel(projectFileNames, targetNames, globalProperties, new List<String>[projectFileNames.Length], toolsVersion, includeTargetOutputs);
 
@@ -336,7 +336,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests to yield the node.
         /// Thread safe, however Yield cannot be called unless the
-        /// last call to Yield or Reaquire was Reaquire.
+        /// last call to Yield or Reacquire was Reacquire.
         /// </summary>
         public void Yield()
         {
@@ -351,8 +351,8 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Requests to reacquire the node.
-        /// Thread safe, however Reaquire cannot be called unless the
-        /// last call to Yield or Reaquire was Yield.
+        /// Thread safe, however Reacquire cannot be called unless the
+        /// last call to Yield or Reacquire was Yield.
         /// </summary>
         public void Reacquire()
         {

@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
@@ -440,7 +441,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Assert that the log file contains the given string.
+        /// Assert that the log file does not contain the given string.
         /// </summary>
         /// <param name="contains"></param>
         internal void AssertLogDoesntContain(string contains)
@@ -472,5 +473,11 @@ namespace Microsoft.Build.UnitTests
         /// Assert that no warnings were logged
         /// </summary>
         internal void AssertNoWarnings() => Assert.Equal(0, WarningCount);
+
+        internal void AssertMessageCount(string message, int expectedCount)
+        {
+            var matches = Regex.Matches(FullLog, message);
+            matches.Count.ShouldBe(expectedCount);
+        }
     }
 }

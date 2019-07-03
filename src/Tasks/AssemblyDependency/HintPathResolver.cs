@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!string.IsNullOrEmpty(hintPath))
             {
-                if (ResolveAsFile(hintPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
+                if (ResolveAsFile(FileUtilities.NormalizePath(hintPath), assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
                 {
                     userRequestedSpecificFile = true;
                     foundPath = hintPath;

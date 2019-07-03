@@ -1112,6 +1112,13 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     internal static partial class Helpers
     {
+        internal static string Format(this string s, params object[] formatItems)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(s, nameof(s));
+
+            return string.Format(s, formatItems);
+        }
+
         internal static string GetOSPlatformAsString()
         {
             var currentPlatformString = string.Empty;
@@ -1872,6 +1879,57 @@ namespace Microsoft.Build.UnitTests
             public int GetHashCode(ElementLocation obj)
             {
                 return obj.Line.GetHashCode() ^ obj.Column.GetHashCode() ^ obj.File.GetHashCode();
+            }
+        }
+
+        internal class BuildManagerSession : IDisposable
+        {
+            private readonly TestEnvironment _env;
+            private readonly BuildManager _buildManager;
+
+            public MockLogger Logger { get; set; }
+
+
+            public BuildManagerSession(
+                TestEnvironment env,
+                BuildParameters buildParametersPrototype = null,
+                bool enableNodeReuse = false,
+                bool shutdownInProcNode = true)
+            {
+                _env = env;
+
+                Logger = new MockLogger(_env.Output);
+                var loggers = new[] {Logger};
+
+                var actualBuildParameters = buildParametersPrototype?.Clone() ?? new BuildParameters();
+
+                actualBuildParameters.Loggers = actualBuildParameters.Loggers == null
+                    ? loggers
+                    : actualBuildParameters.Loggers.Concat(loggers).ToArray();
+
+                actualBuildParameters.ShutdownInProcNodeOnBuildFinish = shutdownInProcNode;
+                actualBuildParameters.EnableNodeReuse = enableNodeReuse;
+
+                _buildManager = new BuildManager();
+                _buildManager.BeginBuild(actualBuildParameters);
+            }
+
+            public BuildResult BuildProjectFile(string projectFile, string[] entryTargets = null)
+            {
+                var buildResult = _buildManager.BuildRequest(
+                    new BuildRequestData(projectFile,
+                        new Dictionary<string, string>(),
+                        MSBuildConstants.CurrentToolsVersion,
+                        entryTargets ?? new string[0],
+                        null));
+
+                return buildResult;
+            }
+
+            public void Dispose()
+            {
+                _buildManager.EndBuild();
+                _buildManager.Dispose();
             }
         }
     }

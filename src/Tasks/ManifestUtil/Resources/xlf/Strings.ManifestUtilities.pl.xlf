@@ -81,15 +81,15 @@
          compatibility then delete the requestedExecutionLevel node.
     </source>
         <target state="translated">
-          Opcje manifestu UAC
-          Jeśli chcesz zmienić poziom kontroli kont użytkowników w systemie Windows, zastąp węzeł
+          Opcje manifestu kontroli konta użytkownika
+          Jeśli chcesz zmienić poziom kontroli konta użytkownika systemu Windows, zastąp węzeł 
           requestedExecutionLevel jednym z następujących.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Jeśli w celu zapewnienia wstecznej zgodności chcesz użyć wirtualizacji plików i rejestru,
+         Jeśli chcesz użyć wirtualizacji plików i rejestru do celów zgodności wstecznej, 
          usuń węzeł requestedExecutionLevel.
     </target>
         <note />

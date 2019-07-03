@@ -50,7 +50,7 @@
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: "{0}" ifadesindeki meta veriler genişletilemiyor. {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
@@ -108,9 +108,16 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: MSBuild görevi, ProjectReference öğesinde belirtilmeyen {0} projesini derliyor. Yalıtılmış derlemelerde bu genellikle başvuruların "{1}" içinde açıkça ProjectReference öğesi olarak belirtilmediği anlamına gelir</target>
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: MSBuild görevi, ProjectReference öğesinde belirtilmeyen {0} projesini derliyor. Yalıtılmış derlemelerde bu genellikle başvuruların "{1}" içinde açıkça ProjectReference öğesi olarak belirtilmediği anlamına gelir</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -447,7 +454,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">&lt;{0}&gt; etiketi &lt;Project&gt; öğesinin alt öğesi olarak artık desteklenmiyor. Bu etiketi bir hedef içine yerleştirin ve hedefin adını &lt;Project&gt; öğesinin "InitialTargets" özniteliğine ekleyin.</target>
+        <target state="translated">&lt;{0}&gt; etiketi artık &lt;Project&gt; öğesinin alt öğesi olarak desteklenmiyor. Bu etiketi bir hedef içine yerleştirin ve hedefin adını &lt;Project&gt; öğesinin "InitialTargets" özniteliğine ekleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -551,12 +558,12 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: İçeri aktarılan "{0}" projesi bulunamadı. Ayrıca, {2} - {3} geri dönüş arama yollarında "{1}" bulunmaya çalışıldı. Bu arama yolları "{4}" içinde tanımlanmıştır. &lt;Import&gt; bildirimindeki yolun doğru olduğunu ve dosyanın arama yollarından birindeki diskte bulunduğunu doğrulayın.</target>
+        <target state="translated">MSB4226: İçeri aktarılan "{0}" projesi bulunamadı. Ayrıca, {2} - {3} için geri dönüş arama yollarında "{1}" bulunmaya çalışıldı. Bu arama yolları "{4}" konumunda tanımlıdır. &lt;Import&gt; bildirimindeki yolun doğru olduğunu ve dosyanın arama yollarından birinde disk üzerinde bulunduğunu doğrulayın.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: İçeri aktarılan "{0}" projesi bulunamadı. Ayrıca, {2} - {3} geri dönüş arama yollarında "{1}" bulunmaya çalışıldı. &lt;Import&gt; bildirimindeki yolun doğru olduğunu ve dosyanın arama yollarından birindeki diskte bulunduğunu doğrulayın.</target>
+        <target state="translated">MSB4226: İçeri aktarılan "{0}" projesi bulunamadı. Ayrıca {2} - {3} için geri dönüş arama yollarında "{1}" bulunmaya çalışıldı. &lt;Import&gt; bildirimindeki yolun doğru olduğunu ve dosyanın arama yollarından birinde disk üzerinde bulunduğunu doğrulayın.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
@@ -783,7 +790,7 @@
       </trans-unit>
       <trans-unit id="MissingTaskError">
         <source>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</source>
-        <target state="translated">MSB4036: "{0}" görevi bulunamadı. Aşağıdakileri denetleyin: 1.) Proje dosyasındaki görevin adı, görev sınıfının adı ile aynıdır. 2.) Görev sınıfı "geneldir" ve Microsoft.Build.Framework.ITask arabirimini uygular. 3.) Görev, proje dosyasında veya "{1}" dizinindeki *.tasks dosyalarında &lt;UsingTask&gt; ile doğru şekilde bildirilmiştir.</target>
+        <target state="translated">MSB4036: "{0}" görevi bulunamadı. Şunları denetleyin: 1.) Proje dosyasındaki görevin adı ile görev sınıfının adı aynı. 2.) Görev sınıfı "public" olarak tanımlanmış ve Microsoft.Build.Framework.ITask arabirimini uyguluyor. 3.) Görev, proje dosyasında veya "{1}" dizinindeki *.tasks dosyalarında &lt;UsingTask&gt; ile doğru biçimde bildirilmiş.</target>
         <note>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MSBuildToolsPathIsNotSpecified">
@@ -818,7 +825,7 @@
       </trans-unit>
       <trans-unit id="NodeMustBeLastUnderElement">
         <source>MSB4038: The element &lt;{0}&gt; must be last under element &lt;{1}&gt;. Found element &lt;{2}&gt; instead.</source>
-        <target state="translated">MSB4038: &lt;{0}&gt; öğesi &lt;{1}&gt; öğesinin altındaki son öğe olmalıdır. Bunun yerine &lt;{2}&gt; öğesi bulundu.</target>
+        <target state="translated">MSB4038: &lt;{0}&gt; öğesi, &lt;{1}&gt; öğesinin altındaki son öğe olmalıdır. Bunun yerine &lt;{2}&gt; öğesi bulundu.</target>
         <note>{StrBegin="MSB4038: "}</note>
       </trans-unit>
       <trans-unit id="NonStringDataInRegistry">
@@ -898,7 +905,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: Projenin varsayılan XML ad alanı, MSBuild XML ad alanı veya boş olmalıdır. Proje MSBuild 2003 biçiminde yazıldıysa lütfen &lt;Project&gt; öğesine xmlns="{0}" ekleyin. Proje eski 1.0 veya 1.2 biçiminde yazıldıysa lütfen MSBuild 2003 biçimine dönüştürün.</target>
+        <target state="translated">MSB4041: Projenin varsayılan XML ad alanı, MSBuild XML ad alanı olmalıdır veya ad alanı olmamalıdır. Proje MSBuild 2003 biçiminde yazılmışsa, lütfen &lt;Project&gt; öğesine xmlns="{0}" ifadesini ekleyin. Proje eski 1.0 veya 1.2 biçiminde yazılmışsa, lütfen MSBuild 2003 biçimine dönüştürün.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1121,7 +1128,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">"$(AspNetConfiguration)" yapılandırması bu web projesi için desteklenmediğinden atlanıyor.  Web projeleri derlemek için kullanılan yapılandırmayı geçersiz kılmak üzere, komut satırına /p:AspNetConfiguration=&lt;value&gt; ekleyerek AspNetConfiguration özelliğini kullanabilirsiniz. Web projeleri şu anda yalnızca Hata Ayıklama ve Yayınlama yapılandırmalarını desteklemektedir.</target>
+        <target state="translated">"$(AspNetConfiguration)" yapılandırması bu web projesi için desteklenmediğinden atlanıyor. Web projeleri oluşturmak için kullanılan yapılandırmayı geçersiz kılmak amacıyla, komut satırına /p:AspNetConfiguration=&lt;değer&gt; ekleyerek AspNetConfiguration özelliğini kullanabilirsiniz. Geçerli durumda web projeleri yalnızca Debug ve Release yapılandırmalarını desteklemektedir.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1979,7 +1986,7 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: "{0}" parametresinin söz dizimi geçerli değil ({1}). Doğru söz dizimi: {0}="&lt;ad&gt;=&lt;değer&gt;".</target>
+        <target state="translated">MSB3100: "{0}" parametresinin sözdizimi geçerli değil ({1}). Doğru sözdizimi: {0}="&lt;ad&gt;=&lt;değer&gt;".</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -2017,17 +2024,17 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="translated">MSB4227: &lt;{1}&gt; öğesindeki "{0}" özniteliği, aynı ada sahip başka bir öznitelik bulunduğundan geçersiz.</target>
+        <target state="translated">MSB4227: Bu ada sahip bir öznitelik zaten var olduğundan &lt;{1}&gt; öğesindeki "{0}" özniteliği geçersiz</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="translated">MSB4228: "{0}" adı, (&lt;{1}&gt; öğesinde) öznitelik olarak ifade edilen meta veriler için geçerli değil.</target>
+        <target state="translated">MSB4228: "{0}" adı, &lt;{1}&gt; öğesinde öznitelik olarak ifade edilen meta veriler için geçerli değil</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="translated">&lt;{0}&gt; öğesi, "{1}", "{2}" veya "{3}" özniteliklerinden yalnızca birine sahip olmalıdır. Birden fazlasına sahip olamaz.</target>
+        <target state="translated">&lt;{0}&gt; öğesinin "{1}" özniteliği, "{2}" özniteliği veya "{3}" özniteliği olmalıdır, ancak birden fazla özniteliği olmamalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
@@ -2182,7 +2189,7 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD: MSB4239 hatası: Profil oluşturma raporu yazılırken hata oluştu. {0}</target>
+        <target state="translated">MSBUILD : error MSB4239: Profil oluşturma raporu yazılırken hata oluştu. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">

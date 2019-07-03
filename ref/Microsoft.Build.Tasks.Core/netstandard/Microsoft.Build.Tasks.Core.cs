@@ -354,6 +354,7 @@ namespace Microsoft.Build.Tasks
         public string TrackerLogDirectory { get { throw null; } set { } }
         public string TrackerSdkPath { get { throw null; } set { } }
         public bool TrackFileAccess { get { throw null; } set { } }
+        public bool UsePreserializedResources { get { throw null; } set { } }
         public bool UseSourcePath { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }

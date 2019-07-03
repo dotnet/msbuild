@@ -355,8 +355,14 @@ namespace Microsoft.Build.BackEnd
 
                 BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion);
 
-                requests[i] = new FullyQualifiedBuildRequest(config, targets, waitForResults,
-                    flags: skipNonexistentTargets ? BuildRequestDataFlags.SkipNonexistentTargets : BuildRequestDataFlags.None);
+                requests[i] = new FullyQualifiedBuildRequest(
+                    config: config,
+                    targets: targets,
+                    resultsNeeded: waitForResults,
+                    skipStaticGraphIsolationConstraints: _componentHost.BuildParameters.IsolateProjects && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath),
+                    flags: skipNonexistentTargets
+                        ? BuildRequestDataFlags.SkipNonexistentTargets
+                        : BuildRequestDataFlags.None);
             }
 
             // Send the requests off

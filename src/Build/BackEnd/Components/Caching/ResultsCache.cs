@@ -151,12 +151,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="configDefaultTargets">The default targets for the request's configuration.</param>
         /// <param name="additionalTargetsToCheckForOverallResult">Any additional targets that need to be checked to determine overall 
         /// pass or failure, but that are not included as actual results. (E.g. AfterTargets of an entrypoint target)</param>
-        /// <param name="skippedResultsAreOK">If false, a cached skipped target will cause this method to return "NotSatisfied".  
+        /// <param name="skippedResultsDoNotCauseCacheMiss">If false, a cached skipped target will cause this method to return "NotSatisfied".  
         /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method 
         /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no 
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, List<string> additionalTargetsToCheckForOverallResult, bool skippedResultsAreOK)
+        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, List<string> additionalTargetsToCheckForOverallResult, bool skippedResultsDoNotCauseCacheMiss)
         {
             ErrorUtilities.VerifyThrowArgument(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new ResultsCacheResponse(ResultsCacheResponseType.NotSatisfied);
@@ -168,7 +168,7 @@ namespace Microsoft.Build.BackEnd
                     BuildResult allResults = _resultsByConfiguration[request.ConfigurationId];
 
                     // Check for targets explicitly specified.
-                    bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, response.ExplicitTargetsToBuild, skippedResultsAreOK);
+                    bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, response.ExplicitTargetsToBuild, skippedResultsDoNotCauseCacheMiss);
 
                     if (explicitTargetsSatisfied)
                     {
@@ -176,7 +176,7 @@ namespace Microsoft.Build.BackEnd
                         response.Type = ResultsCacheResponseType.Satisfied;
 
                         // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
-                        if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, null, skippedResultsAreOK))
+                        if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, null, skippedResultsDoNotCauseCacheMiss))
                         {
                             response.Type = ResultsCacheResponseType.NotSatisfied;
                         }
@@ -186,7 +186,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             // Check for the default target, if necessary.  If we don't know what the default targets are, we
                             // assume they are not satisfied.
-                            if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, null, skippedResultsAreOK))
+                            if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, null, skippedResultsDoNotCauseCacheMiss))
                             {
                                 response.Type = ResultsCacheResponseType.NotSatisfied;
                             }

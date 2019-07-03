@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="CannotAutoDisableAutoResponseFile">
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
-        <target state="translated">MSBUILD : ошибка MSB1027: ключ noAutoResponse не может быть указан в файле автоответа MSBuild.rsp или в любом другом файле ответа, на который файл автоответа ссылается.</target>
+        <target state="translated">MSBUILD : error MSB1027: ключ noAutoResponse не может быть указан в файле автоответа MSBuild.rsp или в любом другом файле ответа, на который файл автоответа ссылается.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="CopyrightMessage">
@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="translated">MSBUILD: ошибка MSB1058: можно указать только один выходной файл кэша результатов.</target>
+        <target state="translated">MSBUILD : error MSB1058: можно указать только один выходной файл кэша результатов.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -240,14 +240,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;файл&gt;            Вставьте параметры командной строки из текстового файла. Чтобы указать
-                     несколько файлов ответов, укажите каждый из них
-                     по отдельности.
-                     
-                     Любые файлы ответов с именем "msbuild.rsp" автоматически 
-                     используются из следующих расположений:
-                     (1) каталог msbuild.exe;
-                     (2) каталог первого собираемого проекта или решения.
+        <target state="translated">  @&lt;файл&gt;            Вставка параметров командной строки из текстового файла. Для задания
+                     нескольких файлов ответов укажите каждый файл ответов
+                     отдельно.
+
+                     Все файлы ответов с именем "msbuild.rsp" автоматически
+                     считываются из следующих расположений:
+                     (1) каталога, где находится файл msbuild.exe
+                     (2) каталога первой сборки проекта или решения
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -281,10 +281,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;целевые_объекты&gt; Собрать эти целевые объекты в конкретном проекте. Используйте точку с запятой или
-                     запятую для разделения нескольких целевых объектов или укажите каждый
+        <target state="translated">  -target:&lt;целевые объекты&gt;  Интегрировать эти конечные объекты в проект. Чтобы разделить несколько
+                     целевых объектов, используйте точку с запятой или запятую либо укажите каждый
                      целевой объект отдельно. (Краткая форма: -t)
-                     Пример:
+         Пример:
                        -target:Resources;Compile
 </target>
         <note>
@@ -304,9 +304,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Задать или переопределить конкретные свойства уровня проекта. &lt;n&gt; является
-                     именем свойства, а &lt;v&gt; — значением свойства. Используйте
-                     точку с запятой или запятую для разделения нескольких свойств или
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Установите или переопределите свойства уровня проекта. &lt;n&gt; является
+                     именем свойства, а &lt;v&gt; —  его значением. Используйте 
+                     точку с запятой или запятую, чтобы разделить несколько свойств, или
                      укажите каждое свойство отдельно. (Краткая форма: -p)
                      Пример:
                        -property:WarningLevel=2;OutDir=bin\Debug\
@@ -335,16 +335,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;средство&gt;   Использовать средство ведения журнала для записи событий из MSBuild. Чтобы указать
-                     несколько средств ведения журнала, задайте каждое средство отдельно.
-                     Синтаксис &lt;средство&gt;:
-                       [&lt;класс_средства&gt;,]&lt;сборка_средства&gt;[;&lt;параметры_средства&gt;]
-                     Синтаксис &lt;класс_средства&gt;:
-                       [&lt;частичное_или_полное_пространство_имен&gt;.]&lt;имя_класс_средства&gt;
-                     Синтаксис &lt;сборка_средства&gt;:
-                       {&lt;имя_сборки&gt;[,&lt;строгое_имя&gt;] | &lt;файл_сборки&gt;}
-                     &lt;Параметры_средства&gt; являются необязательными и передаются
-                     в средство ведения журнала в том виде, в каком были введены. (Краткая форма: -l)
+        <target state="translated">  -logger:&lt;журнал&gt;   Использовать этот журнал для регистрации событий из MSBuild. Чтобы
+                     задать несколько журналов, укажите каждый из них отдельно.
+                     Синтаксис &lt;журнала&gt;:
+                       [&lt;класс журнала&gt;,]&lt;сборка журнала&gt;[;&lt;параметры журнала&gt;]
+                     Синтаксис &lt;класса журнала&gt;:
+                       [&lt;частичное или полное пространство имен&gt;.]&lt;имя класса журнала&gt;
+                     Синтаксис &lt;сборки журнала&gt;:
+                       {&lt;имя сборки&gt;[,&lt;strong name&gt;] | &lt;файл сборки&gt;}
+                     &lt;Параметры журнала&gt; являются необязательными и передаются
+                     в журнал в таком же виде, в каком они вводятся. (Краткая форма: -l)
                      Примеры:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -365,8 +365,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="translated">  -verbosity:&lt;уровень&gt; Отобразить указанный объем информации в журнале событий.
-                     Доступные уровни детализации: q[uiet], m[inimal],
+        <target state="translated">  -verbosity:&lt;уровень&gt; Отображать эти сведения в журнале событий.
+                     Доступными уровнями детализации являются: q[uiet], m[inimal],
                      n[ormal], d[etailed] и diag[nostic]. (Краткая форма: -v)
                      Пример:
                        -verbosity:quiet
@@ -417,35 +417,35 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;параметры&gt;
-                     Параметры для журнала консоли. (Краткая форма: -clp)
-                     Доступные параметры
-                        PerformanceSummary — отобразить время, проведенное в задачах, целевых объектах
-                            и проектах.
-                        Summary — показать сводку ошибок и предупреждений в конце.
-                        NoSummary — не показывать сводку ошибок и предупреждений в
-                            конце.
-                        ErrorsOnly — показывать только ошибки.
-                        WarningsOnly — показывать только предупреждения.
-                        NoItemAndPropertyList — не показывать список элементов и
+                     Параметры журнала консоли. (Краткая форма: -clp)
+                     Доступны следующие параметры:
+                        PerformanceSummary--выводить время, затраченное на выполнение задач,
+                            целевых объектов и  проектов.
+                        Summary--выводить сводку ошибок и предупреждений по завершении работы.
+                        NoSummary--не выводить сводку ошибок и предупреждений по
+                            завершении работы.
+                        ErrorsOnly--выводить только ошибки.
+                        WarningsOnly--выводить только предупреждения.
+                        NoItemAndPropertyList--не отображать список элементов и
                             свойств в начале сборки каждого проекта.
-                        ShowCommandLine — показывать сообщения TaskCommandLineEvent.
-                        ShowTimestamp — отображать метку времени в виде префикса к любому
+                        ShowCommandLine--выводить сообщения TaskCommandLineEvent
+                        ShowTimestamp--выводить метку времени в качестве префикса к любому
                             сообщению.
-                        ShowEventId — показывать код события (eventId) для начатых событий, завершенных
-                            событий и сообщений.
-                        ForceNoAlign — не выравнивать текст в соответствии с размером
-                            буфера консоли.
-                        DisableConsoleColor — использовать цвета консоли по умолчанию
-                            для всех сообщений журнала.
-                        DisableMPLogging — отключить многопроцессорный
+                        ShowEventId--выводить код события eventId для запущенных событий,
+                            завершенных событий и сообщений
+                        ForceNoAlign--не выравнивать текст относительно размера
+                            буфера консоли
+                        DisableConsoleColor--использовать цвета консоли по умолчанию
+                            для всех сообщений ведения журнала.
+                        DisableMPLogging--отключить многопроцессорный
                             стиль ведения журнала выходных данных при работе в
-                            немногопроцессорном режиме.
-                        EnableMPLogging — включить многопроцессорный стиль
-                            ведения журнала даже при работе в немногопроцессорном
-                            режиме. Этот стиль используется по умолчанию.
-                        ForceConsoleColor — использовать цвета консоли ANSI, даже если
-                            консоль их не поддерживает.
-                        Verbosity — переопределяет настройку -verbosity для этого
+                            режиме, отличном от многопроцессорного.
+                        EnableMPLogging--включить многопроцессорный стиль ведения журнала
+                            даже при работе в режиме, отличном от
+                            многопроцессорного. Этот стиль ведения журнала включен по умолчанию.
+                        ForceConsoleColor--использовать ANSI-цвета в консоли, даже если
+                            она не поддерживает их
+                        Verbosity--переопределяет параметр -verbosity для этого
                             журнала.
                      Пример:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
@@ -485,10 +485,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Проверить проект схемой по умолчанию. (Краткая
+        <target state="translated">  -validate          Проверить проект с учетом схемы по умолчанию. (Краткая
                      форма: -val)
 
-  -validate:&lt;схема&gt; Проверить проект указанной схемой. (Краткая
+  -validate:&lt;схема&gt; Проверить проект с учетом указанной схемы. (Краткая
                      форма: -val)
                      Пример:
                        -validate:MyExtendedBuildSchema.xsd
@@ -551,9 +551,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;файл_кэша&gt;...
-                     Список входных файлов кэша через точку с запятой, из которых MSBuild
-                     будет считывать результаты сборки.
-                     При задании этого параметра также включаются изолированные сборки (-isolate).
+                     Разделенный точкам с запятой список входных файлов кэша, откуда MSBuild
+                     будет считывать результаты.
+                     Задание этого параметра также включает изолированные сборки (-isolate).
                      (Краткая форма: -irc)
    </target>
         <note>
@@ -603,19 +603,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;центральный_журнал&gt;*&lt;перенаправляющий_журнал&gt; 
-                     Используйте это средство ведения журнала для записи событий из MSBuild с прикреплением
-                     разных экземпляров к каждому узлу. Чтобы указать
-                     несколько журналов, задавайте каждый из них по отдельности.
+        <target state="translated">  -distributedLogger:&lt;центральный журнал&gt;*&lt;журнал перенаправления&gt;
+                     Использовать этот журнал для регистрации событий из MSBuild, присоединяя
+                     отдельный экземпляр журнала к каждому узлу. Чтобы задать
+                     несколько журналов, укажите каждый из них отдельно.
                      (Краткая форма: -dl)
                      Синтаксис &lt;журнала&gt;:
-                       [&lt;класс_журнала&gt;,]&lt;сборка_журнала&gt;[;&lt;параметры_журнала&gt;]
-                     Синтаксис &lt;класс_журнала&gt;:
-                       [&lt;частичное_или_полное_пространство_имен&gt;.]&lt;имя_класса_журнала&gt;
-                     Синтаксис &lt;сборки_журнала&gt;:
-                       {&lt;имя_сборки&gt;[,&lt;строгое_имя&gt;] | &lt;файл_сборки&gt;}
-                     &lt;Параметры_журнала&gt; являются необязательными и передаются
-                     в средство ведения журнала точно в том виде, в котором они введены. (Краткая форма: -l)
+                       [&lt;класс журнала&gt;,]&lt;сборка журнала&gt;[;&lt;параметры журнала&gt;]
+                     Синтаксис &lt;класса журнала&gt;:
+                       [&lt;частичное или полное пространство имен&gt;.]&lt;имя класса журнала&gt;
+                     Синтаксис &lt;сборки журнала&gt;:
+                       {&lt;имя сборки&gt;[,&lt;strong name&gt;] | &lt;файл сборки&gt;}
+                     &lt;Параметры журнала&gt; являются необязательными и передаются
+                     в журнал в таком же виде, в каком вводятся. (Краткая форма: -l)
                      Примеры:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -638,10 +638,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="translated">  -ignoreProjectExtensions:&lt;расширения&gt;
-                     Список расширений, которые пропускаются при определении
-                     файла проекта для сборки. Используйте точку с запятой или запятую,
-                     чтобы отделять разные расширения.
+        <target state="translated">  -ignoreprojectextensions:&lt;расширения&gt;
+                     Список игнорируемых расширений при определении
+                     типа создаваемого файла проекта. Используйте точку с запятой или запятую 
+                     для разделения нескольких расширений.
                      (Краткая форма: -ignore)
                      Пример:
                        -ignoreProjectExtensions:.sln
@@ -664,13 +664,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -toolsVersion:3.5
    </source>
-        <target state="translated">  -toolsVersion:&lt;версия&gt;
-                     Версия набора инструментов MSBuild (задачи, целевые объекты и т. д.),
-                     используемая во время сборки. Эта версия переопределит
-                     версии, указанные отдельными проектами. (Краткая форма:
+        <target state="translated">  -toolsversion:&lt;версия&gt;
+                     Версия набора инструментов MSBuild Toolset (задачи, целевые объекты и т. д.),
+                     которая будет использована при сборке. Эта версия заменит
+                   версии, определенные для отдельных проектов. (Краткая форма: 
                      -tv)
                      Пример:
-                       -toolsversion:3.5
+                       -toolsVersion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -724,17 +724,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     Записывает выходные данные сборки в несколько файлов журнала: по одному файлу журнала
-                     на узел MSBuild. Начальное расположение для этих файлов —
-                     текущий каталог. По умолчанию файлы называются
-                     "MSBuild&lt;идентификатор_узла&gt;.log". Расположение файлов и
-                     других параметров для fileLogger можно указать,
-                     добавив параметр "-fileLoggerParameters".
+          Вносит результаты сборки в несколько файлов журнала, по одному файлу журнала
+                     на узел MSBuild. Исходным расположением этих файлов является
+                     текущий каталог. По умолчанию файлы называются 
+                     "MSBuild&lt;идентификатор узла nodeid&gt;.log". Можно указать расположение файлов и
+                     другие параметры для fileLogger,
+                    добавив  параметр "-fileLoggerParameters".
 
-                     Если с помощью параметра fileLoggerParameters задано имя файла журнала (fileName),
-                     распределенное средство ведения журнала будет использовать это имя в качестве
-                     шаблона и добавлять к нему идентификаторы узлов, чтобы
-                     создать файл журнала на каждый узел.
+                     Если название файла журнала задано с помощью параметра fileLoggerParameters,
+                      распределенный журнал будет использовать fileName как
+                     шаблон и добавит идентификатор узла в fileName, чтобы
+                     создать файл журнала для каждого узла.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -776,26 +776,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;параметры&gt;
-                     Предоставляет дополнительные параметры для средств ведения журналов в виде файла.
-                     Присутствие этого параметра подразумевает использование
+                     Дополнительные параметры для журналов файлов.
+                     Наличие этого параметра предполагает наличие 
                      соответствующего параметра -fileLogger[n].
-                     Значение "n" (при наличии) может быть цифрой от 1 до 9.
-                     Свойство -fileLoggerParameters также может использоваться любыми распределенными
-                     средствами ведения файловых журналов. См. описание -distributedFileLogger.
+                     Значение "n" (при его наличии) может быть цифрой от 1 до 9.
+                     -fileLoggerParameters также используется любым распределенным
+                     журналом файла, см. описание -distributedFileLogger.
                      (Краткая форма: -flp[n])
-                     Доступны те же параметры, что перечислены для средства ведения журнала
-                     консоли. Вот некоторые дополнительные параметры.
-                        LogFile — путь к файлу журнала, в который будет
-                            записан журнал сборки.
-                        Append — определяет, будет ли журнал сборки добавлен
-                            в файл журнала или перезапишет его. При включении этого
-                            параметра журнал сборки добавляется к файлу журнала;
-                            если параметр не задан, то содержимое
-                            существующего файла журнала перезаписывается.
-                            Значение по умолчанию — не добавлять данные в файл журнала.
-                        Encoding — указывает для файла кодировку,
-                            например UTF-8, Юникод или ASCII.
-                     Детализация по умолчанию — подробная.
+                     Такие же параметры доступны для журнала
+                     консоли. Ниже перечислены некоторые дополнительные доступные параметры:
+                        LogFile--путь к файлу журнала, в который
+                            будет записан журнал сборки.
+                        Append--определяет, будет ли журнал сборки добавлен
+                            в файл журнала или перезапишет его. Установка
+                            параметра добавляет журнал сборки в файл журнала;
+                            Если параметр не задан, происходит перезапись
+                            содержимого существующего файла журнала.
+                            По умолчанию дополнения в файл журнала не вносятся.
+                        Encoding--задает кодировку файла,
+                            например UTF-8, Юникод или ASCII
+                     По умолчанию параметр детализации имеет значение "Детализированный".
                      Примеры:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
@@ -825,11 +825,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;параметры&gt;
-                     Включает или отключает многократное использование узлов MSBuild.
+                     Включает или отключает повторное использование узлов MSBuild.
                      Параметры:
-                     True — узлы останутся после завершения сборки
-                            и будут еще раз использованы в последующих сборках (по умолчанию)
-                     False — узлы не останутся после завершения сборки
+                     True --После завершения сборки узлы будут сохранены и
+                            использованы повторно для последующих сборок (по умолчанию)
+                     False --Узлы не будут сохранены после завершения сборки
                      (Краткая форма: -nr)
                      Пример:
                        -nr:true
@@ -891,7 +891,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
-        <target state="translated">MSBUILD: ошибка MSB1057 — значение сборки графа является недопустимым. {0}</target>
+        <target state="translated">MSBUILD : error MSB1057: значение сборки графа является недопустимым. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -901,7 +901,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidInteractiveValue">
         <source>MSBUILD : error MSB1055: Interactive value is not valid. {0}</source>
-        <target state="translated">MSBUILD: ошибка MSB1055 — интерактивное значение является недопустимым. {0}</target>
+        <target state="translated">MSBUILD : error MSB1055: интерактивное значение является недопустимым. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1055: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -911,7 +911,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="translated">MSBUILD: ошибка MSB1056 — значение изолирования проектов является недопустимым. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: значение изолирования проектов является недопустимым. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1235,12 +1235,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidExtensionToIgnore">
         <source>MSBUILD : error MSB1036: There is an invalid extension in the -ignoreProjectExtensions list. Extensions must start with a period ".", have one or more characters after the period and not contain any invalid path characters or wildcards.</source>
-        <target state="translated">MSBUILD : ошибка MSB1036: недопустимое расширение в списке -ignoreProjectExtensions. Расширения должны начинаться с точки ".", содержать один или несколько символов после точки и не могут включать в себя какие-либо недопустимые символы пути или подстановочные знаки.</target>
+        <target state="translated">MSBUILD : error MSB1036: недопустимое расширение в списке -ignoreProjectExtensions. Расширения должны начинаться с точки ".", содержать один или несколько символов после точки и не могут включать в себя какие-либо недопустимые символы пути или подстановочные знаки.</target>
         <note>{StrBegin="MSBUILD : error MSB1036: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MissingConsoleLoggerParameterError">
         <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch</source>
-        <target state="translated">MSBUILD : ошибка MSB1037: задайте один или несколько параметров журнала консоли при использовании ключа -consoleLoggerParameters</target>
+        <target state="translated">MSBUILD : error MSB1037: задайте один или несколько параметров журнала консоли при использовании ключа -consoleLoggerParameters</target>
         <note>{StrBegin="MSBUILD : error MSB1037: "}
       UE: This happens if the user does something like "msbuild.exe -consoleLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -consoleLoggerParameters:ErrorSummary".
@@ -1249,7 +1249,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingFileLoggerParameterError">
         <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch</source>
-        <target state="translated">MSBUILD : ошибка MSB1038: задайте один или несколько параметров для журнала файла при использовании ключа -fileLoggerParameters</target>
+        <target state="translated">MSBUILD : error MSB1038: задайте один или несколько параметров для журнала файла при использовании ключа -fileLoggerParameters</target>
         <note>{StrBegin="MSBUILD : error MSB1038: "}
       UE: This happens if the user does something like "msbuild.exe -fileLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -fileLoggerParameters:logfile=c:\temp\logfile".
@@ -1258,7 +1258,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MissingNodeReuseParameterError">
         <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch</source>
-        <target state="translated">MSBUILD : ошибка MSB1041: задайте один или несколько параметров для повторного использования узла при использовании ключа -nodeReuse</target>
+        <target state="translated">MSBUILD : error MSB1041: задайте один или несколько параметров для повторного использования узла при использовании ключа -nodeReuse</target>
         <note>{StrBegin="MSBUILD : error MSB1041: "}
       UE: This happens if the user does something like "msbuild.exe -nodeReuse:" without a true or false
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1328,7 +1328,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
-        <target state="translated">MSBUILD: error MSB1050: укажите, какой файл проекта или решения следует использовать, так как папка "{0}" содержит несколько таких файлов.</target>
+        <target state="translated">MSBUILD : error MSB1050: укажите, какой файл проекта или решения следует использовать, так как папка "{0}" содержит несколько таких файлов.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
       project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
@@ -1396,12 +1396,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="ParameterRequiredError">
         <source>MSBUILD : error MSB1049: The {0} parameter must be specified</source>
-        <target state="translated">MSBUILD: error MSB1049: необходимо указать параметр "{0}".</target>
+        <target state="translated">MSBUILD : error MSB1049: необходимо указать параметр "{0}".</target>
         <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="translated">MSBUILD: ошибка MSB1051: если используется параметр -warnAsMessage, нужно указать один код предупреждения (или несколько), которые следует считать сообщениями с низкой важностью.</target>
+        <target state="translated">MSBUILD : error MSB1051: если используется параметр -warnAsMessage, нужно указать один код предупреждения (или несколько), которые следует считать сообщениями с низкой важностью.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1533,7 +1533,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="translated">MSBUILD: ошибка MSB1042 — значение повторного использования узла является недопустимым. Эта версия MSBuild не поддерживает повторное использование узла. Значение должно быть "Ложь".</target>
+        <target state="translated">MSBUILD : error MSB1042: значение повторного использования узла является недопустимым. Эта версия MSBuild не поддерживает повторное использование узла. Значение должно быть "Ложь".</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1542,7 +1542,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="translated">MSBUILD: ошибка MSB1052 — значение восстановления является недопустимым. {0}</target>
+        <target state="translated">MSBUILD : error MSB1052: значение восстановления является недопустимым. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1556,11 +1556,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  -profileEvaluation:&lt;файл&gt;    
-                     Профилирует вычисление MSBuild и записывает результат
-                     в указанный файл. Если файл имеет расширение
-                     ".md", результат создается в формате Markdown.
-                     В противном случае создается файл с разделением табуляцией.
+        <target state="translated">  -profileEvaluation:&lt;файл&gt;
+                     Профилирует оценку MSBuild и записывает результат
+                     в указанный файл. Если указанный файл имеет
+                     расширение MD, результат создается в формате
+                     Markdown. В противном случае создается файл с разделением знаками табуляции.
     </target>
         <note />
       </trans-unit>
@@ -1577,15 +1577,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Задавайте или переопределяйте эти свойства уровня проекта только
-                     при восстановлении и не используйте указанные свойства
-                     с аргументом "-property". &lt;n&gt; — это имя свойства,
-                     а &lt;v&gt; — его значение. Используйте для разделения
-                     свойств запятую или точку с запятой либо укажите
-                     каждое свойство по-отдельности.
+                     Задайте или переопределите только свойства на уровне проекта
+                     во время восстановления и не используйте свойства, указанные
+                     с помощью аргумента -property. &lt;n&gt; является именем
+                     свойства, а &lt;v&gt; — его значением. Используйте
+                     точку с запятой или запятую, чтобы разделить несколько свойств,
+                     либо укажите каждое свойство отдельно.
                      (Краткая форма: -rp)
                      Пример:
-                       -restoreProperty:IsRestore=true;&lt;Свойство&gt;=&lt;значение&gt;
+                       -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.
@@ -1594,7 +1594,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="translated">MSBUILD: ошибка MSB1053 — указанное имя файла недопустимо. {0}</target>
+        <target state="translated">MSBUILD : error MSB1053: указанное имя файла недопустимо. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">

@@ -2214,7 +2214,17 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Adds the specified target to the instance.
         /// </summary>
-        internal ProjectTargetInstance AddTarget(string targetName, string condition, string inputs, string outputs, string returns, string keepDuplicateOutputs, string dependsOnTargets, bool parentProjectSupportsReturnsAttribute)
+        internal ProjectTargetInstance AddTarget(
+            string targetName,
+            string condition,
+            string inputs,
+            string outputs,
+            string returns,
+            string keepDuplicateOutputs,
+            string dependsOnTargets,
+            string beforeTargets,
+            string afterTargets,
+            bool parentProjectSupportsReturnsAttribute)
         {
             VerifyThrowNotImmutable();
 
@@ -2230,6 +2240,8 @@ namespace Microsoft.Build.Execution
                 returns, // returns may be null
                 keepDuplicateOutputs ?? String.Empty,
                 dependsOnTargets ?? String.Empty,
+                beforeTargets ?? String.Empty,
+                afterTargets ?? String.Empty,
                 _projectFileLocation,
                 String.IsNullOrEmpty(condition) ? null : ElementLocation.EmptyLocation,
                 String.IsNullOrEmpty(inputs) ? null : ElementLocation.EmptyLocation,
@@ -2237,8 +2249,8 @@ namespace Microsoft.Build.Execution
                 String.IsNullOrEmpty(returns) ? null : ElementLocation.EmptyLocation,
                 String.IsNullOrEmpty(keepDuplicateOutputs) ? null : ElementLocation.EmptyLocation,
                 String.IsNullOrEmpty(dependsOnTargets) ? null : ElementLocation.EmptyLocation,
-                null,
-                null,
+                String.IsNullOrEmpty(beforeTargets) ? null : ElementLocation.EmptyLocation,
+                String.IsNullOrEmpty(afterTargets) ? null : ElementLocation.EmptyLocation,
                 new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(new List<ProjectTargetInstanceChild>()),
                 new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(new List<ProjectOnErrorInstance>()),
                 parentProjectSupportsReturnsAttribute

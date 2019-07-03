@@ -50,7 +50,7 @@
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: "{0}" 식에서 메타데이터를 확장할 수 없습니다. {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
@@ -108,9 +108,16 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: MSBuild 작업이 ProjectReference 항목에 지정되지 않은 {0} 프로젝트를 빌드하고 있습니다. 격리된 빌드에서 이는 참조가 "{1}"에서 ProjectReference 항목으로 명시적으로 지정되지 않았음을 의미할 수 있습니다.</target>
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: MSBuild 작업이 ProjectReference 항목에 지정되지 않은 {0} 프로젝트를 빌드하고 있습니다. 격리된 빌드에서 이는 참조가 "{1}"에서 ProjectReference 항목으로 명시적으로 지정되지 않았음을 의미할 수 있습니다.</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -546,17 +553,17 @@
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: 가져온 "{0}" 프로젝트를 찾을 수 없습니다. &lt;Import&gt; 선언에 지정한 경로가 올바른지 그리고 파일이 디스크에 있는지 확인하세요.</target>
+        <target state="translated">MSB4019: 가져온 "{0}" 프로젝트를 찾을 수 없습니다. &lt;Import&gt; 선언에 지정한 경로가 올바른지 그리고 파일이 디스크에 있는지 확인하십시오.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: 가져온 "{0}" 프로젝트를 찾을 수 없습니다. {2} - {3}에 대한 대체 검색 경로로 "{1}"도 검색했습니다. 이 검색 경로는 "{4}"(으)로 정의됩니다. &lt;Import&gt; 선언에 지정한 경로가 올바른지 그리고 파일이 검색 경로 중 하나의 디스크에 있는지 확인하세요.</target>
+        <target state="translated">MSB4226: 가져온 프로젝트 "{0}"을(를) 찾을 수 없습니다. 또한 {2} ~ {3}에 대한 대체 검색 경로에서 "{1}"을(를) 찾으려고 시도했습니다. 이 검색 경로는 "{4}"에 정의되어 있습니다. &lt;Import&gt; 선언의 경로가 올바르고 검색 경로 중 하나의 디스크에 파일이 있는지 확인하세요.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: 가져온 "{0}" 프로젝트를 찾을 수 없습니다. {2} - {3}에 대한 대체 검색 경로로 "{1}"도 검색했습니다. &lt;Import&gt; 선언에 지정한 경로가 올바른지 그리고 파일이 검색 경로 중 하나의 디스크에 있는지 확인하세요.</target>
+        <target state="translated">MSB4226: 가져온 프로젝트 "{0}"을(를) 찾을 수 없습니다. 또한 {2} ~ {3}에 대한 대체 검색 경로에서 "{1}"을(를) 찾으려고 시도했습니다. &lt;Import&gt; 선언의 경로가 올바르고 검색 경로 중 하나의 디스크에 파일이 있는지 확인하세요.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
@@ -783,7 +790,7 @@
       </trans-unit>
       <trans-unit id="MissingTaskError">
         <source>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</source>
-        <target state="translated">MSB4036: "{0}" 작업을 찾을 수 없습니다. 다음을 확인하세요. 1) 프로젝트 파일에 있는 작업 이름이 작업 클래스 이름과 같은지 확인합니다. 2.) 작업 클래스가 "public"이고 Microsoft.Build.Framework.ITask 인터페이스를 구현하는지 확인합니다. 3.) 프로젝트 파일 또는 "{1}" 디렉터리에 있는 *.tasks 파일에 &lt;UsingTask&gt;를 사용하여 작업이 올바르게 선언되었는지 확인합니다.</target>
+        <target state="translated">MSB4036: "{0}" 작업을 찾을 수 없습니다. 다음을 수행하십시오. 1) 프로젝트 파일에 있는 작업 이름이 작업 클래스 이름과 같은지 확인합니다. 2) 작업 클래스가 "public"이고 Microsoft.Build.Framework.ITask 인터페이스를 구현하는지 확인합니다. 3) 프로젝트 파일 또는 "{1}" 디렉터리에 있는 *.tasks 파일에 &lt;UsingTask&gt;를 사용하여 작업이 올바르게 선언되었는지 확인합니다.</target>
         <note>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MSBuildToolsPathIsNotSpecified">
@@ -898,7 +905,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: 프로젝트의 기본 XML 네임스페이스는 MSBuild XML 네임스페이스이거나 없어야 합니다. 프로젝트를 MSBuild 2003 형식으로 작성한 경우에는 &lt;Project&gt; 요소에 xmlns="{0}"을(를) 추가하고, 프로젝트를 이전 1.0 또는 1.2 형식으로 작성한 경우에는 MSBuild 2003 형식으로 변환하세요.</target>
+        <target state="translated">MSB4041: 프로젝트의 기본 XML 네임스페이스는 MSBuild XML 네임스페이스여야 합니다. 프로젝트를 MSBuild 2003 형식으로 작성한 경우에는 &lt;Project&gt; 요소에 xmlns="{0}"을(를) 추가하세요. 프로젝트를 이전 1.0 또는 1.2 형식으로 작성한 경우에는 MSBuild 2003 형식으로 변환하세요.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1979,7 +1986,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: "{0}" 매개 변수의 구문이 잘못되었습니다({1}). 올바른 구문은 {0}="&lt;name&gt;=&lt;value&gt;"입니다.</target>
+        <target state="translated">MSB3100: "{0}" 매개 변수의 구문이 잘못되었습니다({1}). 올바른 구문은 {0}="&lt;이름&gt;=&lt;값&gt;"입니다.</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -2017,17 +2024,17 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="translated">MSB4227: &lt;{1}&gt; 요소의 "{0}" 특성은 같은 이름의 특성이 이미 있으므로 잘못되었습니다.</target>
+        <target state="translated">MSB4227: 해당 이름을 가진 특성이 이미 있으므로 요소 &lt;{1}&gt;의 "{0}" 특성은 유효하지 않습니다.</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="translated">MSB4228: &lt;{1}&gt; 요소에서 특성으로 표시된 메타데이터에 대한 "{0}" 이름이 잘못되었습니다.</target>
+        <target state="translated">MSB4228: 요소 &lt;{1}&gt;에서 특성으로 표시된 메타데이터의 이름 "{0}"이(가) 유효하지 않습니다.</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="translated">&lt;{0}&gt; 요소에는 "{1}" 특성, "{2}" 특성 또는 "{3}" 특성 중 하나가 있어야 하지만 두 개 이상이 있을 수는 없습니다.</target>
+        <target state="translated">&lt;{0}&gt; 요소에는 "{1}" 특성, "{2}" 특성 또는 "{3}" 특성 중 하나만 포함되어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
@@ -2182,7 +2189,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD : 오류 MSB4239: 프로파일링 보고서를 쓰는 동안 오류가 발생했습니다. {0}</target>
+        <target state="translated">MSBUILD : error MSB4239: 프로파일링 보고서를 쓰는 동안 오류가 발생했습니다. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">

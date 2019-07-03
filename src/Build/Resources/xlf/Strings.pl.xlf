@@ -50,7 +50,7 @@
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: Nie można rozwinąć metadanych w wyrażeniu „{0}”. {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
@@ -108,9 +108,16 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: Zadanie programu MSBuild kompiluje projekty {0}, które nie są określone w elemencie ProjectReference. W przypadku kompilacji izolowanych prawdopodobnie oznacza to, że odwołania nie zostały jawnie określone jako element ProjectReference w pliku „{1}”</target>
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: Zadanie programu MSBuild kompiluje projekty {0}, które nie są określone w elemencie ProjectReference. W przypadku kompilacji izolowanych prawdopodobnie oznacza to, że odwołania nie zostały jawnie określone jako element ProjectReference w pliku „{1}”</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -783,7 +790,7 @@
       </trans-unit>
       <trans-unit id="MissingTaskError">
         <source>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</source>
-        <target state="translated">MSB4036: Nie można odnaleźć zadania „{0}”. Sprawdź, czy: 1.) Nazwa zadania w pliku projektu jest taka sama jak nazwa klasy zadania. 2.) Klasą zadania jest klasa „public”, która implementuje interfejs Microsoft.Build.Framework.ITask. 3.) Zadanie jest poprawnie zadeklarowane za pomocą parametru &lt;UsingTask&gt; w pliku projektu lub w plikach *.tasks zlokalizowanych w katalogu „{1}”.</target>
+        <target state="translated">MSB4036: Nie można odnaleźć zadania „{0}”. Sprawdź, czy: 1) Nazwa zadania w pliku projektu jest taka sama, jak nazwa klasy zadania. 2) Klasą zadania jest „public” i implementuje ona interfejs Microsoft.Build.Framework.ITask. 3) Zadanie jest poprawnie zadeklarowane za pomocą parametru &lt;UsingTask&gt; w pliku projektu lub w plikach *.tasks zlokalizowanych w katalogu „{1}”.</target>
         <note>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MSBuildToolsPathIsNotSpecified">
@@ -1121,7 +1128,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Operacja zostanie pominięta, ponieważ konfiguracja „$(AspNetConfiguration)” nie jest obsługiwana w tym projekcie sieci Web.  Można za pomocą właściwości AspNetConfiguration przesłonić konfigurację używaną do tworzenia projektów sieci Web, dodając parametr /p:AspNetConfiguration=&lt;value&gt; do wiersza polecenia. Obecnie projekty sieci Web obsługują tylko konfiguracje Debug i Release.</target>
+        <target state="translated">Trwa pomijanie, ponieważ konfiguracja „$(AspNetConfiguration)” nie jest obsługiwana w tym projekcie sieci Web. Można za pomocą właściwości AspNetConfiguration przesłonić konfigurację używaną do tworzenia projektów sieci Web, dodając parametr /p:AspNetConfiguration=&lt;value&gt; do wiersza polecenia. Obecnie projekty sieci Web obsługują tylko konfiguracje Debug i Release.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1979,7 +1986,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: Składnia parametru „{0}” jest nieprawidłowa ({1}). Poprawna składnia to {0}="&lt;nazwa&gt;=&lt;wartość&gt;".</target>
+        <target state="translated">MSB3100: Składnia parametru „{0}” jest nieprawidłowa ({1}). Poprawna składnia to {0}="&lt;name&gt;=&lt;value&gt;".</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -2017,12 +2024,12 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="translated">MSB4227: Atrybut „{0}” elementu &lt;{1}&gt; jest nieprawidłowy, ponieważ atrybut o tej nazwie już istnieje.</target>
+        <target state="translated">MSB4227: Atrybut „{0}” elementu &lt;{1}&gt; jest nieprawidłowy, ponieważ atrybut o tej nazwie już istnieje</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="translated">MSB4228: Nazwa „{0}” jest nieprawidłowa w przypadku metadanych wyrażonych jako atrybut (elementu &lt;{1}&gt;).</target>
+        <target state="translated">MSB4228: Nazwa „{0}” jest nieprawidłowa w przypadku metadanych wyrażonych jako atrybut (elementu &lt;{1}&gt;)</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
@@ -2182,7 +2189,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD : błąd MSB4239: Błąd zapisywania raportu profilowania. {0}</target>
+        <target state="translated">MSBUILD : error MSB4239: Błąd zapisywania raportu profilowania. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">

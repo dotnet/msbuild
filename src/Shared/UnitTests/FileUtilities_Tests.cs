@@ -402,6 +402,7 @@ namespace Microsoft.Build.UnitTests
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>
@@ -1032,6 +1033,21 @@ namespace Microsoft.Build.UnitTests
         public void ContainsRelativeSegmentsTest(string path, bool expectedResult)
         {
             FileUtilities.ContainsRelativePathSegments(path).ShouldBe(expectedResult);
+        }
+
+        [Theory]
+        [InlineData("a/b/c/d", 0, "")]
+        [InlineData("a/b/c/d", 1, "d")]
+        [InlineData("a/b/c/d", 2, "c/d")]
+        [InlineData("a/b/c/d", 3, "b/c/d")]
+        [InlineData("a/b/c/d", 4, "a/b/c/d")]
+        [InlineData("a/b/c/d", 5, "a/b/c/d")]
+        [InlineData(@"a\/\/\//b/\/\/\//c//\/\/\/d/\//\/\/", 2, "c/d")]
+        public static void TestTruncatePathToTrailingSegments(string path, int trailingSegments, string expectedTruncatedPath)
+        {
+            expectedTruncatedPath = expectedTruncatedPath.Replace('/', Path.DirectorySeparatorChar);
+
+            FileUtilities.TruncatePathToTrailingSegments(path, trailingSegments).ShouldBe(expectedTruncatedPath);
         }
     }
 }

@@ -57,7 +57,7 @@ namespace Microsoft.Build.Execution
         private Dictionary<string, NodeAffinity> _projectAffinities;
 
 #if FEATURE_COM_INTEROP
-        private IRunningObjectTableWrapper _runningObjectTable = new RunningObjectTable();
+        private Lazy<IRunningObjectTableWrapper> _runningObjectTable = new Lazy<IRunningObjectTableWrapper>(() => new RunningObjectTable());
 #endif
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Execution
                     try
                     {
                         object objectFromRunningObjectTable =
-                            _runningObjectTable.GetObject(monikerNameOrITaskHost.MonikerName);
+                            _runningObjectTable.Value.GetObject(monikerNameOrITaskHost.MonikerName);
                         return (ITaskHost)objectFromRunningObjectTable;
                     }
                     catch (Exception ex) when (ex is COMException || ex is InvalidCastException)
@@ -383,7 +383,7 @@ namespace Microsoft.Build.Execution
         /// <param name="runningObjectTable"></param>
         internal void SetTestRunningObjectTable(IRunningObjectTableWrapper runningObjectTable)
         {
-            _runningObjectTable = runningObjectTable;
+            _runningObjectTable = new Lazy<IRunningObjectTableWrapper>(() => runningObjectTable);
         }
 #endif
 

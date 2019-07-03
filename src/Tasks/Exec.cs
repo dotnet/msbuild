@@ -46,6 +46,7 @@ namespace Microsoft.Build.Tasks
         private const string UseUtf8Always = "ALWAYS";
         private const string UseUtf8Never = "NEVER";
         private const string UseUtf8Detect = "DETECT";
+        private const string UseUtf8System = "SYSTEM";
 
         // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
@@ -479,7 +480,7 @@ namespace Microsoft.Build.Tasks
                 : Directory.GetCurrentDirectory();
 
             // check if the working directory we're going to use for the exec command is a UNC path
-            workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern.IsMatch(_workingDirectory);
+            workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern(_workingDirectory);
 
             // if the working directory is a UNC path, and all drive letters are mapped, bail out, because the pushd command
             // will not be able to auto-map to the UNC path
@@ -650,7 +651,7 @@ namespace Microsoft.Build.Tasks
 
         #endregion
 
-        private static readonly Encoding s_utf8WithoutBom = new UTF8Encoding(false);
+        private static readonly Encoding s_utf8WithoutBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
         /// <summary>
         /// Find the encoding for the batch file.
@@ -670,10 +671,20 @@ namespace Microsoft.Build.Tasks
             }
 
             var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+
+            // When Windows is configured to use UTF-8 by default, the above returns
+            // a UTF-8-with-BOM encoding, which cmd.exe can't interpret. Force the no-BOM
+            // encoding if the returned encoding would have emitted one (preamble is nonempty).
+            // See https://github.com/Microsoft/msbuild/issues/4268
+            if (defaultEncoding is UTF8Encoding e && e.GetPreamble().Length > 0)
+            {
+                defaultEncoding = s_utf8WithoutBom;
+            }
+
             string useUtf8 = string.IsNullOrEmpty(UseUtf8Encoding) ? UseUtf8Detect : UseUtf8Encoding;
 
 #if FEATURE_OSVERSION
-            // UTF8 is only supposed in Windows 7 (6.1) or greater.
+            // UTF8 is only supported in Windows 7 (6.1) or greater.
             var windows7 = new Version(6, 1);
 
             if (Environment.OSVersion.Version < windows7)
@@ -687,7 +698,8 @@ namespace Microsoft.Build.Tasks
                 case UseUtf8Always:
                     return s_utf8WithoutBom;
                 case UseUtf8Never:
-                    return EncodingUtilities.CurrentSystemOemEncoding;
+                case UseUtf8System:
+                    return defaultEncoding;
                 default:
                     return CanEncodeString(defaultEncoding.CodePage, Command + WorkingDirectory)
                         ? defaultEncoding

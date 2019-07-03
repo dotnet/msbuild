@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="CannotAutoDisableAutoResponseFile">
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
-        <target state="translated">MSBUILD: error MSB1027: Impossible de spécifier le commutateur -noAutoResponse dans le fichier réponse automatique MSBuild.rsp, ni dans aucun autre fichier réponse référencé par le fichier réponse automatique.</target>
+        <target state="translated">MSBUILD : error MSB1027: Impossible de spécifier le commutateur -noAutoResponse dans le fichier réponse automatique MSBuild.rsp, ni dans aucun autre fichier réponse référencé par le fichier réponse automatique.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="CopyrightMessage">
@@ -34,7 +34,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="translated">MSBUILD : erreur MSB1058 : un seul cache de résultats de sortie peut être spécifié.</target>
+        <target state="translated">MSBUILD : error MSB1058: un seul cache de résultats de sortie peut être spécifié.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -241,14 +241,14 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;fichier&gt;         Insérer les paramètres de ligne de commande à partir d'un fichier texte. Pour indiquer
-                     plusieurs fichiers réponse, spécifiez chacun d'eux
-                     séparément.
+        <target state="translated">  @&lt;fichier&gt;         Insère les paramètres de ligne de commande à partir d'un
+         fichier texte. Pour indiquer plusieurs fichiers réponse, spécifiez
+         chacun d'eux séparément.
 
-                     Tous les fichiers réponse nommés "msbuild.rsp" sont automatiquement
-                     consommés depuis les emplacements suivants :
-                     (1) répertoire de msbuild.exe
-                     (2) répertoire de la première solution ou du premier projet généré
+         Tous les fichiers réponse nommés "msbuild.rsp" sont automatiquement
+         consommés depuis les emplacements suivants :
+         (1) répertoire de msbuild.exe
+         (2) répertoire de la première solution ou du premier projet généré
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -282,11 +282,11 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;cibles&gt;  Générer ces cibles dans ce projet. Utilisez un point-virgule ou une
-                     virgule pour séparer plusieurs cibles, ou spécifiez chaque
-                     cible séparément. (Forme abrégée : -t)
-                     Exemple :
-                       -target:Resources;Compile
+        <target state="translated">  -target:&lt;cibles&gt;   Génère ces cibles dans le projet. Utilisez un point-virgule
+         ou une virgule pour séparer plusieurs cibles, ou spécifiez chaque
+         cible à part. (Forme abrégée : -t)
+         Exemple :
+           -target:Resources;Compile
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -305,12 +305,12 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Définir ou remplacer ces propriétés au niveau du projet. &lt;n&gt; est
-                     le nom de la propriété et &lt;v&gt;, la valeur de la propriété. Utilisez un
-                     point-virgule ou une virgule pour séparer plusieurs propriétés, ou
-                     spécifiez chacune d'elles séparément. (Forme abrégée : -p)
-                     Exemple :
-                       -property:WarningLevel=2;OutDir=bin\Debug\
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt; Définit ou remplace ces propriétés au niveau du projet. &lt;n&gt;
+      est le nom de propriété et &lt;v&gt; la valeur de propriété. Utilisez un
+      point-virgule ou une virgule pour séparer plusieurs propriétés, ou
+      spécifiez chaque propriété à part. (Forme abrégée : -p)
+      Exemple :
+           -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -336,19 +336,21 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;journaliseur&gt;   Journaliser les événements de MSBuild dans ce journaliseur. Pour indiquer
-                     plusieurs journaliseurs, spécifiez chacun d'eux séparément.
-                     Syntaxe de l'entrée &lt;journaliseur&gt; :
-                       [&lt;classe de journaliseur&gt;,]&lt;assembly de journaliseur&gt;[;&lt;paramètres de journaliseur&gt;]
-                     Syntaxe de l'entrée &lt;classe de journaliseur&gt; :
-                       [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la classe de journaliseur&gt;
-                     Syntaxe de l'entrée &lt;assembly de journaliseur&gt; :
-                       {&lt;nom de l'assembly&gt;[,&lt;nom fort] | &lt;fichier d'assembly&gt;}
-                     Les &lt;paramètres de journaliseur&gt; sont facultatifs. Ils sont passés
-                     au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
-                     Exemples :
-                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+        <target state="translated">  -logger:&lt;journaliseur&gt;   Journaliseur des événements MSBuild. Pour indiquer
+         plusieurs journaliseurs, spécifiez chacun d'eux séparément.
+         Syntaxe de &lt;journaliseur&gt; :
+           [&lt;classe de journalisation&gt;,]&lt;assembly de journalisation&gt;
+           [;&lt;paramètres de journalisation&gt;]
+         Syntaxe de &lt;classe de journalisation&gt; :
+           [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la
+           classe de journalisation&gt;
+         Syntaxe de &lt;assembly de journalisation&gt; :
+           {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
+         Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
+         au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
+         Exemples :
+           -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+           -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -366,11 +368,11 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="translated">  -verbosity:&lt;niveau&gt; Afficher ce niveau de données dans le journal des événements.
-                     Niveaux de commentaires disponibles : q[uiet], m[inimal],
-                     n[ormal], d[etailed] et diag[nostic]. (Forme abrégée : -v)
-                     Exemple :
-                       -verbosity:quiet
+        <target state="translated">  -verbosity:&lt;niveau&gt; Volume d'inform. affiché dans le journal des événements
+         Les niveaux de détail disponibles sont : q[uiet], m[inimal],
+         n[ormal], d[etailed] et diag[nostic]. (Forme abrégée : -v)
+         Exemple :
+           -verbosity:quiet
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -418,39 +420,39 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;paramètres&gt;
-                     Paramètres du journaliseur de la console. (Forme abrégée : -clp)
-                     Paramètres disponibles :
-                        PerformanceSummary--Afficher la durée des tâches, des cibles
-                            et des projets.
-                        Summary--Afficher un récapitulatif des erreurs et des avertissements à la fin.
-                        NoSummary--Ne pas afficher de récapitulatif des erreurs et des avertissements à la
-                            fin.
-                        ErrorsOnly--Afficher uniquement les erreurs.
-                        WarningsOnly--Afficher uniquement les avertissements.
-                        NoItemAndPropertyList--Ne pas afficher la liste des éléments et
-                            des propriétés au début de chaque génération de projet.
-                        ShowCommandLine--Afficher les messages de TaskCommandLineEvent
-                        ShowTimestamp--Afficher l'horodatage en tant que préfixe des
-                            messages.
-                        ShowEventId--Afficher eventId pour les événements démarrés et
-                            achevés, ainsi que les messages
-                        ForceNoAlign--Ne pas aligner le texte par rapport à la taille de la
-                            mémoire tampon de la console
-                        DisableConsoleColor--Utiliser les couleurs de la console par défaut
-                            pour tous les messages de journalisation.
-                        DisableMPLogging--Désactiver le style de journalisation multiprocesseur
-                            de la sortie durant l'exécution en
-                            mode non multiprocesseur.
-                        EnableMPLogging--Activer le style de journalisation multiprocesseur
-                            même durant l'exécution en mode non
-                            multiprocesseur. Ce style de journalisation est activé par défaut.
-                        ForceConsoleColor--Utiliser les couleurs de la console ANSI même si
-                            cela n'est pas pris en charge par la console
-                        Verbosity--remplace le paramètre -verbosity pour ce
-                            journaliseur.
-                     Exemple :
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                                                 Verbosity=minimal
+         Paramètres du journaliseur de la console. (Forme abrégée : -clp)
+         Paramètres disponibles :
+            PerformanceSummary--Affiche la durée des tâches, des cibles
+                et des projets.
+            Summary--Récapitulatif des erreurs et des avertissements à la fin.
+            NoSummary--Aucun récapitulatif des erreurs et des avertissements
+                à la fin.
+            ErrorsOnly--Affiche uniquement les erreurs.
+            WarningsOnly--Affiche uniquement les avertissements.
+            NoItemAndPropertyList--N'affiche pas la liste des éléments et
+                des propriétés au début de chaque build de projet.
+            ShowCommandLine--Affiche les messages de TaskCommandLineEvent
+            ShowTimestamp--Affiche l'horodatage en tant que préfixe des
+                messages.
+            ShowEventId--Affiche eventId pour les événements démarrés et
+                achevés ainsi que les messages
+            ForceNoAlign--N'aligne pas le texte par rapport à la taille de la
+                mémoire tampon de la console
+            DisableConsoleColor--Utilise les couleurs de la console par défaut
+                pour tous les messages de journalisation.
+            DisableMPLogging--Désactive le style de journalisation
+                multiprocesseur de la sortie durant l'exécution en
+                mode non multiprocesseur.
+            EnableMPLogging--Active le style de journalisation multiprocesseur
+                même durant l'exécution en mode non
+                multiprocesseur. Style de journalisation activé par défaut.
+            ForceConsoleColor--Utilise les couleurs de la console ANSI même si
+                cela n'est pas pris en charge par la console
+            Verbosity--Remplace le paramètre -verbosity pour ce
+                journaliseur.
+         Exemple :
+            -consoleLoggerParameters:PerformanceSummary;NoSummary;
+                         Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -486,13 +488,13 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Valider le projet par rapport au schéma par défaut. (Forme
-                     abrégée : -val)
+        <target state="translated">  -validate          Valide le projet par rapport au schéma par défaut. (Forme
+         abrégée : -val)
 
-  -validate:&lt;schéma&gt; Valider le projet par rapport au schéma spécifié. (Forme
-                     abrégée : -val)
-                     Exemple :
-                       -validate:MyExtendedBuildSchema.xsd
+  -validate:&lt;schéma&gt; Valide le projet par rapport au schéma spécifié. (Forme
+         abrégée : -val)
+         Exemple :
+           -validate:MyExtendedBuildSchema.xsd
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -550,11 +552,11 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Liste de fichiers cache d'entrée séparés par des points-virgules, à partir desquels MSBuild
-                     va lire les résultats de la build.
-                     Ce paramètre active également les builds isolées (-isolate).
-                     (forme abrégée : -irc)
+        <target state="translated">  -inputResultsCaches:&lt;fichierCache&gt;...
+         Liste de fichiers cache d'entrée séparés par des points-virgules, à
+         partir desquels MSBuild va lire les résultats de la build.
+         Ce paramètre active également les builds isolées (-isolate).
+         (Forme abrégée : -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -604,21 +606,23 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
         <target state="translated">  -distributedLogger:&lt;journaliseur central&gt;*&lt;journaliseur de transfert&gt;
-                     Utilisez ce journaliseur pour journaliser les événements de MSBuild, en attachant
-                     une instance de journaliseur différente à chaque nœud. Pour indiquer
-                     plusieurs journaliseurs, spécifiez chacun d'eux séparément.
-                     (Forme abrégée : -dl)
-                     Syntaxe de &lt;journaliseur&gt; :
-                       [&lt;classe de journaliseur&gt;,]&lt;assembly de journaliseur&gt;[;&lt;paramètres de journaliseur&gt;]
-                     Syntaxe de &lt;classe de journaliseur&gt; :
-                       [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la classe de journaliseur&gt;
-                     Syntaxe de &lt;assembly de journaliseur&gt; :
-                       {&lt;nom de l'assembly&gt;[,&lt;nom fort] | &lt;fichier d'assembly&gt;}
-                     Les &lt;paramètres de journaliseur&gt; sont facultatifs. Ils sont passés
-                     au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
-                     Exemples :
-                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+         Utilise ce journaliseur pour consigner les événements MSBuild, en
+         attachant une instance de journaliseur différente à chaque nœud. Pour
+         indiquer plusieurs journaliseurs, spécifiez chacun d'eux séparément.
+         (Forme abrégée -dl)
+         Syntaxe de &lt;journaliseur&gt; :
+           [&lt;classe de journalisation&gt;,]&lt;assembly de journalisation&gt;
+           [;&lt;paramètres de journalisation&gt;]
+         Syntaxe de &lt;classe de journalisation&gt; :
+           [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la
+           classe de journalisation&gt;
+         Syntaxe de &lt;assembly de journalisation&gt; :
+           {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
+         Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
+         au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
+         Exemples :
+           -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+           -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -639,12 +643,12 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;extensions&gt;
-                     Liste d'extensions à ignorer au moment de la sélection
-                     du fichier projet à générer. Utilisez un point-virgule ou une virgule
-                     pour séparer plusieurs extensions.
-                     (Forme abrégée : -ignore)
-                     Exemple :
-                       -ignoreProjectExtensions:.sln
+         Liste d'extensions à ignorer au moment de la sélection
+         du fichier projet à générer. Utilisez un point-virgule ou une virgule
+         pour séparer plusieurs extensions.
+         (Forme abrégée : -ignore)
+         Exemple :
+           -ignoreProjectExtensions:.sln
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -665,12 +669,12 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -toolsVersion:3.5
    </source>
         <target state="translated">  -toolsVersion:&lt;version&gt;
-                     Version de l'ensemble d'outils MSBuild (tâches, cibles, etc.)
-                     à utiliser durant la génération. Cette version remplace les
-                     versions spécifiées par chacun des projets. (Forme abrégée :
-                     -tv)
-                     Exemple :
-                       -toolsVersion:3.5
+         Version de l'ensemble d'outils MSBuild (tâches, cibles, etc.)
+         à utiliser durant la génération. Cette version remplace les
+         versions spécifiées par chacun des projets. (Forme abrégée :
+         -tv)
+         Exemple :
+           -toolsVersion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -724,17 +728,17 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     Enregistre la sortie de build dans plusieurs fichiers journaux, à raison
-                     d'un fichier journal par nœud MSBuild. L'emplacement initial de ces fichiers est
-                     le répertoire actif. Par défaut, les fichiers sont nommés
-                     "MSBuild&lt;idnœud&gt;.log". Vous pouvez spécifier l'emplacement des fichiers et
-                     d'autres paramètres pour fileLogger
-                     en ajoutant le commutateur "-fileLoggerParameters".
+         Enregistre la sortie de build dans plusieurs fichiers journaux, à
+         raison d'un fichier journal par nœud MSBuild. L'emplacement initial de
+         ces fichiers est le répertoire actif. Par défaut, les fichiers sont
+         nommés "MSBuild&lt;idnœud&gt;.log". Vous pouvez spécifier l'emplacement
+         des fichiers et d'autres paramètres pour fileLogger
+         en ajoutant le commutateur "-fileLoggerParameters".
 
-                     Si un nom de fichier journal est défini via le commutateur fileLoggerParameters,
-                     le journaliseur distribué utilise fileName comme
-                     modèle et lui ajoute l'ID du nœud afin de
-                     créer un fichier journal pour chaque nœud.
+         Si un nom de fichier journal est défini via le commutateur
+         fileLoggerParameters, le journaliseur distribué utilise fileName comme
+         modèle et lui ajoute l'ID du nœud afin de
+         créer un fichier journal pour chaque nœud.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -776,33 +780,34 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;paramètres&gt;
-                     Paramètres supplémentaires pour les journaliseurs vers des fichiers.
-                     La présence de ce commutateur implique l'utilisation du
-                     commutateur -filelogger[n] correspondant.
-                     S'il est spécifié, "n" doit être un chiffre entre 1 et 9.
-                     -fileLoggerParameters est également utilisé par tous les
-                     journaliseurs vers des fichiers. Consultez la description de -distributedFileLogger.
-                     (Forme abrégée : -flp[n])
-                     Les mêmes paramètres que ceux répertoriés pour le journaliseur de la console sont
-                     disponibles. Paramètres supplémentaires disponibles :
-                        LogFile--Chemin du fichier journal dans lequel
-                            le journal de génération est écrit.
-                        Append--Détermine si le journal de génération est ajouté
-                            au fichier journal ou s'il le remplace. Si vous utilisez le
-                            commutateur, le journal de génération est ajouté au fichier journal.
-                            Sinon, le contenu du fichier journal
-                            existant est remplacé.
-                            Par défaut, le fichier journal est remplacé.
-                        Encoding--Spécifie l'encodage du fichier,
-                            par exemple, UTF-8, Unicode ou ASCII
-                     Le niveau de commentaires par défaut est Detailed.
-                     Exemples :
-                       -fileLoggerParameters:LogFile=MyLog.log;Append;
-                                           Verbosity=diagnostic;Encoding=UTF-8
+         Paramètres supplémentaires pour les journaliseurs de fichiers.
+         La présence de ce commutateur implique l'utilisation du
+         commutateur -fileLogger[n] correspondant.
+         S'il est spécifié, "n" doit être un chiffre entre 1 et 9.
+         -fileLoggerParameters est également utilisé par tous les
+         journaliseurs vers des fichiers. Consultez la description
+         de -distributedFileLogger.
+         (Forme abrégée : -flp[n])
+         Les mêmes paramètres que ceux listés pour le journaliseur de la
+         console sont disponibles. Paramètres supplémentaires disponibles :
+            LogFile--Chemin du fichier journal dans lequel
+                le journal de génération est écrit.
+            Append--Détermine si le journal de génération est ajouté
+                au fichier journal ou s'il le remplace. Si vous utilisez le
+                commutateur, le journal de génération est ajouté au fichier
+                journal. Sinon, le contenu du fichier journal
+                existant est remplacé.
+                Par défaut, le fichier journal est remplacé.
+            Encoding--Spécifie l'encodage du fichier,
+                par exemple, UTF-8, Unicode ou ASCII
+         Le niveau de détail par défaut est Detailed.
+         Exemples :
+           -fileLoggerParameters:LogFile=MyLog.log;Append;
+                   Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
-                       -flp2:errorsonly;logfile=msbuild.err
+           -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+           -flp1:warningsonly;logfile=msbuild.wrn
+           -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -825,14 +830,14 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;paramètres&gt;
-                     Active ou désactive la réutilisation des nœuds MSBuild.
-                     Paramètres :
-                     True--Les nœuds sont conservés à la fin de la génération et
-                            sont réutilisés par les générations ultérieures (valeur par défaut).
-                     False--Les nœuds ne sont pas conservés à la fin de la génération.
-                     (Forme abrégée : -nr)
-                     Exemple :
-                       -nr:true
+         Active ou désactive la réutilisation des nœuds MSBuild.
+         Paramètres :
+         True--Les nœuds sont conservés une fois la build achevée
+                et sont réutilisés par les builds suivantes (par défaut)
+         False--Les nœuds ne sont pas conservés une fois la build achevée
+         (Forme abrégée : -nr)
+         Exemple :
+           -nr:true
     </target>
         <note />
       </trans-unit>
@@ -891,7 +896,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1057: La valeur de build du graphe n'est pas valide. {0}</target>
+        <target state="translated">MSBUILD : error MSB1057: La valeur de build du graphe n'est pas valide. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -901,7 +906,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidInteractiveValue">
         <source>MSBUILD : error MSB1055: Interactive value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1055: La valeur interactive n'est pas valide. {0}</target>
+        <target state="translated">MSBUILD : error MSB1055: La valeur interactive n'est pas valide. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1055: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -911,7 +916,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1056: La valeur d’isolation des projets n'est pas valide. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: La valeur d’isolation des projets n'est pas valide. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1235,12 +1240,12 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidExtensionToIgnore">
         <source>MSBUILD : error MSB1036: There is an invalid extension in the -ignoreProjectExtensions list. Extensions must start with a period ".", have one or more characters after the period and not contain any invalid path characters or wildcards.</source>
-        <target state="translated">MSBUILD : error MSB1036: Extension non valide dans la liste -ignoreProjectExtensions. Les extensions doivent commencer par un point (".") et contenir au moins un caractère après ce point. Par ailleurs, elles ne doivent pas contenir de caractères génériques ni de caractères de chemin non valides.</target>
+        <target state="translated">MSBUILD : error MSB1036: Extension non valide dans la liste -ignoreProjectExtensions. Les extensions doivent commencer par un point (".") et contenir au moins un caractère après ce point. Par ailleurs, elles ne doivent pas contenir de caractères génériques ni de caractères de chemin non valides.</target>
         <note>{StrBegin="MSBUILD : error MSB1036: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MissingConsoleLoggerParameterError">
         <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1037: Spécifiez un ou plusieurs paramètres pour le journaliseur de console si vous utilisez le commutateur -consoleLoggerParameters</target>
+        <target state="translated">MSBUILD : error MSB1037: Spécifiez un ou plusieurs paramètres pour le journaliseur de console si vous utilisez le commutateur -consoleLoggerParameters</target>
         <note>{StrBegin="MSBUILD : error MSB1037: "}
       UE: This happens if the user does something like "msbuild.exe -consoleLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -consoleLoggerParameters:ErrorSummary".
@@ -1249,7 +1254,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="MissingFileLoggerParameterError">
         <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1038: Spécifiez un ou plusieurs paramètres pour le journaliseur vers un fichier si vous utilisez le commutateur -fileLoggerParameters</target>
+        <target state="translated">MSBUILD : error MSB1038: Spécifiez un ou plusieurs paramètres pour le journaliseur vers un fichier si vous utilisez le commutateur -fileLoggerParameters</target>
         <note>{StrBegin="MSBUILD : error MSB1038: "}
       UE: This happens if the user does something like "msbuild.exe -fileLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -fileLoggerParameters:logfile=c:\temp\logfile".
@@ -1258,7 +1263,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="MissingNodeReuseParameterError">
         <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch</source>
-        <target state="translated">MSBUILD : error MSB1041: Spécifiez un ou plusieurs paramètres pour la réutilisation du nœud si vous utilisez le commutateur -nodeReuse</target>
+        <target state="translated">MSBUILD : error MSB1041: Spécifiez un ou plusieurs paramètres pour la réutilisation du nœud si vous utilisez le commutateur -nodeReuse</target>
         <note>{StrBegin="MSBUILD : error MSB1041: "}
       UE: This happens if the user does something like "msbuild.exe -nodeReuse:" without a true or false
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1328,7 +1333,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
-        <target state="translated">MSBUILD : error MSB1050: Spécifiez le fichier projet ou solution à utiliser, car le dossier "{0}" contient plusieurs fichiers projet ou solution.</target>
+        <target state="translated">MSBUILD : error MSB1050: Spécifiez le fichier projet ou solution à utiliser, car le dossier "{0}" contient plusieurs fichiers projet ou solution.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
       project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
@@ -1400,7 +1405,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="translated">MSBUILD : error MSB1051: Spécifiez un ou plusieurs codes d'avertissement à traiter comme des messages d'importance faible lors de l'utilisation du commutateur /warnAsMessage.</target>
+        <target state="translated">MSBUILD : error MSB1051: Spécifiez un ou plusieurs codes d'avertissement à traiter comme des messages d'importance faible lors de l'utilisation du commutateur /warnAsMessage.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1532,7 +1537,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="translated">MSBUILD : erreur MSB1042: La valeur de réutilisation du nœud est non valide. Cette version de MSBuild ne prend pas en charge la réutilisation du nœud. Si elle est spécifiée, la valeur du commutateur de réutilisation du nœud doit être false.</target>
+        <target state="translated">MSBUILD : error MSB1042: La valeur de réutilisation du nœud est non valide. Cette version de MSBuild ne prend pas en charge la réutilisation du nœud. Si elle est spécifiée, la valeur du commutateur de réutilisation du nœud doit être false.</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1541,7 +1546,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="translated">MSBUILD : erreur MSB1052: La valeur de restauration est non valide. {0}</target>
+        <target state="translated">MSBUILD : error MSB1052: La valeur de restauration est non valide. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1556,10 +1561,10 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      format. Otherwise, a tab separated file is produced.
     </source>
         <target state="translated">  -profileEvaluation:&lt;fichier&gt;
-                     Profile l'évaluation de MSBuild et écrit le résultat
-                     dans le fichier spécifié. Si l'extension du fichier
-                     spécifié est '.md', le résultat est généré au format
-                     markdown. Sinon, un fichier séparé par une tabulation est créé.
+         Profile l'évaluation MSBuild et écrit le résultat
+         dans le fichier spécifié. Si l'extension du fichier spécifié
+         est '.md', le résultat est généré au format Markdown. 
+         Sinon, un fichier de valeurs séparées par des tabulations est généré.
     </target>
         <note />
       </trans-unit>
@@ -1576,15 +1581,15 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Définir ou remplacer ces propriétés de niveau projet seulement
-                     pendant la restauration et ne pas utiliser les propriétés spécifiées
-                     avec l'argument -property. &lt;n&gt; est le nom de la
-                     propriété, tandis que &lt;v&gt; est sa valeur. Utilisez un point-virgule
-                     ou une virgule pour séparer plusieurs propriétés
-                     ou spécifiez chaque propriété séparément.
-                     (Forme courte : -rp)
-                     Exemple :
-                       -restoreProperty:IsRestore=true;MyProperty=value
+         Définit ou remplace ces propriétés au niveau du projet uniquement
+         durant la restauration et n'utilise pas les propriétés spécifiées
+         avec l'argument -property. &lt;n&gt; est le nom de
+         propriété et &lt;v&gt; la valeur de propriété. Utilisez un
+         point-virgule ou une virgule pour séparer plusieurs propriétés,
+         ou spécifiez chaque propriété à part.
+         (Forme abrégée : -rp)
+         Exemple :
+           -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.
@@ -1593,7 +1598,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="translated">MSBUILD : erreur MSB1053 : Le nom de fichier fourni n'est pas valide. {0}</target>
+        <target state="translated">MSBUILD : error MSB1053: Le nom de fichier fourni n'est pas valide. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.shared.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.shared.resx">
     <body>
       <trans-unit id="BuildAborted">
         <source>MSB4188: Build was canceled.</source>
@@ -276,7 +276,7 @@
       <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
         <target state="translated">MSB5024: 無法判斷 MSBuild 的有效位置。請嘗試從 Visual Studio 的開發人員命令提示字元執行此處理序。</target>
-        <note>{StrBegin="MSB5021: "}</note>
+        <note>{StrBegin="MSB5024: "}</note>
       </trans-unit>
       <trans-unit id="InvalidLogFileFormat">
         <source>MSB4233: There was an exception while reading the log file: {0}</source>

@@ -50,7 +50,7 @@
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: No se pueden expandir los metadatos en la expresión "{0}". {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
@@ -108,9 +108,16 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: La tarea MSBuild está compilando proyectos {0} que no se especifican en el elemento ProjectReference. En compilaciones aisladas, esto significa probablemente que las referencias no se especifican explícitamente como un elemento ProjectReference en "{1}"</target>
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: La tarea MSBuild está compilando proyectos {0} que no se especifican en el elemento ProjectReference. En compilaciones aisladas, esto significa probablemente que las referencias no se especifican explícitamente como un elemento ProjectReference en "{1}"</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -447,7 +454,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">La etiqueta &lt;{0}&gt; ya no se admite como elemento secundario del elemento &lt;Project&gt;. Coloque esta etiqueta dentro de un destino y agregue el nombre del destino al atributo "InitialTargets" del elemento &lt;Project&gt;.</target>
+        <target state="translated">La etiqueta &lt;{0}&gt; ya no se admite como elemento secundario del elemento &lt;Project&gt;. Coloque esta etiqueta dentro de un destino y agregue el nombre de dicho destino al atributo "InitialTargets" del elemento &lt;Project&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -551,12 +558,12 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: No se encuentra el proyecto importado "{0}". Además, se ha intentado buscar "{1}" en las rutas de búsqueda de reserva para {2} - {3} . Estas rutas de búsqueda se definen en "{4}". Asegúrese de que la ruta de acceso de la declaración &lt;Import&gt; es correcta y de que el archivo se encuentra en el disco en una de las rutas de búsqueda.</target>
+        <target state="translated">MSB4226: No se encontró el proyecto "{0}" importado. Además, se intentó encontrar "{1}" en las rutas de acceso de búsqueda de reserva para {2} - {3}. Dichas rutas se definen en "{4}". Confirme que la ruta de acceso en la declaración &lt;Import&gt; es correcta y que el archivo existe en el disco en una de las rutas de acceso de búsqueda.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: No se encuentra el proyecto importado "{0}". Además, se ha intentado buscar "{1}" en las rutas de búsqueda de reserva para {2} - {3} . Asegúrese de que la ruta de acceso de la declaración &lt;Import&gt; es correcta y de que el archivo se encuentra en el disco en una de las rutas de búsqueda.</target>
+        <target state="translated">MSB4226: No se encontró el proyecto "{0}" importado. Además, se intentó encontrar "{1}" en las rutas de acceso de búsqueda de reserva para {2} - {3}. Confirme que la ruta de acceso en la declaración &lt;Import&gt; es correcta y que el archivo existe en el disco en una de las rutas de acceso de búsqueda.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
@@ -898,7 +905,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: El espacio de nombres XML predeterminado del proyecto debe ser el espacio de nombres XML de MSBuild o ninguno. Si el proyecto se creó con el formato MSBuild 2003, agregue xmlns="{0}" al elemento &lt;Project&gt;. Si se creó con el formato 1.0 o 1.2 anterior, conviértalo al formato MSBuild 2003.</target>
+        <target state="translated">MSB4041: El espacio de nombres XML predeterminado del proyecto debe ser el espacio de nombres XML de MSBuild o ningún espacio de nombres. Si el proyecto se creó con el formato MSBuild 2003, agregue xmlns="{0}" al elemento &lt;Project&gt;. Si se creó con el formato 1.0 o 1.2 anterior, conviértalo al formato MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1121,7 +1128,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Se omitirá porque la configuración "$(AspNetConfiguration)" no se admite para este proyecto web.  Puede usar la propiedad AspNetConfiguration para invalidar la configuración usada para compilar proyectos web si agrega /p:AspNetConfiguration=&lt;value&gt; a la línea de comandos. Actualmente, los proyectos web solo admiten configuraciones Debug y Release.</target>
+        <target state="translated">Se omitirá porque la configuración "$(AspNetConfiguration)" no se admite para este proyecto web. Puede usar la propiedad AspNetConfiguration para invalidar la configuración usada para compilar proyectos web si agrega /p:AspNetConfiguration=&lt;valor&gt; a la línea de comandos. Actualmente, los proyectos web sólo admiten configuraciones Debug y Release.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1979,7 +1986,7 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="General.InvalidPropertyError">
         <source>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</source>
-        <target state="translated">MSB3100: La sintaxis del parámetro "{0}" no es válida ({1}). La sintaxis correcta es {0}="&lt;name&gt;=&lt;value&gt;".</target>
+        <target state="translated">MSB3100: La sintaxis del parámetro "{0}" no es válida ({1}). La sintaxis correcta es {0}="&lt;nombre&gt;=&lt;valor&gt;".</target>
         <note>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
@@ -2017,17 +2024,17 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="translated">MSB4227: El atributo "{0}" del elemento &lt;{1}&gt; no es válido porque ya existe un atributo con ese nombre</target>
+        <target state="translated">MSB4227: El atributo "{0}" del elemento &lt;{1}&gt; no es válido porque ya existe un atributo con ese nombre.</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="translated">MSB4228: El nombre "{0}" no es válido para los metadatos expresados como un atributo (en el elemento &lt;{1}&gt;)</target>
+        <target state="translated">MSB4228: El nombre "{0}" no es válido para los metadatos expresados como atributo (en el elemento &lt;{1}&gt;).</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="translated">El elemento &lt;{0}&gt; debe tener el atributo "{1}", "{2}" o "{3}", pero nada más que uno.</target>
+        <target state="translated">El elemento &lt;{0}&gt; debe tener el atributo "{1}", "{2}" o "{3}", pero no más de uno.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
@@ -2197,7 +2204,7 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: No se pueden especificar varias versiones del mismo SDK "{0}". Se utilizará la versión del SDK previamente resuelta "{1\}" de la ubicación "{2}", y la versión "{3}" se ignorará.</target>
+        <target state="translated">MSB4240: No se pueden especificar varias versiones del mismo SDK "{0}". Se utilizará la versión del SDK previamente resuelta "{1}" de la ubicación "{2}", y la versión "{3}" se ignorará.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>

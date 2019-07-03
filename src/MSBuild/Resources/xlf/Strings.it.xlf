@@ -251,15 +251,14 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;file&gt;            Inserisce le impostazioni della riga di comando da un file
-                     di testo. Per specificare più file di risposta, specificare
-                     ciascun file separatamente.
-
-                     Qualsiasi file di risposta denominato "msbuild.rsp" viene
-                     utilizzato automaticamente dai percorsi seguenti:
+        <target state="translated">  @&lt;file&gt;            Inserisce le impostazioni della riga di comando da un file di testo. Per specificare
+                     più file di risposta, specificare ciascun file
+                     separatamente.
+                     
+                     Qualsiasi file di risposta denominato "msbuild.rsp" viene usato
+                     automaticamente dai percorsi seguenti: 
                      (1) la directory di msbuild.exe
-                     (2) la directory della prima compilazione di soluzione o
-                         progetto
+                     (2) la directory della prima compilazione di soluzione o progetto
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -293,10 +292,9 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;targets&gt;  Compila le destinazioni specificate nel progetto. Usare il
-                     punto e virgola o la virgola per separare più destinazioni
-                     oppure specificare ciascuna destinazione separatamente.
-                     Forma breve: -t.
+        <target state="translated">  -target:&lt;targets&gt;  Compila le destinazioni specificate nel progetto. Usare il punto
+                     e virgola o la virgola per separare più destinazioni oppure
+                     specificare ciascuna destinazione separatamente. Forma breve: -t.
                      Esempio:
                        -target:Resources;Compile
 </target>
@@ -317,13 +315,12 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Imposta queste proprietà a livello di progetto o ne esegue
-                     l'override. &lt;n&gt; rappresenta il nome della proprietà e &lt;v&gt;
-                     il valore della proprietà. Usare il punto e virgola o la
-                     virgola per delimitare più proprietà o specificare ogni
-                     proprietà separatamente. Forma breve: -p.
-                     Esempio:
-                       -property:WarningLevel=2;OutDir=bin\Debug\
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Imposta queste proprietà a livello di progetto o ne esegue l'override. &lt;n&gt; rappresenta
+                      il nome della proprietà e &lt;v&gt; il valore della proprietà. Usare il punto
+                      e virgola o la virgola per delimitare più proprietà
+                      o specificare ogni proprietà separatamente. Forma breve: -p.
+                      Esempio:
+                        -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -349,18 +346,16 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;logger&gt;   Usare questo logger per registrare eventi da MSBuild. Per
-                     specificare più logger, specificare ogni logger
-                     separatamente.
+        <target state="translated">  -logger:&lt;logger&gt;   Usare questo logger per registrare eventi da MSBuild. Per specificare
+                     più logger, specificare ogni logger separatamente.
                      La sintassi di &lt;logger&gt; è la seguente:
                      [&lt;classe logger&gt;,]&lt;assembly logger&gt;[;&lt;parametri logger&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                      [&lt;spazio nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
                      La sintassi di &lt;logger assembly&gt; è la seguente:
-                     {&lt;nome assembly&gt;[,&lt;nome sicuro&gt;] | &lt;file assembly&gt;}
+                     {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file assembly&gt;}
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
-                     logger nel formato in cui vengono specificati.
-                     Forma breve: -l.
+                     logger nel formato in cui vengono specificati. Forma breve: -l.
                      Esempi:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -381,12 +376,11 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="translated">  -verbosity:&lt;livello&gt; Visualizza la quantità di informazioni specificata nel
-                       log eventi. I livelli di dettaglio disponibili sono:
-                       q[uiet], m[inimal], n[ormal], d[etailed] e diag[nostic].
-                       Forma breve: -v.
-                       Esempio:
-                        -verbosity:quiet
+        <target state="translated">  -verbosity:&lt;livello&gt; Visualizza la quantità di informazioni specificata nel log eventi.
+                     I livelli di dettaglio disponibili sono: q[uiet], m[inimal],
+                     n[ormal], d[etailed] e diag[nostic]. Forma breve: -v.
+                     Esempio:
+                     -verbosity:quiet
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -434,47 +428,47 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parametri&gt;
-                     Parametri per il logger di console. Forma breve: -clp.
-                     I parametri disponibili sono:
-                     PerformanceSummary: indica il tempo impiegato per le
-                     attività, le destinazioni e i progetti.
-                     Summary: visualizza un riepilogo degli errori e degli
-                     avvisi alla fine.
-                     NoSummary: non visualizza un riepilogo degli errori e
-                     degli avvisi alla fine.
-                     ErrorsOnly: visualizza solo gli errori.
-                     WarningsOnly: visualizza solo gli avvisi.
-                     NoItemAndPropertyList: non visualizza l'elenco di
-                     elementi e proprietà all'inizio
-                     di ogni compilazione del
-                     progetto.
-                     ShowCommandLine: visualizza i messaggi
-                     TaskCommandLineEvent.
-                     ShowTimestamp: visualizza il timestamp sotto forma di
-                     prefisso per ogni messaggio.
-                     ShowEventId: mostra l'ID evento per gli eventi iniziati,
-                     gli eventi finiti e i messaggi.
-                     ForceNoAlign: non allinea il testo alle dimensioni del
-                     buffer della console.
-                     DisableConsoleColor: usa i colori predefiniti della
-                     console per tutti i messaggi di
-                     registrazione.
-                     DisableMPLogging: disabilita lo stile di registrazione
-                     multiprocessore dell'output quando è
-                     in esecuzione in modalità non-
-                     multiprocessore.
-                     EnableMPLogging: abilita lo stile di registrazione
-                     multiprocessore anche quando è in
-                     esecuzione in modalità non-
-                     multiprocessore. Si tratta dello stile
-                     di registrazione predefinito.
-                     ForceConsoleColor: usa i colori della console ANSI anche
-                     se non sono supportati dalla console.
-                     Verbosity: esegue l'override dell'impostazione
-                     -verbosity per questo logger.
-                     Esempio:
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                                                 Verbosity=minimal
+                      Parametri per il logger di console. Forma breve: -clp.
+                      I parametri disponibili sono:
+                      PerformanceSummary: indica il tempo impiegato per le
+                      attività, le destinazioni e i progetti.
+                      Summary: visualizza un riepilogo degli errori e degli
+                      avvisi alla fine.
+                      NoSummary: non visualizza un riepilogo degli errori e
+                      degli avvisi alla fine.
+                      ErrorsOnly: visualizza solo gli errori.
+                      WarningsOnly: visualizza solo gli avvisi.
+                      NoItemAndPropertyList: non visualizza l'elenco di
+                      elementi e proprietà all'inizio
+                      di ogni compilazione del
+                      progetto.
+                      ShowCommandLine: visualizza i messaggi
+                      TaskCommandLineEvent.
+                      ShowTimestamp: visualizza il timestamp sotto forma di
+                      prefisso per ogni messaggio.
+                      ShowEventId: mostra l'ID evento per gli eventi iniziati,
+                      gli eventi finiti e i messaggi.
+                      ForceNoAlign: non allinea il testo alle dimensioni del
+                      buffer della console.
+                      DisableConsoleColor: usa i colori predefiniti della
+                      console per tutti i messaggi di
+                      registrazione.
+                      DisableMPLogging: disabilita lo stile di registrazione
+                      multiprocessore dell'output quando è
+                      in esecuzione in modalità non-
+                      multiprocessore.
+                      EnableMPLogging: abilita lo stile di registrazione
+                      multiprocessore anche quando è in
+                      esecuzione in modalità non-
+                      multiprocessore. Si tratta dello stile
+                      di registrazione predefinito.
+                      ForceConsoleColor: usa i colori della console ANSI anche
+                      se non sono supportati dalla console.
+                      Verbosity: esegue l'override dell'impostazione
+                      -verbosity per questo logger.
+                      Esempio:
+                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
+                                                  Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -628,21 +622,19 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
         <target state="translated">  -distributedLogger:&lt;logger centrale&gt;*&lt;logger inoltro&gt;
-                               Usare questo logger per registrare eventi da
-                               MSBuild, associando un'istanza di logger diversa
-                               a ogni nodo. Per specificare più logger,
-                               specificare ogni logger separatamente.
-                               Forma breve -dl.
+                               Usare questo logger per registrare eventi da MSBuild,
+                               associando un'istanza di logger diversa a ogni nodo. Per
+                               specificare più logger, specificare ogni logger
+                               separatamente. Forma breve -dl.
                                La sintassi di &lt;logger&gt; è la seguente:
-                               [&lt;classe logger&gt;,]&lt;assembly logger&gt;[;&lt;parametri logger&gt;]
+                                 [&lt;classe logger&gt;,]&lt;assembly logger&gt;[;&lt;parametri logger&gt;]
                                La sintassi di &lt;classe logger&gt; è la seguente:
-                               [&lt;spazio nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                               La sintassi di &lt;logger assembly&gt; è la seguente:
-                               {&lt;nome assembly&gt;[,&lt;nome sicuro&gt;] | &lt;file assembly&gt;}
-                               I &lt;parametri logger&gt; sono facoltativi e vengono
-                               passati al logger nel formato in cui vengono
-                               specificati. Forma breve: -l.
-                               Esempi:
+                                 [&lt;spazio nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
+                               La sintassi di &lt;assembly logger&gt; è la seguente:
+                                 {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file assembly&gt;}
+                               I &lt;parametri logger&gt; sono facoltativi e vengono passati al
+                               logger nel formato in cui vengono specificati. Forma
+                               breve: -l.                               Esempi:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
@@ -667,8 +659,8 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <target state="translated">  -ignoreProjectExtensions:&lt;estensioni&gt;
                      Elenco delle estensioni da ignorare per la determinazione
                      del file di progetto da compilare. Usare un punto e virgola
-                     o una virgola per separare più estensioni.
-                     Forma breve: -ignore.
+                     o una virgola per separare più estensioni. Forma breve:
+                     -ignore.
                      Esempio:
                        -ignoreProjectExtensions:.sln
     </target>
@@ -691,10 +683,10 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        -toolsVersion:3.5
    </source>
         <target state="translated">  -toolsVersion:&lt;versione&gt;
-                     La versione del set di strumenti di MSBuild (attività,
-                     destinazioni e così via) da usare durante la compilazione.
-                     Tale versione eseguirà l'override delle versioni
-                     specificate nei singoli progetti. Forma breve: -tv.
+                     La versione del set di strumenti di MSBuild (attività, destinazioni
+                     e così via) da usare durante la compilazione. Tale versione
+                     eseguirà l'override delle versioni specificate nei singoli
+                     progetti. Forma breve: -tv.
                      Esempio:
                        -toolsVersion:3.5
    </target>
@@ -825,7 +817,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                         Encoding: specifica la codifica del file, ad esempio
                                   UTF-8, Unicode o ASCII
                      Il livello predefinito di verbosity è Detailed.
-                     Esempi: 
+                     Esempi:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
@@ -857,8 +849,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      Abilita o disabilita il riutilizzo dei nodi MSBuild.
                      I parametri sono:
                      True: i nodi vengono mantenuti dopo il completamento della
-                     compilazione e riutilizzati per le compilazioni successive
-                     (impostazione predefinita).
+                     compilazione e riutilizzati per le compilazioni successive (impostazione predefinita).
                      False: i nodi non vengono mantenuti dopo il completamento
                      della compilazione. Forma breve: -nr.
                      Esempio:
@@ -1593,8 +1584,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  -profileEvaluation:&lt;file&gt;
-                     Esegue la profilatura della valutazione di MSBuild e scrive
+        <target state="translated">  -profileEvaluation:&lt;file&gt;                     Esegue la profilatura della valutazione di MSBuild e scrive
                      il risultato nel file specificato. Se l'estensione del file
                      specificato è '.md', il risultato viene generato in formato
                      Markdown. In caso contrario, viene prodotto un file
@@ -1615,16 +1605,16 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Imposta queste proprietà a livello di progetto o ne esegue
-                     l'override solo durante il ripristino e non usa le
-                     proprietà specificate con l'argomento -property.
-                     &lt;n&gt; rappresenta il nome della proprietà e &lt;v&gt; il
-                     valore della proprietà. Usare il punto e virgola o la
-                     virgola per delimitare più proprietà o specificare ogni
-                     proprietà separatamente.
-                     Forma breve: -rp.
-                     Esempio:
-                       -restoreProperty:IsRestore=true;MyProperty=value
+                      Imposta queste proprietà a livello di progetto o ne esegue
+                      l'override solo durante il ripristino e non usa le
+                      proprietà specificate con l'argomento -property.
+                      &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
+                      valore della proprietà. Usare il punto e virgola o la
+                      virgola per delimitare più proprietà o specificare ogni
+                      proprietà separatamente.
+                      Forma breve: -rp.
+                      Esempio:
+                        -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.

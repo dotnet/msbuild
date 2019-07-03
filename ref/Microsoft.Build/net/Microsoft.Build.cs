@@ -645,6 +645,7 @@ namespace Microsoft.Build.Evaluation
         public int Count { get { throw null; } }
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DisableMarkDirty { get { throw null; } set { } }
+        public static string DisplayVersion { get { throw null; } }
         public static Microsoft.Build.Evaluation.ProjectCollection GlobalProjectCollection { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } }
         public Microsoft.Build.Execution.HostServices HostServices { get { throw null; } set { } }
@@ -949,6 +950,7 @@ namespace Microsoft.Build.Execution
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DetailedSummary { get { throw null; } set { } }
         public bool DisableInProcNode { get { throw null; } set { } }
+        public bool DiscardBuildResults { get { throw null; } set { } }
         public bool EnableNodeReuse { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> EnvironmentProperties { get { throw null; } }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> ForwardingLoggers { get { throw null; } set { } }
@@ -1269,7 +1271,9 @@ namespace Microsoft.Build.Execution
     public sealed partial class ProjectTargetInstance
     {
         internal ProjectTargetInstance() { }
+        public string AfterTargets { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation AfterTargetsLocation { get { throw null; } }
+        public string BeforeTargets { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation BeforeTargetsLocation { get { throw null; } }
         public System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectTargetInstanceChild> Children { get { throw null; } }
         public string Condition { get { throw null; } }

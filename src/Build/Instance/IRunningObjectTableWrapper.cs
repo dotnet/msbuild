@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Build.Execution
 {
-    internal interface IRunningObjectTableWrapper : IDisposable
+    internal interface IRunningObjectTableWrapper
     {
         object GetObject(string itemName);
     }

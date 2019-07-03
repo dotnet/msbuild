@@ -118,7 +118,7 @@ function Build-Repo() {
   }
 
   # Do not set this property to true explicitly, since that would override values set in projects.
-  $suppressPartialNgenOptimization = if (!$applyOptimizationData) { "/p:ApplyPartialNgenOptimization=false" } else { "" }
+  $suppressPartialNgenOptimization = if (!$applyOptimizationData) { "/p:EnableNgenOptimization=false" } else { "" }
 
   MSBuild $toolsetBuildProj `
     $bl `
