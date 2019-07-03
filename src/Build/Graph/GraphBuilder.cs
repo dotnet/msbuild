@@ -11,13 +11,17 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.Graph
 {
     internal class GraphBuilder
     {
+        /// <summary>
+        /// The thread calling BuildGraph() will act as an implicit worker
+        /// </summary>
+        private const int ImplicitWorkerCount = 1;
+
         public IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; private set; }
 
         public IReadOnlyCollection<ProjectGraphNode> RootNodes { get; private set; }
@@ -47,9 +51,8 @@ namespace Microsoft.Build.Experimental.Graph
             _entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(entryPoints);
             IEqualityComparer<ConfigurationMetadata> configComparer = EqualityComparer<ConfigurationMetadata>.Default;
 
-            // Subtract a degree of parallelism; the thread calling BuildGraph() will act as worker[n-1]
             _graphWorkSet = new ParallelWorkSet<ConfigurationMetadata, ProjectGraphNode>(
-                degreeOfParallelism - 1,
+                degreeOfParallelism - ImplicitWorkerCount,
                 configComparer,
                 cancellationToken);
             _projectCollection = projectCollection;
