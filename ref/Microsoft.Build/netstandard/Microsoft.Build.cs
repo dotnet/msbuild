@@ -945,6 +945,7 @@ namespace Microsoft.Build.Execution
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DetailedSummary { get { throw null; } set { } }
         public bool DisableInProcNode { get { throw null; } set { } }
+        public bool DiscardBuildResults { get { throw null; } set { } }
         public bool EnableNodeReuse { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> EnvironmentProperties { get { throw null; } }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> ForwardingLoggers { get { throw null; } set { } }
