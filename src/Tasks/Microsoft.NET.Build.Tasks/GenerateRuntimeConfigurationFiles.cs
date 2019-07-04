@@ -163,12 +163,10 @@ namespace Microsoft.NET.Build.Tasks
                         //  Don't add multiple entries for the same shared framework.
                         //  This is necessary if there are FrameworkReferences to different profiles
                         //  that map to the same shared framework.
-                        if (usedFrameworkNames.Contains(platformLibrary.Name))
+                        if (!usedFrameworkNames.Add(platformLibrary.Name))
                         {
                             continue;
                         }
-
-                        usedFrameworkNames.Add(platformLibrary.Name);
 
                         RuntimeConfigFramework framework = new RuntimeConfigFramework();
                         framework.Name = platformLibrary.Name;
