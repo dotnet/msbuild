@@ -907,10 +907,17 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <PublishItemsOutputGroupDependsOn>
       $(PublishItemsOutputGroupDependsOn);
+      BeforePublishItemsOutputGroup;
       ResolveReferences;
       ComputeFilesToPublish;
     </PublishItemsOutputGroupDependsOn>
   </PropertyGroup>
+
+  <Target Name="BeforePublishItemsOutputGroup">
+    <PropertyGroup>
+      <ResolveRuntimeAssetsDuringDesignTimeBuild>true</ResolveRuntimeAssetsDuringDesignTimeBuild>
+    </PropertyGroup>
+  </Target>
 
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>

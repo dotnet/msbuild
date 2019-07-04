@@ -303,7 +303,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="ResolveRuntimePackAssets" DependsOnTargets="ResolveFrameworkReferences"
-          Condition="'@(RuntimePack)' != '' And '$(DesignTimeBuild)' != 'true'">
+          Condition="'@(RuntimePack)' != '' And ('$(DesignTimeBuild)' != 'true' or '$(ResolveRuntimeAssetsDuringDesignTimeBuild)' == 'true')">
         
     <ResolveRuntimePackAssets FrameworkReferences="@(FrameworkReference)"
                               ResolvedRuntimePacks="@(ResolvedRuntimePack)"
