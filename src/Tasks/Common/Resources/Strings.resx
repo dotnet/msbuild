@@ -540,4 +540,12 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</value>
     <comment>{StrBegin="NETSDK1108: "}</comment>
   </data>
+    <data name="RuntimeListNotFound" xml:space="preserve">
+    <value>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://github.com/dotnet/core-setup/issues.</value>
+    <comment>{StrBegin="NETSDK1109: "}</comment>
+  </data>
+  <data name="DuplicateRuntimePackAsset" xml:space="preserve">
+    <value>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://github.com/dotnet/core-setup/issues.</value>
+    <comment>{StrBegin="NETSDK1110: "}</comment>
+  </data>
 </root>
