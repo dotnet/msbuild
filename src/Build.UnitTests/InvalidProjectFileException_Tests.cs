@@ -7,11 +7,19 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Exceptions;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     public class InvalidProjectFileExceptionTests
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public InvalidProjectFileExceptionTests(ITestOutputHelper output)
+        {
+            _testOutput = output;
+        }
+
         /// <summary>
         /// Verify I implemented ISerializable correctly
         /// </summary>

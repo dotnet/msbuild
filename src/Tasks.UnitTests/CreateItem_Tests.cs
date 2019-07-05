@@ -6,11 +6,19 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateItem_Tests
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public CreateItem_Tests(ITestOutputHelper output)
+        {
+            _testOutput = output;
+        }
+
         /// <summary>
         /// CreateIteming identical lists results in empty list.
         /// </summary>

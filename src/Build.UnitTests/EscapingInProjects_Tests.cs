@@ -22,6 +22,7 @@ using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 {
@@ -901,6 +902,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 #if FEATURE_COMPILE_IN_TESTS
     public class FullProjectsUsingMicrosoftCommonTargets
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public FullProjectsUsingMicrosoftCommonTargets(ITestOutputHelper output)
+        {
+            _testOutput = output;
+        }
+
         private const string SolutionFileContentsWithUnusualCharacters = @"Microsoft Visual Studio Solution File, Format Version 11.00
                 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Cons.ole;!@(foo)'^(Application1`, `Console;!@(foo)'^(Application1\Cons.ole;!@(foo)'^(Application1.csproj`, `{770F2381-8C39-49E9-8C96-0538FA4349A7}`
                 EndProject

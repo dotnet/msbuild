@@ -12,13 +12,17 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     public sealed class MSBuildTask_Tests : IDisposable
     {
-        public MSBuildTask_Tests()
+        private readonly ITestOutputHelper _testOutput;
+
+        public MSBuildTask_Tests(ITestOutputHelper testOutput)
         {
+            _testOutput = testOutput;
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
