@@ -754,7 +754,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 _writer.Write(CacheFormatVersion);
 
-                byte[] hash = _task.HashSettings();
                 _writer.Write(_task.HashSettings());
                 _metadataStringTablePosition = WritePlaceholder();
             }
