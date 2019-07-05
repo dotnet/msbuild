@@ -231,6 +231,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ExpectedPlatformPackages Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.AspNetCore.All'" />
     </ItemGroup>
 
+    <PropertyGroup>
+      <!-- Design time builds set this property to "ErrorAndContinue" -->
+      <ContinueOnError Condition="'$(ContinueOnError)' == ''">false</ContinueOnError>
+    </PropertyGroup>
+
     <ResolvePackageAssets 
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectAssetsCacheFile="$(ProjectAssetsCacheFile)"
@@ -255,6 +260,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ExpectedPlatformPackages="@(ExpectedPlatformPackages)"
       SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
       DesignTimeBuild="$(DesignTimeBuild)"
+      ContinueOnError="$(ContinueOnError)"
       PackageReferences="@(PackageReference)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation

@@ -274,13 +274,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <DefaultItemsMoreInformationLink>https://aka.ms/sdkimplicititems</DefaultItemsMoreInformationLink>
+    </PropertyGroup>
 
-      <!-- For the design-time build, we will continue on error and remove the duplicate items.
-           This is because otherwise there won't be any references to pass to the compiler, leading to design-time
-           compilation errors for every API that is used in the project.  Amidst all the compile errors, it would
-           be easy to miss the duplicate items error which is the real source of the problem. -->
-      <CheckForDuplicateItemsContinueOnError>false</CheckForDuplicateItemsContinueOnError>
-      <CheckForDuplicateItemsContinueOnError Condition="'$(DesignTimeBuild)' == 'true'">ErrorAndContinue</CheckForDuplicateItemsContinueOnError>
+    <!-- NOTE for design-time builds we continue on errors and remove the duplicate items.
+         This is because otherwise there won't be any references to pass to the compiler, leading to design-time
+         compilation errors for every API that is used in the project.  Amidst all the compile errors, it would
+         be easy to miss the duplicate items error which is the real source of the problem. -->
+
+    <PropertyGroup>
+      <!-- Design time builds set this property to "ErrorAndContinue" -->
+      <ContinueOnError Condition="'$(ContinueOnError)' == ''">false</ContinueOnError>
     </PropertyGroup>
 
     <CheckForDuplicateItems
@@ -290,7 +293,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       DefaultItemsOfThisTypeEnabled="$(EnableDefaultCompileItems)"
       PropertyNameToDisableDefaultItems="EnableDefaultCompileItems"
       MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      ContinueOnError="$(ContinueOnError)">
       <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedCompileItems" />
     </CheckForDuplicateItems>
 
@@ -301,7 +304,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       DefaultItemsOfThisTypeEnabled="$(EnableDefaultEmbeddedResourceItems)"
       PropertyNameToDisableDefaultItems="EnableDefaultEmbeddedResourceItems"
       MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      ContinueOnError="$(ContinueOnError)">
       <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedEmbeddedResourceItems" />
     </CheckForDuplicateItems>
     
@@ -313,7 +316,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       DefaultItemsOfThisTypeEnabled="$(EnableDefaultContentItems)"
       PropertyNameToDisableDefaultItems="EnableDefaultContentItems"
       MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      ContinueOnError="$(ContinueOnError)">
       <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedContentItems" />
     </CheckForDuplicateItems>
 
