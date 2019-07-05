@@ -5,7 +5,7 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>03eafc975fde2ef17f03c0bf822f238ff17e7cbd</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-27905-02">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-27905-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>d19d1eb472abe1b88dd79bd07653274516f281d1</Sha>
     </Dependency>
