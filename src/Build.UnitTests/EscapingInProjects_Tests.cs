@@ -1108,7 +1108,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-            MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+            MockLogger log = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class;Library16.dll", @"Did not find expected file obj\debug\Class;Library16.dll");
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class;Library16.pdb", @"Did not find expected file obj\debug\Class;Library16.pdb");
@@ -1167,7 +1168,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-                MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+                MockLogger log = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class;Library16.dll", @"Did not find expected file obj\debug\Class;Library16.dll");
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class;Library16.pdb", @"Did not find expected file obj\debug\Class;Library16.pdb");
@@ -1226,7 +1228,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-            MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+            MockLogger log = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class$(prop)Library16.dll", @"Did not find expected file obj\debug\Class$(prop)Library16.dll");
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class$(prop)Library16.pdb", @"Did not find expected file obj\debug\Class$(prop)Library16.pdb");
@@ -1285,7 +1288,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-                MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+                MockLogger log = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class$(prop)Library16.dll", @"Did not find expected file obj\debug\Class$(prop)Library16.dll");
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class$(prop)Library16.pdb", @"Did not find expected file obj\debug\Class$(prop)Library16.pdb");
@@ -1344,7 +1348,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-            MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+            MockLogger log = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\ClassLibrary16.dll", @"Did not find expected file obj\debug\ClassLibrary16.dll");
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\ClassLibrary16.pdb", @"Did not find expected file obj\debug\ClassLibrary16.pdb");
@@ -1403,7 +1408,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-                MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+                MockLogger log = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\ClassLibrary16.dll", @"Did not find expected file obj\debug\ClassLibrary16.dll");
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\ClassLibrary16.pdb", @"Did not find expected file obj\debug\ClassLibrary16.pdb");
@@ -1579,7 +1585,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // Cons.ole;!@(foo)'^(Application1
             string targetForFirstProject = "Cons_ole_!__foo__^_Application1";
 
-            ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null);
+            MockLogger log = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null, log);
 
             Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                     @"Did not find expected file Console;!@(foo)'^(Application1.exe"
         }
@@ -1750,7 +1757,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // Cons.ole;!@(foo)'^(Application1
                 string targetForFirstProject = "Cons_ole_!__foo__^_Application1";
 
-                ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null);
+                MockLogger log = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null, log);
 
                 Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                         @"Did not find expected file Console;!@(foo)'^(Application1.exe"
             }

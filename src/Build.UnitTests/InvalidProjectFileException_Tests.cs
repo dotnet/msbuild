@@ -74,7 +74,8 @@ namespace Microsoft.Build.UnitTests
                     </Project>
                 "));
 
-                MockLogger ml = ObjectModelHelpers.BuildTempProjectFileExpectFailure(file);
+                MockLogger ml = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectFailure(file, ml);
 
                 // Make sure the log contains the error code and file/line/col for the circular dependency
                 ml.AssertLogContains("MSB4006");
@@ -102,7 +103,8 @@ namespace Microsoft.Build.UnitTests
                         <Target Name=[invalid] />
                     </Project>"));
 
-                var _ = ObjectModelHelpers.BuildTempProjectFileExpectFailure(file);
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectFailure(file, logger);
 
                 Assert.True(false, "Loading an invalid project should have thrown an InvalidProjectFileException.");
             }

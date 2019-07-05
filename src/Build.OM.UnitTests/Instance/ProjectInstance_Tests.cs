@@ -596,7 +596,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 File.WriteAllText(includeFileA, "aaaaaaa");
                 File.WriteAllText(includeFileB, "bbbbbbb");
 
-                MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("a.proj");
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("a.proj", logger);
                 logger.AssertNoWarnings();
             }
             finally

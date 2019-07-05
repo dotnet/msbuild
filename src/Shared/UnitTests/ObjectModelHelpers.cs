@@ -910,34 +910,27 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectFileRelativePath"></param>
         /// <returns></returns>
-        internal static MockLogger BuildTempProjectFileExpectSuccess(string projectFileRelativePath)
+        internal static void BuildTempProjectFileExpectSuccess(string projectFileRelativePath, MockLogger logger)
         {
-            return BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null);
+            BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null, logger);
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build does not succeed.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
+        internal static void BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties, MockLogger logger)
         {
-            MockLogger logger = new MockLogger();
             BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger)
                 .ShouldBeTrue("Build failed.  See Standard Out tab for details");
-
-            return logger;
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build succeeds.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileExpectFailure(string projectFileRelativePath)
+        internal static void BuildTempProjectFileExpectFailure(string projectFileRelativePath, MockLogger logger)
         {
-            MockLogger logger = new MockLogger();
-
             BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger)
                 .ShouldBeFalse("Build unexpectedly succeeded.  See Standard Out tab for details");
-
-            return logger;
         }
 
         /// <summary>

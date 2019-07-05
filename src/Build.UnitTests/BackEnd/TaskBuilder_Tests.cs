@@ -938,7 +938,8 @@ namespace ItemCreationTask
                 File.WriteAllText(projectAPath, ObjectModelHelpers.CleanupFileContents(projectAContents));
                 File.WriteAllText(projectBPath, ObjectModelHelpers.CleanupFileContents(projectBContents));
 
-                MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("a.proj");
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("a.proj", logger);
                 logger.AssertNoWarnings();
             }
             finally
