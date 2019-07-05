@@ -10,6 +10,7 @@ using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using NuGet.Packaging;
 using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
@@ -148,6 +149,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
+                    HashSet<string> usedFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     foreach (var platformLibrary in projectContext.RuntimeFrameworks)
                     {
                         if (projectContext.RuntimeFrameworks.Length > 1 &&
@@ -155,6 +157,14 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             //  If there are multiple runtime frameworks, then exclude Microsoft.NETCore.App,
                             //  as a workaround for https://github.com/dotnet/core-setup/issues/4947
+                            continue;
+                        }
+
+                        //  Don't add multiple entries for the same shared framework.
+                        //  This is necessary if there are FrameworkReferences to different profiles
+                        //  that map to the same shared framework.
+                        if (!usedFrameworkNames.Add(platformLibrary.Name))
+                        {
                             continue;
                         }
 
