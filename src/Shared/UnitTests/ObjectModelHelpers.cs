@@ -921,9 +921,8 @@ namespace Microsoft.Build.UnitTests
         internal static MockLogger BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
         {
             MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
-
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
+            BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger)
+                .ShouldBeTrue("Build failed.  See Standard Out tab for details");
 
             return logger;
         }
@@ -934,9 +933,9 @@ namespace Microsoft.Build.UnitTests
         internal static MockLogger BuildTempProjectFileExpectFailure(string projectFileRelativePath)
         {
             MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger);
 
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
+            BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger)
+                .ShouldBeFalse("Build unexpectedly succeeded.  See Standard Out tab for details");
 
             return logger;
         }
@@ -947,9 +946,8 @@ namespace Microsoft.Build.UnitTests
         internal static MockLogger BuildTempProjectFileWithTargetsExpectFailure(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
         {
             MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
-
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
+            BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger)
+                .ShouldBeFalse("Build unexpectedly succeeded.  See Standard Out tab for details");
 
             return logger;
         }
