@@ -175,7 +175,7 @@ public abstract class MySpecialTask : Task
 }
 ```
 
-  - The can be marked [Required] which will fail the build if not given a non empty string value
+  - Properties can be marked [Required] which will fail the build if given an empty string value
   - Strings are the common type, but you can use types like bool and msbuild will convert for you
   - ITaskItem[] are need to pass Items (lists) to \ from tasks when the task may need to modify them
 - They are later invoked with:
