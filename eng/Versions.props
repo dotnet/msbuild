@@ -35,6 +35,6 @@
   </PropertyGroup>
   <!-- Product Dependencies -->
   <PropertyGroup>
-    <SystemResourcesExtensionsVersion>4.6.0-preview8.19355.1</SystemResourcesExtensionsVersion>
+    <SystemResourcesExtensionsVersion>4.6.0-preview8.19357.5</SystemResourcesExtensionsVersion>
   </PropertyGroup>
 </Project>
