@@ -143,7 +143,7 @@ There are many, but the most common include:
 
     - Outer `"` for the contents of the condition
     - `'` around the variable itself
-    - `'’` for empty string
+    - `''` for empty string
   - Remember, unset variables are valid to access and provide empty string
 
 **List Transforms**
