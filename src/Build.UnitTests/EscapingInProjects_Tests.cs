@@ -663,7 +663,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             project.SetGlobalProperty("MyGlobalProperty", "foo%253bbar");
 
             bool success = project.Build(logger);
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
+            Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
 
             logger.AssertLogContains("MyGlobalProperty = 'foo%3bbar'");
         }
@@ -693,7 +693,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ");
 
                 bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See Standard Out tab for details"
+                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
                 logger.AssertLogContains("[*]");
             }
             finally
@@ -731,7 +731,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ");
 
                 bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See Standard Out tab for details"
+                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
                 logger.AssertLogContains("[*]");
             }
             finally
@@ -790,7 +790,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             MockLogger logger = new MockLogger();
 
             bool success = project.Build(logger);
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
+            Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
             logger.AssertLogContains("[OVERRIDE]");
         }
 
@@ -986,7 +986,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // Build the default targets using the Configuration "a;b'c".
             project.SetGlobalProperty("Configuration", EscapingUtilities.Escape("a;b'c"));
             bool success = project.Build(logger);
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
+            Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\a;b'c\ClassLibrary16.dll");
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"bin\a;b'c\ClassLibrary16.dll");
@@ -1051,7 +1051,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // Build the default targets using the Configuration "a;b'c".
                 project.SetGlobalProperty("Configuration", EscapingUtilities.Escape("a;b'c"));
                 bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See Standard Out tab for details"
+                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
 
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\a;b'c\ClassLibrary16.dll");
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"bin\a;b'c\ClassLibrary16.dll");

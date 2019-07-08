@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests
             Project project = CreateInMemoryProject(projectContents, logger);
 
             bool success = project.Build(logger);
-            Assert.False(success); // "Build succeeded, but shouldn't have.  See Standard Out tab for details"
+            Assert.False(success); // "Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details"
         }
 
         /// <summary>
@@ -921,7 +921,7 @@ namespace Microsoft.Build.UnitTests
         internal static void BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties, MockLogger logger)
         {
             BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger)
-                .ShouldBeTrue("Build failed.  See Standard Out tab for details");
+                .ShouldBeTrue("Build failed.  See test output (Attachments in Azure Pipelines) for details");
         }
 
         /// <summary>
@@ -930,7 +930,7 @@ namespace Microsoft.Build.UnitTests
         internal static void BuildTempProjectFileExpectFailure(string projectFileRelativePath, MockLogger logger)
         {
             BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger)
-                .ShouldBeFalse("Build unexpectedly succeeded.  See Standard Out tab for details");
+                .ShouldBeFalse("Build unexpectedly succeeded.  See test output (Attachments in Azure Pipelines) for details");
         }
 
         /// <summary>
