@@ -180,7 +180,7 @@ public abstract class MySpecialTask : Task
   - ITaskItem[] are need to pass Items (lists) to \ from tasks when the task may need to modify them
 - They are later invoked with:
 
-```
+```xml
      <UsingTask TaskName="MyTasks.MySpecialTask" AssemblyFile="MyTasks.dll" />
      
     <Target Name="_MySpecialTask">
