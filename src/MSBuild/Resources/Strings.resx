@@ -789,7 +789,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </data>
   <data name="HelpMessage_37_LowPrioritySwitch" UESanitized="false" Visibility="Public">
     <value>  -lowPriority[:True|False]
-                     Causes MSBuild to run at low priority.
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
                      (Short form: -low)
     </value>
     <comment>

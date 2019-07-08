@@ -174,11 +174,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="HelpMessage_37_LowPrioritySwitch">
         <source>  -lowPriority[:True|False]
-                     Causes MSBuild to run at low priority.
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
                      (Short form: -low)
     </source>
         <target state="new">  -lowPriority[:True|False]
-                     Causes MSBuild to run at low priority.
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
                      (Short form: -low)
     </target>
         <note>

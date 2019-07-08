@@ -72,16 +72,21 @@ namespace Microsoft.Build.BackEnd
         /// Derived from the binary timestamp to avoid mixing binary versions,
         /// Is64BitProcess to avoid mixing bitness, and enableNodeReuse to
         /// ensure that a /nr:false build doesn't reuse clients left over from
-        /// a prior /nr:true build.
+        /// a prior /nr:true build. The enableLowPriority flag is to ensure that
+        /// a build with /low:false doesn't reuse clients left over for a prior
+        /// /low:true build.
         /// </summary>
         /// <param name="enableNodeReuse">Is reuse of build nodes allowed?</param>
-        internal static long GetHostHandshake(bool enableNodeReuse)
+        /// <param name="enableLowPriority">Is the build running at low priority?</param>
+        internal static long GetHostHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
             long baseHandshake = Constants.AssemblyTimestamp;
 
             baseHandshake = baseHandshake*17 + EnvironmentUtilities.Is64BitProcess.GetHashCode();
 
             baseHandshake = baseHandshake*17 + enableNodeReuse.GetHashCode();
+
+            baseHandshake = baseHandshake*17 + enableLowPriority.GetHashCode();
 
             return CommunicationsUtilities.GenerateHostHandshakeFromBase(baseHandshake, GetClientHandshake());
         }
@@ -121,7 +126,9 @@ namespace Microsoft.Build.BackEnd
 
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
-            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
+
+            long hostHandShake = NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority);
+            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandShake, NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
 
             if (null != context)
             {
@@ -173,13 +180,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            // if no BuildParameters were specified for this build,
+            // If no BuildParameters were specified for this build,
             // we must be trying to shut down idle nodes from some
             // other, completed build. If they're still around,
             // they must have been started with node reuse.
             bool nodeReuse = ComponentHost.BuildParameters?.EnableNodeReuse ?? true;
 
-            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(nodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
+            // If no BuildParameters were specified for this build,
+            // then they couldn't have been launched with priority since it defaults to off.
+            bool lowPriority = ComponentHost.BuildParameters?.LowPriority ?? false;
+
+            ShutdownAllNodes(
+                NodeProviderOutOfProc.GetHostHandshake(nodeReuse, lowPriority),
+                NodeProviderOutOfProc.GetClientHandshake(), 
+                NodeContextTerminated);
         }
 
         #endregion

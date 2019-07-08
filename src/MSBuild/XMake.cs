@@ -622,13 +622,13 @@ namespace Microsoft.Build.CommandLine
                         Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
                     }
 
-					// Honor the low priority flag, we place our selves below normal
-					// priority and let sub processes inherit that priority.
-					if (lowPriority)
-					{
-						Process currentProc = Process.GetCurrentProcess();
-						currentProc.PriorityClass = ProcessPriorityClass.BelowNormal;
-					}
+                    // Honor the low priority flag, we place our selves below normal
+                    // priority and let sub processes inherit that priority.
+                    if (lowPriority)
+                    {
+                        Process currentProc = Process.GetCurrentProcess();
+                        currentProc.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }
 
                     DateTime t1 = DateTime.Now;
 
@@ -670,6 +670,7 @@ namespace Microsoft.Build.CommandLine
                                     interactive,
                                     isolateProjects,
                                     graphBuild,
+                                    lowPriority,
                                     inputResultsCaches,
                                     outputResultsCache))
                             {
@@ -978,6 +979,7 @@ namespace Microsoft.Build.CommandLine
             bool interactive,
             bool isolateProjects,
             bool graphBuild,
+            bool lowPriority,
             string[] inputResultsCaches,
             string outputResultsCache
         )
@@ -1124,6 +1126,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     parameters.EnableNodeReuse = enableNodeReuse;
+                    parameters.LowPriority = lowPriority;
 #if FEATURE_ASSEMBLY_LOCATION
                     parameters.NodeExeLocation = Assembly.GetExecutingAssembly().Location;
 #else

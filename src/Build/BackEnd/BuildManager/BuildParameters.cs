@@ -122,6 +122,11 @@ namespace Microsoft.Build.Execution
 #endif
 
         /// <summary>
+        /// Flag indicating whether the build process should run as low privilege.
+        /// </summary>
+        private bool _lowPriority = false;
+
+        /// <summary>
         /// The original process environment.
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment;

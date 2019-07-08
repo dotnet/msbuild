@@ -36,6 +36,8 @@ namespace Microsoft.Build.BackEnd
 
         private readonly bool _enableReuse;
 
+        private readonly bool _lowPriority;
+
         #endregion
 
         #region Constructors and Factories
@@ -49,11 +51,13 @@ namespace Microsoft.Build.BackEnd
         internal NodeEndpointOutOfProc(
             string pipeName, 
             IBuildComponentHost host,
-            bool enableReuse)
+            bool enableReuse,
+            bool lowPriority)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");
             _componentHost = host;
             _enableReuse = enableReuse;
+            _lowPriority = lowPriority;
 
             InternalConstruct(pipeName);
         }
@@ -65,7 +69,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetHostHandshake()
         {
-            return NodeProviderOutOfProc.GetHostHandshake(_enableReuse);
+            return NodeProviderOutOfProc.GetHostHandshake(_enableReuse, _lowPriority);
         }
 
         /// <summary>

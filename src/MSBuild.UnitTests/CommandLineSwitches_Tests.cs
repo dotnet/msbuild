@@ -1296,6 +1296,7 @@ namespace Microsoft.Build.UnitTests
                                         interactive: false,
                                         isolateProjects: false,
                                         graphBuild: false,
+                                        lowPriority: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null
                         );
