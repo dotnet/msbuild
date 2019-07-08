@@ -165,7 +165,7 @@ There are many, but the most common include:
   - `ToolTask` - A base class that makes invoking a single external tool significantly easier
 - Parameters are passed via public properties defined on the task
 
-```
+```c#
 public abstract class MySpecialTask : Task 
 {
     public string MyOptionalArg { get; set; }
