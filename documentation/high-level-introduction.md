@@ -45,7 +45,7 @@ Examples:
 `<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />`
 `<Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />`
 
-  - Solution files (sln) combine one or more projects for editing and building. They contain some build dependency and configurations information, but project files are main level of build knowledge.
+- Solution files (.sln) combine one or more projects for editing and building. They contain some build dependency and configuration information, but project files are the main level of build knowledge.
 - Target Files (.targets)
   - These files are generally provided by the SDKs
   - These files generally describe a set of steps (targets) which need to be executed to process the build
