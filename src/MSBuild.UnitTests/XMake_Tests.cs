@@ -1213,7 +1213,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NormalPriorityBuild()
         {
-            RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.Normal, arguments: "/nr:false");
+            // In case we are already running at a  different priority, validate
+            // the build runs as the current priority, and not some hard coded priority.
+            ProcessPriorityClass currentPriority = Process.GetCurrentProcess().PriorityClass;
+            RunPriorityBuildTest(expectedPrority: currentPriority, arguments: "/nr:false");
         }
 
         private void RunPriorityBuildTest(ProcessPriorityClass expectedPrority, params string[] arguments)
