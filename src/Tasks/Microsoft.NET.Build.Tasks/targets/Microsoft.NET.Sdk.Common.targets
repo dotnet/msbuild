@@ -25,6 +25,9 @@ Copyright (c) .NET Foundation. All rights reserved.
           Should be re-visited when multiple TFM support is added to Dependencies logic.
     -->
     <DefaultImplicitPackages>Microsoft.NETCore.App;NETStandard.Library</DefaultImplicitPackages>
+
+    <!-- Set RuntimeIdentifier graph for NuGet -->
+    <RuntimeIdentifierGraphPath Condition="'$(RuntimeIdentifierGraphPath)' == ''">$(BundledRuntimeIdentifierGraphFile)</RuntimeIdentifierGraphPath>
   </PropertyGroup>
   
   <!--
