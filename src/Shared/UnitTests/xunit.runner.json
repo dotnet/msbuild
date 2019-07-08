@@ -1,6 +1,8 @@
 ﻿{
+    "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
     "shadowCopy": false,
     "appDomain": "required",
+    "longRunningTestSeconds": 60,
     "maxParallelThreads": 1,
     "parallelizeTestCollections": false,
     "diagnosticMessages":  true
