@@ -178,5 +178,32 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void DuplicateFrameworkAssembly()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "DuplicateFrameworkAssembly",
+                TargetFrameworks = "net472",
+                IsSdkProject = true,
+                IsExe = true
+            };
+            testProject.References.Add("System.Runtime");
+            testProject.References.Add("System.Runtime");
+            testProject.PackageReferences.Add(new TestPackageReference("System.Runtime", "4.3.0"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, projectFolder);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }
