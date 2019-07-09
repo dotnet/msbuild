@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
@@ -17,7 +16,6 @@ using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Config;
-using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Macros;
 using Microsoft.TemplateEngine.Utils;
 using Microsoft.TemplateSearch.Common.TemplateUpdate;
 
@@ -78,14 +76,45 @@ namespace Microsoft.DotNet.Tools.New
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
         {
-            Paths paths = new Paths(environmentSettings);
-            var templatesDir = Path.Combine(paths.Global.BaseDir, "Templates");
-
-            if (paths.Exists(templatesDir))
+            var templateFolders = GetTemplateFolders(environmentSettings);
+            foreach (var templateFolder in templateFolders)
             {
-                var layoutIncludedPackages = environmentSettings.Host.FileSystem.EnumerateFiles(templatesDir, "*.nupkg", SearchOption.TopDirectoryOnly);
+                var layoutIncludedPackages = environmentSettings.Host.FileSystem.EnumerateFiles(templateFolder, "*.nupkg", SearchOption.TopDirectoryOnly);
                 installer.InstallPackages(layoutIncludedPackages);
             }
+        }
+
+        private static IEnumerable<string> GetTemplateFolders(IEngineEnvironmentSettings environmentSettings)
+        {
+            Paths paths = new Paths(environmentSettings);
+            List<string> templateFoldersToInstall = new List<string>();
+
+            // First grab templates from dotnet\templates\M.m folders, in ascending order, up to our version
+            var templatesRootFolder = Path.GetFullPath(Path.Combine(paths.Global.BaseDir, "..", "..", "templates"));
+            Version currentVersion = typeof(NewCommandShim).Assembly.GetName().Version;
+            if (paths.Exists(templatesRootFolder))
+            {
+                var templateFolders = environmentSettings.Host.FileSystem.EnumerateDirectories(templatesRootFolder, "*.*", SearchOption.TopDirectoryOnly);
+                templateFoldersToInstall.AddRange(templateFolders
+                    .Where(versionedFolder => TryGetVersionFromString(Path.GetFileName(versionedFolder), out Version version) && version <= currentVersion)
+                    .OrderBy(versionedFolder => versionedFolder));
+            }
+
+            // Now grab templates from our base folder, if present.
+            var templatesDir = Path.Combine(paths.Global.BaseDir, "Templates");
+            if (paths.Exists(templatesDir))
+            {
+                templateFoldersToInstall.Add(templatesDir);
+            }
+
+            return templateFoldersToInstall;
+        }
+
+        private static bool TryGetVersionFromString(string version, out Version majorMinorVersion)
+        {
+            majorMinorVersion = null;
+            var versionParts = version.Split(new char[] { '.' });
+            return versionParts.Length >= 2 && Version.TryParse($"{versionParts[0]}.{versionParts[1]}", out majorMinorVersion);
         }
     }
 }
