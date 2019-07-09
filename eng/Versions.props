@@ -43,6 +43,7 @@
 
   -->
   <PropertyGroup Label="Automated">
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>3.0.0-preview8.19358.6</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
     <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>3.0.0-preview8.19358.6</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
     <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>3.0.0-preview8.19358.6</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
   </PropertyGroup>
