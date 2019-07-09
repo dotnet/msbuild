@@ -2040,7 +2040,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="TrimmerRootDescriptor" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->Gives the linker a more specific list of types/methods, etc. to include using an xml file.</xs:documentation>
+        <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->Gives the linker a more specific list of types/methods, etc. to include. Path to an xml file.</xs:documentation>
       </xs:annotation>
     </xs:element>
 
