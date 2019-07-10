@@ -525,15 +525,19 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</value>
     <comment>{StrBegin="NETSDK1105: "}</comment>
   </data>
-  <data name="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework" xml:space="preserve">
-    <value>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</value>
-    <comment>{StrBegin="NETSDK1107: "}</comment>
-  </data>
   <data name="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms" xml:space="preserve">
     <value>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</value>
     <comment>{StrBegin="NETSDK1106: "}</comment>
   </data>
+  <data name="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework" xml:space="preserve">
+    <value>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</value>
+    <comment>{StrBegin="NETSDK1107: "}</comment>
+  </data>
   <data name="ReadyToRunCompilationHasWarnings_Info" xml:space="preserve">
     <value>Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</value>
+  </data>
+  <data name="CannotCreateReadyToRunImagesForLibProjects" xml:space="preserve">
+    <value>NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</value>
+    <comment>{StrBegin="NETSDK1108: "}</comment>
   </data>
 </root>
