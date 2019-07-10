@@ -91,13 +91,13 @@ namespace Microsoft.DotNet.Tools.New
 
             // First grab templates from dotnet\templates\M.m folders, in ascending order, up to our version
             var templatesRootFolder = Path.GetFullPath(Path.Combine(paths.Global.BaseDir, "..", "..", "templates"));
-            Version currentVersion = typeof(NewCommandShim).Assembly.GetName().Version;
             if (paths.Exists(templatesRootFolder))
             {
-                var templateFolders = environmentSettings.Host.FileSystem.EnumerateDirectories(templatesRootFolder, "*.*", SearchOption.TopDirectoryOnly);
-                templateFoldersToInstall.AddRange(templateFolders
-                    .Where(versionedFolder => TryGetVersionFromString(Path.GetFileName(versionedFolder), out Version version) && version <= currentVersion)
-                    .OrderBy(versionedFolder => versionedFolder));
+                var parsedNames = GetVersionDirectoriesInDirectory(environmentSettings, templatesRootFolder);
+                var versionedFolders = GetBestVersionsByMajorMinor(parsedNames);
+
+                templateFoldersToInstall.AddRange(versionedFolders
+                    .Select(versionedFolder => Path.Combine(templatesRootFolder, versionedFolder)));
             }
 
             // Now grab templates from our base folder, if present.
@@ -110,11 +110,45 @@ namespace Microsoft.DotNet.Tools.New
             return templateFoldersToInstall;
         }
 
-        private static bool TryGetVersionFromString(string version, out Version majorMinorVersion)
+        // Returns a dictionary of fileName -> Parsed version info
+        // including all the directories in the input directory whose names are parse-able as versions.
+        private static IReadOnlyDictionary<string, SemanticVersion> GetVersionDirectoriesInDirectory(IEngineEnvironmentSettings environmentSettings, string fullPath)
         {
-            majorMinorVersion = null;
-            var versionParts = version.Split(new char[] { '.' });
-            return versionParts.Length >= 2 && Version.TryParse($"{versionParts[0]}.{versionParts[1]}", out majorMinorVersion);
+            Dictionary<string, SemanticVersion> versionFileInfo = new Dictionary<string, SemanticVersion>();
+
+            foreach (string directory in environmentSettings.Host.FileSystem.EnumerateDirectories(fullPath, "*.*", SearchOption.TopDirectoryOnly))
+            {
+                if (SemanticVersion.TryParse(Path.GetFileName(directory), out SemanticVersion versionInfo))
+                {
+                    versionFileInfo.Add(directory, versionInfo);
+                }
+            }
+
+            return versionFileInfo;
+        }
+
+        private static IList<string> GetBestVersionsByMajorMinor(IReadOnlyDictionary<string, SemanticVersion> versionDirInfo)
+        {
+            IDictionary<string, (string path, SemanticVersion version)> bestVersionsByBucket = new Dictionary<string, (string path, SemanticVersion version)>();
+
+            var version = typeof(NewCommandShim).Assembly.GetName().Version;
+            SemanticVersion.TryParse($"{version.Major}.{version.Minor}", out SemanticVersion currentVersion);
+
+            foreach (KeyValuePair<string, SemanticVersion> dirInfo in versionDirInfo)
+            {
+                // restrict the results to not include from higher versions
+                if (dirInfo.Value.CompareTo(currentVersion) <= 0)
+                {
+                    string coreAppVersion = $"{dirInfo.Value.Major}.{dirInfo.Value.Minor}";
+                    if (!bestVersionsByBucket.TryGetValue(coreAppVersion, out (string path, SemanticVersion version) currentHighest)
+                        || dirInfo.Value.CompareTo(currentHighest.version) > 0)
+                    {
+                        bestVersionsByBucket[coreAppVersion] = (dirInfo.Key, dirInfo.Value);
+                    }
+                }
+            }
+
+            return bestVersionsByBucket.OrderBy(x => x.Key).Select(x => x.Value.path).ToList();
         }
     }
 }
