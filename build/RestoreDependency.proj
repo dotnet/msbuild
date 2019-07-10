@@ -1,7 +1,4 @@
 <Project ToolsVersion="15.0" DefaultTargets="EnsureDependencyRestored;CopySdkToOutput">
-  <!-- workaround for https://github.com/Microsoft/msbuild/issues/885 -->
-  <!-- renaming the property because the original property is a global property and therefore
-       cannot be redefined at runtime. -->
   <Target Name="CopySdkToOutput"
           DependsOnTargets="PrepareBundledDependencyProps;
                             EnsureDependencyRestored;

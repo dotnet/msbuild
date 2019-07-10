@@ -9,6 +9,19 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>705a6d8ce1a073d58fffa8ab9f25a7b8112d6b6b</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-preview8-27909-01">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>705a6d8ce1a073d58fffa8ab9f25a7b8112d6b6b</Sha>
+    </Dependency>
+    <!-- Pinned pending fix for https://github.com/dotnet/core-setup/issues/7137 -->
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview-27324-5" Pinned="true">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>705a6d8ce1a073d58fffa8ab9f25a7b8112d6b6b</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-preview8-27909-01">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>705a6d8ce1a073d58fffa8ab9f25a7b8112d6b6b</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview8.19358.6">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
       <Sha>59d636f6bde6104121a19e4e0229a76bb46b8ab1</Sha>
@@ -26,7 +39,7 @@
       <Sha>ca7e58c80729a6e1263c0bd0249f6faa17d7a8c9</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
-      <Uri>https://github.com/dotnet/cliCommandLineParser</Uri>
+      <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
       <Sha>0e89c2116ad28e404ba56c14d1c3f938caa25a01</Sha>
     </Dependency>
   </ProductDependencies>
