@@ -128,6 +128,9 @@ catch {
 }
 finally {
   Pop-Location
+
+  KillProcessesFromRepo
+
   if ($prepareMachine) {
     Stop-Processes
   }
