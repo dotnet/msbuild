@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
@@ -62,8 +63,13 @@ namespace Microsoft.Build.Collections
 
             bool isCloneable = false;
             bool checkForCloneable = true;
-            lock (_syncRoot)
+
+            object lockObject = _syncRoot;
+            bool lockWasTaken = false;
+            try
             {
+                Monitor.Enter(lockObject, ref lockWasTaken);
+
                 foreach (T item in _backingEnumerable)
                 {
                     if (checkForCloneable)
@@ -78,6 +84,13 @@ namespace Microsoft.Build.Collections
 
                     T copiedItem = isCloneable ? (item as IDeepCloneable<T>).DeepClone() : item;
                     list.Add(copiedItem);
+                }
+            }
+            finally
+            {
+                if (lockWasTaken)
+                {
+                    Monitor.Exit(lockObject);
                 }
             }
 
