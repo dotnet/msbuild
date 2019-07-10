@@ -5,7 +5,7 @@ trigger:
 
 jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
-  displayName: "Build and test on Windows using bootstrapped full MSBuild"
+  displayName: "Windows Full"
   pool:
     name: 'Hosted'
     vmImage: 'windows-2019'
@@ -46,7 +46,7 @@ jobs:
     condition: always()
 
 - job: BootstrapMSBuildOnCoreWindows
-  displayName: "Build and test on Windows using bootstrapped core MSBuild"
+  displayName: "Windows Core"
   pool:
     name: 'Hosted'
     vmImage: 'windows-2019'
@@ -88,7 +88,7 @@ jobs:
     condition: always()
 
 - job: FullReleaseOnWindows
-  displayName: "Build and test Release on Windows using full MSBuild"
+  displayName: "Windows Full Release (no bootstrap)"
   pool:
     name: 'Hosted'
     vmImage: 'windows-2019'
@@ -130,7 +130,7 @@ jobs:
     condition: always()
 
 - job: CoreBootstrappedOnLinux
-  displayName: "Build and test on Linux using bootstrapped .NET Core MSBuild"
+  displayName: "Linux Core"
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -159,7 +159,7 @@ jobs:
     condition: always()
 
 - job: CoreOnMac
-  displayName: "Build and test on macOS using bootstrapped .NET Core MSBuild"
+  displayName: "macOS Core"
   pool:
     vmImage: 'macOS-10.14'
   steps:
