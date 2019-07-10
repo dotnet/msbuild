@@ -5,9 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
-using System.Threading;
 
 namespace Microsoft.Build.Collections
 {
@@ -46,7 +47,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Lock object to guard access to backing collection.
         /// </summary>
-        private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Creates empty dictionary
