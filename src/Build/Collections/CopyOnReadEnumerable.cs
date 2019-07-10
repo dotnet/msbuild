@@ -29,6 +29,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         private readonly object _syncRoot;
 
+        private readonly ReaderWriterLockSlim _readerWriterLockSlim;
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -43,6 +45,20 @@ namespace Microsoft.Build.Collections
             _syncRoot = syncRoot;
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="backingEnumerable">The collection which serves as a source for enumeration.</param>
+        /// <param name="readerWriterLock">The object used to synchronize access for copying.</param>
+        public CopyOnReadEnumerable(IEnumerable<T> backingEnumerable, ReaderWriterLockSlim readerWriterLockSlim)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(backingEnumerable, nameof(backingEnumerable));
+            ErrorUtilities.VerifyThrowArgumentNull(readerWriterLockSlim, nameof(readerWriterLockSlim));
+
+            _backingEnumerable = backingEnumerable;
+            _readerWriterLockSlim = readerWriterLockSlim;
+        }
+        
         #region IEnumerable<T> Members
 
         /// <summary>
@@ -68,7 +84,14 @@ namespace Microsoft.Build.Collections
             bool lockWasTaken = false;
             try
             {
-                Monitor.Enter(lockObject, ref lockWasTaken);
+                if (lockObject != null)
+                {
+                    Monitor.Enter(lockObject, ref lockWasTaken);
+                }
+                else
+                {
+                    _readerWriterLockSlim.EnterReadLock();
+                }
 
                 foreach (T item in _backingEnumerable)
                 {
@@ -92,6 +115,8 @@ namespace Microsoft.Build.Collections
                 {
                     Monitor.Exit(lockObject);
                 }
+
+                _readerWriterLockSlim?.ExitReadLock();
             }
 
             return list.GetEnumerator();

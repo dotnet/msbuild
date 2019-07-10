@@ -240,7 +240,7 @@ namespace Microsoft.Build.Collections
         /// <returns>Returns a cloning enumerable.</returns>
         public IEnumerable<T> GetCopyOnReadEnumerable()
         {
-            return new CopyOnReadEnumerable<T>(this, _properties);
+            return new CopyOnReadEnumerable<T>(this, _lock);
         }
 
         /// <summary>
