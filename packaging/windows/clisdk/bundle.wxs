@@ -22,7 +22,11 @@
 
     <swid:Tag Regid="microsoft.com" InstallPath="[DOTNETHOME]" />
 
-    <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFiles6432Folder]dotnet" bal:Overridable="no" />
+    <?if $(var.Platform)=x86?>
+      <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFilesFolder]dotnet" bal:Overridable="no" />
+    <?elseif $(var.Platform)=x64?>
+      <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFiles64Folder]dotnet" bal:Overridable="no" />
+    <?endif?>
     <Variable Name="BUNDLEMONIKER" Type="string" Value="$(var.ProductMoniker)" bal:Overridable="no" />
     <Variable Name="DOTNETSDKVERSION" Type="string" Value="$(var.DisplayVersion)" bal:Overridable="no" />
     <Variable Name="DOTNETRUNTIMEVERSION" Type="string" Value="$(var.DotNetRuntimeVersion)" bal:Overridable="no" />
