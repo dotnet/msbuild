@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             foreach (string targetRelativePath in targetFiles)
             {
-                string pathToRestore = !string.IsNullOrEmpty(outputBasePath) ? Path.Combine(outputBasePath, targetRelativePath) : targetRelativePath;
+                string pathToRestore = !string.IsNullOrEmpty(outputBasePath) ? Path.GetFullPath(Path.Combine(outputBasePath, targetRelativePath)) : targetRelativePath;
 
                 if (string.IsNullOrEmpty(pathToRestore) ||
                     (!Directory.Exists(pathToRestore)
