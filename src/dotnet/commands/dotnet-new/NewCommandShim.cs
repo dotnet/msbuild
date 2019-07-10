@@ -131,13 +131,12 @@ namespace Microsoft.DotNet.Tools.New
         {
             IDictionary<string, (string path, SemanticVersion version)> bestVersionsByBucket = new Dictionary<string, (string path, SemanticVersion version)>();
 
-            var version = typeof(NewCommandShim).Assembly.GetName().Version;
-            SemanticVersion.TryParse($"{version.Major}.{version.Minor}", out SemanticVersion currentVersion);
-
+            var sdkVersion = typeof(NewCommandShim).Assembly.GetName().Version;
             foreach (KeyValuePair<string, SemanticVersion> dirInfo in versionDirInfo)
             {
-                // restrict the results to not include from higher versions
-                if (dirInfo.Value.CompareTo(currentVersion) <= 0)
+                Version majorMinorDirVersion = new Version(dirInfo.Value.Major, dirInfo.Value.Minor);
+                // restrict the results to not include from higher versions of the runtime/templates then the SDK
+                if (majorMinorDirVersion <= sdkVersion)
                 {
                     string coreAppVersion = $"{dirInfo.Value.Major}.{dirInfo.Value.Minor}";
                     if (!bestVersionsByBucket.TryGetValue(coreAppVersion, out (string path, SemanticVersion version) currentHighest)
