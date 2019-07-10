@@ -49,7 +49,7 @@
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: Não é possível expandir os metadados na expressão "{0}". {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
@@ -107,9 +107,16 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: A tarefa MSBuild está compilando projetos {0} que não estão especificados no item ProjectReference. Em builds isolados, isso provavelmente significa que as referências não são especificadas de forma explícita como um item de ProjectReference em "{1}"</target>
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: A tarefa MSBuild está compilando projetos {0} que não estão especificados no item ProjectReference. Em builds isolados, isso provavelmente significa que as referências não são especificadas de forma explícita como um item de ProjectReference em "{1}"</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -446,7 +453,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Não há mais suporte para a tag &lt;{0}&gt; como filho do elemento &lt;Project&gt;. Posicione essa tag dentro de um destino e adicione o nome do destino ao atributo "InitialTargets" do elemento &lt;Project&gt;.</target>
+        <target state="translated">Não há mais suporte para a marca &lt;{0}&gt; como filho do elemento &lt;Project&gt;. Posicione essa marca dentro de um destino e adicione o nome do destino ao atributo "InitialTargets" do elemento &lt;Project&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -550,12 +557,12 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: O projeto "{0}" importado não foi encontrado. Além disso, houve uma tentativa de encontrar "{1}" nos caminhos de pesquisa de fallback para {2} - {3}. Esses caminhos de pesquisa estão definidos em "{4}". Confirme se o caminho na declaração &lt;Import&gt; está correto e se o arquivo existe no disco em um desses caminhos de pesquisa.</target>
+        <target state="translated">MSB4226: o projeto importado "{0}" não foi encontrado. Além disso, houve uma tentativa de localizar "{1}" nos caminhos de pesquisa de fallback de {2} – {3}. Esses caminhos de pesquisa são definidos em "{4}". Confirme se o caminho na declaração &lt;Import&gt; está correto e se o arquivo existe no disco em um dos caminhos de pesquisa.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: O projeto "{0}" importado não foi encontrado. Além disso, houve uma tentativa de encontrar "{1}" nos caminhos de pesquisa de fallback para {2} - {3}. Confirme se o caminho na declaração &lt;Import&gt; está correto e se o arquivo existe no disco em um desses caminhos de pesquisa.</target>
+        <target state="translated">MSB4226: o projeto importado "{0}" não foi encontrado. Além disso, houve uma tentativa de localizar "{1}" nos caminhos de pesquisa de fallback de {2} – {3}. Confirme se o caminho na declaração &lt;Import&gt; está correto e se o arquivo existe no disco em um dos caminhos de pesquisa.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
@@ -897,7 +904,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: o namespace de XML padrão do projeto deve ser namespace XML do MSBuild ou nenhum namespace. Se o projeto tiver sido criado no formato do MSBuild 2003, adicione xmlns="{0}" ao elemento &lt;Project&gt;. Se o projeto tiver sido criado nos antigos formatos 1.0 ou 1.2, converta-o no formato do MSBuild 2003.</target>
+        <target state="translated">MSB4041: o namespace de XML padrão do projeto precisa ser o namespace de XML do MSBuild ou não ser nenhum namespace. Se o projeto foi criado no formato do MSBuild 2003, adicione xmlns="{0}" ao elemento &lt;Project&gt;. Se o projeto foi criado nos antigos formatos 1.0 ou 1.2, converta-o para o formato do MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1120,7 +1127,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Ignorando porque a configuração "$(AspNetConfiguration)" não dá suporte a este projeto Web.  Você pode usar a propriedade AspNetConfiguration para substituir a configuração usada na compilação de projetos da Web adicionando /p:AspNetConfiguration=&lt;valor&gt; à linha de comando. Os projetos da Web atuais dão suporte somente às configurações Debug e Release.</target>
+        <target state="translated">Ignorando porque a configuração "$(AspNetConfiguration)" não dá suporte a este projeto da Web. Você pode usar a propriedade AspNetConfiguration para substituir a configuração usada na compilação de projetos da Web adicionando /p:AspNetConfiguration=&lt;valor&gt; à linha de comando. Os projetos da Web atuais dão suporte somente às configurações Debug e Release.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -2026,7 +2033,7 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="translated">O elemento &lt;{0}&gt; deve ter o atributo "{1}", o atributo "{2}" ou o atributo "{3}", mas não mais de um.</target>
+        <target state="translated">O elemento &lt;{0}&gt; precisa ter o atributo "{1}", o atributo "{2}" ou o atributo "{3}", mas não mais de um.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
@@ -2181,7 +2188,7 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD : erro MSB4239: erro ao gravar relatório de criação de perfil. {0}</target>
+        <target state="translated">MSBUILD : error MSB4239: erro ao gravar relatório de criação de perfil. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">

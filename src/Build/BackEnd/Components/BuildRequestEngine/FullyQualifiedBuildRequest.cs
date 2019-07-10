@@ -25,7 +25,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targets">The set of targets to build.</param>
         /// <param name="resultsNeeded">Whether or not to wait for the results of this request.</param>
         /// <param name="flags">Flags specified for the build request.</param>
-        public FullyQualifiedBuildRequest(BuildRequestConfiguration config, string[] targets, bool resultsNeeded, BuildRequestDataFlags flags = BuildRequestDataFlags.None)
+        public FullyQualifiedBuildRequest(
+            BuildRequestConfiguration config,
+            string[] targets,
+            bool resultsNeeded,
+            bool skipStaticGraphIsolationConstraints = false,
+            BuildRequestDataFlags flags = BuildRequestDataFlags.None
+            )
         {
             ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
             ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
@@ -33,6 +39,7 @@ namespace Microsoft.Build.BackEnd
             Config = config;
             Targets = targets;
             ResultsNeeded = resultsNeeded;
+            SkipStaticGraphIsolationConstraints = skipStaticGraphIsolationConstraints;
             BuildRequestDataFlags = flags;
         }
 
@@ -55,6 +62,8 @@ namespace Microsoft.Build.BackEnd
         /// The set of flags specified in the BuildRequestData for this request.
         /// </summary>
         public BuildRequestDataFlags BuildRequestDataFlags { get; set; }
+
+        public bool SkipStaticGraphIsolationConstraints { get; }
 
         /// <summary>
         /// Implementation of the equality operator.

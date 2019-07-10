@@ -148,7 +148,7 @@
   </data>
   <data name="CannotExpandItemMetadata" UESanitized="false" Visibility="Public">
     <value>MSB4248: Cannot expand metadata in expression "{0}". {1}</value>
-    <comment>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+    <comment>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</comment>
   </data>
@@ -1733,7 +1733,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds" UESanitized="false" Visibility="Public">
-    <value>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</value>
+    <value>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</value>
     <comment>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -1763,13 +1763,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path
     </comment>
   </data>
+  <data name="SkippedConstraintsOnRequest" UESanitized="false" Visibility="Public">
+    <value>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</value>
+    <comment>
+      LOCALIZATION: {0} and {1} are file paths
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
 
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4259.
+        Next message code should be MSB4260.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

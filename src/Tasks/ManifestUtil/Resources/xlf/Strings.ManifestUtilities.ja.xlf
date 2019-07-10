@@ -82,15 +82,15 @@
     </source>
         <target state="translated">
           UAC マニフェスト オプション
-         Windows のユーザー アカウント制御のレベルを変更するには、
-         requestedExecutionLevel ノードを以下のいずれかで置換します。
+          Windows のユーザー アカウント制御のレベルを変更するには、
+          requestedExecutionLevel ノードを以下のいずれかで置換します。
 
-       &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
-       &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
-       &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-        下位互換性を保つためにファイルおよびレジストリの仮想化を使用する場合、
-        requestedExecutionLevel ノードを削除します。
+         下位互換性を保つためにファイルおよびレジストリの仮想化を使用する場合、
+         requestedExecutionLevel ノードを削除します。
     </target>
         <note />
       </trans-unit>

@@ -643,9 +643,29 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
         {
+            try
+            {
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true);
+            }
+            catch(ApplicationException)
+            {
+                // error, retry with signtool /t if timestamp url was given
+                if (timestampUrl != null)
+                {
+                    SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);
+                    return;
+                }
+                throw;
+            }
+        }
+
+        private static void SignPEFileInternal(X509Certificate2 cert, Uri timestampUrl, 
+                                               string path, System.Resources.ResourceManager resources, 
+                                               bool useSha256, bool useRFC3161Timestamp)
+        {
             var startInfo = new ProcessStartInfo(
                 GetPathToTool(resources),
-                GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256))
+                GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256, useRFC3161Timestamp))
             {
                 CreateNoWindow = true,
                 UseShellExecute = false,
@@ -686,7 +706,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        internal static string GetCommandLineParameters(string certThumbprint, Uri timestampUrl, string path, bool useSha256)
+        internal static string GetCommandLineParameters(string certThumbprint, Uri timestampUrl, string path,
+                                                        bool useSha256, bool useRFC3161Timestamp)
         {
             var commandLine = new StringBuilder();
             if (useSha256)
@@ -700,7 +721,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (timestampUrl != null)
             {
-                commandLine.Append(String.Format(CultureInfo.InvariantCulture, "/t {0} ", timestampUrl.ToString()));
+                commandLine.Append(String.Format(CultureInfo.InvariantCulture, 
+                                                "{0} {1} ", 
+                                                useRFC3161Timestamp ? "/tr" : "/t", 
+                                                timestampUrl.ToString()));
             }
             commandLine.Append(string.Format(CultureInfo.InvariantCulture, "\"{0}\"", path));
             return commandLine.ToString();

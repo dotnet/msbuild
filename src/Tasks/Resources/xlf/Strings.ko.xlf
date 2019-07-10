@@ -103,12 +103,12 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer">
         <source>MSB3651: The key container '{0}' does not contain a public/private key pair.</source>
-        <target state="translated">MSB3651: 키 컨테이너 '{0}'에 공개/개인 키 쌍이 없습니다.</target>
+        <target state="translated">MSB3651: 키 컨테이너 '{0}'에 퍼블릭/프라이빗 키 쌍이 없습니다.</target>
         <note>{StrBegin="MSB3651: "}</note>
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile">
         <source>MSB3652: The key file '{0}' does not contain a public/private key pair.</source>
-        <target state="translated">MSB3652: 키 파일 '{0}'에 공개/개인 키 쌍이 없습니다.</target>
+        <target state="translated">MSB3652: 키 파일 '{0}'에 퍼블릭/프라이빗 키 쌍이 없습니다.</target>
         <note>{StrBegin="MSB3652: "}</note>
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.ToolNameMustBeSet">
@@ -998,6 +998,16 @@
         <source>Output file "{0}" does not exist.</source>
         <target state="translated">출력 파일 "{0}"이(가) 없습니다.</target>
         <note>{0} is a filename on disk.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresExtensions">
+        <source>MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</source>
+        <target state="new">MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</target>
+        <note>{StrBegin="MSB3822: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresProperty">
+        <source>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</source>
+        <target state="new">MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</target>
+        <note>{StrBegin="MSB3823: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
@@ -2156,12 +2166,12 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.StrongNameUtils.NoKeyPairInContainer">
         <source>MSB3298: The key container '{0}' does not contain a public/private key pair.</source>
-        <target state="translated">MSB3298: 키 컨테이너 '{0}'에 공개/개인 키 쌍이 없습니다.</target>
+        <target state="translated">MSB3298: 키 컨테이너 '{0}'에 퍼블릭/프라이빗 키 쌍이 없습니다.</target>
         <note>{StrBegin="MSB3298: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.StrongNameUtils.NoKeyPairInFile">
         <source>MSB3299: The key file '{0}' does not contain a public/private key pair.</source>
-        <target state="translated">MSB3299: 키 파일 '{0}'에 공개/개인 키 쌍이 없습니다.</target>
+        <target state="translated">MSB3299: 키 파일 '{0}'에 퍼블릭/프라이빗 키 쌍이 없습니다.</target>
         <note>{StrBegin="MSB3299: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.TypeLibAttrId">
@@ -2290,7 +2300,7 @@
       </trans-unit>
       <trans-unit id="SignFile.CertMissingPrivateKey">
         <source>MSB3487: The signing certificate does not include private key information.</source>
-        <target state="translated">MSB3487: 서명 인증서에 개인 키 정보가 포함되어 있지 않습니다.</target>
+        <target state="translated">MSB3487: 서명 인증서에 프라이빗 키 정보가 포함되어 있지 않습니다.</target>
         <note>{StrBegin="MSB3487: "}</note>
       </trans-unit>
       <trans-unit id="StrongNameUtils.BadKeyContainer">
@@ -2489,8 +2499,8 @@
         <note>{StrBegin="MSB3643: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-        <source>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</source>
-        <target state="translated">MSB3644: "{0}" 프레임워크에 대한 참조 어셈블리를 찾을 수 없습니다. 이 문제를 해결하려면 이 프레임워크 버전에 대한 SDK 또는 타기팅 팩을 설치하거나 애플리케이션의 대상을 SDK 또는 타기팅 팩을 설치한 프레임워크 버전으로 변경하세요. 어셈블리는 GAC(전역 어셈블리 캐시)에서 확인되며 참조 어셈블리 대신 사용됩니다. 따라서 어셈블리의 대상이 사용자가 의도하는 프레임워크로 올바르게 지정되지 않을 수 있습니다.</target>
+        <source>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</source>
+        <target state="translated">MSB3644: {0}의 참조 어셈블리를 찾을 수 없습니다. 이 문제를 해결하려면 이 프레임워크 버전용 개발자 팩(SDK/타기팅 팩)을 설치하거나, 애플리케이션 대상을 변경합니다. https://aka.ms/msbuild/developerpacks에서 .NET Framework 개발자 팩을 다운로드할 수 있습니다.</target>
         <note>{StrBegin="MSB3644: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">
@@ -3111,7 +3121,7 @@
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
         <target state="translated">MSB3492: 기존 파일 "{0}"을(를) 읽을 수 없어 콘텐츠가 최신 상태인지 확인할 수 없습니다. 덮어씁니다.</target>
-        <note>{StrBegin="MSB3491: "}</note>
+        <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>

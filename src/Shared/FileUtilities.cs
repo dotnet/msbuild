@@ -83,7 +83,9 @@ namespace Microsoft.Build.Shared
             (char)31, ':', '*', '?', '\\', '/'
         };
 
-        private static readonly char[] Slashes = { '/', '\\' };
+        internal static readonly char[] Slashes = { '/', '\\' };
+
+        internal static readonly string DirectorySeparatorString = Path.DirectorySeparatorChar.ToString();
 
 #if !CLR2COMPATIBILITY
         private static readonly ConcurrentDictionary<string, bool> FileExistenceCache = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
@@ -248,6 +250,22 @@ namespace Microsoft.Build.Shared
                 return FixFilePath(fullPath.Substring(0, i));
             }
             return null;
+        }
+
+        internal static string TruncatePathToTrailingSegments(string path, int trailingSegmentsToKeep)
+        {
+#if !CLR2COMPATIBILITY
+            ErrorUtilities.VerifyThrowInternalLength(path, nameof(path));
+            ErrorUtilities.VerifyThrow(trailingSegmentsToKeep >= 0, "trailing segments must be positive");
+
+            var segments = path.Split(Slashes, StringSplitOptions.RemoveEmptyEntries);
+
+            var headingSegmentsToRemove = Math.Max(0, segments.Length - trailingSegmentsToKeep);
+
+            return string.Join(DirectorySeparatorString, segments.Skip(headingSegmentsToRemove));
+#else
+            return path;
+#endif
         }
 
         internal static bool ContainsRelativePathSegments(string path)
@@ -642,8 +660,8 @@ namespace Microsoft.Build.Shared
 
             if (NativeMethodsShared.IsWindows && !EndsWithSlash(fullPath))
             {
-                if (FileUtilitiesRegex.DrivePattern.IsMatch(fileSpec) ||
-                    FileUtilitiesRegex.UncPattern.IsMatch(fullPath))
+                if (FileUtilitiesRegex.IsDrivePattern(fileSpec) ||
+                    FileUtilitiesRegex.IsUncPattern(fullPath))
                 {
                     // append trailing slash if Path.GetFullPath failed to (this happens with drive-specs and UNC shares)
                     fullPath += Path.DirectorySeparatorChar;

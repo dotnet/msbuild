@@ -397,7 +397,7 @@ namespace Microsoft.Build.Shared
 
                 try
                 {
-                    if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.FullPath, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.FullPath, StringComparison.OrdinalIgnoreCase))
                     {
                         if (fullPath != null)
                         {
@@ -414,7 +414,7 @@ namespace Microsoft.Build.Shared
 
                         ThrowForUrl(modifiedItemSpec, itemSpec, currentDirectory);
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RootDir, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RootDir, StringComparison.OrdinalIgnoreCase))
                     {
                         GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, ItemSpecModifiers.FullPath, ref fullPath);
 
@@ -422,7 +422,7 @@ namespace Microsoft.Build.Shared
 
                         if (!EndsWithSlash(modifiedItemSpec))
                         {
-                            ErrorUtilities.VerifyThrow(FileUtilitiesRegex.StartsWithUncPattern.IsMatch(modifiedItemSpec),
+                            ErrorUtilities.VerifyThrow(FileUtilitiesRegex.StartsWithUncPattern(modifiedItemSpec),
                                 "Only UNC shares should be missing trailing slashes.");
 
                             // restore/append trailing slash if Path.GetPathRoot() has either removed it, or failed to add it
@@ -430,10 +430,10 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec += Path.DirectorySeparatorChar;
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Filename, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Filename, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no filename
-                        if (Path.GetDirectoryName(itemSpec) == null)
+                        if (IsRootDirectory(itemSpec))
                         {
                             // NOTE: this is to prevent Path.GetFileNameWithoutExtension() from treating server and share elements
                             // in a UNC file-spec as filenames e.g. \\server, \\server\share
@@ -445,10 +445,10 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = Path.GetFileNameWithoutExtension(FixFilePath(itemSpec));
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no extension
-                        if (Path.GetDirectoryName(itemSpec) == null)
+                        if (IsRootDirectory(itemSpec))
                         {
                             // NOTE: this is to prevent Path.GetExtension() from treating server and share elements in a UNC
                             // file-spec as filenames e.g. \\server.ext, \\server\share.ext
@@ -459,11 +459,11 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = Path.GetExtension(itemSpec);
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RelativeDir, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RelativeDir, StringComparison.OrdinalIgnoreCase))
                     {
                         modifiedItemSpec = GetDirectory(itemSpec);
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Directory, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Directory, StringComparison.OrdinalIgnoreCase))
                     {
                         GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, ItemSpecModifiers.FullPath, ref fullPath);
 
@@ -472,17 +472,13 @@ namespace Microsoft.Build.Shared
                         if (NativeMethodsShared.IsWindows)
                         {
                             int length = -1;
-                            if (FileUtilitiesRegex.StartWithDrivePattern.IsMatch(modifiedItemSpec))
+                            if (FileUtilitiesRegex.StartsWithDrivePattern(modifiedItemSpec))
                             {
                                 length = 2;
                             }
                             else
                             {
-                                var match = FileUtilitiesRegex.StartsWithUncPattern.Match(modifiedItemSpec);
-                                if (match.Success)
-                                {
-                                    length = match.Length;
-                                }
+                                length = FileUtilitiesRegex.StartsWithUncPatternMatchLength(modifiedItemSpec);
                             }
 
                             if (length != -1)
@@ -504,16 +500,16 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = modifiedItemSpec.Substring(1);
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
                     {
                         // only the BuildItem class can compute this modifier -- so leave empty
                         modifiedItemSpec = String.Empty;
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Identity, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Identity, StringComparison.OrdinalIgnoreCase))
                     {
                         modifiedItemSpec = itemSpec;
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.ModifiedTime, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.ModifiedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
@@ -531,7 +527,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = String.Empty;
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.CreatedTime, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.CreatedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
@@ -547,7 +543,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = String.Empty;
                         }
                     }
-                    else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.AccessedTime, StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.AccessedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
@@ -572,7 +568,7 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
-                            if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase) == 0)
+                            if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase))
                             {
                                 // ItemSpecModifiers.Directory does not contain the root directory
                                 modifiedItemSpec = Path.Combine
@@ -585,15 +581,15 @@ namespace Microsoft.Build.Shared
                             {
                                 string additionalModifier = null;
 
-                                if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase) == 0)
+                                if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase))
                                 {
                                     additionalModifier = ItemSpecModifiers.FullPath;
                                 }
-                                else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectName, StringComparison.OrdinalIgnoreCase) == 0)
+                                else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectName, StringComparison.OrdinalIgnoreCase))
                                 {
                                     additionalModifier = ItemSpecModifiers.Filename;
                                 }
-                                else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectExtension, StringComparison.OrdinalIgnoreCase) == 0)
+                                else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectExtension, StringComparison.OrdinalIgnoreCase))
                                 {
                                     additionalModifier = ItemSpecModifiers.Extension;
                                 }
@@ -617,6 +613,51 @@ namespace Microsoft.Build.Shared
                 }
 
                 return modifiedItemSpec;
+            }
+
+            /// <summary>
+            /// Indicates whether the given path is a UNC or drive pattern root directory.
+            /// <para>Note: This function mimics the behavior of checking if Path.GetDirectoryName(path) == null.</para>
+            /// </summary>
+            /// <param name="path"></param>
+            /// <returns></returns>
+            private static bool IsRootDirectory(string path)
+            {
+                // Eliminate all non-rooted paths
+                if (!Path.IsPathRooted(path))
+                {
+                    return false;
+                }
+
+                int uncMatchLength = FileUtilitiesRegex.StartsWithUncPatternMatchLength(path);
+
+                // Determine if the given path is a standard drive/unc pattern root
+                if (FileUtilitiesRegex.IsDrivePattern(path) ||
+                    FileUtilitiesRegex.IsDrivePatternWithSlash(path) ||
+                    uncMatchLength == path.Length)
+                {
+                    return true;
+                }
+
+                // Eliminate all non-root unc paths.
+                if (uncMatchLength != -1)
+                {
+                    return false;
+                }
+
+                // Eliminate any drive patterns that don't have a slash after the colon or where the 4th character is a non-slash
+                // A non-slash at [3] is specifically checked here because Path.GetDirectoryName
+                // considers "C:///" a valid root.
+                if (FileUtilitiesRegex.StartsWithDrivePattern(path) &&
+                    ((path.Length >= 3 && path[2] != '\\' && path[2] != '/') ||
+                    (path.Length >= 4 && path[3] != '\\' && path[3] != '/')))
+                {
+                    return false;
+                }
+
+                // There are some edge cases that can get to this point.
+                // After eliminating valid / invalid roots, fall back on original behavior.
+                return Path.GetDirectoryName(path) == null;
             }
 
             /// <summary>

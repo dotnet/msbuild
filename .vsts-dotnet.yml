@@ -27,7 +27,7 @@ jobs:
   - name: VisualStudio.MajorVersion
     value: 16
   - name: VisualStudio.ChannelName
-    value: 'int.d16.2stg'
+    value: 'int.master'
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -128,13 +128,6 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
       ArtifactName: logs
-    condition: succeededOrFailed()
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: bin'
-    inputs:
-      PathtoPublish: 'artifacts\bin'
-      ArtifactName: bin
     condition: succeededOrFailed()
 
   # Publishes setup VSIXes to a drop.

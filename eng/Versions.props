@@ -6,6 +6,7 @@
     <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
         $(RestoreSources);
+        https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
         https://dotnet.myget.org/F/roslyn/api/v3/index.json;
         https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
         https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
@@ -14,10 +15,12 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>16.2.0</VersionPrefix>
+    <VersionPrefix>16.3.0</VersionPrefix>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
+    <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
+    <SemanticVersioningV1>true</SemanticVersioningV1>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
   <PropertyGroup>
@@ -28,6 +31,10 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.2.203</DotNetCliVersion>
+    <DotNetCliVersion>3.0.100-preview5-011568</DotNetCliVersion>
+  </PropertyGroup>
+  <!-- Product Dependencies -->
+  <PropertyGroup>
+    <SystemResourcesExtensionsVersion>4.6.0-preview8.19357.5</SystemResourcesExtensionsVersion>
   </PropertyGroup>
 </Project>

@@ -254,6 +254,10 @@ namespace Microsoft.Build.Tasks
                 {
                     _targetProcessorArchitecture = UtilitiesProcessorArchitecture.ARM;
                 }
+                else if (UtilitiesProcessorArchitecture.ARM64.Equals(value, StringComparison.OrdinalIgnoreCase))
+                {
+                    _targetProcessorArchitecture = UtilitiesProcessorArchitecture.ARM64;
+                }
                 else
                 {
                     _targetProcessorArchitecture = value;
@@ -571,6 +575,7 @@ namespace Microsoft.Build.Tasks
                     break;
                 case UtilitiesProcessorArchitecture.AMD64:
                 case UtilitiesProcessorArchitecture.IA64:
+                case UtilitiesProcessorArchitecture.ARM64:
                     path = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(file, targetFrameworkVersion, visualStudioVersion, DotNetFrameworkArchitecture.Bitness64);
                     break;
                 case UtilitiesProcessorArchitecture.MSIL:

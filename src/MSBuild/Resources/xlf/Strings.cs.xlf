@@ -241,12 +241,12 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;file&gt;            Vloží nastavení příkazového řádku z textového souboru. Pokud chcete
-                     zadat více souborů odpovědí, uveďte každý soubor odpovědí
-                     zvlášť.
-
-                     Automaticky se použijí všechny soubory s názvem msbuild.rsp,
-                     které se nacházejí v následujících umístěních:
+        <target state="translated">  @&lt;soubor&gt;            Vložení nastavení příkazového řádku z textového souboru. Chcete-li zadat
+                     více souborů odpovědí, uveďte každý soubor
+                     odpovědí zvlášť.
+                     
+                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp 
+                     nacházející se v následujících umístěních: 
                      (1) adresář nástroje msbuild.exe
                      (2) adresář prvního sestaveného projektu nebo řešení
 </target>
@@ -282,9 +282,9 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;cíle&gt;  Sestaví projekt s uvedenými cíli. K oddělení více cílů
-                     použijte středníky nebo čárky, nebo zadejte
-                     každý cíl zvlášť. (Krátký tvar: -t)
+        <target state="translated">  -target:&lt;cíle&gt;     Sestavit projekt s uvedenými cíli. K oddělení více cílů
+                     použijte středníky nebo čárky. Můžete také zadat každý cíl zvlášť.
+                     (Krátký tvar: -t)
                      Příklad:
                        -target:Resources;Compile
 </target>
@@ -305,9 +305,9 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Nastaví nebo potlačí tyto vlastnosti na úrovni projektu. &lt;n&gt; je
-                     název vlastnosti a &lt;v&gt; je její hodnota. K oddělení více vlastností
-                     použijte středníky nebo čárky, nebo zadejte
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Nastavení nebo potlačení daných vlastností na úrovni
+                     projektu. &lt;n&gt; je název vlastnosti a &lt;v&gt; je její hodnota. Více
+                     vlastností oddělte středníkem či čárkou nebo zadejte 
                      každou vlastnost zvlášť. (Krátký tvar: -p)
                      Příklad:
                        -property:WarningLevel=2;OutDir=bin\Debug\
@@ -336,16 +336,19 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;protokolovací nástroj&gt;   Použije tento protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete
-                     zadat několik protokolovacích nástrojů, musíte je zadat jednotlivě.
-                     Syntaxe hodnoty &lt;protokolovací nástroj&gt;:
-                       [&lt;třída protokolovacího nástroje&gt;,]&lt;sestavení protokolovacího nástroje&gt;[;&lt;parametry protokolovacího nástroje&gt;]
-                     Syntaxe hodnoty &lt;třída protokolovacího nástroje&gt;:
-                       [&lt;částečný/úplný obor názvů&gt;.]&lt;třída protokolovacího nástroje&gt;
-                     Syntaxe hodnoty &lt;sestavení protokolovacího nástroje&gt;:
-                       {&lt;název sestavení&gt;[,&lt;silný název&gt;] | &lt;soubor sestavení&gt;}
-                     &lt;Parametry protokolovacího nástroje&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém jste je zadali. (Krátký tvar: -l)
+        <target state="translated">  -logger:&lt;protok_nást&gt;   Použít daný protokolovací nástroj k protokolování
+                     událostí nástroje MSBuild. Chcete-li zadat více protokolovacích
+                    nástrojů, musíte je zadat jednotlivě.
+                     Syntaxe hodnoty &lt;protok_nást&gt;:
+                        [&lt;třída_protok_nást&gt;,]&lt;sestavení_protok_nást&gt;
+                        [;&lt;param_protok_nást&gt;]
+                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
+                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
+                     Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
+                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém
+                     byly zadány. (Krátký tvar: -l)
                      Příklady:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -366,8 +369,8 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="translated">  -verbosity:&lt;úroveň&gt; Zobrazí v protokolu událostí příslušný objem informací.
-                     Dostupné úrovně podrobností: q[uiet], m[inimal],
+        <target state="translated">  -verbosity:&lt;úroveň&gt; Zobrazení daného množství informací v protokolu
+                     událostí. Dostupné úrovně podrobností: q[uiet], m[inimal],
                      n[ormal], d[etailed] a diag[nostic]. (Krátký tvar: -v)
                      Příklad:
                        -verbosity:quiet
@@ -417,39 +420,39 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parametry&gt;
+        <target state="translated">  -consoleloggerparameters:&lt;parameters&gt;
                      Parametry protokolovacího nástroje konzoly. (Krátký tvar: -clp)
                      Dostupné parametry:
-                        PerformanceSummary – zobrazí dobu zpracování úloh,
-                            cílů a projektů.
+                        PerformanceSummary – zobrazí dobu zpracování úloh, cílů
+                            a projektů.
                         Summary – na konci zobrazí souhrn chyb a upozornění.
                         NoSummary – na konci nezobrazí souhrny chyb
                             a upozornění.
                         ErrorsOnly – zobrazí jenom chyby.
                         WarningsOnly – zobrazí jenom upozornění.
                         NoItemAndPropertyList – nezobrazí na začátku sestavení každého
-                            projektu seznamy položek a vlastností.
-                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.
-                        ShowTimestamp – před každou zprávou zobrazí časové
-                            razítko.
+                            projektu seznamy položek a vlastností.    
+                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.  
+                        ShowTimestamp – před každou zprávou zobrazí
+                            časové razítko.                                           
                         ShowEventId – zobrazí ID události pro spuštěné a dokončené
                             události a zprávy.
-                        ForceNoAlign – nenastavuje text podle velikosti
-                            vyrovnávací paměti konzoly.
+                        ForceNoAlign – nenastavuje text podle velikosti vyrovnávací
+                            paměti konzoly.
                         DisableConsoleColor – použije výchozí barvy konzoly
                             pro všechny zprávy protokolování.
                         DisableMPLogging – zakáže víceprocesorový styl výstupu
-                            protokolování při práci
-                            v jiném než víceprocesorovém režimu.
+                            protokolování při práci v jiném než víceprocesorovém
+                            režimu.
                         EnableMPLogging – povolí víceprocesorový styl výstupu
-                            protokolování i při práci v jiném než víceprocesorovém
-                            režimu. Tento styl protokolování je ve výchozím nastavení zapnutý.
+                            protokolování i při práci v jiném
+                            režimu. Tento styl protokolování je výchozí. 
                         ForceConsoleColor – použije barvy konzoly ANSI,
                             i když to konzola nepodporuje.
-                        Verbosity – potlačí nastavení -verbosity pro tento
-                            protokolovací nástroj.
+                        Verbosity – potlačí nastavení -verbosity
+                            pro tento protokolovací nástroj.
                      Příklad:
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
+                        -consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -486,11 +489,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Ověří projekt podle výchozího schématu. (Krátký
-                     tvar: -val)
+        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu. 
+                     (Krátký tvar: -val)
 
-  -validate:&lt;schéma&gt; Ověří projekt podle zadaného schématu. (Krátký
-                     tvar: -val)
+  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu. 
+                     (Krátký tvar: -val)
                      Příklad:
                        -validate:MyExtendedBuildSchema.xsd
 </target>
@@ -550,11 +553,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Setting this also turns on isolated builds (-isolate).
                      (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;souborMezipaměti&gt;...
-                     Středníky oddělený seznam vstupních souborů mezipaměti,
-                     z nichž bude MSBuild číst výsledky sestavení.
-                     Nastavením této možnosti zapnete také izolované buildy (-isolate).
-                     (krátký tvar: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Seznam středníkem oddělených vstupních souborů mezipaměti, ze kterých
+                     MSBuild přečte výsledky sestavení.
+                     Nastavení tohoto atributu zároveň zapne izolované buildy (-isolate).
+                     (Krátký tvar: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -603,19 +606,22 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;centrální protokolovací nástroj&gt;*&lt;předávací protokolovací nástroj&gt;
-                     Použije tento protokolovací nástroj k protokolování událostí z nástroje MSBuild.
-                     Ke každému uzlu připojí jinou instanci protokolovacího nástroje. Pokud chcete
-                     zadat několik protokolovacích nástrojů, musíte je zadat jednotlivě.
+        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
+                     Použít zadaný protokolovací nástroj pro protokolování událostí
+                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
+                     protokolovacího nástroje. Chcete-li zadat více 
+                     protokolovacích nástrojů, uveďte je jednotlivě. 
                      (Krátký tvar: -dl)
-                     Syntaxe hodnoty &lt;protokolovací nástroj&gt;:
-                       [&lt;třída protokolovacího nástroje&gt;,]&lt;sestavení protokolovacího nástroje&gt;[;&lt;parametry protokolovacího nástroje&gt;]
-                     Syntaxe hodnoty &lt;třída protokolovacího nástroje&gt;:
-                       [&lt;částečný/úplný obor názvů&gt;.]&lt;třída protokolovacího nástroje&gt;
-                     Syntaxe hodnoty &lt;sestavení protokolovacího nástroje&gt;:
-                       {&lt;název sestavení&gt;[,&lt;silný název&gt;] | &lt;soubor sestavení&gt;}
-                     &lt;Parametry protokolovacího nástroje&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém jste je zadali. (Krátký tvar: -l)
+                     Syntaxe hodnoty &lt;protok_nást&gt;:
+                        [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
+                        [;&lt;param_protok_nást&gt;]
+                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
+                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
+                     Syntaxe hodnoty &lt;sestav_protok_nást&gt;:
+                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
+                     protokolovacímu nástroji přesně v zadaném tvaru.
+                     (Krátký tvar: -l)
                      Příklady:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -638,13 +644,13 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="translated">  -ignoreProjectExtensions:&lt;přípony&gt;
-                     Seznam přípon, které se mají ignorovat při určování souboru
-                     projektu, který bude sestaven. K oddělení několika přípon
-                     použijte středníky nebo čárky.
+        <target state="translated">  -ignoreprojectextensions:&lt;přípony&gt;
+                     Seznam přípon, které mají být ignorovány při určování souboru
+                     projektu, který bude sestaven. Chcete-li zadat více přípon,
+                     oddělte je středníky nebo čárkami.
                      (Krátký tvar: -ignore)
                      Příklad:
-                       -ignoreProjectExtensions:.sln
+                       -ignoreprojectextensions:.sln
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -664,13 +670,13 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -toolsVersion:3.5
    </source>
-        <target state="translated">  -toolsVersion:&lt;verze&gt;
-                     Verze sady nástrojů MSBuild (úloh, cílů apod.),
-                     která se má použít při sestavení. Tato verze má přednost před
-                     verzemi uvedenými v jednotlivých projektech. (Krátký tvar:
-                     -tv)
+        <target state="translated">  -toolsversion:&lt;verze&gt;
+                     Verze sady nástrojů MSBuild (úloh, cílů apod.), která má být
+                     použita při sestavení. Tato verze má přednost před verzemi
+                     uvedenými v jednotlivých projektech. 
+                     (Krátký tvar: -tv)
                      Příklad:
-                       -toolsVersion:3.5
+                       -toolsversion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -723,18 +729,18 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  -distributedFileLogger
-                     Uloží výstup sestavení do několika souborů protokolu,
-                     po jednom pro každý uzel nástroje MSBuild. Tyto soubory jsou na počátku umístěny
-                     v aktuálním adresáři. Ve výchozím nastavení mají tyto soubory
-                     název MSBuild&lt;id uzlu&gt;.log. Umístění souborů
-                     a další parametry pro fileLogger lze nastavit
-                     přidáním přepínače -fileLoggerParameters.
+        <target state="translated">  -distributedFileLogger                                                       
+                     Uloží výstup sestavení do více souborů protokolu, po jednom
+                     pro každý uzel nástroje MSBuild. Tyto soubory jsou na počátku
+                     umístěny v aktuálním adresáři. Standardně mají tyto soubory
+                     název MSBuild&lt;ID_uzlu&gt;.log. Umístění souboru a další
+                     parametry možnosti fileLogger lze nastavit přidáním
+                     přepínače /fileLoggerParameters.
 
-                     Je-li název souboru protokolu nastaven přepínačem fileLoggerParameters,
-                     distribuovaný protokolovací nástroj použije hodnotu fileName
-                     jako šablonu a při vytváření souboru protokolu
-                     připojí k hodnotě fileName ID uzlu.
+                     Je-li název souboru protokolu nastaven přepínačem
+                     fileLoggerParameters, distribuovaný protokolovací nástroj
+                     použije hodnotu fileName jako šablonu a při vytváření souboru
+                     protokolu pro každý uzel připojí k hodnotě fileName ID uzlu.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -775,33 +781,35 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  -fileLoggerParameters[n]:&lt;parametry&gt;
-                     Poskytuje doplňující parametry pro protokolovací nástroje.
+        <target state="translated">  -fileloggerparameters[n]:&lt;parametry&gt;
+                     Obsahuje doplňující parametry protokolovacích nástrojů.
                      Přítomnost tohoto přepínače implikuje
-                     odpovídající přepínač -fileLogger[n].
+                     odpovídající přepínač -filelogger[n].
                      Je-li uvedeno n, může nabývat hodnot 1–9.
-                     -fileLoggerParameters využívají také všechny distribuované
-                     protokolovací nástroje - viz popis přepínače -distributedFileLogger.
+                     Přepínač -fileloggerparameters využívají také
+                     všechny distribuované protokolovací nástroje – viz
+                     popis přepínače -distributedFileLogger.
                      (Krátký tvar: -flp[n])
                      K dispozici jsou stejné parametry jako ty,
-                     které jsou uvedeny u protokolovacího nástroje konzoly. Některé další dostupné parametry:
-                        LogFile – cesta k souboru protokolu,
-                            do kterého se zapíše protokol sestavení.
-                        Append – určuje, jestli se protokol sestavení připojí
-                            k souboru protokolu, nebo ho přepíše. Při nastavení přepínače se
-                            protokol sestavení připojí k souboru protokolu.
-                            Pokud přepínač není nastavený, přepíše se obsah
-                            existujícího souboru.
-                            Ve výchozím nastavení se soubor protokolu přepíše.
-                        Encoding – určuje kódování souboru,
-                            například UTF-8, Unicode nebo ASCII.
-                     Výchozí úroveň podrobností je Detailed.
+                     které jsou uvedeny u protokolovacího nástroje 
+                     konzoly. Některé další dostupné parametry:
+                       LogFile – cesta k souboru protokolu, do nějž bude zapsán
+                                  protokol sestavení 
+                       Append  – určuje, zda bude protokol sestavení připojen
+                                  k souboru protokolu, nebo jej přepíše. Při nastavení 
+                                  přepínače bude protokol sestavení připojen k souboru
+                                  protokolu. Není-li přepínač nastaven, bude obsah 
+                                  existujícího souboru protokolu přepsán. 
+                                  Podle výchozího nastavení je soubor protokolu přepsán.
+                       Encoding – určuje kódování souboru, například 
+                     UTF-8, Unicode nebo ASCII.
+                       Výchozí úroveň podrobností je Detailed.
                      Příklady:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
-                                           Verbosity=diagnostic;Encoding=UTF-8
+                                             Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -825,11 +833,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;parametry&gt;
-                     Povolí nebo zakáže opakované použití uzlů nástroje MSBuild.
+                     Povolit nebo zakázat opakované použití uzlů nástroje MSBuild.
                      Parametry:
-                     True – po dokončení sestavení se uzly zachovají a znovu se
-                            použijí v následných sestaveních (výchozí hodnota).
-                     False – Po dokončení sestavení se uzly nezachovají.
+                     True – Po dokončení sestavení bude uzel zachován a znovu
+                             použit v dalších sestaveních (výchozí hodnota).
+                     False – Po dokončení sestavení nebude uzel zachován.
                      (Krátký tvar: -nr)
                      Příklad:
                        -nr:true
@@ -1559,11 +1567,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  -profileEvaluation:&lt;soubor&gt;
-                     Profiluje vyhodnocení nástroje MSBuild a zapíše výsledek
-                     do určeného souboru. Pokud je přípona zadaného
-                     souboru .md, vygeneruje se výsledek ve formátu
-                     markdown, jinak vznikne soubor s hodnotami oddělenými tabulátorem.
+        <target state="translated">  -profileEvaluation:&lt;file&gt;
+                     Profilovat vyhodnocení MSBuildu a zapsat výsledek
+                     do zadaného souboru. Pokud bude přípona zadaného
+                     souboru .md, výsledek se vygeneruje ve formátu
+                     Markdown. Jinak se vytvoří soubor s hodnotami oddělenými tabulátory.
     </target>
         <note />
       </trans-unit>
@@ -1580,11 +1588,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Tyto vlastnosti na úrovni projektu nastavte nebo přepište
-                     jen během obnovení a nepoužívejte vlastnosti určené
-                     argumentem -property. &lt;n&gt; je název vlastnosti
-                     a &lt;v&gt; je hodnota vlastnosti. K oddělení více
-                     vlastností použijte středník nebo čárku, případně zadejte
+                     Nastavit nebo přepsat během obnovování jen tyto vlastnosti
+                     na úrovni projektu a nepoužívat vlastnosti zadané
+                     pomocí argumentu -property. &lt;n&gt; je název
+                     vlastnosti a &lt;v&gt; je její hodnota. Pokud existuje více vlastností
+                     oddělte je pomocí středníku nebo čárky, nebo zadejte
                      každou vlastnost samostatně.
                      (Krátký tvar: -rp)
                      Příklad:
@@ -1597,7 +1605,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="translated">MSBUILD: chyba MSB1053: Zadaný název souboru není platný. {0}</target>
+        <target state="translated">MSBUILD : error MSB1053: Zadaný název souboru není platný. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">

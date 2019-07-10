@@ -122,12 +122,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When a project to project reference is passed in we want to verify that
         /// the winmd references get the correct metadata applied to them
         /// </summary>
-        [Fact]
-        public void VerifyP2PHaveCorrectMetadataWinMD()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void VerifyP2PHaveCorrectMetadataWinMD(bool setImplementationMetadata)
         {
             // Create the engine.
             MockEngine engine = new MockEngine(_output);
             TaskItem taskItem = new TaskItem(@"C:\WinMD\SampleWindowsRuntimeOnly.Winmd");
+
+            if (setImplementationMetadata)
+            {
+                taskItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, "SampleWindowsRuntimeOnly.dll");
+            }
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {

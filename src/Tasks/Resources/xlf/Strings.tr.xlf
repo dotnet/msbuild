@@ -999,6 +999,16 @@
         <target state="translated">"{0}" çıkış dosyası yok.</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresExtensions">
+        <source>MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</source>
+        <target state="new">MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</target>
+        <note>{StrBegin="MSB3822: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresProperty">
+        <source>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</source>
+        <target state="new">MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</target>
+        <note>{StrBegin="MSB3823: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
         <target state="translated">MSB3552: "{0}" kaynak dosyası bulunamıyor.</target>
@@ -2489,8 +2499,8 @@
         <note>{StrBegin="MSB3643: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-        <source>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</source>
-        <target state="translated">MSB3644: "{0}" çerçevesinin başvuru bütünleştirilmiş kodları bulunamadı. Bu sorunu gidermek için, bu çerçeve sürümüne yönelik SDK’yı veya Hedefleme Paketi’ni yükleyin ya da uygulamanızın hedefini SDK’sı veya Hedefleme Paketi yüklenmiş olan bir çerçeve sürümüne değiştirin. Bütünleştirilmiş kodların Genel Bütünleştirilmiş Kod Önbelleği’nden (GAC) çözümleneceğini ve başvuru bütünleştirilmiş kodlarının yerine kullanılacağını unutmayın. Bu nedenle, bütünleştirilmiş kodunuz hedeflediğiniz çerçeve için doğru şekilde hedeflenemeyebilir.</target>
+        <source>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</source>
+        <target state="translated">MSB3644: {0} için başvuru bütünleştirilmiş kodları bulunamadı. Bunu çözmek için, bu çerçeve sürümü için Geliştirici Paketi'ni (SDK/Hedefleme Paketi) yükleyin veya uygulamanızı yeniden hedefleyin. .NET Framework Geliştirici Paketleri'ni https://aka.ms/msbuild/developerpacks adresinden indirebilirsiniz</target>
         <note>{StrBegin="MSB3644: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">
@@ -3111,7 +3121,7 @@
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
         <target state="translated">MSB3492: İçeriğinin güncel olup olmadığını belirlemek üzere "{0}" adlı mevcut dosya okunamadı. Dosyanın üzerine yazılıyor.</target>
-        <note>{StrBegin="MSB3491: "}</note>
+        <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>

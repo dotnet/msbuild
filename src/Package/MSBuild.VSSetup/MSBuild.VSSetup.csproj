@@ -2,8 +2,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
-    <!-- <ApplyPartialNgenOptimization>true</ApplyPartialNgenOptimization> -->
-
     <!-- VS Insertion -->
     <TargetVsixContainerName>Microsoft.Build.vsix</TargetVsixContainerName>
     <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>

@@ -1820,7 +1820,7 @@ namespace Microsoft.Build.Utilities
                     {
                         targetedArchitecture = SharedDotNetFrameworkArchitecture.Bitness32;
                     }
-                    else if (platformTarget.Equals("x64", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("Itanium", StringComparison.OrdinalIgnoreCase))
+                    else if (platformTarget.Equals("x64", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("Itanium", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm64", StringComparison.OrdinalIgnoreCase))
                     {
                         targetedArchitecture = SharedDotNetFrameworkArchitecture.Bitness64;
                     }

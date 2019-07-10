@@ -281,7 +281,7 @@
       <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
         <target state="new">MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</target>
-        <note>{StrBegin="MSB5021: "}</note>
+        <note>{StrBegin="MSB5024: "}</note>
       </trans-unit>
       <trans-unit id="OM_NotSupportedReadOnlyCollection">
         <source>This collection is read-only.</source>

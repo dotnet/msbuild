@@ -12,9 +12,9 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// Delegate for event raised when a new build request needs to be issued.
     /// </summary>
-    /// <param name="sourceEntry">The entry issuing the request.</param>
+    /// <param name="issuingEntry">The entry issuing the request.</param>
     /// <param name="requests">The request to be issued.</param>
-    internal delegate void NewBuildRequestsDelegate(BuildRequestEntry sourceEntry, FullyQualifiedBuildRequest[] requests);
+    internal delegate void NewBuildRequestsDelegate(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest[] requests);
 
     /// <summary>
     /// Delegate for event raised when a build request has completed.
@@ -25,10 +25,10 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// Delegate for event raised when a build request is blocked on another request which is in progress.
     /// </summary>
-    /// <param name="sourceEntry">The build request entry which is being blocked.</param>
+    /// <param name="issuingEntry">The build request entry which is being blocked.</param>
     /// <param name="blockingGlobalRequestId">The request on which we are blocked.</param>
     /// <param name="blockingTarget">The target on which we are blocked.</param>
-    internal delegate void BuildRequestBlockedDelegate(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult);
+    internal delegate void BuildRequestBlockedDelegate(BuildRequestEntry issuingEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult);
 
     /// <summary>
     /// Represents a class which is capable of building BuildRequestEntries.

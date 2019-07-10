@@ -179,6 +179,8 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 $"r{stringCounter}",
                 $"kdo{stringCounter}",
                 $"dot{stringCounter}",
+                $"bt{stringCounter}",
+                $"at{stringCounter}",
                 new MockElementLocation($"location{stringCounter}"),
                 new MockElementLocation($"conditionLocation{stringCounter}"),
                 new MockElementLocation($"inputsLocation{stringCounter}"),

@@ -580,6 +580,8 @@ namespace Microsoft.Build.Evaluation
                 targetElement.Returns,
                 targetElement.KeepDuplicateOutputs,
                 targetElement.DependsOnTargets,
+                targetElement.BeforeTargets,
+                targetElement.AfterTargets,
                 targetElement.Location,
                 targetElement.ConditionLocation,
                 targetElement.InputsLocation,

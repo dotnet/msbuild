@@ -50,7 +50,7 @@
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: Nejde rozbalit metadata ve výrazu {0}. {1}</target>
-        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+        <note>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
@@ -108,9 +108,16 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="SkippedConstraintsOnRequest">
+        <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
+        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: Úloha MSBuild sestavuje projekty {0}, které nejsou zadané v položce ProjectReference. V izolovaných sestaveních to pravděpodobně znamená, že tyto odkazy nejsou v {1} explicitně zadané jako položka ProjectReference.</target>
+        <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="needs-review-translation">MSB4254: Úloha MSBuild sestavuje projekty {0}, které nejsou zadané v položce ProjectReference. V izolovaných sestaveních to pravděpodobně znamená, že tyto odkazy nejsou v {1} explicitně zadané jako položka ProjectReference.</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
@@ -447,7 +454,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Značka &lt;{0}&gt; již není podporovaná jako podřízený element elementu &lt;Project&gt;. Umístěte tuto značku v rámci cíle a přidejte název cíle do atributu InitialTargets elementu &lt;Project&gt;.</target>
+        <target state="translated">Značka &lt;{0}&gt; již není podporována jako podřízený element elementu &lt;Project&gt;. Umístěte tuto značku v rámci cíle a přidejte název cíle do atributu InitialTargets elementu &lt;Project&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingTaskInTaskHost">
@@ -546,17 +553,17 @@
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: Naimportovaný projekt {0} nebyl nalezen. Zkontrolujte, jestli je cesta v deklaraci &lt;Import&gt; správná a jestli soubor na disku existuje.</target>
+        <target state="translated">MSB4019: Naimportovaný projekt {0} nebyl nalezen. Zkontrolujte, zda je cesta v deklaraci &lt;Import&gt; správná a zda soubor na disku existuje.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: Naimportovaný projekt {0} nebyl nalezen. Zkuste také najít {1} v náhradních vyhledávacích cestách pro {2} - {3} . Tyto vyhledávací cesty jsou definované v {4}. Zkontrolujte, jestli je cesta v deklaraci &lt;Import&gt; správná a jestli soubor na disku v jedné z vyhledávacích cest existuje.</target>
+        <target state="translated">MSB4226: Importovaný projekt {0} se nenašel. Kromě toho proběhl pokus najít {1} na záložních cestách pro hledání pro {2} – {3}. Tyto cesty pro hledání jsou definované v {4}. Potvrďte, že cesta v deklaraci &lt;Import&gt; je správná a že soubor existuje na disku na jedné z cest pro hledání.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: Naimportovaný projekt {0} nebyl nalezen. Zkuste také najít {1} v náhradních vyhledávacích cestách pro {2} - {3} . Zkontrolujte, jestli je cesta v deklaraci &lt;Import&gt; správná a jestli soubor na disku v jedné z vyhledávacích cest existuje.</target>
+        <target state="translated">MSB4226: Importovaný projekt {0} se nenašel. Kromě toho proběhl pokus najít {1} na záložních cestách pro hledání pro {2} – {3}. Potvrďte, že cesta v deklaraci &lt;Import&gt; je správná a že soubor existuje na disku na jedné z cest pro hledání.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
@@ -898,7 +905,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: Výchozí obor názvů XML projektu musí být oborem názvů XML nástroje MSBuild nebo nesmí být žádným oborem názvů. Pokud je projekt vytvořený ve formátu MSBuild 2003, přidejte do elementu atribut xmlns="{0}". Jestliže byl projekt vytvořený ve starém formátu 1.0 nebo 1.2, převeďte ho na formát MSBuild 2003.</target>
+        <target state="translated">MSB4041: Výchozí obor názvů XML projektu musí být oborem názvů XML nástroje MSBuild, nebo se obor názvů musí vynechat. Pokud se projekt vytvořil ve formátu MSBuild 2003, přidejte prosím do elementu &lt;Project&gt; atribut xmlns="{0}". Pokud se projekt vytvořil ve starém formátu 1.0 nebo 1.2, převeďte ho na formát MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1587,7 +1594,7 @@
       </trans-unit>
       <trans-unit id="ProjectStackWithTargetNames">
         <source>"{0}" ({1} target) ({2}) -&gt;</source>
-        <target state="translated">"{0}" ({1} cíl) ({2}) -&gt;</target>
+        <target state="translated">{0} ({1} cíl) ({2}) -&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectStackWithDefaultTargets">
@@ -2017,17 +2024,17 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="translated">MSB4227: Atribut {0} u elementu &lt;{1}&gt; je neplatný, protože atribut s tímto názvem už existuje.</target>
+        <target state="translated">MSB4227: Atribut {0} v elementu &lt;{1}&gt; není platný, protože atribut se stejným názvem už existuje.</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="translated">MSB4228: Název {0} není platný pro metadata vyjádřená jako atribut (u elementu &lt;{1}&gt;).</target>
+        <target state="translated">MSB4228: Název {0} není platný pro metadata vyjádřená jako atribut (v elementu &lt;{1}&gt;).</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="translated">Element &lt;{0}&gt; musí mít atribut {1}, {2} nebo {3}, ale ne více než jeden.</target>
+        <target state="translated">Element &lt;{0}&gt; musí mít buď atribut {1}, atribut {2}, nebo atribut {3}, ale ne více než jeden z nich.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
@@ -2182,7 +2189,7 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD: chyba MSB4239: Při zápisu sestavy profilace došlo k chybě. {0}</target>
+        <target state="translated">MSBUILD : error MSB4239: Při zápisu sestavy profilace došlo k chybě. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">

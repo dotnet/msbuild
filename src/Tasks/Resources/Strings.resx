@@ -1123,7 +1123,14 @@
     <value>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</value>
     <comment>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</comment>
   </data>
-
+  <data name="GenerateResource.PreserializedResourcesRequiresExtensions">
+    <value>MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</value>
+    <comment>{StrBegin="MSB3822: "}</comment>
+  </data>
+  <data name="GenerateResource.PreserializedResourcesRequiresProperty">
+    <value>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</value>
+    <comment>{StrBegin="MSB3823: "}</comment>
+  </data>
 
 
   <!--
@@ -2121,7 +2128,7 @@
   </data>
   <data name="WriteLinesToFile.ErrorReadingFile">
     <value>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</value>
-    <comment>{StrBegin="MSB3491: "}</comment>
+    <comment>{StrBegin="MSB3492: "}</comment>
   </data>
   <data name="WriteLinesToFile.SkippingUnchangedFile">
     <value>MSB3493: Skipping write to file "{0}" because content would not change.</value>
@@ -2140,7 +2147,7 @@
     <comment>{StrBegin="MSB3643: "}</comment>
   </data>
   <data name="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-    <value>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</value>
+    <value>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</value>
     <comment>{StrBegin="MSB3644: "}</comment>
   </data>
   <data name="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">

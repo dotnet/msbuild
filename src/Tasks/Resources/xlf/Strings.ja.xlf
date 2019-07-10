@@ -999,6 +999,16 @@
         <target state="translated">出力ファイル "{0}" は存在しません。</target>
         <note>{0} is a filename on disk.</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresExtensions">
+        <source>MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</source>
+        <target state="new">MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</target>
+        <note>{StrBegin="MSB3822: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.PreserializedResourcesRequiresProperty">
+        <source>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</source>
+        <target state="new">MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</target>
+        <note>{StrBegin="MSB3823: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
         <target state="translated">MSB3552: リソース ファイル "{0}" が見つかりません。</target>
@@ -2489,8 +2499,8 @@
         <note>{StrBegin="MSB3643: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
-        <source>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</source>
-        <target state="translated">MSB3644: フレームワーク "{0}" の参照アセンブリが見つかりませんでした。これを解決するには、このフレームワーク バージョンの SDK または Targeting Pack をインストールするか、SDK または Targeting Pack をインストールしているフレームワークのバージョンにアプリケーションを再ターゲットしてください。アセンブリはグローバル アセンブリ キャッシュ (GAC) から解決され、参照アセンブリの代わりに使用されるため、アセンブリが目的のフレームワークに正しくターゲットされない場合もあります。</target>
+        <source>MSB3644: The reference assemblies for {0} were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks</source>
+        <target state="translated">MSB3644: {0} の参照アセンブリが見つかりませんでした。この問題を解決するには、このフレームワーク バージョンの Developer Pack (SDK/Targeting Pack) をインストールするか、アプリケーションのターゲットを再設定してください。https://aka.ms/msbuild/developerpacks で .NET Framework Developer Pack をダウンロードできます。</target>
         <note>{StrBegin="MSB3644: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">
@@ -3111,7 +3121,7 @@
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
         <target state="translated">MSB3492: ファイル "{0}" のコンテンツが最新であるかを判断するため、そのファイルを読み取ることができませんでした。ファイルは上書きされます。</target>
-        <note>{StrBegin="MSB3491: "}</note>
+        <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>

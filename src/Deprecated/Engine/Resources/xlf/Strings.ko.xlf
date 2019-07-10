@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx" build-num="1306669017">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx" build-num="-1944534404">
     <header>
       <count-group name="BlackBox wordcount">
         <count count-type="x-wordCount">4013</count>
@@ -26,7 +26,7 @@
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4001: "{0}" 작업에 이름이 "{1}"인 매개 변수가 두 개 이상 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4001: Die {0}-Aufgabe enthält mehrere Parameter mit dem Namen "{1}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -35,7 +35,7 @@
         <target state="translated">MSB4081: &lt;Output&gt; 요소에 있는 "ItemName" 특성의 "{0}" 값에 "@" 문자가 있습니다. 항목 이름을 사용하려면 항목 이름 주위에 있는 @( )를 제거하십시오.</target>
         <note>{StrBegin="MSB4081: "}UE: This message is shown when an output tag has an itemname that contains an @. They probably typed @(foo) instead of foo in the ItemName.LOCALIZATION: Output and ItemName should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4081: 값 "{0}" "ItemName"의 &lt; 출력 &gt; 요소의 특성에는 "@" 문자. 항목 이름을 사용 하 여 다음 제거 하려는 경우 해당 @ 항목 이름 큰따옴표 ()입니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4081: Der Wert "{0}" "ItemName-Attribut im Element &lt; Output &gt; enthält ein" @"Zeichen. Soll ein Elementname verwenden und entfernen dann die @ (), um den Namen des Elements.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="30" adjWordcount="25.5" curWordcount="25.5"</note>
       </trans-unit>
@@ -46,7 +46,7 @@
     retrieved -- this is typically because the .NET classes that define the .NET attributes cannot be loaded because the assembly
     they are defined in cannot be found, or the classes themselves cannot be found.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4002: "{0}" 작업의 매개 변수 특성을 검색하지 못했습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4002: Fehler beim Abrufen der Attribute für Parameter in der {0}-Aufgabe. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -56,7 +56,7 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4003: "{0}"의 예약 된 특성은 &lt;{1}&gt; 요소를 올바른 대/소문자와 철자를 입력 해야 하 고. 이 특성에 대 한 매개 변수로 사용할 수 있는 "{2}" 작업.</target>
+          <target state-qualifier="mt-suggestion">MSB4003: "{0}" ist ein reserviertes Attribut der &lt;{1}&gt;-Element und mit der richtigen Groß-/Kleinschreibung geschrieben werden muss. Dieses Attribut kann nicht verwendet werden, als Parameter an die "{2}" Aufgabe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="31" adjWordcount="26.35" curWordcount="26.35"</note>
       </trans-unit>
@@ -65,7 +65,7 @@
         <target state="translated">"REQUESTBATCHSIZE"는 1보다 큰 숫자여야 합니다. "{0}"은(는) 잘못된 값이므로 대신 10을 사용합니다.</target>
         <note>The name "REQUESTBATCHSIZE" is an environment variable</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"REQUESTBATCHSIZE"는 1보다 큰 숫자여야 합니다. "{0}"은(는) 잘못된 값이므로 대신 10을 사용합니다.</target>
+          <target state-qualifier="tm-suggestion">Die "REQUESTBATCHSIZE" muss eine Zahl größer als 1 sein. "{0}" ist ein ungültiger Wert. Der Wert 10 wird stattdessen verwendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -74,7 +74,7 @@
         <target state="translated">{0}에서 빌드가 완료되었습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0}에서 빌드가 완료되었습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Erstellen wurde in {0} beendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -83,7 +83,7 @@
         <target state="translated">빌드하지 못했습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">빌드하지 못했습니다.</target>
+          <target state-qualifier="tm-suggestion">Fehler beim Buildvorgang.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -92,7 +92,7 @@
         <target state="translated">빌드했습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">빌드에 성공했습니다.</target>
+          <target state-qualifier="tm-suggestion">Buildvorgang erfolgreich.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -101,7 +101,7 @@
         <target state="translated">빌드를 시작했습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">빌드를 시작했습니다.</target>
+          <target state-qualifier="tm-suggestion">Der Buildvorgang wurde gestartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -110,7 +110,7 @@
         <target state="translated">빌드 시작: {0}</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">빌드 시작: {0}</target>
+          <target state-qualifier="tm-suggestion">Der Buildvorgang wurde am {0} gestartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -119,7 +119,7 @@
         <target state="translated">"{0}" 대상을 모두 빌드하고 있습니다.</target>
         <note>{0} is the name of the target.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 대상을 모두 빌드하고 있습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wird vollständig erstellt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -128,7 +128,7 @@
         <target state="translated">입력 파일을 지정하지 않았습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">입력 파일을 지정하지 않았습니다.</target>
+          <target state-qualifier="tm-suggestion">Es wurden keine Eingabedateien angegeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -137,7 +137,7 @@
         <target state="translated">입력 파일 "{0}"이(가) 출력 파일 "{1}"보다 최신 파일입니다.</target>
         <note>{0} and {1} are filenames on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">입력 파일 "{0}"이(가) 출력 파일 "{1}"보다 최신 파일입니다.</target>
+          <target state-qualifier="tm-suggestion">Die Eingabedatei "{0}" ist neuer als die Ausgabedatei "{1}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -146,7 +146,7 @@
         <target state="translated">출력 파일 "{0}"이(가) 없습니다.</target>
         <note>{0} is a filename on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">출력 파일 "{0}"이(가) 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Ausgabedatei "{0}" ist nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -155,7 +155,7 @@
         <target state="translated">입력 파일 "{0}"이(가) 없습니다.</target>
         <note>{0} is a filename on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">입력 파일 "{0}"이(가) 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Eingabedatei "{0}" ist nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -164,7 +164,7 @@
         <target state="translated">해당 입력 파일과 비교하여 출력 파일이 최신 파일이 아니므로 "{0}" 대상을 일부만 빌드하고 있습니다.</target>
         <note>{0} is the name of the target.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">해당 입력 파일과 비교하여 출력 파일이 최신 파일이 아니므로 "{0}" 대상을 일부만 빌드하고 있습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wird teilweise erstellt, da einige Ausgabedateien hinsichtlich ihrer Eingabedateien veraltet sind.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -173,7 +173,7 @@
         <target state="translated">[{0}: 입력={1}, 출력={2}] 입력 파일이 출력 파일보다 최신 파일입니다.</target>
         <note>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">[{0}: 입력={1}, 출력={2}] 입력 파일이 출력 파일보다 최신 파일입니다.</target>
+          <target state-qualifier="tm-suggestion">[{0}: Eingabe={1}, Ausgabe={2}] Die Eingabedatei ist neuer als die Ausgabedatei.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -182,7 +182,7 @@
         <target state="translated">[{0}: 입력={1}, 출력={2}] 출력 파일이 없습니다.</target>
         <note>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">[{0}: 입력={1}, 출력={2}] 출력 파일이 없습니다.</target>
+          <target state-qualifier="tm-suggestion">[{0}: Eingabe={1}, Ausgabe={2}] Die Ausgabedatei ist nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -191,7 +191,7 @@
         <target state="translated">[{0}: 입력={1}, 출력={2}] 입력 파일이 없습니다.</target>
         <note>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">[{0}: 입력={1}, 출력={2}] 입력 파일이 없습니다.</target>
+          <target state-qualifier="tm-suggestion">[{0}: Eingabe={1}, Ausgabe={2}] Die Eingabedatei ist nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -200,7 +200,7 @@
         <target state="translated">"{0}" 특성은 알려진 MSBuild 특성이므로 이 메서드를 사용하여 액세스할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 특성은 알려진 MSBuild 특성이므로 이 메서드를 사용하여 액세스할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Das {0}-Attribut ist ein bekanntes MSBuild-Attribut, auf das mithilfe dieser Methode nicht zugegriffen werden kann.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -209,7 +209,7 @@
         <target state="translated">보관된 속성 그룹의 속성은 이름으로 액세스할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">보관된 속성 그룹의 속성은 이름으로 액세스할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Auf Eigenschaften in persistenten Eigenschaftengruppen ist kein Zugriff über den Namen möglich.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -220,7 +220,7 @@
     %(RootDir) to an item-spec that's not a valid path, would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4023: 항목 메타데이터 "%({0})"을(를) 계산할 수 없습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4023: Elementmetadaten "%({0})" können nicht ausgewertet werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -229,7 +229,7 @@
         <target state="translated">프로젝트 개체에 연결되지 않은 작업은 실행할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">프로젝트 개체에 연결되지 않은 작업은 실행할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Eine Aufgabe, die keinem Projektobjekt zugeordnet ist, kann nicht ausgeführt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -238,7 +238,7 @@
         <target state="translated">캐시 엔트리가 이미 다른 값으로 설정되었으므로 수정할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">캐시 엔트리가 이미 다른 값으로 설정되었으므로 수정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Der Cacheeintrag wurde bereits auf einen anderen Wert festgelegt und kann nicht geändert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -247,7 +247,7 @@
         <target state="translated">"{0}" 속성은 환경 변수에서 가져온 것이므로 수정할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 속성은 환경 변수에서 가져온 것이므로 수정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Die {0}-Eigenschaft stammt aus einer Umgebungsvariablen und kann nicht geändert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -256,7 +256,7 @@
         <target state="translated">"{0}" 속성은 전역 속성이므로 확인된 속성 그룹을 통해 수정할 수 없습니다. "{1}"을(를) 대신 사용하십시오.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 속성은 전역 속성이므로 확인된 속성 그룹을 통해 수정할 수 없습니다. "{1}"을(를) 대신 사용하십시오.</target>
+          <target state-qualifier="tm-suggestion">Die {0}-Eigenschaft ist eine globale Eigenschaft und kann nicht über eine ausgewertete Eigenschaftengruppe geändert werden. Verwenden Sie stattdessen {1}.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -265,7 +265,7 @@
         <target state="translated">가져온 프로젝트 파일의 XML은 수정할 수 없습니다. 해당 프로젝트 파일을 직접 열어야 합니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">가져온 프로젝트 파일의 XML은 수정할 수 없습니다. 해당 프로젝트 파일을 직접 열어야 합니다.</target>
+          <target state-qualifier="tm-suggestion">Der XML-Code einer importierten Projektdatei darf nicht geändert werden. Öffnen Sie diese Projektdatei direkt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -274,7 +274,7 @@
         <target state="translated">MSB4117: 항목 이름 "{0}"은(는) 예약되었으므로 사용할 수 없습니다.</target>
         <note>{StrBegin="MSB4117: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4117: 항목 이름 "{0}"은(는) 예약되었으므로 사용할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4117: Der Elementname "{0}" ist reserviert und kann nicht verwendet werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -283,7 +283,7 @@
         <target state="translated">MSB4118: 항목 메타데이터 이름 "{0}"은(는) 예약되었으므로 사용할 수 없습니다.</target>
         <note>{StrBegin="MSB4118: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4118: 항목 메타데이터 이름 "{0}"은(는) 예약되었으므로 사용할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4118: Der Elementmetadatenname "{0}" ist reserviert und kann nicht verwendet werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -292,7 +292,7 @@
         <target state="translated">MSB4004: "{0}" 속성은 예약되었으므로 수정할 수 없습니다.</target>
         <note>{StrBegin="MSB4004: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild properties e.g. $(MSBuildProjectFile)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4004: "{0}" 속성은 예약되었으므로 수정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4004: Die {0}-Eigenschaft ist reserviert und kann nicht geändert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -303,7 +303,7 @@
             UE: This error is shown when a project tries to pass multiple items into a task parameter of type ITaskItem (singular).
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4094: "{0}"은(는) "{3}" 작업의 "{1}" 매개 변수에 사용할 수 없는 값입니다. 여러 개의 항목을 "{2}" 형식의 매개 변수에 전달할 수 없습니다.</target>
+          <target state-qualifier="leveraged-tm">MSB4094: "{0}" ist ein ungültiger Wert für den "{1}"-Parameter der "{3}"-Aufgabe. Mehrere Elemente können nicht in einen Parameter vom Typ "{2}" übergeben werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -314,7 +314,7 @@
         UE: This error is shown when a project tries to pass multiple items into a function in a conditional expression, that can only accept a scalar value (such as the "exists()" function).
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4115: "{0}" 함수는 스칼라 값만 허용하는데 해당 "{1}" 인수는 스칼라 값이 아닌 "{2}"(으)로 계산됩니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4115: Die "{0}"-Funktion nimmt nur einen Skalarwert an, ihr "{1}"-Argument wird jedoch zu "{2}" ausgewertet, bei dem es sich nicht um einen Skalarwert handelt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="22" adjWordcount="5.5" curWordcount="5.5" tmLabel="N''"</note>
       </trans-unit>
@@ -323,16 +323,16 @@
         <target state="translated">이 작업은 현재 프로젝트 개체에 연결되어 있으므로 다른 개체에 추가할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">이 작업은 현재 프로젝트 개체에 연결되어 있으므로 다른 개체에 추가할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Aufgabe ist derzeit einem Projektobjekt zugeordnet und sollte zu keinem anderen Projektobjekt hinzugefügt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="CannotReferenceItemMetadataWithoutItemName">
         <source>MSB4095: The item metadata %({0}) is being referenced without an item name.  Specify the item name by using %(itemname.{0}).</source>
-        <target state="translated">MSB4095: 항목 이름이 없는 항목 메타데이터 %({0})이(가) 참조되고 있습니다.  %(itemname.{0})을(를) 사용하여 항목 이름을 지정하십시오.</target>
+        <target state="translated">MSB4095: 항목 이름이 없는 항목 메타데이터 %({0})이(가) 참조되고 있습니다.  %(itemname.{0})을(를) 사용하여 항목 이름을 지정하세요.</target>
         <note>{StrBegin="MSB4095: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4095: 항목 이름이 없는 항목 메타데이터 %({0})이(가) 참조되고 있습니다.  %(itemname.{0})을(를) 사용하여 항목 이름을 지정하십시오.</target>
+          <target state-qualifier="tm-suggestion">MSB4095: Auf die %({0})-Elementmetadaten wird ohne einen Elementnamen verwiesen. Geben Sie den Namen mithilfe von %(itemname.{0}) an.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -341,7 +341,7 @@
         <target state="translated">이 작업은 지정한 대상 요소 컬렉션에 연결되지 않으므로 해당 컬렉션에서 제거할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">이 작업은 지정한 대상 요소 컬렉션에 연결되지 않으므로 해당 컬렉션에서 제거할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Aufgabe ist nicht der angegebenen Auflistung von Zielelementen zugeordnet und sollte nicht daraus entfernt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -351,7 +351,7 @@
         <note>{StrBegin="MSB4005: "}UE: This message is shown when the current working directory cannot be reset after a build. "{1}" contains a message explaining why.
     LOCALIZATION: "{1}" is a message from an CLR/FX exception and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4005: 현재 작업 디렉터리를 {0}(으)로 복원할 수 없습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4005: Das aktuelle Arbeitsverzeichnis konnte unter {0} nicht wiederhergestellt werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -360,7 +360,7 @@
         <target state="translated">프로젝트 파일에 XML 요소로 표시되지 않은 개체에는 조건을 설정할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">프로젝트 파일에 XML 요소로 표시되지 않은 개체에는 조건을 설정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Eine Bedingung kann nicht für ein Objekt festgelegt werden, wenn das Objekt nicht von einem XML-Element in der Projektdatei repräsentiert wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -369,7 +369,7 @@
         <target state="translated">프로젝트 파일에 XML 요소로 표시되지 않은 개체에 대해서는 ContinueOnError를 설정할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">프로젝트 파일에 XML 요소로 표시되지 않은 개체에 대해서는 ContinueOnError를 설정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Das ContinueOnError-Attribut kann nicht für ein Objekt festgelegt werden, wenn das Objekt nicht von einem XML-Element in der Projektdatei repräsentiert wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -378,7 +378,7 @@
         <target state="translated">MSB4134: 프로젝트를 엔진으로 로드한 다음에는 DefaultToolsVersion을 설정할 수 없습니다.</target>
         <note>{StrBegin="MSB4134: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4134: 프로젝트를 엔진으로 로드한 다음에는 DefaultToolsVersion을 설정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4134: DefaultToolsVersion darf nicht festgelegt werden, nachdem ein Projekt in das Modul geladen wurde.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -387,7 +387,7 @@
         <target state="translated">확인된 항목에는 "{0}" 특성을 지정할 수 없습니다. 이 작업은 프로젝트 파일에서 직접 가져온 원래 보관된 항목에 대해서만 수행할 수 있습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">확인된 항목에는 "{0}" 특성을 지정할 수 없습니다. 이 작업은 프로젝트 파일에서 직접 가져온 원래 보관된 항목에 대해서만 수행할 수 있습니다.</target>
+          <target state-qualifier="leveraged-tm">Das {0}-Attribut darf nicht einem Element zugewiesen werden, das ausgewertet wurde. Dieser Vorgang ist nur für das ursprüngliche persistente Element zulässig, das direkt aus der Projektdatei stammt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="31" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -396,7 +396,7 @@
         <target state="translated">가상 항목의 "{0}" 특성은 할당할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">가상 항목의 "{0}" 특성은 할당할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Zuweisen des {0}-Attributs eines virtuellen Elements ist nicht zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -405,7 +405,7 @@
         <target state="translated">빌드하는 동안에는 속성을 설정할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">빌드하는 동안에는 속성을 설정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Eine Eigenschaft kann nicht während des Erstellens festgelegt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -414,7 +414,7 @@
         <target state="translated">속성은 null로 설정할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">속성은 null로 설정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Eine Eigenschaft kann nicht auf NULL festgelegt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -423,7 +423,7 @@
         <target state="translated">프로젝트 개체에 연결되지 않은 작업에 대해서는 매개 변수를 가져오거나 설정할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">프로젝트 개체에 연결되지 않은 작업에 대해서는 매개 변수를 가져오거나 설정할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Parameter für eine Aufgabe können nicht abgefragt oder festgelegt werden, wenn die Aufgabe keinem Projektobjekt zugeordnet ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -432,7 +432,7 @@
         <target state="translated">MSB4162: &lt;{0}&gt;이(가) 잘못되었습니다. 자식 요소는 항목 제거 요소 아래에 있을 수 없습니다.</target>
         <note>{StrBegin="MSB4162: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4162: &lt;{0}&gt; 올바르지 않습니다. 자식 요소는 항목 제거 요소 아래에 허용 되지 않습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4162: &lt;{0}&gt; ist ungültig. Untergeordnete Elemente dürfen nicht unter einem Element Element entfernen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="16" adjWordcount="13.6" curWordcount="13.6"</note>
       </trans-unit>
@@ -441,7 +441,7 @@
         <target state="translated">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료합니다.</target>
         <note>{StrBegin="MSB4166: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Herunterfahren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -450,7 +450,7 @@
         <target state="translated">MSB4085: &lt;Choose&gt;에는 적어도 하나의 &lt;When&gt;이 있어야 합니다.</target>
         <note>{StrBegin="MSB4085: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4085: &lt; 선택 &gt; 적어도 하나 있어야 &lt; 때 &gt;.</target>
+          <target state-qualifier="mt-suggestion">MSB4085: &lt; auswählen &gt; muss mindestens &lt; Wenn &gt;.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -460,7 +460,7 @@
         <note>{StrBegin="MSB4114: "}UE: This message appears if the project file contains unreasonably nested Choose elements.
     LOCALIZATION: Do not localize "Choose" as it is an XML element name.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4114: &lt; 선택 &gt; 요소를 중첩할 수 없습니다 이상 {0} 수준까지.</target>
+          <target state-qualifier="mt-suggestion">MSB4114: &lt; auswählen &gt; Elemente können nicht geschachtelt werden mehr als {0} Ebenen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
       </trans-unit>
@@ -470,7 +470,7 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4006: 대상 종속성 그래프에 "{0}" 대상과 관련된 순환 종속성이 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4006: Im Zielabhängigkeitsdiagramm besteht eine Ringabhängigkeit im Zusammenhang mit dem Ziel "{0}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -479,7 +479,7 @@
         <target state="translated">MSB4086: "{0}" 조건에서 숫자 대신 "{2}"(으)로 계산되는 "{1}"에 대해 숫자 비교를 시도했습니다.</target>
         <note>{StrBegin="MSB4086: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4086: "{0}" 조건에서 숫자 대신 "{2}"(으)로 계산되는 "{1}"에 대해 숫자 비교를 시도했습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4086: Es wurde versucht, einen numerischen Vergleich für "{1}" auszuführen, der zu "{2}" anstatt zu einer Zahl in Bedingung "{0}" ausgewertet wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -488,16 +488,16 @@
         <target state="translated">MSB4007: "{1}" 특성에 지정한 "{0}" 절이 잘못되었습니다.</target>
         <note>{StrBegin="MSB4007: "}UE: This message is shown when the Condition on an element is invalid in some way -- e.g. syntax error, unrecognized operator.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4007: "{1}" 특성에 지정한 "{0}" 절이 잘못되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4007: Die im {1}-Attribut festgelegte {0}-Klausel ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="ConditionMaybeEvaluatedIncorrectly">
         <source>MSB4130: The condition "{0}" may have been evaluated incorrectly in an earlier version of MSBuild. Please verify that the order of the AND and OR clauses is written as intended. To avoid this warning, add parentheses to make the evaluation order explicit.</source>
-        <target state="translated">MSB4130: 이전 MSBuild 버전에서 "{0}" 조건이 잘못 계산되었을 수 있습니다. AND 및 OR 절의 순서가 맞는지 확인하십시오. 이 경고가 발생하지 않도록 하려면 괄호를 사용하여 계산 순서를 명확하게 표시하십시오.</target>
+        <target state="translated">MSB4130: 이전 MSBuild에서 "{0}" 조건이 잘못 계산되었을 수 있습니다. AND 및 OR 절의 순서가 맞는지 확인하세요. 이 경고가 발생하지 않도록 하려면 괄호를 사용하여 계산 순서를 명확하게 표시하세요.</target>
         <note>{StrBegin="MSB4130: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4130: 이전 MSBuild 버전에서 "{0}" 조건이 잘못 계산되었을 수 있습니다. AND 및 OR 절의 순서가 맞는지 확인하십시오. 이 경고가 발생하지 않도록 하려면 괄호를 사용하여 계산 순서를 명확하게 표시하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4130: Die Bedingung "{0}" ist in einer früheren Version von MSBuild möglicherweise fehlerhaft ausgewertet worden. Stellen Sie sicher, dass die AND- und OR-Klauseln in der beabsichtigten Reihenfolge stehen. Damit diese Warnung nicht angezeigt wird, fügen Sie Klammern hinzu, um die Auswertungsreihenfolge explizit anzugeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="42" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -506,7 +506,7 @@
         <target state="translated">MSB4087: 지정한 조건 "{0}"이(가) 부울로 계산되지 않습니다.</target>
         <note>{StrBegin="MSB4087: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4087: 지정한 조건 "{0}"이(가) 부울로 계산되지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4087: Die angegebene {0}-Bedingung wird nicht zu einem booleschen Wert ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -515,7 +515,7 @@
         <target state="translated">MSB4113: 지정한 조건 "{0}"이(가) 부울 대신 "{1}"(으)로 계산됩니다.</target>
         <note>{StrBegin="MSB4113: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4113: 지정한 조건 "{0}"이(가) 부울 대신 "{1}"(으)로 계산됩니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4113: Die angegebene Bedingung {0} wird zu {1} statt zu einem booleschen Wert ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -524,7 +524,7 @@
         <target state="translated">{0}, 줄 {1}</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0}, 줄 {1}</target>
+          <target state-qualifier="tm-suggestion">{0}, Zeile {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -533,7 +533,7 @@
         <target state="translated">MSB4136: "{0}" 구성 파일에서 도구 집합 정보를 읽는 동안 오류가 발생했습니다. {1}</target>
         <note>{StrBegin="MSB4136: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4136: "{0}" 구성 파일에서 도구 집합 정보를 읽는 동안 오류가 발생했습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4136: Fehler beim Lesen der Toolsetinformationen aus der Konfigurationsdatei "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -542,7 +542,7 @@
         <target state="translated">MSB4008: 작업 어셈블리 "{0}"과(와) 충돌하는 어셈블리가 "{1}"에 있습니다.</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4008: 작업 어셈블리 "{0}"과(와) 충돌하는 어셈블리가 "{1}"에 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4008: Eine mit der Aufgabenassembly "{0}" in Konflikt stehende Assembly wurde in "{1}" gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -551,7 +551,7 @@
         <target state="translated">MSB4142: MSBuildToolsPath가 "{1}"에 정의된 ToolsVersion "{0}"의 MSBuildBinPath와 다릅니다. 두 항목이 모두 있는 경우 값이 같아야 합니다.</target>
         <note>{StrBegin="MSB4142: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4142: MSBuildToolsPath가 "{1}"에 정의된 ToolsVersion "{0}"의 MSBuildBinPath와 다릅니다. 두 항목이 모두 있는 경우 값이 같아야 합니다.</target>
+          <target state-qualifier="leveraged-tm">MSB4142: MSBuildToolsPath ist nicht identisch mit MSBuildBinPath für die bei "{1}" definierte ToolsVersion {0}. Wenn beide Pfade vorhanden sind, müssen sie identische Werte haben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -560,7 +560,7 @@
         <target state="translated">MSB4097: &lt;{1}&gt; 요소 아래의 &lt;{0}&gt; 요소에는 사용자 지정 XML 네임스페이스를 사용할 수 없습니다.</target>
         <note>{StrBegin="MSB4097: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4097: 요소 &lt;{0}&gt; 요소 &lt;{1}&gt; 사용자 지정 XML 네임 스페이스에 없을 수도 있습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4097: Das Element &lt;{0}&gt; unter Element &lt;{1}&gt; möglicherweise keinen benutzerdefinierten XML-Namespace.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="16" adjWordcount="13.6" curWordcount="13.6"</note>
       </trans-unit>
@@ -572,7 +572,7 @@
     separately to loggers.
     LOCALIZATION: "{0}" is a message from some FX method and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4009: 기본 작업 파일을 로드할 수 없습니다. {0}</target>
+          <target state-qualifier="tm-suggestion">MSB4009: Die Standardaufgabendatei konnte nicht geladen werden. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -583,7 +583,7 @@
     found, either because they don't exist, or because of lack of permissions. "{2}" contains a message explaining why.
     LOCALIZATION: "{2}" is a message from some FX method and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4010: "{0}" 파일을 예상 위치 "{1}"에서 로드할 수 없습니다. 기본 작업을 사용할 수 없게 됩니다. {2}</target>
+          <target state-qualifier="tm-suggestion">MSB4010: Die {0}-Dateien konnten nicht vom erwarteten Speicherplatz "{1}" geladen werden. Standardaufgaben sind nicht verfügbar. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -592,7 +592,7 @@
         <target state="translated">MSB4140: 기본 도구 버전이 레지스트리나 구성 파일에 지정되어 있지 않습니다.</target>
         <note>{StrBegin="MSB4140: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4140: 기본 도구 버전이 레지스트리나 구성 파일에 지정되어 있지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4140: Die Standardtoolsversion ist weder in der Registrierung noch in der Konfigurationsdatei angegeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -601,7 +601,7 @@
         <target state="translated">MSB4133: 기본 도구 버전 "{0}"이(가) 지정되었지만 해당 정의를 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB4133: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4133: 기본 도구 버전 "{0}"이(가) 지정되었지만 해당 정의를 찾을 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4133: Eine Standardtoolsversion "{0}" wurde angegeben, aber ihre Definition konnte nicht gefunden werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -610,7 +610,7 @@
         <target state="translated">MSB4080: &lt;Output&gt; 요소에 있는 "PropertyName" 특성의 "{0}" 값에 "$" 문자가 있습니다. 속성 이름을 사용하려면 속성 이름 주위에 있는 $( )를 제거하십시오.</target>
         <note>{StrBegin="MSB4080: "}UE: This message is shown when an output tag has an property name that contains an $. They probably typed $(foo) instead of foo in the PropertyName. LOCALIZATION: Output and PropertyName should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4080: 값 "{0}" &lt; 출력 &gt; 요소에 특성 "PropertyName"의 "$" 문자를 포함 합니다. 속성 이름을 사용 하 고 속성 이름에 $ ()를 제거 하려고 하면.</target>
+          <target state-qualifier="mt-suggestion">MSB4080: Der Wert "{0}" "PropertyName-Attribut im Element &lt; Output &gt;"$"-Zeichen enthält. Wenn Sie auf einen Eigenschaftennamen verwenden und entfernen Sie anschließend die ($), um den Eigenschaftennamen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="32" adjWordcount="27.2" curWordcount="27.2"</note>
       </trans-unit>
@@ -619,7 +619,7 @@
         <target state="translated">MSB4011: "{0}" 파일 가져오기와 관련된 순환 참조가 있습니다. 이 파일을 두 번 이상 가져왔거나 기본 프로젝트 파일을 가져오려고 시도했을 수 있습니다. 이 파일의 첫 번째 인스턴스를 제외한 모든 인스턴스가 무시됩니다.</target>
         <note>{StrBegin="MSB4011: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4011: "{0}" 파일 가져오기와 관련된 순환 참조가 있습니다. 이 파일을 두 번 이상 가져왔거나 기본 프로젝트 파일을 가져오려고 시도했을 수 있습니다. 이 파일의 첫 번째 인스턴스를 제외한 모든 인스턴스가 무시됩니다.</target>
+          <target state-qualifier="leveraged-tm">MSB4011: Es besteht eine Ringabhängigkeit im Zusammenhang mit dem Import der Datei {0}. Diese Datei wurde unter Umständen mehrmals importiert, oder es wurde versucht, die Hauptprojektdatei zu importieren. Alle außer der ersten Instanz dieser Datei werden ignoriert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="43" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -628,17 +628,17 @@
         <target state="translated">MSB4079: &lt;ProjectExtensions&gt; 요소가 두 번 이상 나타납니다.</target>
         <note>{StrBegin="MSB4079: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4079: &lt; ProjectExtensions &gt; 요소가 두 번 이상 발생 합니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4079: Das Element &lt; ProjectExtensions &gt; tritt mehr als einmal.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="9" adjWordcount="7.65" curWordcount="7.65"</note>
       </trans-unit>
       <trans-unit id="EmbeddedItemVectorCannotBeItemized">
         <source>MSB4012: The expression "{0}" cannot be used in this context. Item lists cannot be concatenated with other strings where an item list is expected. Use a semicolon to separate multiple item lists.</source>
-        <target state="translated">MSB4012: 이 컨텍스트에서는 "{0}" 식을 사용할 수 없습니다. 항목 목록이 필요한 위치에서는 항목 목록을 다른 문자열과 연결할 수 없습니다. 세미콜론을 사용하여 여러 항목 목록을 구분하십시오.</target>
+        <target state="translated">MSB4012: 이 컨텍스트에서는 "{0}" 식을 사용할 수 없습니다. 항목 목록이 필요한 위치에서는 항목 목록을 다른 문자열과 연결할 수 없습니다. 세미콜론을 사용하여 여러 항목 목록을 구분하세요.</target>
         <note>{StrBegin="MSB4012: "}UE: This message is shown when the user does not properly specify an item list when an item list is expected
     e.g. "badprefix@(foo)badsuffix" instead of "prefix; @(foo); suffix"</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4012: 이 컨텍스트에서는 "{0}" 식을 사용할 수 없습니다. 항목 목록이 필요한 위치에서는 항목 목록을 다른 문자열과 연결할 수 없습니다. 세미콜론을 사용하여 여러 항목 목록을 구분하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4012: Der Ausdruck {0} kann in diesem Kontext nicht verwendet werden. Elementlisten können nicht mit anderen Zeichenfolgen verkettet werden, wenn eine Elementliste erwartet wird. Verwenden Sie ein Semikolon, um mehrere Elementlisten voneinander zu trennen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="32" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -647,7 +647,7 @@
         <target state="translated">프로젝트 파일 이름을 지정해야 합니다.</target>
         <note>UE: This message is shown when the user calls into the engine to build a project without specifying a filename.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">프로젝트 파일 이름을 지정해야 합니다.</target>
+          <target state-qualifier="tm-suggestion">Geben Sie den Projektdateinamen an.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -657,7 +657,7 @@
         <note>This is the name of the "EndOfInput" token. It is displayed in quotes as the
     unexpected char or token when the end of a conditional was unexpectedly reached.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">입력의 끝</target>
+          <target state-qualifier="tm-suggestion">Ende der Eingabe</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -666,7 +666,7 @@
         <target state="translated">ContinueOnError=true로 작업을 호출했으므로 이전 오류가 경고로 변환되었습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">ContinueOnError=true로 작업을 호출했으므로 이전 오류가 경고로 변환되었습니다.</target>
+          <target state-qualifier="tm-suggestion">Der vorherige Fehler wurde in eine Warnung umgewandelt, da die Aufgabe mit ContinueOnError=true aufgerufen wurde.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -675,7 +675,7 @@
         <target state="translated">오류 {0}개</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">오류 {0}개</target>
+          <target state-qualifier="tm-suggestion">{0} Fehler</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -684,7 +684,7 @@
         <target state="translated">MSB4159: "{0}" 도구 집합을 만드는 동안 오류가 발생했습니다. {1}</target>
         <note>{StrBegin="MSB4159: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4159: "{0}" 도구 집합을 만드는 동안 오류가 발생했습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4159: Fehler beim Erstellen des Toolsets "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -693,7 +693,7 @@
         <target state="translated">MSB4146: "{1}"에 있는 속성 식 "{0}"을(를) 계산할 수 없습니다. {2}</target>
         <note>{StrBegin="MSB4146: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4146: "{1}"에 있는 속성 식 "{0}"을(를) 계산할 수 없습니다. {2}</target>
+          <target state-qualifier="tm-suggestion">MSB4146: Der bei "{1}" gefundene Eigenschaftsausdruck "{0}" kann nicht ausgewertet werden. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -702,7 +702,7 @@
         <target state="translated">&lt;{0}&gt; 태그는 더 이상 &lt;Project&gt; 요소의 자식으로 지원되지 않습니다. 이 태그를 대상 안에 넣고 대상의 이름을 &lt;Project&gt; 요소의 "InitialTargets" 특성에 추가하세요.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">&lt;{0}&gt; 태그는 &lt; 프로젝트 &gt; 요소의 자식으로 지원 되지 않습니다. 이 태그는 대상 내 놓고 &lt; 프로젝트 &gt; 요소의 "InitialTargets" 특성에는 대상의 이름을 추가 합니다.</target>
+          <target state-qualifier="mt-suggestion">Das &lt;{0}&gt;-Tag nicht als untergeordnetes Element des &lt; Project &gt;-Elements unterstützt. Platzieren Sie dieses Tag in einem Ziel und fügen Sie den Namen des Ziels InitialTargets-Attribut des &lt; Project &gt;-Elements hinzu.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="38" adjWordcount="32.3" curWordcount="32.3"</note>
       </trans-unit>
@@ -711,7 +711,7 @@
         <target state="translated">MSB4100: "{2}" 조건에서 "{1}" 대신 부울로 계산되는 "{0}"이(가) 필요합니다.</target>
         <note>{StrBegin="MSB4100: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4100: "{2}" 조건에서 "{1}" 대신 부울로 계산되는 "{0}"이(가) 필요합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4100: Das Ergebnis der Auswertung von {0} war {1}, es wurde jedoch ein boolescher Wert in der {2}-Bedingung erwartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -720,7 +720,7 @@
         <target state="translated">MSB4028: "{0}" 작업의 출력을 "{1}" 매개 변수에서 검색할 수 없습니다. {2}</target>
         <note>{StrBegin="MSB4028: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4028: "{0}" 작업의 출력을 "{1}" 매개 변수에서 검색할 수 없습니다. {2}</target>
+          <target state-qualifier="tm-suggestion">MSB4028: Die Ausgaben der {0}-Aufgabe konnten nicht aus dem {1}-Parameter abgerufen werden. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -730,7 +730,7 @@
         <note>{StrBegin="MSB4014: "}UE: This message is shown when an unhandled exception terminates the build. The cause is most likely a programming
     error in the build engine.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4014: 내부 오류로 인해 빌드가 중단되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4014: Das Erstellen wurde aufgrund eines internen Fehlers abgebrochen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -741,7 +741,7 @@
     because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a special
     exception to abort the build.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4015: 종료하는 동안 "{0}" 로거에서 예기치 않은 오류가 발생하여 빌드가 중단되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4015: Das Erstellen wurde abgebrochen, da für die {0}-Protokollierung beim Herunterfahren ein unerwarteter Fehler aufgetreten ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -752,7 +752,7 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4016: 초기화하는 동안 "{0}" 로거에서 예기치 않은 오류가 발생하여 빌드가 중단되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4016: Das Erstellen wurde abgebrochen, da für die {0}-Protokollierung bei der Initialisierung ein unerwarteter Fehler aufgetreten ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -763,7 +763,7 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4017: 예기치 않은 로거 오류가 발생하여 빌드가 중단되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4017: Das Erstellen wurde wegen eines unerwarteten Protokollierungsfehlers abgebrochen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -774,7 +774,7 @@
     programming error in the task; however, it is also possible that the unhandled exception originated in the engine, and was
     surfaced through the task when the task called into the engine.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4018: "{0}" 작업에서 예기치 않은 오류가 발생했습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4018: Unerwarteter Fehler bei der {0}-Aufgabe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -783,7 +783,7 @@
         <target state="translated">MSB4165: "{1}"ms의 제한 시간 내에 자식 노드 "{0}"에서 응답을 받지 못했습니다. 종료합니다.</target>
         <note>{StrBegin="MSB4165: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4165: "{1}"ms의 제한 시간 내에 자식 노드 "{0}"에서 응답을 받지 못했습니다. 종료합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4165: Vom untergeordneten Knoten "{0}" wurde innerhalb des Zeitlimits von "{1}" ms keine Antwort empfangen. Herunterfahren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -792,7 +792,7 @@
         <target state="translated">MSB4088: "{0}" 조건이 제대로 생성되지 않았습니다.</target>
         <note>{StrBegin="MSB4088: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4088: "{0}" 조건이 제대로 생성되지 않았습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4088: Die {0}-Bedingung ist falsch konstruiert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -801,7 +801,7 @@
         <target state="translated">MSB4105: "{0}" 조건의 {1} 위치에 예기치 않은 '{2}' 문자가 있습니다. "=="를 사용하려고 했나요?</target>
         <note>{StrBegin="MSB4105: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4105: "{0}" 조건의 {1} 위치에 예기치 않은 '{2}' 문자가 있습니다. "=="를 사용하려고 했습니까?</target>
+          <target state-qualifier="tm-suggestion">MSB4105: Ein unerwartetes Zeichen {2} wurde an Position {1} in der {0}-Bedingung gefunden. Wollten Sie "==" verwenden?</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -810,7 +810,7 @@
         <target state="translated">MSB4106: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. 닫는 괄호가 없습니다.</target>
         <note>{StrBegin="MSB4106: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4106: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. 닫는 괄호가 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4106: Eine Elementliste wurde an Position {1} in Bedingung {0} erwartet. Haben Sie die schließende Klammer vergessen?</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -819,7 +819,7 @@
         <target state="translated">MSB4107: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. '@' 뒤에 여는 괄호가 없습니다. '@' 리터럴을 사용하려면 '%40'을 대신 사용하세요.</target>
         <note>{StrBegin="MSB4107: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4107: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. '@' 뒤에 여는 괄호가 없습니다. '@' 리터럴을 사용하려면 '%40'을 대신 사용하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4107: Eine Elementliste wurde an Position {1} in Bedingung {0} erwartet. Haben Sie die öffnende Klammer hinter dem Zeichen "@" vergessen? Wenn Sie ein literales "@" verwenden möchten, geben Sie "%40" ein.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -828,7 +828,7 @@
         <target state="translated">MSB4108: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. 항목 목록 식 안에 닫는 따옴표가 없습니다.</target>
         <note>{StrBegin="MSB4108: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4108: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. 항목 목록 식 안에 닫는 따옴표가 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4108: Eine Elementliste wurde an Position {1} in Bedingung {0} erwartet. Haben Sie das schließende Anführungszeichen innerhalb des Elementlistenausdrucks vergessen?</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -837,7 +837,7 @@
         <target state="translated">MSB4109: "{0}" 조건의 {1} 위치에 속성이 필요합니다. 닫는 괄호가 없습니다.</target>
         <note>{StrBegin="MSB4109: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4109: "{0}" 조건의 {1} 위치에 속성이 필요합니다. 닫는 괄호가 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4109: Eine Eigenschaft wurde an Position {1} in Bedingung {0} erwartet. Haben Sie die schließende Klammer vergessen?</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -846,7 +846,7 @@
         <target state="translated">MSB4110: "{0}" 조건의 {1} 위치에 속성이 필요합니다. '$' 뒤에 여는 괄호가 없습니다. '$' 리터럴을 사용하려면 '%24'를 대신 사용하세요.</target>
         <note>{StrBegin="MSB4110: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4110: "{0}" 조건의 {1} 위치에 속성이 필요합니다. '$' 뒤에 여는 괄호가 없습니다. '$' 리터럴을 사용하려면 '%24'를 대신 사용하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4110: Eine Eigenschaft wurde an Position {1} in Bedingung {0} erwartet. Haben Sie die öffnende Klammer hinter dem Zeichen "$" vergessen? Wenn Sie eine literales "$" verwenden möchten, geben Sie "%24" ein.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="27" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -855,7 +855,7 @@
         <target state="translated">MSB4101: "{0}" 조건의 {1} 위치 뒤에 닫는 따옴표가 필요합니다.</target>
         <note>{StrBegin="MSB4101: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4101: "{0}" 조건의 {1} 위치 뒤에 닫는 따옴표가 필요합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4101: Es wurde ein schließendes Anführungszeichen hinter Position {1} in Bedingung {0} erwartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -864,16 +864,16 @@
         <target state="translated">MSB4019: 가져온 "{0}" 프로젝트를 찾을 수 없습니다. &lt;Import&gt; 선언에 지정한 경로가 올바른지 그리고 파일이 디스크에 있는지 확인하십시오.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4019: 가져온된 프로젝트 "{0}" 찾을 수 없습니다. &lt; 가져오기 &gt; 선언에 대 한 경로가 올바른지 파일이 디스크에 있는지 확인 하십시오.</target>
+          <target state-qualifier="mt-suggestion">MSB4019: Das importierte Projekt "{0}" wurde nicht gefunden. Bestätigen Sie den Pfad in der Deklaration &lt; Import &gt; und die Datei auf dem Datenträger vorhanden ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="26" adjWordcount="22.1" curWordcount="22.1"</note>
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
         <source>MSB4089: Incorrect number of arguments to function in condition "{0}". Found {1} argument(s) when expecting {2}.</source>
-        <target state="translated">MSB4089: "{0}" 조건에 사용된 함수의 인수 개수가 잘못되었습니다. {2}개가 있어야 하는데 {1}개가 있습니다.</target>
+        <target state="translated">MSB4089: "{0}" 조건에 사용된 함수의 인수 개수가 잘못되었습니다. 인수가 {2}개 있어야 하는데 {1}개 있습니다.</target>
         <note>{StrBegin="MSB4089: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4089: "{0}" 조건에 사용된 함수의 인수 개수가 잘못되었습니다. {2}개가 있어야 하는데 {1}개가 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4089: Falsche Anzahl von Argumenten für eine Funktion in der Bedingung "{0}". {1} Argument(e) gefunden, obwohl {2} erwartet wurde(n).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -882,7 +882,7 @@
         <target state="translated">지정한 "{0}" 개체는 올바른 "{1}" 개체에 속하지 않습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">지정한 "{0}" 개체는 올바른 "{1}" 개체에 속하지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">Das angegebene {0}-Objekt gehört nicht zum korrekten {1}-Objekt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -892,7 +892,7 @@
         <note>{StrBegin="MSB4020: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
     attributes e.g. &lt;Import Project=""&gt; -- the value of Project should not be an empty string.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4020: 값 "{0}"에 "{1}" 요소의 특성에에서 &lt;{2}&gt; 올바르지 않습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4020: Der Wert "{0}" von der "{1}" Attribut im Element &lt;{2}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="14" adjWordcount="11.9" curWordcount="11.9"</note>
       </trans-unit>
@@ -902,7 +902,7 @@
         <note>{StrBegin="MSB4102: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
         attributes. At the end of the message we show the exception text we got trying to use the value.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4102: 값 "{0}"에 "{1}" 요소의 특성에에서 &lt;{2}&gt; 올바르지 않습니다. {3}</target>
+          <target state-qualifier="mt-suggestion">MSB4102: Der Wert "{0}" von der "{1}" Attribut im Element &lt;{2}&gt; ist ungültig. {3}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="15" adjWordcount="12.75" curWordcount="12.75"</note>
       </trans-unit>
@@ -911,7 +911,7 @@
         <target state="translated">MSB4021: "{0}" 작업의 "ContinueOnError" 특성이 잘못되었습니다. {1}</target>
         <note>{StrBegin="MSB4021: "}LOCALIZATION: "ContinueOnError" should not be localized. "{1}" is a message from another exception explaining the problem.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4021: "{0}" 작업의 "ContinueOnError" 특성이 잘못되었습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4021: Das ContinueOnError-Attribut für die {0}-Aufgabe ist ungültig. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -920,7 +920,7 @@
         <target state="translated">MSB4139: 레지스트리 키 "{0}"에 지정된 기본 ToolsVersion 값이 잘못되었습니다.</target>
         <note>{StrBegin="MSB4139: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4139: 레지스트리 키 "{0}"에 지정된 기본 ToolsVersion 값이 잘못되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4139: Im Registrierungsschlüssel "{0}" ist ein ungültiger Wert für die Standard-ToolsVersion angegeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -930,7 +930,7 @@
         <note>{StrBegin="MSB4022: "}UE: This message is shown when the engine is checking the correctness of the value (after evaluating embedded
     properties/items) assigned to an XML attribute of an XML element in the project file.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4022: 결과 "{0}"의 값을 계산 하 는"{1}"의 "{2}" 요소의 특성에에서 &lt;{3}&gt; 올바르지 않습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4022: Das Ergebnis "{0}"der Auswertung des Werts"{1}" von der "{2}" Attribut im Element &lt;{3}&gt; ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="20" adjWordcount="17" curWordcount="17"</note>
       </trans-unit>
@@ -939,7 +939,7 @@
         <target state="translated">"{0}"은(는) 올바른 이벤트 범주가 아닙니다. 사용자 지정 이벤트를 발생시키려면 "{1}" 범주를 사용하십시오.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}"은(는) 올바른 이벤트 범주가 아닙니다. 사용자 지정 이벤트를 발생시키려면 "{1}" 범주를 사용하십시오.</target>
+          <target state-qualifier="tm-suggestion">{0} ist keine gültige Ereigniskategorie. Verwenden Sie die {1}-Kategorie, um ein benutzerdefiniertes Ereignis auszulösen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -948,7 +948,7 @@
         <target state="translated">"{0}"은(는) 올바른 이벤트 중요도 수준이 아닙니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}"은(는) 올바른 이벤트 중요도 수준이 아닙니다.</target>
+          <target state-qualifier="tm-suggestion">{0} ist kein gültiger Wert für die Bedeutung eines Ereignisses.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -957,7 +957,7 @@
         <target state="translated">MSB4104: "{0}" 로그 파일에 쓰지 못했습니다. {1}</target>
         <note>{StrBegin="MSB4104: "}UE: This is shown when the File Logger can't create or write to the file it was instructed to log to.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4104: "{0}" 로그 파일에 쓰지 못했습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4104: Fehler beim Schreiben in die Protokollierungsdatei "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -968,7 +968,7 @@
     filename is not part of the message because it is provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4024: 가져온 프로젝트 파일을 로드할 수 없습니다. {0}</target>
+          <target state-qualifier="tm-suggestion">MSB4024: Die importierte Projektdatei konnte nicht geladen werden. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -977,7 +977,7 @@
         <target state="translated">보관된 항목 그룹에 대한 작업이 잘못되었습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">보관된 항목 그룹에 대한 작업이 잘못되었습니다.</target>
+          <target state-qualifier="tm-suggestion">Ungültiger Vorgang für eine persistente Elementgruppe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -986,7 +986,7 @@
         <target state="translated">가상 항목 그룹에 대한 작업이 잘못되었습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">가상 항목 그룹에 대한 작업이 잘못되었습니다.</target>
+          <target state-qualifier="tm-suggestion">Ungültiger Vorgang für eine virtuelle Elementgruppe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1001,7 +1001,7 @@
                   Normal should not be localized.
                   Low should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4071: 값 중요성 = "{0}" &lt; 메시지 &gt; 요소가 잘못 되었습니다. 유효한 값은: 높음, 보통 및 낮음.</target>
+          <target state-qualifier="mt-suggestion">MSB4071: Der Wert Importance = "{0}" in &lt; Nachricht &gt; Element ist ungültig. Gültige Werte sind: hoch, Normal und niedrig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="18" adjWordcount="15.3" curWordcount="15.3"</note>
       </trans-unit>
@@ -1013,7 +1013,7 @@
     provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4025: 프로젝트 파일을 로드할 수 없습니다. {0}</target>
+          <target state-qualifier="tm-suggestion">MSB4025: Die Projektdatei konnte nicht geladen werden. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1022,7 +1022,7 @@
         <target state="translated">MSB4147: "{1}"의 "{0}" 속성이 잘못되었습니다. {2}</target>
         <note>{StrBegin="MSB4147: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4147: "{1}"의 "{0}" 속성이 잘못되었습니다. {2}</target>
+          <target state-qualifier="tm-suggestion">MSB4147: Die {0}-Eigenschaft bei "{1}" ist ungültig. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1031,7 +1031,7 @@
         <target state="translated">"{0}"은(는) 잘못된 "ProjectFileEncoding" 값입니다.</target>
         <note>LOCALIZATION: "ProjectFileEncoding" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}"은(는) 잘못된 "ProjectFileEncoding" 값입니다.</target>
+          <target state-qualifier="tm-suggestion">{0} ist ein ungültiger ProjectFileEncoding-Wert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1043,7 +1043,7 @@
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4143: "{0}" 식을 계산할 수 없습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4143: Der Ausdruck "{0}" kann nicht ausgewertet werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1056,7 +1056,7 @@
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4184: "{0}" 식을 계산할 수 없습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4184: Der Ausdruck "{0}" kann nicht ausgewertet werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1068,7 +1068,7 @@
       LOCALIZATION: "{0}" is the static function name, "{1}" is the .NET Framework type name
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4185: "{1}" 형식의 "{0}" 함수를 실행할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4185: Die {0}-Funktion für den {1}-Typ wurde nicht für die Ausführung aktiviert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1080,7 +1080,7 @@
       LOCALIZATION: "{0}" is the function expression which is in error
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4186: 정적 메서드 호출 구문 "{0}"이(가) 잘못되었습니다. 정적 메서드 호출의 형식은 $([FullTypeName]::Method())여야 합니다. 예: $([System.IO.Path]::Combine(`a`, `b`))</target>
+          <target state-qualifier="tm-suggestion">MSB4186: Ungültige Aufrufsyntax für statische Methode: "{0}". Für den Aufruf statischer Methoden muss folgendes Format verwendet werden: $([vollständiger Typname]::Methode()), z. B. $([System.IO.Path]::Combine(`a`, `b`))</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1090,7 +1090,7 @@
         <note>{StrBegin="MSB4070: "}UE: This message is shown when the schema file provided for the validation of a project is itself not valid.
     LOCALIZATION: "{0}" is the schema file path. "{1}" is a message from an FX exception that describes why the schema file is bad.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4070: "{0}" 스키마가 잘못되었습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4070: Das Schema "{0}" ist nicht gültig. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1099,7 +1099,7 @@
         <target state="translated">MSB4026: "{2}" 작업의 "{0}={1}" 매개 변수가 잘못되었습니다.</target>
         <note>{StrBegin="MSB4026: "}UE: This message is displayed when a task has an invalid parameter that cannot be initialized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4026: "{2}" 작업의 "{0}={1}" 매개 변수가 잘못되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4026: Der {0}={1}-Parameter für die {2}-Aufgabe ist ungültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1108,7 +1108,7 @@
         <target state="translated">MSB4027: "{0}" 작업이 "{1}" 출력 매개 변수에서 잘못된 항목을 생성했습니다. {2}</target>
         <note>{StrBegin="MSB4027: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4027: "{0}" 작업이 "{1}" 출력 매개 변수에서 잘못된 항목을 생성했습니다. {2}</target>
+          <target state-qualifier="tm-suggestion">MSB4027: Die {0}-Aufgabe generierte ungültige Elemente aus dem {1}-Ausgabeparameter. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1117,7 +1117,7 @@
         <target state="translated">MSB4029: "{0}" 작업의 출력 사양이 잘못되었습니다. "TaskParameter" 특성이 필요하고 "ItemName" 또는 "PropertyName" 특성 중 하나를 지정해야 합니다(둘 다 지정할 수 없음).</target>
         <note>{StrBegin="MSB4029: "}LOCALIZATION: "TaskParameter", "ItemName" and "PropertyName" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4029: "{0}" 작업의 출력 사양이 잘못되었습니다. "TaskParameter" 특성이 필요하고 "ItemName" 또는 "PropertyName" 특성 중 하나를 지정해야 합니다(둘 다 지정할 수 없음).</target>
+          <target state-qualifier="leveraged-tm">MSB4029: Die {0}-Aufgabe enthält eine ungültige Ausgabespezifikation. Das TaskParameter-Attribut ist erforderlich, und es muss entweder das ItemName- oder PropertyName-Attribut angegeben werden (jedoch nicht beide).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="27" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1128,7 +1128,7 @@
     and the type of the .NET property that corresponds to the task parameter. For example, if an int task parameter called "Count"
     is assigned the value "x", this error would be displayed: &lt;MyTask Count="x" /&gt;</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4030: "{0}"은(는) "{3}" 작업의 "{1}" 매개 변수에 사용할 수 없는 값입니다. "{1}" 매개 변수는 "{2}" 형식입니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4030: "{0}" ist ein ungültiger Wert für den {1}-Parameter der {3}-Aufgabe. Der {1}-Parameter ist vom Typ "{2}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1137,7 +1137,7 @@
         <target state="translated">MSB4137: 구성 파일의 "{0}"에 잘못된 값이 지정되었습니다. 속성 이름 또는 도구 버전 이름이 빈 문자열입니다.</target>
         <note>{StrBegin="MSB4137: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4137: 구성 파일의 "{0}"에 잘못된 값이 지정되었습니다. 속성 이름 또는 도구 버전 이름이 빈 문자열입니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4137: In der Konfigurationsdatei ist bei "{0}" ein ungültiger Wert angegeben. Der Eigenschaftenname oder der Toolsversionname ist eine leere Zeichenfolge.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="20" adjWordcount="5" curWordcount="5" tmLabel="N''"</note>
       </trans-unit>
@@ -1146,7 +1146,7 @@
         <target state="translated">MSB4103: "{0}"은(는) 로거의 자세한 정도로 알맞지 않습니다.</target>
         <note>{StrBegin="MSB4103: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4103: "{0}"은(는) 로거의 자세한 정도로 알맞지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4103: "{0}" ist kein gültiger Ausführlichkeitsgrad für die Protokollierung.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1155,7 +1155,7 @@
         <target state="translated">MSB4163: &lt;ItemDefinitionGroup&gt;은 대상 내에 사용할 수 없습니다.</target>
         <note>{StrBegin="MSB4163: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4163: &lt; ItemDefinitionGroup &gt; 대상 내 허용 되지 않습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4163: &lt; ItemDefinitionGroup &gt; ist in einem Ziel nicht zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="9" adjWordcount="7.65" curWordcount="7.65"</note>
       </trans-unit>
@@ -1164,16 +1164,16 @@
         <target state="translated">지정한 항목은 현재 항목 그룹에 속하지 않습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">지정한 항목은 현재 항목 그룹에 속하지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">Das angegebene Element gehört nicht zu der aktuellen Elementgruppe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="ItemDoesNotContainValueForUnqualifiedMetadata">
         <source>MSB4096: The item "{0}" in item list "{1}" does not define a value for metadata "{2}".  In order to use this metadata, either qualify it by specifying %({1}.{2}), or ensure that all items in this list define a value for this metadata.</source>
-        <target state="translated">MSB4096: 항목 목록 "{1}"의 "{0}" 항목은 "{2}" 메타데이터의 값을 정의하지 않습니다.  이 메타데이터를 사용하려면 %({1}.{2})을(를) 지정하여 메타데이터를 한정하거나, 이 목록에 있는 모든 항목이 이 메타데이터의 값을 정의하는지 확인하십시오.</target>
+        <target state="translated">MSB4096: 항목 목록 "{1}"의 "{0}" 항목은 "{2}" 메타데이터의 값을 정의하지 않습니다.  이 메타데이터를 사용하려면 %({1}.{2})을(를) 지정하여 메타데이터를 한정하거나, 이 목록에 있는 모든 항목이 이 메타데이터의 값을 정의하는지 확인하세요.</target>
         <note>{StrBegin="MSB4096: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4096: 항목 목록 "{1}"의 "{0}" 항목은 "{2}" 메타데이터의 값을 정의하지 않습니다.  이 메타데이터를 사용하려면 %({1}.{2})을(를) 지정하여 메타데이터를 한정하거나, 이 목록에 있는 모든 항목이 이 메타데이터의 값을 정의하는지 확인하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4096: Das Element "{0}" in der Elementliste "{1}" definiert keinen Wert für die {2}-Metadaten. Wenn Sie diese Metadaten verwenden möchten, qualifizieren Sie sie, indem Sie %({1}.{2}) angeben, oder vergewissern Sie sich, dass alle Elemente in der Liste einen Wert für diese Metadaten definieren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="42" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1182,7 +1182,7 @@
         <target state="translated">MSB4099: 이 조건 "{0}"에서는 {1} 위치에 있는 항목 목록을 참조할 수 없습니다.</target>
         <note>{StrBegin="MSB4099: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4099: 이 조건 "{0}"에서는 {1} 위치에 있는 항목 목록을 참조할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4099: Ein Verweis auf eine Elementliste an Position {1} ist in dieser {0}-Bedingung nicht zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1191,7 +1191,7 @@
         <target state="translated">MSB4033: "{0}"은(는) 예약된 항목 메타데이터이므로 항목의 사용자 지정 메타데이터로 다시 정의할 수 없습니다.</target>
         <note>{StrBegin="MSB4033: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4033: "{0}"은(는) 예약된 항목 메타데이터이므로 항목의 사용자 지정 메타데이터로 다시 정의할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4033: "{0}" sind reservierte Elementmetadaten und können nicht als benutzerdefinierte Metadaten für das Element neu definiert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1202,7 +1202,7 @@
     only the engine is allowed to create and throw this exception.
     LOCALIZATION: "InternalLoggerException" and "MSBuild" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">InternalLoggerException은 MSBuild 엔진에서만 throw할 수 있습니다. 이 클래스의 public 생성자는 예외의 인스턴스를 만드는 데 사용할 수 없습니다.</target>
+          <target state-qualifier="leveraged-tm">Eine InternalLoggerException kann nur durch das MSBuild-Modul ausgelöst werden. Die öffentlichen Konstruktoren dieser Klasse können nicht verwendet werden, um eine Instanz der Ausnahme zu erstellen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1211,7 +1211,7 @@
         <target state="translated">초기 항목:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">초기 항목:</target>
+          <target state-qualifier="tm-suggestion">Ursprüngliche Elemente:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1220,7 +1220,7 @@
         <target state="translated">MSB4083: "{0}" 요소에 Condition 특성이 필요합니다.</target>
         <note>{StrBegin="MSB4083: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4083: "{0}" 요소에 Condition 특성이 필요합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4083: Es wurde ein Bedingungsattribut für das {0}-Element erwartet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1229,7 +1229,7 @@
         <target state="translated">MSB4164: "{1}" 메타데이터의 "{0}" 값에 항목 목록 식이 있습니다. 기본 메타데이터 값에는 항목 목록 식이 허용되지 않습니다.</target>
         <note>{StrBegin="MSB4164: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4164: "{1}" 메타데이터의 "{0}" 값에 항목 목록 식이 있습니다. 기본 메타데이터 값에는 항목 목록 식이 허용되지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4164: Der Wert "{0}" der {1}-Metadaten enthält einen Elementlistenausdruck. Elementlistenausdrücke sind nicht als Standardwerte für Metadaten zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="22" adjWordcount="5.5" curWordcount="5.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1238,7 +1238,7 @@
         <target state="translated">MSBuild에 올바른 "{0}" 개체가 필요합니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSBuild에 올바른 "{0}" 개체가 필요합니다.</target>
+          <target state-qualifier="tm-suggestion">MSBuild erwartet ein gültiges {0}-Objekt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1248,7 +1248,7 @@
         <note>{StrBegin="MSB4035: "}UE: This message is shown when a user leaves off a required attribute from a project element
     e.g. &lt;UsingTask AssemblyName="foo"&gt; -- this is missing the "TaskName" attribute.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4035: 필수 속성 "{0}" 요소에서 없습니다 &lt;{1}&gt;.</target>
+          <target state-qualifier="mt-suggestion">MSB4035: Das erforderliche Attribut "{0}"-Element fehlt &lt;{1}&gt;.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -1257,7 +1257,7 @@
         <target state="translated">MSB4036: "{0}" 작업을 찾을 수 없습니다. 다음을 수행하십시오. 1) 프로젝트 파일에 있는 작업 이름이 작업 클래스 이름과 같은지 확인합니다. 2) 작업 클래스가 "public"이고 Microsoft.Build.Framework.ITask 인터페이스를 구현하는지 확인합니다. 3) 프로젝트 파일 또는 "{1}" 디렉터리에 있는 *.tasks 파일에 &lt;UsingTask&gt;를 사용하여 작업이 올바르게 선언되었는지 확인합니다.</target>
         <note>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4036:에서 "{0}" 작업을 찾을 수 없습니다. 다음: 1.) 프로젝트 파일에서 작업 이름이 작업 클래스의 이름과 동일 합니다. 2.) 작업 클래스가 "public" 이며 같은지. 3.) 작업이 올바르게로 선언 된 &lt; UsingTask &gt;에 있는 *.tasks 파일 또는 프로젝트 파일에는 "{1}" 디렉터리.</target>
+          <target state-qualifier="mt-suggestion">MSB4036: Die "{0}" Task wurde nicht gefunden. Überprüfen Sie Folgendes: 1.) der Name der Aufgabe in der Projektdatei entspricht dem Namen der Aufgabenklasse. 2) die Aufgabenklasse ist "public" und implementiert die Microsoft.Build.Framework.ITask-Schnittstelle. 3) die Aufgabe korrekt mit &lt; UsingTask &gt; deklariert, in der Projektdatei oder in den Tasks-Dateien der "{1}" Verzeichnis.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="64" adjWordcount="54.4" curWordcount="54.4"</note>
       </trans-unit>
@@ -1266,7 +1266,7 @@
         <target state="translated">MSB4141: "{1}"에 정의된 ToolsVersion "{0}"에 대해 MSBuildToolsPath가 지정되지 않았거나 지정된 값이 빈 문자열로 계산됩니다.</target>
         <note>{StrBegin="MSB4141: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4141: "{1}"에 정의된 ToolsVersion "{0}"에 대해 MSBuildToolsPath가 지정되지 않았거나 지정된 값이 빈 문자열로 계산됩니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4141: MSBuildToolsPath ist für die bei "{1}" definierte ToolsVersion {0} nicht angegeben, oder der angegebene Wert wird zu einer leeren Zeichenfolge ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1278,7 +1278,7 @@
     version information we need.
     LOCALIZATION: "MSBuild", "MSBuildVersion" and &lt;Project&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4031: "MSBuildVersion" 특성은 사용 되지 않습니다. 프로젝트는 MSBuild 2003 형식으로 작성 된, &lt; 프로젝트 &gt; 태그에서 특성을 제거 하십시오. 이전 1.0 또는 1.2 형식으로 작성 되었으므로 프로젝트 경우 MSBuild 2003 형식으로 변환 하십시오.</target>
+          <target state-qualifier="mt-suggestion">MSB4031: Das Attribut "MSBuildVersion" ist veraltet. Wenn das Projekt im Format MSBuild 2003 erstellt wurde, entfernen Sie das Attribut aus dem Tag &lt; Project &gt;. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="45" adjWordcount="38.25" curWordcount="38.25"</note>
       </trans-unit>
@@ -1287,7 +1287,7 @@
         <target state="translated">MSB4144: "{0}" 도구 집합에 대한 정의가 여러 개 있습니다. </target>
         <note>{StrBegin="MSB4144: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4144: 도구 집합에 대 한 여러 정의 찾지 못했습니다 "{0}".</target>
+          <target state-qualifier="mt-suggestion">MSB4144: Für das Toolset wurden mehrere Definitionen gefunden "{0}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="9" adjWordcount="7.65" curWordcount="7.65"</note>
       </trans-unit>
@@ -1296,7 +1296,7 @@
         <target state="translated">MSB4145: "{0}" 속성에 대한 정의가 여러 개 있습니다.</target>
         <note>{StrBegin="MSB4145: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4145: "{0}" 속성에 대한 정의가 여러 개 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4145: Für die {0}-Eigenschaft wurden mehrere Definitionen gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1305,7 +1305,7 @@
         <target state="translated">MSB4082: Choose에 &lt;Otherwise&gt; 요소가 두 개 이상 있습니다.</target>
         <note>{StrBegin="MSB4082: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4082: 선택 &lt; 그 &gt; 요소가 여러 개 있습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4082: Wählen Sie mehrere &lt; Otherwise &gt;-Element enthält.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="9" adjWordcount="7.65" curWordcount="7.65"</note>
       </trans-unit>
@@ -1314,7 +1314,7 @@
         <target state="translated">이 메서드는 보관된 &lt;{0}&gt; 요소에만 사용할 수 있습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">이 메서드는 유효한 유지만 &lt;{0}&gt; 요소입니다.</target>
+          <target state-qualifier="mt-suggestion">Diese Methode ist nur gültig für beibehalten &lt;{0}&gt; Elemente.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="10" adjWordcount="8.5" curWordcount="8.5"</note>
       </trans-unit>
@@ -1323,7 +1323,7 @@
         <target state="translated">이 메서드는 &lt;{0}&gt; 요소가 아니라 가상 속성 그룹에만 사용할 수 있습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">이 방법은 가상 속성 그룹에 &lt;{0}&gt; 요소입니다.</target>
+          <target state-qualifier="mt-suggestion">Diese Methode gilt nur für virtuelle Eigenschaftengruppen nicht &lt;{0}&gt; Elemente.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="13" adjWordcount="11.05" curWordcount="11.05"</note>
       </trans-unit>
@@ -1332,7 +1332,7 @@
         <target state="translated">MSB4038: &lt;{1}&gt; 요소 아래의 마지막 항목은 &lt;{0}&gt; 요소여야 하는데 &lt;{2}&gt; 요소가 있습니다.</target>
         <note>{StrBegin="MSB4038: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4038: 요소 &lt;{0}&gt; 요소 아래의 마지막 있어야 &lt;{1}&gt;. 요소를 발견 &lt;{2}&gt; 대신.</target>
+          <target state-qualifier="mt-suggestion">MSB4038: Das Element &lt;{0}&gt; muss unter Element &lt;{1}&gt;. Element wurde gefunden &lt;{2}&gt; statt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="17" adjWordcount="14.45" curWordcount="14.45"</note>
       </trans-unit>
@@ -1341,7 +1341,7 @@
         <target state="translated">MSB4138: 레지스트리 위치 "{0}"에 문자열이 아닌 데이터가 지정되었습니다.</target>
         <note>{StrBegin="MSB4138: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4138: 레지스트리 위치 "{0}"에 문자열이 아닌 데이터가 지정되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4138: Am Registrierungsspeicherort "{0}" wurden Daten angegeben, die keine Zeichenfolge sind.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1350,7 +1350,7 @@
         <target state="translated">MSB4039: 프로젝트 파일에 "{0}" 요소가 없습니다.</target>
         <note>{StrBegin="MSB4039: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4039: 프로젝트 파일에 "{0}" 요소가 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4039: Das {0}-Element wurde in der Projektdatei nicht gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1359,7 +1359,7 @@
         <target state="translated">MSB4040: 프로젝트에 대상이 없습니다.</target>
         <note>{StrBegin="MSB4040: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4040: 프로젝트에 대상이 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4040: Das Projekt enthält kein Ziel.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1368,7 +1368,7 @@
         <target state="translated">항목의 "{0}" 특성은 제거할 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">항목의 "{0}" 특성은 제거할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Löschen des {0}-Attributs eines Elements ist nicht zulässig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1377,7 +1377,7 @@
         <target state="translated">전달된 개체가 프로젝트의 일부가 아닙니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">전달된 개체가 프로젝트의 일부가 아닙니다.</target>
+          <target state-qualifier="tm-suggestion">Das übergebene Objekt ist nicht Teil des Projekts.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1386,7 +1386,7 @@
         <target state="translated">"{1}" 프로젝트의 "{0}" 대상을 "{3}" 프로젝트의 "{2}" 대상으로 재정의하고 있습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}" 프로젝트의 "{0}" 대상을 "{3}" 프로젝트의 "{2}" 대상으로 재정의하고 있습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" im Projekt "{1}" wird durch das Ziel "{2}" aus dem Projekt "{3}" außer Kraft gesetzt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1395,7 +1395,7 @@
         <target state="translated">MSB4167: 부모 프로세스가 예기치 않게 종료되었습니다. 자식 노드 "{0}"을(를) 종료합니다.</target>
         <note>{StrBegin="MSB4167: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4167: 부모 프로세스가 예기치 않게 종료되었습니다. 자식 노드 "{0}"을(를) 종료합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4167: Der übergeordnete Prozess wurde unerwartet beendet. Der untergeordnete Knoten "{0}" wird heruntergefahren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1404,7 +1404,7 @@
         <target state="translated">{0}ms  {1} {2}회 호출</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0}ms  {1} {2}회 호출</target>
+          <target state-qualifier="tm-suggestion">{0} ms {1} {2} Aufrufe</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1413,7 +1413,7 @@
         <target state="translated">(* = 재입력으로 인해 타이밍이 기록되지 않았습니다.)</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">(* = 재입력으로 인해 타이밍이 기록되지 않았습니다.)</target>
+          <target state-qualifier="tm-suggestion">(* = Zeit wurde aufgrund des erneuten Eintretens nicht aufgezeichnet)</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1422,7 +1422,7 @@
         <target state="translated">이 프로젝트 개체는 MSBuild 엔진에서 언로드되었으며 더 이상 유효하지 않습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">이 프로젝트 개체는 MSBuild 엔진에서 언로드되었으며 더 이상 유효하지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">Dieses Projektobjekt wurde aus dem MSBuild-Modul entladen und ist nicht mehr gültig.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1431,7 +1431,7 @@
         <target state="translated">프로젝트 파일 "{0}"을(를) 찾을 수 없습니다.</target>
         <note>UE: This message is shown when the user calls into the OM to build a project that doesn't exist on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">프로젝트 파일 "{0}"을(를) 찾을 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Projektdatei "{0}" wurde nicht gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1440,7 +1440,7 @@
         <target state="translated">"{0}" 프로젝트를 빌드했습니다. - 실패</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트를 빌드했습니다. - 실패</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung des Projekts "{0}" ist abgeschlossen – FEHLER.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1449,7 +1449,7 @@
         <target state="translated">"{0}" 프로젝트를 빌드했습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트를 빌드했습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung des Projekts "{0}" ist abgeschlossen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -1459,7 +1459,7 @@
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
     LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4041: 프로젝트의 기본 XML 네임 스페이스에는 MSBuild XML 네임 스페이스 여야 합니다. 프로젝트는 MSBuild 2003 형식으로 작성 된, 추가 하십시오 xmlns = "{0}" &lt; 프로젝트 &gt; 요소를. 이전 1.0 또는 1.2 형식으로 작성 되었으므로 프로젝트 경우 MSBuild 2003 형식으로 변환 하십시오.</target>
+          <target state-qualifier="mt-suggestion">MSB4041: Der XML-Standardnamespace des Projekts muss MSBuild XML-Namespace. Wenn das Projekt im Format MSBuild 2003 erstellt wurde, fügen Sie Xmlns = "{0}" &lt; Project &gt;-Element. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="52" adjWordcount="44.2" curWordcount="44.2"</note>
       </trans-unit>
@@ -1468,7 +1468,7 @@
         <target state="translated">프로젝트 성능 요약:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">프로젝트 성능 요약:</target>
+          <target state-qualifier="tm-suggestion">Leistungszusammenfassung für das Projekt:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1477,7 +1477,7 @@
         <target state="translated">MSB4042: 프로젝트 파일에서 구문 오류가 발생했으므로 작업을 중단합니다.</target>
         <note>{StrBegin="MSB4042: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4042: 프로젝트 파일에서 구문 오류가 발생했으므로 작업을 중단합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4042: Prozess aufgrund von Syntaxfehlern in der Projektdatei angehalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1486,7 +1486,7 @@
         <target state="translated">"{0}" 프로젝트에서 "{1}" 빌드 중({2} 대상):</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트에서 "{1}" 빌드 중({2} 대상):</target>
+          <target state-qualifier="tm-suggestion">Das Projekt {0} erstellt {1} ({2} Ziel(e)):</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1495,7 +1495,7 @@
         <target state="translated">"{0}" 프로젝트에서 "{1}" 빌드 중(기본 대상):</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트에서 "{1}" 빌드 중(기본 대상):</target>
+          <target state-qualifier="tm-suggestion">Das Projekt "{0}" erstellt "{1}" (Standardziele):</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1504,7 +1504,7 @@
         <target state="translated">"{0}" 프로젝트({1} 대상):</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트({1} 대상):</target>
+          <target state-qualifier="tm-suggestion">Projekt "{0}", {1} Ziel(e):</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -1513,7 +1513,7 @@
         <target state="translated">"{0}" 프로젝트(기본 대상):</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트(기본 대상):</target>
+          <target state-qualifier="tm-suggestion">Projekt "{0}" (Standardziele):</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -1522,7 +1522,7 @@
         <target state="translated">"{0}" 프로젝트를 빌드했습니다({1} 대상).</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트를 빌드했습니다({1} 대상).</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung von Projekt "{0}" ist abgeschlossen ({1} Ziel(e)).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1531,7 +1531,7 @@
         <target state="translated">"{0}" 프로젝트를 빌드했습니다(기본 대상).</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트를 빌드했습니다(기본 대상).</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung von Projekt "{0}" ist abgeschlossen (Standardziele).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1540,7 +1540,7 @@
         <target state="translated">"{0}" 프로젝트를 빌드했습니다({1} 대상). - 실패</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트를 빌드했습니다({1} 대상). - 실패</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung des Projekts "{0}" ist abgeschlossen, {1} Ziel(e) -- FEHLER.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1549,7 +1549,7 @@
         <target state="translated">"{0}" 프로젝트를 빌드했습니다(기본 대상). - 실패</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트를 빌드했습니다(기본 대상). - 실패</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung von Projekt "{0}" ist abgeschlossen (Standardziele) -- FEHLER.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1558,16 +1558,16 @@
         <target state="translated">MSB4075: 프로젝트 파일을 MSBuild로 빌드하려면 파일을 Visual Studio IDE에서 열어 최신 버전으로 변환해야 합니다.</target>
         <note>{StrBegin="MSB4075: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4075: 프로젝트 파일을 MSBuild로 빌드하려면 파일을 Visual Studio IDE에서 열어 최신 버전으로 변환해야 합니다.</target>
+          <target state-qualifier="leveraged-tm">MSB4075: Die Projektdatei muss in der Visual Studio IDE geöffnet und in ein aktuelles Versionsformat gebracht werden, bevor sie mit MSBuild erstellt werden kann.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
         <source>MSB4192: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</source>
-        <target state="translated">MSB4192: 프로젝트 파일 "{0}"이(가) MSBuild에서 더 이상 지원하지 않는 ".vcproj" 파일 형식입니다. 프로젝트를 Visual Studio IDE에서 열거나 변환 도구를 실행하여 프로젝트를 변환하거나, MSBuild 3.5 이하 버전을 사용하여 프로젝트를 빌드하십시오.</target>
+        <target state="translated">MSB4192: 프로젝트 파일 "{0}"이(가) MSBuild에서 더 이상 지원하지 않는 ".vcproj" 파일 형식입니다. 프로젝트를 Visual Studio IDE에서 열거나 변환 도구를 실행하여 프로젝트를 변환하거나, MSBuild 3.5 이하 버전을 사용하여 프로젝트를 빌드하세요.</target>
         <note>{StrBegin="MSB4192: "} LOC: ".vcproj" should not be localized</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4192: 프로젝트 파일 "{0}"이(가) MSBuild에서 더 이상 지원하지 않는 ".vcproj" 파일 형식입니다. 프로젝트를 Visual Studio IDE에서 열거나 변환 도구를 실행하여 프로젝트를 변환하거나, MSBuild 3.5 이하 버전을 사용하여 프로젝트를 빌드하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4192: Die Projektdatei "{0}" ist im VSPROJ-Dateiformat gespeichert, das nicht mehr von MSBuild unterstützt wird. Konvertieren Sie das Projekt, indem Sie es in der Visual Studio IDE öffnen oder das Konvertierungstool ausführen, oder verwenden Sie MSBuild 3.5 oder früher zum Erstellen des Projekts.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="42" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1576,7 +1576,7 @@
         <target state="translated">지정한 속성은 현재 속성 그룹에 속하지 않습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">지정한 속성은 현재 속성 그룹에 속하지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">Die angegebene Eigenschaft gehört nicht zu der aktuellen Eigenschaftengruppe.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1585,7 +1585,7 @@
         <target state="translated">초기 속성:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">초기 속성:</target>
+          <target state-qualifier="tm-suggestion">Ursprüngliche Eigenschaften:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1594,7 +1594,7 @@
         <target state="translated">MSB4148: 레지스트리 키 "{0}"에 저장된 속성 이름의 길이가 0입니다.</target>
         <note>{StrBegin="MSB4148: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4148: 레지스트리 키 "{0}"에 저장된 속성 이름의 길이가 0입니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4148: Der Name einer unter dem Registrierungsschlüssel "{0}" gespeicherten Eigenschaft hat eine Länge von Null.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1603,18 +1603,18 @@
         <target state="translated">인덱서와 "{0}" 개체의 속성 이름이 일치하지 않습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">인덱서와 "{0}" 개체의 속성 이름이 일치하지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Eigenschaftennamen im Indexer und das {0}-Objekt stimmen nicht überein.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="QualifiedMetadataInTransformNotAllowed">
         <source>MSB4043: The item metadata reference "{0}" is invalid because it is qualified with an item name. Item metadata referenced in transforms do not need to be qualified, because the item name is automatically deduced from the items being transformed. Change "{0}" to "%({1})".</source>
-        <target state="translated">MSB4043: 항목 메타데이터 참조 "{0}"은(는) 항목 이름으로 한정되므로 올바르지 않습니다. 항목 이름은 변환되는 항목에서 자동으로 추론되므로 변환에서 참조하는 항목 메타데이터는 한정하지 않아도 됩니다. "{0}"을(를) "%({1})"(으)로 변경하십시오.</target>
+        <target state="translated">MSB4043: 항목 메타데이터 참조 "{0}"은(는) 항목 이름으로 한정되므로 올바르지 않습니다. 항목 이름은 변환되는 항목에서 자동으로 추론되므로 변환에서 참조하는 항목 메타데이터는 한정하지 않아도 됩니다. "{0}"을(를) "%({1})"(으)로 변경하세요.</target>
         <note>{StrBegin="MSB4043: "}UE: This message is shown when the user does something like this: @(foo-&gt;'%(foo.metadata)'). There is no need to specify
     "foo.metadata", because "foo" is automatically deduced. In corollary, "bar.metadata" is not allowed either, where "bar" is a different
     item list type.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4043: 항목 메타데이터 참조 "{0}"은(는) 항목 이름으로 한정되므로 올바르지 않습니다. 항목 이름은 변환되는 항목에서 자동으로 추론되므로 변환에서 참조하는 항목 메타데이터는 한정하지 않아도 됩니다. "{0}"을(를) "%({1})"(으)로 변경하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4043: Der Elementmetadatenverweis "{0}" ist ungültig, da er mit einem Elementnamen qualifiziert ist. Elementmetadaten, auf die bei Transformationen verwiesen wird, müssen nicht qualifiziert werden, da der Elementname automatisch aus den transformierten Elementen abgeleitet wird. Ändern Sie "{0}" in "%({1})".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="43" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1623,7 +1623,7 @@
         <target state="translated">MSB4135: 레지스트리 위치 "{0}"에서 도구 집합 정보를 읽는 동안 오류가 발생했습니다. {1}</target>
         <note>{StrBegin="MSB4135: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4135: 레지스트리 위치 "{0}"에서 도구 집합 정보를 읽는 동안 오류가 발생했습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4135: Fehler beim Lesen der Toolsetinformationen am Registrierungsspeicherort "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1632,7 +1632,7 @@
         <target state="translated">MSB4044: "{0}" 작업의 필수 매개 변수 "{1}"에 값을 지정하지 않았습니다.</target>
         <note>{StrBegin="MSB4044: "}UE: This message is shown when a task parameter designated as "required" is not set in the project file.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4044: "{0}" 작업의 필수 매개 변수 "{1}"에 값을 지정하지 않았습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4044: Die {0}-Aufgabe hat keinen Wert für den erforderlichen {1}-Parameter erhalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1641,7 +1641,7 @@
         <target state="translated">"{0}" 스키마 파일을 사용하여 프로젝트의 유효성을 검사하고 있습니다.</target>
         <note>LOCALIZATION: "{0}" is the location of the schema file.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 스키마 파일을 사용하여 프로젝트의 유효성을 검사하고 있습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Projekt wird anhand der Schemadatei "{0}" überprüft.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1652,16 +1652,16 @@
     MSBuild.exe), and the project has errors. "{0}" contains a message explaining the problem.
     LOCALIZATION: "{0}" is a message from the System.XML schema validator and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4045: 프로젝트가 잘못되었습니다. {0}</target>
+          <target state-qualifier="tm-suggestion">MSB4045: Ungültiges Projekt. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="SecurityProjectBuildDisabled">
         <source>MSB4112: The targets in this project have been disabled by the host and therefore cannot be built at this time. This may have been done for security reasons. To enable the targets, the host must set Project.BuildEnabled to "true".</source>
-        <target state="translated">MSB4112: 호스트에서 이 프로젝트의 대상을 사용할 수 없도록 설정했으므로 지금은 빌드할 수 없습니다. 보안상의 이유로 이렇게 설정한 것 같습니다. 해당 대상을 사용하려면 호스트에서 Project.BuildEnabled를 "true"로 설정해야 합니다.</target>
+        <target state="translated">MSB4112: 호스트에서 이 프로젝트의 대상을 사용할 수 없도록 설정했으므로 지금은 빌드할 수 없습니다. 보안상의 이유로 이렇게 설정한 것 같습니다. 해당 대상을 사용하도록 설정하려면 호스트에서 Project.BuildEnabled를 "true"로 설정해야 합니다.</target>
         <note>{StrBegin="MSB4112: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4112: 호스트에서 이 프로젝트의 대상을 사용할 수 없도록 설정했으므로 지금은 빌드할 수 없습니다. 보안상의 이유로 이렇게 설정한 것 같습니다. 해당 대상을 사용하려면 호스트에서 Project.BuildEnabled를 "true"로 설정해야 합니다.</target>
+          <target state-qualifier="leveraged-tm">MSB4112: Die Ziele in diesem Projekt wurden vom Host deaktiviert und können aus diesem Grund derzeit nicht erstellt werden. Die Deaktivierung wurde wahrscheinlich aus Sicherheitsgründen durchgeführt. Wenn Sie die Ziele aktivieren möchten, muss der Host Project.BuildEnabled auf "true" festlegen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="39" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1671,7 +1671,7 @@
         <note>{StrBegin="MSB4093: "}UE: This error is shown when a project tries to assign a value to a task parameter that does not have a "set"
     accessor on the corresponding .NET property on the task class.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4093: "set" 접근자가 없으므로 "{1}" 작업의 "{0}" 매개 변수에 쓸 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4093: In den {0}-Parameter der {1}-Aufgabe kann nicht geschrieben werden, da er keinen set-Accessor besitzt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="20" adjWordcount="5" curWordcount="5" tmLabel="N''"</note>
       </trans-unit>
@@ -1680,7 +1680,7 @@
         <target state="translated">이 개체의 부분 복제본을 만들 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">이 개체의 부분 복제본을 만들 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Ein unechter Klon dieses Objekts kann nicht erstellt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1689,7 +1689,7 @@
         <target state="translated">입력이 없으므로 "{0}" 대상을 건너뜁니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">입력이 없으므로 "{0}" 대상을 건너뜁니다.</target>
+          <target state-qualifier="tm-suggestion">Das {0}-Ziel wird übersprungen, da es keine Eingaben besitzt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1698,7 +1698,7 @@
         <target state="translated">대상에서 입력을 선언했지만 입력 사양이 빈 속성 및/또는 빈 항목 목록만 참조합니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">대상에서 입력을 선언했지만 입력 사양이 빈 속성 및/또는 빈 항목 목록만 참조합니다.</target>
+          <target state-qualifier="tm-suggestion">Obwohl das Ziel seine Eingaben deklariert hat, verweist die Eingabespezifikation nur auf leere Eigenschaften und/oder leere Elementlisten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1707,7 +1707,7 @@
         <target state="translated">출력이 없으므로 "{0}" 대상을 건너뜁니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">출력이 없으므로 "{0}" 대상을 건너뜁니다.</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wird übersprungen, da es keine Ausgaben enthält.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1716,7 +1716,7 @@
         <target state="translated">대상에서 출력을 선언했지만 출력 사양이 빈 속성 및/또는 빈 항목 목록만 참조합니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">대상에서 출력을 선언했지만 출력 사양이 빈 속성 및/또는 빈 항목 목록만 참조합니다.</target>
+          <target state-qualifier="tm-suggestion">Obwohl das Ziel seine Ausgaben deklariert hat, verweist die Ausgabespezifikation nur auf leere Eigenschaften und/oder leere Elementlisten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1725,7 +1725,7 @@
         <target state="translated">해당 입력 파일과 비교하여 출력 파일이 모두 최신 파일이므로 "{0}" 대상을 건너뜁니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">해당 입력 파일과 비교하여 출력 파일이 모두 최신 파일이므로 "{0}" 대상을 건너뜁니다.</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wird übersprungen, da alle Ausgabedateien hinsichtlich der Eingabedateien aktuell sind.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1734,7 +1734,7 @@
         <target state="translated">입력 파일: {0}</target>
         <note>{0} is a semicolon-separated list of filenames.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">입력 파일: {0}</target>
+          <target state-qualifier="tm-suggestion">Eingabedateien: {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1743,7 +1743,7 @@
         <target state="translated">출력 파일: {0}</target>
         <note>{0} is a semicolon-separated list of filenames.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">출력 파일: {0}</target>
+          <target state-qualifier="tm-suggestion">Ausgabedateien: {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1752,7 +1752,7 @@
         <target state="translated">솔루션 구성 "{0}"을(를) 빌드하고 있습니다.</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">솔루션 구성 "{0}"을(를) 빌드하고 있습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappenkonfiguration "{0}" wird erstellt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -1761,7 +1761,7 @@
         <target state="translated">구성 "{1}" 및 도구 버전 "{2}"의 솔루션 캐시 파일 "{0}"을(를) 사용하고 있습니다.</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">구성 "{1}" 및 도구 버전 "{2}"의 솔루션 캐시 파일 "{0}"을(를) 사용하고 있습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappen-Cachedatei "{0}" wird für die Konfiguration "{1}" und die Toolsversion "{2}" verwendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1770,7 +1770,7 @@
         <target state="translated">솔루션 캐시 파일 "{0}"을(를) 읽지 못했습니다. {1} 솔루션 파일을 직접 사용하고 있습니다.</target>
         <note>UE: This is not a true error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">솔루션 캐시 파일 "{0}"을(를) 읽지 못했습니다. {1} 솔루션 파일을 직접 사용하고 있습니다.</target>
+          <target state-qualifier="tm-suggestion">Fehler beim Lesen der Projektmappen-Cachedatei "{0}". {1} Projektmappendatei wird direkt verwendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1779,7 +1779,7 @@
         <target state="translated">솔루션 캐시 파일 "{0}"을(를) 쓰지 못했습니다. {1}</target>
         <note>UE: This is not a true error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">솔루션 캐시 파일 "{0}"을(를) 쓰지 못했습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">Fehler beim Schreiben der Projektmappen-Cachedatei "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -1788,7 +1788,7 @@
         <target state="translated">"{1}"의 "{0}" 값에 대해 솔루션 캐시 파일이 만들어졌지만 현재 값은 "{2}"입니다. 캐시 파일을 새로 고칩니다.</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}"의 "{0}" 값에 대해 솔루션 캐시 파일이 만들어졌지만 현재 값은 "{2}"입니다. 캐시 파일을 새로 고칩니다.</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappen-Cachedatei wurde für den {0}-Wert "{1}" erstellt, aber der aktuelle Wert ist "{2}". Cachedatei wird aktualisiert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="20" adjWordcount="5" curWordcount="5" tmLabel="N''"</note>
       </trans-unit>
@@ -1797,7 +1797,7 @@
         <target state="translated">솔루션 캐시 파일의 내부 버전 번호는 "{0}"인데 현재 값은 "{1}"입니다. 캐시 파일을 새로 고칩니다.</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">솔루션 캐시 파일의 내부 버전 번호는 "{0}"인데 현재 값은 "{1}"입니다. 캐시 파일을 새로 고칩니다.</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappen-Cachedatei hat die interne Versionsnummer "{0}", der aktuelle Wert ist aber "{1}". Cachedatei wird aktualisiert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1806,7 +1806,7 @@
         <target state="translated">솔루션 캐시 파일이 만료되었습니다. 캐시 파일을 새로 고칩니다. {0}</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">솔루션 캐시 파일이 만료되었습니다. 캐시 파일을 새로 고칩니다. {0}</target>
+          <target state-qualifier="tm-suggestion">Die Projektmappen-Cachedatei ist veraltet. Cachedatei wird aktualisiert. {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1815,7 +1815,7 @@
         <target state="translated">MSB4160: "{0}" 프로젝트와 관련하여 순환 종속성이 발견되었습니다.</target>
         <note>{StrBegin="MSB4160: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4160: "{0}" 프로젝트와 관련하여 순환 종속성이 발견되었습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4160: Eine Ringabhängigkeit im Zusammenhang mit dem Projekt "{0}" wurde erkannt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1824,7 +1824,7 @@
         <target state="translated">MSB4126: 지정된 솔루션 구성 "{0}"이(가) 잘못되었습니다. Configuration 및 Platform 속성을 사용하여 올바른 솔루션 구성을 지정(예: MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU")하거나 기본 솔루션 구성을 사용하도록 이 속성을 빈 상태로 두세요.</target>
         <note>{StrBegin="MSB4126: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4126: 지정된 솔루션 구성 "{0}"이(가) 잘못되었습니다. Configuration 및 Platform 속성을 사용하여 올바른 솔루션 구성을 지정(예: MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU")하거나 기본 솔루션 구성을 사용하도록 이 속성을 빈 상태로 두십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4126: Die angegebene Projektmappenkonfiguration "{0}" ist ungültig. Geben Sie mithilfe der Konfigurations- und Plattformeigenschaften eine gültige Projektmappenkonfiguration an (z. B. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU"), oder lassen Sie diese Eigenschaften leer, sodass die Standardprojektmappenkonfiguration verwendet wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="37" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1833,7 +1833,7 @@
         <target state="translated">MSB4046: 프로젝트 파일 "{0}"을(를) 읽는 동안 오류가 발생했습니다. {1}</target>
         <note>{StrBegin="MSB4046: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4046: 프로젝트 파일 "{0}"을(를) 읽는 동안 오류가 발생했습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4046: Fehler beim Lesen der Projektdatei "{0}": {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1842,7 +1842,7 @@
         <target state="translated">MSB4125: 프로젝트 파일 이름 "{0}"이(가) 잘못되었습니다. {1}</target>
         <note>{StrBegin="MSB4125: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4125: 프로젝트 파일 이름 "{0}"이(가) 잘못되었습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4125: Der Projektdateiname "{0}" ist ungültig. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1851,7 +1851,7 @@
         <target state="translated">MSB4051: {0} 프로젝트에서 GUID가 {1}인 프로젝트를 참조하지만 .SLN 파일에서 이 GUID를 사용하는 프로젝트를 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB4051: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4051: {0} 프로젝트에서 GUID가 {1}인 프로젝트를 참조하지만 .SLN 파일에서 이 GUID를 사용하는 프로젝트를 찾을 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4051: Das Projekt "{0}" verweist auf ein Projekt mit der GUID {1}, in der SLN-Datei wurde jedoch kein Projekt mit dieser GUID gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1860,7 +1860,7 @@
         <target state="translated">MSB4078: 프로젝트 파일 "{0}"을(를) MSBuild에서 지원하지 않으므로 빌드할 수 없습니다.</target>
         <note>{StrBegin="MSB4078: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4078: 프로젝트 파일 "{0}"을(를) MSBuild에서 지원하지 않으므로 빌드할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4078: Die Projektdatei "{0}" wird nicht von MSBuild unterstützt und kann nicht erstellt werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1869,7 +1869,7 @@
         <target state="translated">MSB4054: 솔루션 파일을 MSBuild로 빌드하려면 파일을 Visual Studio IDE에서 열어 최신 버전으로 변환해야 합니다.</target>
         <note>{StrBegin="MSB4054: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4054: 솔루션 파일을 MSBuild로 빌드하려면 파일을 Visual Studio IDE에서 열어 최신 버전으로 변환해야 합니다.</target>
+          <target state-qualifier="leveraged-tm">MSB4054: Die Projektmappendatei muss in der Visual Studio IDE geöffnet und in die neuste Version konvertiert werden, bevor sie mit MSBuild erstellt werden kann.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1878,7 +1878,7 @@
         <target state="translated">MSB4121: 솔루션 구성 "{1}"에 대한 솔루션 파일에 "{0}" 프로젝트에 대한 프로젝트 구성이 지정되어 있지 않습니다.</target>
         <note>{StrBegin="MSB4121: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4121: 솔루션 구성 "{1}"에 대한 솔루션 파일에 "{0}" 프로젝트에 대한 프로젝트 구성이 지정되어 있지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4121: Die Projektkonfiguration für das Projekt "{0}" wurde nicht in der Projektmappendatei für die Projektmappenkonfiguration "{1}" angegeben.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1889,7 +1889,7 @@
       UE: This is not an error, so doesn't need an error code.
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 프로젝트가 솔루션 구성 "{1}"에서 빌드되도록 선택되지 않았습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Projekt "{0}" ist in der Projektmappenkonfiguration "{1}" nicht zum Erstellen ausgewählt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1898,7 +1898,7 @@
         <target state="translated">MSB4122: "{0}" 프로젝트에 대한 프로젝트 종속성을 검색하지 못했습니다. {1}</target>
         <note>{StrBegin="MSB4122: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4122: "{0}" 프로젝트에 대한 프로젝트 종속성을 검색하지 못했습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4122: Fehler beim Überprüfen der Projektabhängigkeiten für Projekt "{0}". {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1907,7 +1907,7 @@
         <target state="translated">MSB4149: 솔루션의 도구 버전 "{0}"은(는) 다른 도구 버전을 사용한 프로젝트 빌드를 지원하지 않습니다.</target>
         <note>{StrBegin="MSB4149: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4149: 솔루션의 도구 버전 "{0}"은(는) 다른 도구 버전을 사용한 프로젝트 빌드를 지원하지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4149: Die Toolsversion {0} der Projektmappe unterstützt das Erstellen von Projekten mit unterschiedlichen Toolsversionen nicht.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1917,7 +1917,7 @@
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">웹 프로젝트에서는 "Clean" 대상을 지원하지 않습니다.  나머지 프로젝트를 진행합니다.</target>
+          <target state-qualifier="tm-suggestion">Webprojekte unterstützen das Clean-Ziel nicht. Verbleibende Projekte werden fortgesetzt...</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1927,7 +1927,7 @@
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">웹 프로젝트에서는 "Publish" 대상을 지원하지 않습니다.  나머지 프로젝트를 진행합니다.</target>
+          <target state-qualifier="tm-suggestion">Webprojekte unterstützen das Publish-Ziel nicht. Verbleibende Projekte werden fortgesetzt...</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -1939,7 +1939,7 @@
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
     </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">건너뛰기 때문에 "$(AspNetConfiguration)"이 웹 프로젝트에 대 한 구성은 지원 되지 않습니다.  AspNetConfiguration 속성을 사용 하 여 /p:AspNetConfiguration을 추가 하 여 웹 프로젝트를 빌드하는 데 사용 하는 구성 재정의 명령줄에 &lt; 값 &gt; =. 현재 웹 프로젝트는 디버그 및 릴리스 구성만 지원합니다.</target>
+          <target state-qualifier="mt-suggestion">Da der "$(AspNetConfiguration)" Konfiguration für dieses Webprojekt nicht unterstützt.  Verwenden die AspNetConfiguration-Eigenschaft die Konfiguration zum Erstellen von Webprojekten hinzufügen/p: AspNetConfiguration überschreiben = &lt; Wert &gt; in der Befehlszeile. Aktuell unterstützen Webprojekte nur Debug- und Releasekonfigurationen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="44" adjWordcount="37.4" curWordcount="37.4"</note>
       </trans-unit>
@@ -1948,7 +1948,7 @@
         <target state="translated">MSB4076: VC 프로젝트에서는 "Publish" 대상을 지원하지 않습니다.</target>
         <note>{StrBegin="MSB4076: "}LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4076: VC 프로젝트에서는 "Publish" 대상을 지원하지 않습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4076: VC-Projekte unterstützen nicht das Publish-Ziel.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -1957,7 +1957,7 @@
         <target state="translated">MSB4098: 이 프로젝트를 빌드하기 위해 MSBuild에서 VCBuild를 호출하고 있습니다. 독립 실행형 VC++ 프로젝트를 빌드할 때는 명령줄 빌드 시스템에서 VC++ 프로젝트(.VCPROJ)와 C#/VB/VJ# 프로젝트(.CSPROJ, .VBPROJ, .VJSPROJ) 사이의 프로젝트 간 참조를 사용할 수 없습니다. 이러한 프로젝트 간 참조가 있는 프로젝트는 빌드되지 않습니다. 대신 이 프로젝트가 포함된 솔루션 파일을 빌드하십시오.</target>
         <note>{StrBegin="MSB4098: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4098: 이 프로젝트를 빌드하기 위해 MSBuild에서 VCBuild를 호출하고 있습니다. 독립 실행형 VC++ 프로젝트를 빌드할 때는 명령줄 빌드 시스템에서 VC++ 프로젝트(.VCPROJ)와 C#/VB/VJ# 프로젝트(.CSPROJ, .VBPROJ, .VJSPROJ) 사이의 프로젝트 간 참조를 사용할 수 없습니다. 이러한 프로젝트 간 참조가 있는 프로젝트는 빌드되지 않습니다. 대신 이 프로젝트가 포함된 솔루션 파일을 빌드하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4098: MSBuild ruft zum Erstellen dieses Projekts VCBuild auf. Interprojektverweise zwischen VC++-Projekten (.VCPROJ) und C#-/VB-/VJ#-Projekten (.CSPROJ, .VBPROJ, .VJSPROJ) werden beim Erstellen eigenständiger VC++-Projekte von den Befehlszeilen-Buildsystemen nicht unterstützt. Projekte, die solche Interprojektverweise enthalten, werden nicht erstellt. Erstellen Sie stattdessen die Projektmappendatei, die dieses Projekt enthält.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="53" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -1966,7 +1966,7 @@
         <target state="translated">MSB4056: MSBuild 엔진은 단일 스레드 아파트에서 호출되어야 합니다. 현재 스레딩 모델은 "{0}"입니다. 작업을 진행할 수 있지만 일부 작업이 제대로 수행되지 않을 수 있습니다.</target>
         <note>{StrBegin="MSB4056: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4056: MSBuild 엔진은 단일 스레드 아파트에서 호출되어야 합니다. 현재 스레딩 모델은 "{0}"입니다. 작업을 진행할 수 있지만 일부 작업이 제대로 수행되지 않을 수 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4056: Das MSBuild-Modul muss in einem Singlethread-Apartment aufgerufen werden. Das aktuelle Threadmodell ist {0}. Der Vorgang wird fortgesetzt, aber einige Aufgaben werden möglicherweise nicht ordnungsgemäß ausgeführt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
       </trans-unit>
@@ -1978,7 +1978,7 @@
     "MSBUILD : Schema validation error MSB0000: This is an error."
     LOCALIZATION: This fragment needs to be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">스키마 유효성 검사</target>
+          <target state-qualifier="tm-suggestion">Schemavalidierung</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1987,7 +1987,7 @@
         <target state="translated">"{0}" 대상을 건너뜁니다. 이전에 제대로 빌드되지 않았습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 대상을 건너뜁니다. 이전에 제대로 빌드되지 않았습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wurde übersprungen. Die vorherige Erstellung war nicht erfolgreich.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -1996,7 +1996,7 @@
         <target state="translated">"{0}" 대상을 건너뜁니다. 이전에 빌드되었습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 대상을 건너뜁니다. 이전에 빌드되었습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wurde übersprungen. Die vorherige Erstellung war erfolgreich.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2005,7 +2005,7 @@
         <target state="translated">MSB4116: "{0}" 대상에 대한 "{1}" 조건에 항목 메타데이터에 대한 참조가 있습니다. 항목 메타데이터에 대한 참조는 항목 변환의 일부가 아니면 대상 조건에서 사용할 수 없습니다.</target>
         <note>{StrBegin="MSB4116: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4116: "{0}" 대상에 대한 "{1}" 조건에 항목 메타데이터에 대한 참조가 있습니다. 항목 메타데이터에 대한 참조는 항목 변환의 일부가 아니면 대상 조건에서 사용할 수 없습니다.</target>
+          <target state-qualifier="leveraged-tm">MSB4116: Die Bedingung "{1}" des {0}-Ziels enthält einen Verweis auf Elementmetadaten. Verweise auf Elementmetadaten sind in Zielbedingungen nicht zulässig, es sei denn, sie sind Teil einer Elementtransformation.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="32" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2014,7 +2014,7 @@
         <target state="translated">MSB4057: 프로젝트에 "{0}" 대상이 없습니다.</target>
         <note>{StrBegin="MSB4057: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4057: 프로젝트에 "{0}" 대상이 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4057: Das Ziel "{0}" ist im Projekt nicht vorhanden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2023,7 +2023,7 @@
         <target state="translated">"{1}" 프로젝트에 "{0}" 대상을 빌드했습니다. - 실패</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}" 프로젝트에 "{0}" 대상을 빌드했습니다. - 실패</target>
+          <target state-qualifier="tm-suggestion">Erstellen des {0}-Ziels in Projekt {1} beendet - Fehler beim Erstellen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
@@ -2032,7 +2032,7 @@
         <target state="translated">"{1}" 프로젝트에 "{0}" 대상을 빌드했습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}" 프로젝트에 "{0}" 대상을 빌드했습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Erstellung des Ziels "{0}" im Projekt "{1}" ist abgeschlossen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2041,7 +2041,7 @@
         <target state="translated">{0}: (대상 ID:{1})</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0}: (대상 ID:{1})</target>
+          <target state-qualifier="tm-suggestion">{0}: (Ziel-ID:{1})</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2050,7 +2050,7 @@
         <target state="translated">MSB4058: "{0}" 대상에 출력 사양이 없습니다. 대상에서 입력을 선언한 경우 출력도 선언해야 합니다.</target>
         <note>{StrBegin="MSB4058: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4058: "{0}" 대상에 출력 사양이 없습니다. 대상에서 입력을 선언한 경우 출력도 선언해야 합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4058: Das {0}-Ziel enthält keine Ausgabespezifikation. Wenn ein Ziel Eingaben deklariert, muss es auch Ausgaben deklarieren.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2059,7 +2059,7 @@
         <target state="translated">MSB4168: "{1}" 형식의 "{0}" 항목은 "{2}" 식의 메타데이터 값을 정의하지 않습니다. 이 식은 대상 "{3}"의 대상 출력에 사용됩니다. 대상에서 변환 출력을 선언한 경우 변환의 모든 항목에는 변환의 메타데이터 값이 있어야 합니다.</target>
         <note>{StrBegin="MSB4168: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4168: "{1}" 형식의 "{0}" 항목은 "{2}" 식의 메타데이터 값을 정의하지 않습니다. 이 식은 대상 "{3}"의 대상 출력에 사용됩니다. 대상에서 변환 출력을 선언한 경우 변환의 모든 항목에는 변환의 메타데이터 값이 있어야 합니다.</target>
+          <target state-qualifier="leveraged-tm">MSB4168: Das Element "{0}" vom Typ "{1}" definiert keinen Wert für die Metadaten im Ausdruck "{2}". Dieser Ausdruck wird in der Zielausgabe für "{3}" verwendet. Wenn ein Ziel Ausgaben deklariert, bei denen es sich um Transformationen handelt, müssen alle Elemente in der Transformation einen Wert für die in der Transformation enthaltenen Metadaten aufweisen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="53" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2068,7 +2068,7 @@
         <target state="translated">대상 성능 요약:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">대상 성능 요약:</target>
+          <target state-qualifier="tm-suggestion">Leistungszusammenfassung für das Ziel:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2077,7 +2077,7 @@
         <target state="translated">조건이 잘못되어 "{0}" 대상을 건너뜁니다. ({1})이(가) ({2})(으)로 확인되었습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">조건이 잘못되어 "{0}" 대상을 건너뜁니다. ({1})이(가) ({2})(으)로 확인되었습니다.</target>
+          <target state-qualifier="tm-suggestion">Das Ziel "{0}" wurde übersprungen, da die Bedingung "false" war . ({1}) wurde als ({2}) ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2086,7 +2086,7 @@
         <target state="translated">"{1}" 프로젝트의 "{0}" 대상</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}" 프로젝트의 "{0}" 대상</target>
+          <target state-qualifier="tm-suggestion">{0}-Ziel in {1}-Projekt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2095,7 +2095,7 @@
         <target state="translated">{0} 대상:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0} 대상:</target>
+          <target state-qualifier="tm-suggestion">Ziel "{0}":</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2104,7 +2104,7 @@
         <target state="translated">"{1}" 파일의 "{0}" 대상:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}" 파일의 "{0}" 대상:</target>
+          <target state-qualifier="tm-suggestion">Ziel "{0}" in Datei "{1}":</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2113,7 +2113,7 @@
         <target state="translated">"{1}" 작업의 "{0}"이(가) "{2}"(으)로 설정되어 있으므로 빌드가 계속됩니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}" 작업의 "{0}"이(가) "{2}"(으)로 설정되어 있으므로 빌드가 계속됩니다.</target>
+          <target state-qualifier="tm-suggestion">Der Buildvorgang wird fortgesetzt, da {0} in der {1}-Aufgabe auf "{2}" festgelegt ist.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2122,7 +2122,7 @@
         <target state="translated">"{1}" 프로젝트의 {0} 대상:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}" 프로젝트의 {0} 대상:</target>
+          <target state-qualifier="tm-suggestion">Ziel "{0}" aus Projekt "{1}":</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2131,16 +2131,16 @@
         <target state="translated">"{2}" 프로젝트의 "{1}" 파일에 있는 "{0}" 대상:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{2}" 프로젝트의 "{1}" 파일에 있는 "{0}" 대상:</target>
+          <target state-qualifier="tm-suggestion">Ziel "{0}" in Datei "{1}" aus Projekt "{2}":</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="8" adjWordcount="2" curWordcount="2" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="TaskDeclarationOrUsageError">
         <source>MSB4060: The "{0}" task has been declared or used incorrectly, or failed during construction. Check the spelling of the task name and the assembly name.</source>
-        <target state="translated">MSB4060: "{0}" 작업이 잘못 선언 또는 사용되었거나, 생성 중에 실패했습니다. 작업 이름 및 어셈블리 이름의 철자를 확인하십시오.</target>
+        <target state="translated">MSB4060: "{0}" 작업이 잘못 선언 또는 사용되었거나, 생성 중에 실패했습니다. 작업 이름 및 어셈블리 이름의 철자를 확인하세요.</target>
         <note>{StrBegin="MSB4060: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4060: "{0}" 작업이 잘못 선언 또는 사용되었거나, 생성 중에 실패했습니다. 작업 이름 및 어셈블리 이름의 철자를 확인하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4060: Die {0}-Aufgabe wurde falsch deklariert, falsch verwendet oder konnte bei der Erstellung nicht ausgeführt werden. Überprüfen Sie die Schreibweise des Aufgaben- und des Assemblynamens.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="25" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2149,7 +2149,7 @@
         <target state="translated">MSB4077: "{0}" 작업이 LoadInSeparateAppDomain 특성으로 표시되었지만 MarshalByRefObject에서 파생되지 않습니다. 해당 작업이 MarshalByRefObject 또는 AppDomainIsolatedTask에서 파생되는지 확인하십시오.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4077: "{0}" 작업이 LoadInSeparateAppDomain 특성으로 표시되었지만 MarshalByRefObject에서 파생되지 않습니다. 해당 작업이 MarshalByRefObject 또는 AppDomainIsolatedTask에서 파생되는지 확인하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4077: Die Aufgabe "{0}" wurde mit dem LoadInSeparateAppDomain-Attribut markiert, ist jedoch nicht von MarshalByRefObject abgeleitet. Stellen Sie sicher, dass die Aufgabe von MarshalByRefObject oder AppDomainIsolatedTask abgeleitet wird.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2158,7 +2158,7 @@
         <target state="translated">"{0}" 작업을 실행했습니다. - 실패</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 작업이 실패했습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Ausführung von Task "{0}" wurde beendet – FEHLER.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2167,7 +2167,7 @@
         <target state="translated">"{0}" 작업을 실행했습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 작업을 실행했습니다.</target>
+          <target state-qualifier="tm-suggestion">Die Ausführung von Task "{0}" wurde beendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="4" adjWordcount="1" curWordcount="1" tmLabel="N''"</note>
       </trans-unit>
@@ -2176,7 +2176,7 @@
         <target state="translated">{0}(작업 ID:{1})</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{0}(작업 ID:{1})</target>
+          <target state-qualifier="tm-suggestion">{0} (Aufgaben-ID: {1})</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2185,7 +2185,7 @@
         <target state="translated">"{1}" 어셈블리에서 "{0}" 작업을 사용합니다.</target>
         <note>UE: This informational message helps users determine which assemblies their tasks were loaded from.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{1}" 어셈블리에서 "{0}" 작업을 사용합니다.</target>
+          <target state-qualifier="tm-suggestion">Die {0}-Aufgabe aus der {1}-Assembly wird verwendet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2194,17 +2194,17 @@
         <target state="translated">MSB4061: "{1}" 어셈블리에서 "{0}" 작업을 인스턴스화할 수 없습니다. {2}</target>
         <note>{StrBegin="MSB4061: "}LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4061: "{1}" 어셈블리에서 "{0}" 작업을 인스턴스화할 수 없습니다. {2}</target>
+          <target state-qualifier="tm-suggestion">MSB4061: Die {0}-Aufgabe konnte nicht aus der {1}-Assembly instanziiert werden. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureErrorInvalidCast">
         <source>MSB4127: The "{0}" task could not be instantiated from the assembly "{1}". Please verify the task assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</source>
-        <target state="translated">MSB4127: "{1}" 어셈블리에서 "{0}" 작업을 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 작업 어셈블리가 빌드되었는지, 호스트 애플리케이션에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하십시오. {2}</target>
+        <target state="translated">MSB4127: "{1}" 어셈블리에서 "{0}" 작업을 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 작업 어셈블리가 빌드되었는지, 호스트 애플리케이션에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하세요. {2}</target>
         <note>{StrBegin="MSB4127: "}UE: This message is a specialized version of the TaskInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4127: "{1}" 어셈블리에서 "{0}" 작업을 인스턴스화할 수 없습니다. 컴퓨터에 설치된 버전과 동일한 Microsoft.Build.Framework 어셈블리를 사용하여 작업 어셈블리가 빌드되었는지, 호스트 응용 프로그램에 Microsoft.Build.Framework에 대한 바인딩 리디렉션이 누락되지 않았는지 확인하십시오. {2}</target>
+          <target state-qualifier="leveraged-tm">MSB4127: Die "{0}"-Aufgabe konnte nicht aus der "{1}"-Assembly instanziiert werden. Überprüfen Sie, ob die Aufgabenassembly mit der gleichen Version der Microsoft.Build.Framework-Assembly erstellt wurde, die auf Ihrem Computer installiert ist, und dass Ihrer Hostanwendung kein BindingRedirect-Eintrag für Microsoft.Build.Framework fehlt. {2}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="49" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2215,7 +2215,7 @@
     invalid task declaration, disk error, etc. "{2}" contains a message explaining what happened.
     LOCALIZATION: "{2}" is a message from the CLR loader and is already localized. Also, &lt;UsingTask&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">: MSB4062는 "{0}" 작업 어셈블리에서 로드할 수 없습니다 {1}. {2} &lt; UsingTask &gt; 선언이 올바른지와 어셈블리와 모든 종속 요소를 사용할 수 있는지 확인 합니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4062: Die "{0}" Vorgang konnte nicht aus der Assembly geladen werden {1}. {2} Bestätigen &lt; UsingTask &gt; Erklärung richtig ist und die Assembly und die zugehörigen Dateien verfügbar sind.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="31" adjWordcount="26.35" curWordcount="26.35"</note>
       </trans-unit>
@@ -2224,7 +2224,7 @@
         <target state="translated">MSB4063: 해당 입력 매개 변수를 사용하여 "{0}" 작업을 초기화할 수 없습니다. {1}</target>
         <note>{StrBegin="MSB4063: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4063: 해당 입력 매개 변수를 사용하여 "{0}" 작업을 초기화할 수 없습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4063: Die "{0}"-Aufgabe konnte nicht mit ihren Eingabeparametern initialisiert werden. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2233,7 +2233,7 @@
         <target state="translated">작업 성능 요약:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">작업 성능 요약:</target>
+          <target state-qualifier="tm-suggestion">Leistungszusammenfassung für die Aufgabe:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2242,7 +2242,7 @@
         <target state="translated">조건이 잘못되어 "{0}" 작업을 건너뜁니다. ({1})이(가) ({2})(으)로 확인되었습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">조건이 잘못되어 "{0}" 작업을 건너뜁니다. ({1})이(가) ({2})(으)로 확인되었습니다.</target>
+          <target state-qualifier="tm-suggestion">Die {0}-Aufgabe wurde übersprungen, da die Bedingung "false" war . ({1}) wurde als ({2}) ausgewertet.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2251,7 +2251,7 @@
         <target state="translated">"{0}" 작업</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 작업</target>
+          <target state-qualifier="tm-suggestion">Task "{0}"</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2260,7 +2260,7 @@
         <target state="translated">경과 시간: {0}</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">경과 시간: {0}</target>
+          <target state-qualifier="tm-suggestion">Verstrichene Zeit {0}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="3" adjWordcount="0.75" curWordcount="0.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2269,7 +2269,7 @@
         <target state="translated">도구 버전 "{0}"(을)를 사용하여 빌드하고 있습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">도구 버전 "{0}"(을)를 사용하여 빌드하고 있습니다.</target>
+          <target state-qualifier="tm-suggestion">Erstellung mit der Toolsversion "{0}".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="5" adjWordcount="1.25" curWordcount="1.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2278,7 +2278,7 @@
         <target state="translated">프로젝트 파일에 ToolsVersion="{0}"이(가) 들어 있습니다. 이 도구 집합을 알 수 없거나 누락되었습니다. 이 도구 집합에 적합한 .NET Framework를 설치하면 이 문제를 해결할 수 있습니다. 프로젝트에 ToolsVersion="4.0"이 들어 있는 것으로 간주합니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">프로젝트 파일에 ToolsVersion="{0}"이(가) 들어 있습니다. 이 도구 집합을 알 수 없거나 누락되었습니다. 이 도구 집합에 적합한 .NET Framework를 설치하면 이 문제를 해결할 수 있습니다. 프로젝트에 ToolsVersion="4.0"이 들어 있는 것으로 간주합니다.</target>
+          <target state-qualifier="leveraged-tm">Die Projektdatei enthält ToolsVersion="{0}". Dieses Toolset ist nicht bekannt oder nicht vorhanden. Sie können das Problem möglicherweise beheben, indem Sie das entsprechende .NET Framework für dieses Toolset installieren. Das Projekt wird behandelt als enthielte es ToolsVersion="4.0".</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="34" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2287,7 +2287,7 @@
         <target state="translated">지연된 메시지</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">지연된 메시지</target>
+          <target state-qualifier="tm-suggestion">Zurückgestellte Meldungen</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2296,7 +2296,7 @@
         <target state="translated">ProjectStarted 이벤트와 연결되지 않은 일부 메시지가 표시되지 않았습니다. 이 메시지를 보려면 자세한 정도로 diagnostic을 사용하십시오.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">ProjectStarted 이벤트와 연결되지 않은 일부 메시지가 표시되지 않았습니다. 이 메시지를 보려면 자세한 정도로 diagnostic을 사용하십시오.</target>
+          <target state-qualifier="tm-suggestion">Einige Meldungen wurden nicht angezeigt, weil sie keinem ProjectStarted-Ereignis zugeordnet sind. Verwenden Sie den Ausführlichkeitsgrad "diagnostic", um diese Meldungen anzuzeigen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="21" adjWordcount="5.25" curWordcount="5.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2305,7 +2305,7 @@
         <target state="translated">MSB4090: "{0}" 조건의 {1} 위치에 예기치 않은 '{2}' 문자가 있습니다.</target>
         <note>{StrBegin="MSB4090: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4090: "{0}" 조건의 {1} 위치에 예기치 않은 '{2}' 문자가 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4090: Das unerwartete Zeichen {2} wurde an Position {1} in der {0}-Bedingung gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2314,7 +2314,7 @@
         <target state="translated">MSB4091: "{0}" 조건에 정의되지 않은 "{1}" 함수의 호출이 있습니다.</target>
         <note>{StrBegin="MSB4091: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4091: "{0}" 조건에 정의되지 않은 "{1}" 함수의 호출이 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4091: Aufruf zu einer undefinierten Funktion "{1}" in Bedingung "{0}" gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2323,7 +2323,7 @@
         <target state="translated">MSB4064: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 설정 가능한 public 인스턴스 속성인지 확인하세요.</target>
         <note>{StrBegin="MSB4064: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4064: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 설정 가능한 public 인스턴스 속성인지 확인하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4064: Der {0}-Parameter wird von der {1}-Aufgabe nicht unterstützt. Vergewissern Sie sich, dass der Parameter in der Aufgabe vorhanden ist und es sich um eine festlegbare öffentliche Instanzeigenschaft handelt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2332,7 +2332,7 @@
         <target state="translated">MSB4131: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 가져올 수 있는 public 인스턴스 속성인지 확인하세요.</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4131: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 가져올 수 있는 public 인스턴스 속성인지 확인하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4131: Der {0}-Parameter wird von der {1}-Aufgabe nicht unterstützt. Vergewissern Sie sich, dass der Parameter in der Aufgabe vorhanden ist und es sich um eine abrufbare öffentliche Instanzeigenschaft handelt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2341,7 +2341,7 @@
         <target state="translated">MSB4092: "{0}" 조건의 문자 위치 {2}에 예기치 않은 "{1}" 토큰이 있습니다.</target>
         <note>{StrBegin="MSB4092: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4092: "{0}" 조건의 문자 위치 {2}에 예기치 않은 "{1}" 토큰이 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4092: Ein unerwartetes Token "{1}" wurde an Zeichenposition "{2}" in Bedingung "{0}" gefunden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="14" adjWordcount="3.5" curWordcount="3.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2350,7 +2350,7 @@
         <target state="translated">MSB4065: "{1}" 작업에서 "{0}" 매개 변수를 출력용으로 표시하지 않았습니다.</target>
         <note>{StrBegin="MSB4065: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4065: "{1}" 작업에서 "{0}" 매개 변수를 출력용으로 표시하지 않았습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4065: Der {0}-Parameter ist nicht für die Ausgabe durch die {1}-Aufgabe markiert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2359,7 +2359,7 @@
         <target state="translated">MSB4066: &lt;{1}&gt; 요소의 "{0}" 특성을 인식할 수 없습니다.</target>
         <note>{StrBegin="MSB4066: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4066: 특성 "{0}" 요소에 &lt;{1}&gt;을 인식할 수 없습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4066: Das Attribut "{0}" im Element &lt;{1}&gt; wurde nicht erkannt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="10" adjWordcount="8.5" curWordcount="8.5"</note>
       </trans-unit>
@@ -2368,7 +2368,7 @@
         <target state="translated">MSB4067: &lt;{1}&gt; 요소 아래의 &lt;{0}&gt; 요소를 인식할 수 없습니다.</target>
         <note>{StrBegin="MSB4067: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4067: 요소 &lt;{0}&gt; 요소 &lt;{1}&gt;을 인식할 수 없습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4067: Das Element &lt;{0}&gt; unter Element &lt;{1}&gt; wurde nicht erkannt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
       </trans-unit>
@@ -2377,7 +2377,7 @@
         <target state="translated">MSB4068: &lt;{0}&gt; 요소를 인식할 수 없거나 요소가 이 컨텍스트에서 지원되지 않습니다.</target>
         <note>{StrBegin="MSB4068: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4068: 요소 &lt;{0}&gt;, 인식할 수 없음 또는이 컨텍스트에서 지원 되지 않습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4068: Das Element &lt;{0}&gt; ist unbekannt oder in diesem Kontext nicht unterstützt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="13" adjWordcount="11.05" curWordcount="11.05"</note>
       </trans-unit>
@@ -2386,7 +2386,7 @@
         <target state="translated">MSB4132: 도구 버전 "{0}"을(를) 인식할 수 없습니다.</target>
         <note>{StrBegin="MSB4132: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4132: 도구 버전 "{0}"을(를) 인식할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4132: Die Toolsversion "{0}" ist unbekannt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2395,7 +2395,7 @@
         <target state="translated">MSB4069: MSBuild에서는 "{2}" 작업의 "{1}" 매개 변수에 "{0}" 형식을 사용할 수 없습니다.</target>
         <note>{StrBegin="MSB4069: "}LOCALIZATION: "MSBuild" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4069: MSBuild에서는 "{2}" 작업의 "{1}" 매개 변수에 "{0}" 형식을 사용할 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4069: Der {0}-Typ des {1}-Parameters der {2}-Aufgabe wird von MSBuild nicht unterstützt.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2404,7 +2404,7 @@
         <target state="translated">MSB4072: &lt;{0}&gt; 요소는 "{1}" 특성 또는 "{2}" 특성 중 하나를 포함해야 합니다(둘 다 포함할 수 없음).</target>
         <note>{StrBegin="MSB4072: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4072: A &lt;{0}&gt; 요소 하나를 포함 해야 하면 "{1}" 특성 또는 "{2}" 특성 (만).</target>
+          <target state-qualifier="mt-suggestion">MSB4072: Ein &lt;{0}&gt;-Element muss entweder die "{1}" Attribut oder "{2}" Attribut (jedoch nicht beide).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="18" adjWordcount="15.3" curWordcount="15.3"</note>
       </trans-unit>
@@ -2413,7 +2413,7 @@
         <target state="translated">경고 {0}개</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">경고 {0}개</target>
+          <target state-qualifier="tm-suggestion">{0} Warnung(en)</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2422,7 +2422,7 @@
         <target state="translated">MSB4084: &lt;Choose&gt;에서 &lt;When&gt; 요소는 &lt;Otherwise&gt; 요소 다음에 올 수 없습니다.</target>
         <note>{StrBegin="MSB4084: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4084: A &lt; 때 &gt; 요소 &lt; 선택 &gt;에서 &lt; 그 &gt; 요소에 따르지 않을 수 있습니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4084: A &lt; &gt;-Element kein Element &lt; Otherwise &gt; &lt; auswählen &gt; folgen.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="16" adjWordcount="13.6" curWordcount="13.6"</note>
       </trans-unit>
@@ -2431,7 +2431,7 @@
         <target state="translated">대상 이름: "{0}" 프로젝트 이름: "{1}"</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">대상 이름: "{0}" 프로젝트 이름: "{1}"</target>
+          <target state-qualifier="tm-suggestion">Zielname: "{0}" Projektname: "{1}"</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="6" adjWordcount="1.5" curWordcount="1.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2440,7 +2440,7 @@
         <target state="translated">순환 추적:</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">순환 추적:</target>
+          <target state-qualifier="tm-suggestion">Schleifenablaufverfolgung:</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="2" adjWordcount="0.5" curWordcount="0.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2449,7 +2449,7 @@
         <target state="translated">MSB4150: ApplyParameter를 사용하기 전에 initialize 메서드를 사용하여 콘솔 로거를 초기화해야 합니다.</target>
         <note>{StrBegin="MSB4150: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4150: ApplyParameter를 사용하기 전에 initialize 메서드를 사용하여 콘솔 로거를 초기화해야 합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4150: Die Konsolenprotokollierung muss vor der Verwendung von ApplyParameter mithilfe der Initialisierungsmethode initialisiert werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="13" adjWordcount="3.25" curWordcount="3.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2458,7 +2458,7 @@
         <target state="translated">MSB4151: 프로젝트 "{0}", 대상 "{1}"을(를) 빌드하는 동안 오류가 발생했습니다. 자세한 정보는 innerException을 참조하십시오.</target>
         <note>{StrBegin="MSB4151: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4151: 프로젝트 "{0}", 대상 "{1}"을(를) 빌드하는 동안 오류가 발생했습니다. 자세한 정보는 innerException을 참조하십시오.</target>
+          <target state-qualifier="tm-suggestion">MSB4151: Fehler beim Erstellen von Projekt "{0}", Ziel "{1}". Ausführliche Informationen finden Sie in der innerException.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
       </trans-unit>
@@ -2467,7 +2467,7 @@
         <target state="translated">MSB4152: 자식 노드 "{0}"에서 오류가 발생했지만 부모 노드로 전달할 수 없습니다. {1}</target>
         <note>{StrBegin="MSB4152: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4152: 자식 노드 "{0}"에서 오류가 발생했지만 부모 노드로 전달할 수 없습니다. {1}</target>
+          <target state-qualifier="tm-suggestion">MSB4152: Fehler im untergeordneten Knoten "{0}", der nicht an den übergeordneten Knoten übergeben werden konnte. {1}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2476,7 +2476,7 @@
         <target state="translated">MSB4153: 이미 실행이 끝난 작업에 해당하는 비활성 IBuildEngine 인터페이스를 호출했습니다.</target>
         <note>{StrBegin="MSB4153: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4153: 이미 실행이 끝난 작업에 해당하는 비활성 IBuildEngine 인터페이스를 호출했습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4153: Eine inaktive IBuildEngine-Schnittstelle wird aufgerufen, der eine Aufgabe entspricht, deren Ausführung bereits abgeschlossen wurde.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="18" adjWordcount="4.5" curWordcount="4.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2485,7 +2485,7 @@
         <target state="translated">MSB4154: 전달 로거가 BuildFinished 이벤트를 전달하려고 합니다.</target>
         <note>{StrBegin="MSB4154: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4154: 전달 로거가 BuildFinished 이벤트를 전달하려고 합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4154: Eine weiterleitende Protokollierung versucht, das BuildFinished-Ereignis weiterzuleiten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2494,7 +2494,7 @@
         <target state="translated">MSB4155: 노드와 통신하는 동안 오류가 발생했습니다.</target>
         <note>{StrBegin="MSB4155: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4155: 노드와 통신하는 동안 오류가 발생했습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4155: Fehler bei der Kommunikation mit einem Knoten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2503,7 +2503,7 @@
         <target state="translated">MSB1021: 로거의 인스턴스를 만들 수 없습니다. {0}.</target>
         <note>{StrBegin="MSB1021: "}The error code for this message is duplicated from MSBuild.exe. </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB1021: 로거의 인스턴스를 만들 수 없습니다. {0}.</target>
+          <target state-qualifier="tm-suggestion">MSB1021: Eine Instanz der Protokollierung kann nicht erstellt werden - {0}.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2512,7 +2512,7 @@
         <target state="translated">MSB1020: {0} 로거를 찾을 수 없습니다. 다음을 수행하십시오. 1) 지정한 로거 이름이 로거 클래스 이름과 같은지 확인합니다. 2) 로거 클래스가 "public"이고 Microsoft.Build.Framework.ILogger 인터페이스를 구현하는지 확인합니다. 3) 로거 어셈블리의 경로가 올바른지 또는 지정한 어셈블리 이름만 사용하여 로거를 로드할 수 있는지 확인합니다.</target>
         <note>{StrBegin="MSB1020: "}The error code for this message is duplicated from MSBuild.exe.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB1020: {0} 로거를 찾을 수 없습니다. 다음을 수행하십시오. 1) 지정한 로거 이름이 로거 클래스 이름과 같은지 확인합니다. 2) 로거 클래스가 "public"이고 Microsoft.Build.Framework.ILogger 인터페이스를 구현하는지 확인합니다. 3) 로거 어셈블리의 경로가 올바른지 또는 지정한 어셈블리 이름만 사용하여 로거를 로드할 수 있는지 확인합니다.</target>
+          <target state-qualifier="leveraged-tm">MSB1020: Die Protokollierung {0} wurde nicht gefunden. Überprüfen Sie Folgendes: 1.) Der angegebene Name der Protokollierung ist mit dem Namen der Protokollierungsklasse identisch. 2.) Die Protokollierungsklasse ist "public" und implementiert die Microsoft.Build.Framework.ILogger-Schnittstelle. 3.) Der Pfad zur Protokollierungsassembly ist richtig, bzw. die Protokollierung kann alleine mithilfe des angegebenen Assemblynamens geladen werden.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="57" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2521,7 +2521,7 @@
         <target state="translated">MSB4156: 전달 로거가 BuildStarted 이벤트를 전달하려고 합니다.</target>
         <note>{StrBegin="MSB4156: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4156: 전달 로거가 BuildStarted 이벤트를 전달하려고 합니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4156: Eine weiterleitende Protokollierung versucht, das BuildStarted-Ereignis weiterzuleiten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2539,7 +2539,7 @@
         <target state="translated">"{0}"(기본 대상)({1})-&gt;</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">"{0}" (기본 대상) ({1})-&gt;</target>
+          <target state-qualifier="mt-suggestion">"{0}" (Standardziel) ({1}) -&gt;</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="5" adjWordcount="4.25" curWordcount="4.25"</note>
       </trans-unit>
@@ -2548,7 +2548,7 @@
         <target state="translated">{0} {1,5}</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">{0} 1,5}</target>
+          <target state-qualifier="mt-suggestion">{0} {1,5}</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="2" adjWordcount="1.7" curWordcount="1.7"</note>
       </trans-unit>
@@ -2557,7 +2557,7 @@
         <target state="translated">{1} 노드의 "{0}" 프로젝트({2} 대상)입니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{1} 노드의 "{0}" 프로젝트({2} 대상)입니다.</target>
+          <target state-qualifier="tm-suggestion">Projekt "{0}" auf Knoten "{1}", {2} Ziel(e).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2566,7 +2566,7 @@
         <target state="translated">{1} 노드의 "{0}" 프로젝트(기본 대상)입니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">{1} 노드의 "{0}" 프로젝트(기본 대상)입니다.</target>
+          <target state-qualifier="tm-suggestion">Projekt "{0}" auf Knoten "{1}" (Standardziele).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2575,7 +2575,7 @@
         <target state="translated">"{0}"({1}) 프로젝트가 {4} 노드에서 "{2}"({3})을(를) 빌드하고 있습니다({5} 대상).</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}"({1}) 프로젝트가 {4} 노드에서 "{2}"({3})을(를) 빌드하고 있습니다({5} 대상).</target>
+          <target state-qualifier="tm-suggestion">Das Projekt "{0}" ({1}) erstellt "{2}" ({3}) auf Knoten "{4}", {5} Ziel(e).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2584,7 +2584,7 @@
         <target state="translated">"{0}"({1}) 프로젝트가 {4} 노드에서 "{2}"({3})을(를) 빌드하고 있습니다(기본 대상).</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}"({1}) 프로젝트가 {4} 노드에서 "{2}"({3})을(를) 빌드하고 있습니다(기본 대상).</target>
+          <target state-qualifier="tm-suggestion">Das Projekt "{0}" ({1}) erstellt "{2}" ({3}) auf Knoten "{4}" (Standardziele).</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="12" adjWordcount="3" curWordcount="3" tmLabel="N''"</note>
       </trans-unit>
@@ -2593,7 +2593,7 @@
         <target state="translated">({0} 대상) -&gt; </target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">({0} 대상)-&gt;</target>
+          <target state-qualifier="mt-suggestion">({0} Ziel) -&gt;</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="3" adjWordcount="2.55" curWordcount="2.55"</note>
       </trans-unit>
@@ -2602,7 +2602,7 @@
         <target state="translated">MSB4157: 프로젝트 파일 배열에는 값이 적어도 하나는 있어야 합니다. </target>
         <note>{StrBegin="MSB4157: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="mt-suggestion">MSB4157: 프로젝트 파일의 배열 하나 이상의 값을 포함 해야 합니다.</target>
+          <target state-qualifier="mt-suggestion">MSB4157: Das Array der Projektdateien muss mindestens einen Wert enthalten.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="15" wordcount="13" adjWordcount="11.05" curWordcount="11.05"</note>
       </trans-unit>
@@ -2611,7 +2611,7 @@
         <target state="translated">MSB4158: {0} 요소의 프로젝트 파일 이름이 비어 있습니다.</target>
         <note>{StrBegin="MSB4158: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">MSB4158: {0} 요소의 프로젝트 파일 이름이 비어 있습니다.</target>
+          <target state-qualifier="tm-suggestion">MSB4158: Der Projektdateiname bei Element {0} ist leer.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="10" adjWordcount="2.5" curWordcount="2.5" tmLabel="N''"</note>
       </trans-unit>
@@ -2620,7 +2620,7 @@
         <target state="translated">값이 "{1}"인 "{0}" 속성을 다른 일괄 처리에서 재정의하고 있습니다. 속성은 이제 "{2}"입니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">값이 "{1}"인 "{0}" 속성을 다른 일괄 처리에서 재정의하고 있습니다. 속성은 이제 "{2}"입니다.</target>
+          <target state-qualifier="tm-suggestion">Die Eigenschaft "{0}" mit dem Wert "{1}" wird von einem anderen Batch überschrieben. Die Eigenschaft ist jetzt: "{2}"</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2629,7 +2629,7 @@
         <target state="translated">오류 정보는 내부 예외를 참조하십시오.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">오류 정보는 내부 예외를 참조하십시오.</target>
+          <target state-qualifier="tm-suggestion">Fehlerinformationen finden Sie in der internen Ausnahme.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="7" adjWordcount="1.75" curWordcount="1.75" tmLabel="N''"</note>
       </trans-unit>
@@ -2638,7 +2638,7 @@
         <target state="translated">"{0}" 이벤트 형식은 serialize할 수 있어야 합니다. 이 이벤트는 serialize할 수 없으므로 무시되었습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">"{0}" 이벤트 형식은 serialize할 수 있어야 합니다. 이 이벤트는 serialize할 수 없으므로 무시되었습니다.</target>
+          <target state-qualifier="tm-suggestion">Es wurde erwartet, dass der Typ "{0}" serialisierbar ist. Das Ereignis war nicht serialisierbar und wurde ignoriert.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="17" adjWordcount="4.25" curWordcount="4.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2647,7 +2647,7 @@
         <target state="translated">로그 파일 경로는 null이거나 비어 있을 수 없습니다.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">로그 파일 경로는 null이거나 비어 있을 수 없습니다.</target>
+          <target state-qualifier="tm-suggestion">Der Protokolldateipfad darf nicht NULL oder leer sein.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
       </trans-unit>
@@ -2656,7 +2656,7 @@
         <target state="translated">MSB4161: 현재 빌드를 실행하는 동안 "{0}" 프로젝트를 로드 및 언로드했습니다. 빌드하는 동안 프로젝트를 다시 로드하면 오류가 발생하거나 빌드 상태가 일치하지 않을 수 있습니다. "{0}" 프로젝트를 언로드하지 않거나 프로젝트를 언로드하기 전에 대상 "{1}"의 계산 결과를 캐시하십시오.</target>
         <note>{StrBegin="MSB4161: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="leveraged-tm">MSB4161: 현재 빌드를 실행하는 동안 "{0}" 프로젝트를 로드 및 언로드했습니다. 빌드하는 동안 프로젝트를 다시 로드하면 오류가 발생하거나 빌드 상태가 일치하지 않을 수 있습니다. "{0}" 프로젝트를 언로드하지 않거나 프로젝트를 언로드하기 전에 대상 "{1}"의 계산 결과를 캐시하십시오.</target>
+          <target state-qualifier="leveraged-tm">MSB4161: Das Projekt "{0}" wurde während der aktuellen Erstellung geladen und entladen. Das erneute Laden eines Projekts während der Erstellung kann zu Fehlern oder einem nicht konsistenten Buildzustand führen. Vermeiden Sie entweder das Entladen des Projekts "{0}", oder speichern Sie die Auswertungsergebnisse der Ziele "{1}" vor dem Entladen des Projekts im Cache.</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="101" wordcount="43" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
       </trans-unit>
@@ -2665,7 +2665,7 @@
         <target state="translated">[기본값]</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
-          <target state-qualifier="tm-suggestion">[기본값]</target>
+          <target state-qualifier="tm-suggestion">[Standard]</target>
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="1" adjWordcount="0.25" curWordcount="0.25" tmLabel="N''"</note>
       </trans-unit>

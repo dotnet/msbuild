@@ -2313,6 +2313,10 @@ namespace Microsoft.Build.Evaluation
                                 rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                             }
 
+                            // Normalize the path to remove elements like "..".
+                            // Otherwise we run the risk of returning two or more different paths that represent the
+                            // same directory.
+                            rootedPath = FileUtilities.NormalizePath(rootedPath);
                             directoryName = Path.GetDirectoryName(rootedPath);
                         }
                         catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
