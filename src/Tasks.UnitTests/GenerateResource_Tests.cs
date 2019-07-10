@@ -432,6 +432,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             _output.WriteLine("Touch one input");
             File.SetLastWriteTime(firstResx, DateTime.Now);
 
+            // Increasing the space between the last write and task execution due to precision on file time
+            System.Threading.Thread.Sleep(1000);
+
             Utilities.ExecuteTask(t2);
 
             _output.WriteLine("Check only one output was updated");
