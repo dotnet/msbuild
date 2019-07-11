@@ -216,6 +216,72 @@ elementFormDefault="qualified">
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="IncludeAssets" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_IncludeAssets" _locComment="" -->Assets to include from this reference
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ExcludeAssets" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_ExcludeAssets" _locComment="" -->Assets to exclude from this reference
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="PrivateAssets" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_PrivateAssets" _locComment="" -->Assets that are private in this reference
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="FrameworkReference" substitutionGroup="msb:Item">
+    <xs:annotation>
+      <xs:documentation>
+        <!-- _locID_text="FrameworkReference" _locComment="" -->Reference to a shared framework.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="msb:SimpleItemType">
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:choice>
+              <xs:element name="IsTrimmable">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="FrameworkReference_IsTrimmable" _locComment="" -->Controls whether the runtime assets of this shared framework can be trimmed by the IL Linker (if PublishTrimmed is true).
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TargetLatestRuntimePatch">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="FrameworkReference_TargetLatestRuntimePatch" _locComment="" -->Controls whether the app will target the latest patch of the runtime.  Defaults to true for self-contained apps, false otherwise.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:choice>
+          </xs:sequence>
+          <xs:attribute name="IsTrimmable" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="FrameworkReference_Attribute_IsTrimmable" _locComment="" -->Controls whether the runtime assets of this shared framework can be trimmed by the IL Linker (if PublishTrimmed is true).
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="TargetLatestRuntimePatch" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="FrameworkReference_Attribute_TargetLatestRuntimePatch" _locComment="" -->Controls whether the app will target the latest patch of the runtime.  Defaults to true for self-contained apps, false otherwise.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -1733,6 +1799,90 @@ elementFormDefault="qualified">
     <xs:element name="WebPage" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Win32ResourceFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="WholeProgramOptimization" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="TieredCompilation" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="TieredCompilation" _locComment="" -->Indicates whether the runtime should enable tiered JIT compilation.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ServerGarbageCollection" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ServerGarbageCollection" _locComment="" -->Indicates whether the runtime should enable the server garbage collection mode.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="UserSecretsId" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UserSecretsId" _locComment="" -->The ID that will be used to locate the file storing secret configuration values for this project at development time.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <!-- ======================== RAZOR PROPERTIES ======================== -->
+    <xs:element name="RazorCompileOnBuild" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RazorCompileOnBuild" _locComment="" -->Indicates whether Razor files should be compiled at build time.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="RazorCompileOnPublish" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RazorCompileOnPublish" _locComment="" -->Indicates whether Razor files should be compiled at publish time.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="UseRazorBuildServer" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UseRazorBuildServer" _locComment="" -->Indicates whether Razor code generation should use a persistent build server process.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="RazorOutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RazorOutputPath" _locComment="" -->Directory for Razor output.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultRazorGenerateItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultRazorGenerateItems" _locComment="" -->Set to true to automatically include Razor (.cshtml) files in @(RazorGenerate) from @(Content).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultContentItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultContentItems" _locComment="" -->Set to true to automatically include certain file types, such as .cshtml files, as content in the project. When referenced via Microsoft.NET.Sdk.Web, this additionally includes all files under wwwroot, and any config files.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultRazorComponentItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultRazorComponentItems" _locComment="" -->Set to true to automatically include Razor (.razor) files in @(RazorComponent) from @(Content).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="CopyRazorGenerateFilesToPublishDirectory" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="CopyRazorGenerateFilesToPublishDirectory" _locComment="" -->Set to true to copy RazorGenerate items (.cshtml) to the publish directory. Typically Razor files are not needed for a published application if they participate in compilation at build-time or publish-time. By default, the Razor SDK will suppress the copying of RazorGenerate items to the publish directory.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="CopyRefAssembliesToPublishDirectory" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="CopyRefAssembliesToPublishDirectory" _locComment="" -->Set to true to copy reference assembly items to the publish directory. Typically reference assemblies are not needed for a published application if Razor compilation occurs at build-time or publish-time. By default, the Razor SDK will suppress the copying of reference assemblies to the publish directory.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="IncludeRazorContentInPack" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="IncludeRazorContentInPack" _locComment="" -->Configures whether all Razor content items (.cshtml files) will be marked to be included in the produced NuGet package as content. All Content items are included in a NuGet package as content files. This setting can be used to control this behavior for Razor content items.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="RazorTargetName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RazorTargetName" _locComment="" -->File name (without extension) of the assembly produced by Razor.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EmbedRazorGenerateSources" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EmbedRazorGenerateSources" _locComment="" -->Configures whether all of the @(RazorGenerate) items will be added as embedded files to the produced assembly. When true, everything in @(RazorGenerate) will be added to @(RazorEmbeddedFiles) and passed to CSC.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <!-- ======================== gRPC properties ======================== -->
+    <xs:element name="DisableProtobufDesignTimeBuild" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="DisableProtobufDesignTimeBuild" _locComment="" -->Indicates whether Design Time Build should be disabled for referenced @(Protobuf) files.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
     <!-- ======================== DOTNET PACK PROPERTIES =====================================-->
     <xs:element name="AssemblyTitle" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1843,6 +1993,54 @@ elementFormDefault="qualified">
     <xs:element name="VersionSuffix" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="VersionSuffix" _locComment="" -->When Version is not specified, VersionSuffix represents the second fragment of the version string (e.g. beta). The syntax is VersionPrefix[-VersionSuffix].</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="RestoreSources" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="RestoreSources" _locComment="" -->The feeds that NuGet will use for restoring packages for this project.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageLicenseExpression" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageLicenseExpression" _locComment="" -->The project license's SPDX identifier. Only OSI and FSF approved licenses can use an identifier. Other licenses should use PackageLicenseFile.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageLicenseFile" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageLicenseFile" _locComment="" -->A path to the package's license file. Should only be used when the package doesn't use an OSI or FSF approved license.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageType" _locComment="" -->Indicates what the intended package use is, e.g. .NET CLI global tool, standard dependency, etc.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+
+    <!-- ======================== Publish properties =====================================-->
+
+    <xs:element name="PublishReadyToRun" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PublishReadyToRun" _locComment="" -->Indicates whether the project should produce ReadyToRun images during publish.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PublishSingleFile" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PublishSingleFile" _locComment="" -->Indicates whether the project should produce a self-extracting executable during publish.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PublishTrimmed" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PublishTrimmed" _locComment="" -->Indicates whether the project should produce trimmed assembly images during publish.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TrimmerRootAssembly" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TrimmerRootAssembly" _locComment="" -->Indicates to the linker to explicitly keep an assembly by adding it to your csproj (use the assembly name without extension).</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TrimmerRootDescriptor" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->Gives the linker a more specific list of types/methods, etc. to include. Path to an xml file.</xs:documentation>
       </xs:annotation>
     </xs:element>
 

@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests
             Project project = CreateInMemoryProject(projectContents, logger);
 
             bool success = project.Build(logger);
-            Assert.False(success); // "Build succeeded, but shouldn't have.  See Standard Out tab for details"
+            Assert.False(success); // "Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details"
         }
 
         /// <summary>
@@ -910,48 +910,27 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectFileRelativePath"></param>
         /// <returns></returns>
-        internal static MockLogger BuildTempProjectFileExpectSuccess(string projectFileRelativePath)
+        internal static void BuildTempProjectFileExpectSuccess(string projectFileRelativePath, MockLogger logger)
         {
-            return BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null);
+            BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null, logger);
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build does not succeed.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
+        internal static void BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties, MockLogger logger)
         {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
-
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
-
-            return logger;
+            BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger)
+                .ShouldBeTrue("Build failed.  See test output (Attachments in Azure Pipelines) for details");
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build succeeds.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileExpectFailure(string projectFileRelativePath)
+        internal static void BuildTempProjectFileExpectFailure(string projectFileRelativePath, MockLogger logger)
         {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger);
-
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
-
-            return logger;
-        }
-
-        /// <summary>
-        /// Builds a project file from disk, and asserts if the build succeeds.
-        /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectFailure(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
-        {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
-
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
-
-            return logger;
+            BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger)
+                .ShouldBeFalse("Build unexpectedly succeeded.  See test output (Attachments in Azure Pipelines) for details");
         }
 
         /// <summary>
