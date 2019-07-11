@@ -3477,11 +3477,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             bool success = t.Execute();
             Assert.True(success);
 
-            if (t.OutputResources != null && t.OutputResources[0] != null)
+            if (t.OutputResources != null && t.OutputResources[0] != null && t.Sources[0] != null)
             {
-                DateTime resourcesLastModified = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-                if (t.Sources[0] != null)
-                    Assert.True(resourcesLastModified >= File.GetLastWriteTime(t.Sources[0].ItemSpec));
+                File.GetLastWriteTime(t.OutputResources[0].ItemSpec).ShouldBeGreaterThanOrEqualTo(File.GetLastWriteTime(t.Sources[0].ItemSpec), $"we're talking here about {t.OutputResources[0].ItemSpec} and {t.Sources[0].ItemSpec}");
             }
         }
 
