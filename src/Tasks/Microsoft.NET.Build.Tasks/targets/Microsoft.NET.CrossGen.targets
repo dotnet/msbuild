@@ -269,7 +269,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <MSBuild Projects="$(MSBuildProjectFullPath)"
                  Targets="Restore"
-                 Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
+                 Properties="RuntimeIdentifiers=$(RuntimeIdentifier);
+                             RestoreGraphProjectInput=$(MSBuildProjectFullPath);
                              RestoreOutputPath=$(_CrossProjFileDir);
                              StorePackageName=$(MicrosoftNETPlatformLibrary);
                              StorePackageVersion=%(PackageReferenceForCrossGen.Version);"/>
