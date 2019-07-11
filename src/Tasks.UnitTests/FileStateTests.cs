@@ -50,10 +50,8 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() => { var time = state.LastWriteTime; });
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BadTooLongLastWriteTime()
         {
             Helpers.VerifyAssertThrowsSameWay(

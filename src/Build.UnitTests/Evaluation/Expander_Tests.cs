@@ -589,9 +589,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogContains("[foo;bar]");
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Cannot fail on path too long with Unix"
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -875,9 +874,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -938,9 +936,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1001,7 +998,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
@@ -1058,9 +1055,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4248");
         }
 
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void PathTooLongInDirectMetadata()
         {
             var logger = Helpers.BuildProjectUsingBuildManagerExpectResult(
