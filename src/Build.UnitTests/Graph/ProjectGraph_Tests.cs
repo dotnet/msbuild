@@ -21,7 +21,6 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Experimental.Graph.UnitTests
 {
-    [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
     public class ProjectGraphTests : IDisposable
     {
         private TestEnvironment _env;
