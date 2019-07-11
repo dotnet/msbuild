@@ -47,7 +47,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Lock object to guard access to backing collection.
         /// </summary>
-        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
         /// <summary>
         /// Creates empty dictionary
