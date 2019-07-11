@@ -259,6 +259,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PackageReference Remove="@(_PackageReferenceToRemove)" />
 
       <PackageReference Include="@(_PackageReferenceToAdd)" />
+
+      <!-- Clear items for other targets to use -->
+      <_PackageReferenceToAdd Remove="@(_PackageReferenceToAdd)" />
+
     </ItemGroup>
     
     <!-- If any implicit package references were overridden, then don't check that RuntimeFrameworkVersion matches the package version -->
