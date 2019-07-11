@@ -4067,7 +4067,6 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
         public void GraphBuildInvalid()
         {
             string project1 = _env.CreateFile(".proj").Path;
