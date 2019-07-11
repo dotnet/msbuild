@@ -53,6 +53,7 @@
     <RemoveDir Directories="$(NuGetPackageRoot)$(ToolCommandName)\$(PackageVersion)" />
 
     <Exec Command="dotnet new tool-manifest"
+      IgnoreStandardErrorWarningFormat="true"
       WorkingDirectory="$(TestLocalToolFolder)"
       EnvironmentVariables="DOTNET_CLI_HOME=$(DOTNET_CLI_HOME)"/>
     
