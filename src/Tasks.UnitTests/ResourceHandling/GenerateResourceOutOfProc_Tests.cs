@@ -2409,7 +2409,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                     }
                 ");
 
-            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("lib1.csproj");
+            MockLogger logger = new MockLogger(_output);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("lib1.csproj", logger);
 
             string p2pReference = Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\debug\lib1.dll");
             Assert.True(File.Exists(p2pReference)); // "lib1.dll doesn't exist."
@@ -2594,7 +2595,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                     }
                 ");
 
-            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("ClassLibrary20.csproj");
+            MockLogger logger = new MockLogger(_output);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("ClassLibrary20.csproj", logger);
 
             // -------------------------------------------------------------------------------
             // Done producing an assembly on disk.
