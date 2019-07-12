@@ -53,6 +53,10 @@ namespace Microsoft.DotNet.Tools.Run
                 {
                     return 1;
                 }
+
+                // Ignore Ctrl-C for the remainder of the command's execution
+                Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
+
                 return targetCommand.Execute().ExitCode;
             }
             catch (InvalidProjectFileException e)
