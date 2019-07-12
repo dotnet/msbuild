@@ -163,8 +163,8 @@
     </ItemGroup>
 
     <PropertyGroup>
-      <MicrosoftNETCoreAppLatestVersion1_0 Condition="'$(MicrosoftNETCoreAppLatestVersion1_0)' == ''">1.0.15</MicrosoftNETCoreAppLatestVersion1_0>
-      <MicrosoftNETCoreAppLatestVersion1_1 Condition="'$(MicrosoftNETCoreAppLatestVersion1_1)' == ''">1.1.12</MicrosoftNETCoreAppLatestVersion1_1>
+      <MicrosoftNETCoreAppLatestVersion1_0 Condition="'$(MicrosoftNETCoreAppLatestVersion1_0)' == ''">1.0.16</MicrosoftNETCoreAppLatestVersion1_0>
+      <MicrosoftNETCoreAppLatestVersion1_1 Condition="'$(MicrosoftNETCoreAppLatestVersion1_1)' == ''">1.1.13</MicrosoftNETCoreAppLatestVersion1_1>
       <MicrosoftNETCoreAppLatestVersion2_0 Condition="'$(MicrosoftNETCoreAppLatestVersion2_0)' == ''">2.0.9</MicrosoftNETCoreAppLatestVersion2_0>
     </PropertyGroup>
 
