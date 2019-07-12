@@ -24,6 +24,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -111,6 +112,11 @@ namespace Microsoft.Build.BackEnd
         /// Flag indicating whether this request builder has been zombied by a cancellation request.
         /// </summary>
         private bool _isZombie = false;
+
+        private readonly PrintLineDebugger debugger = PrintLineDebugger.CreateWithFallBackWriter(
+            new PrintLineDebuggerWriters.IdBasedFilesWriter(PrintLineDebuggerWriters.ArtifactsLogDirectory).Writer,
+            "RequestBuilder",
+            true);
 
         /// <summary>
         /// Creates a new request builder.
@@ -1226,6 +1232,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void RestoreOperatingEnvironment()
         {
+            // logic cloned in Microsoft.Build.BackEnd.InProcNode.HandleShutdown
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
                 ErrorUtilities.VerifyThrow(_requestEntry.RequestConfiguration.SavedCurrentDirectory != null, "Current directory not previously saved.");
@@ -1271,9 +1278,13 @@ namespace Microsoft.Build.BackEnd
                 // If the environment doesn't have the variable set, or if its value differs from what we have saved, set it
                 // to the saved value.  Doing the comparison before setting is faster than unconditionally setting it using
                 // the API.
-                string value;
-                if (!currentEnvironment.TryGetValue(entry.Key, out value) || !String.Equals(entry.Value, value, StringComparison.Ordinal))
+                if (!currentEnvironment.TryGetValue(entry.Key, out var currentValue) || !string.Equals(entry.Value, currentValue, StringComparison.Ordinal))
                 {
+                    if (entry.Key.Equals("BUILD_REQUESTEDFOREMAIL"))
+                    {
+                        debugger.Log($"BUILD_REQUESTEDFOREMAIL was set to [{entry.Value ?? "null"}]");
+                    }
+
                     Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                 }
             }

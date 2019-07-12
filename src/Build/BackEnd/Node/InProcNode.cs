@@ -13,6 +13,7 @@ using Microsoft.Build.Shared;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -95,6 +96,11 @@ namespace Microsoft.Build.BackEnd
         /// Handler for request completed events.
         /// </summary>
         private readonly RequestCompleteDelegate _requestCompleteEventHandler;
+
+        private readonly PrintLineDebugger debugger = PrintLineDebugger.CreateWithFallBackWriter(
+            new PrintLineDebuggerWriters.IdBasedFilesWriter(PrintLineDebuggerWriters.ArtifactsLogDirectory).Writer,
+            "InProcNode",
+            true);
 
         /// <summary>
         /// Constructor.
@@ -318,13 +324,16 @@ namespace Microsoft.Build.BackEnd
                 ((IBuildComponent)objectCache).ShutdownComponent();
             }
 
+            // logic cloned in Microsoft.Build.BackEnd.RequestBuilder.RestoreOperatingEnvironment
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
                 // Restore the original current directory.
                 NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
 
                 // Restore the original environment.
-                foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
+                var currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+
+                foreach (KeyValuePair<string, string> entry in currentEnvironment)
                 {
                     if (!_savedEnvironment.ContainsKey(entry.Key))
                     {
@@ -334,7 +343,15 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (KeyValuePair<string, string> entry in _savedEnvironment)
                 {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    if (!currentEnvironment.TryGetValue(entry.Key, out var currentValue) || !string.Equals(entry.Value, currentValue, StringComparison.Ordinal))
+                    {
+                        if (entry.Key.Equals("BUILD_REQUESTEDFOREMAIL"))
+                        {
+                            debugger.Log($"BUILD_REQUESTEDFOREMAIL was set to [{entry.Value ?? "null"}]");
+                        }
+
+                        Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    }
                 }
             }
 
