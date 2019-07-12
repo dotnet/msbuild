@@ -355,6 +355,7 @@ namespace Microsoft.Build.UnitTests
                 Path.Combine("bug'533'369", "Sub;Dir", "ConsoleApplication1", "ConsoleApplication1.csproj"), @"
 
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                  <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                   <PropertyGroup>
                     <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                     <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
