@@ -146,7 +146,7 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         internal void WaitForAllWork()
         {
-            while (Interlocked.Read(ref _pendingCount) > 0 && !_cancellationToken.IsCancellationRequested)
+            while (!_cancellationToken.IsCancellationRequested && Interlocked.Read(ref _pendingCount) > 0)
             {
                 ExecuteWorkItem();
             }
