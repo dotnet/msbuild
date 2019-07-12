@@ -245,9 +245,7 @@ namespace Microsoft.Build.Experimental.Graph
                 ParseProject(projectToEvaluate);
             }
 
-            _graphWorkSet.WaitForAllWork();
-            _graphWorkSet.Complete();
-            _graphWorkSet.WaitForCompletion();
+            _graphWorkSet.WaitForAllWorkAndComplete();
 
             return _graphWorkSet.CompletedWork;
         }

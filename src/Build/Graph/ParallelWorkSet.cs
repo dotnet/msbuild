@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -118,38 +118,25 @@ namespace Microsoft.Build.Experimental.Graph
         }
 
         /// <summary>
-        /// Marks the work set as completed.
+        /// Assists processing items until all the items added to the queue are processed, completes the work set, and
+        /// propagates any exceptions thrown by workers.
         /// </summary>
-        internal void Complete()
+        internal void WaitForAllWorkAndComplete()
         {
             if (IsCompleted)
             {
                 return;
+            }
+            while (!_cancellationToken.IsCancellationRequested && Interlocked.Read(ref _pendingCount) > 0)
+            {
+                ExecuteWorkItem();
             }
 
             IsCompleted = true;
 
             // Release one thread that will release all the threads when all the elements are processed.
             _semaphore.Release();
-        }
-
-        /// <summary>
-        /// Waits until <see cref="Complete"/> method is called and all work items added to the queue are processed.
-        /// </summary>
-        internal void WaitForCompletion()
-        {
             Task.WhenAll(_tasks.ToArray()).GetAwaiter().GetResult();
-        }
-
-        /// <summary>
-        /// Assists processing items until all the items added to the queue are processed.
-        /// </summary>
-        internal void WaitForAllWork()
-        {
-            while (!_cancellationToken.IsCancellationRequested && Interlocked.Read(ref _pendingCount) > 0)
-            {
-                ExecuteWorkItem();
-            }
         }
 
         private Task CreateProcessorItemTask()
