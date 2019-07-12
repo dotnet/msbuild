@@ -1787,8 +1787,8 @@ namespace Microsoft.Build.CommandLine
                                 // ignore leading whitespace on each line
                                 string responseFileLine = responseFileContents.ReadLine().TrimStart();
 
-                                // skip comment lines beginning with #
-                                if (!responseFileLine.StartsWith("#", StringComparison.Ordinal))
+                                // Check to see if we should skip the line
+                                if (!SkipResponseFileLine(ref responseFileLine))
                                 {
                                     // Allow special case to support a path relative to the .rsp file being processed.
                                     responseFileLine = Regex.Replace(responseFileLine, responseFilePathReplacement,
@@ -1820,6 +1820,44 @@ namespace Microsoft.Build.CommandLine
             {
                 commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e);
             }
+        }
+
+        /// <summary>
+        /// Determine if the response file line should be skipped. Lines starting with # should be skipped, except if:
+        ///  - MSBuild is version 16.300 or later
+        ///  - The line starts with a version which is less than the current version.
+        ///     Example: Running MSBuild 16.300, "#v16.300 ..." will be included but "#v16.700 ..." will not.
+        /// </summary>
+        /// <param name="responseFileLine">Response file line. Passed by ref in case it needs to be updated (trimmed version out). </param>
+        /// <returns>True when the line should be skipped. </returns>
+        private static bool SkipResponseFileLine(ref string responseFileLine)
+        {
+            // If it doesn't start with # we should not skip it.
+            if (!responseFileLine.StartsWith("#", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            // Match "#v16.0 " -> 16.0
+            var match = Regex.Match(responseFileLine, @"^#v(\d+\.\d+) ");
+
+            // If we don't have a version match, skip the file since it started with a #
+            if (!match.Success)
+            {
+                return true;
+            }
+
+            // We have a version in the comment, make sure it's less than or equal to the current version.
+            if (Version.TryParse(match.Groups[1].Value, out Version ver))
+            {
+                if (ver.Major <= ProjectCollection.Version.Major && ver.Minor <= ProjectCollection.Version.Minor)
+                {
+                    responseFileLine = responseFileLine.Substring(2 + match.Groups[1].Value.Length + 1);
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

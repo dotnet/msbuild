@@ -1207,7 +1207,64 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-#region IgnoreProjectExtensionTests
+        /// <summary>
+        /// Make sure that prior versions of MSBuild specified in a response file line are processed.
+        /// </summary>
+        /// <param name="version">Version to check</param>
+        [Theory]
+        [InlineData("1.0")]
+        [InlineData("2.0")]
+        [InlineData("16.0")]
+        [InlineData("16.1")]
+        [InlineData("16.300")]
+        public void ResponseFileSupportsVersionedLines(string version)
+        {
+            using (var env = UnitTests.TestEnvironment.Create())
+            {
+                var content = ObjectModelHelpers.CleanupFileContents(
+                    "<Project><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+
+                var directory = env.CreateFolder();
+                directory.CreateFile("Directory.Build.rsp", $@"#v{version} /p:A=%MSBuildThisFileDirectory%");
+                var projectPath = directory.CreateFile("my.proj", content).Path;
+
+                var msbuildParameters = "\"" + projectPath + "\"";
+
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                successfulExit.ShouldBeTrue();
+
+                output.ShouldContain($"[A={directory.Path}{Path.DirectorySeparatorChar}]");
+            }
+        }
+
+        /// <summary>
+        /// Ensure that a line in a response file with a future MSBuild version specified is ignored.
+        /// </summary>
+        [Theory]
+        [InlineData("#16")]
+        [InlineData("#v99.9")]
+        [InlineData("# comment #v16.1")]
+        public void ResponseFileRejectsFutureOrInvalidVersions(string prefix)
+        {
+            using (var env = UnitTests.TestEnvironment.Create())
+            {
+                var content = ObjectModelHelpers.CleanupFileContents(
+                    "<Project><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+
+                var directory = env.CreateFolder();
+                directory.CreateFile("Directory.Build.rsp", $"{prefix} /p:A=%MSBuildThisFileDirectory%");
+                var projectPath = directory.CreateFile("my.proj", content).Path;
+
+                var msbuildParameters = "\"" + projectPath + "\"";
+
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                successfulExit.ShouldBeTrue();
+
+                output.ShouldNotContain($"[A={directory.Path}{Path.DirectorySeparatorChar}]");
+            }
+        }
+
+        #region IgnoreProjectExtensionTests
 
         /// <summary>
         /// Test the case where the extension is a valid extension but is not a project
