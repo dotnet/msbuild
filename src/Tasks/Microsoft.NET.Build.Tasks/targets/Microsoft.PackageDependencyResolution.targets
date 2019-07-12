@@ -231,11 +231,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ExpectedPlatformPackages Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.AspNetCore.All'" />
     </ItemGroup>
 
-    <PropertyGroup>
-      <!-- Design time builds set this property to "ErrorAndContinue" -->
-      <ContinueOnError Condition="'$(ContinueOnError)' == ''">false</ContinueOnError>
-    </PropertyGroup>
-
     <ResolvePackageAssets 
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectAssetsCacheFile="$(ProjectAssetsCacheFile)"

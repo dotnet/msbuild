@@ -281,11 +281,6 @@ Copyright (c) .NET Foundation. All rights reserved.
          compilation errors for every API that is used in the project.  Amidst all the compile errors, it would
          be easy to miss the duplicate items error which is the real source of the problem. -->
 
-    <PropertyGroup>
-      <!-- Design time builds set this property to "ErrorAndContinue" -->
-      <ContinueOnError Condition="'$(ContinueOnError)' == ''">false</ContinueOnError>
-    </PropertyGroup>
-
     <CheckForDuplicateItems
       Items="@(Compile)"
       ItemName="Compile"
