@@ -13,6 +13,7 @@ using Microsoft.Build.Shared;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -95,6 +96,11 @@ namespace Microsoft.Build.BackEnd
         /// Handler for request completed events.
         /// </summary>
         private readonly RequestCompleteDelegate _requestCompleteEventHandler;
+
+        private readonly PrintLineDebugger debugger = PrintLineDebugger.CreateWithFallBackWriter(
+            new PrintLineDebuggerWriters.IdBasedFilesWriter(PrintLineDebuggerWriters.ArtifactsLogDirectory).Writer,
+            "InProcNode",
+            true);
 
         /// <summary>
         /// Constructor.
@@ -339,6 +345,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!currentEnvironment.TryGetValue(entry.Key, out var currentValue) || !string.Equals(entry.Value, currentValue, StringComparison.Ordinal))
                     {
+                        if (entry.Key.Equals("BUILD_REQUESTEDFOREMAIL"))
+                        {
+                            debugger.Log($"BUILD_REQUESTEDFOREMAIL was set to [{entry.Value ?? "null"}]");
+                        }
+
                         Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                     }
                 }

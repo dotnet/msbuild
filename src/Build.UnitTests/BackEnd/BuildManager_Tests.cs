@@ -21,6 +21,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Experimental.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -3242,6 +3243,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 </Project>
 ");
+
+            _output.WriteLine(PrintLineDebuggerWriters.ArtifactsLogDirectory);
 
             string fileName = _env.CreateFile(".proj").Path;
             File.WriteAllText(fileName, contents);

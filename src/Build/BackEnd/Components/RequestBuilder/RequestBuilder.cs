@@ -24,6 +24,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -111,6 +112,11 @@ namespace Microsoft.Build.BackEnd
         /// Flag indicating whether this request builder has been zombied by a cancellation request.
         /// </summary>
         private bool _isZombie = false;
+
+        private readonly PrintLineDebugger debugger = PrintLineDebugger.CreateWithFallBackWriter(
+            new PrintLineDebuggerWriters.IdBasedFilesWriter(PrintLineDebuggerWriters.ArtifactsLogDirectory).Writer,
+            "RequestBuilder",
+            true);
 
         /// <summary>
         /// Creates a new request builder.
@@ -1274,6 +1280,11 @@ namespace Microsoft.Build.BackEnd
                 // the API.
                 if (!currentEnvironment.TryGetValue(entry.Key, out var currentValue) || !string.Equals(entry.Value, currentValue, StringComparison.Ordinal))
                 {
+                    if (entry.Key.Equals("BUILD_REQUESTEDFOREMAIL"))
+                    {
+                        debugger.Log($"BUILD_REQUESTEDFOREMAIL was set to [{entry.Value ?? "null"}]");
+                    }
+
                     Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                 }
             }
