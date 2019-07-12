@@ -75,10 +75,23 @@ namespace Microsoft.Build.Shared.Debugging
 
                 var logIndex = executingAssembly.IndexOf(binPart, StringComparison.Ordinal);
 
+                ErrorUtilities.VerifyThrow(logIndex > 0, "Assume msbuild dlls are under bin.");
+
                 var artifactsPart = executingAssembly.Substring(0, logIndex);
-                return logIndex < 0
-                    ? null
-                    : Path.Combine(artifactsPart, "log", "Debug");
+
+                var path = Path.Combine(
+                    artifactsPart,
+                    "log",
+#if DEBUG
+                    "Debug"
+#else
+                    "Release"
+#endif
+                    );
+
+                ErrorUtilities.VerifyThrowDirectoryExists(path);
+
+                return path;
             });
 
         public static string ArtifactsLogDirectory => _artifactsLogs.Value;
