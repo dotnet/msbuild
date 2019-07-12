@@ -31,12 +31,6 @@ namespace Microsoft.Build.Experimental.Graph
         private readonly ConcurrentQueue<Lazy<TResult>> _queue =
             new ConcurrentQueue<Lazy<TResult>>();
 
-        /// <summary>
-        /// Task completion source used for signaling that <see cref="Complete"/> method was called.
-        /// </summary>
-        private readonly TaskCompletionSource<object> _schedulingCompletedTcs =
-            new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-
         private readonly SemaphoreSlim _semaphore;
 
         private readonly List<Task> _tasks;
@@ -67,7 +61,11 @@ namespace Microsoft.Build.Experimental.Graph
         /// <summary>
         /// Checks if the work set has been marked as completed.
         /// </summary>
-        internal bool IsCompleted => _isSchedulingCompleted;
+        internal bool IsCompleted
+        {
+            get => Volatile.Read(ref _isSchedulingCompleted);
+            set => Volatile.Write(ref _isSchedulingCompleted, value);
+        }
 
         internal ParallelWorkSet(int degreeOfParallelism, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken)
         {
@@ -119,17 +117,15 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         internal void Complete()
         {
-            bool schedulingCompleted = Volatile.Read(ref _isSchedulingCompleted);
-            if (schedulingCompleted)
+            if (IsCompleted)
             {
                 return;
             }
 
-            Volatile.Write(ref _isSchedulingCompleted, true);
+            IsCompleted = true;
 
             // Release one thread that will release all the threads when all the elements are processed.
             _semaphore.Release();
-            _schedulingCompletedTcs.SetResult(null);
         }
 
         /// <summary>
@@ -137,7 +133,6 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         internal void WaitForCompletion()
         {
-            _schedulingCompletedTcs.Task.GetAwaiter().GetResult();
             Task.WhenAll(_tasks.ToArray()).GetAwaiter().GetResult();
         }
 
@@ -157,9 +152,9 @@ namespace Microsoft.Build.Experimental.Graph
             return Task.Run(
                 async () =>
                 {
-                    bool shouldCancelWorker = false;
+                    bool shouldStopAllWorkers = false;
 
-                    while (!shouldCancelWorker)
+                    while (!shouldStopAllWorkers)
                     {
                         await _semaphore.WaitAsync(_cancellationToken);
 
@@ -169,14 +164,14 @@ namespace Microsoft.Build.Experimental.Graph
                         }
                         finally
                         {
-                            // Could be -1 if the number of pending items is already 0 and the task was awakened for graceful finish.
-                            if (Interlocked.Read(ref _pendingCount) <= 0 && Volatile.Read(ref _isSchedulingCompleted))
+                            shouldStopAllWorkers = Interlocked.Read(ref _pendingCount) == 0 && IsCompleted;
+
+                            if (shouldStopAllWorkers)
                             {
                                 // Ensure all tasks are unblocked and can gracefully
                                 // finish since there are at most degreeOfParallelism - 1 tasks
                                 // waiting at this point
                                 _semaphore.Release(_degreeOfParallelism);
-                                shouldCancelWorker = true;
                             }
                         }
                     }
