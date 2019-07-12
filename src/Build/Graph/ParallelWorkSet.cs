@@ -95,6 +95,11 @@ namespace Microsoft.Build.Experimental.Graph
         /// <param name="workFunc"></param>
         internal void AddWork(TKey key, Func<TResult> workFunc)
         {
+            if (IsCompleted)
+            {
+                throw new InvalidOperationException("Cannot add new work after work set is marked as completed.");
+            }
+
             var workItem = new Lazy<TResult>(workFunc);
 
             if (!_inProgressOrCompletedWork.TryAdd(key, workItem))
