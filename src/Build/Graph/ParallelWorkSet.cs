@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -188,8 +188,14 @@ namespace Microsoft.Build.Experimental.Graph
         {
             if (_queue.TryDequeue(out Lazy<TResult> workItem))
             {
-                TResult _ = workItem.Value;
-                Interlocked.Decrement(ref _pendingCount);
+                try
+                {
+                    TResult _ = workItem.Value;
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _pendingCount);
+                }
             }
         }
     }
