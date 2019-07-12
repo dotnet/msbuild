@@ -97,6 +97,30 @@ namespace Microsoft.Build.Shared.Debugging
             }
         }
 
+        public static PrintLineDebugger CreateWithFallBackWriter(
+            CommonWriterType fallBackWriter,
+            string id = null,
+            bool prependProcessInfo = false)
+        {
+            fallBackWriter = GetStaticWriter() == null
+                ? fallBackWriter
+                : null;
+
+            return Create(fallBackWriter, id, prependProcessInfo);
+        }
+
+        public static PrintLineDebugger Create(
+            CommonWriterType writer = null,
+            string id = null,
+            bool prependProcessInfo = false)
+        {
+            return new PrintLineDebugger(
+                prependProcessInfo
+                    ? $"{ProcessInfo}_{id}"
+                    : id,
+                writer);
+        }
+
         public void Dispose()
         {
             ReleaseUnmanagedResources();
@@ -142,18 +166,6 @@ namespace Microsoft.Build.Shared.Debugging
             }
 
             CommonWriterProperty.Value.SetValue(null, null);
-        }
-
-        public static PrintLineDebugger Create(
-            CommonWriterType writer = null,
-            string id = null,
-            bool prependProcessInfo = false)
-        {
-            return new PrintLineDebugger(
-                prependProcessInfo
-                    ? $"{ProcessInfo}_{id}"
-                    : id,
-                writer);
         }
 
         public CommonWriterType GetWriter()

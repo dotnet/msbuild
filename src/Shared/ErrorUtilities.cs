@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Microsoft.Build.Shared.FileSystem;
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
@@ -98,6 +99,16 @@ namespace Microsoft.Build.Shared
                 ErrorUtilities.ThrowInternalError("This type does not implement ToString() properly {0}", param.GetType().FullName);
             }
 #endif
+        }
+
+        public static void VerifyThrowDirectoryExists(string path, string message = null)
+        {
+            VerifyThrowArgumentNull(path, nameof(path));
+
+            if (!FileSystems.Default.DirectoryExists(path))
+            {
+                ThrowInternalError(message ?? $"Directory expected to exist: {path}");
+            }
         }
 
         /// <summary>

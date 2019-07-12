@@ -40,7 +40,7 @@ namespace Microsoft.Build.Shared.Debugging
 
             public static IdBasedFilesWriter FromArtifactLogDirectory()
             {
-                return new IdBasedFilesWriter(ArtifactsLogDirectory);
+                return new IdBasedFilesWriter(RepositoryInfo.Instance.ArtifactsLogDirectory);
             }
         }
 
@@ -65,23 +65,6 @@ namespace Microsoft.Build.Shared.Debugging
         }
 
         public static CommonWriterType StdOutWriter = (id, callsite, args) => Console.WriteLine(SimpleFormat(id, callsite, args));
-
-        private static Lazy<string> _artifactsLogs = new Lazy<string>(
-            () =>
-            {
-                var executingAssembly = FileUtilities.ExecutingAssemblyPath;
-
-                var binPart = $"bin";
-
-                var logIndex = executingAssembly.IndexOf(binPart, StringComparison.Ordinal);
-
-                var artifactsPart = executingAssembly.Substring(0, logIndex);
-                return logIndex < 0
-                    ? null
-                    : Path.Combine(artifactsPart, "log", "Debug");
-            });
-
-        public static string ArtifactsLogDirectory => _artifactsLogs.Value;
 
         public static string SimpleFormat(string id, string callsite, IEnumerable<string> args)
         {

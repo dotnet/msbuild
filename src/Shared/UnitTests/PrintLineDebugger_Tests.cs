@@ -13,15 +13,30 @@ using CommonWriterType = System.Action<string, string, System.Collections.Generi
 
 namespace Microsoft.Build.UnitTests
 {
-    public sealed class PrintLineDebugger_Tests
+    public sealed class PrintLineDebugger_Tests : IDisposable
     {
+        private readonly TestEnvironment _env;
+
+        public PrintLineDebugger_Tests()
+        {
+            PrintLineDebugger.GetStaticWriter().ShouldBeNull();
+
+            _env = TestEnvironment.Create();
+        }
+
         private class MockWriter
         {
+            private readonly string _writerId;
             public readonly List<string> Logs = new List<string>();
+
+            public MockWriter(string writerId = "")
+            {
+                _writerId = writerId;
+            }
 
             public CommonWriterType Writer()
             {
-                return (id, callsite, args) => Logs.Add($"{id}{callsite}{string.Join(";", args)}");
+                return (id, callsite, args) => Logs.Add($"{_writerId}{id}{callsite}{string.Join(";", args)}");
             }
         }
 
@@ -182,7 +197,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ArtifactsDirectoryLooksGood()
         {
-            var artifactsDirectory = PrintLineDebuggerWriters.ArtifactsLogDirectory;
+            var artifactsDirectory = RepositoryInfo.Instance.ArtifactsLogDirectory;
 
             artifactsDirectory.ShouldNotBeNull();
             artifactsDirectory.ShouldEndWith(Path.Combine("log", "Debug"), Case.Sensitive);
@@ -198,16 +213,13 @@ namespace Microsoft.Build.UnitTests
 
             PrintLineDebugger.SetWriter(new MockWriter().Writer());
 
-            using (var env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
+            _env.SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
 
-                Should.Throw<Exception>(
-                    () =>
-                    {
-                        PrintLineDebugger.SetWriter(new MockWriter().Writer());
-                    });
-            }
+            Should.Throw<Exception>(
+                () =>
+                {
+                    PrintLineDebugger.SetWriter(new MockWriter().Writer());
+                });
 
             PrintLineDebugger.UnsetWriter();
             PrintLineDebugger.SetWriter(new MockWriter().Writer());
@@ -242,19 +254,73 @@ namespace Microsoft.Build.UnitTests
             PrintLineDebugger.SetWriter(new MockWriter().Writer());
             PrintLineDebugger.UnsetWriter();
 
-            using (var env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
+            _env.SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
 
-                Should.Throw<Exception>(
-                    () =>
-                    {
-                        PrintLineDebugger.UnsetWriter();
-                    });
-            }
+            Should.Throw<Exception>(
+                () =>
+                {
+                    PrintLineDebugger.UnsetWriter();
+                });
 
             PrintLineDebugger.SetWriter(new MockWriter().Writer());
             PrintLineDebugger.UnsetWriter();
+        }
+
+        [Fact]
+        public void CreateWithFallBackWriterSetsWriterIfNoWriterIsSet()
+        {
+            var writer = new MockWriter("FallBackWriter");
+
+            using (var debugger = PrintLineDebugger.CreateWithFallBackWriter(writer.Writer()))
+            {
+                debugger.Log("foo");
+            }
+
+            writer.Logs.ShouldHaveSingleItem();
+            writer.Logs.First().ShouldEndWith("foo");
+            writer.Logs.First().ShouldStartWith("FallbackWriter");
+        }
+
+        [Fact]
+        public void CreateWithFallBackWriterDoesNotSetWriterIfAWriterIsAlreadySet()
+        {
+            try
+            {
+                var firstWriter = new MockWriter("FirstWriter");
+                var fallbackWriter = new MockWriter("FallBackWriter");
+
+                PrintLineDebugger.SetWriter(firstWriter.Writer());
+
+                PrintLineDebugger.Default.Value.Log("ForFirstWriter1");
+
+                using (var debugger = PrintLineDebugger.CreateWithFallBackWriter(fallbackWriter.Writer()))
+                {
+                    debugger.Log("foo");
+                    PrintLineDebugger.Default.Value.Log("ForFirstWriter2");
+                }
+
+                PrintLineDebugger.Default.Value.Log("ForFirstWriter3");
+
+                fallbackWriter.Logs.ShouldBeEmpty();
+
+                firstWriter.Logs.Count.ShouldBe(4);
+
+                firstWriter.Logs.ShouldAllBe(message => message.StartsWith("FirstWriter"));
+
+                firstWriter.Logs[0].ShouldEndWith("ForFirstWriter1");
+                firstWriter.Logs[1].ShouldEndWith("foo");
+                firstWriter.Logs[2].ShouldEndWith("ForFirstWriter2");
+                firstWriter.Logs[3].ShouldEndWith("ForFirstWriter3");
+            }
+            finally
+            {
+                PrintLineDebugger.UnsetWriter();
+            }
+        }
+
+        public void Dispose()
+        {
+            _env?.Dispose();
         }
     }
 }
