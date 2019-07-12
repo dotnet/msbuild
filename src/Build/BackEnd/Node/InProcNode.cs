@@ -13,6 +13,7 @@ using Microsoft.Build.Shared;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -96,6 +97,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly RequestCompleteDelegate _requestCompleteEventHandler;
 
+        private readonly PrintLineDebugger debugger;
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -108,6 +111,13 @@ namespace Microsoft.Build.BackEnd
             _shutdownEvent = new AutoResetEvent(false);
 
             _buildRequestEngine = componentHost.GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
+
+            debugger = RepositoryInfo.Instance.ArtifactsLogDirectory != null
+                ? PrintLineDebugger.CreateWithFallBackWriter(
+                    PrintLineDebuggerWriters.IdBasedFilesWriter.FromArtifactLogDirectory().Writer,
+                    "InprocNode",
+                    true)
+                : null;
 
             _engineExceptionEventHandler = OnEngineException;
             _newConfigurationRequestEventHandler = OnNewConfigurationRequest;
@@ -339,6 +349,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!currentEnvironment.TryGetValue(entry.Key, out var currentValue) || !string.Equals(entry.Value, currentValue, StringComparison.Ordinal))
                     {
+                        if (entry.Key.Equals("BUILD_REQUESTEDFOREMAIL"))
+                        {
+                            debugger?.Log($"BUILD_REQUESTEDFOREMAIL was set to [{entry.Value ?? "null"}]");
+                        }
+
                         Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                     }
                 }

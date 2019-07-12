@@ -131,4 +131,6 @@ finally {
   if ($prepareMachine) {
     Stop-Processes
   }
+
+  KillProcessesFromRepo
 }
