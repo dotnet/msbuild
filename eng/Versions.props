@@ -43,8 +43,8 @@
 
   -->
   <PropertyGroup Label="Automated">
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>3.0.0-preview8.19360.3</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>3.0.0-preview8.19360.3</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>3.0.0-preview8.19360.3</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>3.0.0-preview8.19361.5</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>3.0.0-preview8.19361.5</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>3.0.0-preview8.19361.5</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
   </PropertyGroup>
 </Project>
