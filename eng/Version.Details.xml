@@ -5,11 +5,11 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>7e145e3eefb9c2c595791ab597eca7bc9ad05552</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-27912-12">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-27912-13">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>b5983343c7ff2946a3ba769c42d025bb731c65b7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-preview8-27912-12">
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-preview8-27912-13">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>b5983343c7ff2946a3ba769c42d025bb731c65b7</Sha>
     </Dependency>
@@ -18,7 +18,7 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>705a6d8ce1a073d58fffa8ab9f25a7b8112d6b6b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-preview8-27912-12">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-preview8-27912-13">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>b5983343c7ff2946a3ba769c42d025bb731c65b7</Sha>
     </Dependency>
