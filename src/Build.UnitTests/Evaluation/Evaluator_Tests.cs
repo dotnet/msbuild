@@ -4546,26 +4546,22 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 logger
                     .AllBuildEvents
                     .OfType<UninitializedPropertyReadEventArgs>()
-                    .Any(p => p.PropertyName == "DOES_NOT_EXIST")
-                    .ShouldBeTrue();
+                    .ShouldContain(p => p.PropertyName == "DOES_NOT_EXIST");
 
                 logger
                     .AllBuildEvents
                     .OfType<EnvironmentVariableReadEventArgs>()
-                    .Any(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE2")
-                    .ShouldBeTrue();
+                    .ShouldContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE2");
 
                 logger
                     .AllBuildEvents
                     .OfType<EnvironmentVariableReadEventArgs>()
-                    .Any(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE")
-                    .ShouldBeFalse();
+                    .ShouldNotContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE");
 
                 logger
                     .AllBuildEvents
                     .OfType<PropertyReassignmentEventArgs>()
-                    .Any(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2")
-                    .ShouldBeTrue();
+                    .ShouldContain(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2");
             }
         }
 
