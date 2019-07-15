@@ -86,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks
         private void AddRuntimePackAssetsFromManifest(List<ITaskItem> runtimePackAssets, string runtimePackRoot,
             string runtimeListPath, ITaskItem runtimePack)
         {
-            var assetSubPaths = new HashSet<string>();
+            var assetSubPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             XDocument frameworkListDoc = XDocument.Load(runtimeListPath);
             foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
