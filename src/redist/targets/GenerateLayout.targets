@@ -25,7 +25,7 @@
   <Target Name="PublishTestCli"
           BeforeTargets="Build">
     <PropertyGroup>
-      <TestCliNuGetDirectory>$(NuGetPackagesDir)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.0/</TestCliNuGetDirectory>
+      <TestCliNuGetDirectory>$(NuGetPackagesDir)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.1/</TestCliNuGetDirectory>
     </PropertyGroup>
     <ItemGroup>
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NewtonSoft.Json.dll" />
