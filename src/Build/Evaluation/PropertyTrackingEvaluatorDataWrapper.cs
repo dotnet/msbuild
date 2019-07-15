@@ -29,7 +29,7 @@ namespace Microsoft.Build.Evaluation
         where D : class, IItemDefinition<M>
     {
         private readonly IEvaluatorData<P, I, M, D> _wrapped;
-        private readonly HashSet<string> _environmentVariables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _overwrittenEnvironmentVariables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly EvaluationLoggingContext _evaluationLoggingContext;
 
         /// <summary>
@@ -79,21 +79,8 @@ namespace Microsoft.Build.Evaluation
             P originalProperty = _wrapped.GetProperty(name);
             P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, isEnvironmentVariable);
 
+            this.TrackPropertyWrite(newProperty.Name, isEnvironmentVariable);
             this.TrackPropertyReassignment(originalProperty, newProperty, string.Empty);
-
-            // If it's an environment variable, add it to our list.
-            // If not, make sure it's removed.
-            if (isEnvironmentVariable)
-            {
-                _environmentVariables.Add(name);
-            }
-            else
-            {
-                // If setting a property overwrites a previous environment variable property
-                // we won't track reads of it ANY MORE. However, if reads happened prior to
-                // when it was overwritten, those reads ARE captured.
-                _environmentVariables.Remove(name);
-            }
 
             return newProperty;
         }
@@ -110,9 +97,9 @@ namespace Microsoft.Build.Evaluation
             P originalProperty = _wrapped.GetProperty(propertyElement.Name);
             P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped);
 
+            this.TrackPropertyWrite(newProperty.Name, isEnvironmentVariable: false);
             this.TrackPropertyReassignment(originalProperty, newProperty, propertyElement.Location.LocationString);
 
-            _environmentVariables.Remove(newProperty.Name);
             return newProperty;
         }
         #endregion
@@ -138,6 +125,7 @@ namespace Microsoft.Build.Evaluation
         public IEnumerable<D> ItemDefinitionsEnumerable => _wrapped.ItemDefinitionsEnumerable;
         public ItemDictionary<I> Items => _wrapped.Items;
         public List<ProjectItemElement> EvaluatedItemElements => _wrapped.EvaluatedItemElements;
+        public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => _wrapped.EnvironmentVariablePropertiesDictionary;
         public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem) => _wrapped.InitializeForEvaluation(toolsetProvider, fileSystem);
         public void FinishEvaluation() => _wrapped.FinishEvaluation();
         public void AddItem(I item) => _wrapped.AddItem(item);
@@ -168,7 +156,9 @@ namespace Microsoft.Build.Evaluation
             // (which is an empty string). Thus this check.
             if (string.IsNullOrEmpty(name)) return;
 
-            if (_environmentVariables.Contains(name))
+            // If a property matches the name of an environment variable, but has NOT been overwritten by a non-environment-variable property
+            // track it as an environment variable read.
+            if (_wrapped.EnvironmentVariablePropertiesDictionary.Contains(name) && !_overwrittenEnvironmentVariables.Contains(name))
             {
                 this.TrackEnvironmentVariableRead(name);
             }
@@ -204,6 +194,13 @@ namespace Microsoft.Build.Evaluation
             args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
 
             _evaluationLoggingContext.LogBuildEvent(args);
+        }
+
+        private void TrackPropertyWrite(string name, bool isEnvironmentVariable)
+        {
+            // If this property was an environment variable but no longer is, track it.
+            if (_wrapped.EnvironmentVariablePropertiesDictionary.Contains(name) && !isEnvironmentVariable)
+                _overwrittenEnvironmentVariables.Add(name);
         }
 
         /// <summary>

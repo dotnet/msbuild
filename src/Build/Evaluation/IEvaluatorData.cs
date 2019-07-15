@@ -206,6 +206,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// A dictionary of all of the environment variable properties.
+        /// </summary>
+        PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary { get; }
+
+        /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
         void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem);

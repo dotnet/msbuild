@@ -124,6 +124,14 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary
+            {
+                get
+                {
+                    return _wrappedData.EnvironmentVariablePropertiesDictionary;
+                }
+            }
+
             public ISet<string> GlobalPropertiesToTreatAsLocal
             {
                 get

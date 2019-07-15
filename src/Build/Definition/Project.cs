@@ -2998,6 +2998,11 @@ namespace Microsoft.Build.Evaluation
             public PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary { get; }
 
             /// <summary>
+            /// A dictionary of all of the environment variable properties.
+            /// </summary>
+            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => this.Project.ProjectCollection.EnvironmentProperties;
+
+            /// <summary>
             /// List of names of the properties that, while global, are still treated as overridable 
             /// </summary>
             public ISet<string> GlobalPropertiesToTreatAsLocal => _globalPropertiesToTreatAsLocal ?? (_globalPropertiesToTreatAsLocal =

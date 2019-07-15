@@ -877,6 +877,11 @@ namespace Microsoft.Build.Execution
             { return _globalProperties; }
         }
 
+        PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.EnvironmentVariablePropertiesDictionary
+        {
+            get => _environmentVariableProperties;
+        }
+
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable 
         /// </summary>
