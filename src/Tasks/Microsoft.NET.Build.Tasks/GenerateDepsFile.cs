@@ -175,16 +175,6 @@ namespace Microsoft.NET.Build.Tasks
             _filesWritten.Add(new TaskItem(depsFilePath));
         }
 
-        bool _loggedLocalError = false;
-
-        public override bool Execute()
-        {
-            if (!base.Execute() || _loggedLocalError)
-            {
-                return false;
-            }
-            return true;
-        }
         protected override void ExecuteCore()
         {
             WriteDepsFile(DepsFilePath);

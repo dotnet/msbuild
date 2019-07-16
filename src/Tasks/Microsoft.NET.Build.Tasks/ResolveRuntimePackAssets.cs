@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    throw new BuildErrorException("Runtime list not found: " + runtimeListPath);
+                    throw new BuildErrorException(string.Format(Strings.RuntimeListNotFound, runtimeListPath));
                 }
             }
 
@@ -85,7 +85,9 @@ namespace Microsoft.NET.Build.Tasks
 
         private void AddRuntimePackAssetsFromManifest(List<ITaskItem> runtimePackAssets, string runtimePackRoot,
             string runtimeListPath, ITaskItem runtimePack)
-        {            
+        {
+            var assetSubPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             XDocument frameworkListDoc = XDocument.Load(runtimeListPath);
             foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
             {
@@ -123,6 +125,14 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 var assetItem = CreateAssetItem(assetPath, assetType, runtimePack, culture);
+
+                // Ensure the asset item's destination sub-path is unique
+                var assetSubPath = assetItem.GetMetadata(MetadataKeys.DestinationSubPath);
+                if (!assetSubPaths.Add(assetSubPath))
+                {
+                    Log.LogError(Strings.DuplicateRuntimePackAsset, assetSubPath);
+                    continue;
+                }
 
                 assetItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion")?.Value);
                 assetItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion")?.Value);
