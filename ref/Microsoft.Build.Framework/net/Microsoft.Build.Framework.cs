@@ -408,6 +408,14 @@ namespace Microsoft.Build.Framework
         public string ToolsVersion { get { throw null; } }
     }
     public delegate void ProjectStartedEventHandler(object sender, Microsoft.Build.Framework.ProjectStartedEventArgs e);
+    public partial class PropertyInitialValueSetEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public PropertyInitialValueSetEventArgs() { }
+        public PropertyInitialValueSetEventArgs(string propertyName, string propertyValue, string propertySource, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public string PropertyName { get { throw null; } set { } }
+        public string PropertySource { get { throw null; } set { } }
+        public string PropertyValue { get { throw null; } set { } }
+    }
     public partial class PropertyReassignmentEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
         public PropertyReassignmentEventArgs() { }

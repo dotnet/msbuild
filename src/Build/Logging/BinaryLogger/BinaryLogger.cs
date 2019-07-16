@@ -41,7 +41,6 @@ namespace Microsoft.Build.Logging
         private ProjectImportsCollector projectImportsCollector;
         private string _initialTargetOutputLogging;
         private string _initialLogImports;
-        private string _initialTrackProperties;
 
         /// <summary>
         /// Describes whether to collect the project files (including imported project files) used during the build.
@@ -90,11 +89,9 @@ namespace Microsoft.Build.Logging
         {
             _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
             _initialLogImports = Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS");
-            _initialTrackProperties = Environment.GetEnvironmentVariable("MsBuildLogPropertyTracking");
 
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "true");
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
-            Environment.SetEnvironmentVariable("MsBuildLogPropertyTracking", "1");
 
             ProcessParameters();
 
@@ -152,7 +149,6 @@ namespace Microsoft.Build.Logging
         {
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports);
-            Environment.SetEnvironmentVariable("MsBuildLogPropertyTracking", _initialTrackProperties);
 
             if (projectImportsCollector != null)
             {

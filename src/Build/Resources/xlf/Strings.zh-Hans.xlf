@@ -113,6 +113,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>MSB4263: Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="new">MSB4263: Property initial value: $({0})="{1}" Source: {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 项目“{0}”已跳过所引用的项目“{1}”上的图形隔离约束</target>

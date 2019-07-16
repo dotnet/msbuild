@@ -112,6 +112,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>MSB4263: Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="new">MSB4263: Property initial value: $({0})="{1}" Source: {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: o projeto "{0}" ignorou as restrições de isolamento do gráfico no projeto referenciado "{1}"</target>

@@ -79,8 +79,11 @@ namespace Microsoft.Build.Evaluation
             P originalProperty = _wrapped.GetProperty(name);
             P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, isEnvironmentVariable);
 
-            this.TrackPropertyWrite(newProperty.Name, isEnvironmentVariable);
-            this.TrackPropertyReassignment(originalProperty, newProperty, string.Empty);
+            this.TrackPropertyWrite(
+                originalProperty,
+                newProperty,
+                string.Empty,
+                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable));
 
             return newProperty;
         }
@@ -97,8 +100,11 @@ namespace Microsoft.Build.Evaluation
             P originalProperty = _wrapped.GetProperty(propertyElement.Name);
             P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped);
 
-            this.TrackPropertyWrite(newProperty.Name, isEnvironmentVariable: false);
-            this.TrackPropertyReassignment(originalProperty, newProperty, propertyElement.Location.LocationString);
+            this.TrackPropertyWrite(
+                originalProperty,
+                newProperty,
+                propertyElement.Location.LocationString,
+                PropertySource.Xml);
 
             return newProperty;
         }
@@ -196,11 +202,44 @@ namespace Microsoft.Build.Evaluation
             _evaluationLoggingContext.LogBuildEvent(args);
         }
 
-        private void TrackPropertyWrite(string name, bool isEnvironmentVariable)
+        private void TrackPropertyWrite(P predecessor, P property, string location, PropertySource source)
         {
+            string name = property.Name;
+
             // If this property was an environment variable but no longer is, track it.
-            if (_wrapped.EnvironmentVariablePropertiesDictionary.Contains(name) && !isEnvironmentVariable)
+            if (_wrapped.EnvironmentVariablePropertiesDictionary.Contains(name) && source != PropertySource.EnvironmentVariable)
+            {
                 _overwrittenEnvironmentVariables.Add(name);
+            }
+
+            if (predecessor == null)
+            {
+                // If this property had no previous value, then track an initial value.
+                TrackPropertyInitialValueSet(property, source);
+            }
+            else
+            {
+                // There was a previous value, and it might have been changed. Track that.
+                TrackPropertyReassignment(predecessor, property, location);
+            }
+        }
+
+        /// <summary>
+        /// If the property's initial value is set, it logs a PropertyInitialValueSet event.
+        /// </summary>
+        /// <param name="property">The property being set.</param>
+        /// <param name="source">The source of the property.</param>
+        private void TrackPropertyInitialValueSet(P property, PropertySource source)
+        {
+            var args = new PropertyInitialValueSetEventArgs(
+                    property.Name,
+                    property.EvaluatedValue,
+                    source.ToString(),
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, property.EvaluatedValue, source)
+                );
+            args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
+
+            _evaluationLoggingContext.LogBuildEvent(args);
         }
 
         /// <summary>
@@ -211,8 +250,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="location">The location of this property's reassignment.</param>
         private void TrackPropertyReassignment(P predecessor, P property, string location)
         {
-            if (predecessor == null) return;
-
             string newValue = property.EvaluatedValue;
             string oldValue = predecessor.EvaluatedValue;
             if (newValue == oldValue) return;
@@ -228,6 +265,36 @@ namespace Microsoft.Build.Evaluation
             _evaluationLoggingContext.LogBuildEvent(args);
         }
 
+        /// <summary>
+        /// Determines the source of a property given the variables SetProperty arguments provided. This logic follows what's in <see cref="Evaluator{P,I,M,D}"/>.
+        /// </summary>
+        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
+        {
+            if (isEnvironmentVariable)
+            {
+                return PropertySource.EnvironmentVariable;
+            }
+
+            if (isGlobalProperty)
+            {
+                return PropertySource.Global;
+            }
+
+            return mayBeReserved ? PropertySource.BuiltIn : PropertySource.Toolset;
+        }
+
         #endregion
+
+        /// <summary>
+        /// The available sources for a property.
+        /// </summary>
+        private enum PropertySource
+        {
+            Xml,
+            BuiltIn,
+            Global,
+            Toolset,
+            EnvironmentVariable
+        }
     }
 }

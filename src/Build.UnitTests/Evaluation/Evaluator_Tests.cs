@@ -4562,6 +4562,32 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     .AllBuildEvents
                     .OfType<PropertyReassignmentEventArgs>()
                     .ShouldContain(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2");
+
+                IDictionary<string, PropertyInitialValueSetEventArgs> propertyInitialValueMap = logger
+                    .AllBuildEvents
+                    .OfType<PropertyInitialValueSetEventArgs>()
+                    .ToDictionary(piv => piv.PropertyName);
+
+                // Verify logging of property initial values.
+                propertyInitialValueMap.ShouldContainKey("Prop");
+                propertyInitialValueMap["Prop"].PropertySource.ShouldBe("Xml");
+                propertyInitialValueMap["Prop"].PropertyValue.ShouldBe(string.Empty);
+
+                propertyInitialValueMap.ShouldContainKey("EnvVar");
+                propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
+                propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's Defined!");
+
+                propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
+                propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertySource.ShouldBe("EnvironmentVariable");
+                propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertyValue.ShouldBe("It's Defined!");
+
+                propertyInitialValueMap.ShouldContainKey("NotEnvVarRead");
+                propertyInitialValueMap["NotEnvVarRead"].PropertySource.ShouldBe("Xml");
+                propertyInitialValueMap["NotEnvVarRead"].PropertyValue.ShouldBe("Overwritten!");
+
+                propertyInitialValueMap.ShouldContainKey("Prop2");
+                propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
+                propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
             }
         }
 
