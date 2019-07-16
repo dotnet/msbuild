@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Evaluation
         {
             return _cache.GetOrAdd(projectFile, key =>
             {
-                var rootElement = openFunc(key, this);
+                ProjectRootElement rootElement = openFunc(key, this);
                 ErrorUtilities.VerifyThrowInternalNull(rootElement, "projectRootElement");
                 ErrorUtilities.VerifyThrow(rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
                     "Got project back with incorrect path");
@@ -78,7 +78,6 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-
         internal override void RenameEntry(string oldFullPath, ProjectRootElement projectRootElement)
         {
             throw new NotImplementedException();
@@ -88,7 +87,6 @@ namespace Microsoft.Build.Evaluation
         {
             return TryGet(projectFile, null);
         }
-
 
         internal override ProjectRootElement TryGet(string projectFile, bool? preserveFormatting)
         {
