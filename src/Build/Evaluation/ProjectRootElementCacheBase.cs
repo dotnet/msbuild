@@ -70,7 +70,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="sender">The dirtied project root element.</param>
         /// <param name="e">Details on the PRE and the nature of the change.</param>
-        internal void OnProjectRootElementDirtied(ProjectRootElement sender, ProjectXmlChangedEventArgs e)
+        internal virtual void OnProjectRootElementDirtied(ProjectRootElement sender, ProjectXmlChangedEventArgs e)
         {
             var cacheDirtied = ProjectRootElementDirtied;
             cacheDirtied?.Invoke(sender, e);
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="sender">The dirtied project.</param>
         /// <param name="e">Details on the Project and the change.</param>
-        internal void OnProjectDirtied(Project sender, ProjectChangedEventArgs e)
+        internal virtual void OnProjectDirtied(Project sender, ProjectChangedEventArgs e)
         {
             var projectDirtied = ProjectDirtied;
             projectDirtied?.Invoke(sender, e);

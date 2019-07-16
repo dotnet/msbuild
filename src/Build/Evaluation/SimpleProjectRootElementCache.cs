@@ -122,6 +122,16 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        internal override void OnProjectRootElementDirtied(ProjectRootElement sender, ProjectXmlChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal override void OnProjectDirtied(Project sender, ProjectChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
         {
              throw new NotImplementedException();
