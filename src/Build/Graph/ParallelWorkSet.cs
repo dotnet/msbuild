@@ -64,7 +64,7 @@ namespace Microsoft.Build.Experimental.Graph
         internal bool IsCompleted
         {
             get => Volatile.Read(ref _isSchedulingCompleted);
-            set => Volatile.Write(ref _isSchedulingCompleted, value);
+            private set => Volatile.Write(ref _isSchedulingCompleted, value);
         }
 
         internal ParallelWorkSet(int degreeOfParallelism, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken)
