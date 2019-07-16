@@ -29,7 +29,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         private ParallelWorkSet<string, string> _workSet;
 
         [Fact]
-        public void GivenExceptionsOutsideWorker_CompletesAndThrowsException()
+        public void GivenExceptionsOnCompletionThread_CompletesAndThrowsException()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
             {
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
-        public void GivenExceptionsWithinWorker_CompletesAndThrowsExceptions()
+        public void GivenExceptionsOnWorkerThread_CompletesAndThrowsExceptions()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
             {
