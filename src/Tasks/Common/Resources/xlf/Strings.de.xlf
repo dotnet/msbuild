@@ -267,6 +267,11 @@
         <target state="translated">NETSDK1060: Fehler beim Lesen der Ressourcendatei: {0}</target>
         <note>{StrBegin="NETSDK1060: "}</note>
       </trans-unit>
+      <trans-unit id="FailedToDeleteApphost">
+        <source>NETSDK1111: Failed to delete output apphost: {0}</source>
+        <target state="new">NETSDK1111: Failed to delete output apphost: {0}</target>
+        <note>{StrBegin="NETSDK1111: "}</note>
+      </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
         <target state="translated">NETSDK1077: Fehler beim Sperren der Ressource.</target>

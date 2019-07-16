@@ -97,7 +97,14 @@ namespace Microsoft.NET.Build.Tasks
             catch (Exception)
             {
                 // Delete the destination file so we don't leave an unmodified apphost
-                File.Delete(appHostDestinationFilePath);
+                try
+                {
+                    File.Delete(appHostDestinationFilePath);
+                }
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                {
+                    log?.LogError(Strings.FailedToDeleteApphost, ex.Message);
+                }
                 throw;
             }
         }

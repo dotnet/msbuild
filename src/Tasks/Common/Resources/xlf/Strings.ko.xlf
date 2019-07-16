@@ -267,6 +267,11 @@
         <target state="translated">NETSDK1060: 자산 파일 {0}을(를) 읽는 동안 오류가 발생했습니다.</target>
         <note>{StrBegin="NETSDK1060: "}</note>
       </trans-unit>
+      <trans-unit id="FailedToDeleteApphost">
+        <source>NETSDK1111: Failed to delete output apphost: {0}</source>
+        <target state="new">NETSDK1111: Failed to delete output apphost: {0}</target>
+        <note>{StrBegin="NETSDK1111: "}</note>
+      </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
         <target state="translated">NETSDK1077: 리소스를 잠그지 못했습니다.</target>
