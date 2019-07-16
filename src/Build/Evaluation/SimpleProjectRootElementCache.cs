@@ -121,5 +121,10 @@ namespace Microsoft.Build.Evaluation
                 _cache.TryRemove(projectRootElement.FullPath, out _);
             }
         }
+
+        protected override void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
+        {
+             throw new NotImplementedException();
+        }
     }
 }

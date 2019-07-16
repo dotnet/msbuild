@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Raises an event which is raised when a project root element is removed from the strong cache.
         /// </summary>
-        protected void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
+        protected virtual void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
         {
             StrongCacheEntryRemovedDelegate removedEvent = StrongCacheEntryRemoved;
             removedEvent?.Invoke(this, projectRootElement);
