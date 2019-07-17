@@ -19,7 +19,7 @@
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
     <MicrosoftNETCoreAppPackageVersion>3.0.0-preview8-27917-07</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.0-preview8-27917-07</MicrosoftDotNetPlatformAbstractionsPackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.0-preview-27324-5</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.0-preview8-27917-07</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.0.0-preview8-27917-07</MicrosoftNETCoreDotNetHostResolverPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
