@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Build.Evaluation;
+﻿using Microsoft.Build.Evaluation;
 using Shouldly;
 using Xunit;
 
