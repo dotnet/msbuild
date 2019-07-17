@@ -227,6 +227,7 @@ namespace Microsoft.Build.Construction
         internal void AddDependency(string referencedProjectGuid)
         {
             _dependencies.Add(referencedProjectGuid);
+            _dependenciesAsReadonly = null;
         }
 
         /// <summary>
@@ -235,6 +236,7 @@ namespace Microsoft.Build.Construction
         internal void SetProjectConfiguration(string configurationName, ProjectConfigurationInSolution configuration)
         {
             _projectConfigurations[configurationName] = configuration;
+            _projectConfigurationsReadOnly = null;
         }
 
         /// <summary>
