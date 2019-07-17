@@ -171,7 +171,7 @@ namespace Microsoft.Build.Globbing
                 globRoot = Directory.GetCurrentDirectory();
             }
 
-            globRoot = OpportunisticIntern.InternStringIfPossible(FileUtilities.NormalizePath(globRoot));
+            globRoot = OpportunisticIntern.InternStringIfPossible(FileUtilities.NormalizePath(globRoot).WithTrailingSlash());
 
             var lazyState = new Lazy<GlobState>(() =>
             {
