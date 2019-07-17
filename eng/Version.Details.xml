@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
+    <Dependency Name="Microsoft.AspNetCore.Analyzers" Version="3.0.0-preview8.19366.10">
+      <Uri>https://github.com/aspnet/AspNetCore</Uri>
+      <Sha>4ba66f05bf2ff20e38ae00d3ab27256df778a652</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.AspNetCore.Components.Analyzers" Version="3.0.0-preview8.19366.10">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
       <Sha>4ba66f05bf2ff20e38ae00d3ab27256df778a652</Sha>
