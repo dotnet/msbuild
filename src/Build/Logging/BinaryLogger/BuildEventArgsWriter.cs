@@ -304,6 +304,12 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
+            if (e is PropertyInitialValueSetEventArgs)
+            {
+                Write((PropertyInitialValueSetEventArgs)e);
+                return;
+            }
+
             Write(BinaryLogRecordKind.Message);
             WriteMessageFields(e);
         }
@@ -348,6 +354,15 @@ namespace Microsoft.Build.Logging
             Write(BinaryLogRecordKind.UninitializedPropertyRead);
             WriteMessageFields(e);
             Write(e.PropertyName);
+        }
+
+        private void Write(PropertyInitialValueSetEventArgs e)
+        {
+            Write(BinaryLogRecordKind.PropertyInitialValueSet);
+            WriteMessageFields(e);
+            Write(e.PropertyName);
+            Write(e.PropertyValue);
+            Write(e.PropertySource);
         }
 
         private void Write(EnvironmentVariableReadEventArgs e)

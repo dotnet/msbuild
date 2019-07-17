@@ -121,6 +121,9 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.UninitializedPropertyRead:
                     result = ReadUninitializedPropertyReadEventArgs();
                     break;
+                case BinaryLogRecordKind.PropertyInitialValueSet:
+                    result = ReadPropertyInitialValueSetEventArgs();
+                    break;
                 default:
                     break;
             }
@@ -566,6 +569,27 @@ namespace Microsoft.Build.Logging
 
             var e = new UninitializedPropertyReadEventArgs(
                 propertyName,
+                fields.Message,
+                fields.HelpKeyword,
+                fields.SenderName,
+                importance);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadPropertyInitialValueSetEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var importance = (MessageImportance)ReadInt32();
+            string propertyName = ReadString();
+            string propertyValue = ReadString();
+            string propertySource = ReadString();
+
+            var e = new PropertyInitialValueSetEventArgs(
+                propertyName,
+                propertyValue,
+                propertySource,
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,

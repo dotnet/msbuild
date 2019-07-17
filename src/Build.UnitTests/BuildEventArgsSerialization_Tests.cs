@@ -473,6 +473,25 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void PropertyInitialValueEventArgs()
+        {
+            var args = new PropertyInitialValueSetEventArgs(
+                propertyName: Guid.NewGuid().ToString(),
+                propertyValue: Guid.NewGuid().ToString(),
+                propertySource: Guid.NewGuid().ToString(),
+                message: Guid.NewGuid().ToString(),
+                helpKeyword: Guid.NewGuid().ToString(),
+                senderName: Guid.NewGuid().ToString());
+
+            Roundtrip(args,
+                e => e.PropertyName,
+                e => e.PropertyValue,
+                e => e.PropertySource,
+                e => e.Message,
+                e => e.HelpKeyword,
+                e => e.SenderName);
+        }
+        [Fact]
         public void ReadingCorruptedStreamThrows()
         {
             var memoryStream = new MemoryStream();

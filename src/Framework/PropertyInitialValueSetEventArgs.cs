@@ -8,6 +8,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// The argument for a property initial value set event.
     /// </summary>
+    [Serializable]
     public class PropertyInitialValueSetEventArgs : BuildMessageEventArgs
     {
         /// <summary>

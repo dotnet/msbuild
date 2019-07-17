@@ -23,6 +23,7 @@
         TargetSkipped,
         PropertyReassignment,
         UninitializedPropertyRead,
-        EnvironmentVariableRead
+        EnvironmentVariableRead,
+        PropertyInitialValueSet
     }
 }
