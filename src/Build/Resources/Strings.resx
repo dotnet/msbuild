@@ -1771,6 +1771,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="StaticGraphAcceptsSingleSolutionEntryPoint" UESanitized="false" Visibility="Public">
     <value>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</value>
+    <value>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</value>
     <comment>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </comment>
