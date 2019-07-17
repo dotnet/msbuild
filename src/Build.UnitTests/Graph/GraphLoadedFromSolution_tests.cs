@@ -494,7 +494,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                     {"Platform", "AnyCPU"}
                 });
 
-            // Use ConfigutationMetadata because it is IEquatable, whereas ProjectGraphNode is node.
+            // Use ConfigurationMetadata because it is IEquatable, whereas ProjectGraphNode is not.
             var graphEdges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
 
             var solutionContents =
