@@ -14,18 +14,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
             collectionWithDefaultCache.ProjectRootElementCache.ShouldBeOfType<ProjectRootElementCache>();
 
             const string envKey = "MsBuildUseSimpleProjectRootElementCacheConcurrency";
-            string originalEnvVar = Environment.GetEnvironmentVariable(envKey);
 
-            try
+            using (TestEnvironment env = TestEnvironment.Create())
             {
-                Environment.SetEnvironmentVariable(envKey, "true");
-
+                env.SetEnvironmentVariable(envKey, "true");
                 var collectionWithSimpleCache = new ProjectCollection();
                 collectionWithSimpleCache.ProjectRootElementCache.ShouldBeOfType<SimpleProjectRootElementCache>();
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(envKey, originalEnvVar);
             }
         }
     }
