@@ -314,12 +314,11 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         [Fact]
         public void ProjectCollectionShouldNotInfluenceGlobalProperties()
         {
-            var entryFile1 = CreateProjectFile(_env, 1, new[] { 3 ,4 });
+            var entryFile1 = CreateProjectFile(_env, 1, new[] { 3, 4 });
             var entryFile2 = CreateProjectFile(_env, 2, new []{ 4, 5 });
             CreateProjectFile(_env, 3);
             CreateProjectFile(_env, 4);
             CreateProjectFile(_env, 5);
-
 
             var entryPoint1 = new ProjectGraphEntryPoint(entryFile1.Path, new Dictionary<string, string> {["B"] = "EntryPointB", ["C"] = "EntryPointC"});
             var entryPoint2 = new ProjectGraphEntryPoint(entryFile2.Path, null);
