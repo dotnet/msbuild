@@ -146,10 +146,10 @@ namespace Microsoft.Build.Engine.UnitTests
 
             var sb = new StringBuilder();
 
-            sb.AppendLine($@"
+            sb.AppendLine(@"
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version {VisualStudioVersion.VersionLatest}
-VisualStudioVersion = {VisualStudioVersion.VersionLatest}.0.0.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1");
 
             foreach (var project in projectInfos.Values)
