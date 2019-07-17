@@ -552,7 +552,7 @@ export PATH="$PATH:{0}"
   <data name="EnvironmentPathLinuxNeedLogout" xml:space="preserve">
     <value>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</value>
   </data>
-  <data name="EnvironmentPathOSXManualInstructions" xml:space="preserve">
+  <data name="EnvironmentPathOSXBashManualInstructions" xml:space="preserve">
     <value>Tools directory '{0}' is not currently on the PATH environment variable.
 If you are using bash, you can add it to your profile by running the following command:
 
@@ -562,6 +562,22 @@ export PATH="$PATH:{0}"
 EOF
 
 You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathOSXZshManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </value>
