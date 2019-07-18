@@ -90,7 +90,7 @@
      <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)"
            DestinationFiles="$(PublishDir)dotnet.runtimeconfig.json" />
      <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)"
-           DestinationFiles="$(PublishDir)msbuild.runtimeconfig.json" />
+           DestinationFiles="$(PublishDir)MSBuild.runtimeconfig.json" />
   </Target>
 
   <Target Name="ChmodPublishDir"
