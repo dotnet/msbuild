@@ -16,7 +16,13 @@
             "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
             "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc",
           ]
-        }
+        },
+        {
+          "container": "ManagedLangs",
+          "testCases": [
+            "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+          ]
+        }  
       ]
     }
   ],
