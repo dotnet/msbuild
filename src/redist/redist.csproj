@@ -89,6 +89,8 @@
           AfterTargets="Publish">
      <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)"
            DestinationFiles="$(PublishDir)dotnet.runtimeconfig.json" />
+     <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)"
+           DestinationFiles="$(PublishDir)MSBuild.runtimeconfig.json" />
   </Target>
 
   <Target Name="ChmodPublishDir"
