@@ -52,45 +52,61 @@ namespace Microsoft.NET.Build.Tasks
             // Copy apphost to destination path so it inherits the same attributes/permissions.
             File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwrite: true);
 
-            // Re-write the destination apphost with the proper contents.
-            bool appHostIsPEImage = false;
-            using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostDestinationFilePath))
+            try
             {
-                using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor())
+                // Re-write the destination apphost with the proper contents.
+                bool appHostIsPEImage = false;
+                using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostDestinationFilePath))
                 {
-                    SearchAndReplace(accessor, AppBinaryPathPlaceholderSearchValue, bytesToWrite, appHostSourceFilePath);
-
-                    appHostIsPEImage = IsPEImage(accessor);
-
-                    if (windowsGraphicalUserInterface)
+                    using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor())
                     {
-                        if (!appHostIsPEImage)
-                        {
-                            throw new BuildErrorException(Strings.AppHostNotWindows, appHostSourceFilePath);
-                        }
+                        SearchAndReplace(accessor, AppBinaryPathPlaceholderSearchValue, bytesToWrite, appHostSourceFilePath);
 
-                        SetWindowsGraphicalUserInterfaceBit(accessor, appHostSourceFilePath);
+                        appHostIsPEImage = IsPEImage(accessor);
+
+                        if (windowsGraphicalUserInterface)
+                        {
+                            if (!appHostIsPEImage)
+                            {
+                                throw new BuildErrorException(Strings.AppHostNotWindows, appHostSourceFilePath);
+                            }
+
+                            SetWindowsGraphicalUserInterfaceBit(accessor, appHostSourceFilePath);
+                        }
                     }
                 }
-            }
 
-            if (intermediateAssembly != null && appHostIsPEImage)
+                if (intermediateAssembly != null && appHostIsPEImage)
+                {
+                    if (ResourceUpdater.IsSupportedOS())
+                    {
+                        // Copy resources from managed dll to the apphost
+                        new ResourceUpdater(appHostDestinationFilePath)
+                            .AddResourcesFromPEImage(intermediateAssembly)
+                            .Update();
+                    }
+                    else if (log != null)
+                    {
+                        log.LogWarning(Strings.AppHostCustomizationRequiresWindowsHostWarning);
+                    }
+                }
+
+                // Memory-mapped write does not updating last write time
+                File.SetLastWriteTimeUtc(appHostDestinationFilePath, DateTime.UtcNow);
+            }
+            catch (Exception)
             {
-                if (ResourceUpdater.IsSupportedOS())
+                // Delete the destination file so we don't leave an unmodified apphost
+                try
                 {
-                    // Copy resources from managed dll to the apphost
-                    new ResourceUpdater(appHostDestinationFilePath)
-                        .AddResourcesFromPEImage(intermediateAssembly)
-                        .Update();
+                    File.Delete(appHostDestinationFilePath);
                 }
-                else if (log != null)
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
                 {
-                    log.LogWarning(Strings.AppHostCustomizationRequiresWindowsHostWarning);
+                    log?.LogError(Strings.FailedToDeleteApphost, ex.Message);
                 }
+                throw;
             }
-
-            // Memory-mapped write does not updating last write time
-            File.SetLastWriteTimeUtc(appHostDestinationFilePath, DateTime.UtcNow);
         }
 
         // See: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm

@@ -68,6 +68,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     .Contain(sourceAppHostMock)
                     .And
                     .Contain(AppBinaryPathPlaceholder);
+
+                File.Exists(destinationFilePath).Should().BeFalse();
             }
         }
 
@@ -88,6 +90,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     .Message
                     .Should()
                     .Contain(appBinaryFilePath);
+
+                File.Exists(destinationFilePath).Should().BeFalse();
             }
         }
 
@@ -161,6 +165,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     .Message
                     .Should()
                     .Contain(sourceAppHostMock);
+
+                File.Exists(destinationFilePath).Should().BeFalse();
             }
         }
 
