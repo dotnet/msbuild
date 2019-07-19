@@ -22,12 +22,21 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        void ParseRuntimeConfigWithTrailingCommaShouldThrow()
+        void ParseRuntimeConfigWithTrailingComma()
         {
             var tempPath = GetTempPath();
             File.WriteAllText(tempPath, TrailingComma);
-            Action a = () => new RuntimeConfig(tempPath);
-            a.ShouldThrow<JsonException>();
+            var runtimeConfig = new RuntimeConfig(tempPath);
+            Asset(runtimeConfig);
+        }
+
+        [Fact]
+        void ParseRuntimeConfigWithComment()
+        {
+            var tempPath = GetTempPath();
+            File.WriteAllText(tempPath, WithComment);
+            var runtimeConfig = new RuntimeConfig(tempPath);
+            Asset(runtimeConfig);
         }
 
         [Fact]
@@ -136,6 +145,18 @@ namespace Microsoft.DotNet.Tests
     }
   }
 }";
+
+        private const string WithComment =
+            @"{
+  ""runtimeOptions"": {
+    ""tfm"": ""netcoreapp2.1"",
+    ""framework"": {
+      ""name"": ""Microsoft.NETCore.App"",
+      ""version"": ""2.1.0"" // with comment
+    }
+  }
+}";
+
         private const string Order =
             @"{
   ""runtimeOptions"": {
@@ -157,8 +178,9 @@ namespace Microsoft.DotNet.Tests
     }
   }
 }";
+
         private const string CasingOnFrameworkField =
-               @"{
+            @"{
      ""runtimeOptions"": {
        ""tfm"": ""netcoreapp2.1"",
        ""Framework"": {
@@ -200,11 +222,11 @@ namespace Microsoft.DotNet.Tests
     }
   }
 }";
+
         private const string NoFramework =
             @"{
   ""runtimeOptions"": {
   }
 }";
-
     }
 }
