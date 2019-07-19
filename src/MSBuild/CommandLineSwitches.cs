@@ -71,7 +71,9 @@ namespace Microsoft.Build.CommandLine
             Target,
             Property,
             Logger,
+            OptionalLogger,
             DistributedLogger,
+            OptionalDistributedLogger,
             Verbosity,
 #if FEATURE_XML_SCHEMA_VALIDATION
             Validate,
@@ -239,7 +241,9 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "target", "t"},                        ParameterizedSwitch.Target,                     null,                           true,           "MissingTargetError",                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "property", "p" },                     ParameterizedSwitch.Property,                   null,                           true,           "MissingPropertyError",                true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "logger", "l" },                       ParameterizedSwitch.Logger,                     null,                           false,          "MissingLoggerError",                  false,  false  ),
+            new ParameterizedSwitchInfo(  new string[] { "optionallogger" },                    ParameterizedSwitch.OptionalLogger,             null,                           false,          "MissingLoggerError",                  false,  false  ),
             new ParameterizedSwitchInfo(  new string[] { "distributedlogger", "dl" },           ParameterizedSwitch.DistributedLogger,          null,                           false,          "MissingLoggerError",                  false,  false  ),
+            new ParameterizedSwitchInfo(  new string[] { "optionalDistributedlogger" },         ParameterizedSwitch.OptionalDistributedLogger,  null,                           false,          "MissingLoggerError",                  false,  false  ),
             new ParameterizedSwitchInfo(  new string[] { "verbosity", "v" },                    ParameterizedSwitch.Verbosity,                  null,                           false,          "MissingVerbosityError",               true,   false  ),
 #if FEATURE_XML_SCHEMA_VALIDATION
             new ParameterizedSwitchInfo(  new string[] { "validate", "val" },                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true,   false  ),

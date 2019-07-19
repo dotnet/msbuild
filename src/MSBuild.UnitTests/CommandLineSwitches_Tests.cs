@@ -537,6 +537,51 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void OptionalLoggerSwitchIdentificationTests()
+        {
+            CommandLineSwitches.IsParameterizedSwitch("optionallogger", out var parameterizedSwitch,
+                out var duplicateSwitchErrorMessage, out var multipleParametersAllowed,
+                out var missingParametersErrorMessage, out var unquoteParameters, out _).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.OptionalLogger);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBe("MissingLoggerError");
+            unquoteParameters.ShouldBeFalse();
+
+            CommandLineSwitches.IsParameterizedSwitch("OPTIONALLOGGER", out parameterizedSwitch,
+                out duplicateSwitchErrorMessage, out multipleParametersAllowed,
+                out missingParametersErrorMessage, out unquoteParameters, out _).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.OptionalLogger);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBe("MissingLoggerError");
+            unquoteParameters.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void OptionalDistributedLoggerSwitchIdentificationTests()
+        {
+            CommandLineSwitches.IsParameterizedSwitch("optionaldistributedlogger",
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch, out _,
+                out bool multipleParametersAllowed, out string missingParametersErrorMessage,
+                out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.OptionalDistributedLogger);
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBe("MissingLoggerError");
+            unquoteParameters.ShouldBeFalse();
+            emptyParametersAllowed.ShouldBeFalse();
+
+            CommandLineSwitches.IsParameterizedSwitch("OPTIONALDISTRIBUTEDLOGGER", out parameterizedSwitch, out _,
+                out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters,
+                out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.OptionalDistributedLogger);
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBe("MissingLoggerError");
+            unquoteParameters.ShouldBeFalse();
+            emptyParametersAllowed.ShouldBeFalse();
+        }
+
+        [Fact]
         public void VerbositySwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;

@@ -345,6 +345,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Examples:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                     Note: Using -optionallogger will allow the build to
+                     continue if the logger can't be created.
 </source>
         <target state="new">  -logger:&lt;logger&gt;   Use this logger to log events from MSBuild. To specify
                      multiple loggers, specify each logger separately.
@@ -359,6 +361,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Examples:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                     Note: Using -optionallogger will allow the build to
+                     continue if the logger can't be created.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -612,6 +616,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Examples:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                     Note: Using -optionaldistributedlogger will allow the
+                     build to continue if the logger can't be created.
 </source>
         <target state="new">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
                      Use this logger to log events from MSBuild, attaching a
@@ -629,6 +635,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Examples:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                     Note: Using -optionaldistributedlogger will allow the
+                     build to continue if the logger can't be created.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1312,6 +1320,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="OptionalLoggerCreationMessage">
+        <source>MSBUILD : Cannot create an instance of the optional logger. {0}</source>
+        <target state="new">MSBUILD : Cannot create an instance of the optional logger. {0}</target>
+        <note>
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.
     </note>
       </trans-unit>
       <trans-unit id="PickedUpSwitchesFromAutoResponse">

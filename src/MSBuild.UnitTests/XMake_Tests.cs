@@ -776,6 +776,58 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void MissingOptionalLoggersAreIgnored()
+        {
+            string projectString =
+                "<Project>" +
+                "<Target Name=\"t\"><Message Text=\"Hello\"/></Target>" +
+                "</Project>";
+            using (var env = UnitTests.TestEnvironment.Create())
+            {
+                var tempDir = env.CreateFolder();
+                var projectFile = tempDir.CreateFile("missingloggertest.proj", projectString);
+                var nonExistentFile = env.GetTempFile(".dll");
+
+                var parametersLoggerOptional = $"-optionallogger:\"{nonExistentFile.Path}\" -verbosity:diagnostic \"{projectFile.Path}\"";
+                var parametersLoggerRequired = $"-logger:\"{nonExistentFile.Path}\" -verbosity:diagnostic \"{projectFile.Path}\"";
+
+                var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
+                successfulExit.ShouldBe(true);
+                output.ShouldContain("Hello");
+                output.ShouldContain("Cannot create an instance of the optional logger.");
+
+                var output2 = RunnerUtilities.ExecMSBuild(parametersLoggerRequired, out bool successfulExit2, _output);
+                successfulExit2.ShouldBe(false);
+            }
+        }
+
+        [Fact]
+        public void MissingOptionalDistributedLoggersAreIgnored()
+        {
+            string projectString =
+                "<Project>" +
+                "<Target Name=\"t\"><Message Text=\"Hello\"/></Target>" +
+                "</Project>";
+            using (var env = UnitTests.TestEnvironment.Create())
+            {
+                var tempDir = env.CreateFolder();
+                var projectFile = tempDir.CreateFile("missingloggertest.proj", projectString);
+                var nonExistentFile = env.GetTempFile(".dll");
+
+                var parametersLoggerOptional = $"-optionaldistributedlogger:\"LoggerName,{nonExistentFile.Path}*ForwardingLoggerName,{nonExistentFile}\" -verbosity:diagnostic \"{projectFile.Path}\"";
+                var parametersLoggerRequired = $"-distributedlogger:\"LoggerName,{nonExistentFile.Path}*ForwardingLoggerName,{nonExistentFile}\" -verbosity:diagnostic \"{projectFile.Path}\"";
+
+                var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
+                successfulExit.ShouldBe(true);
+                output.ShouldContain("Hello");
+                output.ShouldContain("Cannot create an instance of the optional logger.");
+
+                var output2 = RunnerUtilities.ExecMSBuild(parametersLoggerRequired, out bool successfulExit2, _output);
+                successfulExit2.ShouldBe(false);
+            }
+        }
+
         private string _pathToArbitraryBogusFile = NativeMethodsShared.IsWindows // OK on 64 bit as well
                                                         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe")
                                                         : "/bin/cat";

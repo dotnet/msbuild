@@ -335,8 +335,10 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      Examples:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                     Note: Using -optionallogger will allow the build to
+                     continue if the logger can't be created.
 </source>
-        <target state="translated">  -logger:&lt;journaliseur&gt;   Journaliseur des événements MSBuild. Pour indiquer
+        <target state="needs-review-translation">  -logger:&lt;journaliseur&gt;   Journaliseur des événements MSBuild. Pour indiquer
          plusieurs journaliseurs, spécifiez chacun d'eux séparément.
          Syntaxe de &lt;journaliseur&gt; :
            [&lt;classe de journalisation&gt;,]&lt;assembly de journalisation&gt;
@@ -604,8 +606,10 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      Examples:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                     Note: Using -optionaldistributedlogger will allow the
+                     build to continue if the logger can't be created.
 </source>
-        <target state="translated">  -distributedLogger:&lt;journaliseur central&gt;*&lt;journaliseur de transfert&gt;
+        <target state="needs-review-translation">  -distributedLogger:&lt;journaliseur central&gt;*&lt;journaliseur de transfert&gt;
          Utilise ce journaliseur pour consigner les événements MSBuild, en
          attachant une instance de journaliseur différente à chaque nœud. Pour
          indiquer plusieurs journaliseurs, spécifiez chacun d'eux séparément.
@@ -1128,6 +1132,15 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note>
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="OptionalLoggerCreationMessage">
+        <source>MSBUILD : Cannot create an instance of the optional logger. {0}</source>
+        <target state="new">MSBUILD : Cannot create an instance of the optional logger. {0}</target>
+        <note>
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.
     </note>
       </trans-unit>
       <trans-unit id="PickedUpSwitchesFromAutoResponse">

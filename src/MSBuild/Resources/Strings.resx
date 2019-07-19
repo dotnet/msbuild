@@ -262,6 +262,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Examples:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+                     Note: Using -optionallogger will allow the build to
+                     continue if the logger can't be created.
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:
@@ -416,6 +418,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Examples:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+                     Note: Using -optionaldistributedlogger will allow the
+                     build to continue if the logger can't be created.
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:
@@ -1167,6 +1171,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
       logger class must exist in the given assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+  <data name="OptionalLoggerCreationMessage" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : Cannot create an instance of the optional logger. {0}</value>
+    <comment>
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.
     </comment>
   </data>
   <data name="ProjectUpgradeNeededToVcxProj">

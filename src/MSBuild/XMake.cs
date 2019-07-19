@@ -2186,7 +2186,9 @@ namespace Microsoft.Build.CommandLine
 
                     loggers = ProcessLoggingSwitches(
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.OptionalLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.OptionalDistributedLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
@@ -2888,7 +2890,9 @@ namespace Microsoft.Build.CommandLine
         private static ILogger[] ProcessLoggingSwitches
         (
             string[] loggerSwitchParameters,
+            string[] optionalLoggerSwitchParameters,
             string[] distributedLoggerSwitchParameters,
+            string[] optionalDistributedLoggerSwitchParameters,
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
@@ -2914,10 +2918,12 @@ namespace Microsoft.Build.CommandLine
                 verbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
             }
 
-            ArrayList loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity);
+            ArrayList loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity, optional: false);
+            loggers.AddRange(ProcessLoggerSwitch(optionalLoggerSwitchParameters, verbosity, optional: true));
 
             // Add any loggers which have been specified on the commandline
-            distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
+            distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity, optional: false);
+            distributedLoggerRecords.AddRange(ProcessDistributedLoggerSwitch(optionalDistributedLoggerSwitchParameters, verbosity, optional: true));
 
             ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
@@ -3263,7 +3269,7 @@ namespace Microsoft.Build.CommandLine
         /// Figures out which additional loggers are going to listen to build events.
         /// </summary>
         /// <returns>List of loggers.</returns>
-        private static ArrayList ProcessLoggerSwitch(string[] parameters, LoggerVerbosity verbosity)
+        private static ArrayList ProcessLoggerSwitch(string[] parameters, LoggerVerbosity verbosity, bool optional)
         {
             ArrayList loggers = new ArrayList();
 
@@ -3273,7 +3279,12 @@ namespace Microsoft.Build.CommandLine
 
                 LoggerDescription loggerDescription = ParseLoggingParameter(parameter, unquotedParameter, verbosity);
 
-                loggers.Add(CreateAndConfigureLogger(loggerDescription, verbosity, unquotedParameter));
+                var logger = CreateAndConfigureLogger(loggerDescription, verbosity, unquotedParameter, optional);
+                if (logger != null)
+                {
+                    loggers.Add(logger);
+                }
+                
             }
 
             return loggers;
@@ -3283,7 +3294,7 @@ namespace Microsoft.Build.CommandLine
         /// Parses command line arguments describing the distributed loggers
         /// </summary>
         /// <returns>List of distributed logger records</returns>
-        private static List<DistributedLoggerRecord> ProcessDistributedLoggerSwitch(string[] parameters, LoggerVerbosity verbosity)
+        private static List<DistributedLoggerRecord> ProcessDistributedLoggerSwitch(string[] parameters, LoggerVerbosity verbosity, bool optional)
         {
             List<DistributedLoggerRecord> distributedLoggers = new List<DistributedLoggerRecord>();
 
@@ -3300,7 +3311,10 @@ namespace Microsoft.Build.CommandLine
                 LoggerDescription centralLoggerDescription =
                     ParseLoggingParameter((string)loggerSpec[0], unquotedParameter, verbosity);
 
-                ILogger centralLogger = CreateAndConfigureLogger(centralLoggerDescription, verbosity, unquotedParameter);
+                ILogger centralLogger = CreateAndConfigureLogger(centralLoggerDescription, verbosity, unquotedParameter, optional);
+
+                // Couldn't create the logger specified (it was optional), so continue to the next one.
+                if (centralLogger == null) continue;
 
                 // By default if no forwarding logger description is specified the same logger is used for both functions
                 LoggerDescription forwardingLoggerDescription = centralLoggerDescription;
@@ -3410,10 +3424,11 @@ namespace Microsoft.Build.CommandLine
         (
             LoggerDescription loggerDescription,
             LoggerVerbosity verbosity,
-            string unquotedParameter
+            string unquotedParameter,
+            bool optional
         )
         {
-            ILogger logger = null;
+            ILogger logger;
 
             try
             {
@@ -3423,27 +3438,33 @@ namespace Microsoft.Build.CommandLine
             }
             catch (IOException e)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                HandleLoggerCreationError(verbosity, unquotedParameter, optional, e, messageResource: "LoggerCreationError", showStackTrace:false);
+                return null;
             }
             catch (BadImageFormatException e)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                HandleLoggerCreationError(verbosity, unquotedParameter, optional, e, messageResource: "LoggerCreationError", showStackTrace: false);
+                return null;
             }
             catch (SecurityException e)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                HandleLoggerCreationError(verbosity, unquotedParameter, optional, e, messageResource: "LoggerCreationError", showStackTrace: false);
+                return null;
             }
             catch (ReflectionTypeLoadException e)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                HandleLoggerCreationError(verbosity, unquotedParameter, optional, e, messageResource: "LoggerCreationError", showStackTrace: false);
+                return null;
             }
             catch (MemberAccessException e)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                HandleLoggerCreationError(verbosity, unquotedParameter, optional, e, messageResource: "LoggerCreationError", showStackTrace: false);
+                return null;
             }
             catch (TargetInvocationException e)
             {
-                InitializationException.Throw("LoggerFatalError", unquotedParameter, e.InnerException, true);
+                HandleLoggerCreationError(verbosity, unquotedParameter, optional, e.InnerException, messageResource: "LoggerFatalError", showStackTrace: true);
+                return null;
             }
 
             // Configure the logger by setting the verbosity level and parameters
@@ -3466,10 +3487,40 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception e)
             {
-                InitializationException.Throw("LoggerFatalError", unquotedParameter, e, true);
+                HandleLoggerCreationError(verbosity, unquotedParameter, optional, e, "LoggerFatalError", true);
+                return null;
             }
 
             return logger;
+        }
+
+        private static void HandleLoggerCreationError(LoggerVerbosity verbosity, string unquotedParameter,
+            bool optional, Exception exceptionToThrow, string messageResource, bool showStackTrace)
+        {
+            if (optional)
+            {
+                // Format the informational message and write it if we're above normal verbosity
+                if (verbosity > LoggerVerbosity.Normal)
+                {
+                    string errorMessage = AssemblyResources.GetString("OptionalLoggerCreationMessage");
+                    if (showStackTrace)
+                    {
+                        errorMessage += Environment.NewLine + exceptionToThrow;
+                    }
+                    else
+                    {
+                        // the exception message can contain a format item i.e. "{0}" to hold the given exception's message
+                        errorMessage = ResourceUtilities.FormatString(errorMessage, exceptionToThrow.Message);
+                    }
+
+                    Console.WriteLine(errorMessage);
+                }
+            }
+            else if (exceptionToThrow != null)
+            {
+                // The logger was not optional, we need to throw
+                InitializationException.Throw(messageResource, unquotedParameter, exceptionToThrow.InnerException, showStackTrace);
+            }
         }
 
         private static void ReplayBinaryLog
