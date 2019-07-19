@@ -33,6 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyTitleAttribute Condition="'$(GenerateAssemblyTitleAttribute)' == ''">true</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute Condition="'$(GenerateAssemblyVersionAttribute)' == ''">true</GenerateAssemblyVersionAttribute>
     <GenerateNeutralResourcesLanguageAttribute Condition="'$(GenerateNeutralResourcesLanguageAttribute)' == ''">true</GenerateNeutralResourcesLanguageAttribute>
+    <GenerateAssemblyMetadataAttributes Condition="'$(GenerateAssemblyMetadataAttributes)' == ''">true</GenerateAssemblyMetadataAttributes>
     <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
@@ -94,6 +95,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguageAttribute" Condition="'$(NeutralLanguage)' != '' and '$(GenerateNeutralResourcesLanguageAttribute)' == 'true'">
         <_Parameter1>$(NeutralLanguage)</_Parameter1>
       </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadata" Condition="%(AssemblyMetadata.Identity) != '' and '$(GenerateAssemblyMetadataAttributes)' == 'true'">
+        <_Parameter1>%(AssemblyMetadata.Identity)</_Parameter1>
+        <_Parameter2>%(AssemblyMetadata.Value)</_Parameter2>
+      </AssemblyAttribute>      
     </ItemGroup>
   </Target>
 
