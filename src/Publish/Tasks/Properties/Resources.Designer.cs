@@ -10,9 +10,8 @@
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
     using System;
-    using System.Reflection;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -20,7 +19,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -40,7 +39,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.NET.Sdk.Publish.Tasks.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.NET.Sdk.Publish.Tasks.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -1876,6 +1875,42 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         public static string WEBDEPLOY_MERGE_Succeeded {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_MERGE_Succeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The attempt to publish the ZIP file through {0} failed with HTTP status code {1}..
+        /// </summary>
+        public static string ZIPDEPLOY_FailedDeploy {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_FailedDeploy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to retrieve credentials..
+        /// </summary>
+        public static string ZIPDEPLOY_FailedToRetrieveCred {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_FailedToRetrieveCred", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Neither SiteName nor PublishUrl was given a value..
+        /// </summary>
+        public static string ZIPDEPLOY_InvalidSiteNamePublishUrl {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_InvalidSiteNamePublishUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publishing {0} to {1}....
+        /// </summary>
+        public static string ZIPDEPLOY_PublishingZip {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_PublishingZip", resourceCulture);
             }
         }
     }

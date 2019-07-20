@@ -1155,4 +1155,18 @@ For more information on this deploy script visit:	https://go.microsoft.com/fwlin
   <data name="WebConfigTransform_InvalidHostingOption" xml:space="preserve">
     <value>In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to at least AspNetCoreModuleV2.</value>
   </data>
+  <data name="ZIPDEPLOY_InvalidSiteNamePublishUrl" xml:space="preserve">
+    <value>Neither SiteName nor PublishUrl was given a value.</value>
+  </data>
+  <data name="ZIPDEPLOY_PublishingZip" xml:space="preserve">
+    <value>Publishing {0} to {1}...</value>
+    <comment>{0} - Path of zip to publish, {1} - URL to deploy zip</comment>
+  </data>
+  <data name="ZIPDEPLOY_FailedDeploy" xml:space="preserve">
+    <value>The attempt to publish the ZIP file through {0} failed with HTTP status code {1}.</value>
+    <comment>{0} - URL to deploy zip, {1} - HTTP response code</comment>
+  </data>
+  <data name="ZIPDEPLOY_FailedToRetrieveCred" xml:space="preserve">
+    <value>Failed to retrieve credentials.</value>
+  </data>
 </root>
