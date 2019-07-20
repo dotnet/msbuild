@@ -46,6 +46,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup>
     <GenerateRuntimeConfigurationFilesInputs Include="$(ProjectAssetsFile)" />
+    <GenerateRuntimeConfigurationFilesInputs Include="$(ProjectAssetsCacheFile)" />
     <GenerateRuntimeConfigurationFilesInputs Include="$(UserRuntimeConfig)" Condition=" Exists($(UserRuntimeConfig)) " />
   </ItemGroup>
 
@@ -153,7 +154,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputePackageReferencePublish"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition="'$(GenerateDependencyFile)' == 'true'"
-          Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
+          Inputs="$(ProjectAssetsFile);$(ProjectAssetsCacheFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
 
     <ItemGroup>
