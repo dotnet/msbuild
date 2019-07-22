@@ -148,6 +148,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void SimpleP2PBuildOutOfProc()
         {
             var newParameters = _parameters.Clone();
