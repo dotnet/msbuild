@@ -5,21 +5,21 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>b103c4a9c64f62b8d940cc651b41fe774435f478</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-27919-09">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-19372-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>3fcf1dac5531a0a92ce53af4eae4fc42316a0ccf</Sha>
+      <Sha>758a89c36c33310b2573bfa11ee2cc78e020c6c8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-preview8-27919-09">
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-preview8-19372-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>3fcf1dac5531a0a92ce53af4eae4fc42316a0ccf</Sha>
+      <Sha>758a89c36c33310b2573bfa11ee2cc78e020c6c8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview8-27919-09">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview8-19372-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>3fcf1dac5531a0a92ce53af4eae4fc42316a0ccf</Sha>
+      <Sha>758a89c36c33310b2573bfa11ee2cc78e020c6c8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-preview8-27919-09">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-preview8-19372-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>3fcf1dac5531a0a92ce53af4eae4fc42316a0ccf</Sha>
+      <Sha>758a89c36c33310b2573bfa11ee2cc78e020c6c8</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview8.19372.1">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
