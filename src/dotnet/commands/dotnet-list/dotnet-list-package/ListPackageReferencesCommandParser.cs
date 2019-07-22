@@ -19,6 +19,9 @@ namespace Microsoft.DotNet.Cli
                 Create.Option("--outdated",
                               LocalizableStrings.CmdOutdatedDescription,
                               Accept.NoArguments().ForwardAs("--outdated")),
+                Create.Option("--deprecated",
+                              LocalizableStrings.CmdDeprecatedDescription,
+                              Accept.NoArguments().ForwardAs("--deprecated")),
                 Create.Option("--framework",
                               LocalizableStrings.CmdFrameworkDescription,
                               Accept.OneOrMoreArguments()
