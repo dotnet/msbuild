@@ -383,6 +383,11 @@ namespace Microsoft.Build.Shared
         private static string GetProcessFromRunningProcess()
         {
 #if RUNTIME_TYPE_NETCORE
+            if (AssemblyUtilities.EntryAssembly == null)
+            {
+                return Process.GetCurrentProcess().MainModule.FileName;
+            }
+
             return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
 #else
             return Process.GetCurrentProcess().MainModule.FileName;
