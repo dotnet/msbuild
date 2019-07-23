@@ -13,6 +13,9 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>1ff3588d49079733e228a7d34bc06ebc33796bc1</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-preview8-19373-02">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+    </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview8-19373-02">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>1ff3588d49079733e228a7d34bc06ebc33796bc1</Sha>

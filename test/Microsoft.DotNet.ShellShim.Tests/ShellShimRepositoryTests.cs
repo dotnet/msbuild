@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
     public class ShellShimRepositoryTests : TestBase
     {
         private readonly ITestOutputHelper _output;
+        private Lazy<FilePath> _reusedHelloWorldExecutableDll = new Lazy<FilePath>(() => MakeHelloWorldExecutableDll("reused"));
 
         public ShellShimRepositoryTests(ITestOutputHelper output)
         {
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenAnExecutablePathItCanGenerateShimFile()
         {
-            var outputDll = MakeHelloWorldExecutableDll();
+            var outputDll = _reusedHelloWorldExecutableDll.Value;
             var pathToShim = GetNewCleanFolderUnderTempRoot();
             ShellShimRepository shellShimRepository = ConfigBasicTestDependencyShellShimRepository(pathToShim);
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
@@ -76,7 +77,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenAnExecutablePathItCanGenerateShimFileInTransaction()
         {
-            var outputDll = MakeHelloWorldExecutableDll();
+            var outputDll = _reusedHelloWorldExecutableDll.Value;
             var pathToShim = GetNewCleanFolderUnderTempRoot();
             var shellShimRepository = ConfigBasicTestDependencyShellShimRepository(pathToShim);
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
@@ -97,7 +98,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenAnExecutablePathDirectoryThatDoesNotExistItCanGenerateShimFile()
         {
-            var outputDll = MakeHelloWorldExecutableDll();
+            var outputDll = _reusedHelloWorldExecutableDll.Value;
             var extraNonExistDirectory = Path.GetRandomFileName();
             var shellShimRepository = new ShellShimRepository(new DirectoryPath(Path.Combine(TempRoot.Root, extraNonExistDirectory)), GetAppHostTemplateFromStage2());
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
@@ -113,7 +114,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [InlineData(" \"arg with ' quote\" ", new[] { "arg with ' quote" })]
         public void GivenAShimItPassesThroughArguments(string arguments, string[] expectedPassThru)
         {
-            var outputDll = MakeHelloWorldExecutableDll();
+            var outputDll = _reusedHelloWorldExecutableDll.Value;
             var pathToShim = GetNewCleanFolderUnderTempRoot();
             var shellShimRepository = ConfigBasicTestDependencyShellShimRepository(pathToShim);
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
@@ -197,7 +198,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    shellShimRepository.CreateShim(new FilePath("dummy.dll"), new ToolCommandName(shellCommandName));
+                    FilePath targetExecutablePath = _reusedHelloWorldExecutableDll.Value;
+                    shellShimRepository.CreateShim(targetExecutablePath, new ToolCommandName(shellCommandName));
 
                     intendedError();
                     scope.Complete();
@@ -253,7 +255,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
 
-            shellShimRepository.CreateShim(new FilePath("dummy.dll"), new ToolCommandName(shellCommandName));
+            FilePath targetExecutablePath = _reusedHelloWorldExecutableDll.Value;
+            shellShimRepository.CreateShim(targetExecutablePath, new ToolCommandName(shellCommandName));
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().NotBeEmpty();
 
@@ -282,7 +285,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
 
-            shellShimRepository.CreateShim(new FilePath("dummy.dll"), new ToolCommandName(shellCommandName));
+            FilePath targetExecutablePath = _reusedHelloWorldExecutableDll.Value;
+            shellShimRepository.CreateShim(targetExecutablePath, new ToolCommandName(shellCommandName));
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().NotBeEmpty();
 
@@ -318,7 +322,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
 
-            shellShimRepository.CreateShim(new FilePath("dummy.dll"), new ToolCommandName(shellCommandName));
+            FilePath targetExecutablePath = _reusedHelloWorldExecutableDll.Value;
+            shellShimRepository.CreateShim(targetExecutablePath, new ToolCommandName(shellCommandName));
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().NotBeEmpty();
 
