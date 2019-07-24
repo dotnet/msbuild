@@ -192,6 +192,14 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
 
+                string referencedByDefaultAttributeValue = fileElement.Attribute("ReferencedByDefault")?.Value;
+                if (referencedByDefaultAttributeValue != null &&
+                    referencedByDefaultAttributeValue.Equals("false", StringComparison.OrdinalIgnoreCase))
+                {
+                    //  Don't automatically reference this assembly if it has ReferencedByDefault="false"
+                    continue;
+                }
+
                 var dllPath = Path.Combine(targetingPackDllFolder, assemblyName + ".dll");
                 var referenceItem = CreateReferenceItem(dllPath, targetingPack);
 
