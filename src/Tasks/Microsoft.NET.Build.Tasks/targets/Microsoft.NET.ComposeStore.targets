@@ -101,7 +101,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <!-- Resolve phase-->
     <MSBuild Projects="@(PackageReferencesToStore)"
                  Targets="StoreResolver"
-                 Properties="SelfContained=false;MSBuildProjectExtensionsPath=$(ComposeWorkingDir)\%(PackageReferencesToStore.PackageName)_$([System.String]::Copy('%(PackageReferencesToStore.PackageVersion)').Replace('*','-'))\;"
+                 Properties="SelfContained=false;UseAppHost=false;MSBuildProjectExtensionsPath=$(ComposeWorkingDir)\%(PackageReferencesToStore.PackageName)_$([System.String]::Copy('%(PackageReferencesToStore.PackageVersion)').Replace('*','-'))\;"
                  BuildInParallel="$(BuildInParallel)">
       <Output ItemName="ResolvedPackagesFromMapper" TaskParameter="TargetOutputs" />
     </MSBuild>
