@@ -14,9 +14,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- This file is imported by both cross-targeting and inner builds. Set properties that need to be available to both here. -->
 
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <MicrosoftNETBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)..\tools\</MicrosoftNETBuildTasksDirectoryRoot>
-    <MicrosoftNETBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp2.0</MicrosoftNETBuildTasksTFM>
+    <MicrosoftNETBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp2.1</MicrosoftNETBuildTasksTFM>
     <MicrosoftNETBuildTasksTFM Condition=" '$(MicrosoftNETBuildTasksTFM)' == ''">net472</MicrosoftNETBuildTasksTFM>
     <MicrosoftNETBuildTasksDirectory>$(MicrosoftNETBuildTasksDirectoryRoot)$(MicrosoftNETBuildTasksTFM)/</MicrosoftNETBuildTasksDirectory>
     <MicrosoftNETBuildTasksAssembly>$(MicrosoftNETBuildTasksDirectory)Microsoft.NET.Build.Tasks.dll</MicrosoftNETBuildTasksAssembly>
@@ -27,10 +26,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
     <DefaultImplicitPackages>Microsoft.NETCore.App;NETStandard.Library</DefaultImplicitPackages>
   </PropertyGroup>
-
+  
   <!--
      Some versions of Microsoft.NET.Test.Sdk.targets change the OutputType after we've set _IsExecutable and
-     HasRuntimeOutput default in Microsfot.NET.Sdk.BeforeCommon.targets. Refresh these value here for backwards
+     HasRuntimeOutput default in Microsoft.NET.Sdk.BeforeCommon.targets. Refresh these value here for backwards
      compatibilty with that.
    -->
   <PropertyGroup>
@@ -39,8 +38,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(DotnetCliToolTargetFramework)' == '' And '$(BundledNETCoreAppTargetFrameworkVersion)' != ''">
-    <!-- Set the TFM used to restore .NET CLI tools to match the version of .NET Core bundled in the CLI -->
-    <DotnetCliToolTargetFramework>netcoreapp$(BundledNETCoreAppTargetFrameworkVersion)</DotnetCliToolTargetFramework>
+    <!-- Maximum supported target framework for DotnetCliProjectTools is .NET Core 2.2 -->
+    <DotnetCliToolTargetFramework>netcoreapp2.2</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -52,6 +51,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkError" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkWarning" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="NETSdkInformation" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ShowPreviewMessage" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--

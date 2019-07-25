@@ -1,0 +1,250 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Publish.TransformFiles.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask TaskName="TransformWebConfig" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="TransformAppSettings" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="GenerateEFSQLScripts" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="GenerateRunCommandFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="TransformXml" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="GenerateEnvTransform" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+
+  <PropertyGroup>
+    <_DotNetPublishTransformFiles>
+      _TransformWebConfig;
+      _TransformXml;
+      _TransformAppSettings;
+      _GenerateEFSQLScripts;
+      _GenerateRunCommandFile;
+    </_DotNetPublishTransformFiles>
+  </PropertyGroup>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _TransformWebConfig
+  ***********************************************************************************************
+ -->
+  <Target Name="_TransformWebConfig">
+
+    <PropertyGroup>
+      <_IsAspNetCoreProject Condition=" %(ProjectCapability.Identity) == 'AspNetCore' ">true</_IsAspNetCoreProject>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(UseAppHost)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(SelfContained)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' Or '$(RuntimeIdentifier)' == '' ">false</_UseAppHost>
+      <_ExecutableExtension Condition=" '$(_ExecutableExtension)' == '' And $(RuntimeIdentifier.StartsWith('win')) ">.exe</_ExecutableExtension>
+      <_TransformWebConfigForAzure Condition=" '$(PublishProvider)' == 'AzureWebSite' Or '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1' ">true</_TransformWebConfigForAzure>
+    </PropertyGroup>
+    
+
+    <TransformWebConfig
+        Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true' And '$(IsWebConfigTransformDisabled)' != 'true'"
+        TargetPath="$(TargetPath)"
+        PublishDir="$(PublishIntermediateOutputPath)"
+        UseAppHost="$(_UseAppHost)"
+        ExecutableExtension="$(_ExecutableExtension)"
+        IsAzure="$(_TransformWebConfigForAzure)"
+        ProjectGuid="$(ProjectGuid)"
+        IgnoreProjectGuid="$(IgnoreProjectGuid)" 
+        ProjectFullPath="$(MSBuildProjectFullPath)" 
+        SolutionPath="$(SolutionPath)"
+        AspNetCoreModuleName="$(AspNetCoreModuleName)"
+        AspNetCoreHostingModel="$(AspNetCoreHostingModel)"
+        EnvironmentName="$(EnvironmentName)"/> 
+  </Target>
+
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _TransformXml
+  ***********************************************************************************************
+ -->
+  <Target Name="_TransformXml">
+
+    <PropertyGroup>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+      <TransformXmlStackTraceEnabled Condition="'$(TransformXmlStackTraceEnabled)' == ''">true</TransformXmlStackTraceEnabled>
+      <!-- Forcing the property value to be boolean -->
+      <TransformXmlStackTraceEnabled Condition="'$(TransformXmlStackTraceEnabled)' != 'true'">false</TransformXmlStackTraceEnabled>
+      <_WebConfigTransformCompleted Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true' And '$(IsWebConfigTransformDisabled)' != 'true'">true</_WebConfigTransformCompleted>
+      <_WebConfigTransformCompleted Condition="'$(_WebConfigTransformCompleted)' == ''">false</_WebConfigTransformCompleted>
+      <RunXdt Condition="'$(RunXdt)' == ''">$(_WebConfigTransformCompleted)</RunXdt>
+    </PropertyGroup>
+    
+  <PropertyGroup Condition="'$(WebPublishProfileFile)' !=''">
+    <PublishProfileName>$([System.IO.Path]::GetFileNameWithoutExtension($(WebPublishProfileFile)))</PublishProfileName>
+    <PublishProfileDirectory>$([System.IO.Path]::GetDirectoryName($(WebPublishProfileFile)))</PublishProfileDirectory>
+  </PropertyGroup>
+
+<!-- PROJECT LEVEL TRANSFORMS -->
+    
+    <!-- Run the Project transforms first i.e $(MSBuildProjectDirectory)\web.<transform>.config -->
+    <ItemGroup>
+      <!-- Run the transform at the config level e.g: web.Release.config if the configuration is Release-->
+      <ProjectTransforms Condition=" '$(Configuration)' != '' " Include="$(MSBuildProjectDirectory)\web.$(Configuration).config" />
+      <!-- Run the transform at the profile level e.g: web.FolderProfile.config if the profile name is FolderProfile -->
+      <ProjectTransforms Condition=" '$(PublishProfileName)' != '' " Include="$(MSBuildProjectDirectory)\web.$(PublishProfileName).config" />
+      <!-- Run the transform at the environment level e.g: web.staging.config if the $(EnvironmentName) passed to msbuild is staging-->
+      <ProjectTransforms Condition=" '$(EnvironmentName)' != '' " Include="$(MSBuildProjectDirectory)\web.$(EnvironmentName).config" />
+    </ItemGroup>
+
+    <TransformXml Condition=" '%(ProjectTransforms.Identity)' != ''
+                  And Exists('%(ProjectTransforms.Identity)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="%(ProjectTransforms.Identity)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
+
+    <!-- PROFILE LEVEL TRANSFORMS -->
+    
+    <!-- Run the Profile transforms next i.e $(PublishProfileDirectory)\$(PublishProfileName).transform -->
+    <ItemGroup>
+      <!-- Run the transform at the profile level e.g: Properties\PublishProfiles\FolderProfile.transform when the profile name is FolderProfile -->
+      <ProfileTransforms Condition=" '$(PublishProfileName)' != '' " Include="$(PublishProfileDirectory)\$(PublishProfileName).transform" />
+    </ItemGroup>
+
+    <TransformXml Condition=" '%(ProfileTransforms.Identity)' != ''
+                  And Exists('%(ProfileTransforms.Identity)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="%(ProfileTransforms.Identity)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
+
+    <!-- CUSTOM TRANSFORMS -->
+    
+    <!-- Run the Custom transforms next i.e $(CustomTransformFileName) in the project directory first and then run $(CustomTransformFilePath)\$(CustomTransformFileName) -->
+    <ItemGroup>
+      <!-- Run the custom transform file e.g: MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml-->
+      <CustomTransforms Condition=" '$(CustomTransformFileName)' != '' " Include="$(MSBuildProjectDirectory)\$(CustomTransformFileName)" />
+      <!-- Run the custom transform file from any location e.g: c:\temp\MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml
+           and $(CustomTransformDirectory) passed to msbuild is c:\temp\-->
+      <CustomTransforms Condition=" '$(CustomTransformDirectory)' != '' And '$(CustomTransformFileName)' != '' " Include="$(CustomTransformDirectory)\$(CustomTransformFileName)" />
+
+    </ItemGroup>
+
+    <TransformXml Condition=" '%(CustomTransforms.Identity)' != ''
+                  And Exists('%(CustomTransforms.Identity)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="%(CustomTransforms.Identity)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
+
+    <!-- ENVIRONMENT TRANSFORMS -->
+
+    <!-- Transform the environment variables in the web.config with the $(WebConfigEnvironmentVariables) from publish profile or Project -->
+    <ItemGroup>
+      <EnvironmentTransforms Include="$(MSBuildThisFileDirectory)Transforms\EnvironmentWithLocation.transform;$(MSBuildThisFileDirectory)Transforms\EnvironmentNoLocation.transform" />
+    </ItemGroup>
+    
+    <GenerateEnvTransform Condition=" '$(WebConfigEnvironmentVariables)' != '' "
+                          WebConfigEnvironmentVariables = "$(WebConfigEnvironmentVariables)"
+                          EnvTransformTemplatePaths="@(EnvironmentTransforms)"
+                          PublishTempDirectory="$(PublishIntermediateTempPath)">
+                          <Output TaskParameter="GeneratedTransformFullPaths" ItemName="_GeneratedEnvironmentTransforms" />
+    </GenerateEnvTransform>
+
+    <TransformXml Condition=" '%(_GeneratedEnvironmentTransforms.Identity)' != ''
+                  And Exists('%(_GeneratedEnvironmentTransforms.Identity)')
+                  And Exists('$(PublishIntermediateOutputPath)web.config')
+                  And '$(RunXdt)' == 'true'"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="%(_GeneratedEnvironmentTransforms.Identity)"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="false"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(PublishIntermediateTempPath)"
+                  IgnoreError="true"/>
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _TransformAppSettings
+  ***********************************************************************************************
+ -->
+  
+  <Target Name="_TransformAppSettings">
+    <PropertyGroup>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+    </PropertyGroup>
+
+    <TransformAppSettings
+      Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformAppSettingsDisabled)' != 'true' And @(DestinationConnectionStrings) != ''"
+      PublishDirectory="$(PublishIntermediateOutputPath)"
+      ProjectDirectory="$(MSBuildProjectDirectory)"
+      DestinationConnectionStrings="@(DestinationConnectionStrings)"
+      SourceAppSettingsName="$(SourceAppSettingsName)"
+      DestinationAppSettingsName ="$(DestinationAppSettingsName)"
+      EnvironmentName="$(EnvironmentName)"/>
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _GenerateEFSQLScripts
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_GenerateEFSQLScripts">
+    <PropertyGroup>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+      <_EFPublishDirectory Condition="'$(CopyEFSQLScriptsToOutputFolder)' == 'true'">$(PublishIntermediateOutputPath)</_EFPublishDirectory>
+      <_EFPublishDirectory Condition="'$(_EFPublishDirectory)' == ''">$(PublishIntermediateTempPath)</_EFPublishDirectory>
+    </PropertyGroup>
+
+    <GenerateEFSQLScripts
+      Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsGenerateEFSQLScriptsDisabled)' != 'true' And @(EfMigrations) != ''"
+      ProjectDirectory="$(MSBuildProjectDirectory)"
+      EFPublishDirectory="$(_EFPublishDirectory)"
+      EFSQLScriptsFolderName="$(EFSQLScriptsFolderName)"
+      EFMigrations="@(EFMigrations)"
+      EFMigrationsAdditionalArgs="$(EFMigrationsAdditionalArgs)">
+      <Output TaskParameter="EFSQLScripts" ItemName="_EFSQLScripts" />
+    </GenerateEFSQLScripts>
+  </Target>
+
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _GenerateRunCommandFile
+  ***********************************************************************************************
+ -->
+  <Target Name="_GenerateRunCommandFile">
+
+    <PropertyGroup>
+      <_IsWebJobProject Condition=" '$(_IsWebJobProject)' == '' And '$(WebJobName)' != '' And '$(WebJobType)' != '' ">true</_IsWebJobProject>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(UseAppHost)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(SelfContained)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' Or '$(RuntimeIdentifier)' == '' ">false</_UseAppHost>
+      <_ExecutableExtension Condition=" '$(_ExecutableExtension)' == '' And $(RuntimeIdentifier.StartsWith('win')) ">.exe</_ExecutableExtension>
+    </PropertyGroup>
+
+    <GenerateRunCommandFile
+        Condition="'$(_IsWebJobProject)' == 'true' And '$(IsGenerateRunCommandFileDisabled)' != 'true'"
+        ProjectDirectory="$(MSBuildProjectDirectory)"
+        TargetPath="$(TargetPath)"
+        WebJobsDirectory="$(PublishIntermediateOutputPath)\app_data\Jobs\$(WebJobType)\$(WebJobName)\"
+        UseAppHost="$(_UseAppHost)"
+        ExecutableExtension="$(_ExecutableExtension)" />
+  </Target>
+</Project>

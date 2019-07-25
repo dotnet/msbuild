@@ -11,7 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(MSBuildThisFileDirectory)..\build\netstandard1.0\Microsoft.NET.Sdk.Web.ProjectSystem.targets" 
-		Condition="Exists('$(MSBuildThisFileDirectory)..\build\netstandard1.0\Microsoft.NET.Sdk.Web.ProjectSystem.targets')" />
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Web.ProjectSystem.targets" 
+		Condition="Exists('$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Web.ProjectSystem.targets')" />
 
 </Project>

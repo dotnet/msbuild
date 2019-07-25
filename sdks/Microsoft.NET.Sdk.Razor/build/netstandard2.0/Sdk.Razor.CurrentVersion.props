@@ -30,20 +30,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableDefaultRazorGenerateItems Condition="'$(EnableDefaultRazorGenerateItems)'==''">true</EnableDefaultRazorGenerateItems>
 
     <!--
+      Set to true to automatically include Razor (.razor) files in @(RazorComponent) from @(Content).
+    -->
+    <EnableDefaultRazorComponentItems Condition="'$(EnableDefaultRazorComponentItems)'==''">true</EnableDefaultRazorComponentItems>
+
+    <!--
       Set to true to copy RazorGenerate items (.cshtml) to the publish directory.
 
       Typically Razor files are not needed for a published application if they participate in compilation at build-time
       or publish-time. By default, the Razor SDK will suppress the copying of RazorGenerate items to the publish directory.
     -->
     <CopyRazorGenerateFilesToPublishDirectory Condition="'$(CopyRazorGenerateFilesToPublishDirectory)'==''">false</CopyRazorGenerateFilesToPublishDirectory>
-
-    <!--
-      Set to true to copy reference assembly items to the publish directory.
-
-      Typically reference assemblies are not needed for a published application if Razor compilation occurs at build-time
-      or publish-time. By default, the Razor SDK will suppress the copying of reference assemblies to the publish directory.
-    -->
-    <CopyRefAssembliesToPublishDirectory Condition="'$(CopyRefAssembliesToPublishDirectory)'==''">false</CopyRefAssembliesToPublishDirectory>
 
     <!--
     Determines the toolset to use to compile Razor (.cshtml) files. Defaults to 'Implicit' to let the Razor Sdk determine the toolset to use.
@@ -61,17 +58,34 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!--
     Configures the file extension used for generated C# files.
     -->
-    <RazorGenerateOutputFileExtension>.g.cshtml.cs</RazorGenerateOutputFileExtension>
+    <RazorGenerateOutputFileExtension>.g.cs</RazorGenerateOutputFileExtension>
 
+    <!-- Determines if the deps file includes complication context -->
     <PreserveCompilationContext>true</PreserveCompilationContext>
+
+    <!-- Determines if the refs folder is produced as part of build \ publish -->
+    <PreserveCompilationReferences>false</PreserveCompilationReferences>
+
+    <!--
+    List of file extensions that will cause VS to restart the application when RazorSDK is effective.
+    This property affects C# projects targeting 3.0 or later.
+    -->
+    <RazorUpToDateReloadFileTypes>.cs;.razor;.resx;.cshtml</RazorUpToDateReloadFileTypes>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true'">
-    <Content Include="**\*.cshtml" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);$(DefaultWebContentItemExcludes)">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-
+    <Content Include="**\*.cshtml" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);$(DefaultWebContentItemExcludes)" />
+    <Content Include="**\*.razor" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);$(DefaultWebContentItemExcludes)" />
     <None Remove="**\*.cshtml" />
+    <None Remove="**\*.razor" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <EnableRazorSdkContent Condition="'$(EnableRazorSdkContent)' =='' and '$(UsingMicrosoftNETSdkWeb)' == '' ">true</EnableRazorSdkContent>
+  </PropertyGroup>
+
+  <Import 
+    Project="$(MSBuildThisFileDirectory)..\..\Sdk\Sdk.Razor.StaticAssets.ProjectSystem.props"
+    Condition=" '$(EnableRazorSdkContent)' == 'true' " />
 
 </Project>
