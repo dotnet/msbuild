@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netstandard2.0")]
         [InlineData("netcoreapp2.1")]
         [InlineData("netcoreapp3.0")]
-        public void It_builds_a_simple_project(string targetFramework)
+        public void It_builds_a_simple_vb_project(string targetFramework)
         {
             if (targetFramework == "net45" && !TestProject.ReferenceAssembliesAreInstalled("v4.5"))
             {
@@ -164,6 +164,19 @@ namespace Microsoft.NET.Build.Tests
                         ? VBRuntime.Referenced
                         : VBRuntime.Unknown;
             }
+        }
+
+        [WindowsOnlyFact]
+        public void It_builds_a_vb_wpf_app()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+
+            var newCommand = new DotnetCommand(Log, "new", "wpf", "-lang", "vb");
+            newCommand.WorkingDirectory = testDirectory;
+            newCommand.Execute().Should().Pass();
+
+            var buildCommand = new BuildCommand(Log, testDirectory);
+            buildCommand.Execute().Should().Pass();
         }
     }
 }

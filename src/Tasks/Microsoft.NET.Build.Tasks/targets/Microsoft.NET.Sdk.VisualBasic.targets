@@ -103,7 +103,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <VBRuntime>Embed</VBRuntime>
   </PropertyGroup>
 
-  <Target Name="_UseReferencedVBRuntime" Condition="'$(UseReferencedVBRuntime)' == 'true'" AfterTargets="ResolveAssemblyReferences">
+  <!--
+    NOTE: We must hook directly to CoreCompile for compatibility with two phase XAML
+          build. We also must not pull in a dependency on ResolveAssemblyReferences
+          as the generated temporary project for xaml compilation has a hard-coded list
+          of items in ReferencePath, and does not need to run RAR.
+  -->
+  <Target Name="_UseReferencedVBRuntime" Condition="'$(UseReferencedVBRuntime)' == 'true'" BeforeTargets="CoreCompile">
     <PropertyGroup>
       <VBRuntime Condition="'%(ReferencePath.FileName)' == 'Microsoft.VisualBasic'">%(ReferencePath.Identity)</VBRuntime>
     </PropertyGroup>
