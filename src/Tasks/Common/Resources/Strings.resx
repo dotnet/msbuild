@@ -552,4 +552,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1111: Failed to delete output apphost: {0}</value>
     <comment>{StrBegin="NETSDK1111: "}</comment>
   </data>
+  <data name="RuntimePackNotDownloaded" xml:space="preserve">
+    <value>NETSDK1112: The runtime pack for {0} was not downloaded. Try running a NuGet restore with the RuntimeIdentifier '{1}'.</value>
+    <comment>{StrBegin="NETSDK1112: "}</comment>
+  </data>
 </root>

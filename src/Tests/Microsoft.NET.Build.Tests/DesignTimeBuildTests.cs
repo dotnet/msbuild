@@ -68,7 +68,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/3409")]
+        [Fact]
         public void DesignTimeBuildSucceedsAfterRuntimeIdentifierIsChanged()
         {
             TestDesignTimeBuildAfterChange(project =>
@@ -99,6 +99,9 @@ namespace Microsoft.NET.Build.Tests
             //  Add some package references to test more code paths (such as in ResolvePackageAssets)
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
             testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
+
+            //  Use a test-specific packages folder
+            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(p =>
