@@ -476,6 +476,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="new">NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
+      <trans-unit id="RuntimePackNotDownloaded">
+        <source>NETSDK1112: The runtime pack for {0} was not downloaded. Try running a NuGet restore with the RuntimeIdentifier '{1}'.</source>
+        <target state="new">NETSDK1112: The runtime pack for {0} was not downloaded. Try running a NuGet restore with the RuntimeIdentifier '{1}'.</target>
+        <note>{StrBegin="NETSDK1112: "}</note>
+      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: Cesty AdditionalProbingPaths byly zadány pro GenerateRuntimeConfigurationFiles, ale vynechávají se, protože RuntimeConfigDevPath je prázdné.</target>
