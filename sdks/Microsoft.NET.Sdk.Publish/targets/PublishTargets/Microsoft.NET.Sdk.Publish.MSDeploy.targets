@@ -1,0 +1,375 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Publish.MSDeploy.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process to deploy web application projects.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+  ***********************************************************************************************
+  Including the tasks
+  ***********************************************************************************************
+ -->
+  <UsingTask TaskName="MSDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="ImportParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="GetPassword" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+
+  <PropertyGroup>
+    <_DotNetPublishFiles>
+      MSDeployPublish;
+    </_DotNetPublishFiles>
+  </PropertyGroup>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : MSDeployPublish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <MSDeployPublishDependsOn>
+      $(MSDeployPublishDependsOn);
+      _PrepareForMsDeployPublish;
+      _CreateManifestFiles;
+      _CreateParameterFiles;
+    </MSDeployPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="MSDeployPublish" DependsOnTargets="$(MSDeployPublishDependsOn)">
+    <ValidateParameter
+        ParameterName="MsDeployServiceUrl"
+        ParameterValue="$(MsDeployServiceUrl)"/>
+
+    <ValidateParameter
+    ParameterName="DeployIisAppPath"
+    ParameterValue="$(DeployIisAppPath)"/>
+
+    <PropertyGroup>
+      <MSDeployPublishSourceType>manifest</MSDeployPublishSourceType>
+      <MSDeployPublishSourceRoot>$(_MsDeploySourceManifestPath)</MSDeployPublishSourceRoot>
+      <!--Destination is alway a manifest-->
+      <MSDeployPublishDestinationType>auto</MSDeployPublishDestinationType>
+      <MSDeployPublishDestinationRoot></MSDeployPublishDestinationRoot>
+      <PublishEnableLinks Condition="'$(PublishEnableLinks)' == ''"></PublishEnableLinks>
+      <PublishDisableLinks Condition="'$(PublishDisableLinks)' == ''">AppPoolExtension;ContentExtension;CertificateExtension</PublishDisableLinks>
+      <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">10</RetryAttemptsForDeployment>
+      <RetryIntervalForDeployment Condition=" '$(RetryIntervalForDeployment)' == '' ">2000</RetryIntervalForDeployment>
+      <MSDeployUseChecksum Condition=" '$(MSDeployUseChecksum)' == '' ">false</MSDeployUseChecksum>
+      <AllowUntrustedCertificate Condition=" '$(AllowUntrustedCertificate)' == '' ">false</AllowUntrustedCertificate>
+      <EnableOptimisticParameterDefaultValue Condition="$(EnableOptimisticParameterDefaultValue) == ''">true</EnableOptimisticParameterDefaultValue>
+      <!-- Forcing File preview to be a boolean value -->
+      <FilePreview Condition="'$(FilePreview)' != 'true'">false</FilePreview>
+      <NormalizePublishSettings Condition="'$(NormalizePublishSettings)'==''">true</NormalizePublishSettings>
+      <AuthType Condition="'$(AuthType)'==''" >Basic</AuthType>
+      <!-- Supported value for $(MSDeployPublishMethod): WMSVC, RemoteAgent, InProc -->
+      <MSDeployPublishMethod Condition="'$(MSDeployPublishMethod)'==''" >WMSVC</MSDeployPublishMethod>
+      <!-- AppOffline support is enabled by default for WMSVC-->
+      <EnableMSDeployAppOffline Condition="'$(EnableMSDeployAppOffline)' == '' And '$(MSDeployPublishMethod)' == 'WMSVC' ">true</EnableMSDeployAppOffline>
+      <_UseWMSVC>false</_UseWMSVC>
+      <_UseWMSVC Condition="'$(MSDeployPublishMethod)'=='WMSVC'">true</_UseWMSVC>
+      <_UseRemoteAgent>false</_UseRemoteAgent>
+      <_UseRemoteAgent Condition="'$(MSDeployPublishMethod)'=='RemoteAgent'">true</_UseRemoteAgent>
+
+      <!-- UserAgent string sent to msdeploy -->
+      <_MSDeployUserAgentSource>CmdLine</_MSDeployUserAgentSource>
+      <_MSDeployUserAgent>VS$(_MSDeployUserAgentSource)</_MSDeployUserAgent>
+      <!-- MsDeploy Api is not supported for core yet -->
+      <UseMsDeployExe Condition="'$(UseMsDeployExe)' == '' And '$(MSBuildRuntimeType)' == 'Core'">true</UseMsDeployExe>
+    </PropertyGroup>
+
+    <CreateProperty Value="NTLM" Condition="!$(_UseWMSVC) And $(NormalizePublishSettings)">
+      <Output TaskParameter="Value" PropertyName="AuthType"/>
+    </CreateProperty>
+
+    <!-- Normalize service url such as convert a server name to format like https://<server>:8172/msdeploy.axd-->
+    <NormalizeServiceUrl 
+      ServiceUrl="$(MsDeployServiceUrl)" 
+      UseWMSVC="$(_UseWMSVC)" 
+      UseRemoteAgent="$(_UseRemoteAgent)" 
+      SiteName="$(DeployIisAppPath)"
+      Condition="$(NormalizePublishSettings) == 'true'" >
+      <Output TaskParameter="ResultUrl" PropertyName="MsDeployServiceUrl" />
+    </NormalizeServiceUrl>
+
+    <GetPassword
+      EncryptedPassword ="$(EncryptedPassword)"
+      Condition="'$(Password)' == '' And '$(IsGetPasswordEnabled)' == 'true'">
+      <Output TaskParameter="ClearPassword" PropertyName="Password"/>
+    </GetPassword>
+    
+    <!--  Data Passed to MSDeploy -->
+    <ItemGroup>
+      <MsDeploySourceProviderSetting Remove="@(MsDeploySourceProviderSetting)" />
+      <MsDeploySourceProviderSetting Include="$(MSDeployPublishSourceType)">
+        <Path>$(MSDeployPublishSourceRoot)</Path>
+      </MsDeploySourceProviderSetting>
+
+      <MsDeployDestinationProviderSetting Remove="@(MsDeployDestinationProviderSetting)" />
+      <MsDeployDestinationProviderSetting Include="$(MSDeployPublishDestinationType)">
+        <Path>$(MSDeployPublishDestinationRoot)</Path>
+        <ComputerName>$(MsDeployServiceUrl)</ComputerName>
+        <UserName>$(UserName)</UserName>
+        <Password>$(Password)</Password>
+        <EncryptPassword>$(DeployEncryptKey)</EncryptPassword>
+        <IncludeAcls>False</IncludeAcls>
+        <AuthType>$(AuthType)</AuthType>
+      </MsDeployDestinationProviderSetting>
+    </ItemGroup>
+
+    <!-- Additional destination provider settings -->
+    <ItemGroup>
+      <MsDeployAdditionalDestinationProviderSettings Include="$(MSDeployEncryptProviderName)">
+        <Name>WebConfigEncryptProvider</Name>
+        <Value>$(MSDeployWebConfigEncryptProvider)</Value>
+      </MsDeployAdditionalDestinationProviderSettings>
+    </ItemGroup>
+
+    <VSMSDeploy
+        Condition="'$(UseMsdeployExe)' != 'true'"
+        Source="@(MsDeploySourceProviderSetting)"
+        Destination="@(MsDeployDestinationProviderSetting)"
+        DisableLink="$(PublishDisableLinks)"
+        EnableLink="$(PublishEnableLinks)"
+        AllowUntrustedCertificate="$(AllowUntrustedCertificate)"
+        SkipExtraFilesOnServer="$(SkipExtraFilesOnServer)"
+        SkipRuleItems="@(MsDeploySkipRules)"
+        ImportSetParametersItems="$(_MSDeployParametersFilePath)"
+        WhatIf="$(FilePreview)"
+        RetryAttempts="$(RetryAttemptsForDeployment)"
+        RetryInterval="$(RetryIntervalForDeployment)"
+        EnableMSDeployBackup="$(EnableMSDeployBackup)"
+        EnableMSDeployAppOffline="$(EnableMSDeployAppOffline)"
+        AdditionalDestinationProviderOptions="@(MsDeployAdditionalDestinationProviderSettings)"
+        UseChecksum="$(MSDeployUseChecksum)"
+        UserAgent="$(_MSDeployUserAgent)">
+      <Output TaskParameter="Result" PropertyName="_PublishResult" />
+    </VSMSDeploy>
+
+    <ItemGroup>
+      <_EnableRuleListItems Condition="'$(SkipExtraFilesOnServer)' == 'true'" Include="DoNotDeleteRule" />
+      <_EnableRuleListItems Condition="'$(EnableMSDeployAppOffline)' == 'true'" Include="AppOffline" />
+      <_EnableRuleListItems Condition="'$(MSDeployEnableWebConfigEncryptRule)' == 'true'" Include="EncryptWebConfig" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_EnableRuleList>@(_EnableRuleListItems)</_EnableRuleList>
+    </PropertyGroup>
+    
+    <MSdeploy
+          Condition="'$(UseMsdeployExe)' == 'true'"
+          Verb="sync"
+          WhatIf="$(FilePreview)"
+          Source="@(MsDeploySourceProviderSetting)"
+          Destination="@(MsDeployDestinationProviderSetting)"
+          DisableLink="$(PublishDisableLinks)"
+          EnableLink="$(PublishEnableLinks)"
+          EnableRule="$(_EnableRuleList)"
+          AllowUntrusted="$(AllowUntrustedCertificate)"
+          SkipRuleItems="@(MsDeploySkipRules)"
+          ImportSetParametersItems="$(_MSDeployParametersFilePath)"
+          RetryAttempts="$(RetryAttemptsForDeployment)"
+          RetryInterval="$(RetryIntervalForDeployment)"
+          AdditionalDestinationProviderOptions="@(MsDeployAdditionalDestinationProviderSettings)"
+          UseChecksum="$(MSDeployUseChecksum)"
+          UserAgent="$(_MSDeployUserAgent)"
+          ExePath="$(MSDeployPath)" />
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _PrepareForMsDeployPublish
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_PrepareForMsDeployPublish">
+
+    <PropertyGroup>
+      <_MsDeploySourceManifestPath Condition="'$(_MsDeploySourceManifestPath)' == ''">$(PublishIntermediateTempPath)$(MSBuildProjectName).SourceManifest.xml</_MsDeploySourceManifestPath>
+      <_MSDeployParametersFilePath Condition="'$(_MSDeployParametersFilePath)' == ''">$(PublishIntermediateTempPath)$(MSBuildProjectName).Parameters.xml</_MSDeployParametersFilePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_PublishConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath)" />
+    </ItemGroup>
+
+    <MakeDir Directories="$(PublishIntermediateTempPath)" Condition="!Exists('$(PublishIntermediateTempPath)')" ContinueOnError="true"/>
+    <Delete Files="@(_PublishConfigFiles)" ContinueOnError="true" />
+    <Touch AlwaysCreate="true" Files="@(_PublishConfigFiles)" ContinueOnError="true" />
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _CreateManifestFiles
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_CreateManifestFiles">
+
+    <ItemGroup>
+      <MsDeploySourceManifest Remove="@(MsDeploySourceManifest)" />
+
+      <MsDeploySourceManifest Include="IisApp" >
+        <Path>$(PublishIntermediateOutputPath)</Path>
+      </MsDeploySourceManifest>
+    </ItemGroup>
+    
+    <ItemGroup Condition="'@(_EFSQLScripts)' != ''">
+      <MsDeploySourceManifest Include="dbfullsql" >
+        <Path>%(_EFSQLScripts.Identity)</Path>
+      </MsDeploySourceManifest>
+    </ItemGroup>
+
+    <CreateManifestFile
+      Manifests="@(MsDeploySourceManifest)"
+      ManifestFile="$(_MsDeploySourceManifestPath)" />
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _CreateParameterFiles
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_CreateParameterFiles">
+
+    <ItemGroup>
+      <MsDeployDeclareParameters Remove="@(MsDeployDeclareParameters)" />
+
+      <MsDeployDeclareParameters Include="IIS Web Application Name" >
+        <Kind>ProviderPath</Kind>
+        <Scope>IisApp</Scope>
+        <Match>$(PublishIntermediateOutputPath)</Match>
+        <Description></Description>
+        <DefaultValue>$(DeployIisAppPath)</DefaultValue>
+        <Value>$(DeployIisAppPath)</Value>
+        <Tags>IisApp</Tags>
+        <Priority></Priority>
+        <ExcludeFromSetParameter>false</ExcludeFromSetParameter>
+      </MsDeployDeclareParameters>
+    </ItemGroup>
+    
+    <ItemGroup Condition="'@(_EFSQLScripts)' != ''">
+      <MsDeployDeclareParameters Include="%(_EFSQLScripts.DBContext)">
+        <Kind>ProviderPath</Kind>
+        <Scope>dbfullsql</Scope>
+        <Match>%(_EFSQLScripts.Identity)</Match>
+        <Description></Description>
+        <DefaultValue>%(_EFSQLScripts.ConnectionString)</DefaultValue>
+        <Value>%(_EFSQLScripts.ConnectionString)</Value>
+        <Tags>dbfullsql</Tags>
+        <Priority></Priority>
+        <ExcludeFromSetParameter>false</ExcludeFromSetParameter>
+      </MsDeployDeclareParameters>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ParametersXMLFiles Include="$(MSBuildProjectDirectory)\Parameters.xml" 
+                          Condition="Exists('$(MSBuildProjectDirectory)\Parameters.xml')"/>
+    </ItemGroup>
+
+    <ImportParameterFile Condition="'@(ParametersXMLFiles)' != ''" 
+                         Files="@(ParametersXMLFiles)">
+      <Output TaskParameter="Result" 
+              ItemName="_ImportedMSDeployDeclareParameters" />
+    </ImportParameterFile>
+
+    <ItemGroup>
+      <MsDeployDeclareParameters Include="@(_ImportedMSDeployDeclareParameters)"
+                                 Condition="'%(_ImportedMSDeployDeclareParameters.Identity)' !=''">
+        <Value>%(_ImportedMSDeployDeclareParameters.DefaultValue)</Value>
+        <Priority></Priority>
+      </MsDeployDeclareParameters>
+    </ItemGroup>
+
+    <CreateParameterFile
+      Parameters="@(MsDeployDeclareParameters)"
+      DeclareSetParameterFile="$(_MSDeployParametersFilePath)"
+      IncludeDefaultValue="True"
+      GenerateFileEvenIfEmpty="True" />
+
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  Item Definitions
+  ***********************************************************************************************
+ -->
+
+  <ItemDefinitionGroup>
+    <MsDeploySourceProviderSetting>
+      <Path></Path>
+      <ComputerName></ComputerName>
+      <!--<Wmsvc></Wmsvc>  Not supported yet-->
+      <UserName></UserName>
+      <Password></Password>
+      <EncryptPassword></EncryptPassword>
+      <IncludeAcls></IncludeAcls>
+      <authType></authType>
+      <prefetchPayload></prefetchPayload>
+    </MsDeploySourceProviderSetting>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup>
+    <MsDeployDestinationProviderSetting>
+      <Path></Path>
+      <ComputerName></ComputerName>
+      <!--<Wmsvc></Wmsvc>  Not supported yet-->
+      <UserName></UserName>
+      <Password></Password>
+      <EncryptPassword></EncryptPassword>
+      <IncludeAcls></IncludeAcls>
+      <authType></authType>
+      <prefetchPayload></prefetchPayload>
+    </MsDeployDestinationProviderSetting>
+  </ItemDefinitionGroup>
+
+  <!--
+  DeploymentSkipRule(string skipAction, string objectName, string absolutePath, string XPath);-->
+  <ItemDefinitionGroup>
+    <MsDeploySkipRules>
+      <SkipAction></SkipAction>
+      <ObjectName></ObjectName>
+      <AbsolutePath></AbsolutePath>
+      <XPath></XPath>
+      <KeyAttribute></KeyAttribute>
+      <!--Source, Destination, Both(the default)-->
+      <Apply></Apply>
+    </MsDeploySkipRules>
+  </ItemDefinitionGroup>
+
+  <!-- AdditionalProviderSettings denote the additionProviderSetting need to be set in the manifest files-->
+  <ItemDefinitionGroup>
+    <MsDeploySourceManifest>
+      <Path>Unknown</Path>
+      <AdditionalProviderSettings></AdditionalProviderSettings>
+    </MsDeploySourceManifest>
+  </ItemDefinitionGroup>
+
+  <!--
+  DeploymentParameter(string name, string type, string scope, string match, string description, string defaultValue); -->
+  <ItemDefinitionGroup>
+    <MsDeployDeclareParameters>
+      <Kind></Kind>
+      <Scope></Scope>
+      <Match></Match>
+      <Description></Description>
+      <DefaultValue></DefaultValue>
+      <Tags></Tags>
+      <ExcludeFromSetParameter></ExcludeFromSetParameter>
+    </MsDeployDeclareParameters>
+  </ItemDefinitionGroup>
+
+</Project>

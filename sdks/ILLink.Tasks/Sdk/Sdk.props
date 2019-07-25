@@ -1,0 +1,25 @@
+<!--
+***********************************************************************************************
+Sdk.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0">
+
+  <PropertyGroup>
+    <_ILLinkTasksDirectoryRoot Condition=" '$(_ILLinkTasksDirectoryRoot)' == '' ">$(MSBuildThisFileDirectory)../tools/</_ILLinkTasksDirectoryRoot>
+    <_ILLinkTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core' ">netcoreapp2.0</_ILLinkTasksTFM>
+    <_ILLinkTasksTFM Condition=" '$(_ILLinkTasksTFM)' == '' ">net472</_ILLinkTasksTFM>
+    <_ILLinkTasksDirectory>$(_ILLinkTasksDirectoryRoot)$(_ILLinkTasksTFM)/</_ILLinkTasksDirectory>
+    <ILLinkTasksAssembly Condition=" '$(ILLinkTasksAssembly)' == '' ">$(_ILLinkTasksDirectory)ILLink.Tasks.dll</ILLinkTasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ILLink.Tasks.ILLink" AssemblyFile="$(ILLinkTasksAssembly)" />
+  <UsingTask TaskName="ILLink.Tasks.ComputeManagedAssemblies" AssemblyFile="$(ILLinkTasksAssembly)" />
+
+</Project>

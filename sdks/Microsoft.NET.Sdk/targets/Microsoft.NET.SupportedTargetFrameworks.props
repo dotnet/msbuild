@@ -13,16 +13,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 <!-- This file contains a list of the TFMs that are supported by this SDK for .NET Core and .NET Standard.
      This is used by VS to show the list of frameworks to which projects can be retargeted. -->
 <Project>
-    <PropertyGroup>
-        <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    </PropertyGroup>
-
     <!-- .NET Core -->
     <ItemGroup>
         <SupportedTargetFramework Include=".NETCoreApp,Version=v1.0" DisplayName=".NET Core 1.0" />
         <SupportedTargetFramework Include=".NETCoreApp,Version=v1.1" DisplayName=".NET Core 1.1" />
         <SupportedTargetFramework Include=".NETCoreApp,Version=v2.0" DisplayName=".NET Core 2.0" />
         <SupportedTargetFramework Include=".NETCoreApp,Version=v2.1" DisplayName=".NET Core 2.1" />
+        <SupportedTargetFramework Include=".NETCoreApp,Version=v2.2" DisplayName=".NET Core 2.2" />
+        <SupportedTargetFramework Include=".NETCoreApp,Version=v3.0" DisplayName=".NET Core 3.0" />
     </ItemGroup>
 
     <!-- .NET Standard -->
@@ -35,5 +33,6 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedTargetFramework Include=".NETStandard,Version=v1.5" DisplayName=".NET Standard 1.5" />
         <SupportedTargetFramework Include=".NETStandard,Version=v1.6" DisplayName=".NET Standard 1.6" />
         <SupportedTargetFramework Include=".NETStandard,Version=v2.0" DisplayName=".NET Standard 2.0" />
+        <SupportedTargetFramework Include=".NETStandard,Version=v2.1" DisplayName=".NET Standard 2.1" />
     </ItemGroup>
 </Project>

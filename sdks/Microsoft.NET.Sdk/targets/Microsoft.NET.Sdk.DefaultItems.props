@@ -18,7 +18,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(NETCoreSdkBundledVersionsProps)" Condition="Exists('$(NETCoreSdkBundledVersionsProps)')" />
 
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <!-- Disable web SDK implicit package versions for ASP.NET packages, since the .NET SDK now handles that -->
+    <EnableWebSdkImplicitPackageVersions>false</EnableWebSdkImplicitPackageVersions>
   </PropertyGroup>
 
 
@@ -35,7 +36,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Automatically reference NETStandard.Library or Microsoft.NETCore.App package if targeting the corresponding target framework.
       We can refer here in the .props file to properties set in the .targets files because items and their conditions are
       evaluated in the second pass of evaluation, after all properties have been evaluated. -->
-  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard'">
+  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1'">
     <PackageReference Include="NETStandard.Library" Version="$(NETStandardImplicitPackageVersion)" IsImplicitlyDefined="true" />
 
     <!-- If targeting .NET Standard 2.0 or higher, then don't include a dependency on NETStandard.Library in the package produced by pack -->
@@ -44,16 +45,30 @@ Copyright (c) .NET Foundation. All rights reserved.
                       PrivateAssets="All" 
                       Publish="true" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(_TargetFrameworkVersionWithoutV)' >= '2.1'">
+    <FrameworkReference Include="NETStandard.Library" IsImplicitlyDefined="true" Pack="false" PrivateAssets="All"/>
+  </ItemGroup>
 
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(RuntimeFrameworkVersion)" IsImplicitlyDefined="true" />
+    
+    <!-- Use implicit PackageReference for Microsoft.NETCore.App on versions prior to 3.0.  For 3.0 or higher, use
+         an implicit FrameworkReference -->
+    
+    <PackageReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true" 
+                      Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0')"/>
 
-    <!-- For libraries targeting .NET Core 2.0 or higher, don't include a dependency on Microsoft.NETCore.App in the package produced by pack.
-         Packing an app (for example a .NET CLI tool) should include the Microsoft.NETCore.App package dependency. -->
+    <!-- For targeting .NET Core 2.0 or higher, don't include a dependency on Microsoft.NETCore.App in the package produced by pack.
+         Packing an DotnetCliTool should include the Microsoft.NETCore.App package dependency. -->
     <PackageReference Update="Microsoft.NETCore.App"
-                      Condition="('$(OutputType)' != 'Exe') And ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0')"
+                      Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0') And ('$(PackageType)' != 'DotnetCliTool')"
                       PrivateAssets="All"
-                      Publish="true" />    
+                      Publish="true" />
+
+    <FrameworkReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true"
+                        Pack="false"
+                        PrivateAssets="All"
+                    Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
+
   </ItemGroup>
 
 </Project>

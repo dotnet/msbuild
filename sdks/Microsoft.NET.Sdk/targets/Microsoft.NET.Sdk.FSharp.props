@@ -12,10 +12,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup> 
-
   <!-- If any of these variables are set then we are building under the FSharp.NET.Sdk so use their logic -->
   <PropertyGroup Condition = "'$(UseBundledFSharpTargets)' == '' ">
     <!-- If any of these variables are set then we are building under the FSharp.NET.Sdk so use their logic -->

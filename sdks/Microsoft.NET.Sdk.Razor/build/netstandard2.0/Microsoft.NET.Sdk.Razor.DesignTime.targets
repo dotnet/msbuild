@@ -12,6 +12,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project ToolsVersion="14.0">
 
+  <PropertyGroup>
+    <!--
+      Defines the list of file extensions that VS will monitor to reload the application.
+      We'll only define these for C# projects targeting RazorLangVersion 3.0 or later, and let VS use defaults in other cases.
+    -->
+    <UpToDateReloadFileTypes Condition="'$(Language)'=='C#' AND '$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(RazorUpToDateReloadFileTypes)' == ''">$(UpToDateReloadFileTypes);$(RazorUpToDateReloadFileTypes)</UpToDateReloadFileTypes>
+  </PropertyGroup>
+
   <ItemGroup>
     <!--
       Defines the generic .NET Core 'Razor' capability.
@@ -21,6 +29,31 @@ Copyright (c) .NET Foundation. All rights reserved.
       we use the lack of the capability to detect downlevel scenarios.
     -->
     <ProjectCapability Include="DotNetCoreRazor"/>
+
+    <!--
+      Defines the ability to understand the configuration for the Razor language service provided by
+      the runtime/toolset packages. Introduced in 2.1
+    -->
+    <ProjectCapability Include="DotNetCoreRazorConfiguration" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true'"/>
+
+    <!--
+      Activates the set of nesting behaviors we want from solution explorer.
+    -->
+    <ProjectCapability Include="WebNestingDefaults" />
+  </ItemGroup>
+
+  <!-- 
+    For now we need to treat component files as if they have a single file generator. This will allow us
+    to trigger a workspace update for the declaration files when they change.
+  -->
+  <ItemGroup>
+    <Content Update="**\*.razor">
+      <Generator>MSBuild:RazorGenerateComponentDeclarationDesignTime</Generator>
+    </Content>
+
+    <Content Update="$(_RazorComponentInclude)">
+      <Generator>MSBuild:RazorGenerateComponentDeclarationDesignTime</Generator>
+    </Content>
   </ItemGroup>
 
   <!--
@@ -43,6 +76,40 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyPageSchema Include="$(MSBuildThisFileDirectory)Rules\RazorGeneral.xaml">
       <Context>Project</Context>
     </PropertyPageSchema>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)Rules\RazorGenerateWithTargetPath.xaml">
+      <Context>Project</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)Rules\RazorComponentWithTargetPath.xaml">
+      <Context>Project</Context>
+    </PropertyPageSchema>
   </ItemGroup>
+
+  <Target 
+    Name="RazorGenerateDesignTime" 
+    DependsOnTargets="ResolveRazorGenerateInputs;AssignRazorGenerateTargetPaths" 
+    Returns="@(RazorGenerateWithTargetPath)">
+  </Target>
+
+  <!--
+    Using DependsOnTargets here because real dependencies of this target aren't defined in
+    a downlevel (pre-3.0) SDK.
+  -->
+  <Target 
+    Name="RazorGenerateComponentDesignTime" 
+    DependsOnTargets="$(_RazorGenerateComponentDesignTimeDependsOn)" 
+    Returns="@(RazorComponentWithTargetPath)">
+  </Target>
+
+
+  <!--
+    Using DependsOnTargets here because real dependencies of this target aren't defined in
+    a downlevel (pre-3.0) SDK.
+
+    Called by the project system to update generated declaration files
+  -->
+  <Target 
+    Name="RazorGenerateComponentDeclarationDesignTime" 
+    DependsOnTargets="$(_RazorGenerateComponentDeclarationDesignTimeDependsOn)">
+  </Target>
 
 </Project>
