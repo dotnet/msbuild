@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -161,7 +162,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         ~TaskExecutionHost()
         {
-            // Debug.Fail("Unexpected finalization.  Dispose should already have been called.");
+            Debug.Fail("Unexpected finalization.  Dispose should already have been called.");
             Dispose(false);
         }
 
