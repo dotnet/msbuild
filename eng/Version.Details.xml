@@ -15,5 +15,9 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>5d8d5e866113c9f144136a04222f191456dfff1d</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-preview7-27902-19">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>fbe9466dddee8b3bbde6b706598d8f83802d08ce</Sha>
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
