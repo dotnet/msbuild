@@ -20,6 +20,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] SatelliteResourceLanguages { get; set; } = Array.Empty<ITaskItem>();
 
+        public bool DesignTimeBuild { get; set; }
+
         [Output]
         public ITaskItem[] RuntimePackAssets { get; set; }
 
@@ -54,11 +56,15 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (string.IsNullOrEmpty(runtimePackRoot) || !Directory.Exists(runtimePackRoot))
                 {
-                    //  If we do the work in https://github.com/dotnet/cli/issues/10528,
-                    //  then we should add a new error message here indicating that the runtime pack hasn't
-                    //  been downloaded, and that restore should be run with that runtime identifier.
-                    Log.LogError(Strings.NoRuntimePackAvailable, runtimePack.ItemSpec,
-                        runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+                    if (!DesignTimeBuild)
+                    {
+                        //  Don't treat this as an error if we are doing a design-time build.  This is because the design-time
+                        //  build needs to succeed in order to get the right information in order to run a restore to download
+                        //  the runtime pack.
+                        Log.LogError(Strings.RuntimePackNotDownloaded, runtimePack.ItemSpec,
+                            runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+                    }
+                    continue;
                 }
 
                 if (!processedRuntimePackRoots.Add(runtimePackRoot))
