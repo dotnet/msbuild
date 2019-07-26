@@ -186,6 +186,57 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal("WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
         }
 
+        [Fact]
+        public void VerifyP2PHaveCorrectMetadataWinMDStaticLib()
+        {
+            // Create the engine.
+            MockEngine engine = new MockEngine(_output);
+            TaskItem taskItem = new TaskItem(@"C:\WinMD\SampleWindowsRuntimeOnly.Winmd");
+
+            taskItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, "SampleWindowsRuntimeOnly.lib");
+
+            ITaskItem[] assemblyFiles = new TaskItem[]
+            {
+                taskItem
+            };
+
+            // Now, pass feed resolved primary references into ResolveAssemblyReference.
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = engine;
+            t.AssemblyFiles = assemblyFiles;
+            t.TargetProcessorArchitecture = "X86";
+            t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
+            bool succeeded = Execute(t);
+
+            Assert.True(succeeded);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.RelatedFiles);
+
+            bool priFound = false;
+
+            foreach (ITaskItem item in t.RelatedFiles)
+            {
+                if (item.ItemSpec.EndsWith(@"C:\WinMD\SampleWindowsRuntimeOnly.pri"))
+                {
+                    priFound = true;
+
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime));
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winMDFile));
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+                }
+            }
+
+            Assert.True(priFound); // "Expected to find .pri related files but NOT the ."
+            Assert.Empty(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
+            Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
+            Assert.Equal("Native", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFileType));
+            Assert.Equal("SampleWindowsRuntimeOnly.lib", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+            Assert.Equal("WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
+        }
+
         /// <summary>
         /// When a project to project reference is passed in we want to verify that
         /// the winmd references get the correct metadata applied to them
