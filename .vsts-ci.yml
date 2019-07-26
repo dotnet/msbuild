@@ -4,22 +4,26 @@ trigger:
 
 variables:
   _TeamName: Roslyn-Project-System
+  _DotNetArtifactsCategory: .NETCore
   ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    PB_PublishBlobFeedKey:
     PB_PublishBlobFeedUrl:
     _DotNetPublishToBlobFeed: false
+    _PublishUsingPipelines: false
     _PublishType: none
   ${{ if ne(variables['System.TeamProject'], 'public') }}:
     PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-toolset/index.json
     _DotNetPublishToBlobFeed: true
+    _PublishUsingPipelines: true
     _PublishType: blob
 
 jobs:
 - template: /eng/build.yml
   parameters:
     agentOs: Windows_NT
-    queue:
+    pool:
       name: Hosted VS2017
-      parallel: 99
+    strategy:
       matrix:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           Build_Debug_x86:
@@ -33,9 +37,9 @@ jobs:
   - template: /eng/build.yml
     parameters:
       agentOs: Linux
-      queue:
+      pool:
         name: Hosted Ubuntu 1604
-        parallel: 99
+      strategy:
         matrix:
           Build_Ubuntu_14_04_Release_x64:
             _BuildConfig: Release
@@ -107,8 +111,9 @@ jobs:
   - template: /eng/build.yml
     parameters:
       agentOs: Darwin
-      queue:
+      pool:
         name: Hosted macOS
+      strategy:
         matrix:
           Build_Release:
             _BuildConfig: Release
@@ -116,6 +121,7 @@ jobs:
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/phases/publish-build-assets.yml
     parameters:
+      publishUsingPipelines: true
       dependsOn:
         - Windows_NT
       queue:
