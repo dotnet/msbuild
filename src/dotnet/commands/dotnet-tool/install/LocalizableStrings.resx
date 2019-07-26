@@ -185,7 +185,9 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
 * You are attempting to install a preview release and did not use the --version option to specify the version.
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</value>
+* You mistyped the name of the tool.
+
+For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</value>
   </data>
   <data name="ToolInstallationFailedContactAuthor" xml:space="preserve">
     <value>Tool '{0}' failed to install. Contact the tool author for assistance.</value>
