@@ -377,7 +377,8 @@ Copyright (c) .NET Foundation. All rights reserved.
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="RunProduceContentAssets"
-          DependsOnTargets="ResolvePackageAssets">
+          DependsOnTargets="ResolvePackageAssets"
+          Condition="'@(_ContentFilesToPreprocess)' != ''">
 
     <ProduceContentAssets
       ContentFileDependencies="@(_ContentFilesToPreprocess)"
