@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -30,6 +29,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal("i", target.Inputs);
             Assert.Equal("o", target.Outputs);
             Assert.Equal("d", target.DependsOnTargets);
+            Assert.Equal("b", target.BeforeTargets);
+            Assert.Equal("a", target.AfterTargets);
             Assert.Equal("k", target.KeepDuplicateOutputs);
             Assert.Equal("r", target.Returns);
             Assert.Equal("t1", ((ProjectTaskInstance)target.Children[0]).Name);
@@ -133,7 +134,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <Target Name='t' Inputs='i' Outputs='o' Condition='c' DependsOnTargets='d' KeepDuplicateOutputs='k' Returns='r'>
+                        <Target Name='t' Inputs='i' Outputs='o' Condition='c' DependsOnTargets='d' BeforeTargets='b' AfterTargets='a' KeepDuplicateOutputs='k' Returns='r'>
                             <t1/>
                         </Target>
                     </Project>

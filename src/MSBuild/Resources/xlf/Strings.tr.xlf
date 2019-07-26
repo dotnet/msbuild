@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="CannotAutoDisableAutoResponseFile">
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
-        <target state="translated">MSBUILD : hata MSB1027: -noAutoResponse anahtarı, MSBuild.rsp otomatik yanıt dosyasında ve bu dosyanın başvuruda bulunduğu herhangi bir yanıt dosyasında belirtilemez.</target>
+        <target state="translated">MSBUILD : error MSB1027: -noAutoResponse anahtarı, MSBuild.rsp otomatik yanıt dosyasında ve bu dosyanın başvuruda bulunduğu herhangi bir yanıt dosyasında belirtilemez.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="CopyrightMessage">
@@ -34,7 +34,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="translated">MSBUILD : hata MSB1058: Yalnızca bir çıkış sonuçları önbelleği belirtilebilir.</target>
+        <target state="translated">MSBUILD : error MSB1058: Yalnızca bir çıkış sonuçları önbelleği belirtilebilir.</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
@@ -241,14 +241,14 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;file&gt;            Bir metin dosyasından komut satırı ayarlarını ekler. Birden fazla
-                     yanıt dosyası belirtmek için her bir yanıt dosyasını
-                     ayrı ayrı belirtin.
+        <target state="translated">  @&lt;dosya&gt;            Komut satırı ayarlarını bir metin dosyasından ekler.
+                     Birden çok yanıt dosyası belirtmek için her
+                     yanıt dosyasını ayrı ayrı belirtin.
 
-                     "msbuild.rsp" adlı tüm yanıt dosyaları
-                     aşağıdaki konumlardan otomatik olarak kullanılır:
-                     (1) msbuild.exe dizini
-                     (2) derlenen birinci proje veya çözümün dizini
+                     Aşağıdaki konumlardaki "msbuild.rsp" adlı yanıt
+                     dosyaları otomatik olarak kullanılır:
+                     (1) msbuild.exe dosyasının dizini
+                     (2) derlenen ilk projenin veya çözümün dizini
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -282,9 +282,9 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;targets&gt;  Bu hedefleri bu projede oluşturur. Birden fazla hedefi ayırmak için
-                     noktalı virgül ya da virgül kullanın veya her bir
-                     hedefi ayrı ayrı belirtin. (Kısa biçim: -t)
+        <target state="translated">  -target:&lt;hedefler&gt;  Bu projede bu hedefleri oluşturur. Birden çok hedefi
+                     ayırmak için noktalı virgül veya virgül kullanın
+                     ya da her hedefi ayrı ayrı belirtin. (Kısa biçim: -t)
                      Örnek:
                        -target:Resources;Compile
 </target>
@@ -305,10 +305,10 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Bu proje düzeyi özelliklerini ayarlar veya geçersiz kılar. &lt;n&gt;
-                     özellik adı ve &lt;v&gt; özellik değeridir. Birden fazla
-                     özelliği ayırmak için noktalı virgül veya virgül kullanın
-                     ya da her bir özelliği ayrı ayrı belirtin. (Kısa biçim: -p)
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Bu proje düzeyi özellikleri ayarlayın veya geçersiz kılın. &lt;n&gt; 
+                     özelliğin adı ve &lt;v&gt; özelliğin değeridir. Birden çok
+                     özelliği birbirinden ayırmak için noktalı virgül veya virgül
+                     kullanın veya her özelliği ayrı ayrı belirtin. (Kısa biçim: -p)
                      Örnek:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </target>
@@ -336,18 +336,20 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;logger&gt;   MSBuild olaylarını günlüğe kaydetmek için bu günlükçüyü kullanın. Birden fazla
-                     günlükçü belirtmek için her bir günlükçüyü ayrı ayrı belirtin.
-                     &lt;logger&gt; söz dizimi:
-                       [&lt;günlükçü sınıfı&gt;,]&lt;günlükçü bütünleştirilmiş kodu&gt;[;&lt;günlükçü parametreleri&gt;]
-                     &lt;günlükçü sınıfı&gt; söz dizimi:
+        <target state="translated">  -logger:&lt;günlükçü&gt; MSBuild'daki olayları günlüğe almak için bu günlükçüyü 
+                     kullanın. Birden çok günlükçü belirtmek için, her 
+                     günlükçüyü ayrı ayrı belirtin.
+                     &lt;günlükçü&gt; söz dizimi şöyledir:
+                       [&lt;günlükçü sınıfı&gt;,]&lt;günlükçü derlemesi&gt;
+                       [;&lt;günlükçü parametreleri&gt;]
+                     &lt;günlükçü sınıfı&gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
-                     &lt;günlükçü bütünleştirilmiş kodu&gt; söz dizimi:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     &lt;logger parameters&gt; isteğe bağlıdır ve günlükçüye
-                     tam olarak yazdığınız şekilde geçirilir. (Kısa biçim: -l)
+                     &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
+                       {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                     &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve tam olarak
+                     yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
                      Örnekler:
-                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
         <note>
@@ -366,11 +368,11 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -verbosity:quiet
 </source>
-        <target state="translated">  -verbosity:&lt;level&gt; Bu bilgi miktarını olay günlüğünde gösterir.
-                     Kullanılabilir ayrıntı düzeyleri: q[uiet], m[inimal],
+        <target state="translated">  -verbosity:&lt;düzey&gt; Olay günlüğünde bu miktarda bilgi görüntüler.
+                     Kullanılabilen ayrıntı düzeyleri: q[uiet], m[inimal],
                      n[ormal], d[etailed] ve diag[nostic]. (Kısa biçim: -v)
                      Örnek:
-                       -verbosity:quiet
+                       /verbosity:quiet
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -417,39 +419,39 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Konsol günlükçüsü parametreleri. (Kısa biçim: -clp)
+        <target state="translated">  -consoleLoggerParameters:&lt;parametreler&gt;
+                     Konsol günlükçüsü için parametreler. (Kısa biçim: -clp)
                      Kullanılabilir parametreler:
-                        PerformanceSummary--Görevlerde, hedeflerde ve
-                            projelerde harcanan süreyi gösterir.
-                        Summary--Hata ve uyarı özetini sonda gösterir.
-                        NoSummary--Hata ve uyarı özetini sonda
-                            göstermez.
-                        ErrorsOnly--Yalnızca hataları gösterir.
-                        WarningsOnly--Yalnızca uyarıları gösterir.
-                        NoItemAndPropertyList--Öğe ve özellik listesini
-                            her bir proje yapısının başlangıcında göstermez.
-                        ShowCommandLine--TaskCommandLineEvent iletilerini gösterir
-                        ShowTimestamp--Zaman Damgasını herhangi bir iletinin
-                            ön eki olarak gösterir.
-                        ShowEventId--Başlatılan olaylar, biten olaylar
-                            ve iletiler için olay kimliğini gösterir
-                        ForceNoAlign--Metni konsol ara belleğinin
-                            boyutu ile hizalamaz
+                        PerformanceSummary--Görevlerde, hedeflerde ve 
+                            projelerde harcanan süreyi göster.
+                        Summary--Sonda hata ve uyarı özetini göster.
+                        NoSummary--Sonda hata ve uyarı özetini gösterme.
+                        ErrorsOnly--Yalnızca hataları göster.
+                        WarningsOnly--Yalnızca uyarıları göster.
+                        NoItemAndPropertyList--Her proje derlemesinin
+                            başında öğe ve özelliklerin listesini gösterme. 
+                        ShowCommandLine--TaskCommandLineEvent iletilerini 
+                            göster.
+                        ShowTimestamp--Tüm iletilerde önek olarak Zaman
+                            Damgasını göster.
+                        ShowEventId--Başlatılan olaylar, bitirilen olaylar ve 
+                            iletiler için eventId'yi göster.
+                        ForceNoAlign--Metni konsol arabelleğinin boyutuna göre
+                            ayarlama.
                         DisableConsoleColor--Tüm günlük iletileri için
-                            varsayılan konsol renklerini kullanır.
-                        DisableMPLogging-- Çok işlemcili olmayan modda çalışırken
-                            çıktının çok işlemcili günlüğe kaydetme stilini
-                            devre dışı bırakır.
-                        EnableMPLogging-- Çok işlemcili olmayan modda çalışırken
-                            bile çok işlemcili günlüğe kaydetme stilini
-                            etkinleştirir. Bu günlüğe kaydetme stili varsayılan olarak açıktır.
-                        ForceConsoleColor--Konsol tarafından desteklenmese bile
-                            ANSI konsol renklerini kullanır
-                        Verbosity--bu günlükçü için -verbosity
-                            ayarını geçersiz kılar.
+                            varsayılan konsol renklerini kullan.
+                        DisableMPLogging--Çoklu işlemci olmayan modda 
+                            çalışırken çıkışta çok işlemcili günlük stilini 
+                            devre dışı bırak.
+                        EnableMPLogging--Çok işlemci olmayan modda çalışırken 
+                            bile çok işlemcili günlük stilini etkinleştir. Bu 
+                            günlük stili varsayılan olarak açıktır.  
+                        ForceConsoleColor--Konsol desteklemese bile ANSI
+                            konsol renklerini kullan
+                                                Verbosity--Bu günlükçü için /verbosity ayarını
+                            geçersiz kılar.
                      Örnek:
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
+                        /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -486,10 +488,10 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Projeyi varsayılan şemaya göre doğrular. (Kısa
+        <target state="translated">  -validate          Varsayılan şemaya göre projeyi doğrular. (Kısa
                      biçim: -val)
 
-  -validate:&lt;schema&gt; Projeyi belirtilen şemaya göre doğrular. (Kısa
+  -validate:&lt;şema&gt; Belirtilen şemaya göre projeyi doğrular. (Kısa
                      biçim: -val)
                      Örnek:
                        -validate:MyExtendedBuildSchema.xsd
@@ -551,9 +553,9 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;önbellekDosyası&gt;...
-                     MSBuild’in derleme sonuçlarını okuyacağı giriş önbellek dosyalarının
-                     noktalı virgülle ayrılmış listesi.
-                     Bu ayarlandığında yalıtılmış derlemeler (-isolate) de açılır.
+                     MSBuild'in derleme sonuçlarını okuyacağı giriş
+                     önbellek dosyalarının noktalı virgülle ayrılmış listesi.
+                     Ayarlandığında yalıtılmış derlemeler de açılır (-isolate).
                      (kısa biçim: -irc)
    </target>
         <note>
@@ -603,19 +605,20 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
-                     MSBuild olaylarını günlüğe kaydetmek ve
-                     her bir düğüme farklı bir günlükçü örneği eklemek için bu günlükçüyü kullanın. Birden fazla
-                     günlükçü belirtmek için her bir günlükçüyü ayrı ayrı belirtin.
-                     (Kısa biçim -dl)
-                     &lt;günlükçü&gt; söz dizimi:
-                       [&lt;günlükçü sınıfı&gt;,]&lt;günlükçü bütünleştirilmiş kodu&gt;[;&lt;günlükçü parametreleri&gt;]
-                     &lt;günlükçü sınıfı&gt; söz dizimi:
+        <target state="translated">  -distributedlogger:&lt;merkezi günlükçü&gt;*&lt;iletilen günlükçü&gt;  
+                     MSBuild'dan gelen olayları her düğüme farklı bir günlükçü 
+                     örneği iliştirerek günlüğe almak için bu günlükçüyü 
+                     kullanın. Birden çok günlükçü belirtmek için, her 
+                     günlükçüyü ayrı belirtin. (Kısa biçim -dl)
+                     &lt;günlükçü&gt; söz dizimi şöyledir:
+                       [&lt;günlükçü sınıfı&gt;,]&lt;günlükçü derlemesi&gt;
+                       [;&lt;günlükçü parametreleri&gt;]
+                     &lt;günlükçü sınıfı&gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
-                     &lt;günlükçü bütünleştirilmiş kodu&gt; söz dizimi:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     &lt;logger parameters&gt; isteğe bağlıdır ve günlükçüye
-                     tam olarak yazdığınız şekilde geçirilir. (Kısa biçim: -l)
+                     &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
+                       {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                     &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve tam olarak
+                     yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
                      Örnekler:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -638,10 +641,11 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="translated">  -ignoreProjectExtensions:&lt;extensions&gt;
-                     Hangi proje dosyasının derleneceği belirlenirken
-                     yoksayılacak uzantılar listesi. Birden fazla uzantıyı ayırmak için
-                     noktalı virgül ya da virgül kullanın.
+        <target state="translated">  -ignoreProjectExtensions:&lt;uzantılar&gt;
+                     Hangi proje dosyasının oluşturulacağı belirlenirken 
+                     yoksayılacak uzantıların listesi. Birden çok uzantıyı 
+                     birbirinden ayırmak için noktalı virgül veya 
+                     virgül kullanın.
                      (Kısa biçim: -ignore)
                      Örnek:
                        -ignoreProjectExtensions:.sln
@@ -664,10 +668,10 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -toolsVersion:3.5
    </source>
-        <target state="translated">  -toolsVersion:&lt;version&gt;
-                     Derleme sırasında kullanılacak MS Build Araç Takımı
-                     (görevler, hedefler vb.) sürümü. Bu sürüm, ayrı ayrı projeler tarafından
-                     belirtilen sürümleri geçersiz kılar. (Kısa biçim:
+        <target state="translated">  -toolsVersion:&lt;sürüm&gt;
+                     Derleme sırasında kullanılacak MSBuild Araç Kümesinin
+                     (görevler, hedefler vb.) sürümü. Bu sürüm, tek tek projelerde 
+                     belirtilen sürümleri geçersiz kılar. (Kısa biçim: 
                      -tv)
                      Örnek:
                        -toolsVersion:3.5
@@ -723,18 +727,19 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  -distributedFileLogger
-                     Derleme çıktısını birden fazla günlük dosyasına yazar,
-                     her bir MSBuild düğümü için bir günlük dosyası kullanılır. Bu dosyaların başlangıç konumu
-                     geçerli dizindir. Dosyalar varsayılan olarak
-                     "MSBuild&lt;nodeid&gt;.log" olarak adlandırılır. Dosyaların konumu ve
-                     diğer fileLogger parametreleri
-                     "-fileLoggerParameters" anahtarı eklenerek belirlenebilir.
+        <target state="translated">  -distributedFileLogger                                                       
+                     Derleme çıkışını, her MSBuild düğümü için bir günlük
+                     dosyası olmak üzere birden çok günlük dosyasına kaydeder. Bu
+                     dosyaların ilk konumu geçerli dizindir. Dosyaların 
+                     varsayılan adı "MSBuild&lt;düğümkimliği&gt;.log"dur. 
+                     Dosyaların konumu ve fileLogger'ın diğer parametreleri 
+                     "/fileLoggerParameters" anahtarının eklenmesi yoluyla
+                     belirtilebilir.
 
-                     Bir günlük dosyasının adı fileLoggerParameters anahtarı ile ayarlanmışsa
-                     dağıtılmış günlükçü fileName değerini şablon olarak kullanır
-                     ve düğüm kimliğini bu fileName değerine ekleyerek
-                     her bir düğüm için günlük dosyası oluşturur.
+                     Günlük dosyası adı fileLoggerParameters anahtarı
+                     aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName 
+                     değerini şablon olarak kullanıp her düğümün günlük dosyasını
+                     oluşturmak için bu fileName değerine düğüm kimliğini ekler.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -775,33 +780,34 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  -fileLoggerParameters[n]:&lt;parameters&gt;
-                     Dosya günlükçüleri için fazladan parametreler sağlar.
-                     Bu anahtarın varlığı, karşılık gelen
-                     -fileLogger[n] anahtarına işaret eder.
-                     Varsa "n" değeri 1-9 aralığında bir sayı olabilir.
-                     -fileLoggerParameters ayrıca herhangi bir dağıtılmış dosya günlükçüsü
-                     tarafından kullanılabilir. -distributedFileLogger tanımına bakın.
+        <target state="translated">  -fileLoggerParameters[n]:&lt;parametreler&gt;
+                     Dosya günlükçüleri için ek parametreler sağlar.
+                     Bu anahtarın olması karşılık gelen -fileLogger[n] 
+                     anahtarının olduğu anlamına gelir.
+                     "n" varsa, 1-9 arasında bir rakam olabilir.
+                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters 
+                     bunlar tarafından da kullanılır; -distributedFileLogger 
+                     açıklamasına bakın.
                      (Kısa biçim: -flp[n])
-                     Konsol günlükçüsü için listelenen parametreler
-                     de kullanılabilir. Kullanılabilir diğer parametrelerden bazıları şunlardır:
-                        LogFile--derleme günlüğünün yazılacağı günlük
+                     Konsol günlükçüsü için listelenenlerle aynı parametreler 
+                     kullanılabilir. Kullanılabilecek bazı ek parametreler:
+                        LogFile--Oluşturma günlüğünün yazılacağı günlük 
                             dosyasının yolu.
-                        Append--derleme günlüğünün ekleneceğini ya da
-                            günlük dosyasının üzerine yazılacağını belirler. Anahtar ayarlandığında derleme günlüğü
-                            günlük dosyasına eklenir;
-                            Anahtar ayarlanmadığında mevcut
-                            günlük dosyasındaki içeriğin üzerine yazılır.
-                            Varsayılan seçenek günlük dosyasına eklenmemesidir.
-                        Encoding--dosyada kullanılacak kodlama türünü
-                            (UTF-8, Unicode ya da ASCII gibi) belirler.
-                     Varsayılan ayrıntı düzeyi değeri Detailed şeklindedir.
+                        Append--Derleme günlüğünün gün dosyasının sonuna mı 
+                            ekleneceğini yoksa üzerine mi yazılacağını 
+                            belirler. Anahtar ayarlandığında oluşturma günlüğü 
+                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında 
+                            varolan günlük dosyasının üzerine yazılır. 
+                            Varsayılan: günlük dosyasının sonuna eklenmez.
+                        Encoding--Dosyanın kodlamasını belirtir; örneğin, 
+                            UTF-8, Unicode veya ASCII
+                     Varsayılan verbosity ayarı Detailed'dır.
                      Örnekler:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -824,11 +830,12 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -nr:true
     </source>
-        <target state="translated">  -nodeReuse:&lt;parameters&gt;
-                     MSBuild düğümlerinin yeniden kullanılmasını etkinleştirir veya devre dışı bırakır.
-                     Parametreler şunlardır:
-                     True--Derleme tamamlandıktan sonra düğümler kalır
-                            ve sonraki derlemeler tarafından yeniden kullanılır (varsayılan)
+        <target state="translated">  -nodeReuse:&lt;parametreler&gt;
+                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir
+                     veya devre dışı bırakır.
+                     Parametreler:
+                     True --Derleme tamamlandıktan sonra düğümler kalır ve
+                            izleyen derlemelerde yeniden kullanılır (varsayılan)
                      False--Derleme tamamlandıktan sonra düğümler kalmaz
                      (Kısa biçim: -nr)
                      Örnek:
@@ -891,7 +898,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
-        <target state="translated">MSBUILD : hata MSB1057: Grafik derleme değeri geçerli değil. {0}</target>
+        <target state="translated">MSBUILD : error MSB1057: Grafik derleme değeri geçerli değil. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -901,7 +908,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidInteractiveValue">
         <source>MSBUILD : error MSB1055: Interactive value is not valid. {0}</source>
-        <target state="translated">MSBUILD : hata MSB1055: Etkileşimli değer geçerli değil. {0}</target>
+        <target state="translated">MSBUILD : error MSB1055: Etkileşimli değer geçerli değil. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1055: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -911,7 +918,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="translated">MSBUILD : hata MSB1056: Projeleri yalıtma değeri geçerli değil. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: Projeleri yalıtma değeri geçerli değil. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -943,7 +950,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidMaxCPUCountValueOutsideRange">
         <source>MSBUILD : error MSB1032: Maximum CPU count is not valid. Value must be an integer greater than zero and no more than 1024.</source>
-        <target state="translated">MSBUILD: hata MSB1032: En yüksek CPU sayısı geçerli değil. Değer sıfırdan büyük ve 1024’ten küçük bir tamsayı olmalıdır.</target>
+        <target state="translated">MSBUILD : error MSB1032: En yüksek CPU sayısı geçerli değil. Değer sıfırdan büyük ve 1024’ten küçük bir tamsayı olmalıdır.</target>
         <note>{StrBegin="MSBUILD : error MSB1032: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a CPU value that is zero or less. For example, -m:0 instead of -m:2.
@@ -962,7 +969,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidNodeNumberValueIsNegative">
         <source>MSBUILD : error MSB1034: Node number is not valid. Value must be an integer greater than zero.</source>
-        <target state="translated">MSBUILD: hata MSB1034: Düğüm sayısı geçerli değil. Değer sıfırdan büyük bir tamsayı olmalıdır.</target>
+        <target state="translated">MSBUILD : error MSB1034: Düğüm sayısı geçerli değil. Değer sıfırdan büyük bir tamsayı olmalıdır.</target>
         <note>{StrBegin="MSBUILD : error MSB1034: "}
         UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
         This error is shown when a user specifies a CPU value that is zero or less. For example, -nodeMode:0 instead of -nodeMode:2.
@@ -1064,7 +1071,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="MissingProjectError">
         <source>MSBUILD : error MSB1003: Specify a project or solution file. The current working directory does not contain a project or solution file.</source>
-        <target state="translated">MSBUILD: hata MSB1003: Bir proje veya çözüm dosyası belirtin. Geçerli çalışma dizini bir proje veya çözüm dosyası içermiyor.</target>
+        <target state="translated">MSBUILD : error MSB1003: Bir proje veya çözüm dosyası belirtin. Geçerli çalışma dizini bir proje veya çözüm dosyası içermiyor.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1003: "}UE: The user must either specify a project or solution file to build, or there must be a project file in the current directory
       with a file extension ending in "proj" (e.g., foo.csproj), or a solution file ending in "sln".
@@ -1159,7 +1166,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="RepeatedResponseFileError">
         <source>MSBUILD : error MSB1013: The response file was specified twice. A response file can be specified only once. Any files named "msbuild.rsp" in the directory of MSBuild.exe or in the directory of the first project or solution built (which if no project or solution is specified is the current working directory) were automatically used as response files.</source>
-        <target state="translated">MSBUILD: hata MSB1013: Yanıt dosyası iki kez belirtildi. Bir yanıt dosyası yalnızca bir kez belirtilebilir. MSBuild.exe dosyasının dizininde veya derlenen ilk projenin veya çözümün dizininde (hiçbir proje veya çözüm belirtilmemiş bu geçerli çalışma dizinidir) bulunan "msbuild.rsp" adlı dosyalar otomatik olarak yanıt dosyası olarak kullanıldı.</target>
+        <target state="translated">MSBUILD : error MSB1013: Yanıt dosyası iki kez belirtildi. Bir yanıt dosyası yalnızca bir kez belirtilebilir. MSBuild.exe dosyasının dizininde veya derlenen ilk projenin veya çözümün dizininde (hiçbir proje veya çözüm belirtilmemiş bu geçerli çalışma dizinidir) bulunan "msbuild.rsp" adlı dosyalar otomatik olarak yanıt dosyası olarak kullanıldı.</target>
         <note>{StrBegin="MSBUILD : error MSB1013: "}UE: Response files are just text files that contain a bunch of command-line switches to be passed to MSBuild.exe. The
     purpose is so you don't have to type the same switches over and over again ... you can just pass in the response file instead.
     Response files can include the @ switch in order to further include other response files. In order to prevent a circular
@@ -1216,7 +1223,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="UnsupportedOS">
         <source>MSBUILD : error MSB1015: MSBuild does not run on this version of the operating system. It is only supported on Windows 2000, Windows XP, and later versions.</source>
-        <target state="translated">MSBUILD: hata MSB1015: MSBuild işletim sisteminin bu sürümünde çalışmaz. Yalnızca Windows 2000, Windows XP ve sonraki sürümlerde desteklenir.</target>
+        <target state="translated">MSBUILD : error MSB1015: MSBuild işletim sisteminin bu sürümünde çalışmaz. Yalnızca Windows 2000, Windows XP ve sonraki sürümlerde desteklenir.</target>
         <note>{StrBegin="MSBUILD : error MSB1015: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Using35Engine">
@@ -1235,12 +1242,12 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidExtensionToIgnore">
         <source>MSBUILD : error MSB1036: There is an invalid extension in the -ignoreProjectExtensions list. Extensions must start with a period ".", have one or more characters after the period and not contain any invalid path characters or wildcards.</source>
-        <target state="translated">MSBUILD: hata MSB1036: -ignoreProjectExtensions listesinde geçersiz bir uzantı var. Uzantılar noktayla "." başlamalı, noktadan sonra bir veya daha fazla karakter içermeli ve uzantılarda geçersiz yol karakterleri veya joker karakterler bulunmamalıdır.</target>
+        <target state="translated">MSBUILD : error MSB1036: -ignoreProjectExtensions listesinde geçersiz bir uzantı var. Uzantılar noktayla "." başlamalı, noktadan sonra bir veya daha fazla karakter içermeli ve uzantılarda geçersiz yol karakterleri veya joker karakterler bulunmamalıdır.</target>
         <note>{StrBegin="MSBUILD : error MSB1036: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MissingConsoleLoggerParameterError">
         <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch</source>
-        <target state="translated">MSBUILD : hata MSB1037: -consoleLoggerParameters anahtarı kullanılıyorsa konsol günlükçüsü için bir veya birden çok parametre belirtin</target>
+        <target state="translated">MSBUILD : error MSB1037: -consoleLoggerParameters anahtarı kullanılıyorsa konsol günlükçüsü için bir veya birden çok parametre belirtin</target>
         <note>{StrBegin="MSBUILD : error MSB1037: "}
       UE: This happens if the user does something like "msbuild.exe -consoleLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -consoleLoggerParameters:ErrorSummary".
@@ -1249,7 +1256,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="MissingFileLoggerParameterError">
         <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch</source>
-        <target state="translated">MSBUILD : hata MSB1038: -fileLoggerParameters anahtarı kullanılıyorsa dosya günlükçüsü için bir veya birden çok parametre belirtin</target>
+        <target state="translated">MSBUILD : error MSB1038: -fileLoggerParameters anahtarı kullanılıyorsa dosya günlükçüsü için bir veya birden çok parametre belirtin</target>
         <note>{StrBegin="MSBUILD : error MSB1038: "}
       UE: This happens if the user does something like "msbuild.exe -fileLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -fileLoggerParameters:logfile=c:\temp\logfile".
@@ -1258,7 +1265,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="MissingNodeReuseParameterError">
         <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch</source>
-        <target state="translated">MSBUILD : hata MSB1041: -nodeReuse anahtarı kullanılıyorsa düğüm yeniden kullanımı için bir veya birden çok parametre belirtin</target>
+        <target state="translated">MSBUILD : error MSB1041: -nodeReuse anahtarı kullanılıyorsa düğüm yeniden kullanımı için bir veya birden çok parametre belirtin</target>
         <note>{StrBegin="MSBUILD : error MSB1041: "}
       UE: This happens if the user does something like "msbuild.exe -nodeReuse:" without a true or false
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1293,7 +1300,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="LoggerNotFoundError">
         <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSBUILD: hata MSB1020: Günlükçü bulunamadı. Aşağıdakileri denetleyin: 1.) Belirtilen günlükçü adı, günlükçü sınıfının adıyla aynıdır. 2.) Günlükçü sınıfı "geneldir" ve Microsoft.Build.Framework.ILogger arabirimini uygular. 3.) Günlükçü bütünleştirilmiş kodunun yolu doğrudur veya günlükçü yalnızca belirtilen günlükçü adı kullanılarak yüklenebilir.</target>
+        <target state="translated">MSBUILD : error MSB1020: Günlükçü bulunamadı. Aşağıdakileri denetleyin: 1.) Belirtilen günlükçü adı, günlükçü sınıfının adıyla aynıdır. 2.) Günlükçü sınıfı "geneldir" ve Microsoft.Build.Framework.ILogger arabirimini uygular. 3.) Günlükçü bütünleştirilmiş kodunun yolu doğrudur veya günlükçü yalnızca belirtilen günlükçü adı kullanılarak yüklenebilir.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
@@ -1303,7 +1310,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="translated">MSBUILD: hata MSB4192: "{0}" proje dosyası, MSBuild’in doğrudan derleyemeyeceği ".vcproj" veya ".dsp" dosya biçiminde. Lütfen projeyi Visual Studio IDE içinde açarak veya dönüştürme aracını kullanarak dönüştürün ya da “.vcproj” için MSBuild kullanarak projeyi içeren çözüm dosyasını derleyin.</target>
+        <target state="translated">MSBUILD : error MSB4192: "{0}" proje dosyası, MSBuild’in doğrudan derleyemeyeceği ".vcproj" veya ".dsp" dosya biçiminde. Lütfen projeyi Visual Studio IDE içinde açarak veya dönüştürme aracını kullanarak dönüştürün ya da “.vcproj” için MSBuild kullanarak projeyi içeren çözüm dosyasını derleyin.</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
       <trans-unit id="NeedJustMyCode">
@@ -1313,7 +1320,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="DebuggingSolutionFiles">
         <source>MSBUILD : error MSB1048: Solution files cannot be debugged directly. Run MSBuild first with an environment variable MSBUILDEMITSOLUTION=1 to create a corresponding ".sln.metaproj" file. Then debug that.</source>
-        <target state="translated">MSBUILD: hata MSB1048: Çözüm dosyalarının hataları doğrudan ayıklanamıyor. Karşılık gelen bir “.sln.metaproj” dosyası oluşturmak için öncelikle MSBuild’i MSBUILDEMITSOLUTION=1 ortam değişkeni ile çalıştırın. Sonra, hatalarını ayıklayın.</target>
+        <target state="translated">MSBUILD : error MSB1048: Çözüm dosyalarının hataları doğrudan ayıklanamıyor. Karşılık gelen bir “.sln.metaproj” dosyası oluşturmak için öncelikle MSBuild’i MSBUILDEMITSOLUTION=1 ortam değişkeni ile çalıştırın. Sonra, hatalarını ayıklayın.</target>
         <note>{StrBegin="MSBUILD : error MSB1048: "} LOC: ".SLN" should not be localized</note>
       </trans-unit>
       <trans-unit id="BuildStarted">
@@ -1328,7 +1335,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
-        <target state="translated">MSBUILD: hata MSB1050: "{0}" klasöründe birden fazla proje veya çözüm dosyası var. Lütfen hangi projenin veya çözüm dosyasının kullanılacağını belirtin.</target>
+        <target state="translated">MSBUILD : error MSB1050: "{0}" klasöründe birden fazla proje veya çözüm dosyası var. Lütfen hangi projenin veya çözüm dosyasının kullanılacağını belirtin.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
       project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
@@ -1394,12 +1401,12 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="ParameterRequiredError">
         <source>MSBUILD : error MSB1049: The {0} parameter must be specified</source>
-        <target state="translated">MSBUILD : hata MSB1049: {0} parametresi belirtilmelidir</target>
+        <target state="translated">MSBUILD : error MSB1049: {0} parametresi belirtilmelidir</target>
         <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="translated">MSBUILD: hata MSB1051: -warnAsMessage anahtarını kullanırken düşük önemli iletiler olarak işlenecek bir veya daha fazla uyarı kodu belirtin.</target>
+        <target state="translated">MSBUILD : error MSB1051: -warnAsMessage anahtarını kullanırken düşük önemli iletiler olarak işlenecek bir veya daha fazla uyarı kodu belirtin.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1554,12 +1561,12 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  -profileEvaluation:&lt;file&gt;
+        <target state="translated">  -profileEvaluation:&lt;dosya&gt;
                      MSBuild değerlendirmesinin profilini oluşturur ve sonucu
                      belirtilen dosyaya yazar. Belirtilen dosyanın uzantısı
-                     '.md' olursa, sonuç markdown biçiminde oluşturulur.
-                     Aksi takdirde, sekmeyle ayrılmış bir dosya oluşturulur.
-    </target>
+                     '.md' ise, sonuç markdown biçiminde oluşturulur.
+                     Aksi halde, sekme ayrılmış bir dosya oluşturulur.
+</target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_33_RestorePropertySwitch">
@@ -1574,12 +1581,12 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
-        <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Proje düzeyindeki bu özellikleri yalnızca geri yükleme
-                     sırasında kullanın ve -property bağımsız değişkeniyle
-                     belirtilen özellikleri kullanmayın. &lt;a&gt; özellik
-                     adı, &lt;d&gt; ise özelliğin değeridir. Birden
-                     çok özelliği ayırmak için noktalı virgül veya virgül kullanın
+        <target state="translated">-restoreProperty:&lt;n&gt;=&lt;v&gt;
+                     Bu proje düzeyi özellikleri yalnızca geri yükleme sırasında
+                     ayarlayın veya geçersiz kılın, -property bağımsız değişkeni
+                     ile belirtilen özellikleri kullanmayın. &lt;n&gt; özellik
+                     adı ve &lt;v&gt; özellik değeri. Birden çok
+                     özelliği ayırmak için noktalı virgül veya virgül kullanın
                      veya her özelliği ayrı ayrı belirtin.
                      (Kısa biçim: -rp)
                      Örnek:
@@ -1592,7 +1599,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="translated">MSBUILD: MSB1053 hatası: Sağlanan dosya adı geçerli değil. {0}</target>
+        <target state="translated">MSBUILD : error MSB1053: Sağlanan dosya adı geçerli değil. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">

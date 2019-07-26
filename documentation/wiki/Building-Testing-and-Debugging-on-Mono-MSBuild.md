@@ -12,6 +12,8 @@ MSBuild requires a stable version of [Mono](http://www.mono-project.com/download
 
 ```make```
 
+If you encounter errors, see [Something's wrong in my build](Something's-wrong-in-my-build.md)
+
 ## Tests ##
 
 ```make test-mono```

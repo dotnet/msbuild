@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.Runtime.Serialization;
+﻿using Microsoft.Build.Shared;
+using System.IO;
 using System.Xml;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
@@ -7,10 +7,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// <summary>
     /// Serialization contract for an SDK Resolver manifest
     /// </summary>
-    [DataContract(Name = "SdkResolver", Namespace = "")]
     internal class SdkResolverManifest
     {
-        [DataMember(IsRequired = false, Order = 1)]
         internal string Path { get; set; }
 
         /// <summary>
@@ -20,12 +18,68 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <returns>New deserialized collection instance.</returns>
         internal static SdkResolverManifest Load(string filePath)
         {
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(fs, new XmlDictionaryReaderQuotas()))
+            XmlReaderSettings readerSettings = new XmlReaderSettings()
             {
-                DataContractSerializer serializer = new DataContractSerializer(typeof(SdkResolverManifest));
-                return (SdkResolverManifest)serializer.ReadObject(reader, true);
+                IgnoreComments = true,
+                IgnoreWhitespace = true,
+                DtdProcessing = DtdProcessing.Ignore,
+                XmlResolver = null
+            };
+
+            using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (XmlReader reader = XmlReader.Create(stream, readerSettings))
+            {
+                while (reader.Read())
+                {
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            switch (reader.Name)
+                            {
+                                case "SdkResolver":
+                                    return ParseSdkResolverElement(reader);
+
+                                default:
+                                    throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
+                            }
+
+                        default:
+                            throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
+                    }
+                }
             }
+
+            return null;
+        }
+
+        private static SdkResolverManifest ParseSdkResolverElement(XmlReader reader)
+        {
+            SdkResolverManifest manifest = new SdkResolverManifest();
+
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        {
+                            switch (reader.Name)
+                            {
+                                case "Path":
+                                    manifest.Path = reader.ReadElementContentAsString();
+                                    break;
+
+                                default:
+                                    throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
+                            }
+                        }
+                        break;
+
+                    default:
+                        throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
+                }
+            }
+
+            return manifest;
         }
     }
 }

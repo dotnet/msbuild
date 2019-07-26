@@ -82,15 +82,15 @@
     </source>
         <target state="translated">
           UAC Bildirim Seçenekleri
-          Windows Kullanıcı Hesabı Denetim düzeyini değiştirmek istiyorsanız
-          requestedExecutionLevel düğümünü aşağıdakilerden biriyle değiştirin.
+          Windows Kullanıcı Hesabı Denetimi düzeyini değiştirmek istiyorsanız,
+           requestedExecutionLevel düğümünü aşağıdakilerden biriyle değiştirin.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
-        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
-        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Geriye dönük uyumluluk için Dosya ve Kayıt Defteri Sanallaştırması’nı
-         kullanmak istiyorsanız requestedExecutionLevel düğümünü silin.
+         Geriye dönük uyumluluk için Dosya ve Kayıt Defteri Sanallaştırması
+         kullanmak istiyorsanız, requestedExecutionLevel düğümünü silin.
     </target>
         <note />
       </trans-unit>

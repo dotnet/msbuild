@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests
             Project project = CreateInMemoryProject(projectContents, logger);
 
             bool success = project.Build(logger);
-            Assert.False(success); // "Build succeeded, but shouldn't have.  See Standard Out tab for details"
+            Assert.False(success); // "Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details"
         }
 
         /// <summary>
@@ -910,48 +910,27 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectFileRelativePath"></param>
         /// <returns></returns>
-        internal static MockLogger BuildTempProjectFileExpectSuccess(string projectFileRelativePath)
+        internal static void BuildTempProjectFileExpectSuccess(string projectFileRelativePath, MockLogger logger)
         {
-            return BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null);
+            BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null, logger);
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build does not succeed.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
+        internal static void BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties, MockLogger logger)
         {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
-
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
-
-            return logger;
+            BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger)
+                .ShouldBeTrue("Build failed.  See test output (Attachments in Azure Pipelines) for details");
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build succeeds.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileExpectFailure(string projectFileRelativePath)
+        internal static void BuildTempProjectFileExpectFailure(string projectFileRelativePath, MockLogger logger)
         {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger);
-
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
-
-            return logger;
-        }
-
-        /// <summary>
-        /// Builds a project file from disk, and asserts if the build succeeds.
-        /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectFailure(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
-        {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
-
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
-
-            return logger;
+            BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger)
+                .ShouldBeFalse("Build unexpectedly succeeded.  See test output (Attachments in Azure Pipelines) for details");
         }
 
         /// <summary>
@@ -1112,6 +1091,13 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     internal static partial class Helpers
     {
+        internal static string Format(this string s, params object[] formatItems)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(s, nameof(s));
+
+            return string.Format(s, formatItems);
+        }
+
         internal static string GetOSPlatformAsString()
         {
             var currentPlatformString = string.Empty;
@@ -1872,6 +1858,57 @@ namespace Microsoft.Build.UnitTests
             public int GetHashCode(ElementLocation obj)
             {
                 return obj.Line.GetHashCode() ^ obj.Column.GetHashCode() ^ obj.File.GetHashCode();
+            }
+        }
+
+        internal class BuildManagerSession : IDisposable
+        {
+            private readonly TestEnvironment _env;
+            private readonly BuildManager _buildManager;
+
+            public MockLogger Logger { get; set; }
+
+
+            public BuildManagerSession(
+                TestEnvironment env,
+                BuildParameters buildParametersPrototype = null,
+                bool enableNodeReuse = false,
+                bool shutdownInProcNode = true)
+            {
+                _env = env;
+
+                Logger = new MockLogger(_env.Output);
+                var loggers = new[] {Logger};
+
+                var actualBuildParameters = buildParametersPrototype?.Clone() ?? new BuildParameters();
+
+                actualBuildParameters.Loggers = actualBuildParameters.Loggers == null
+                    ? loggers
+                    : actualBuildParameters.Loggers.Concat(loggers).ToArray();
+
+                actualBuildParameters.ShutdownInProcNodeOnBuildFinish = shutdownInProcNode;
+                actualBuildParameters.EnableNodeReuse = enableNodeReuse;
+
+                _buildManager = new BuildManager();
+                _buildManager.BeginBuild(actualBuildParameters);
+            }
+
+            public BuildResult BuildProjectFile(string projectFile, string[] entryTargets = null)
+            {
+                var buildResult = _buildManager.BuildRequest(
+                    new BuildRequestData(projectFile,
+                        new Dictionary<string, string>(),
+                        MSBuildConstants.CurrentToolsVersion,
+                        entryTargets ?? new string[0],
+                        null));
+
+                return buildResult;
+            }
+
+            public void Dispose()
+            {
+                _buildManager.EndBuild();
+                _buildManager.Dispose();
             }
         }
     }

@@ -764,6 +764,11 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
+        /// </summary>
+        public bool DiscardBuildResults { get; set; } = false;
+
+        /// <summary>
         /// Retrieves a toolset.
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
@@ -786,6 +791,8 @@ namespace Microsoft.Build.Execution
         internal bool UsesOutputCache() => OutputResultsCacheFile != null;
 
         internal bool UsesInputCaches() => InputResultsCacheFiles != null;
+
+        internal bool SkippedResultsDoNotCauseCacheMiss() => IsolateProjects;
 
         /// <summary>
         /// Implementation of the serialization mechanism.

@@ -2305,7 +2305,7 @@ namespace Microsoft.Build.Shared
                         }
                         else if (excludeBaseDirectory.Length > includeBaseDirectory.Length)
                         {
-                            if (!excludeBaseDirectory.StartsWith(includeBaseDirectory, StringComparison.OrdinalIgnoreCase))
+                            if (!IsSubdirectoryOf(excludeBaseDirectory, includeBaseDirectory))
                             {
                                 //  Exclude path is longer, but doesn't start with include path.  So ignore it.
                                 continue;
@@ -2334,7 +2334,7 @@ namespace Microsoft.Build.Shared
                         else
                         {
                             //  Exclude base directory length is less than include base directory length.
-                            if (!state.BaseDirectory.StartsWith(excludeState.BaseDirectory, StringComparison.OrdinalIgnoreCase))
+                            if (!IsSubdirectoryOf(state.BaseDirectory, excludeState.BaseDirectory))
                             {
                                 //  Include path is longer, but doesn't start with the exclude path.  So ignore exclude path
                                 //  (since it won't match anything under the include path)
@@ -2438,6 +2438,33 @@ namespace Microsoft.Build.Shared
                 : listOfFiles.SelectMany(list => list).ToArray();
 
             return files;
+        }
+
+        private static bool IsSubdirectoryOf(string possibleChild, string possibleParent)
+        {
+            if (possibleParent == string.Empty)
+            {
+                // Something is always possibly a child of nothing
+                return true;
+            }
+
+            bool prefixMatch = possibleChild.StartsWith(possibleParent, StringComparison.OrdinalIgnoreCase);
+
+            if (!prefixMatch)
+            {
+                return false;
+            }
+
+            // Ensure that the prefix match wasn't to a distinct directory, so that
+            // x\y\prefix doesn't falsely match x\y\prefixmatch.
+            if (directorySeparatorCharacters.Contains(possibleParent[possibleParent.Length-1]))
+            {
+                return true;
+            }
+            else
+            {
+                return directorySeparatorCharacters.Contains(possibleChild[possibleParent.Length]);
+            }
         }
 
         private static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
