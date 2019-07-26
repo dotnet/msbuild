@@ -38,7 +38,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             "x86",
             "x64",
             "Itanium",
-            "arm"
+            "arm",
+            "arm64",
         };
         private static readonly string[] s_processorArchitectures =
         {
@@ -46,7 +47,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             "x86",
             "amd64",
             "ia64",
-            "arm"
+            "arm",
+            "arm64",
         };
         #endregion
 

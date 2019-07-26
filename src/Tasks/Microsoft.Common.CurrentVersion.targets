@@ -2784,6 +2784,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       DependsOnTargets="ResolveComReferences" />
 
   <!--
+    ============================================================
+                                      ResolveFrameworkReferences
+
+    Overrridden by Microsoft.NET.Sdk to return
+    ResolvedFrameworkReference items in order to populate the
+    Frameworks node of the Solution Explorer in the IDE.
+  -->
+  <Target Name="ResolveFrameworkReferences" />
+  
+  <!--
     ***********************************************************************************************
     ***********************************************************************************************
                                                                 PrepareResources Section
@@ -3038,7 +3048,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <GenerateResourceMSBuildArchitecture Condition="'$(GenerateResourceMSBuildArchitecture)' == ''">$(PlatformTargetAsMSBuildArchitecture)</GenerateResourceMSBuildArchitecture>
-
+      
       <ResgenToolPath Condition="'$(ResgenToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</ResgenToolPath>
     </PropertyGroup>
 
@@ -3067,6 +3077,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Sources="@(EmbeddedResource)"
         UseSourcePath="$(UseSourcePath)"
         References="@(ReferencePathWithRefAssemblies)"
+        UsePreserializedResources="$(GenerateResourceUsePreserializedResources)"
         AdditionalInputs="$(MSBuildAllProjects)"
         NeverLockTypeAssemblies="$(GenerateResourceNeverLockTypeAssemblies)"
         StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.cache"
@@ -3433,7 +3444,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     contribute to incremental build inconsistencies.
     ============================================================
     -->
-  <Target Name="_GenerateCompileDependencyCache" DependsOnTargets="ResolveAssemblyReferences">
+  <Target Name="_GenerateCompileDependencyCache" Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' != 'true'" DependsOnTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
       <CoreCompileCache Include="@(Compile)" />

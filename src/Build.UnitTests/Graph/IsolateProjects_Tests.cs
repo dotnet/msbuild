@@ -15,10 +15,14 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Experimental.Graph.UnitTests
 {
-    public class IsolateProjectsTests
+    public class IsolateProjectsTests : IDisposable
     {
         private readonly string _project = @"
                 <Project DefaultTargets='BuildSelf'>
+
+                    <ItemGroup>
+                        <GraphIsolationExemptReference Condition=`'{4}'!=''` Include=`$([MSBuild]::Escape('{4}'))`/>
+                    </ItemGroup>
 
                     <ItemGroup>
                         <ProjectReference Include='{0}'/>
@@ -54,31 +58,108 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
                     <Target Name='SelfTarget'>
                     </Target>
+
+                    <UsingTask TaskName='CustomMSBuild' TaskFactory='{5}' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+                        <ParameterGroup>
+                          <Projects ParameterType='Microsoft.Build.Framework.ITaskItem[]' Required='true' />
+                          <Targets ParameterType='Microsoft.Build.Framework.ITaskItem[]' Required='true' />
+                        </ParameterGroup>
+                        <Task>
+                          <Code Type='Fragment' Language='cs'>
+                    <![CDATA[
+
+var projects = new string[Projects.Length];
+var globalProperties = new IDictionary[Projects.Length];
+var toolsVersions = new string[Projects.Length];
+
+for (var i = 0; i < Projects.Length; i++)
+{{
+  projects[i] = Projects[i].ItemSpec;
+  globalProperties[i] = new Dictionary<string, string>();
+  toolsVersions[i] = ""Current"";
+}}
+
+var targets = new string[Targets.Length];
+for (var i = 0; i < Targets.Length; i++)
+{{
+  targets[i] = Targets[i].ItemSpec;
+}}
+
+BuildEngine5.BuildProjectFilesInParallel(
+  projects,
+  targets,
+  globalProperties,
+  null,
+  toolsVersions,
+  false,
+  false
+  );
+]]>
+                          </Code>
+                        </Task>
+                    </UsingTask>
+
+                    <Target Name='BuildDeclaredReferenceViaTask'>
+                        <CustomMSBuild Projects='{1}' Targets='DeclaredReferenceTarget'/>
+                    </Target>
+
+                    <Target Name='BuildUndeclaredReferenceViaTask'>
+                        <CustomMSBuild Projects='{2}' Targets='UndeclaredReferenceTarget'/>
+                    </Target>
                 </Project>";
 
         private readonly string _declaredReference = @"
                 <Project>
                     <Target Name='DeclaredReferenceTarget'>
+                        <Message Text='Message from reference' Importance='High' />
                     </Target>
                 </Project>";
 
         private readonly string _undeclaredReference = @"
                 <Project>
                     <Target Name='UndeclaredReferenceTarget'>
+                        <Message Text='Message from reference' Importance='High' />
                     </Target>
                 </Project>";
 
         private readonly ITestOutputHelper _testOutput;
+        private TestEnvironment _env;
+        private BuildParameters _buildParametersPrototype;
 
         public IsolateProjectsTests(ITestOutputHelper testOutput)
         {
             _testOutput = testOutput;
+            _env = TestEnvironment.Create(_testOutput);
+
+            if (NativeMethodsShared.IsOSX)
+            {
+                // OSX links /var into /private, which makes Path.GetTempPath() to return "/var..." but Directory.GetCurrentDirectory to return "/private/var..."
+                // this discrepancy fails the msbuild undeclared reference enforcements due to failed path equality checks
+                _env.SetTempPath(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")), deleteTempDirectory:true);
+            }
+
+            // todo investigate why out of proc builds fail on macos https://github.com/Microsoft/msbuild/issues/3915
+            var disableInProcNode = !NativeMethodsShared.IsOSX;
+
+            _buildParametersPrototype = new BuildParameters
+            {
+                EnableNodeReuse = false,
+                IsolateProjects = true,
+                DisableInProcNode = disableInProcNode
+            };
         }
+
+        public void Dispose()
+        {
+            _env.Dispose();
+        }
+
+        
 
         [Theory]
         [InlineData(BuildResultCode.Success, new string[] { })]
         [InlineData(BuildResultCode.Success, new[] {"BuildSelf"})]
-        public void CacheAndTaskEnforcementShouldAcceptSelfReferences(BuildResultCode expectedBuildResult, string[] targets)
+        public void CacheAndUndeclaredReferenceEnforcementShouldAcceptSelfReferences(BuildResultCode expectedBuildResult, string[] targets)
         {
             AssertBuild(targets,
                 (result, logger) =>
@@ -90,7 +171,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
-        public void CacheAndTaskEnforcementShouldAcceptCallTarget()
+        public void CacheAndUndeclaredReferenceEnforcementShouldAcceptCallTarget()
         {
             AssertBuild(new []{"CallTarget"},
                 (result, logger) =>
@@ -130,9 +211,58 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
-        public void CacheEnforcementShouldAcceptPreviouslyBuiltReferences()
+        public void IsolationRelatedMessagesShouldNotBePresentInNonIsolatedBuilds()
         {
-            AssertBuild(new []{"BuildDeclaredReference"},
+            AssertBuild(
+                new[] { "BuildDeclaredReference", "BuildUndeclaredReference" },
+                (result, logger) =>
+                {
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                    logger.ErrorCount.ShouldBe(0);
+                    logger.Errors.ShouldBeEmpty();
+
+                    // the references got built because isolation is turned off
+                    logger.AssertMessageCount("Message from reference", 2);
+                    logger.AllBuildEvents.OfType<ProjectStartedEventArgs>().Count().ShouldBe(3);
+
+                    logger.AssertLogDoesntContain("MSB4260");
+                },
+                excludeReferencesFromConstraints: true,
+                isolateProjects: false);
+        }
+
+        [Theory]
+        [InlineData("BuildDeclaredReference")]
+        [InlineData("BuildDeclaredReferenceViaTask")]
+        [InlineData("BuildUndeclaredReference")]
+        [InlineData("BuildUndeclaredReferenceViaTask")]
+        public void EnforcementsCanBeSkipped(string targetName)
+        {
+            AssertBuild(
+                new[] { targetName },
+                (result, logger) =>
+                {
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                    logger.ErrorCount.ShouldBe(0);
+                    logger.Errors.ShouldBeEmpty();
+
+                    // the reference got built because the constraints were skipped
+                    logger.AssertMessageCount("Message from reference", 1);
+                    logger.AllBuildEvents.OfType<ProjectStartedEventArgs>().Count().ShouldBe(2);
+
+                    logger.AssertMessageCount("MSB4260", 1);
+                },
+                excludeReferencesFromConstraints: true);
+        }
+
+        [Theory]
+        [InlineData("BuildDeclaredReference")]
+        [InlineData("BuildDeclaredReferenceViaTask")]
+        public void CacheEnforcementShouldAcceptPreviouslyBuiltReferences(string targetName)
+        {
+            AssertBuild(new []{ targetName },
                 (result, logger) =>
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -143,11 +273,13 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void TaskEnforcementShouldFailOnUndeclaredReference(bool addContinueOnError)
+        [InlineData(false, "BuildUndeclaredReference")]
+//        [InlineData(false, "BuildUndeclaredReferenceViaTask")] https://github.com/microsoft/msbuild/issues/4385
+        [InlineData(true, "BuildUndeclaredReference")]
+//        [InlineData(true, "BuildUndeclaredReferenceViaTask")] https://github.com/microsoft/msbuild/issues/4385
+        public void UndeclaredReferenceEnforcementShouldFailOnUndeclaredReference(bool addContinueOnError, string targetName)
         {
-            AssertBuild(new[] { "BuildUndeclaredReference" },
+            AssertBuild(new[] { targetName },
                 (result, logger) =>
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Failure);
@@ -159,10 +291,12 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 addContinueOnError: addContinueOnError);
         }
 
-        [Fact]
-        public void TaskEnforcementShouldFailOnPreviouslyBuiltButUndeclaredReferences()
+        [Theory]
+        [InlineData("BuildUndeclaredReference")]
+//        [InlineData("BuildUndeclaredReferenceViaTask")] https://github.com/microsoft/msbuild/issues/4385
+        public void UndeclaredReferenceEnforcementShouldFailOnPreviouslyBuiltButUndeclaredReferences(string targetName)
         {
-            AssertBuild(new[] { "BuildUndeclaredReference" },
+            AssertBuild(new[] { targetName },
                 (result, logger) =>
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Failure);
@@ -174,7 +308,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 buildUndeclaredReference: true);
         }
 
-        public static IEnumerable<object[]> TaskEnforcementShouldNormalizeFilePathsTestData
+        public static IEnumerable<object[]> UndeclaredReferenceEnforcementShouldNormalizeFilePathsTestData
         {
             get
             {
@@ -194,27 +328,33 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
 
                 Func<string, string> ToDuplicateSlashes = path => path.Replace("/", "//").Replace(@"\", @"\\");
 
+                var targetNames = new []{"BuildDeclaredReference", /*"BuildDeclaredReferenceViaTask"*/};
+
                 var functions = new[] {Preserve, FullToRelative, ToForwardSlash, ToBackSlash, ToDuplicateSlashes};
 
                 foreach (var projectReferenceModifier in functions)
                 {
                     foreach (var msbuildProjectModifier in functions)
                     {
-                        yield return new object[]
+                        foreach (var targetName in targetNames)
                         {
-                            projectReferenceModifier,
-                            msbuildProjectModifier
-                        };
+                            yield return new object[]
+                            {
+                                projectReferenceModifier,
+                                msbuildProjectModifier,
+                                targetName
+                            };
+                        }
                     }
                 }
             }
         }
 
         [Theory]
-        [MemberData(nameof(TaskEnforcementShouldNormalizeFilePathsTestData))]
-        public void TaskEnforcementShouldNormalizeFilePaths(Func<string, string> projectReferenceModifier, Func<string, string> msbuildProjectModifier)
+        [MemberData(nameof(UndeclaredReferenceEnforcementShouldNormalizeFilePathsTestData))]
+        public void UndeclaredReferenceEnforcementShouldNormalizeFilePaths(Func<string, string> projectReferenceModifier, Func<string, string> msbuildProjectModifier, string targetName)
         {
-            AssertBuild(new []{"BuildDeclaredReference"},
+            AssertBuild(new []{targetName},
                 (result, logger) =>
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -224,8 +364,8 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 buildDeclaredReference: true,
                 buildUndeclaredReference: false,
                 addContinueOnError: false,
-                projectReferenceModifier,
-                msbuildProjectModifier);
+                projectReferenceModifier: projectReferenceModifier,
+                msbuildOnDeclaredReferenceModifier: msbuildProjectModifier);
         }
 
         private void AssertBuild(
@@ -234,91 +374,47 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             bool buildDeclaredReference = false,
             bool buildUndeclaredReference = false,
             bool addContinueOnError = false,
+            bool excludeReferencesFromConstraints = false,
+            bool isolateProjects = true,
             Func<string, string> projectReferenceModifier = null,
             Func<string, string> msbuildOnDeclaredReferenceModifier = null)
         {
-            using (var env = TestEnvironment.Create())
-            using (var buildManager = new BuildManager())
+            var rootProjectFile = CreateTmpFile(_env).Path;
+            var declaredReferenceFile = CreateTmpFile(_env).Path;
+            var undeclaredReferenceFile = CreateTmpFile(_env).Path;
+
+            var projectContents = string.Format(
+                _project.Cleanup(),
+                projectReferenceModifier?.Invoke(declaredReferenceFile) ?? declaredReferenceFile,
+                msbuildOnDeclaredReferenceModifier?.Invoke(declaredReferenceFile) ?? declaredReferenceFile,
+                undeclaredReferenceFile,
+                addContinueOnError
+                    ? "ContinueOnError='WarnAndContinue'"
+                    : string.Empty,
+                excludeReferencesFromConstraints
+                    ? $"{declaredReferenceFile};{undeclaredReferenceFile}"
+                    : string.Empty,
+                NativeMethodsShared.IsMono ? "CodeTaskFactory" : "RoslynCodeTaskFactory")
+                .Cleanup();
+
+            File.WriteAllText(rootProjectFile, projectContents);
+            File.WriteAllText(declaredReferenceFile, _declaredReference);
+            File.WriteAllText(undeclaredReferenceFile, _undeclaredReference);
+
+            var buildParameters = _buildParametersPrototype.Clone();
+            buildParameters.IsolateProjects = isolateProjects;
+
+            using (var buildManagerSession = new Helpers.BuildManagerSession(_env, buildParameters))
             {
-                if (NativeMethodsShared.IsOSX)
+                if (buildDeclaredReference)
                 {
-                    // OSX links /var into /private, which makes Path.GetTempPath() to return "/var..." but Directory.GetCurrentDirectory to return "/private/var..."
-                    // this discrepancy fails the msbuild task enforcements due to failed path equality checks
-                    env.SetTempPath(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")), deleteTempDirectory:true);
+                    buildManagerSession.BuildProjectFile(declaredReferenceFile, new[] {"DeclaredReferenceTarget"})
+                        .OverallResult.ShouldBe(BuildResultCode.Success);
                 }
 
-                var projectFile = CreateTmpFile(env).Path;
-                var declaredReferenceFile = CreateTmpFile(env).Path;
-                var undeclaredReferenceFile = CreateTmpFile(env).Path;
+                var result = buildManagerSession.BuildProjectFile(rootProjectFile, targets);
 
-                File.WriteAllText(
-                    projectFile,
-                    string.Format(
-                        _project,
-                        projectReferenceModifier?.Invoke(declaredReferenceFile) ?? declaredReferenceFile,
-                        msbuildOnDeclaredReferenceModifier?.Invoke(declaredReferenceFile) ?? declaredReferenceFile,
-                        undeclaredReferenceFile,
-                        addContinueOnError ? "ContinueOnError='WarnAndContinue'" : string.Empty));
-
-                File.WriteAllText(declaredReferenceFile, _declaredReference);
-                File.WriteAllText(undeclaredReferenceFile, _undeclaredReference);
-
-                var logger = new MockLogger(_testOutput);
-
-                // todo investigate why out of proc builds fail on macos https://github.com/Microsoft/msbuild/issues/3915
-                var disableInProcNode = !NativeMethodsShared.IsOSX;
-
-                var buildParameters = new BuildParameters
-                {
-                    IsolateProjects = true,
-                    Loggers = new ILogger[] {logger},
-                    EnableNodeReuse = false,
-                    DisableInProcNode = disableInProcNode
-                };
-
-                var rootRequest = new BuildRequestData(
-                    projectFile,
-                    new Dictionary<string, string>(),
-                    MSBuildConstants.CurrentToolsVersion,
-                    targets,
-                    null);
-
-                try
-                {
-                    buildManager.BeginBuild(buildParameters);
-
-                    if (buildDeclaredReference)
-                    {
-                        buildManager.BuildRequest(
-                            new BuildRequestData(
-                                declaredReferenceFile,
-                                new Dictionary<string, string>(),
-                                MSBuildConstants.CurrentToolsVersion,
-                                new[] {"DeclaredReferenceTarget"},
-                                null))
-                            .OverallResult.ShouldBe(BuildResultCode.Success);
-                    }
-
-                    if (buildUndeclaredReference)
-                    {
-                        buildManager.BuildRequest(
-                            new BuildRequestData(
-                                undeclaredReferenceFile,
-                                new Dictionary<string, string>(),
-                                MSBuildConstants.CurrentToolsVersion,
-                                new[] {"UndeclaredReferenceTarget"},
-                                null))
-                            .OverallResult.ShouldBe(BuildResultCode.Success);
-                    }
-
-                    var result = buildManager.BuildRequest(rootRequest);
-
-                    assert(result, logger);
-                }
-                finally
-                {
-                    buildManager.EndBuild();
-                }
+                assert(result, buildManagerSession.Logger);
             }
 
             TransientTestFile CreateTmpFile(TestEnvironment env)
@@ -326,6 +422,57 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
                 return NativeMethodsShared.IsMono && NativeMethodsShared.IsOSX
                                                 ? env.CreateFile(new TransientTestFolder(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N"))))
                                                 : env.CreateFile();
+            }
+        }
+
+        [Fact]
+        public void SkippedTargetsShouldNotTriggerCacheMissEnforcement()
+        {
+            var referenceFile = _env.CreateFile(
+                "reference",
+                @"
+<Project DefaultTargets=`DefaultTarget` InitialTargets=`InitialTarget`>
+
+  <Target Name=`A` Condition=`true == false`/>
+
+  <Target Name=`DefaultTarget` Condition=`true == false`/>
+
+  <Target Name=`InitialTarget` Condition=`true == false`/>
+
+</Project>
+".Cleanup()).Path;
+
+            var projectFile = _env.CreateFile(
+                "proj",
+                $@"
+<Project DefaultTargets=`Build`>
+
+  <ItemGroup>
+    <ProjectReference Include=`{referenceFile}` />
+  </ItemGroup>
+
+  <Target Name=`Build`>
+    <MSBuild Projects=`@(ProjectReference)` Targets=`A` />
+    <MSBuild Projects=`@(ProjectReference)` />
+  </Target>
+
+</Project>
+".Cleanup()).Path;
+
+            _buildParametersPrototype.IsolateProjects.ShouldBeTrue();
+
+            using (var buildManagerSession = new Helpers.BuildManagerSession(_env, _buildParametersPrototype))
+            {
+                // seed caches with results from the reference
+                buildManagerSession.BuildProjectFile(referenceFile).OverallResult.ShouldBe(BuildResultCode.Success);
+                buildManagerSession.BuildProjectFile(referenceFile, new []{"A"}).OverallResult.ShouldBe(BuildResultCode.Success);
+
+                buildManagerSession.BuildProjectFile(projectFile).OverallResult.ShouldBe(BuildResultCode.Success);
+
+                buildManagerSession.Logger.WarningCount.ShouldBe(0);
+                buildManagerSession.Logger.ErrorCount.ShouldBe(0);
+                // twice for the initial target, once for A, once for DefaultTarget
+                buildManagerSession.Logger.AssertMessageCount("Previously built successfully", 4);
             }
         }
     }

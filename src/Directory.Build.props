@@ -4,6 +4,7 @@
 
   <PropertyGroup>
       <LangVersion>latest</LangVersion>
+      <DiscoverEditorConfigFiles>true</DiscoverEditorConfigFiles>
   </PropertyGroup>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(ShouldUseIBCOptimization)' == 'true'" />

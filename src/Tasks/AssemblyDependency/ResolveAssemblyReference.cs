@@ -2928,6 +2928,10 @@ namespace Microsoft.Build.Tasks
                 {
                     return SystemProcessorArchitecture.Arm;
                 }
+                else if (targetedProcessorArchitecture.Equals(Microsoft.Build.Utilities.ProcessorArchitecture.ARM64, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (SystemProcessorArchitecture)6;
+                }
             }
 
             return SystemProcessorArchitecture.MSIL;

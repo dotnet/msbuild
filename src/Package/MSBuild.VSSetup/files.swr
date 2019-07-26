@@ -26,6 +26,11 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)MSBuild.exe.config
   file source=$(TaskHostBinPath)MSBuildTaskHost.exe vs.file.ngenArchitecture=x86
   file source=$(TaskHostBinPath)MSBuildTaskHost.exe.config
+  file source=$(X86BinPath)System.Buffers.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Memory.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Numerics.Vectors.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
@@ -161,6 +166,11 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Buffers.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Memory.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Numerics.Vectors.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
@@ -281,6 +291,7 @@ folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
   file source=$(SourceDir)Framework\Microsoft.Build.Framework.pkgdef
   file source=$(SourceDir)Build\Microsoft.Build.pkgdef
   file source=$(SourceDir)Tasks\Microsoft.Build.Tasks.Core.pkgdef
+  file source=$(SourceDir)Tasks\System.Resources.Extensions.pkgdef
   file source=$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef
   file source=$(SourceDir)Deprecated\Conversion\Microsoft.Build.Conversion.Core.pkgdef
   file source=$(SourceDir)Deprecated\Engine\Microsoft.Build.Engine.pkgdef

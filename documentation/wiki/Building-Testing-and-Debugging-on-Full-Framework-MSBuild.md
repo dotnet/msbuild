@@ -4,7 +4,7 @@ These instructions refer to working with the `master` branch.
 
 ## Required Software
 
-**Latest Microsoft Visual Studio 2017**: You can download the Visual Studio Community edition from [https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx).
+**Latest Microsoft Visual Studio 2019**: You can download the Visual Studio Community edition from [https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx).
 
 All command lines should be executed from a Visual Studio developer command prompt.
 
@@ -12,6 +12,7 @@ All command lines should be executed from a Visual Studio developer command prom
 
 1. Clone the repo: `git clone https://github.com/Microsoft/msbuild.git`
 2. Build on the command line: `.\build.cmd`
+   1. If you encounter errors, see [Something's wrong in my build](Something's-wrong-in-my-build.md).
 3. Open the solution file in Visual Studio (`MSBuild.Dev.sln`).
 
 ## Running Unit Tests

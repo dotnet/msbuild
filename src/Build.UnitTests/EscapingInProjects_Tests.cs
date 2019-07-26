@@ -22,6 +22,7 @@ using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 {
@@ -662,7 +663,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             project.SetGlobalProperty("MyGlobalProperty", "foo%253bbar");
 
             bool success = project.Build(logger);
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
+            Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
 
             logger.AssertLogContains("MyGlobalProperty = 'foo%3bbar'");
         }
@@ -692,7 +693,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ");
 
                 bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See Standard Out tab for details"
+                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
                 logger.AssertLogContains("[*]");
             }
             finally
@@ -730,7 +731,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ");
 
                 bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See Standard Out tab for details"
+                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
                 logger.AssertLogContains("[*]");
             }
             finally
@@ -789,7 +790,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             MockLogger logger = new MockLogger();
 
             bool success = project.Build(logger);
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
+            Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
             logger.AssertLogContains("[OVERRIDE]");
         }
 
@@ -901,6 +902,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 #if FEATURE_COMPILE_IN_TESTS
     public class FullProjectsUsingMicrosoftCommonTargets
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public FullProjectsUsingMicrosoftCommonTargets(ITestOutputHelper output)
+        {
+            _testOutput = output;
+        }
+
         private const string SolutionFileContentsWithUnusualCharacters = @"Microsoft Visual Studio Solution File, Format Version 11.00
                 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Cons.ole;!@(foo)'^(Application1`, `Console;!@(foo)'^(Application1\Cons.ole;!@(foo)'^(Application1.csproj`, `{770F2381-8C39-49E9-8C96-0538FA4349A7}`
                 EndProject
@@ -978,7 +986,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // Build the default targets using the Configuration "a;b'c".
             project.SetGlobalProperty("Configuration", EscapingUtilities.Escape("a;b'c"));
             bool success = project.Build(logger);
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
+            Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\a;b'c\ClassLibrary16.dll");
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"bin\a;b'c\ClassLibrary16.dll");
@@ -1043,7 +1051,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // Build the default targets using the Configuration "a;b'c".
                 project.SetGlobalProperty("Configuration", EscapingUtilities.Escape("a;b'c"));
                 bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See Standard Out tab for details"
+                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
 
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\a;b'c\ClassLibrary16.dll");
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"bin\a;b'c\ClassLibrary16.dll");
@@ -1100,7 +1108,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-            MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+            MockLogger log = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class;Library16.dll", @"Did not find expected file obj\debug\Class;Library16.dll");
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class;Library16.pdb", @"Did not find expected file obj\debug\Class;Library16.pdb");
@@ -1159,7 +1168,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-                MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+                MockLogger log = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class;Library16.dll", @"Did not find expected file obj\debug\Class;Library16.dll");
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class;Library16.pdb", @"Did not find expected file obj\debug\Class;Library16.pdb");
@@ -1218,7 +1228,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-            MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+            MockLogger log = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class$(prop)Library16.dll", @"Did not find expected file obj\debug\Class$(prop)Library16.dll");
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class$(prop)Library16.pdb", @"Did not find expected file obj\debug\Class$(prop)Library16.pdb");
@@ -1277,7 +1288,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-                MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+                MockLogger log = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class$(prop)Library16.dll", @"Did not find expected file obj\debug\Class$(prop)Library16.dll");
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\Class$(prop)Library16.pdb", @"Did not find expected file obj\debug\Class$(prop)Library16.pdb");
@@ -1336,7 +1348,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-            MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+            MockLogger log = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\ClassLibrary16.dll", @"Did not find expected file obj\debug\ClassLibrary16.dll");
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\ClassLibrary16.pdb", @"Did not find expected file obj\debug\ClassLibrary16.pdb");
@@ -1395,7 +1408,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 }
             ");
 
-                MockLogger log = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj");
+                MockLogger log = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("foo.csproj", log);
 
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\ClassLibrary16.dll", @"Did not find expected file obj\debug\ClassLibrary16.dll");
                 ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"obj\debug\ClassLibrary16.pdb", @"Did not find expected file obj\debug\ClassLibrary16.pdb");
@@ -1571,7 +1585,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // Cons.ole;!@(foo)'^(Application1
             string targetForFirstProject = "Cons_ole_!__foo__^_Application1";
 
-            ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null);
+            MockLogger log = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null, log);
 
             Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                     @"Did not find expected file Console;!@(foo)'^(Application1.exe"
         }
@@ -1742,7 +1757,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // Cons.ole;!@(foo)'^(Application1
                 string targetForFirstProject = "Cons_ole_!__foo__^_Application1";
 
-                ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null);
+                MockLogger log = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null, log);
 
                 Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                         @"Did not find expected file Console;!@(foo)'^(Application1.exe"
             }

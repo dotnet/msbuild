@@ -329,7 +329,7 @@
       </trans-unit>
       <trans-unit id="CannotReferenceItemMetadataWithoutItemName">
         <source>MSB4095: The item metadata %({0}) is being referenced without an item name.  Specify the item name by using %(itemname.{0}).</source>
-        <target state="translated">MSB4095: Auf die %({0})-Elementmetadaten wird ohne einen Elementnamen verwiesen. Geben Sie den Namen mithilfe von %(itemname.{0}) an.</target>
+        <target state="translated">MSB4095: Auf die %({0})-Elementmetadaten wird ohne einen Elementnamen verwiesen.  Geben Sie den Namen mithilfe von %(itemname.{0}) an.</target>
         <note>{StrBegin="MSB4095: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4095: Auf die %({0})-Elementmetadaten wird ohne einen Elementnamen verwiesen. Geben Sie den Namen mithilfe von %(itemname.{0}) an.</target>
@@ -494,7 +494,7 @@
       </trans-unit>
       <trans-unit id="ConditionMaybeEvaluatedIncorrectly">
         <source>MSB4130: The condition "{0}" may have been evaluated incorrectly in an earlier version of MSBuild. Please verify that the order of the AND and OR clauses is written as intended. To avoid this warning, add parentheses to make the evaluation order explicit.</source>
-        <target state="translated">MSB4130: Die Bedingung "{0}" ist in einer früheren Version von MSBuild möglicherweise fehlerhaft ausgewertet worden. Stellen Sie sicher, dass die AND- und OR-Klauseln in der beabsichtigten Reihenfolge stehen. Damit diese Warnung nicht angezeigt wird, fügen Sie Klammern hinzu, um die Auswertungsreihenfolge explizit anzugeben.</target>
+        <target state="translated">MSB4130: Die Bedingung "{0}" wurde in einer früheren Version von MSBuild möglicherweise fehlerhaft ausgewertet. Stellen Sie sicher, dass die AND- und OR-Klauseln in der beabsichtigten Reihenfolge stehen. Damit diese Warnung nicht angezeigt wird, fügen Sie Klammern hinzu, um die Auswertungsreihenfolge explizit anzugeben.</target>
         <note>{StrBegin="MSB4130: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4130: Die Bedingung "{0}" ist in einer früheren Version von MSBuild möglicherweise fehlerhaft ausgewertet worden. Stellen Sie sicher, dass die AND- und OR-Klauseln in der beabsichtigten Reihenfolge stehen. Damit diese Warnung nicht angezeigt wird, fügen Sie Klammern hinzu, um die Auswertungsreihenfolge explizit anzugeben.</target>
@@ -578,7 +578,7 @@
       </trans-unit>
       <trans-unit id="DefaultTasksFileLoadFailureWarning">
         <source>MSB4010: The "{0}" files could not be successfully loaded from their expected location "{1}". Default tasks will not be available. {2}</source>
-        <target state="translated">MSB4010: Die {0}-Dateien konnten nicht vom erwarteten Speicherplatz "{1}" geladen werden. Standardaufgaben sind nicht verfügbar. {2}</target>
+        <target state="translated">MSB4010: Die "{0}"-Dateien konnten nicht vom erwarteten Speicherplatz "{1}" geladen werden. Standardaufgaben sind nicht verfügbar. {2}</target>
         <note>{StrBegin="MSB4010: "}UE: This message is shown when the default tasks files that are located alongside the MSBuild binaries cannot be
     found, either because they don't exist, or because of lack of permissions. "{2}" contains a message explaining why.
     LOCALIZATION: "{2}" is a message from some FX method and is already localized.</note>
@@ -634,7 +634,7 @@
       </trans-unit>
       <trans-unit id="EmbeddedItemVectorCannotBeItemized">
         <source>MSB4012: The expression "{0}" cannot be used in this context. Item lists cannot be concatenated with other strings where an item list is expected. Use a semicolon to separate multiple item lists.</source>
-        <target state="translated">MSB4012: Der Ausdruck {0} kann in diesem Kontext nicht verwendet werden. Elementlisten können nicht mit anderen Zeichenfolgen verkettet werden, wenn eine Elementliste erwartet wird. Verwenden Sie ein Semikolon, um mehrere Elementlisten voneinander zu trennen.</target>
+        <target state="translated">MSB4012: Der Ausdruck "{0}" kann in diesem Kontext nicht verwendet werden. Elementlisten können nicht mit anderen Zeichenfolgen verkettet werden, wenn eine Elementliste erwartet wird. Verwenden Sie ein Semikolon, um mehrere Elementlisten voneinander zu trennen.</target>
         <note>{StrBegin="MSB4012: "}UE: This message is shown when the user does not properly specify an item list when an item list is expected
     e.g. "badprefix@(foo)badsuffix" instead of "prefix; @(foo); suffix"</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -699,7 +699,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Das &lt;{0}&gt;-Tag wird nicht mehr als untergeordnetes Element des &lt;Project&gt;-Elements unterstützt. Platzieren Sie dieses Tag in einem Ziel, und fügen Sie den Namen des Ziels dem InitialTargets-Attribut des &lt;Project&gt;-Elements hinzu.</target>
+        <target state="translated">Die &lt;{0}&gt;-Kennung wird nicht mehr als untergeordnetes Element des &lt;Project&gt;-Elements unterstützt. Platzieren Sie diese Kennung in einem Ziel, und fügen Sie den Namen des Ziels dem InitialTargets-Attribut des &lt;Project&gt;-Elements hinzu.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">Das &lt;{0}&gt;-Tag nicht als untergeordnetes Element des &lt; Project &gt;-Elements unterstützt. Platzieren Sie dieses Tag in einem Ziel und fügen Sie den Namen des Ziels InitialTargets-Attribut des &lt; Project &gt;-Elements hinzu.</target>
@@ -1170,7 +1170,7 @@
       </trans-unit>
       <trans-unit id="ItemDoesNotContainValueForUnqualifiedMetadata">
         <source>MSB4096: The item "{0}" in item list "{1}" does not define a value for metadata "{2}".  In order to use this metadata, either qualify it by specifying %({1}.{2}), or ensure that all items in this list define a value for this metadata.</source>
-        <target state="translated">MSB4096: Das Element "{0}" in der Elementliste "{1}" definiert keinen Wert für die {2}-Metadaten. Wenn Sie diese Metadaten verwenden möchten, qualifizieren Sie sie, indem Sie %({1}.{2}) angeben, oder vergewissern Sie sich, dass alle Elemente in der Liste einen Wert für diese Metadaten definieren.</target>
+        <target state="translated">MSB4096: Das Element "{0}" in der Elementliste "{1}" definiert keinen Wert für die Metadaten "{2}".  Wenn Sie diese Metadaten verwenden möchten, qualifizieren Sie sie, indem Sie %({1}.{2}) angeben, oder vergewissern Sie sich, dass alle Elemente in der Liste einen Wert für diese Metadaten definieren.</target>
         <note>{StrBegin="MSB4096: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4096: Das Element "{0}" in der Elementliste "{1}" definiert keinen Wert für die {2}-Metadaten. Wenn Sie diese Metadaten verwenden möchten, qualifizieren Sie sie, indem Sie %({1}.{2}) angeben, oder vergewissern Sie sich, dass alle Elemente in der Liste einen Wert für diese Metadaten definieren.</target>
@@ -1226,7 +1226,7 @@
       </trans-unit>
       <trans-unit id="MetadataDefinitionCannotContainItemVectorExpression">
         <source>MSB4164: The value "{0}" of metadata "{1}" contains an item list expression. Item list expressions are not allowed on default metadata values.</source>
-        <target state="translated">MSB4164: Der Wert "{0}" der {1}-Metadaten enthält einen Elementlistenausdruck. Elementlistenausdrücke sind nicht als Standardwerte für Metadaten zulässig.</target>
+        <target state="translated">MSB4164: Der Wert "{0}" der "{1}"-Metadaten enthält einen Elementlistenausdruck. Elementlistenausdrücke sind nicht als Standardwerte für Metadaten zulässig.</target>
         <note>{StrBegin="MSB4164: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4164: Der Wert "{0}" der {1}-Metadaten enthält einen Elementlistenausdruck. Elementlistenausdrücke sind nicht als Standardwerte für Metadaten zulässig.</target>
@@ -1272,7 +1272,7 @@
       </trans-unit>
       <trans-unit id="MSBuildVersionAttributeDeprecated">
         <source>MSB4031: The "MSBuildVersion" attribute is deprecated. If the project is authored in the MSBuild 2003 format, please remove the attribute from the &lt;Project&gt; tag. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4031: Das MSBuildVersion-Attribut ist veraltet. Wenn das Projekt im Format MSBuild 2003 erstellt wurde, löschen Sie das Attribut aus dem &lt;Project&gt;-Tag. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
+        <target state="translated">MSB4031: Das MSBuildVersion-Attribut ist veraltet. Wenn das Projekt im Format MSBuild 2003 erstellt wurde, löschen Sie das Attribut aus der &lt;Project&gt;-Kennung. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
         <note>{StrBegin="MSB4031: "}UE: This message is shown for projects that still contain the "MSBuildVersion" attribute in their &lt;Project&gt;
     tag. We no longer need this attribute because the project's XML namespace (i.e. the "xmlns" attribute) gives us all the
     version information we need.
@@ -1564,7 +1564,7 @@
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
         <source>MSB4192: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</source>
-        <target state="translated">MSB4192: Die Projektdatei "{0}" ist im VSPROJ-Dateiformat gespeichert, das nicht mehr von MSBuild unterstützt wird. Konvertieren Sie das Projekt, indem Sie es in der Visual Studio IDE öffnen oder das Konvertierungstool ausführen, oder verwenden Sie MSBuild 3.5 oder früher zum Erstellen des Projekts.</target>
+        <target state="translated">MSB4192: Die Projektdatei "{0}" ist im "VCPROJ"-Dateiformat gespeichert, das nicht mehr von MSBuild unterstützt wird. Konvertieren Sie das Projekt, indem Sie es in der Visual Studio IDE öffnen oder das Konvertierungstool ausführen, oder verwenden Sie MSBuild 3.5 oder früher zum Erstellen des Projekts.</target>
         <note>{StrBegin="MSB4192: "} LOC: ".vcproj" should not be localized</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4192: Die Projektdatei "{0}" ist im VSPROJ-Dateiformat gespeichert, das nicht mehr von MSBuild unterstützt wird. Konvertieren Sie das Projekt, indem Sie es in der Visual Studio IDE öffnen oder das Konvertierungstool ausführen, oder verwenden Sie MSBuild 3.5 oder früher zum Erstellen des Projekts.</target>
@@ -1609,7 +1609,7 @@
       </trans-unit>
       <trans-unit id="QualifiedMetadataInTransformNotAllowed">
         <source>MSB4043: The item metadata reference "{0}" is invalid because it is qualified with an item name. Item metadata referenced in transforms do not need to be qualified, because the item name is automatically deduced from the items being transformed. Change "{0}" to "%({1})".</source>
-        <target state="translated">MSB4043: Der Elementmetadatenverweis "{0}" ist ungültig, da er mit einem Elementnamen qualifiziert ist. Elementmetadaten, auf die bei Transformationen verwiesen wird, müssen nicht qualifiziert werden, da der Elementname automatisch aus den transformierten Elementen abgeleitet wird. Ändern Sie "{0}" in "%({1})".</target>
+        <target state="translated">MSB4043: Der Elementmetadatenverweis "{0}" ist ungültig, da er mit einem Elementnamen qualifiziert ist. Elementmetadaten, auf die bei Transformationen verwiesen wird, müssen nicht qualifiziert werden, da der Elementname automatisch aus den Elementen die transformiert werden abgeleitet wird. Ändern Sie "{0}" in "%({1})".</target>
         <note>{StrBegin="MSB4043: "}UE: This message is shown when the user does something like this: @(foo-&gt;'%(foo.metadata)'). There is no need to specify
     "foo.metadata", because "foo" is automatically deduced. In corollary, "bar.metadata" is not allowed either, where "bar" is a different
     item list type.</note>
@@ -1658,7 +1658,7 @@
       </trans-unit>
       <trans-unit id="SecurityProjectBuildDisabled">
         <source>MSB4112: The targets in this project have been disabled by the host and therefore cannot be built at this time. This may have been done for security reasons. To enable the targets, the host must set Project.BuildEnabled to "true".</source>
-        <target state="translated">MSB4112: Die Ziele in diesem Projekt wurden vom Host deaktiviert und können aus diesem Grund derzeit nicht erstellt werden. Die Deaktivierung wurde wahrscheinlich aus Sicherheitsgründen durchgeführt. Wenn Sie die Ziele aktivieren möchten, muss der Host Project.BuildEnabled auf "true" festlegen.</target>
+        <target state="translated">MSB4112: Die Ziele in diesem Projekt wurden vom Host deaktiviert und können aus diesem Grund derzeit nicht erstellt werden. Die Deaktivierung wurde möglicherweise aus Sicherheitsgründen durchgeführt. Wenn Sie die Ziele aktivieren möchten, muss der Host Project.BuildEnabled auf TRUE festlegen.</target>
         <note>{StrBegin="MSB4112: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4112: Die Ziele in diesem Projekt wurden vom Host deaktiviert und können aus diesem Grund derzeit nicht erstellt werden. Die Deaktivierung wurde wahrscheinlich aus Sicherheitsgründen durchgeführt. Wenn Sie die Ziele aktivieren möchten, muss der Host Project.BuildEnabled auf "true" festlegen.</target>
@@ -2020,7 +2020,7 @@
       </trans-unit>
       <trans-unit id="TargetFinishedFailure">
         <source>Done building target "{0}" in project "{1}" -- FAILED.</source>
-        <target state="translated">Erstellen des {0}-Ziels in Projekt {1} beendet - Fehler beim Erstellen.</target>
+        <target state="translated">Die Erstellung des Ziels "{0}" im Projekt "{1}" ist abgeschlossen -- FEHLER.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Erstellen des {0}-Ziels in Projekt {1} beendet - Fehler beim Erstellen.</target>
@@ -2047,7 +2047,7 @@
       </trans-unit>
       <trans-unit id="TargetInputsSpecifiedWithoutOutputs">
         <source>MSB4058: The "{0}" target is missing its output specification. If a target declares inputs, it must also declare outputs.</source>
-        <target state="translated">MSB4058: Das {0}-Ziel enthält keine Ausgabespezifikation. Wenn ein Ziel Eingaben deklariert, muss es auch Ausgaben deklarieren.</target>
+        <target state="translated">MSB4058: Das "{0}"-Ziel enthält keine Ausgabespezifikation. Wenn ein Ziel Eingaben deklariert, muss es auch Ausgaben deklarieren.</target>
         <note>{StrBegin="MSB4058: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4058: Das {0}-Ziel enthält keine Ausgabespezifikation. Wenn ein Ziel Eingaben deklariert, muss es auch Ausgaben deklarieren.</target>
@@ -2137,7 +2137,7 @@
       </trans-unit>
       <trans-unit id="TaskDeclarationOrUsageError">
         <source>MSB4060: The "{0}" task has been declared or used incorrectly, or failed during construction. Check the spelling of the task name and the assembly name.</source>
-        <target state="translated">MSB4060: Die {0}-Aufgabe wurde falsch deklariert, falsch verwendet oder konnte bei der Erstellung nicht ausgeführt werden. Überprüfen Sie die Schreibweise des Aufgaben- und des Assemblynamens.</target>
+        <target state="translated">MSB4060: Die "{0}"-Aufgabe wurde falsch deklariert, falsch verwendet oder konnte bei der Erstellung nicht ausgeführt werden. Überprüfen Sie die Schreibweise des Aufgaben- und des Assemblynamens.</target>
         <note>{StrBegin="MSB4060: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4060: Die {0}-Aufgabe wurde falsch deklariert, falsch verwendet oder konnte bei der Erstellung nicht ausgeführt werden. Überprüfen Sie die Schreibweise des Aufgaben- und des Assemblynamens.</target>
@@ -2200,7 +2200,7 @@
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureErrorInvalidCast">
         <source>MSB4127: The "{0}" task could not be instantiated from the assembly "{1}". Please verify the task assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</source>
-        <target state="translated">MSB4127: Die "{0}"-Aufgabe konnte nicht aus der "{1}"-Assembly instanziiert werden. Überprüfen Sie, ob die Aufgabenassembly mit der gleichen Version der Microsoft.Build.Framework-Assembly erstellt wurde, die auf Ihrem Computer installiert ist, und dass Ihrer Hostanwendung kein BindingRedirect-Eintrag für Microsoft.Build.Framework fehlt. {2}</target>
+        <target state="translated">MSB4127: Die "{0}"-Aufgabe konnte nicht aus der Assembly "{1}" instanziiert werden. Stellen Sie sicher, dass die Aufgabenassembly mit der auf dem Computer installierten Version der Microsoft.Build.Framework-Assembly erstellt wurde und die Hostanwendung über einen BindingRedirect-Eintrag für Microsoft.Build.Framework verfügt. {2}</target>
         <note>{StrBegin="MSB4127: "}UE: This message is a specialized version of the TaskInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">

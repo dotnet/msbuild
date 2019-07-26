@@ -14,5 +14,6 @@ Strings to search for in the build logs:
  * `Building target "CoreCompile" completely`
  * `is newer than output`
  * `out-of-date`
+ * `missing`
 
 Consider using http://msbuildlog.com to help with searching through the build log.
