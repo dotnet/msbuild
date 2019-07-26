@@ -97,7 +97,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         if (File.Exists(packageOverridesPath))
                         {
-                            packageConflictOverrides.Add(CreatePackageOverride(targetingPack.GetMetadata("RuntimeFrameworkName"), packageOverridesPath));
+                            packageConflictOverrides.Add(CreatePackageOverride(targetingPack.GetMetadata(MetadataKeys.PackageName), packageOverridesPath));
                         }
 
                         if (targetingPack.ItemSpec.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
