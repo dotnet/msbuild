@@ -77,6 +77,9 @@ namespace Microsoft.NET.Build.Tasks
         public const string TargetPath = "TargetPath";
         public const string CopyLocal = "CopyLocal";
 
+        //  Targeting packs
+        public const string PackageConflictPreferredPackages = "PackageConflictPreferredPackages";
+
         // Content files
         public const string PPOutputPath = "PPOutputPath";
         public const string CodeLanguage = "CodeLanguage";

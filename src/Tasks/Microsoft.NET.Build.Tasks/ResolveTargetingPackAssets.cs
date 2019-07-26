@@ -101,7 +101,7 @@ namespace Microsoft.NET.Build.Tasks
                             packageConflictOverrides.Add(CreatePackageOverride(targetingPack.GetMetadata("RuntimeFrameworkName"), packageOverridesPath));
                         }
 
-                        preferredPackages.AddRange(targetingPack.GetMetadata("PackageConflictPreferredPackages").Split(';'));
+                        preferredPackages.AddRange(targetingPack.GetMetadata(MetadataKeys.PackageConflictPreferredPackages).Split(';'));
                     }
                 }
             }
