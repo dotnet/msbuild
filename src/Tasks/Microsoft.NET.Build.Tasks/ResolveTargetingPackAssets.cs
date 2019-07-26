@@ -45,6 +45,7 @@ namespace Microsoft.NET.Build.Tasks
             List<TaskItem> platformManifests = new List<TaskItem>();
             PackageConflictPreferredPackages = string.Empty;
             List<TaskItem> packageConflictOverrides = new List<TaskItem>();
+            List<string> preferredPackages = new List<string>();
 
             var resolvedTargetingPacks = ResolvedTargetingPacks.ToDictionary(item => item.ItemSpec, StringComparer.OrdinalIgnoreCase);
 
@@ -100,12 +101,7 @@ namespace Microsoft.NET.Build.Tasks
                             packageConflictOverrides.Add(CreatePackageOverride(targetingPack.GetMetadata(MetadataKeys.PackageName), packageOverridesPath));
                         }
 
-                        if (targetingPack.ItemSpec.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
-                        {
-                            //  Hardcode this for now.  Once the targeting pack has PackageOverrides.txt, then delete this code
-                            //  https://github.com/dotnet/cli/issues/10581
-                            PackageConflictPreferredPackages = "Microsoft.NETCore.App;runtime.linux-x64.Microsoft.NETCore.App;runtime.linux-x64.Microsoft.NETCore.App;runtime.linux-musl-x64.Microsoft.NETCore.App;runtime.linux-musl-x64.Microsoft.NETCore.App;runtime.rhel.6-x64.Microsoft.NETCore.App;runtime.rhel.6-x64.Microsoft.NETCore.App;runtime.osx-x64.Microsoft.NETCore.App;runtime.osx-x64.Microsoft.NETCore.App;runtime.freebsd-x64.Microsoft.NETCore.App;runtime.freebsd-x64.Microsoft.NETCore.App;runtime.win-x86.Microsoft.NETCore.App;runtime.win-x86.Microsoft.NETCore.App;runtime.win-arm.Microsoft.NETCore.App;runtime.win-arm.Microsoft.NETCore.App;runtime.win-arm64.Microsoft.NETCore.App;runtime.win-arm64.Microsoft.NETCore.App;runtime.linux-arm.Microsoft.NETCore.App;runtime.linux-arm.Microsoft.NETCore.App;runtime.linux-arm64.Microsoft.NETCore.App;runtime.linux-arm64.Microsoft.NETCore.App;runtime.tizen.4.0.0-armel.Microsoft.NETCore.App;runtime.tizen.4.0.0-armel.Microsoft.NETCore.App;runtime.tizen.5.0.0-armel.Microsoft.NETCore.App;runtime.tizen.5.0.0-armel.Microsoft.NETCore.App;runtime.win-x64.Microsoft.NETCore.App;runtime.win-x64.Microsoft.NETCore.App";
-                        }
+                        preferredPackages.AddRange(targetingPack.GetMetadata(MetadataKeys.PackageConflictPreferredPackages).Split(';'));
                     }
                 }
             }
@@ -121,6 +117,7 @@ namespace Microsoft.NET.Build.Tasks
 
             PlatformManifests = platformManifests.ToArray();
             PackageConflictOverrides = packageConflictOverrides.ToArray();
+            PackageConflictPreferredPackages = string.Join(";", preferredPackages);
         }
 
         //  Get distinct items based on case-insensitive ItemSpec comparison

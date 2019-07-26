@@ -108,9 +108,23 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
+                List<string> preferredPackages = new List<string>();
+                preferredPackages.Add(knownFrameworkReference.TargetingPackName);
+
+                var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';');
+                foreach (var runtimeIdentifier in knownFrameworkReferenceRuntimePackRuntimeIdentifiers)
+                {
+                    foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
+                    {
+                        string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimeIdentifier);
+                        preferredPackages.Add(runtimePackName);
+                    }
+                }
+
                 //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                 TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
                 targetingPack.SetMetadata(MetadataKeys.PackageName, knownFrameworkReference.TargetingPackName);
+                targetingPack.SetMetadata(MetadataKeys.PackageConflictPreferredPackages, string.Join(";", preferredPackages));
 
                 string targetingPackVersion = null;
                 if (frameworkReference != null)
