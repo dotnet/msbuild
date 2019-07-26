@@ -164,6 +164,14 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool EnsureStdOutForChildNodesIsPrimaryStdout = Environment.GetEnvironmentVariable("MSBUILDENSURESTDOUTFORTASKPROCESSES") == "1";
 
+        /// <summary>
+        /// Use the original, string-only resx parsing in .NET Core scenarios.
+        /// </summary>
+        /// <remarks>
+        /// Escape hatch for problems arising from https://github.com/microsoft/msbuild/pull/4420.
+        /// </remarks>
+        public readonly bool UseMinimalResxParsingInCoreScenarios = Environment.GetEnvironmentVariable("MSBUILDUSEMINIMALRESX") == "1";
+
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);

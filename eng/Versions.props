@@ -6,7 +6,7 @@
     <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
         $(RestoreSources);
-        https://api.nuget.org/v3/index.json;
+        https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
         https://dotnet.myget.org/F/roslyn/api/v3/index.json;
         https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
         https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
@@ -15,7 +15,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>16.2.0</VersionPrefix>
+    <VersionPrefix>16.3.0</VersionPrefix>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -32,6 +32,10 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>3.0.100-preview5-011568</DotNetCliVersion>
+    <DotNetCliVersion>3.0.100-preview6-012264</DotNetCliVersion>
+  </PropertyGroup>
+  <!-- Product Dependencies -->
+  <PropertyGroup>
+    <SystemResourcesExtensionsVersion>4.6.0-preview8.19364.1</SystemResourcesExtensionsVersion>
   </PropertyGroup>
 </Project>

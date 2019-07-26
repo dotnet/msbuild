@@ -9,7 +9,11 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.BackEnd
@@ -708,6 +712,47 @@ namespace Microsoft.Build.BackEnd
             }
 
             return null;
+        }
+
+        private Func<string, bool> shouldSkipStaticGraphIsolationOnReference;
+
+        public bool ShouldSkipIsolationConstraintsForReference(string referenceFullPath)
+        {
+            ErrorUtilities.VerifyThrowInternalNull(Project, nameof(Project));
+            ErrorUtilities.VerifyThrowInternalLength(referenceFullPath, nameof(referenceFullPath));
+            ErrorUtilities.VerifyThrow(Path.IsPathRooted(referenceFullPath), "Method does not treat path normalization cases");
+
+            if (shouldSkipStaticGraphIsolationOnReference == null)
+            {
+                shouldSkipStaticGraphIsolationOnReference = GetReferenceFilter();
+            }
+
+            return shouldSkipStaticGraphIsolationOnReference(referenceFullPath);
+
+            Func<string, bool> GetReferenceFilter()
+            {
+                lock (_syncLock)
+                {
+                    if (shouldSkipStaticGraphIsolationOnReference != null)
+                    {
+                        return shouldSkipStaticGraphIsolationOnReference;
+                    }
+
+                    var items = Project.GetItems(ItemTypeNames.GraphIsolationExemptReference);
+
+                    if (items.Count == 0 || items.All(i => string.IsNullOrWhiteSpace(i.EvaluatedInclude)))
+                    {
+                        return _ => false;
+                    }
+
+                    var fragments = items.SelectMany(i => ExpressionShredder.SplitSemiColonSeparatedList(i.EvaluatedInclude));
+                    var glob = new CompositeGlob(
+                        fragments
+                            .Select(s => MSBuildGlob.Parse(Project.Directory, s)));
+
+                    return s => glob.IsMatch(s);
+                }
+            }
         }
 
         /// <summary>

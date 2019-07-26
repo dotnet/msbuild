@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 using Microsoft.Build.Evaluation;
@@ -1778,6 +1779,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (!isRepeatedResponseFile)
                     {
+                        var responseFileDirectory = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(responseFile));
                         s_includedResponseFiles.Add(responseFile);
 
                         ArrayList argsFromResponseFile;
@@ -1798,6 +1800,10 @@ namespace Microsoft.Build.CommandLine
                                 // skip comment lines beginning with #
                                 if (!responseFileLine.StartsWith("#", StringComparison.Ordinal))
                                 {
+                                    // Allow special case to support a path relative to the .rsp file being processed.
+                                    responseFileLine = Regex.Replace(responseFileLine, responseFilePathReplacement,
+                                        responseFileDirectory, RegexOptions.IgnoreCase);
+
                                     // treat each line of the response file like a command line i.e. args separated by whitespace
                                     argsFromResponseFile.AddRange(QuotingUtilities.SplitUnquoted(Environment.ExpandEnvironmentVariables(responseFileLine)));
                                 }
@@ -1930,9 +1936,14 @@ namespace Microsoft.Build.CommandLine
         private const string autoResponseFileName = "MSBuild.rsp";
 
         /// <summary>
-        /// THe name of an auto-response file to search for in the project directory and above.
+        /// The name of an auto-response file to search for in the project directory and above.
         /// </summary>
         private const string directoryResponseFileName = "Directory.Build.rsp";
+
+        /// <summary>
+        /// String replacement pattern to support paths in response files.
+        /// </summary>
+        private const string responseFilePathReplacement = "%MSBuildThisFileDirectory%";
 
         /// <summary>
         /// Whether switches from the auto-response file are being used.

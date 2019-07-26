@@ -24,6 +24,8 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
+    <Content Include="$(RepoRoot)mono\bin-dir\**\*" CopyToOutputDirectory="PreserveNewest" />
+
     <!-- Include the bundled SDKs -->
     <Content Include="$(RepoRoot)sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
 

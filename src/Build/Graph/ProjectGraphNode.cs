@@ -2,21 +2,25 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.Graph
 {
     /// <summary>
     /// Represents the node for a particular project in a project graph.
     /// </summary>
+    [DebuggerDisplay(@"{DebugString()}")]
     public sealed class ProjectGraphNode
     {
-        private readonly List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
-        private readonly List<ProjectGraphNode> _referencingProjects = new List<ProjectGraphNode>();
+        private readonly HashSet<ProjectGraphNode> _projectReferences = new HashSet<ProjectGraphNode>();
+        private readonly HashSet<ProjectGraphNode> _referencingProjects = new HashSet<ProjectGraphNode>();
 
         // No public creation.
         internal ProjectGraphNode(ProjectInstance projectInstance)
         {
+            ErrorUtilities.VerifyThrowInternalNull(projectInstance, nameof(projectInstance));
             ProjectInstance = projectInstance;
         }
 
@@ -35,12 +39,34 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
 
-        internal void AddProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Add(projectGraphNode);
+        private string DebugString()
+        {
+            var truncatedProjectFile = FileUtilities.TruncatePathToTrailingSegments(ProjectInstance.FullPath, 2);
 
-        internal void RemoveReferences() => _projectReferences.Clear();
+            return
+                $"{truncatedProjectFile}, #GlobalProps={ProjectInstance.GlobalProperties.Count}, #Props={ProjectInstance.Properties.Count}, #Items={ProjectInstance.Items.Count}, #in={ReferencingProjects.Count}, #out={ProjectReferences.Count}";
+        }
 
-        internal void RemoveProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Remove(projectGraphNode);
+        internal void AddProjectReference(ProjectGraphNode reference, ProjectItemInstance projectReferenceItem, GraphBuilder.GraphEdges edges)
+        {
+            _projectReferences.Add(reference);
+            reference._referencingProjects.Add(this);
 
-        internal void AddReferencingProject(ProjectGraphNode projectGraphNode) => _referencingProjects.Add(projectGraphNode);
+            // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
+            edges[(this, reference)] = projectReferenceItem;
+        }
+
+        internal void RemoveReferences(GraphBuilder.GraphEdges edges)
+        {
+            foreach (var reference in _projectReferences)
+            {
+                ErrorUtilities.VerifyThrow(reference._referencingProjects.Contains(this), "references should point to the nodes referencing them");
+                reference._referencingProjects.Remove(this);
+
+                edges.RemoveEdge((this, reference));
+            }
+
+            _projectReferences.Clear();
+        }
     }
 }

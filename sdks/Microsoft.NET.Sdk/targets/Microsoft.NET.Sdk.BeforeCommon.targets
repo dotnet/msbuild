@@ -12,7 +12,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
   </PropertyGroup>
 
@@ -26,6 +25,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Set default intermediate and output paths -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" />
   
+  <!-- Before any additional SDK targets are imported, import the publish profile.
+       This allows the publish profile to set properties like RuntimeIdentifier and them be
+       respected by the SDK. -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.ImportPublishProfile.targets"
+          Condition="'$(PublishProfileImported)' != 'true'"/>
+
   <!-- 
     Expand TargetFramework to TargetFrameworkIdentifier and TargetFrameworkVersion,
     and adjust intermediate and output paths to include it.
@@ -61,7 +66,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Default settings for .NET Core and .NET Standard build logic -->
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == 'true'">
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
-    
+
     <!-- Assembly and file versions of runtime assets should be written to the deps.json by default, to support
          runtime minor version roll-forward: https://github.com/dotnet/core-setup/issues/3546 -->
     <IncludeFileVersionsInDependencyFile Condition="'$(IncludeFileVersionsInDependencyFile)' == ''">true</IncludeFileVersionsInDependencyFile>
@@ -69,15 +74,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Force .dll extension for .NETCoreApp and .NETStandard projects even if output type is exe. -->
     <TargetExt Condition="'$(TargetExt)' == ''">.dll</TargetExt>
 
-    <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core and .NETStandard projects -->
-    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">false</CopyLocalLockFileAssemblies>
-
     <!-- Disable the use of FrameworkPathOverride in Microsoft.Common.CurrentVersion.targets which can slow down evaluation.  FrameworkPathOverride
     is not needed for NETStandard or NETCore since references come from NuGet packages-->
     <EnableFrameworkPathOverride Condition="'$(EnableFrameworkPathOverride)' == ''">false</EnableFrameworkPathOverride>
   </PropertyGroup>
   
-  <!-- Regardless of platform, enable dependency file generation if PreserveCompilatioContext is set. -->
+  <!-- Regardless of platform, enable dependency file generation if PreserveCompilationContext is set. -->
   <PropertyGroup>
     <GenerateDependencyFile Condition="'$(GenerateDependencyFile)' == ''">$(PreserveCompilationContext)</GenerateDependencyFile>
   </PropertyGroup>
@@ -124,9 +126,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!--<Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
     <_SDKImplicitReference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
 
-    <!-- Set Pack=false on implicit references so they don't get added to NuGet packages as framework assemblies -->
     <_SDKImplicitReference Update="@(_SDKImplicitReference)"
-                           Pack="false" />
+                           Pack="false"
+                           IsImplicitlyDefined="true" />
 
     <!-- Don't duplicate any references that are explicit in the project file.  This means that if you do want to include a framework assembly in your
          NuGet package, you can just add the Reference to your project file. -->
@@ -142,7 +144,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(DisableImplicitAssetTargetFallback)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' >= '2.0'">
-    <AssetTargetFallback>$(AssetTargetFallback);net461</AssetTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);net461;net462;net47;net471;net472;net48</AssetTargetFallback>
   </PropertyGroup>
 
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->

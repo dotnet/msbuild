@@ -11,10 +11,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-  
   <!--
     ============================================================
                                         PrepOptimizer
@@ -108,8 +104,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           CrossgenExe=$(Crossgen);
           CrossgenJit=$(JitPath);
           CrossgenInputAssembly=%(_ManagedResolvedFilesToOptimize.Fullpath);
-          CrossgenOutputAssembly=$(_RuntimeOptimizedDir)$(DirectorySeparatorChar)%(FileName)%(Extension);
-          CrossgenSubOutputPath=%(DestinationSubPath);
+          CrossgenOutputAssembly=$(_RuntimeOptimizedDir)$(DirectorySeparatorChar)%(_ManagedResolvedFilesToOptimize.FileName)%(_ManagedResolvedFilesToOptimize.Extension);
+          CrossgenSubOutputPath=%(_ManagedResolvedFilesToOptimize.DestinationSubPath);
           _RuntimeOptimizedDir=$(_RuntimeOptimizedDir);
           PublishDir=$(StoreStagingDir);
           CrossgenPlatformAssembliesPath=$(_RuntimeRefDir)$(PathSeparator)$(_NetCoreRefDir);
@@ -151,7 +147,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!--Optimization skip if the assembly is already present in the final output directory-->
     <Exec
      Command="$(CrossgenCommandline)"
-     Condition="!Exists($([System.IO.Path]::Combine($(PublishDir),$(CrossgenSubOutputPath))))" />
+     Condition="!Exists($([System.IO.Path]::Combine($(PublishDir),$(CrossgenSubOutputPath))))"
+     IgnoreStandardErrorWarningFormat="true" />
 
     <Copy SourceFiles = "$(CrossgenOutputAssembly)"
           DestinationFiles="$(PublishDir)\$(CrossgenSubOutputPath)"
@@ -167,7 +164,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MakeDir Directories="$(CrossgenProfilingSymbolsOutputDirectory)"
              Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" />
     <Exec Command="$(CrossgenExe) -nologo -readytorun -platform_assemblies_paths $(CrossgenPlatformAssembliesPath) -$(CreateProfilingSymbolsOptionName) $(CrossgenProfilingSymbolsOutputDirectory) $(CrossgenOutputAssembly)"
-          Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" />
+          Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" 
+          IgnoreStandardErrorWarningFormat="true" />
 
     <ItemGroup>
       <_ProfilingSymbols Include="$(CrossgenProfilingSymbolsOutputDirectory)\*"
@@ -252,33 +250,55 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
                                         _RestoreCrossgen
-Restores netcoreapp and publishes it to a temp directory
+    Restores netcoreapp and publishes it to a temp directory
     ============================================================
     -->
   
   <Target Name="_RestoreCrossgen"
           DependsOnTargets="PrepforRestoreForComposeStore;
-                           _SetupStageForCrossgen;"
+                           _SetupStageForCrossgen;
+                           ProcessFrameworkReferences;
+                           ApplyImplicitVersions;
+                           _ComputePackageReferencePublish"
           Condition="$(SkipOptimization) != 'true' ">
+
+    <ItemGroup>
+      <!-- Filter package references to the one for the platform library, in order to find the right version -->
+      <PackageReferenceForCrossGen Include="@(PackageReference)" Condition="'%(Identity)' == '$(MicrosoftNETPlatformLibrary)'" />
+    </ItemGroup>
+
     <MSBuild Projects="$(MSBuildProjectFullPath)"
                  Targets="Restore"
                  Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
-                             DisableImplicitFrameworkReferences=true;
                              RestoreOutputPath=$(_CrossProjFileDir);
                              StorePackageName=$(MicrosoftNETPlatformLibrary);
-                             StorePackageVersion=$(RuntimeFrameworkVersion);"/>
+                             StorePackageVersion=%(PackageReferenceForCrossGen.Version);"/>
 
-    <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
-                              AssetsFilePath="$(_CrossProjAssetsFile)"
-                              TargetFramework="$(_TFM)"
-                              RuntimeIdentifier="$(RuntimeIdentifier)"
-                              PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
-                              IsSelfContained="$(SelfContained)"
-                              PreserveStoreLayout="false">
+    <!-- For future: Use ResolvePackageAssets instead of ResolveCopyLocalAssets, delete ResolveCopyLocalAssets task -->
+    <ResolveCopyLocalAssets Condition="'$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
+                            AssetsFilePath="$(_CrossProjAssetsFile)"
+                            TargetFramework="$(_TFM)"
+                            RuntimeIdentifier="$(RuntimeIdentifier)"
+                            PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                            RuntimeFrameworks="@(RuntimeFramework)"
+                            ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
+                            IsSelfContained="$(SelfContained)"
+                            PreserveStoreLayout="false">
 
-      <Output TaskParameter="AssembliesToPublish" ItemName="CrossgenResolvedAssembliesToPublish" />
-    </ResolvePublishAssemblies>
+      <Output TaskParameter="ResolvedAssets" ItemName="CrossgenResolvedAssembliesToPublish" />
+    </ResolveCopyLocalAssets>
+
+    <GetPackageDirectory Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0'"
+                         Items="@(RuntimePack)"
+                         AssetsFileWithAdditionalPackageFolders="$(_CrossProjAssetsFile)">
+      <Output TaskParameter="Output" ItemName="_CrossgenRuntimePack" />
+    </GetPackageDirectory>
+
+    <ResolveRuntimePackAssets Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0'"
+                              FrameworkReferences="@(FrameworkReference)"
+                              ResolvedRuntimePacks="@(_CrossgenRuntimePack)">
+      <Output TaskParameter="RuntimePackAssets" ItemName="CrossgenResolvedAssembliesToPublish" />
+    </ResolveRuntimePackAssets>
 
     <!-- Copy managed files to  a flat temp directory for passing it as ref for crossgen -->
     <Copy SourceFiles = "@(CrossgenResolvedAssembliesToPublish)"

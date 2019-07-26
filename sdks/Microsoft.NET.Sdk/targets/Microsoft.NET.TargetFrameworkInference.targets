@@ -42,9 +42,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     infer the version of 1.0. The user can also override it as always we honor a TargetFrameworkIdentifier
     or TargetFrameworkVersion that is already set.
    -->
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
 
   <!-- Split $(TargetFramework) (e.g. net45) into short identifier and short version (e.g. 'net' and '45'). -->
   <PropertyGroup Condition="'$(TargetFramework)' != '' and !$(TargetFramework.Contains(',')) and !$(TargetFramework.Contains('+'))">
@@ -90,11 +87,11 @@ Copyright (c) .NET Foundation. All rights reserved.
           errors that are only consequences of the root cause identified here.
   -->
   <Target Name="_CheckForUnsupportedTargetFramework"
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetReferenceAssemblyPaths"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths"
           Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'"
           >
     <NETSdkError Condition="!$(TargetFramework.Contains(';'))"
-                 ResourceName="CannotInferTargetFrameworkIdentiferAndVersion"
+                 ResourceName="CannotInferTargetFrameworkIdentifierAndVersion"
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
 
     <NETSdkError Condition="$(TargetFramework.Contains(';'))"
@@ -106,7 +103,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Telemetry EventName="targetframeworkeval" EventData="TargetFrameworkVersion=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'))" />
   </Target>
 
-  <!-- 
+  <!--
     Don't leave TargetFrameworkVersion empty if it still hasn't been determined. We will trigger the error above,
     but we need this to be a valid version so that our error message does not get pre-empted by failure to interpret
     version comparison expressions, which is currently unrecoverable in VS.
@@ -126,8 +123,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NETCoreAppMaximumVersion)' == ''">
-    <!-- Once we've bundled a 2.1 version of .NET Core with the CLI, reset this property to use $(BundledNETCoreAppTargetFrameworkVersion) -->
-    <NETCoreAppMaximumVersion>2.1</NETCoreAppMaximumVersion>
+    <!-- Once we've bundled a 2.2 version of .NET Core with the CLI, reset this property to use $(BundledNETCoreAppTargetFrameworkVersion) -->
+    <NETCoreAppMaximumVersion>2.2</NETCoreAppMaximumVersion>
     <!--<NETCoreAppMaximumVersion>$(BundledNETCoreAppTargetFrameworkVersion)</NETCoreAppMaximumVersion>-->
   </PropertyGroup>
     
@@ -141,7 +138,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
-    <NETStandardMaximumVersion>$(BundledNETStandardTargetFrameworkVersion)</NETStandardMaximumVersion>
+    <!--<NETStandardMaximumVersion>$(BundledNETStandardTargetFrameworkVersion)</NETStandardMaximumVersion>-->
+    <NETStandardMaximumVersion>2.1</NETStandardMaximumVersion>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedNETStandardVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"

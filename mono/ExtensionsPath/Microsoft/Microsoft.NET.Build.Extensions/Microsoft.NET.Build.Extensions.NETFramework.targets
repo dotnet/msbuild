@@ -12,8 +12,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
     <!-- Add NETStandard references if targetframeworkversion supports netstandard2.0 (net461 or later) -->
     <ImplicitlyExpandNETStandardFacades Condition="'$(ImplicitlyExpandNETStandardFacades)' == '' AND '$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'">true</ImplicitlyExpandNETStandardFacades>
   </PropertyGroup>
@@ -21,6 +19,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
   <UsingTask TaskName="NETBuildExtensionsError" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
   <UsingTask TaskName="NETBuildExtensionsWarning" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
+  <UsingTask TaskName="AddFacadesToReferences" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
 
   <Target Name="ImplicitlyExpandNETStandardFacades"
           Condition="'$(ImplicitlyExpandNETStandardFacades)' == 'true'"
@@ -90,13 +89,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup Condition="'@(_NETStandardLibraryNETFrameworkLib)' != ''">
-      <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
-           consider a project with a Reference Include="System.Net.Http" or "System.IO.Compression", which are both in
-           _NETStandardLibraryNETFrameworkReference.
-           Simple references can also come from NuGet framework assemblies, hence this statement should occur after
-           including all computed references, thus this target is scheduled after references have been raised by NuGet
-           targets. -->
-      <Reference Remove="%(_NETStandardLibraryNETFrameworkLib.FileName)" />
 
       <!-- Put each facade assembly in two separate items: Reference with Private set to false, which means it won't be
            copied locally, and ReferenceCopyLocalPaths, which will be copied locally.  The reason for this split is to
@@ -112,14 +104,25 @@ Copyright (c) .NET Foundation. All rights reserved.
            and VS won't show a warning icon on the reference.  See https://github.com/dotnet/sdk/issues/1499
            -->
 
-      <Reference Include="%(_NETStandardLibraryNETFrameworkLib.FileName)">
-        <HintPath>%(_NETStandardLibraryNETFrameworkLib.Identity)</HintPath>
-        <Private>false</Private>
-      </Reference>
-
       <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)" Condition="'%(FileName)' != 'netfx.force.conflicts'">
         <Private>false</Private>
       </ReferenceCopyLocalPaths>
+
+      <_UpdatedReference Remove="@(_UpdatedReference)" />
+    </ItemGroup>
+    
+    <!-- Facade assemblies should override simple name references.  However, we want to preserve custom metadata
+         on those simple name references (for example for aliases).  That's what this task does. -->
+    <AddFacadesToReferences References="@(Reference)"
+                            Facades="@(_NETStandardLibraryNETFrameworkLib)"
+                            Condition="'@(_NETStandardLibraryNETFrameworkLib)' != ''">
+      <Output TaskParameter="UpdatedReferences" ItemName="_UpdatedReference" />
+    </AddFacadesToReferences>
+
+    <ItemGroup Condition="'@(_NETStandardLibraryNETFrameworkLib)' != ''">
+      <Reference Remove="@(Reference)" />
+      <Reference Include="@(_UpdatedReference)" />
+      <_UpdatedReference Remove="@(_UpdatedReference)" />
     </ItemGroup>
   </Target>
 

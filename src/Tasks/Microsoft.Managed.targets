@@ -35,19 +35,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <DisableTransitiveProjectReferences Condition="'$(BuildProjectReferences)' != 'false' and '$(DisableTransitiveProjectReferences)' == ''">true</DisableTransitiveProjectReferences>
    </PropertyGroup>
 
+   <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+      <!-- WPF projects generate a project with a random name at build time and then build the project via the IBuildEngine callbacks.
+           Detect WPF, and exclude the generated project from static graph isolation constraint checking.
+           Escape the item to avoid eager evaluation of the wildcards.
+      -->
+      <GraphIsolationExemptReference
+         Condition="'$(UseWPF)' == 'true' or '@(Page)' != '' or '@(ApplicationDefinition)' != '' or '@(XamlPage)' != '' or '@(XamlAppDef)' != ''"
+         Include="$([MSBuild]::Escape('$(MSBuildProjectDirectory)\$(MSBuildProjectName)*_wpftmp$(MSBuildProjectExtension)'))" />
+   </ItemGroup>
+
   <!--
     Properties for extension of ProjectReferenceTargets.
     Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.
   -->
   <PropertyGroup>
     <ProjectReferenceTargetsForBuildInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForBuildInOuterBuild)</ProjectReferenceTargetsForBuildInOuterBuild>
-    <ProjectReferenceTargetsForBuild>.default;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForBuild>.projectReferenceTargetsOrDefaultTargets;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
 
     <ProjectReferenceTargetsForCleanInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForCleanInOuterBuild)</ProjectReferenceTargetsForCleanInOuterBuild>
     <ProjectReferenceTargetsForClean>Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
 
     <ProjectReferenceTargetsForRebuildInOuterBuild>$(ProjectReferenceTargetsForCleanInOuterBuild);$(ProjectReferenceTargetsForBuildInOuterBuild);$(ProjectReferenceTargetsForRebuildInOuterBuild)</ProjectReferenceTargetsForRebuildInOuterBuild>
     <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
+
+    <ProjectReferenceTargetsForPublish>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
+    <ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)</ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -59,6 +72,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForRebuildInOuterBuild)' != '' " />
       <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+
+      <ProjectReferenceTargets Include="Publish" Targets="$(ProjectReferenceTargetsForPublish)" Condition=" '$(ProjectReferenceTargetsForPublish)' != '' " />
+      <ProjectReferenceTargets Include="GetCopyToPublishDirectoryItems" Targets="$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)" Condition=" '$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)' != '' " />
+
   </ItemGroup>
 
 </Project>

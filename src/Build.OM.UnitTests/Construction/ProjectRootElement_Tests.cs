@@ -733,13 +733,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Verifies that ProjectRootElement.Encoding returns the correct value
         /// after reading a file off disk, even if no xml declaration is present.
         /// </summary>
-#if FEATURE_ENCODING_DEFAULT
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/301")]
-#endif
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
             string projectFullPath = FileUtilities.GetTemporaryFile();

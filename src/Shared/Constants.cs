@@ -78,13 +78,19 @@ namespace Microsoft.Build.Shared
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"
         /// </summary>
         internal const string CurrentProductVersion = "16.0";
-		
-		/// <summary>
+        
+        /// <summary>
         /// Symbol used in ProjectReferenceTarget items to represent default targets
         /// </summary>
         internal const string DefaultTargetsMarker = ".default";
-		
-		// One-time allocations to avoid implicit allocations for Split(), Trim().
+
+        /// <summary>
+        /// Symbol used in ProjectReferenceTarget items to represent targets specified on the ProjectReference item
+        /// with fallback to default targets if the ProjectReference item has no targets specified.
+        /// </summary>
+        internal const string ProjectReferenceTargetsOrDefaultTargetsMarker = ".projectReferenceTargetsOrDefaultTargets";
+        
+        // One-time allocations to avoid implicit allocations for Split(), Trim().
         internal static readonly char[] SemicolonChar = { ';' };
         internal static readonly char[] SpaceChar = { ' ' };
         internal static readonly char[] SingleQuoteChar = { '\'' };
@@ -127,6 +133,8 @@ namespace Microsoft.Build.Shared
         /// Statically specifies what targets a project calls on its references
         /// </summary>
         internal const string ProjectReferenceTargets = nameof(ProjectReferenceTargets);
+
+        internal const string GraphIsolationExemptReference = nameof(GraphIsolationExemptReference);
     }
 
     /// <summary>

@@ -1182,6 +1182,31 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// A response file should support path replacement (%MSBuildThisFileDirectory% becomes full path to the
+        /// rsp file directory).
+        /// </summary>
+        [Fact]
+        public void ResponseFileSupportsThisFileDirectory()
+        {
+            using (var env = UnitTests.TestEnvironment.Create())
+            {
+                var content = ObjectModelHelpers.CleanupFileContents(
+                    "<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+
+                var directory = env.CreateFolder();
+                directory.CreateFile("Directory.Build.rsp", "/p:A=%MSBuildThisFileDirectory%");
+                var projectPath = directory.CreateFile("my.proj", content).Path;
+
+                var msbuildParameters = "\"" + projectPath + "\"";
+
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                successfulExit.ShouldBeTrue();
+
+                output.ShouldContain($"[A={directory.Path}{Path.DirectorySeparatorChar}]");
+            }
+        }
+
 #region IgnoreProjectExtensionTests
 
         /// <summary>

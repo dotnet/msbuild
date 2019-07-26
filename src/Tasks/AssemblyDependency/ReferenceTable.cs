@@ -890,10 +890,21 @@ namespace Microsoft.Build.Tasks
             }
 
             // Native Winmd files may have a companion dll beside it.
-            // If this is not a primary reference or the implementation metadata is not set on the item we need to set the implmentation metadata.
-            if (reference.IsWinMDFile && (!reference.IsPrimary || String.IsNullOrEmpty(reference.PrimarySourceItem.GetMetadata(ItemMetadataNames.winmdImplmentationFile))) && !reference.IsManagedWinMDFile)
+            if (reference.IsWinMDFile && !reference.IsManagedWinMDFile)
             {
-                string companionFile = baseName + ".dll";
+                var companionFile = baseName + ".dll";
+
+                if (reference.IsPrimary)
+                {
+                    var implementationFile = reference.PrimarySourceItem.GetMetadata(ItemMetadataNames.winmdImplmentationFile);
+
+                    // Static library projects can produce a .winmd with an associated .lib, but that is not
+                    // a real ImplementationAssembly--it would fail downstream when trying to read its PE header.
+                    if (!String.IsNullOrEmpty(implementationFile) && Path.GetExtension(implementationFile) == ".dll")
+                    {
+                        companionFile = Path.Combine(Path.GetDirectoryName(baseName), implementationFile);
+                    }
+                }
 
                 if (_fileExists(companionFile))
                 {
@@ -2602,7 +2613,10 @@ namespace Microsoft.Build.Tasks
                 {
                     if (VerifyArchitectureOfImplementationDll(reference.ImplementationAssembly, reference.FullPath))
                     {
-                        referenceItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, Path.GetFileName(reference.ImplementationAssembly));
+                        if (string.IsNullOrEmpty(referenceItem.GetMetadata(ItemMetadataNames.winmdImplmentationFile)))
+                        {
+                            referenceItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, Path.GetFileName(reference.ImplementationAssembly));
+                        }
 
                         // Add the implementation item as a related file
                         ITaskItem item = new TaskItem(reference.ImplementationAssembly);
@@ -2797,6 +2811,9 @@ namespace Microsoft.Build.Tasks
                     case NativeMethods.IMAGE_FILE_MACHINE_ARM:
                     case NativeMethods.IMAGE_FILE_MACHINE_ARMV7:
                         dllArchitecture = SystemProcessorArchitecture.Arm;
+                        break;
+                    case NativeMethods.IMAGE_FILE_MACHINE_ARM64:
+                        dllArchitecture = (SystemProcessorArchitecture) 6; // There's no entry for ARM64 in SystemProcessorArchitecture, use the next available constant
                         break;
                     case NativeMethods.IMAGE_FILE_MACHINE_I386:
                         dllArchitecture = SystemProcessorArchitecture.X86;

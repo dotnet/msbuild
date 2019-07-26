@@ -120,6 +120,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void TimeoutFailsEvenWhenExitCodeIsIgnored()
+        {
+            // On non-Windows the exit code of a killed process is SIGTERM (143)
+            int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 143;
+
+            Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
+            exec.Timeout = 5;
+            exec.IgnoreExitCode = true;
+            bool result = exec.Execute();
+
+            Assert.False(result);
+            Assert.Equal(expectedExitCode, exec.ExitCode);
+            ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
+            Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
+
+            // ToolTask does not log an error on timeout.
+            Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
+        }
+
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void WindowsNewLineCharactersInCommandOnUnix()
         {
@@ -377,11 +397,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that Exec still executes properly when there's a non-ANSI character in the command
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
-#else
         [Fact]
-#endif
         public void ExecTaskUnicodeCharacterInCommand()
         {
             RunExec(true, new UTF8Encoding(false).EncodingName);
@@ -399,11 +415,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exec task will use UTF8 when UTF8 Always is specified (with non-ANSI characters in the Command)
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
-#else
         [Fact]
-#endif
         public void ExecTaskUtf8AlwaysWithNonAnsi()
         {
             RunExec(true, new UTF8Encoding(false).EncodingName, "Always");
@@ -422,24 +434,24 @@ namespace Microsoft.Build.UnitTests
         /// Exec task will NOT use UTF8 when UTF8 Never is specified and non-ANSI characters are in the Command
         /// <remarks>Exec task will fail as the cmd processor will not be able to run the command.</remarks>
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
-#else
-        [Fact]
-#endif
-        [Trait("Category", "mono-osx-failing")]
-        public void ExecTaskUtf8NeverWithNonAnsi()
+        [Theory]
+        [InlineData("Never")]
+        [InlineData("System")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void ExecTaskUtf8NeverWithNonAnsi(string useUtf8)
         {
-            RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never", false);
+            RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8, false);
         }
 
         /// <summary>
         /// Exec task will NOT use UTF8 when UTF8 Never is specified and only ANSI characters are in the Command
         /// </summary>
-        [Fact]
-        public void ExecTaskUtf8NeverWithAnsi()
+        [Theory]
+        [InlineData("Never")]
+        [InlineData("System")]
+        public void ExecTaskUtf8NeverWithAnsi(string useUtf8)
         {
-            RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never");
+            RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8);
         }
 
         [Theory]
@@ -835,12 +847,8 @@ namespace Microsoft.Build.UnitTests
         /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
         /// in the current system encoding.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
-#else
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-#endif
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void CanEncodeTest()
         {
             var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;

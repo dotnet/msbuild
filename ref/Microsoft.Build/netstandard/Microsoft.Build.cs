@@ -945,6 +945,7 @@ namespace Microsoft.Build.Execution
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DetailedSummary { get { throw null; } set { } }
         public bool DisableInProcNode { get { throw null; } set { } }
+        public bool DiscardBuildResults { get { throw null; } set { } }
         public bool EnableNodeReuse { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> EnvironmentProperties { get { throw null; } }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> ForwardingLoggers { get { throw null; } set { } }
@@ -1264,7 +1265,9 @@ namespace Microsoft.Build.Execution
     public sealed partial class ProjectTargetInstance
     {
         internal ProjectTargetInstance() { }
+        public string AfterTargets { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation AfterTargetsLocation { get { throw null; } }
+        public string BeforeTargets { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation BeforeTargetsLocation { get { throw null; } }
         public System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectTargetInstanceChild> Children { get { throw null; } }
         public string Condition { get { throw null; } }
@@ -1409,6 +1412,8 @@ namespace Microsoft.Build.Experimental.Graph
         public ProjectGraph(Microsoft.Build.Experimental.Graph.ProjectGraphEntryPoint entryPoint, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public ProjectGraph(System.Collections.Generic.IEnumerable<Microsoft.Build.Experimental.Graph.ProjectGraphEntryPoint> entryPoints) { }
         public ProjectGraph(System.Collections.Generic.IEnumerable<Microsoft.Build.Experimental.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Experimental.Graph.ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory) { }
+        public ProjectGraph(System.Collections.Generic.IEnumerable<Microsoft.Build.Experimental.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Experimental.Graph.ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory, int degreeOfParallelism, System.Threading.CancellationToken cancellationToken) { }
+        public ProjectGraph(System.Collections.Generic.IEnumerable<Microsoft.Build.Experimental.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Evaluation.ProjectCollection projectCollection, Microsoft.Build.Experimental.Graph.ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory, System.Threading.CancellationToken cancellationToken) { }
         public ProjectGraph(System.Collections.Generic.IEnumerable<string> entryProjectFiles) { }
         public ProjectGraph(System.Collections.Generic.IEnumerable<string> entryProjectFiles, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public ProjectGraph(System.Collections.Generic.IEnumerable<string> entryProjectFiles, System.Collections.Generic.IDictionary<string, string> globalProperties) { }

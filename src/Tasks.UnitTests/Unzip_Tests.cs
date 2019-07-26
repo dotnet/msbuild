@@ -134,9 +134,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(
-                        $"D6DFD219DACE48F8B86EFCDF98433333.txt{ (NativeMethodsShared.IsMono ? "\"" : "'") } is denied",
-                        () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain($"D6DFD219DACE48F8B86EFCDF98433333.txt{ (NativeMethodsShared.IsMono ? "\"" : "'") } is denied", () => _mockEngine.Log);
             }
         }
 
