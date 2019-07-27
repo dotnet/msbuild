@@ -409,7 +409,7 @@ namespace Microsoft.Build.Execution
             _directory = directory;
             _projectFileLocation = ElementLocation.Create(fullPath);
             _hostServices = hostServices;
-            
+
             EvaluationId = data.EvaluationId;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
@@ -499,13 +499,13 @@ namespace Microsoft.Build.Execution
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
                 this.InitialTargets = new List<string>(that.InitialTargets);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                    ProjectItemDefinitionInstance>) this).BeforeTargets = CreateCloneDictionary(
+                    ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                        ProjectItemDefinitionInstance>) that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
+                        ProjectItemDefinitionInstance>)that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                    ProjectItemDefinitionInstance>) this).AfterTargets = CreateCloneDictionary(
+                    ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                        ProjectItemDefinitionInstance>) that).AfterTargets, StringComparer.OrdinalIgnoreCase);
+                        ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
                 this.TaskRegistry =
                     that.TaskRegistry; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
 
@@ -1914,7 +1914,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            var globalPropertiesToTreatAsLocal = (HashSet<string>) _globalPropertiesToTreatAsLocal;
+            var globalPropertiesToTreatAsLocal = (HashSet<string>)_globalPropertiesToTreatAsLocal;
             translator.Translate(ref globalPropertiesToTreatAsLocal);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
@@ -2669,19 +2669,22 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+                ProjectItemInstance instance = null;
 
                 if (item.DirectMetadata != null)
                 {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(item.DirectMetadataCount);
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(item.DirectMetadataCount);
                     foreach (ProjectMetadata directMetadatum in item.DirectMetadata)
                     {
                         ProjectMetadataInstance directMetadatumInstance = new ProjectMetadataInstance(directMetadatum);
                         directMetadata.Set(directMetadatumInstance);
                     }
+                    instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, ProjectCollection.Escape(item.Xml.ContainingProject.FullPath));
                 }
-
-                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, ProjectCollection.Escape(item.Xml.ContainingProject.FullPath));
+                else
+                {
+                    instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, null, inheritedItemDefinitions, ProjectCollection.Escape(item.Xml.ContainingProject.FullPath));
+                }
 
                 _items.Add(instance);
 
