@@ -2681,7 +2681,8 @@ namespace Microsoft.Build.Execution
                     directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(item.DirectMetadataCount);
                     foreach (ProjectMetadata directMetadatum in item.DirectMetadata)
                     {
-                        directMetadata.Set(ProjectMetadataInstance(directMetadatum));
+                        ProjectMetadataInstance directMetadatumInstance = new ProjectMetadataInstance(directMetadatum);
+                        directMetadata.Set(directMetadatumInstance);
                     }
                 }
 
