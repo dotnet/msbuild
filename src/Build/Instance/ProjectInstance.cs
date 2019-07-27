@@ -2164,10 +2164,9 @@ namespace Microsoft.Build.Execution
             {
                 return beforeTargetsForTarget;
             }
-            else
-            {
-                return Array.Empty<TargetSpecification>();
-            }
+
+            return Array.Empty<TargetSpecification>();
+
         }
 
         /// <summary>
@@ -2181,10 +2180,9 @@ namespace Microsoft.Build.Execution
             {
                 return afterTargetsForTarget;
             }
-            else
-            {
-                return Array.Empty<TargetSpecification>();
-            }
+
+            return Array.Empty<TargetSpecification>();
+
         }
 
         /// <summary>
@@ -2455,14 +2453,11 @@ namespace Microsoft.Build.Execution
         /// <param name="dictionary">Dictionary to clone.</param>
         private static IDictionary<string, TValue> CreateCloneDictionary<TValue>(IDictionary<string, TValue> dictionary) where TValue : class, IKeyed
         {
-            if (dictionary == null)
-            {
-                return ReadOnlyEmptyDictionary<string, TValue>.Instance;
-            }
-            else
+            if (dictionary != null)
             {
                 return new RetrievableEntryHashSet<TValue>(dictionary, StringComparer.OrdinalIgnoreCase, readOnly: true);
             }
+            return ReadOnlyEmptyDictionary<string, TValue>.Instance;
         }
 
         /// <summary>
