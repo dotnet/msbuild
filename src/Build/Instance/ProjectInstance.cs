@@ -327,8 +327,10 @@ namespace Microsoft.Build.Execution
             this.ProjectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
             _explicitToolsVersionSpecified = projectToInheritFrom._explicitToolsVersionSpecified;
             this.InitialTargets = new List<string>();
-            this.DefaultTargets = new List<string>();
-            this.DefaultTargets.Add("Build");
+            this.DefaultTargets = new List<string>
+            {
+                "Build"
+            };
             this.TaskRegistry = projectToInheritFrom.TaskRegistry;
             _isImmutable = projectToInheritFrom._isImmutable;
 

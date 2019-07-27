@@ -979,8 +979,10 @@ namespace Microsoft.Build.UnitTests
         )
         {
             // Build the default targets.
-            List<ILogger> loggers = new List<ILogger>(1);
-            loggers.Add(logger);
+            List<ILogger> loggers = new List<ILogger>(1)
+            {
+                logger
+            };
 
             if (string.Equals(Path.GetExtension(projectFileRelativePath), ".sln"))
             {
@@ -1319,8 +1321,10 @@ namespace Microsoft.Build.UnitTests
             Project project = new Project(XmlReader.Create(new StringReader(content)));
             logger = new MockLogger();
             logger.AllowTaskCrashes = allowTaskCrash;
-            List<ILogger> loggers = new List<ILogger>();
-            loggers.Add(logger);
+            List<ILogger> loggers = new List<ILogger>
+            {
+                logger
+            };
             result = project.Build(loggers);
         }
 

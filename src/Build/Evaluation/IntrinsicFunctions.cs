@@ -374,9 +374,11 @@ namespace Microsoft.Build.Evaluation
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
             architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture);
 
-            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            parameters.Add(XMakeAttributes.runtime, runtime);
-            parameters.Add(XMakeAttributes.architecture, architecture);
+            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { XMakeAttributes.runtime, runtime },
+                { XMakeAttributes.architecture, architecture }
+            };
 
             TaskHostContext desiredContext = CommunicationsUtilities.GetTaskHostContext(parameters);
             string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(desiredContext);

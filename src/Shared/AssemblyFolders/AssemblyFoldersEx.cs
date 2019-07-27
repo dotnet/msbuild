@@ -460,9 +460,11 @@ namespace Microsoft.Build.Shared
             {
                 // The version is not in our dictionary yet, lets add it
                 // We need a new list since one has not been added yet
-                listOfFrameworks = new List<string>();
-                // Make sure we add ourselves to the list
-                listOfFrameworks.Add(version);
+                listOfFrameworks = new List<string>
+                {
+                    // Make sure we add ourselves to the list
+                    version
+                };
 
                 targetFrameworkVersionToRegistryVersions.Add(candidateVersion, listOfFrameworks);
             }

@@ -227,9 +227,8 @@ namespace Microsoft.Build.Framework.Profiler
         /// <nodoc/>
         public override bool Equals(object obj)
         {
-            if (obj is EvaluationLocation)
+            if (obj is EvaluationLocation other)
             {
-                var other = (EvaluationLocation) obj;
                 return
                     Id == other.Id &&
                     ParentId == other.ParentId &&
@@ -239,7 +238,7 @@ namespace Microsoft.Build.Framework.Profiler
                     Line == other.Line &&
                     ElementName == other.ElementName &&
                     ElementDescription == other.ElementDescription &&
-					Kind == other.Kind;
+                    Kind == other.Kind;
             }
             return false;
         }

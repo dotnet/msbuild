@@ -136,13 +136,15 @@ namespace Microsoft.Build.BackEnd
             _requestsWeAreBlockedBy = new Dictionary<BlockingRequestKey, SchedulableRequest>();
             _requestsWeAreBlocking = new HashSet<SchedulableRequest>();
 
-            _timeRecords = new Dictionary<SchedulableRequestState, ScheduleTimeRecord>(5);
-            _timeRecords[SchedulableRequestState.Unscheduled] = new ScheduleTimeRecord();
-            _timeRecords[SchedulableRequestState.Blocked] = new ScheduleTimeRecord();
-            _timeRecords[SchedulableRequestState.Yielding] = new ScheduleTimeRecord();
-            _timeRecords[SchedulableRequestState.Executing] = new ScheduleTimeRecord();
-            _timeRecords[SchedulableRequestState.Ready] = new ScheduleTimeRecord();
-            _timeRecords[SchedulableRequestState.Completed] = new ScheduleTimeRecord();
+            _timeRecords = new Dictionary<SchedulableRequestState, ScheduleTimeRecord>(5)
+            {
+                [SchedulableRequestState.Unscheduled] = new ScheduleTimeRecord(),
+                [SchedulableRequestState.Blocked] = new ScheduleTimeRecord(),
+                [SchedulableRequestState.Yielding] = new ScheduleTimeRecord(),
+                [SchedulableRequestState.Executing] = new ScheduleTimeRecord(),
+                [SchedulableRequestState.Ready] = new ScheduleTimeRecord(),
+                [SchedulableRequestState.Completed] = new ScheduleTimeRecord()
+            };
 
             ChangeToState(SchedulableRequestState.Unscheduled);
         }

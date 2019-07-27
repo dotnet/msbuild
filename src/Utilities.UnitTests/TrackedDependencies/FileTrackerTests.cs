@@ -1918,18 +1918,24 @@ class X
                 // Item1: appname
                 // Item2: command line
                 // Item3: number of times to launch
-                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3));
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>
+                {
+                    new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3)
+                };
 
                 // Item1: FileTracker context name
                 // Item2: Tuple <string, string, int> as described above
-                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>
+                {
+                    new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch)
+                };
 
                 // Item1: tlog pattern
                 // Item2: # times it's expected to appear
-                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3));
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>
+                {
+                    new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3)
+                };
 
                 LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
             }
@@ -1958,19 +1964,25 @@ class X
                 // Item1: appname
                 // Item2: command line
                 // Item3: number of times to launch
-                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i foo " + tempFilePath, 3));
-                toolsToLaunch.Add(new Tuple<string, string, int>(null, "\"" + destinationFindstrPath + "\" /i baz " + tempFilePath, 3));
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>
+                {
+                    new Tuple<string, string, int>(destinationFindstrPath, "/i foo " + tempFilePath, 3),
+                    new Tuple<string, string, int>(null, "\"" + destinationFindstrPath + "\" /i baz " + tempFilePath, 3)
+                };
 
                 // Item1: FileTracker context name
                 // Item2: Tuple <string, string, int> as described above
-                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>
+                {
+                    new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch)
+                };
 
                 // Item1: tlog pattern
                 // Item2: # times it's expected to appear
-                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 6));
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>
+                {
+                    new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 6)
+                };
 
                 LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
             }
@@ -2004,20 +2016,26 @@ class X
                 // Item1: appname
                 // Item2: command line
                 // Item3: number of times to launch
-                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3));
-                toolsToLaunch.Add(new Tuple<string, string, int>(null, "\"" + destinationFindstrPath + "\" /i foo " + tempFilePath, 2));
-                toolsToLaunch.Add(new Tuple<string, string, int>(null, "\"" + destinationFindstrPath + "\" /i ba " + tempFilePath, 2));
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>
+                {
+                    new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3),
+                    new Tuple<string, string, int>(null, "\"" + destinationFindstrPath + "\" /i foo " + tempFilePath, 2),
+                    new Tuple<string, string, int>(null, "\"" + destinationFindstrPath + "\" /i ba " + tempFilePath, 2)
+                };
 
                 // Item1: FileTracker context name
                 // Item2: Tuple <string, string, int> as described above
-                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>
+                {
+                    new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch)
+                };
 
                 // Item1: tlog pattern
                 // Item2: # times it's expected to appear
-                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 7));
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>
+                {
+                    new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 7)
+                };
 
                 LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
             }
@@ -2054,20 +2072,26 @@ class X
                 // Item1: appname
                 // Item2: command line
                 // Item3: number of times to launch
-                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-                toolsToLaunch.Add(new Tuple<string, string, int>(originalFindstrPath, "/i foo " + tempFilePath, 3));
-                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3));
-                toolsToLaunch.Add(new Tuple<string, string, int>(null, "FIndsTr /i ba " + tempFilePath, 2));
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>
+                {
+                    new Tuple<string, string, int>(originalFindstrPath, "/i foo " + tempFilePath, 3),
+                    new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3),
+                    new Tuple<string, string, int>(null, "FIndsTr /i ba " + tempFilePath, 2)
+                };
 
                 // Item1: FileTracker context name
                 // Item2: Tuple <string, string, int> as described above
-                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>
+                {
+                    new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch)
+                };
 
                 // Item1: tlog pattern
                 // Item2: # times it's expected to appear
-                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-findstr*tlog", 8));
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>
+                {
+                    new Tuple<string, int>("ProcessLaunchTest-findstr*tlog", 8)
+                };
 
                 LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
             }
@@ -2109,19 +2133,25 @@ class X
                 // Item1: appname
                 // Item2: command line
                 // Item3: number of times to launch
-                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/ip oo " + tempFilePath, 3));
-                toolsToLaunch.Add(new Tuple<string, string, int>(null, "abc.exe /i foo " + tempFilePath, 3));
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>
+                {
+                    new Tuple<string, string, int>(destinationFindstrPath, "/ip oo " + tempFilePath, 3),
+                    new Tuple<string, string, int>(null, "abc.exe /i foo " + tempFilePath, 3)
+                };
 
                 // Item1: FileTracker context name
                 // Item2: Tuple <string, string, int> as described above
-                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>
+                {
+                    new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch)
+                };
 
                 // Item1: tlog pattern
                 // Item2: # times it's expected to appear
-                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 6));
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>
+                {
+                    new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 6)
+                };
 
                 LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
             }
@@ -2159,20 +2189,26 @@ class X
                 // Item1: appname
                 // Item2: command line
                 // Item3: number of times to launch
-                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i foo " + tempFilePath, 3));
-                toolsToLaunch.Add(new Tuple<string, string, int>(null, "findstr /i foo " + tempFilePath, 3));
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>
+                {
+                    new Tuple<string, string, int>(destinationFindstrPath, "/i foo " + tempFilePath, 3),
+                    new Tuple<string, string, int>(null, "findstr /i foo " + tempFilePath, 3)
+                };
 
                 // Item1: FileTracker context name
                 // Item2: Tuple <string, string, int> as described above
-                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>
+                {
+                    new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch)
+                };
 
                 // Item1: tlog pattern
                 // Item2: # times it's expected to appear
-                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3));
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-findstr*tlog", 3));
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>
+                {
+                    new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3),
+                    new Tuple<string, int>("ProcessLaunchTest-findstr*tlog", 3)
+                };
 
                 LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
             }
@@ -2204,21 +2240,27 @@ class X
                 // Item1: appname
                 // Item2: command line
                 // Item3: number of times to launch
-                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-                toolsToLaunch.Add(new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3));
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>
+                {
+                    new Tuple<string, string, int>(destinationFindstrPath, "/i baz " + tempFilePath, 3)
+                };
 
                 // Item1: FileTracker context name
                 // Item2: Tuple <string, string, int> as described above
                 IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications =
-                    new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest2", toolsToLaunch));
+                    new List<Tuple<string, IList<Tuple<string, string, int>>>>
+                    {
+                        new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch),
+                        new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest2", toolsToLaunch)
+                    };
 
                 // Item1: tlog pattern
                 // Item2: # times it's expected to appear
-                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3));
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest2-abc*tlog", 3));
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>
+                {
+                    new Tuple<string, int>("ProcessLaunchTest-abc*tlog", 3),
+                    new Tuple<string, int>("ProcessLaunchTest2-abc*tlog", 3)
+                };
 
                 LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, false);
             }
@@ -2287,22 +2329,28 @@ namespace ConsoleApplication4
                 // Item1: appname
                 // Item2: command line
                 // Item3: number of times to launch
-                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>();
-                toolsToLaunch.Add(new Tuple<string, string, int>(outputFile, outputFile + " 3 " + tempFilePath, 3));
+                IList<Tuple<string, string, int>> toolsToLaunch = new List<Tuple<string, string, int>>
+                {
+                    new Tuple<string, string, int>(outputFile, outputFile + " 3 " + tempFilePath, 3)
+                };
 
                 // Item1: FileTracker context name
                 // Item2: Tuple <string, string, int> as described above
-                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>();
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch));
-                contextSpecifications.Add(new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest2", toolsToLaunch));
+                IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications = new List<Tuple<string, IList<Tuple<string, string, int>>>>
+                {
+                    new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest", toolsToLaunch),
+                    new Tuple<string, IList<Tuple<string, string, int>>>("ProcessLaunchTest2", toolsToLaunch)
+                };
 
                 // Item1: tlog pattern
                 // Item2: # times it's expected to appear
-                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>();
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-FindstrLauncher-findstr*tlog", 3));
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest-FindstrLauncher.*-findstr*tlog", 6));
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest2-FindstrLauncher-findstr*tlog", 3));
-                tlogPatterns.Add(new Tuple<string, int>("ProcessLaunchTest2-FindstrLauncher.*-findstr*tlog", 6));
+                IList<Tuple<string, int>> tlogPatterns = new List<Tuple<string, int>>
+                {
+                    new Tuple<string, int>("ProcessLaunchTest-FindstrLauncher-findstr*tlog", 3),
+                    new Tuple<string, int>("ProcessLaunchTest-FindstrLauncher.*-findstr*tlog", 6),
+                    new Tuple<string, int>("ProcessLaunchTest2-FindstrLauncher-findstr*tlog", 3),
+                    new Tuple<string, int>("ProcessLaunchTest2-FindstrLauncher.*-findstr*tlog", 6)
+                };
 
                 LaunchDuplicateToolsAndVerifyTlogExistsForEach(testDir, contextSpecifications, tlogPatterns, createTestDirectory: false);
             }

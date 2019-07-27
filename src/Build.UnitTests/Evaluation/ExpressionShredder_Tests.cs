@@ -453,8 +453,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         private void VerifyExpression(string test)
         {
-            List<string> list = new List<string>();
-            list.Add(test);
+            List<string> list = new List<string>
+            {
+                test
+            };
             ItemsAndMetadataPair pair = ExpressionShredder.GetReferencedItemNamesAndMetadata(list);
 
             HashSet<string> actualItems = pair.Items;

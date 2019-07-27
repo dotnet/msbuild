@@ -243,8 +243,10 @@ namespace Microsoft.Build.BuildEngine
             string solutionFileLocation = Path.Combine(solutionFileDirectory, solutionFileName);
             inputs.Add(solutionFileLocation);
 
-            List<string> outputs = new List<string>();
-            outputs.Add(msbuildProject.FullFileName);
+            List<string> outputs = new List<string>
+            {
+                msbuildProject.FullFileName
+            };
 
             DependencyAnalysisLogDetail dependencyAnalysisDetail;
             bool isAnyOutOfDate = TargetDependencyAnalyzer.IsAnyOutOfDate(out dependencyAnalysisDetail, solutionFileDirectory, inputs, outputs);

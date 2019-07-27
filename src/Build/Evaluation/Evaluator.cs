@@ -1181,16 +1181,17 @@ namespace Microsoft.Build.Evaluation
         {
             string startupDirectory = BuildParameters.StartupDirectory;
 
-            List<P> builtInProperties = new List<P>(19);
-
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.startupDirectory, startupDirectory));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture)));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild));
+            List<P> builtInProperties = new List<P>(19)
+            {
+                SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion),
+                SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath),
+                SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath),
+                SetBuiltInProperty(ReservedPropertyNames.startupDirectory, startupDirectory),
+                SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture)),
+                SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32),
+                SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion),
+                SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild)
+            };
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)
@@ -1581,8 +1582,10 @@ namespace Microsoft.Build.Evaluation
                 {
                     // If there is bare metadata of any kind, and the Include involved an item list, we should
                     // run items individually, as even non-built-in metadata might differ between items
-                    List<string> include = new List<string>();
-                    include.Add(itemElement.Include);
+                    List<string> include = new List<string>
+                    {
+                        itemElement.Include
+                    };
                     ItemsAndMetadataPair itemsAndMetadataFromInclude = ExpressionShredder.GetReferencedItemNamesAndMetadata(include);
 
                     if (itemsAndMetadataFromInclude.Items != null && itemsAndMetadataFromInclude.Items.Count > 0)

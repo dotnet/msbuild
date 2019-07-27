@@ -223,10 +223,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     yield return fragment.ItemSpecFragment;
                 }
-                else if (fragment is ItemExpressionFragment<P, I>)
+                else if (fragment is ItemExpressionFragment<P, I> itemExpression)
                 {
-                    var itemExpression = (ItemExpressionFragment<P, I>) fragment;
-
                     foreach (var referencedItem in itemExpression.ReferencedItems)
                     {
                         yield return referencedItem.ItemSpecFragment;
@@ -238,7 +236,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
         }
-		
+
         public override string ToString()
         {
             return ItemSpecString;

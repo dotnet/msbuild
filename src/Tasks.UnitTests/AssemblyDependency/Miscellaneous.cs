@@ -6466,8 +6466,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            blackList[engineAssemblyName.FullName] = null;
+            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [engineAssemblyName.FullName] = null
+            };
             string[] targetFrameworks = new string[] { "Client", "Web" };
             string subSetName = ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null);
 
@@ -6506,8 +6508,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            blackList[engineAssemblyName.FullName] = null;
+            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [engineAssemblyName.FullName] = null
+            };
             string[] targetFrameworks = new string[] { "Client", "Web" };
             string subSetName = ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null);
             referenceTable.MarkReferencesForExclusion(blackList);
@@ -6583,8 +6587,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            blackList[engineAssemblyName.FullName] = null;
+            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [engineAssemblyName.FullName] = null
+            };
             referenceTable.MarkReferencesForExclusion(blackList);
             referenceTable.RemoveReferencesMarkedForExclusion(true, String.Empty);
 

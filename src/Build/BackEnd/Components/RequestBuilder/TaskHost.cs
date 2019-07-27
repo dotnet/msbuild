@@ -668,8 +668,10 @@ namespace Microsoft.Build.BackEnd
 
                 if (returnTargetOutputs)
                 {
-                    targetOutputsPerProject = new List<IDictionary<string, ITaskItem[]>>(1);
-                    targetOutputsPerProject.Add(new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase));
+                    targetOutputsPerProject = new List<IDictionary<string, ITaskItem[]>>(1)
+                    {
+                        new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase)
+                    };
                 }
 
                 for (int i = 0; i < targetNames.Length; i++)

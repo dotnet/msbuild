@@ -462,10 +462,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                       "<File AssemblyName='System' Version='4.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                                   "</FileList >";
 
-            List<string> additionalPaths = new List<string>();
-            additionalPaths.Add(s_myComponents40ComponentPath);
-            additionalPaths.Add(s_myVersion40Path);
-            additionalPaths.Add(s_myVersion90Path + Path.DirectorySeparatorChar);
+            List<string> additionalPaths = new List<string>
+            {
+                s_myComponents40ComponentPath,
+                s_myVersion40Path,
+                s_myVersion90Path + Path.DirectorySeparatorChar
+            };
 
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -503,10 +505,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                       "<File AssemblyName='System' Version='4.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                                   "</FileList >";
 
-            List<string> additionalPaths = new List<string>();
-            additionalPaths.Add(s_myComponents40ComponentPath);
-            additionalPaths.Add(s_myVersion40Path);
-            additionalPaths.Add(s_myVersion90Path + Path.DirectorySeparatorChar);
+            List<string> additionalPaths = new List<string>
+            {
+                s_myComponents40ComponentPath,
+                s_myVersion40Path,
+                s_myVersion90Path + Path.DirectorySeparatorChar
+            };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 

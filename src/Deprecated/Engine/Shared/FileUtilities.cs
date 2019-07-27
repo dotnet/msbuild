@@ -501,12 +501,14 @@ namespace Microsoft.Build.BuildEngine.Shared
                 {
                     if (cachedModifiers == null)
                     {
-                        cachedModifiers = new Hashtable(StringComparer.OrdinalIgnoreCase);
-     
-                        // mark the cache to indicate the item-spec for which it was created
-                        // NOTE: we've intentionally picked a key here that will never conflict with any modifier name -- if we
-                        // use the item-spec as the key, it's possible for it to conflict with the name of a modifier
-                        cachedModifiers[String.Empty] = itemSpec;
+                        cachedModifiers = new Hashtable(StringComparer.OrdinalIgnoreCase)
+                        {
+
+                            // mark the cache to indicate the item-spec for which it was created
+                            // NOTE: we've intentionally picked a key here that will never conflict with any modifier name -- if we
+                            // use the item-spec as the key, it's possible for it to conflict with the name of a modifier
+                            [String.Empty] = itemSpec
+                        };
                     }
 
                     cachedModifiers[modifier] = modifiedItemSpec;

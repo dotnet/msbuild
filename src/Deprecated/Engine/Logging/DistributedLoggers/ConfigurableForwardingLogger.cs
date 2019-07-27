@@ -75,22 +75,24 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void InitializeForwardingTable()
         {
-            forwardingTable = new Dictionary<string, int>(15, StringComparer.OrdinalIgnoreCase);
-            forwardingTable[BuildStartedEventDescription] = 0;
-            forwardingTable[BuildFinishedEventDescription] = 0;
-            forwardingTable[ProjectStartedEventDescription] = 0;
-            forwardingTable[ProjectFinishedEventDescription] = 0;
-            forwardingTable[TargetStartedEventDescription] = 0;
-            forwardingTable[TargetFinishedEventDescription] = 0;
-            forwardingTable[TaskStartedEventDescription] = 0;
-            forwardingTable[TaskFinishedEventDescription] = 0;
-            forwardingTable[ErrorEventDescription] = 0;
-            forwardingTable[WarningEventDescription] = 0;
-            forwardingTable[HighMessageEventDescription] = 0;
-            forwardingTable[NormalMessageEventDescription] = 0;
-            forwardingTable[LowMessageEventDescription] = 0;
-            forwardingTable[CustomEventDescription] = 0;
-            forwardingTable[CommandLineDescription] = 0;
+            forwardingTable = new Dictionary<string, int>(15, StringComparer.OrdinalIgnoreCase)
+            {
+                [BuildStartedEventDescription] = 0,
+                [BuildFinishedEventDescription] = 0,
+                [ProjectStartedEventDescription] = 0,
+                [ProjectFinishedEventDescription] = 0,
+                [TargetStartedEventDescription] = 0,
+                [TargetFinishedEventDescription] = 0,
+                [TaskStartedEventDescription] = 0,
+                [TaskFinishedEventDescription] = 0,
+                [ErrorEventDescription] = 0,
+                [WarningEventDescription] = 0,
+                [HighMessageEventDescription] = 0,
+                [NormalMessageEventDescription] = 0,
+                [LowMessageEventDescription] = 0,
+                [CustomEventDescription] = 0,
+                [CommandLineDescription] = 0
+            };
             forwardingSetFromParameters = false;
         }
 

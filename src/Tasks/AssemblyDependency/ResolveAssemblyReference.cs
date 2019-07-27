@@ -1036,9 +1036,10 @@ namespace Microsoft.Build.Tasks
                                         // binding redirects during the build, populate a buffer (to be output below) with the
                                         // binding redirect syntax that users need to add manually to the App.Config.
 
-                                        var assemblyIdentityAttributes = new List<XAttribute>(4);
-
-                                        assemblyIdentityAttributes.Add(new XAttribute("name", idealRemappingPartialAssemblyName.Name));
+                                        var assemblyIdentityAttributes = new List<XAttribute>(4)
+                                        {
+                                            new XAttribute("name", idealRemappingPartialAssemblyName.Name)
+                                        };
 
                                         // We use "neutral" for "Invariant Language (Invariant Country)" in assembly names.
                                         var cultureString = idealRemappingPartialAssemblyName.CultureName;
@@ -1097,9 +1098,8 @@ namespace Microsoft.Build.Tasks
                     // Log general resolution exceptions.
                     foreach (Exception error in generalResolutionExceptions)
                     {
-                        if (error is InvalidReferenceAssemblyNameException)
+                        if (error is InvalidReferenceAssemblyNameException e)
                         {
-                            InvalidReferenceAssemblyNameException e = (InvalidReferenceAssemblyNameException)error;
                             Log.LogWarningWithCodeFromResources("General.MalformedAssemblyName", e.SourceItemSpec);
                         }
                         else

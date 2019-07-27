@@ -77,24 +77,26 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void InitializeForwardingTable()
         {
-            _forwardingTable = new Dictionary<string, int>(15, StringComparer.OrdinalIgnoreCase);
-            _forwardingTable[BuildStartedEventDescription] = 0;
-            _forwardingTable[BuildFinishedEventDescription] = 0;
-            _forwardingTable[ProjectStartedEventDescription] = 0;
-            _forwardingTable[ProjectFinishedEventDescription] = 0;
-            _forwardingTable[ProjectEvaluationStartedEventDescription] = 0;
-            _forwardingTable[ProjectEvaluationFinishedEventDescription] = 0;
-            _forwardingTable[TargetStartedEventDescription] = 0;
-            _forwardingTable[TargetFinishedEventDescription] = 0;
-            _forwardingTable[TaskStartedEventDescription] = 0;
-            _forwardingTable[TaskFinishedEventDescription] = 0;
-            _forwardingTable[ErrorEventDescription] = 0;
-            _forwardingTable[WarningEventDescription] = 0;
-            _forwardingTable[HighMessageEventDescription] = 0;
-            _forwardingTable[NormalMessageEventDescription] = 0;
-            _forwardingTable[LowMessageEventDescription] = 0;
-            _forwardingTable[CustomEventDescription] = 0;
-            _forwardingTable[CommandLineDescription] = 0;
+            _forwardingTable = new Dictionary<string, int>(15, StringComparer.OrdinalIgnoreCase)
+            {
+                [BuildStartedEventDescription] = 0,
+                [BuildFinishedEventDescription] = 0,
+                [ProjectStartedEventDescription] = 0,
+                [ProjectFinishedEventDescription] = 0,
+                [ProjectEvaluationStartedEventDescription] = 0,
+                [ProjectEvaluationFinishedEventDescription] = 0,
+                [TargetStartedEventDescription] = 0,
+                [TargetFinishedEventDescription] = 0,
+                [TaskStartedEventDescription] = 0,
+                [TaskFinishedEventDescription] = 0,
+                [ErrorEventDescription] = 0,
+                [WarningEventDescription] = 0,
+                [HighMessageEventDescription] = 0,
+                [NormalMessageEventDescription] = 0,
+                [LowMessageEventDescription] = 0,
+                [CustomEventDescription] = 0,
+                [CommandLineDescription] = 0
+            };
             _forwardingSetFromParameters = false;
         }
 

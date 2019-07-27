@@ -1328,12 +1328,14 @@ namespace Microsoft.Build.CommandLine
         private static (BuildResultCode result, Exception exception) ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
         {
             // Make a copy of the global properties
-            Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
+            Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties)
+            {
 
-            // Add/set a property with a random value to ensure that restore happens under a different evaluation context
-            // If the evaluation context is not different, then projects won't be re-evaluated after restore
-            // The initializer syntax can't be used just in case a user set this property to a value
-            restoreGlobalProperties["MSBuildRestoreSessionId"] = Guid.NewGuid().ToString("D");
+                // Add/set a property with a random value to ensure that restore happens under a different evaluation context
+                // If the evaluation context is not different, then projects won't be re-evaluated after restore
+                // The initializer syntax can't be used just in case a user set this property to a value
+                ["MSBuildRestoreSessionId"] = Guid.NewGuid().ToString("D")
+            };
 
             // Create a new request with a Restore target only and specify:
             //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds

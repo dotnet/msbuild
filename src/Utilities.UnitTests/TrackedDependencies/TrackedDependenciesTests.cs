@@ -3681,8 +3681,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
     {
         public static ITaskItem[] ItemArray(ITaskItem item)
         {
-            var itemList = new List<ITaskItem>();
-            itemList.Add(item);
+            var itemList = new List<ITaskItem>
+            {
+                item
+            };
             return itemList.ToArray();
         }
 

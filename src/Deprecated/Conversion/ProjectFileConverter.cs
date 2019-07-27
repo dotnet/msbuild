@@ -403,16 +403,18 @@ namespace Microsoft.Build.Conversion
             this.isMyTypeAlreadySetInOriginalProject = false;
             this.conversionWarnings = new ArrayList();
 
-            this.propertiesToEscape = new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);
-            this.propertiesToEscape.Add("ApplicationIcon", null);
-            this.propertiesToEscape.Add("AssemblyKeyContainerName", null);
-            this.propertiesToEscape.Add("AssemblyName", null);
-            this.propertiesToEscape.Add("AssemblyOriginatorKeyFile", null);
-            this.propertiesToEscape.Add("RootNamespace", null);
-            this.propertiesToEscape.Add("StartupObject", null);
-            this.propertiesToEscape.Add("ConfigurationOverrideFile", null);
-            this.propertiesToEscape.Add("DocumentationFile", null);
-            this.propertiesToEscape.Add("OutputPath", null);
+            this.propertiesToEscape = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "ApplicationIcon", null },
+                { "AssemblyKeyContainerName", null },
+                { "AssemblyName", null },
+                { "AssemblyOriginatorKeyFile", null },
+                { "RootNamespace", null },
+                { "StartupObject", null },
+                { "ConfigurationOverrideFile", null },
+                { "DocumentationFile", null },
+                { "OutputPath", null }
+            };
         }
 
         /// <summary>
