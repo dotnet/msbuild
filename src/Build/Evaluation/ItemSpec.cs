@@ -225,7 +225,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else if (fragment is ItemExpressionFragment<P, I>)
                 {
-                    var itemExpression = (ItemExpressionFragment<P, I>) fragment;
+                    var itemExpression = (ItemExpressionFragment<P, I>)fragment;
 
                     foreach (var referencedItem in itemExpression.ReferencedItems)
                     {
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
         }
-		
+
         public override string ToString()
         {
             return ItemSpecString;

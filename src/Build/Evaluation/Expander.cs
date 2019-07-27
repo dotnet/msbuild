@@ -983,7 +983,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Search for "$(" in the expression.  Loop until we don't find it 
                 // any more.
-                while (propertyStartIndex != -1)
+                do
                 {
                     if (lastResult != null)
                     {
@@ -1000,7 +1000,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Append the result with the portion of the expression up to
                     // (but not including) the "$(", and advance the sourceIndex pointer.
-                    if (propertyStartIndex - sourceIndex > 0)
+                    if (propertyStartIndex > sourceIndex)
                     {
                         if (results == null)
                         {
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     propertyStartIndex = s_invariantCompareInfo.IndexOf(expression, "$(", sourceIndex, CompareOptions.Ordinal);
-                }
+                } while (propertyStartIndex != -1);
 
                 // If we have only a single result, then just return it
                 if (results == null && expression.Length == sourceIndex)
@@ -1140,7 +1140,7 @@ namespace Microsoft.Build.Evaluation
 
                         // And if we couldn't find anymore property tags in the expression,
                         // so just literally copy the remainder into the result.
-                        if (expression.Length - sourceIndex > 0)
+                        if (expression.Length > sourceIndex)
                         {
                             result.Append(expression, sourceIndex, expression.Length - sourceIndex);
                         }
@@ -2032,7 +2032,7 @@ namespace Microsoft.Build.Evaluation
                 // Remove trailing separator if we added one
                 if (itemsFromCapture.Count > 0)
                     builder.Length--;
-                
+
                 return false;
             }
 
@@ -2325,14 +2325,9 @@ namespace Microsoft.Build.Evaluation
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                         }
 
-                        while (!String.IsNullOrEmpty(directoryName))
+                        // Make sure we have not already gotten this directory (and all its ancestors) in the set.
+                        while (!(String.IsNullOrEmpty(directoryName) || directories.Contains(directoryName)))
                         {
-                            if (directories.Contains(directoryName))
-                            {
-                                // We've already got this directory (and all its ancestors) in the set.
-                                break;
-                            }
-
                             directories.Add(directoryName);
                             directoryName = Path.GetDirectoryName(directoryName);
                         }
@@ -3118,7 +3113,7 @@ namespace Microsoft.Build.Evaluation
                 IFileSystem fileSystem)
             {
                 // Used to aggregate all the components needed for a Function
-                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> {FileSystem = fileSystem};
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem };
 
                 // By default the expression root is the whole function expression
                 ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -4346,7 +4341,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // We will work our way up the namespace looking for an assembly that matches
-                while (assemblyNameEnd > 0)
+                do
                 {
                     string candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
 
@@ -4364,7 +4359,7 @@ namespace Microsoft.Build.Evaluation
                         baseName = candidateAssemblyName;
                         assemblyNameEnd = baseName.LastIndexOf('.');
                     }
-                }
+                } while (assemblyNameEnd > 0);
 
                 // We didn't find it, so we need to give up
                 return null;
@@ -4470,7 +4465,7 @@ namespace Microsoft.Build.Evaluation
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
 
                 ReadOnlySpan<char> expressionFunctionAsSpan = expressionFunction.AsSpan();
-                
+
                 ReadOnlySpan<char> expressionSubstringAsSpan = argumentStartIndex > -1 ? expressionFunctionAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex) : ReadOnlySpan<char>.Empty;
 
                 // There are arguments that need to be passed to the function
