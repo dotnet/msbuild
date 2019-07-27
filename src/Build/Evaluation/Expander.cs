@@ -2325,14 +2325,9 @@ namespace Microsoft.Build.Evaluation
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                         }
 
-                        while (!String.IsNullOrEmpty(directoryName))
+                        // Make sure we have not already gotten this directory (and all its ancestors) in the set.
+                        while (!(String.IsNullOrEmpty(directoryName) || directories.Contains(directoryName)))
                         {
-                            if (directories.Contains(directoryName))
-                            {
-                                // We've already got this directory (and all its ancestors) in the set.
-                                break;
-                            }
-
                             directories.Add(directoryName);
                             directoryName = Path.GetDirectoryName(directoryName);
                         }
