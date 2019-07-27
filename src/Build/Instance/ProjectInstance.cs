@@ -409,7 +409,7 @@ namespace Microsoft.Build.Execution
             _directory = directory;
             _projectFileLocation = ElementLocation.Create(fullPath);
             _hostServices = hostServices;
-            
+
             EvaluationId = data.EvaluationId;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
@@ -499,13 +499,13 @@ namespace Microsoft.Build.Execution
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
                 this.InitialTargets = new List<string>(that.InitialTargets);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                    ProjectItemDefinitionInstance>) this).BeforeTargets = CreateCloneDictionary(
+                    ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                        ProjectItemDefinitionInstance>) that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
+                        ProjectItemDefinitionInstance>)that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                    ProjectItemDefinitionInstance>) this).AfterTargets = CreateCloneDictionary(
+                    ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                        ProjectItemDefinitionInstance>) that).AfterTargets, StringComparer.OrdinalIgnoreCase);
+                        ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
                 this.TaskRegistry =
                     that.TaskRegistry; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
 
@@ -1919,7 +1919,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            var globalPropertiesToTreatAsLocal = (HashSet<string>) _globalPropertiesToTreatAsLocal;
+            var globalPropertiesToTreatAsLocal = (HashSet<string>)_globalPropertiesToTreatAsLocal;
             translator.Translate(ref globalPropertiesToTreatAsLocal);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
@@ -2674,11 +2674,10 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
-
+                CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(item.DirectMetadataCount);
+                
                 if (item.DirectMetadata != null)
                 {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(item.DirectMetadataCount);
                     foreach (ProjectMetadata directMetadatum in item.DirectMetadata)
                     {
                         ProjectMetadataInstance directMetadatumInstance = new ProjectMetadataInstance(directMetadatum);
