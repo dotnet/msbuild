@@ -123,7 +123,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         internal Expander(Expander expander, SpecificItemDefinitionLibrary itemDefinitionLibrary)
-            : this(expander.lookup, null , expander.options)
+            : this(expander.lookup, null, expander.options)
         {
             if (implicitMetadataItemType == null)
             {
@@ -132,7 +132,7 @@ namespace Microsoft.Build.BuildEngine
             this.specificItemDefinitionLibrary = itemDefinitionLibrary;
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Adds metadata to the table being used by this expander.
@@ -469,7 +469,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // Append the targetString with the portion of the sourceString up to
                 // (but not including) the "$(", and advance the sourceIndex pointer.
-                if (propertyStartIndex - sourceIndex > 0)
+                if (propertyStartIndex > sourceIndex)
                 {
                     results.Add(expression.Substring(sourceIndex, propertyStartIndex - sourceIndex));
                 }
@@ -558,7 +558,7 @@ namespace Microsoft.Build.BuildEngine
                 // We couldn't find anymore property tags in the expression,
                 // so just literally copy the remainder into the result
                 // and return.
-                if (expression.Length - sourceIndex > 0)
+                if (expression.Length > sourseIndex)
                 {
                     results.Add(expression.Substring(sourceIndex, expression.Length - sourceIndex));
                 }
@@ -706,7 +706,7 @@ namespace Microsoft.Build.BuildEngine
 
             return (nestLevel == 0) ? index : -1;
         }
-        
+
         /// <summary>
         /// Expand the body of the property, including any functions that it may contain
         /// </summary>
@@ -873,7 +873,7 @@ namespace Microsoft.Build.BuildEngine
         private string ExpandRegistryValue(string registryExpression, XmlNode node)
         {
             string registryLocation = registryExpression.Substring(9);
-            
+
             // Split off the value name -- the part after the "@" sign. If there's no "@" sign, then it's the default value name
             // we want.
             int firstAtSignOffset = registryLocation.IndexOf('@');
@@ -881,9 +881,9 @@ namespace Microsoft.Build.BuildEngine
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(firstAtSignOffset == lastAtSignOffset, node, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", String.Empty);
 
-            string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1 
+            string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1
                 ? null : registryLocation.Substring(lastAtSignOffset + 1);
-            
+
             // If there's no '@', or '@' is first, then we'll use null or String.Empty for the location; otherwise
             // the location is the part before the '@'
             string registryKeyName = lastAtSignOffset != -1 ? registryLocation.Substring(0, lastAtSignOffset) : registryLocation;
@@ -1190,7 +1190,7 @@ namespace Microsoft.Build.BuildEngine
                         // change the type of the final unescaped string into the destination
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
                     }
-                    
+
                     // If we've been asked for and instance to be constructed, then we
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", this.name, StringComparison.OrdinalIgnoreCase))
@@ -1234,7 +1234,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         functionResult = EscapingUtilities.Escape((string)functionResult);
                     }
-                    
+
                     // There's nothing left to deal within the function expression, return the result from the execution
                     if (String.IsNullOrEmpty(remainder))
                     {
@@ -1483,7 +1483,7 @@ namespace Microsoft.Build.BuildEngine
 
                 return objectType;
             }
-            
+
             /// <summary>
             /// Factory method to construct a function for property evaluation
             /// </summary>
@@ -1957,7 +1957,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 metadataValue = GetDefaultMetadataValue(itemType, metadataName, metadataValue);
             }
-            
+
             return metadataValue ?? String.Empty;
         }
 

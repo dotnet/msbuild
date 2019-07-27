@@ -1077,14 +1077,13 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string GetEscapedValueIfPresent(string itemType, string name)
             {
-                string value = null;
 
                 if ((itemType == null) || String.Equals(_item.ItemType, itemType, StringComparison.OrdinalIgnoreCase))
                 {
-                    value = GetEscapedValue(name);
+                    return GetEscapedValue(name);
                 }
 
-                return value;
+                return null;
             }
         }
     }
