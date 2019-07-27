@@ -187,9 +187,9 @@ namespace Microsoft.Build.Evaluation
             var result = new List<ItemFragment>(Fragments.Count());
             matches = 0;
 
-            foreach (var fragment in Fragments)
+            foreach (ItemFragment fragment in Fragments)
             {
-                var itemMatches = fragment.MatchCount(itemToMatch);
+                int itemMatches = fragment.MatchCount(itemToMatch);
 
                 if (itemMatches > 0)
                 {
@@ -223,10 +223,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     yield return fragment.ItemSpecFragment;
                 }
-                else if (fragment is ItemExpressionFragment<P, I>)
+                else if (fragment is ItemExpressionFragment<P, I> itemExpression)
                 {
-                    var itemExpression = (ItemExpressionFragment<P, I>) fragment;
-
                     foreach (var referencedItem in itemExpression.ReferencedItems)
                     {
                         yield return referencedItem.ItemSpecFragment;

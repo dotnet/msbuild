@@ -556,8 +556,7 @@ namespace Microsoft.Build.Logging
 
         private void WriteItemList(IEnumerable items)
         {
-            var taskItems = items as IEnumerable<ITaskItem>;
-            if (taskItems != null)
+            if (items is IEnumerable<ITaskItem> taskItems)
             {
                 Write(taskItems.Count());
 

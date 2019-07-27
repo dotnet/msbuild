@@ -90,9 +90,8 @@ namespace Microsoft.Build.Shared
 
 #if !CLR2COMPATIBILITY
             // Check if any critical exceptions
-            var aggregateException = e as AggregateException;
 
-            if (aggregateException != null)
+            if (e is AggregateException aggregateException)
             {
                 // If the aggregate exception contains a critical exception it is considered a critical exception
                 if (aggregateException.InnerExceptions.Any(innerException => IsCriticalException(innerException)))
@@ -160,8 +159,7 @@ namespace Microsoft.Build.Shared
             var line = 0;
             var column = 0;
 
-            var xmlException = e as XmlException;
-            if (xmlException != null)
+            if (e is XmlException xmlException)
             {
                 line = xmlException.LineNumber;
                 column = xmlException.LinePosition;
@@ -169,8 +167,7 @@ namespace Microsoft.Build.Shared
             else
             {
 #if FEATURE_VARIOUS_EXCEPTIONS
-                var schemaException = e as XmlSchemaException;
-                if (schemaException != null)
+                if (e is XmlSchemaException schemaException)
                 {
                     line = schemaException.LineNumber;
                     column = schemaException.LinePosition;
@@ -194,16 +191,16 @@ namespace Microsoft.Build.Shared
         /// <param name="e">The exception to check.</param>
         internal static bool NotExpectedIoOrXmlException(Exception e)
         {
-            if
-            (
-                IsXmlException(e)
-                || !NotExpectedException(e)
+             if
+            (	
+                IsXmlException(e)	
+                || !NotExpectedException(e)	
             )
             {
-                return false;
-            }
+                return false;	
+            }	
 
-            return true;
+             return true;
         }
 
         /// <summary>
