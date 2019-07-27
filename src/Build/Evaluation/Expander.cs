@@ -2032,7 +2032,7 @@ namespace Microsoft.Build.Evaluation
                 // Remove trailing separator if we added one
                 if (itemsFromCapture.Count > 0)
                     builder.Length--;
-                
+
                 return false;
             }
 
@@ -3118,7 +3118,7 @@ namespace Microsoft.Build.Evaluation
                 IFileSystem fileSystem)
             {
                 // Used to aggregate all the components needed for a Function
-                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> {FileSystem = fileSystem};
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem };
 
                 // By default the expression root is the whole function expression
                 ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -3329,7 +3329,7 @@ namespace Microsoft.Build.Evaluation
                             //
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new []
+                            args = new[]
                             {
                                 args[0],
                                 startingDirectory,
@@ -3732,7 +3732,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (ElementsOfType(args, typeof(string)))
                             {
-                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string) o));
+                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string)o));
                                 return true;
                             }
                         }
@@ -3908,7 +3908,7 @@ namespace Microsoft.Build.Evaluation
                                 default:
                                     if (ElementsOfType(args, typeof(string)))
                                     {
-                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string) o));
+                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string)o));
                                         return true;
                                     }
                                     break;
@@ -4340,10 +4340,6 @@ namespace Microsoft.Build.Evaluation
 
                 // If the string has no dot, or is nothing but a dot, we have no
                 // namespace to look for, so we can't help.
-                if (assemblyNameEnd <= 0)
-                {
-                    return null;
-                }
 
                 // We will work our way up the namespace looking for an assembly that matches
                 while (assemblyNameEnd > 0)
@@ -4470,7 +4466,7 @@ namespace Microsoft.Build.Evaluation
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
 
                 ReadOnlySpan<char> expressionFunctionAsSpan = expressionFunction.AsSpan();
-                
+
                 ReadOnlySpan<char> expressionSubstringAsSpan = argumentStartIndex > -1 ? expressionFunctionAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex) : ReadOnlySpan<char>.Empty;
 
                 // There are arguments that need to be passed to the function
