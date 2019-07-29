@@ -4541,7 +4541,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = pc.LoadProject(tempPath.Path);
 
                 project.Build().ShouldBeTrue();
-                Assert.True(result);
 
                 logger
                     .AllBuildEvents
