@@ -4528,7 +4528,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 env.SetEnvironmentVariable("MsBuildLogPropertyTracking", "1");
                 env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE", "It's Defined!");
-                env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE2", "It's Defined!");
+                env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE2", "It's also Defined!");
 
                 var tempPath = env.CreateFile(Guid.NewGuid().ToString(), testTargets);
 
