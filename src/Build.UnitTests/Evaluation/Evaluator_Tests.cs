@@ -4574,7 +4574,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 propertyInitialValueMap.ShouldContainKey("EnvVar");
                 propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
-                propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's Defined!");
+                propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's also Defined!");
 
                 propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
                 propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertySource.ShouldBe("EnvironmentVariable");
