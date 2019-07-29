@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="3.0.0-preview7.19365.7">
+    <Dependency Name="Microsoft.AspNetCore.Analyzers" Version="3.0.0-preview8.19377.1">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>d27c0100bc8b9b93eb8102b097c20b40f7de9c49</Sha>
+      <Sha>c23b9feb19a9809a82e541427028b63ca66fa847</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="3.0.0-preview7.19365.7">
+    <Dependency Name="Microsoft.AspNetCore.Components.Analyzers" Version="3.0.0-preview8.19377.1">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>d27c0100bc8b9b93eb8102b097c20b40f7de9c49</Sha>
+      <Sha>c23b9feb19a9809a82e541427028b63ca66fa847</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="3.0.0-preview8.19377.1">
+      <Uri>https://github.com/aspnet/AspNetCore</Uri>
+      <Sha>c23b9feb19a9809a82e541427028b63ca66fa847</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="3.0.0-preview8.19377.1">
+      <Uri>https://github.com/aspnet/AspNetCore</Uri>
+      <Sha>c23b9feb19a9809a82e541427028b63ca66fa847</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Web.Xdt" Version="3.0.0" Pinned="true">
       <Uri>https://github.com/aspnet/xdt</Uri>
@@ -15,9 +23,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19330.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19378.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>89fab80685c91024c8f9e21f1c37f62580f648f8</Sha>
+      <Sha>a8e982d3bac01d8f4f91a4c57191147570079448</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
