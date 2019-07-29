@@ -10,7 +10,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ShellShim
 {
-    internal class OSXEnvironmentPath : IEnvironmentPath
+    internal class OsxBashEnvironmentPath : IEnvironmentPath
     {
         private const string PathName = "PATH";
         private readonly BashPathUnderHomeDirectory _packageExecutablePath;
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ShellShim
             = Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_OSX_PATHSD_PATH")
               ?? @"/etc/paths.d/dotnet-cli-tools";
 
-        public OSXEnvironmentPath(
+        public OsxBashEnvironmentPath(
             BashPathUnderHomeDirectory executablePath,
             IReporter reporter,
             IEnvironmentProvider environmentProvider,
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.ShellShim
                     // similar to https://code.visualstudio.com/docs/setup/mac
                     _reporter.WriteLine(
                         string.Format(
-                            CommonLocalizableStrings.EnvironmentPathOSXManualInstructions,
+                            CommonLocalizableStrings.EnvironmentPathOSXBashManualInstructions,
                             _packageExecutablePath.Path));
                 }
             }

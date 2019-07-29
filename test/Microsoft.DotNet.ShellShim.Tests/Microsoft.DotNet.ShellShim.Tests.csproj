@@ -19,4 +19,9 @@
     <PackageReference Include="Moq" Version="4.7.25" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="WpfBinaryTestAsssets\testwpf.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

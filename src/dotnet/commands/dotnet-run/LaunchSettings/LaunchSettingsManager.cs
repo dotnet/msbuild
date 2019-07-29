@@ -25,7 +25,13 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
         {
             try
             {
-                using (var document = JsonDocument.Parse(launchSettingsJsonContents))
+                var jsonDocumentOptions = new JsonDocumentOptions
+                {
+                    CommentHandling = JsonCommentHandling.Skip,
+                    AllowTrailingCommas = true,
+                };
+
+                using (var document = JsonDocument.Parse(launchSettingsJsonContents, jsonDocumentOptions))
                 {
                     var model = document.RootElement;
 

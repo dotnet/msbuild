@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
                 .Returns(pathValue);
 
-            var environmentPath = new OSXEnvironmentPath(
+            var environmentPath = new OsxBashEnvironmentPath(
                 toolsPath,
                 reporter,
                 provider.Object,
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             reporter.Lines.Should().Equal(
                 string.Format(
-                    CommonLocalizableStrings.EnvironmentPathOSXManualInstructions,
+                    CommonLocalizableStrings.EnvironmentPathOSXBashManualInstructions,
                     toolsPath.Path));
         }
 
@@ -54,12 +54,12 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
                 .Returns(pathValue);
 
-            var environmentPath = new OSXEnvironmentPath(
+            var environmentPath = new OsxBashEnvironmentPath(
                 toolsPath,
                 reporter,
                 provider.Object,
                 new FileSystemMockBuilder()
-                    .AddFile(OSXEnvironmentPath.DotnetCliToolsPathsDPath, "")
+                    .AddFile(OsxBashEnvironmentPath.DotnetCliToolsPathsDPath, "")
                     .Build()
                     .File);
 
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
                 .Returns(pathValue + ":" + toolsDirectoryOnPath);
 
-            var environmentPath = new OSXEnvironmentPath(
+            var environmentPath = new OsxBashEnvironmentPath(
                 toolsPath,
                 reporter,
                 provider.Object,
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
                 .Returns(pathValue + ":" + toolsPath.Path);
 
-            var environmentPath = new OSXEnvironmentPath(
+            var environmentPath = new OsxBashEnvironmentPath(
                 toolsPath,
                 reporter,
                 provider.Object,
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             reporter.Lines.Should().BeEmpty();
 
             fileSystem
-                .Exists(OSXEnvironmentPath.DotnetCliToolsPathsDPath)
+                .Exists(OsxBashEnvironmentPath.DotnetCliToolsPathsDPath)
                 .Should()
                 .Be(false);
         }
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
                 .Returns(pathValue);
 
-            var environmentPath = new OSXEnvironmentPath(
+            var environmentPath = new OsxBashEnvironmentPath(
                 toolsPath,
                 reporter,
                 provider.Object,
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             fileSystem
                 .File
-                .ReadAllText(OSXEnvironmentPath.DotnetCliToolsPathsDPath)
+                .ReadAllText(OsxBashEnvironmentPath.DotnetCliToolsPathsDPath)
                 .Should()
                 .Be(toolsPath.PathWithTilde);
         }

@@ -139,8 +139,10 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
 * You are attempting to install a preview release and did not use the --version option to specify the version.
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</source>
-        <target state="translated">Не удалось установить средство "{0}". Возможные причины сбоя:
+* You mistyped the name of the tool.
+
+For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
+        <target state="needs-review-translation">Не удалось установить средство "{0}". Возможные причины сбоя:
 
 * Вы пытаетесь установить предварительный выпуск и не указали версию с помощью параметра --version.
 * Пакет с таким именем найден, но он не является средством .NET Core.

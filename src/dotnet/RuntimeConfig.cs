@@ -15,8 +15,14 @@ namespace Microsoft.DotNet.Tools.Common
 
         public RuntimeConfig(string runtimeConfigPath)
         {
+            var jsonDocumentOptions = new JsonDocumentOptions
+            {
+                AllowTrailingCommas = true,
+                CommentHandling = JsonCommentHandling.Skip
+            };
+
             using (var stream = File.OpenRead(runtimeConfigPath))
-            using (JsonDocument doc = JsonDocument.Parse(stream))
+            using (JsonDocument doc = JsonDocument.Parse(stream, jsonDocumentOptions))
             {
                 JsonElement root = doc.RootElement;
                 if (root.TryGetProperty("runtimeOptions", out var runtimeOptionsRoot))
@@ -56,7 +62,6 @@ namespace Microsoft.DotNet.Tools.Common
                     {
                         Framework = null;
                     }
-
                 }
             }
 

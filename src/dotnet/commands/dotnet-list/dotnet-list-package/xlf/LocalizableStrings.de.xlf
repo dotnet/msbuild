@@ -7,6 +7,11 @@
         <target state="translated">Hiermit listen Sie alle Paketverweise des Projekts oder der Lösung auf.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdDeprecatedDescription">
+        <source>Lists packages that have been deprecated.</source>
+        <target state="new">Lists packages that have been deprecated.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
@@ -38,23 +43,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>The path to the NuGet config file to use. Requires the '--outdated' option.</source>
-        <target state="translated">Der Pfad zu der NuGet-Konfigurationsdatei, die verwendet werden soll. Erfordert die Option "--outdated".</target>
+        <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="needs-review-translation">Der Pfad zu der NuGet-Konfigurationsdatei, die verwendet werden soll. Erfordert die Option "--outdated".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
-        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="translated">Hiermit werden bei der Suche nach neueren Paketen nur die Pakete mit übereinstimmender Hauptversionsnummer berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
+        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="needs-review-translation">Hiermit werden bei der Suche nach neueren Paketen nur die Pakete mit übereinstimmender Hauptversionsnummer berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
-        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="translated">Hiermit werden bei der Suche nach neueren Paketen nur die Pakete mit übereinstimmender Haupt- und Nebenversionsnummer berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
+        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="needs-review-translation">Hiermit werden bei der Suche nach neueren Paketen nur die Pakete mit übereinstimmender Haupt- und Nebenversionsnummer berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
-        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="translated">Hiermit werden bei der Suche nach neueren Pakete auch Pakete mit Vorabversionen berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
+        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="needs-review-translation">Hiermit werden bei der Suche nach neueren Pakete auch Pakete mit Vorabversionen berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -63,18 +68,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="translated">Die bei der Suche nach neueren Paketen zu verwendenden NuGet-Quellen. Hierfür ist die Option "--outdated" erforderlich.</target>
+        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="needs-review-translation">Die bei der Suche nach neueren Paketen zu verwendenden NuGet-Quellen. Hierfür ist die Option "--outdated" erforderlich.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OutdatedOptionOnly">
-        <source>Option '{0}' requires the '--outdated' option to be specified.</source>
-        <target state="translated">Für die Option "{0}" muss die Option "--outdated" angegeben werden.</target>
+      <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
+        <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
+        <target state="new">Option '--outdated' and '--deprecated' cannot be combined.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
         <source>Could not find file or directory '{0}'.</source>
         <target state="translated">Die Datei oder das Verzeichnis "{0}" wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedOrDeprecatedOptionOnly">
+        <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
+        <target state="new">Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</target>
         <note />
       </trans-unit>
     </body>

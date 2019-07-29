@@ -1,4 +1,5 @@
 {
+  // This comment is to verify proper comment handling by dotnet run. Do not remove.
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
