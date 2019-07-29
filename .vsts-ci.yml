@@ -14,7 +14,7 @@ variables:
   ${{ if ne(variables['System.TeamProject'], 'public') }}:
     PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-toolset/index.json
     _DotNetPublishToBlobFeed: true
-    _PublishUsingPipelines: true
+    _PublishUsingPipelines: false
     _PublishType: blob
 
 jobs:
@@ -121,7 +121,7 @@ jobs:
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/phases/publish-build-assets.yml
     parameters:
-      publishUsingPipelines: true
+      publishUsingPipelines: false
       dependsOn:
         - Windows_NT
       queue:
