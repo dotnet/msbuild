@@ -2998,7 +2998,7 @@ namespace Microsoft.Build.Evaluation
             public PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary { get; }
 
             /// <summary>
-            /// A dictionary of all of the environment variable properties.
+            /// A dictionary of all of the properties read from environment variables during evaluation.
             /// </summary>
             public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => this.Project.ProjectCollection.EnvironmentProperties;
 
