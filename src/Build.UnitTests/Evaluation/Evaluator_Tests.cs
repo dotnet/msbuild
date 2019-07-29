@@ -4540,7 +4540,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(tempPath.Path);
 
-                bool result = project.Build();
+                project.Build().ShouldBeTrue();
                 Assert.True(result);
 
                 logger
