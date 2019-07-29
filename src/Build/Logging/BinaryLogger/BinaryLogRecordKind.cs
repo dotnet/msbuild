@@ -24,6 +24,6 @@
         PropertyReassignment,
         UninitializedPropertyRead,
         EnvironmentVariableRead,
-        PropertyInitialValueSet
+        PropertyInitialValueSet,
     }
 }
