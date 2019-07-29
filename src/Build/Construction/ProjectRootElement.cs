@@ -108,6 +108,11 @@ namespace Microsoft.Build.Construction
         private ElementLocation _projectFileLocation;
 
         /// <summary>
+        /// The project file's full path, escaped.
+        /// </summary>
+        private string _escapedFullPath;
+
+        /// <summary>
         /// The directory that the project is in. 
         /// Essential for evaluating relative paths.
         /// If the project is not loaded from disk, returns the current-directory from 
@@ -365,6 +370,8 @@ namespace Microsoft.Build.Construction
             // Used during solution load to ensure solutions which were created from a file have a location.
         }
 
+        public string EscapedFullPath => _escapedFullPath ?? (_escapedFullPath = ProjectCollection.Escape(FullPath));
+
         /// <summary>
         /// Full path to the project file.
         /// If the project has not been loaded from disk and has not been given a path, returns null.
@@ -394,6 +401,7 @@ namespace Microsoft.Build.Construction
                 }
 
                 _projectFileLocation = ElementLocation.Create(newFullPath);
+                _escapedFullPath = null;
                 _directory = Path.GetDirectoryName(newFullPath);
 
                 if (XmlDocument != null)
@@ -2005,6 +2013,7 @@ namespace Microsoft.Build.Construction
                     }
 
                     _projectFileLocation = ElementLocation.Create(fullPath);
+                    _escapedFullPath = null;
                     _directory = Path.GetDirectoryName(fullPath);
 
                     if (XmlDocument != null)
