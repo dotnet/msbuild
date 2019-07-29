@@ -1793,17 +1793,17 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="UninitializedPropertyRead" UESanitized="false" Visibility="Public">
-    <value>MSB4261: Read uninitialized property "{0}"</value>
+    <value>Read uninitialized property "{0}"</value>
     <comment>
     </comment>
   </data>
   <data name="EnvironmentVariableRead" UESanitized="false" Visibility="Public">
-    <value>MSB4262: Read environment variable "{0}"</value>
+    <value>Read environment variable "{0}"</value>
     <comment>
     </comment>
   </data>
   <data name="PropertyAssignment" UESanitized="false" Visibility="Public">
-    <value>MSB4263: Property initial value: $({0})="{1}" Source: {2}</value>
+    <value>Property initial value: $({0})="{1}" Source: {2}</value>
     <comment>
     </comment>
   </data>
@@ -1813,7 +1813,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4264.
+        Next message code should be MSB4261.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

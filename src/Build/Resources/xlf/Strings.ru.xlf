@@ -68,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
-        <source>MSB4262: Read environment variable "{0}"</source>
-        <target state="new">MSB4262: Read environment variable "{0}"</target>
+        <source>Read environment variable "{0}"</source>
+        <target state="new">Read environment variable "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -114,8 +114,8 @@
     </note>
       </trans-unit>
       <trans-unit id="PropertyAssignment">
-        <source>MSB4263: Property initial value: $({0})="{1}" Source: {2}</source>
-        <target state="new">MSB4263: Property initial value: $({0})="{1}" Source: {2}</target>
+        <source>Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -163,8 +163,8 @@
     </note>
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
-        <source>MSB4261: Read uninitialized property "{0}"</source>
-        <target state="new">MSB4261: Read uninitialized property "{0}"</target>
+        <source>Read uninitialized property "{0}"</source>
+        <target state="new">Read uninitialized property "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
