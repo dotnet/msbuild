@@ -4,6 +4,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
@@ -207,34 +208,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.AssemblyFiles = assemblyFiles;
             t.TargetProcessorArchitecture = "X86";
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
-            bool succeeded = Execute(t);
+            Execute(t).ShouldBeTrue();
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
-            Assert.Single(t.RelatedFiles);
+            t.ResolvedFiles.ShouldHaveSingleItem();
+            t.RelatedFiles.ShouldHaveSingleItem();
 
-            bool priFound = false;
+            t.RelatedFiles[0].ItemSpec.ShouldEndWith(@"C:\WinMD\SampleWindowsRuntimeOnly.pri",
+                "Expected to find.pri related files but NOT the lib.");
 
-            foreach (ITaskItem item in t.RelatedFiles)
-            {
-                if (item.ItemSpec.EndsWith(@"C:\WinMD\SampleWindowsRuntimeOnly.pri"))
-                {
-                    priFound = true;
+            t.RelatedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).ShouldBeEmpty();
+            t.RelatedFiles[0].GetMetadata(ItemMetadataNames.winMDFile).ShouldBeEmpty();
+            t.RelatedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).ShouldBeEmpty();
 
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime));
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winMDFile));
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile));
-                }
-            }
-
-            Assert.True(priFound); // "Expected to find .pri related files but NOT the ."
-            Assert.Empty(t.ResolvedDependencyFiles);
-            Assert.Equal(0, engine.Errors);
-            Assert.Equal(0, engine.Warnings);
-            Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
-            Assert.Equal("Native", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFileType));
-            Assert.Equal("SampleWindowsRuntimeOnly.lib", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
-            Assert.Equal("WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
+            t.ResolvedDependencyFiles.ShouldBeEmpty();
+            engine.Errors.ShouldBe(0);
+            engine.Warnings.ShouldBe(0);
+            bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)).ShouldBeTrue();
+            t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFileType).ShouldBe("Native");
+            t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).ShouldBe("SampleWindowsRuntimeOnly.lib");
+            t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).ShouldBe("WindowsRuntime 1.0");
         }
 
         /// <summary>
