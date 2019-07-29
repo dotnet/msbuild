@@ -15,7 +15,7 @@ namespace ZipDeployPublish.Test
     public class ZipDeployerTaskTests
     {
         private static string _testZippedPublishContentsPath;
-        private static string TestAssemblyToTestZipPath = @"Resources\TestPublishContents.zip";
+        private static string TestAssemblyToTestZipPath = Path.Combine("Resources", "TestPublishContents.zip");
         private static string UserAgentName = "websdk-tools";
         private static string UserAgentVersion = "1.0";
 
@@ -100,7 +100,6 @@ namespace ZipDeployPublish.Test
         [InlineData(HttpStatusCode.InternalServerError, false)]
         public async Task ExecuteZipDeploy_VaryingHttpResponseStatuses(HttpStatusCode responseStatusCode, bool expectedResult)
         {
-            ;
             Action<Mock<IHttpClient>, bool> verifyStep = (client, result) =>
             {
                 client.Verify(c => c.PostAsync(
