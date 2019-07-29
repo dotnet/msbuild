@@ -17,7 +17,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
@@ -300,8 +300,10 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        [CoreMSBuildOnlyFact]
-        public void It_stores_when_targeting_netcoreapp3()
+        [CoreMSBuildOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_stores_when_targeting_netcoreapp3(bool isExe)
         {
             const string TFM = "netcoreapp3.0";
 
@@ -309,12 +311,13 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "Test",
                 IsSdkProject = true,
-                TargetFrameworks = TFM
+                TargetFrameworks = TFM,
+                IsExe = isExe,
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: isExe.ToString());
 
             var outputFolder = Path.Combine(testProjectInstance.TestRoot, "o");
             var workingDir = Path.Combine(testProjectInstance.TestRoot, "w");

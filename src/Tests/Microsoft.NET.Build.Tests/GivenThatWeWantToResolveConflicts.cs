@@ -178,5 +178,68 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void DuplicateFrameworkAssembly()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "DuplicateFrameworkAssembly",
+                TargetFrameworks = "net472",
+                IsSdkProject = true,
+                IsExe = true
+            };
+            testProject.References.Add("System.Runtime");
+            testProject.References.Add("System.Runtime");
+            testProject.PackageReferences.Add(new TestPackageReference("System.Runtime", "4.3.0"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, projectFolder);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void FilesFromAspNetCoreSharedFrameworkAreNotIncluded()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AspNetCoreProject",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Extensions.DependencyInjection.Abstractions", "2.2.0"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "FrameworkReference",
+                                    new XAttribute("Include", "Microsoft.AspNetCore.App")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            outputDirectory.Should().NotHaveFile("Microsoft.Extensions.DependencyInjection.Abstractions.dll");
+        }
     }
 }

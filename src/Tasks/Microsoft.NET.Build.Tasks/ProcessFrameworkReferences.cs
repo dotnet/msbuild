@@ -50,9 +50,6 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] PackagesToDownload { get; set; }
 
         [Output]
-        public ITaskItem[] LegacyFrameworkPackages { get; set; }
-
-        [Output]
         public ITaskItem[] RuntimeFrameworks { get; set; }
 
         [Output]
@@ -84,7 +81,6 @@ namespace Microsoft.NET.Build.Tasks
             var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec, StringComparer.OrdinalIgnoreCase);
 
             List<ITaskItem> packagesToDownload = new List<ITaskItem>();
-            List<ITaskItem> legacyFrameworkPackages = new List<ITaskItem>();
             List<ITaskItem> runtimeFrameworks = new List<ITaskItem>();
             List<ITaskItem> targetingPacks = new List<ITaskItem>();
             List<ITaskItem> runtimePacks = new List<ITaskItem>();
@@ -112,21 +108,23 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                if (frameworkReference != null && !string.IsNullOrEmpty(knownFrameworkReference.LegacyFrameworkPackages))
-                {
-                    foreach (var packageAndVersion in knownFrameworkReference.LegacyFrameworkPackages.Split(';'))
-                    {
-                        var items = packageAndVersion.Split('/');
-                        TaskItem packageToReference = new TaskItem(items[0]);
-                        packageToReference.SetMetadata(MetadataKeys.Version, items[1]);
+                List<string> preferredPackages = new List<string>();
+                preferredPackages.Add(knownFrameworkReference.TargetingPackName);
 
-                        legacyFrameworkPackages.Add(packageToReference);
+                var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';');
+                foreach (var runtimeIdentifier in knownFrameworkReferenceRuntimePackRuntimeIdentifiers)
+                {
+                    foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
+                    {
+                        string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimeIdentifier);
+                        preferredPackages.Add(runtimePackName);
                     }
                 }
 
                 //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                 TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
                 targetingPack.SetMetadata(MetadataKeys.PackageName, knownFrameworkReference.TargetingPackName);
+                targetingPack.SetMetadata(MetadataKeys.PackageConflictPreferredPackages, string.Join(";", preferredPackages));
 
                 string targetingPackVersion = null;
                 if (frameworkReference != null)
@@ -228,11 +226,6 @@ namespace Microsoft.NET.Build.Tasks
             if (packagesToDownload.Any())
             {
                 PackagesToDownload = packagesToDownload.ToArray();
-            }
-
-            if (legacyFrameworkPackages.Any())
-            {
-                LegacyFrameworkPackages = legacyFrameworkPackages.ToArray();
             }
 
             if (runtimeFrameworks.Any())
@@ -411,19 +404,6 @@ namespace Microsoft.NET.Build.Tasks
             public bool IsWindowsOnly => _item.HasMetadataValue("IsWindowsOnly", "true");
 
             public string Profile => _item.GetMetadata("Profile");
-
-            public string LegacyFrameworkPackages
-            {
-                get
-                {
-                    var packages = _item.GetMetadata("LegacyFrameworkPackages");
-                    if (string.IsNullOrEmpty(packages))
-                    {
-                        packages = _item.GetMetadata("PackagesToReference");
-                    }
-                    return packages;
-                }
-            }
 
             public NuGetFramework TargetFramework { get; }
         }

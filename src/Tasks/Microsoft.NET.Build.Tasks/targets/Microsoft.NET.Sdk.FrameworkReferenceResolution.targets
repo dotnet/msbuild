@@ -70,7 +70,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
-      <Output TaskParameter="LegacyFrameworkPackages" ItemName="_LegacyFrameworkPackage" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
@@ -121,17 +120,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                         PrivateAssets="all"
                         ExcludeAssets="all" />
     </ItemGroup>
-
-    <!-- Only add these "legacy" package references if there are already existing package references,
-         as they are only needed in those scenarios (for example supplying the RID graph to
-         NuGet, or preventing older versions of Framework packages from being used). -->
-    <ItemGroup Condition="'@(PackageReference)' != '' and '$(DisableImplicitFrameworkReferences)' != 'true'">
-      <PackageReference Include="@(_LegacyFrameworkPackage)"
-                        IsImplicitlyDefined="true"
-                        PrivateAssets="all"
-                        ExcludeAssets="all" />
-    </ItemGroup>
-
   </Target>
 
   <!--
@@ -303,12 +291,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="ResolveRuntimePackAssets" DependsOnTargets="ResolveFrameworkReferences"
-          Condition="'@(RuntimePack)' != '' And '$(DesignTimeBuild)' != 'true'">
+          Condition="'@(RuntimePack)' != ''">
         
     <ResolveRuntimePackAssets FrameworkReferences="@(FrameworkReference)"
                               ResolvedRuntimePacks="@(ResolvedRuntimePack)"
                               UnavailableRuntimePacks="@(UnavailableRuntimePack)"
-                              SatelliteResourceLanguages="$(SatelliteResourceLanguages)">
+                              SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
+                              DesignTimeBuild="$(DesignTimeBuild)">
       <Output TaskParameter="RuntimePackAssets" ItemName="RuntimePackAsset" />
     </ResolveRuntimePackAssets>
     

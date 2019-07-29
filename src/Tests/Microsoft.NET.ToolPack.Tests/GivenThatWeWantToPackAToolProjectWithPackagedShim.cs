@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using System;
 using NuGet.Frameworks;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -394,6 +395,48 @@ namespace Microsoft.NET.ToolPack.Tests
                 targetFramework: targetFramework);
 
             AssertValidShim(_testRoot, nugetPackage);
+        }
+
+        [WindowsOnlyFact]
+        public void Given_wpf_project_It_contains_shim_with_WindowsGraphicalUserInterfaceBit()
+        {
+            ushort windowsGUISubsystem = 0x2;
+            var testProject = new TestProject()
+            {
+                Name = "wpfTool",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                IsWinExe = true,
+            };
+
+            testProject.AdditionalProperties.Add("UseWPF", "true");
+            testProject.AdditionalProperties.Add("PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64");
+            testProject.AdditionalProperties.Add("ToolCommandName", _customToolCommandName);
+            testProject.AdditionalProperties.Add("PackAsTool", "true");
+
+            TestAsset asset = _testAssetsManager.CreateTestProject(testProject);
+            var packCommand = new PackCommand(Log, Path.Combine(asset.Path, testProject.Name));
+
+            packCommand
+                .Execute("/restore")
+                .Should()
+                .Pass();
+
+            var nugetPackage = packCommand.GetNuGetPackage(packageVersion: _packageVersion);
+
+            using (var nupkgReader = new PackageArchiveReader(nugetPackage))
+            {
+                IEnumerable<NuGetFramework> supportedFrameworks = nupkgReader.GetSupportedFrameworks();
+                supportedFrameworks.Should().NotBeEmpty();
+
+                var tmpfilePath = Path.Combine(asset.TestRoot, "temp", Path.GetRandomFileName());
+                string copiedFile = nupkgReader.ExtractFile(
+                    $"tools/netcoreapp3.0/any/shims/win-x64/{_customToolCommandName}.exe",
+                    tmpfilePath,
+                    null);
+                HostModel.AppHost.BinaryUtils.GetWindowsGraphicalUserInterfaceBit(copiedFile).Should().Be(windowsGUISubsystem);
+            }
         }
 
         private void AssertValidShim(string testRoot, string nugetPackage)

@@ -720,5 +720,50 @@ class Program
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void It_regenerates_files_if_self_contained_changes()
+        {
+            const string TFM = "netcoreapp3.0";
+
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(TFM);
+
+            var testProject = new TestProject()
+            {
+                Name = "GenerateFilesTest",
+                TargetFrameworks = TFM,
+                RuntimeIdentifier = runtimeIdentifier,
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: TFM, runtimeIdentifier: runtimeIdentifier).FullName;
+            var depsFilePath = Path.Combine(outputPath, $"{testProject.Name}.deps.json");
+            var runtimeConfigPath = Path.Combine(outputPath, $"{testProject.Name}.runtimeconfig.json");
+
+            var depsFileLastWriteTime = File.GetLastWriteTimeUtc(depsFilePath);
+            var runtimeConfigLastWriteTime = File.GetLastWriteTimeUtc(runtimeConfigPath);
+
+            WaitForUtcNowToAdvance();
+
+            buildCommand
+                .Execute("/p:SelfContained=false")
+                .Should()
+                .Pass();
+
+            depsFileLastWriteTime.Should().NotBe(File.GetLastWriteTimeUtc(depsFilePath));
+            runtimeConfigLastWriteTime.Should().NotBe(File.GetLastWriteTimeUtc(runtimeConfigPath));
+        }
     }
 }

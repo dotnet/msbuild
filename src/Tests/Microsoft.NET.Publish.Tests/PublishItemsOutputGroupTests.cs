@@ -38,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
             buildCommand
-                .Execute("/p:RuntimeIdentifier=win-x86", "/t:PublishItemsOutputGroup")
+                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true", "/t:PublishItemsOutputGroup")
                 .Should()
                 .Pass();
 
@@ -72,7 +72,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
             buildCommand
-                .Execute("/t:PublishItemsOutputGroup")
+                .Execute("/p:DesignTimeBuild=true", "/t:PublishItemsOutputGroup")
                 .Should()
                 .Pass();
 

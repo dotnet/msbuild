@@ -727,7 +727,66 @@ namespace Microsoft.NET.Build.Tests
             var netCoreAppLibrary = target.Libraries.Single(l => l.Name == "Microsoft.NETCore.App");
             netCoreAppLibrary.Version.ToString().Should().Be(explicitPackageVersion);
         }
-        
+
+        [Fact]
+        public void DuplicatePackageReferencesCanBeUsed()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DuplicatePackageReference",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+            
+            testProject.SourceFiles["Test.cs"] = @"
+public class Class1
+{
+    public static void Test()
+    {
+        Newtonsoft.Json.Linq.JToken.Parse(""{ }"");
+    }
+}";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            //  https://github.com/dotnet/sdk/issues/3027 could cause a situation where the build fails in VS
+            //  but not the command line, apparently due to differences in how the different restores handle
+            //  duplicate package references.  So for this test, check the metadata.
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name),
+                testProject.TargetFrameworks, "PackageReference", GetValuesCommand.ValueType.Item);
+
+            getValuesCommand.MetadataNames.Add("PrivateAssets");
+            getValuesCommand.MetadataNames.Add("ExcludeAssets");
+            getValuesCommand.MetadataNames.Add("IsImplicitlyDefined");
+
+            getValuesCommand.Execute().Should().Pass();
+
+            var packageReferences = getValuesCommand.GetValuesWithMetadata();
+
+            var newtonsoftReferences = packageReferences.Where(pr => pr.value == "Newtonsoft.Json");
+
+            newtonsoftReferences.Count().Should().BeGreaterOrEqualTo(1);
+
+            foreach (var r in newtonsoftReferences)
+            {
+                r.metadata["PrivateAssets"].Should().BeEmpty();
+                r.metadata["ExcludeAssets"].Should().BeEmpty();
+                r.metadata["IsImplicitlyDefined"].Should().BeEmpty();
+            }
+        }
+
         void RemoveGeneratedCompileItems(List<string> compileItems)
         {
             //  Remove auto-generated compile items.

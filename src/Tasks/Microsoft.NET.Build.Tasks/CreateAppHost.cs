@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
-using System.IO;
+using Microsoft.NET.HostModel;
+using Microsoft.NET.HostModel.AppHost;
+using System;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -28,13 +30,41 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            AppHost.Create(
-                AppHostSourcePath,
-                AppHostDestinationPath,
-                AppBinaryName,
-                windowsGraphicalUserInterface : WindowsGraphicalUserInterface,
-                intermediateAssembly: IntermediateAssembly,
-                log: Log);
+            try
+            {
+                if (ResourceUpdater.IsSupportedOS())
+                {
+                    HostWriter.CreateAppHost(appHostSourceFilePath: AppHostSourcePath,
+                                             appHostDestinationFilePath: AppHostDestinationPath,
+                                             appBinaryFilePath: AppBinaryName,
+                                             windowsGraphicalUserInterface: WindowsGraphicalUserInterface,
+                                             assemblyToCopyResorcesFrom: IntermediateAssembly);
+                }
+                else
+                {
+                    // by passing null to assemblyToCopyResorcesFrom, it will skip copying resorces,
+                    // which is only supported on Windows
+                    if (WindowsGraphicalUserInterface)
+                    {
+                        Log.LogWarning(Strings.AppHostCustomizationRequiresWindowsHostWarning);
+                    }
+
+                    HostWriter.CreateAppHost(appHostSourceFilePath: AppHostSourcePath,
+                                             appHostDestinationFilePath: AppHostDestinationPath,
+                                             appBinaryFilePath: AppBinaryName,
+                                             windowsGraphicalUserInterface: false,
+                                             assemblyToCopyResorcesFrom: null);
+
+                }
+            }
+            catch (AppNameTooLongException ex)
+            {
+                throw new BuildErrorException(Strings.FileNameIsTooLong, ex.LongName);
+            }
+            catch (PlaceHolderNotFoundInAppHostException ex)
+            {
+                throw new BuildErrorException(Strings.AppHostHasBeenModified, AppHostSourcePath, BitConverter.ToString(ex.MissingPattern));
+            }
         }
     }
 }

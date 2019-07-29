@@ -100,6 +100,9 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
             testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
 
+            //  Use a test-specific packages folder
+            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(p =>
                 {

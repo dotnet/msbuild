@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Text;
+using Microsoft.NET.HostModel;
 
 namespace Microsoft.NET.Build.Tasks
 {

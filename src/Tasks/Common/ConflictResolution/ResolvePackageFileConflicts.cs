@@ -262,7 +262,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var result = new ITaskItem[original.Length - conflicts.Count];
             int index = 0;
 
-            foreach(var originalItem in original)
+            foreach (var originalItem in original)
             {
                 if (!conflicts.Contains(originalItem))
                 {
@@ -272,6 +272,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     }
                     result[index++] = originalItem;
                 }
+            }
+
+            //  If there are duplicates in the original list, then our size calculation for the result will have been wrong.
+            //  So we have to re-allocate the array with the right size.
+            //  Duplicates can happen if there are duplicate Reference items that are joined with a reference from a package in ResolveLockFileReferences
+            if (index != result.Length)
+            {
+                return result.Take(index).ToArray();
             }
 
             return result;

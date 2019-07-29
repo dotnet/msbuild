@@ -445,15 +445,23 @@ public static class Program
             publishResult.Should().Pass();
         }
 
-        [Fact]
-        public void It_preserves_newest_files_on_publish()
+        [Theory]
+        [InlineData("netcoreapp2.1")]
+        [InlineData("netcoreapp3.0")]
+        public void It_preserves_newest_files_on_publish(string tfm)
         {
-            var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .Restore(Log);
+            var testProject = new TestProject()
+            {
+                Name = "PreserveNewestFilesOnPublish",
+                IsSdkProject = true,
+                TargetFrameworks = tfm,
+                IsExe = true
+            };
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             publishCommand
                 .Execute("-v:n")
