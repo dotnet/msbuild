@@ -59,7 +59,7 @@ jobs:
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
-      testRunTitle: 'Windows-on-full Full Framework'
+      testRunTitle: 'Windows-on-Core Full Framework'
       testRunner: XUnit
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
@@ -68,7 +68,7 @@ jobs:
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
-      testRunTitle: 'Windows-on-full .NET Core 2.1'
+      testRunTitle: 'Windows-on-Core .NET Core 2.1'
       testRunner: XUnit
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
