@@ -20,8 +20,8 @@
     <MicrosoftAspNetCoreAnalyzersPackageVersion>3.0.0-preview8.19377.1</MicrosoftAspNetCoreAnalyzersPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>3.0.100</VersionPrefix>
-    <PreReleaseVersionLabel>preview8</PreReleaseVersionLabel>
+    <VersionPrefix>5.0.100</VersionPrefix>
+    <PreReleaseVersionLabel>alpha1</PreReleaseVersionLabel>
   </PropertyGroup>
   <PropertyGroup>
     <RestoreSources>
