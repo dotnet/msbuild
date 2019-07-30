@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
@@ -259,13 +260,15 @@ namespace Microsoft.NET.Build.Tests
 
             using (var stream = new FileStream(intermediateAppHost, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                 buildCommand.Execute()
+                var result = buildCommand.Execute();
+
+                result
                     .Should()
                     .Fail()
                     .And
-                    .HaveStdOutContaining("System.IO.IOException")
-                    .And
-                    .HaveStdOutContaining("NETSDK1113");
+                    .HaveStdOutContaining("System.IO.IOException");
+
+                Regex.Matches(result.StdOut, "NETSDK1113", RegexOptions.None).Count.Should().Be(2);
             }
         }
 

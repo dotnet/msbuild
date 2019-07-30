@@ -17,6 +17,10 @@ namespace Microsoft.NET.Build.Tasks
     public class CreateAppHost : TaskBase
     {
         /// <summary>
+        /// The number of additional retries to attempt for creating the apphost.
+        /// <summary>
+        public const int DefaultRetries = 2;
+
         /// The default delay, in milliseconds, for each retry attempt for creating the apphost.
         /// </summary>
         public const int DefaultRetryDelayMilliseconds = 1000;
@@ -35,7 +39,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool WindowsGraphicalUserInterface { get; set; }
 
-        public int Retries { get; set; }
+        public int Retries { get; set; } = DefaultRetries;
 
         public int RetryDelayMilliseconds { get; set; } = DefaultRetryDelayMilliseconds;
 
@@ -59,7 +63,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 int attempts = 0;
                 
-                do
+                while (true)
                 {
                     try
                     {
@@ -71,19 +75,20 @@ namespace Microsoft.NET.Build.Tasks
                         return;
                     }
                     catch (Exception ex) when (ex is IOException ||
-                                               ex is UnauthorizedAccessException)
-                                               //ex is ResourceUpdater.HResultException)
+                                               ex is UnauthorizedAccessException ||
+                                               // Note: replace this when https://github.com/dotnet/core-setup/issues/7516 is fixed
+                                               ex.GetType().Name == "HResultException")
                     {
-                        ++attempts;
-
                         if (Retries < 0 || attempts == Retries) {
                             throw;
                         }
 
+                        ++attempts;
+
                         Log.LogWarning(
                             string.Format(Strings.AppHostCreationFailedWithRetry,
                                 attempts,
-                                Retries,
+                                Retries + 1,
                                 ex.Message));
 
                         if (RetryDelayMilliseconds > 0) {
@@ -91,7 +96,6 @@ namespace Microsoft.NET.Build.Tasks
                         }
                     }
                 }
-                while (attempts < Retries);
             }
             catch (AppNameTooLongException ex)
             {
