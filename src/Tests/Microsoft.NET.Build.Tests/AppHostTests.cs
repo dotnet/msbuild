@@ -223,6 +223,52 @@ namespace Microsoft.NET.Build.Tests
 
         }
 
+        [Fact]
+        public void It_retries_on_failure_to_create_apphost()
+        {
+            const string TFM = "netcoreapp3.0";
+
+            var testProject = new TestProject()
+            {
+                Name = "RetryAppHost",
+                TargetFrameworks = TFM,
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var projectDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, projectDirectory);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var intermediateDirectory = buildCommand.GetIntermediateDirectory(targetFramework: TFM).FullName;
+
+            File.SetLastWriteTimeUtc(
+                Path.Combine(
+                    intermediateDirectory,
+                    testProject.Name + ".dll"),
+                DateTime.UtcNow.AddSeconds(5));
+
+            var intermediateAppHost = Path.Combine(intermediateDirectory, testProject.Name + Constants.ExeSuffix);
+
+            using (var stream = new FileStream(intermediateAppHost, FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                 buildCommand.Execute()
+                    .Should()
+                    .Fail()
+                    .And
+                    .HaveStdOutContaining("System.IO.IOException")
+                    .And
+                    .HaveStdOutContaining("NETSDK1113");
+            }
+        }
+
         private static bool IsPE32(string path)
         {
             using (var reader = new PEReader(File.OpenRead(path)))
@@ -230,6 +276,5 @@ namespace Microsoft.NET.Build.Tests
                 return reader.PEHeaders.PEHeader.Magic == PEMagic.PE32;
             }
         }
-
     }
 }

@@ -1,10 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.IO;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.NET.HostModel;
 using Microsoft.NET.HostModel.AppHost;
-using System;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -14,6 +16,11 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public class CreateAppHost : TaskBase
     {
+        /// <summary>
+        /// The default delay, in milliseconds, for each retry attempt for creating the apphost.
+        /// </summary>
+        public const int DefaultRetryDelayMilliseconds = 1000;
+
         [Required]
         public string AppHostSourcePath { get; set; }
 
@@ -28,34 +35,63 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool WindowsGraphicalUserInterface { get; set; }
 
+        public int Retries { get; set; }
+
+        public int RetryDelayMilliseconds { get; set; } = DefaultRetryDelayMilliseconds;
+
         protected override void ExecuteCore()
         {
             try
             {
-                if (ResourceUpdater.IsSupportedOS())
+                var isGUI = WindowsGraphicalUserInterface;
+                var resourcesAssembly = IntermediateAssembly;
+
+                if (!ResourceUpdater.IsSupportedOS())
                 {
-                    HostWriter.CreateAppHost(appHostSourceFilePath: AppHostSourcePath,
-                                             appHostDestinationFilePath: AppHostDestinationPath,
-                                             appBinaryFilePath: AppBinaryName,
-                                             windowsGraphicalUserInterface: WindowsGraphicalUserInterface,
-                                             assemblyToCopyResorcesFrom: IntermediateAssembly);
-                }
-                else
-                {
-                    // by passing null to assemblyToCopyResorcesFrom, it will skip copying resorces,
-                    // which is only supported on Windows
-                    if (WindowsGraphicalUserInterface)
+                    if (isGUI)
                     {
                         Log.LogWarning(Strings.AppHostCustomizationRequiresWindowsHostWarning);
                     }
 
-                    HostWriter.CreateAppHost(appHostSourceFilePath: AppHostSourcePath,
-                                             appHostDestinationFilePath: AppHostDestinationPath,
-                                             appBinaryFilePath: AppBinaryName,
-                                             windowsGraphicalUserInterface: false,
-                                             assemblyToCopyResorcesFrom: null);
-
+                    isGUI = false;
+                    resourcesAssembly = null;
                 }
+
+                int attempts = 0;
+                
+                do
+                {
+                    try
+                    {
+                        HostWriter.CreateAppHost(appHostSourceFilePath: AppHostSourcePath,
+                                                appHostDestinationFilePath: AppHostDestinationPath,
+                                                appBinaryFilePath: AppBinaryName,
+                                                windowsGraphicalUserInterface: isGUI,
+                                                assemblyToCopyResorcesFrom: resourcesAssembly);
+                        return;
+                    }
+                    catch (Exception ex) when (ex is IOException ||
+                                               ex is UnauthorizedAccessException)
+                                               //ex is ResourceUpdater.HResultException)
+                    {
+                        ++attempts;
+
+                        if (Retries < 0 || attempts == Retries) {
+                            throw;
+                        }
+
+                        Log.LogWarning(
+                            string.Format(Strings.AppHostCreationFailedWithRetry,
+                                attempts,
+                                Retries,
+                                ex.Message));
+
+                        if (RetryDelayMilliseconds > 0) {
+                            Thread.Sleep(RetryDelayMilliseconds);
+                        }
+                    }
+                }
+                while (attempts < Retries);
             }
             catch (AppNameTooLongException ex)
             {

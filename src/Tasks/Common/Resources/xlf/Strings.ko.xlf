@@ -12,6 +12,11 @@
         <target state="translated">NETSDK1070: 애플리케이션 구성 파일에는 루트 구성 요소가 있어야 합니다.</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
+      <trans-unit id="AppHostCreationFailedWithRetry">
+        <source>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</source>
+        <target state="new">NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</target>
+        <note>{StrBegin="NETSDK1113: "}</note>
+      </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
         <target state="translated">NETSDK1074: 리소스를 추가하려면 빌드가 Windows(Nano Server 제외)에서 수행되어야 하므로 애플리케이션 호스트 실행 파일이 사용자 지정되지 않습니다.</target>

@@ -556,4 +556,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1112: The runtime pack for {0} was not downloaded. Try running a NuGet restore with the RuntimeIdentifier '{1}'.</value>
     <comment>{StrBegin="NETSDK1112: "}</comment>
   </data>
+  <data name="AppHostCreationFailedWithRetry" xml:space="preserve">
+    <value>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</value>
+    <comment>{StrBegin="NETSDK1113: "}</comment>
+  </data>
 </root>
