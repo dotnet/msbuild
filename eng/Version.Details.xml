@@ -5,25 +5,25 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>dd6eb08b7aad05eeadb585ef4c853f29ea95726c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-28379-14">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-28380-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>f4b35ce6e8583b08630baf576f55424728b04081</Sha>
+      <Sha>e2f55eb923e9d611de1533ab80f31cc558934122</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-preview8-28379-14">
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-preview8-28380-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>f4b35ce6e8583b08630baf576f55424728b04081</Sha>
+      <Sha>e2f55eb923e9d611de1533ab80f31cc558934122</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-preview8-28379-14">
+    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-preview8-28380-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>f4b35ce6e8583b08630baf576f55424728b04081</Sha>
+      <Sha>e2f55eb923e9d611de1533ab80f31cc558934122</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview8-28379-14">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview8-28380-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>f4b35ce6e8583b08630baf576f55424728b04081</Sha>
+      <Sha>e2f55eb923e9d611de1533ab80f31cc558934122</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-preview8-28379-14">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-preview8-28380-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>f4b35ce6e8583b08630baf576f55424728b04081</Sha>
+      <Sha>e2f55eb923e9d611de1533ab80f31cc558934122</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview8.19377.1">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
