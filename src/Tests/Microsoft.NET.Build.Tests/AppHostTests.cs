@@ -260,7 +260,7 @@ namespace Microsoft.NET.Build.Tests
 
             using (var stream = new FileStream(intermediateAppHost, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                var result = buildCommand.Execute();
+                var result = buildCommand.Execute("/clp:NoSummary");
 
                 result
                     .Should()
