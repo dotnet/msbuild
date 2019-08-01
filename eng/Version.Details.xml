@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="3.0.0-preview9.19381.3">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.0-alpha1.19401.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>790578e4189fc70719a50b33bcaed4567f0abfeb</Sha>
+      <Sha>dc3de384829410500748023c862bab291ab0492d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview8-28379-12">
       <Uri>https://github.com/dotnet/core-setup</Uri>
