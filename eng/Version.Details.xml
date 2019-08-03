@@ -5,23 +5,23 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>6aa89884a7a4353f6abd9eb385bba33a58624670</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="5.0.0-alpha1.19402.7">
+    <Dependency Name="Microsoft.NETCore.App" Version="5.0.0-alpha1.19402.8">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>18e5616f62e7ef3438749cc54170cc3bc74138df</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-alpha1.19402.7">
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-alpha1.19402.8">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>18e5616f62e7ef3438749cc54170cc3bc74138df</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="5.0.0-alpha1.19402.7">
+    <Dependency Name="Microsoft.NET.HostModel" Version="5.0.0-alpha1.19402.8">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>18e5616f62e7ef3438749cc54170cc3bc74138df</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="5.0.0-alpha1.19402.7">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="5.0.0-alpha1.19402.8">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>18e5616f62e7ef3438749cc54170cc3bc74138df</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="5.0.0-alpha1.19402.7">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="5.0.0-alpha1.19402.8">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>18e5616f62e7ef3438749cc54170cc3bc74138df</Sha>
     </Dependency>
