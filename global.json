@@ -8,6 +8,6 @@
     }
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "1.0.0-beta.19402.16"
+    "Microsoft.DotNet.Arcade.Sdk": "1.0.0-beta.19403.1"
   }
 }
