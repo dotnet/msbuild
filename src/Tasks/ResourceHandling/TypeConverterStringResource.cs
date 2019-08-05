@@ -14,6 +14,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         public string OriginatingFile { get; }
         public string StringRepresentation { get; }
 
+        public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
+
         public TypeConverterStringResource(string name, string assemblyQualifiedTypeName, string stringRepresentation, string originatingFile)
         {
             Name = name;

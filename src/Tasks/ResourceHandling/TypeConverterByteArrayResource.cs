@@ -20,6 +20,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         public string OriginatingFile { get; }
         public byte[] Bytes { get; }
 
+        public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
+
         public TypeConverterByteArrayResource(string name, string assemblyQualifiedTypeName, byte[] bytes, string originatingFile)
         {
             Name = name;

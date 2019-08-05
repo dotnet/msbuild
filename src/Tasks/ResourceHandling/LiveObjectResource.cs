@@ -19,6 +19,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         public string Name { get; }
         public object Value { get; }
 
+        public string TypeFullName => Value.GetType().FullName;
+
         public void AddTo(IResourceWriter writer)
         {
             writer.AddResource(Name, Value);

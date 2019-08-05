@@ -18,6 +18,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
         public string Value { get; }
 
+        public string TypeFullName => typeof(string).FullName;
+
         public StringResource(string name, string value, string filename)
         {
             Name = name;

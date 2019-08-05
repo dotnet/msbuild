@@ -20,6 +20,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         public string OriginatingFile { get; }
         public string FileName { get; }
 
+        public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
+
         /// <summary>
         /// Construct a new linked resource.
         /// </summary>
