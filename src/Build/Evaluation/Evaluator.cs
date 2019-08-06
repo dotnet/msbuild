@@ -162,7 +162,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The cache to consult for any imports that need loading.
         /// </summary>
-        private readonly ProjectRootElementCache _projectRootElementCache;
+        private readonly ProjectRootElementCacheBase _projectRootElementCache;
 
         /// <summary>
         /// The logging context to be used and piped down throughout evaluation
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Evaluation
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
-            ProjectRootElementCache projectRootElementCache,
+            ProjectRootElementCacheBase projectRootElementCache,
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext,
@@ -273,7 +273,7 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingService,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
-            ProjectRootElementCache projectRootElementCache,
+            ProjectRootElementCacheBase projectRootElementCache,
             BuildEventContext buildEventContext,
             ISdkResolverService sdkResolverService,
             int submissionId,
@@ -2524,7 +2524,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private bool EvaluateConditionCollectingConditionedProperties(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, ProjectRootElementCache projectRootElementCache = null)
+        private bool EvaluateConditionCollectingConditionedProperties(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, ProjectRootElementCacheBase projectRootElementCache = null)
         {
             return EvaluateConditionCollectingConditionedProperties(element, element.Condition, expanderOptions, parserOptions, projectRootElementCache);
         }
@@ -2532,7 +2532,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate a given condition, collecting conditioned properties.
         /// </summary>
-        private bool EvaluateConditionCollectingConditionedProperties(ProjectElement element, string condition, ExpanderOptions expanderOptions, ParserOptions parserOptions, ProjectRootElementCache projectRootElementCache = null)
+        private bool EvaluateConditionCollectingConditionedProperties(ProjectElement element, string condition, ExpanderOptions expanderOptions, ParserOptions parserOptions, ProjectRootElementCacheBase projectRootElementCache = null)
         {
             if (condition.Length == 0)
             {

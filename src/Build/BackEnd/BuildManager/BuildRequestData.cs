@@ -50,7 +50,7 @@ namespace Microsoft.Build.Execution
         IgnoreExistingProjectState = 1 << 2,
 
         /// <summary>
-        /// When this flag is present, caches including the <see cref="ProjectRootElementCache"/> will be cleared
+        /// When this flag is present, caches including the <see cref="ProjectRootElementCacheBase"/> will be cleared
         /// after the build request completes.  This is used when the build request is known to modify a lot of
         /// state such as restoring packages or generating parts of the import graph.
         /// </summary>
