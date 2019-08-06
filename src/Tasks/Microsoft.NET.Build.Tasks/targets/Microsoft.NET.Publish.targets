@@ -50,15 +50,17 @@ Copyright (c) .NET Foundation. All rights reserved.
       GeneratePublishDependencyFile;
       BundlePublishDirectory;
     </_CorePublishTargets>
+
+    <_PublishNoBuildAlternativeDependsOn>$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)</_PublishNoBuildAlternativeDependsOn>
   </PropertyGroup>
 
   <Target Name="_PublishBuildAlternative"
-          Condition="'$(NoBuild)' != 'true' and '$(GeneratePackageOnBuild)' != 'true'"
+          Condition="'$(NoBuild)' != 'true'"
           DependsOnTargets="Build;$(_CorePublishTargets)" />
 
   <Target Name="_PublishNoBuildAlternative"
-          Condition="'$(NoBuild)' == 'true' or '$(GeneratePackageOnBuild)' == 'true'"
-          DependsOnTargets="$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)" />
+          Condition="'$(NoBuild)' == 'true'"
+          DependsOnTargets="$(_PublishNoBuildAlternativeDependsOn)" />
 
   <Target Name="Publish"
           Condition="$(IsPublishable) == 'true'"
