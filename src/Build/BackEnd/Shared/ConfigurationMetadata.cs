@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -14,6 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// A struct representing the uniquely-identifying portion of a BuildRequestConfiguration.  Used for lookups.
     /// </summary>
+    [DebuggerDisplay(@"{DebugString()}")]
     internal class ConfigurationMetadata : IEquatable<ConfigurationMetadata>, ITranslatable
     {
         /// <summary>
@@ -165,6 +166,14 @@ namespace Microsoft.Build.BackEnd
             return ProjectFullPath.Equals(other.ProjectFullPath, StringComparison.OrdinalIgnoreCase) &&
                    ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
                    GlobalProperties.Equals(other.GlobalProperties);
+        }
+
+        private string DebugString()
+        {
+            var truncatedProjectFile = FileUtilities.TruncatePathToTrailingSegments(ProjectFullPath, 2);
+
+            return
+                $"{truncatedProjectFile}, #GlobalProps={GlobalProperties.Count}";
         }
     }
 }

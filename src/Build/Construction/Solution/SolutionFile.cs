@@ -666,8 +666,8 @@ namespace Microsoft.Build.Construction
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseProjectDepGuidError", proj.ProjectName);
 
-                        string parentGuid = match.Groups["PROPERTYNAME"].Value.Trim();
-                        proj.AddDependency(parentGuid);
+                        string referenceGuid = match.Groups["PROPERTYNAME"].Value.Trim();
+                        proj.AddDependency(referenceGuid);
 
                         line = ReadLine();
                     }

@@ -1769,13 +1769,36 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} and {1} are file paths
     </comment>
   </data>
+  <data name="StaticGraphAcceptsSingleSolutionEntryPoint" UESanitized="false" Visibility="Public">
+    <value>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</value>
+    <value>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</value>
+    <comment>
+      LOCALIZATION: {0} is a semicolon delimited list of files
+    </comment>
+  </data>
+  <data name="StaticGraphSolutionLoaderEncounteredSolutionWarningsAndErrors" UESanitized="false" Visibility="Public">
+    <value>MSB4262: Solution file "{0}" contains the following warnings and errors:
+           Warnings: {1}
+           Errors: {2}
+    </value>
+    <comment>
+      LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
+    </comment>
+  </data>
+  <data name="StaticGraphDoesNotSupportSlnReferences" UESanitized="false" Visibility="Public">
+    <value>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+    </value>
+    <comment>
+      LOCALIZATION: {0} and {1} are file paths
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
 
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4260.
+        Next message code should be MSB4264.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
