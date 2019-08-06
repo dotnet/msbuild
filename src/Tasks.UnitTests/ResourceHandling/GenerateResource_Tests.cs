@@ -1425,6 +1425,72 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         /// <summary>
+        /// STR-emitted code has the correct types.
+        /// </summary>
+        /// <remarks>
+        /// Regression test for legacy-codepath-resources case of https://github.com/microsoft/msbuild/issues/4582
+        /// </remarks>
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/2272")]
+        public void StronglyTypedResourcesEmitTypeIntoClass()
+        {
+            string bitmap = Utilities.CreateWorldsSmallestBitmap();
+            string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
+
+            GenerateResource t = Utilities.CreateTask(_output);
+            try
+            {
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                t.StronglyTypedLanguage = "CSharp";
+                t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+                Utilities.ExecuteTask(t);
+
+                string resourcesFile = t.OutputResources[0].ItemSpec;
+                Assert.Equal(".resources", Path.GetExtension(resourcesFile));
+                resourcesFile = t.FilesWritten[0].ItemSpec;
+                Assert.Equal(".resources", Path.GetExtension(resourcesFile));
+
+                Utilities.AssertStateFileWasWritten(t);
+
+                // Should have defaulted the STR filename to the bare output resource name + ".cs"
+                string STRfile = Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs");
+                Assert.Equal(t.StronglyTypedFileName, STRfile);
+                Assert.True(File.Exists(STRfile));
+
+                // Should have defaulted the class name to the bare output resource name
+                Assert.Equal(t.StronglyTypedClassName, Path.GetFileNameWithoutExtension(t.OutputResources[0].ItemSpec));
+
+                Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", resxFile, resourcesFile);
+                Utilities.AssertLogContainsResource(t, "GenerateResource.ReadResourceMessage", 2, resxFile);
+                Utilities.AssertLogContainsResource(t, "GenerateResource.CreatingSTR", t.StronglyTypedFileName);
+
+                string generatedSource = File.ReadAllText(t.StronglyTypedFileName);
+
+                generatedSource.ShouldNotContain("object Image1", "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
+                generatedSource.ShouldContain("Bitmap Image1");
+
+                generatedSource.ShouldNotContain("object MyString", "Strongly-typed resource accessor is returning type `object` instead of `string`");
+                generatedSource.ShouldContain("static string MyString");
+                generatedSource.ShouldMatch("//.*Looks up a localized string similar to MyValue", "Couldn't find a comment in the usual format for a string resource.");
+
+            }
+            finally
+            {
+                // Done, so clean up.
+                FileUtilities.DeleteNoThrow(bitmap);
+                FileUtilities.DeleteNoThrow(resxFile);
+
+                FileUtilities.DeleteNoThrow(t.StronglyTypedFileName);
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    FileUtilities.DeleteNoThrow(item.ItemSpec);
+                }
+            }
+        }
+
+
+        /// <summary>
         ///  STR with resource namespace yields proper output, message (CS)
         /// </summary>
 #if FEATURE_CODEDOM
