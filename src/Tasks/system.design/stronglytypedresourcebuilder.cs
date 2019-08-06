@@ -121,6 +121,15 @@ namespace Microsoft.Build.Tasks
                     String valueAsString = node.GetValue((AssemblyName[])null).ToString();
                     data = new ResourceData(type, valueAsString);
                 }
+               else if (de.Value is StringResource sr)
+                {
+                    data = new ResourceData(typeof(string), sr.Value);
+                }
+                else if (de.Value is FileStreamResource fsr)
+                {
+                    data = new ResourceData(fsr.TypeAssemblyQualifiedName.Substring(0, fsr.TypeAssemblyQualifiedName.IndexOf(',')));
+                }
+                // TODO: other cases!
                 else
                 {
                     // If the object is null, we don't have a good way of guessing the
