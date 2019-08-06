@@ -91,12 +91,7 @@ namespace Microsoft.Build.Tasks
             internal String ValueAsString { get; }
         }
 
-        internal static CodeCompileUnit Create(IDictionary resourceList, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
-        {
-            return Create(resourceList, baseName, generatedCodeNamespace, null, codeProvider, internalClass, out unmatchable);
-        }
-
-        internal static CodeCompileUnit Create(IDictionary resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
+        internal static CodeCompileUnit Create(Dictionary<string, IResource> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
         {
             if (resourceList == null)
             {
@@ -104,13 +99,13 @@ namespace Microsoft.Build.Tasks
             }
 
             var resourceTypes = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
-            foreach (DictionaryEntry de in resourceList)
+            foreach (KeyValuePair<string, IResource> de in resourceList)
             {
                 var node = de.Value as ResXDataNode;
                 ResourceData data;
                 if (node != null)
                 {
-                    string keyname = (string)de.Key;
+                    string keyname = de.Key;
                     if (keyname != node.Name)
                     {
                         throw new ArgumentException(SR.GetString(SR.MismatchedResourceName, keyname, node.Name));
@@ -138,7 +133,7 @@ namespace Microsoft.Build.Tasks
                     Type type = de.Value?.GetType() ?? typeof(Object);
                     data = new ResourceData(type, de.Value?.ToString());
                 }
-                resourceTypes.Add((String)de.Key, data);
+                resourceTypes.Add(de.Key, data);
             }
 
             // Note we still need to verify the resource names are valid language

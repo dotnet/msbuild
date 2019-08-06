@@ -3869,15 +3869,15 @@ namespace Microsoft.Build.Tasks
             public String cultureName;
             // We use a list to preserve the resource ordering (primarily for easier testing),
             // but also use a hash table to check for duplicate names.
-            public ArrayList resources;
-            public Hashtable resourcesHashTable;
+            public List<IResource> resources;
+            public Dictionary<string, IResource> resourcesHashTable;
             public String assemblySimpleName;  // The main assembly's simple name (ie, no .resources)
             public bool fromNeutralResources;  // Was this from the main assembly (or if the NRLA specified fallback to satellite, that satellite?)
 
             public ReaderInfo()
             {
-                resources = new ArrayList();
-                resourcesHashTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                resources = new List<IResource>();
+                resourcesHashTable = new Dictionary<string, IResource>(StringComparer.OrdinalIgnoreCase);
             }
         }
 
