@@ -39,6 +39,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ResolveToolPackagePaths
+      AppHostIntermediatePath="$(AppHostIntermediatePath)"
       ResolvedFileToPublish="@(ResolvedFileToPublish)"
       PublishDir="$(PublishDir)"
       TargetFramework="$(TargetFramework)">

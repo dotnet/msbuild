@@ -104,7 +104,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
     <UseAppHost Condition="'$(UseAppHost)' == '' and
-                           ('$(SelfContained)' == 'true' or '$(PackAsTool)' != 'true') and
                            ('$(SelfContained)' == 'true' or
                             ('$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1') or
                             '$(_TargetFrameworkVersionWithoutV)' >= '3.0')">true</UseAppHost>
