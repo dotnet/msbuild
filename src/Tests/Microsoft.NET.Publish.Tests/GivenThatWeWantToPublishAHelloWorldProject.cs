@@ -655,5 +655,61 @@ public static class Program
                 output.Should().NotHaveFile($"{testProject.Name}{Constants.ExeSuffix}");
             }
         }
+
+        [Fact]
+        public void It_publishes_with_full_path_publish_profile()
+        {
+            var libProject = new TestProject()
+            {
+                Name = "LibProjectWithDifferentTFM",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true,
+            };
+
+            var testProject = new TestProject()
+            {
+                Name = "ExeWithPublishProfile",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            testProject.ReferencedProjects.Add(libProject);
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    project.Root.Add(XElement.Parse(@"
+<ItemDefinitionGroup>
+  <ProjectReference>
+    <GlobalPropertiesToRemove>%(GlobalPropertiesToRemove);WebPublishProfileFile</GlobalPropertiesToRemove>
+  </ProjectReference>
+</ItemDefinitionGroup>"));
+                });
+
+            var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
+            var projectPath = Path.Combine(projectDirectory, $"{testProject.Name}.csproj");
+            var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
+            var publishProfilePath = Path.Combine(publishProfilesDirectory, "test.pubxml");
+
+            Directory.CreateDirectory(publishProfilesDirectory);
+            File.WriteAllText(publishProfilePath, @"
+<Project>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+</Project>
+");
+
+            var command = new PublishCommand(Log, projectDirectory);
+            command
+                .Execute(
+                    "/restore",
+                    $"/p:WebPublishProfileFile={publishProfilePath}",
+                    $"/p:ProjectToOverrideProjectExtensionsPath={projectPath}"
+                )
+                .Should()
+                .Pass();
+        }
     }
 }

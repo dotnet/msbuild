@@ -22,8 +22,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == '' and Exists('$(PublishProfileFullPath)')">$(PublishProfileFullPath)</WebPublishProfileFile>
 
     <!-- If the publish profile doesn't exist, mark as not imported.
-         This allows the Web SDK to import some default profiles that come with the Web SDK. -->
-    <PublishProfileImported Condition="'$(WebPublishProfileFile)' == '' or !Exists('$(WebPublishProfileFile)')">false</PublishProfileImported>
+       This allows the Web SDK to import some default profiles that come with the Web SDK.
+       Publishing in Visual Studio sets `WebPublishProfileFile` as a global property.
+       Therefore, check that `ProjectToOverrideProjectExtensionsPath` is equal to `MSBuildProjectFullPath`
+       to limit the import to the project being published. -->
+    <PublishProfileImported Condition="('$(ProjectToOverrideProjectExtensionsPath)' != '' and
+                                        '$(ProjectToOverrideProjectExtensionsPath)' != '$(MSBuildProjectFullPath)') or
+                                       '$(WebPublishProfileFile)' == '' or
+                                       !Exists('$(WebPublishProfileFile)')">false</PublishProfileImported>
   </PropertyGroup>
 
   <Import Project="$(WebPublishProfileFile)" Condition="'$(PublishProfileImported)' == 'true'" />
