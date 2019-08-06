@@ -447,7 +447,7 @@ EndGlobal
         public void WhenSolutionItemsExistInFolderParentFoldersAreNotRemoved()
         {
             var projectDirectory = TestAssets
-                .Get("SlnFileWithSolutinItemsInNestedFolders")
+                .Get("SlnFileWithSolutionItemsInNestedFolders")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
