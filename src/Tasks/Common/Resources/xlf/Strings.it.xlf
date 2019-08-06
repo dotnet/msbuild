@@ -12,6 +12,11 @@
         <target state="translated">NETSDK1070: il file di configurazione dell'applicazione deve avere un elemento di configurazione radice.</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
+      <trans-unit id="AppHostCreationFailedWithRetry">
+        <source>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</source>
+        <target state="new">NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</target>
+        <note>{StrBegin="NETSDK1113: "}</note>
+      </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
         <target state="translated">NETSDK1074: l'eseguibile dell'host applicazione non verrà personalizzato perché per aggiungere risorse è necessario eseguire la compilazione in Windows (escluso Nano Server).</target>
