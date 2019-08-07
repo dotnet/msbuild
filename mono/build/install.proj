@@ -48,6 +48,7 @@
             <MSBuildFiles Include="$(MSBuildBinSrcDir)\Newtonsoft*" />
 
             <MSBuildFiles Include="$(MSBuildBinSrcDir)\*.dll*" />
+            <MSBuildFiles Include="$(MSBuildBinSrcDir)\RuntimeIdentifierGraph.json" />
 
             <!-- nuget tasks/targets that are now installed to bin dir -->
             <MSBuildFiles Include="$(RepoRoot)\nuget-support\tasks-targets\*" />

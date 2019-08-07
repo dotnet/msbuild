@@ -1,9 +1,9 @@
 <Project>
 
   <PropertyGroup>
-      <MicrosoftNetCompilersVersion>3.1.0</MicrosoftNetCompilersVersion>
-      <CompilerToolsVersion>3.1.0</CompilerToolsVersion>
-      <NuGetPackageVersion>5.2.0-rtm.6067</NuGetPackageVersion>
+      <MicrosoftNetCompilersVersion>3.3.0-beta2-19381-14</MicrosoftNetCompilersVersion>
+      <CompilerToolsVersion>3.3.0-beta2-19381-14</CompilerToolsVersion>
+      <NuGetPackageVersion>5.3.0-preview.2.6136</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
       <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
