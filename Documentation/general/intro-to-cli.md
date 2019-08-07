@@ -57,6 +57,6 @@ Guidance on how to write a command
 ==================================
 How you write a given command depends largely on whether you are trying to add it to the CLI project or want to add the command locally, that is on your machine or server. 
 
-For the former case, the [developer guide](developer-guide.md) has all of the details that you will need to get going. 
+For the former case, the [developer guide](../project-docs/developer-guide.md) has all of the details that you will need to get going. 
 
 If you are adding a command on your own machine(s), then there is really no special model to keep in mind. However, since your users will be using the local commands through the `dotnet` driver, we strongly suggest to keep to the principles outlined in the [CLI UX guidelines](cli-ux-guidelines.md) to have an unified user experience for your users. 
