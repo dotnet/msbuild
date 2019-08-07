@@ -24,10 +24,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <Content Include="$(RepoRoot)mono\bin-dir\**\*" CopyToOutputDirectory="PreserveNewest" />
-
     <!-- Include the bundled SDKs -->
     <Content Include="$(RepoRoot)sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)mono\bin-dir\**\*" CopyToOutputDirectory="PreserveNewest" />
 
     <!-- Use the NuGet.targets that we bundle, since that is what we will install so we should be testing against that -->
     <Content Include="$(RepoRoot)nuget-support\tasks-targets\*" CopyToOutputDirectory="PreserveNewest" />
