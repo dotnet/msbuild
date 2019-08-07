@@ -37,9 +37,7 @@
   <PropertyGroup>
     <SystemResourcesExtensionsVersion>4.6.0-preview8.19379.2</SystemResourcesExtensionsVersion>
   </PropertyGroup>
-
-  <Target Name="OverrideArcadeFileVersion"
-          AfterTargets="_InitializeAssemblyVersion">
+  <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- MSBuild 16.2.0 didn't exist. It shipped as file version 16.200.19.32702,
          informational version 16.2.32702+c4012a063 because of confusion around
          Arcade versioning rules: https://github.com/dotnet/arcade/issues/3386
