@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
@@ -19,7 +20,7 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem CompilationEntry { get; set; }
         [Required]
-        public ITaskItem[] ImplementationAssemblies { get; set; }
+        public ITaskItem[] References { get; set; }
         public bool ShowCompilerWarnings { get; set; }
 
         [Output]
@@ -88,51 +89,6 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        // TEMP LOGIC - SDK Should provide correct list - When fixing https://github.com/dotnet/sdk/issues/3110, delete
-        // both IsManagedAssemblyToUseAsCrossgenReference and IsReferenceAssembly
-        bool IsManagedAssemblyToUseAsCrossgenReference(ITaskItem file)
-        {
-            // Reference only managed assemblies that will be published to the root directory.
-            string relativeOutputPath = file.GetMetadata(MetadataKeys.RelativePath);
-
-            if (string.IsNullOrEmpty(relativeOutputPath))
-            {
-                relativeOutputPath = file.GetMetadata(MetadataKeys.DestinationSubPath);
-            }
-
-            if (!String.IsNullOrEmpty(Path.GetDirectoryName(relativeOutputPath)))
-            {
-                return false;
-            }
-
-            using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
-            {
-                try
-                {
-                    using (var pereader = new PEReader(fs))
-                    {
-                        if (!pereader.HasMetadata)
-                            return false;
-
-                        MetadataReader mdReader = pereader.GetMetadataReader();
-                        if (!mdReader.IsAssembly)
-                            return false;
-
-                        // Reference assemblies should never be given to crossgen
-                        if (IsReferenceAssembly(mdReader))
-                            return false;
-                    }
-                }
-                catch (BadImageFormatException)
-                {
-                    // Not a valid assembly file
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         private bool IsReferenceAssembly(MetadataReader mdReader)
         {
             foreach (var attributeHandle in mdReader.GetAssemblyDefinition().GetCustomAttributes())
@@ -175,18 +131,13 @@ namespace Microsoft.NET.Build.Tasks
         {
             StringBuilder result = new StringBuilder();
 
-            // Add all runtime libraries to the list of references passed to crossgen
-            foreach (var runtimeAssembly in ImplementationAssemblies)
+            foreach (var reference in References)
             {
                 // When generating PDBs, we must not add a reference to the IL version of the R2R image for which we're trying to generate a PDB
-                if (IsPdbCompilation && String.Equals(Path.GetFileName(runtimeAssembly.ItemSpec), Path.GetFileName(_outputR2RImage), StringComparison.OrdinalIgnoreCase))
+                if (IsPdbCompilation && String.Equals(Path.GetFileName(reference.ItemSpec), Path.GetFileName(_outputR2RImage), StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                // TODO: Delete check when fixing https://github.com/dotnet/sdk/issues/3109
-                if (!IsManagedAssemblyToUseAsCrossgenReference(runtimeAssembly))
-                    continue;
-
-                result.AppendLine($"/r \"{runtimeAssembly}\"");
+                result.AppendLine($"/r \"{reference}\"");
             }
 
             return result.ToString();

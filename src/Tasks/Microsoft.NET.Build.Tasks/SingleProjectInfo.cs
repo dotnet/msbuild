@@ -72,13 +72,13 @@ namespace Microsoft.NET.Build.Tasks
 
         public static Dictionary<string, SingleProjectInfo> CreateProjectReferenceInfos(
             IEnumerable<ITaskItem> referencePaths,
-            IEnumerable<ITaskItem> referenceDependencyPaths,
-            IEnumerable<ITaskItem> referenceSatellitePaths)
+            IEnumerable<ITaskItem> referenceSatellitePaths,
+            Func<ITaskItem, bool> isRuntimeAssembly)
         {
             Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>(StringComparer.OrdinalIgnoreCase);
 
             IEnumerable<ITaskItem> projectReferencePaths = referencePaths
-                .Where(r => IsProjectReference(r));
+                .Where(r => ReferenceInfo.IsProjectReference(r) && isRuntimeAssembly(r));
 
             foreach (ITaskItem projectReferencePath in projectReferencePaths)
             {
@@ -99,29 +99,7 @@ namespace Microsoft.NET.Build.Tasks
                     new SingleProjectInfo(sourceProjectFile, name, version, outputName, dependencyReferences: null, resourceAssemblies: null));
             }
 
-            //  Include direct references of referenced projects, but only if they are CopyLocal
-            IEnumerable<ITaskItem> projectReferenceDependencyPaths = referenceDependencyPaths
-                .Where(r => IsProjectReference(r) &&
-                            MSBuildUtilities.ConvertStringToBool(r.GetMetadata(MetadataKeys.CopyLocal)));
-
-            foreach (ITaskItem projectReferenceDependencyPath in projectReferenceDependencyPaths)
-            {
-                string sourceProjectFile = projectReferenceDependencyPath.GetMetadata(MetadataKeys.MSBuildSourceProjectFile);
-
-                if (string.IsNullOrEmpty(sourceProjectFile))
-                {
-                    throw new BuildErrorException(Strings.MissingItemMetadata, MetadataKeys.MSBuildSourceProjectFile, "ReferenceDependencyPath", projectReferenceDependencyPath.ItemSpec);
-                }
-
-                SingleProjectInfo referenceProjectInfo;
-                if (projectReferences.TryGetValue(sourceProjectFile, out referenceProjectInfo))
-                {
-                    ReferenceInfo dependencyReferenceInfo = ReferenceInfo.CreateReferenceInfo(projectReferenceDependencyPath);
-                    referenceProjectInfo._dependencyReferences.Add(dependencyReferenceInfo);
-                }
-            }
-
-            IEnumerable<ITaskItem> projectReferenceSatellitePaths = referenceSatellitePaths.Where(r => IsProjectReference(r));
+            IEnumerable<ITaskItem> projectReferenceSatellitePaths = referenceSatellitePaths.Where(r => ReferenceInfo.IsProjectReference(r));
 
             foreach (ITaskItem projectReferenceSatellitePath in projectReferenceSatellitePaths)
             {
@@ -156,9 +134,5 @@ namespace Microsoft.NET.Build.Tasks
             return projectReferences;
         }
 
-        private static bool IsProjectReference(ITaskItem i)
-        {
-            return string.Equals(i.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase);
-        }
     }
 }
