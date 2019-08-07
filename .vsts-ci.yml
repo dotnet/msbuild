@@ -164,7 +164,7 @@ stages:
               _BuildConfig: Release
 
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    - template: /eng/common/templates/phases/publish-build-assets.yml
+    - template: /eng/common/templates/job/publish-build-assets.yml
       parameters:
         publishUsingPipelines: true
         dependsOn:
@@ -173,6 +173,6 @@ stages:
           name: Hosted VS2017
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: eng\common\templates\post-build\post-build.yml
+  - template: /eng/common/templates/post-build/post-build.yml
     parameters:
       enableSymbolValidation: false
