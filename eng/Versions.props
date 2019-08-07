@@ -48,7 +48,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted -->
-    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-preview9.19404.4</MicrosoftNETSdkWindowsDesktopPackageVersion>
+    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-preview9.19405.10</MicrosoftNETSdkWindowsDesktopPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/nuget/nuget.client -->
@@ -70,13 +70,13 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/corefx -->
-    <SystemCodeDomPackageVersion>5.0.0-alpha1.19381.2</SystemCodeDomPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>5.0.0-alpha1.19381.2</SystemTextEncodingCodePagesPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-alpha1.19381.2</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemCodeDomPackageVersion>5.0.0-alpha1.19406.14</SystemCodeDomPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>5.0.0-alpha1.19406.14</SystemTextEncodingCodePagesPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-alpha1.19406.14</SystemSecurityCryptographyProtectedDataPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppPackageVersion>5.0.0-alpha1.19405.9</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>5.0.0-alpha1.19407.1</MicrosoftNETCoreAppPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
