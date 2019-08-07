@@ -1014,11 +1014,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR without references yields proper output, message
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact (Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void StronglyTypedResources()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -1075,11 +1071,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR without references yields proper output, message
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void StronglyTypedResourcesUpToDate()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -1160,11 +1152,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// STR class file is out of date, but resources are up to date. Should still generate it.
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void StronglyTypedResourcesOutOfDate()
         {
             string resxFile = null;
@@ -1251,11 +1239,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// Verify STR generation with a specified specific filename
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void StronglyTypedResourcesWithFilename()
         {
             string txtFile = null;
@@ -1310,11 +1294,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with VB
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void StronglyTypedResourcesVB()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -1370,11 +1350,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR namespace can be empty
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void StronglyTypedResourcesWithoutNamespaceOrClassOrFilename()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -1493,11 +1469,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with resource namespace yields proper output, message (CS)
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void STRWithResourcesNamespaceCS()
         {
             Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null, _output);
@@ -1506,11 +1478,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with resource namespace yields proper output, message (VB)
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void STRWithResourcesNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", null, _output);
@@ -1519,11 +1487,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with resource namespace and STR namespace yields proper output, message (CS)
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void STRWithResourcesNamespaceAndSTRNamespaceCS()
         {
             Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", "MySTClassNamespace", _output);
@@ -1532,11 +1496,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with resource namespace and STR namespace yields proper output, message (CS)
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void STRWithResourcesNamespaceAndSTRNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace", _output);
@@ -1844,11 +1804,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Invalid STR Class name
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void FailedSTRProperty()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2142,11 +2098,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR class name derived from output file transformation
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedClassName()
@@ -2193,11 +2145,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR class file name derived from class name transformation
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
@@ -2471,11 +2419,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Invalid StronglyTypedLanguage yields CodeDOM exception
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         [Trait("Category", "mono-osx-failing")]
         public void UnknownStronglyTypedLanguage()
         {
@@ -2541,11 +2485,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR class name derived from output file transformation
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void BadStronglyTypedFilename()
         {
             string txtFile = null;
@@ -2684,11 +2624,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// Verify that passing a STR language with more than 1 sources errors
         /// </summary>
-#if FEATURE_CODEDOM
         [Fact]
-#else
-        [Fact(Skip = "Does not support strongly typed resources on netcore")]
-#endif
         public void StronglyTypedResourceFileIsExistingDirectory()
         {
             string dir = null;

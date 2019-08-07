@@ -263,6 +263,7 @@ namespace Microsoft.Build.Tasks
                 throw new ArgumentNullException(nameof(resxFile));
             }
 
+#if FEATURE_RESX_RESOURCE_READER
             // Read the resources from a ResX file into a dictionary - name & type name
             Dictionary<String, ResourceData> resourceList = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
             using (ResXResourceReader rr = new ResXResourceReader(resxFile))
@@ -283,6 +284,9 @@ namespace Microsoft.Build.Tasks
             // keywords, etc.  So there's no point to duplicating the code above.
 
             return InternalCreate(resourceList, baseName, generatedCodeNamespace, resourcesNamespace, codeProvider, internalClass, out unmatchable);
+#else
+            throw new PlatformNotSupportedException("Creating strongly-typed resources directly from a resx file is not currently supported on .NET Core");
+#endif
         }
 
         private static void AddGeneratedCodeAttributeforMember(CodeTypeMember typeMember)
