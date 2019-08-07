@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
@@ -110,14 +110,14 @@
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
-        <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>
+        <target state="translated">MSB4260: 專案 "{0}" 已跳過參考專案 "{1}" 上的圖形隔離條件約束</target>
         <note>
       LOCALIZATION: {0} and {1} are file paths
     </note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="needs-review-translation">MSB4254: MSBuild 工作建置的專案 {0} 未在 ProjectReference 項目中指定。在隔離式組建中，這可能代表未在 "{1}" 中將該參考明確指定為 ProjectReference 項目</target>
+        <target state="translated">MSB4254: MSBuild 工作正在建置未在 ProjectReference 項目中指定的專案 "{0}"。在隔離式組建中，這可能代表未在 "{1}" 中將該參考明確指定為 ProjectReference 項目</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.

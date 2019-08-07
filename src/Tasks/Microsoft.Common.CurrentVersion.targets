@@ -1600,8 +1600,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       invocation below to fail by passing invalid properties. Therefore we do not use the NTM if it contains a semicolon.
     -->
     <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' != '' and !$(NuGetTargetMoniker.Contains(';'))">$(NugetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' == ''">$(TargetFrameworkMoniker)</ReferringTargetFrameworkForProjectReferences>
+      <ReferringTargetFrameworkForProjectReferences Condition="'$(NuGetTargetMoniker)' != '' and !$(NuGetTargetMoniker.Contains(';'))">$(NuGetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
+      <ReferringTargetFrameworkForProjectReferences Condition="'$(NuGetTargetMoniker)' == ''">$(TargetFrameworkMoniker)</ReferringTargetFrameworkForProjectReferences>
     </PropertyGroup>
 
     <!--
