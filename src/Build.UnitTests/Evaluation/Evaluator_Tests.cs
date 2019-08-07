@@ -4509,9 +4509,268 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        public void VerifyPropertyTrackingLogging()
+        public void VerifyPropertyTrackingLoggingDefault()
         {
-           string testTargets = ObjectModelHelpers.CleanupFileContents(@"
+            // Having nothing defined should default to only logging reassignments
+            this.VerifyPropertyTrackingLoggingScenario(
+                null,
+                logger =>
+                {
+                    logger
+                        .AllBuildEvents
+                        .OfType<UninitializedPropertyReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .ShouldContain(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2");
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyInitialValueSetEventArgs>()
+                        .ShouldBeEmpty();
+
+                });
+        }
+
+        [Fact]
+        public void VerifyPropertyTrackingLoggingPropertyReassignment()
+        {
+            this.VerifyPropertyTrackingLoggingScenario(
+                "PropertyReassignment",
+                logger =>
+                {
+                    logger
+                        .AllBuildEvents
+                        .OfType<UninitializedPropertyReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .ShouldContain(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2");
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyInitialValueSetEventArgs>()
+                        .ShouldBeEmpty();
+
+                });
+        }
+
+        [Fact]
+        public void VerifyPropertyTrackingLoggingNone()
+        {
+            this.VerifyPropertyTrackingLoggingScenario(
+                "None",
+                logger =>
+                {
+                    logger
+                        .AllBuildEvents
+                        .OfType<UninitializedPropertyReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyInitialValueSetEventArgs>()
+                        .ShouldBeEmpty();
+                });
+        }
+
+        [Fact]
+        public void VerifyPropertyTrackingLoggingPropertyInitialValue()
+        {
+            this.VerifyPropertyTrackingLoggingScenario(
+                "PropertyInitialValueSet",
+                logger =>
+                {
+                    logger
+                        .AllBuildEvents
+                        .OfType<UninitializedPropertyReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .ShouldBeEmpty();
+
+                    IDictionary<string, PropertyInitialValueSetEventArgs> propertyInitialValueMap = logger
+                        .AllBuildEvents
+                        .OfType<PropertyInitialValueSetEventArgs>()
+                        .ToDictionary(piv => piv.PropertyName);
+
+                    // Verify logging of property initial values.
+                    propertyInitialValueMap.ShouldContainKey("Prop");
+                    propertyInitialValueMap["Prop"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop"].PropertyValue.ShouldBe(string.Empty);
+
+                    propertyInitialValueMap.ShouldContainKey("EnvVar");
+                    propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's also Defined!");
+
+                    propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
+                    propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertySource.ShouldBe("EnvironmentVariable");
+                    propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertyValue.ShouldBe("It's Defined!");
+
+                    propertyInitialValueMap.ShouldContainKey("NotEnvVarRead");
+                    propertyInitialValueMap["NotEnvVarRead"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["NotEnvVarRead"].PropertyValue.ShouldBe("Overwritten!");
+
+                    propertyInitialValueMap.ShouldContainKey("Prop2");
+                    propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
+                });
+        }
+
+        [Fact]
+        public void VerifyPropertyTrackingLoggingEnvironmentVariableRead()
+        {
+            this.VerifyPropertyTrackingLoggingScenario(
+                "EnvironmentVariableRead",
+                logger =>
+                {
+                    logger
+                        .AllBuildEvents
+                        .OfType<UninitializedPropertyReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE2");
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldNotContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE");
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyInitialValueSetEventArgs>()
+                        .ShouldBeEmpty();
+                });
+        }
+
+        [Fact]
+        public void VerifyPropertyTrackingLoggingUninitializedPropertyRead()
+        {
+            this.VerifyPropertyTrackingLoggingScenario(
+                "UninitializedPropertyRead",
+                logger =>
+                {
+                    logger
+                        .AllBuildEvents
+                        .OfType<UninitializedPropertyReadEventArgs>()
+                        .ShouldContain(p => p.PropertyName == "DOES_NOT_EXIST");
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .ShouldBeEmpty();
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyInitialValueSetEventArgs>()
+                        .ShouldBeEmpty();
+                });
+        }
+
+        [Fact]
+        public void VerifyPropertyTrackingLoggingAll()
+        {
+            this.VerifyPropertyTrackingLoggingScenario(
+                "All",
+                logger =>
+                {
+                    logger
+                        .AllBuildEvents
+                        .OfType<UninitializedPropertyReadEventArgs>()
+                        .ShouldContain(p => p.PropertyName == "DOES_NOT_EXIST");
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE2");
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<EnvironmentVariableReadEventArgs>()
+                        .ShouldNotContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE");
+
+                    logger
+                        .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .ShouldContain(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2");
+
+                    IDictionary<string, PropertyInitialValueSetEventArgs> propertyInitialValueMap = logger
+                        .AllBuildEvents
+                        .OfType<PropertyInitialValueSetEventArgs>()
+                        .ToDictionary(piv => piv.PropertyName);
+
+                    // Verify logging of property initial values.
+                    propertyInitialValueMap.ShouldContainKey("Prop");
+                    propertyInitialValueMap["Prop"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop"].PropertyValue.ShouldBe(string.Empty);
+
+                    propertyInitialValueMap.ShouldContainKey("EnvVar");
+                    propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's also Defined!");
+
+                    propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
+                    propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertySource.ShouldBe("EnvironmentVariable");
+                    propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertyValue.ShouldBe("It's Defined!");
+
+                    propertyInitialValueMap.ShouldContainKey("NotEnvVarRead");
+                    propertyInitialValueMap["NotEnvVarRead"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["NotEnvVarRead"].PropertyValue.ShouldBe("Overwritten!");
+
+                    propertyInitialValueMap.ShouldContainKey("Prop2");
+                    propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
+                });
+        }
+
+        private void VerifyPropertyTrackingLoggingScenario(string envVarValue, Action<MockLogger> loggerEvaluatorAction)
+        {
+            // The default is that only reassignments are logged.
+
+            string testTargets = ObjectModelHelpers.CleanupFileContents(@"
                                 <Project>
                                      <PropertyGroup>
                                          <Prop>$(DOES_NOT_EXIST)</Prop>
@@ -4526,7 +4785,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MsBuildLogPropertyTracking", "1");
+                if (!string.IsNullOrWhiteSpace(envVarValue))
+                    env.SetEnvironmentVariable("MsBuildLogPropertyTracking", envVarValue);
+
                 env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE", "It's Defined!");
                 env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE2", "It's also Defined!");
 
@@ -4542,51 +4803,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 project.Build().ShouldBeTrue();
 
-                logger
-                    .AllBuildEvents
-                    .OfType<UninitializedPropertyReadEventArgs>()
-                    .ShouldContain(p => p.PropertyName == "DOES_NOT_EXIST");
-
-                logger
-                    .AllBuildEvents
-                    .OfType<EnvironmentVariableReadEventArgs>()
-                    .ShouldContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE2");
-
-                logger
-                    .AllBuildEvents
-                    .OfType<EnvironmentVariableReadEventArgs>()
-                    .ShouldNotContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE");
-
-                logger
-                    .AllBuildEvents
-                    .OfType<PropertyReassignmentEventArgs>()
-                    .ShouldContain(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2");
-
-                IDictionary<string, PropertyInitialValueSetEventArgs> propertyInitialValueMap = logger
-                    .AllBuildEvents
-                    .OfType<PropertyInitialValueSetEventArgs>()
-                    .ToDictionary(piv => piv.PropertyName);
-
-                // Verify logging of property initial values.
-                propertyInitialValueMap.ShouldContainKey("Prop");
-                propertyInitialValueMap["Prop"].PropertySource.ShouldBe("Xml");
-                propertyInitialValueMap["Prop"].PropertyValue.ShouldBe(string.Empty);
-
-                propertyInitialValueMap.ShouldContainKey("EnvVar");
-                propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
-                propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's also Defined!");
-
-                propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
-                propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertySource.ShouldBe("EnvironmentVariable");
-                propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertyValue.ShouldBe("It's Defined!");
-
-                propertyInitialValueMap.ShouldContainKey("NotEnvVarRead");
-                propertyInitialValueMap["NotEnvVarRead"].PropertySource.ShouldBe("Xml");
-                propertyInitialValueMap["NotEnvVarRead"].PropertyValue.ShouldBe("Overwritten!");
-
-                propertyInitialValueMap.ShouldContainKey("Prop2");
-                propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
-                propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
+                loggerEvaluatorAction?.Invoke(logger);
             }
         }
 

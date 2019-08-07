@@ -82,7 +82,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Log property tracking information.
         /// </summary>
-        public bool LogPropertyTracking => Environment.GetEnvironmentVariable("MsBuildLogPropertyTracking") == "1";
+        public string LogPropertyTracking => Environment.GetEnvironmentVariable("MsBuildLogPropertyTracking");
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {

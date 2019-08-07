@@ -31,19 +31,21 @@ namespace Microsoft.Build.Evaluation
         private readonly IEvaluatorData<P, I, M, D> _wrapped;
         private readonly HashSet<string> _overwrittenEnvironmentVariables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly EvaluationLoggingContext _evaluationLoggingContext;
+        private readonly PropertyTrackingSetting _settings;
 
         /// <summary>
         /// Creates an instance of the PropertyTrackingEvaluatorDataWrapper class.
         /// </summary>
         /// <param name="dataToWrap">The underlying <see cref="IEvaluatorData{P,I,M,D}"/> to wrap for property tracking.</param>
         /// <param name="evaluationLoggingContext">The <see cref="EvaluationLoggingContext"/> used to log relevant events.</param>
-        public PropertyTrackingEvaluatorDataWrapper(IEvaluatorData<P, I, M, D> dataToWrap, EvaluationLoggingContext evaluationLoggingContext)
+        public PropertyTrackingEvaluatorDataWrapper(IEvaluatorData<P, I, M, D> dataToWrap, EvaluationLoggingContext evaluationLoggingContext, string settingString)
         {
             ErrorUtilities.VerifyThrowInternalNull(dataToWrap, nameof(dataToWrap));
             ErrorUtilities.VerifyThrowInternalNull(evaluationLoggingContext, nameof(evaluationLoggingContext));
 
             _wrapped = dataToWrap;
             _evaluationLoggingContext = evaluationLoggingContext;
+            _settings = ParsePropertyTrackingSettings(settingString);
         }
 
         #region IEvaluatorData<> members with tracking-related code in them.
@@ -180,6 +182,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="name">The name of the environment variable read.</param>
         private void TrackEnvironmentVariableRead(string name)
         {
+            if ((_settings & PropertyTrackingSetting.EnvironmentVariableRead) != PropertyTrackingSetting.EnvironmentVariableRead) return;
+
             var args = new EnvironmentVariableReadEventArgs(
                 name,
                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentVariableRead", name));
@@ -194,6 +198,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="name">The name of the uninitialized property read.</param>
         private void TrackUninitializedPropertyRead(string name)
         {
+            if ((_settings & PropertyTrackingSetting.UninitializedPropertyRead) != PropertyTrackingSetting.UninitializedPropertyRead) return;
+
             var args = new UninitializedPropertyReadEventArgs(
                 name,
                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UninitializedPropertyRead", name));
@@ -231,6 +237,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="source">The source of the property.</param>
         private void TrackPropertyInitialValueSet(P property, PropertySource source)
         {
+            if ((_settings & PropertyTrackingSetting.PropertyInitialValueSet) != PropertyTrackingSetting.PropertyInitialValueSet) return;
+
             var args = new PropertyInitialValueSetEventArgs(
                     property.Name,
                     property.EvaluatedValue,
@@ -250,6 +258,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="location">The location of this property's reassignment.</param>
         private void TrackPropertyReassignment(P predecessor, P property, string location)
         {
+            if ((_settings & PropertyTrackingSetting.PropertyReassignment) != PropertyTrackingSetting.PropertyReassignment) return;
+
             string newValue = property.EvaluatedValue;
             string oldValue = predecessor.EvaluatedValue;
             if (newValue == oldValue) return;
@@ -283,6 +293,20 @@ namespace Microsoft.Build.Evaluation
             return mayBeReserved ? PropertySource.BuiltIn : PropertySource.Toolset;
         }
 
+        private static PropertyTrackingSetting ParsePropertyTrackingSettings(string settingString)
+        {
+            // If the environment is NOT defined, or there is a parsing error,
+            // default this to the current functionality: property reassignments are logged.
+            if (
+                string.IsNullOrEmpty(settingString) ||
+                !Enum.TryParse(settingString, true, out PropertyTrackingSetting settings))
+            {
+                return PropertyTrackingSetting.PropertyReassignment;
+            }
+
+            return settings;
+        }
+
         #endregion
 
         /// <summary>
@@ -295,6 +319,19 @@ namespace Microsoft.Build.Evaluation
             Global,
             Toolset,
             EnvironmentVariable
+        }
+
+        [Flags]
+        private enum PropertyTrackingSetting
+        {
+            None = 0,
+
+            PropertyReassignment = 1,
+            PropertyInitialValueSet = 1 << 1,
+            EnvironmentVariableRead = 1 << 2,
+            UninitializedPropertyRead = 1 << 3,
+
+            All = PropertyReassignment | PropertyInitialValueSet | EnvironmentVariableRead | UninitializedPropertyRead
         }
     }
 }
