@@ -124,6 +124,7 @@ namespace Microsoft.Build.Tasks
     public partial class CreateCSharpManifestResourceName : Microsoft.Build.Tasks.CreateManifestResourceName
     {
         public CreateCSharpManifestResourceName() { }
+        public override string SourceFileExtension { get { throw null; } }
         protected override string CreateManifestName(string fileName, string linkFileName, string rootNamespace, string dependentUponFileName, System.IO.Stream binaryStream) { throw null; }
         protected override bool IsSourceFile(string fileName) { throw null; }
     }
@@ -149,6 +150,8 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] ResourceFilesWithManifestResourceNames { get { throw null; } set { } }
         public string RootNamespace { get { throw null; } set { } }
+        public abstract string SourceFileExtension { get; }
+        public bool UseDependentUponConvention { get { throw null; } set { } }
         protected abstract string CreateManifestName(string fileName, string linkFileName, string rootNamespaceName, string dependentUponFileName, System.IO.Stream binaryStream);
         public override bool Execute() { throw null; }
         protected abstract bool IsSourceFile(string fileName);
@@ -166,6 +169,7 @@ namespace Microsoft.Build.Tasks
     public partial class CreateVisualBasicManifestResourceName : Microsoft.Build.Tasks.CreateManifestResourceName
     {
         public CreateVisualBasicManifestResourceName() { }
+        public override string SourceFileExtension { get { throw null; } }
         protected override string CreateManifestName(string fileName, string linkFileName, string rootNamespace, string dependentUponFileName, System.IO.Stream binaryStream) { throw null; }
         protected override bool IsSourceFile(string fileName) { throw null; }
     }
