@@ -10,7 +10,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<!-- This file contains a list of the TFMs that are supported by this SDK for .NET Core and .NET Standard.
+<!-- This file contains a list of the TFMs that are supported by this SDK for .NET Core, .NET Standard, and .NET Framework.
      This is used by VS to show the list of frameworks to which projects can be retargeted. -->
 <Project>
     <!-- .NET Core App -->
@@ -36,8 +36,26 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v2.1" DisplayName=".NET Standard 2.1" />
     </ItemGroup>
 
+    <!-- .NET Framework -->
+    <ItemGroup>
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v2.0"   DisplayName=".NET Framework 2.0" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v3.0"   DisplayName=".NET Framework 3.0" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v3.5"   DisplayName=".NET Framework 3.5" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.0"   DisplayName=".NET Framework 4.0" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5"   DisplayName=".NET Framework 4.5" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5.1" DisplayName=".NET Framework 4.5.1" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5.2" DisplayName=".NET Framework 4.5.2" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6"   DisplayName=".NET Framework 4.6" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6.1" DisplayName=".NET Framework 4.6.1" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6.2" DisplayName=".NET Framework 4.6.2" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7"   DisplayName=".NET Framework 4.7" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.1" DisplayName=".NET Framework 4.7.1" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.2" DisplayName=".NET Framework 4.7.2" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.8"   DisplayName=".NET Framework 4.8" />
+    </ItemGroup>
+
     <!-- All supported target frameworks -->
     <ItemGroup>
-        <SupportedTargetFramework Include="@(SupportedNETCoreAppTargetFramework);@(SupportedNETStandardTargetFramework)" />
+        <SupportedTargetFramework Include="@(SupportedNETCoreAppTargetFramework);@(SupportedNETStandardTargetFramework);@(SupportedNETFrameworkTargetFramework)" />
     </ItemGroup>
 </Project>

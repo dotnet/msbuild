@@ -94,12 +94,23 @@ namespace Microsoft.NET.Build.Tests
 
             supportedNetStandardTFs.Should().NotBeEmpty();
 
+            var supportedNetFrameworkTFs = GetItems(
+                testDirectory,
+                project.TargetFrameworks,
+                "SupportedNETFrameworkTargetFramework");
+
+            supportedNetFrameworkTFs.Should().NotBeEmpty();
+
             var supportedTFs = GetItems(
                 testDirectory,
                 project.TargetFrameworks,
                 "SupportedTargetFramework");
 
-            supportedNetCoreAppTFs.Union(supportedNetStandardTFs).Should().Equal(supportedTFs);
+            supportedNetCoreAppTFs
+                .Union(supportedNetStandardTFs)
+                .Union(supportedNetFrameworkTFs)
+                .Should()
+                .Equal(supportedTFs);
         }
 
         private List<string> GetItems(string testDirectory, string tfm, string itemName)
