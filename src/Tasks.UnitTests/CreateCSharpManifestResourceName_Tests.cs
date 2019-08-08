@@ -481,8 +481,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
-
         /// <summary>
         /// When disabling UseDependentUponConvention it will find no .cs file and default to filename.
         /// </summary>
@@ -516,7 +514,6 @@ namespace Microsoft.Build.UnitTests
                 t.ManifestResourceNames[0].ItemSpec.ShouldBe("SR1", "Expected only the file name.");
             }
         }
-
 
         /// <summary>
         /// helper method for verifying manifest resource names
