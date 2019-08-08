@@ -21,7 +21,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
     <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp2.1</_PublishTaskFramework>
     <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net46</_PublishTaskFramework>
-    <_PublishSdkDir Condition=" '$(_PublishSdkDir)'=='' ">$(MSBuildThisFileDirectory)..\Sdk\</_PublishSdkDir>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
     <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)Microsoft.NET.Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
     <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
@@ -29,6 +28,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
     <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
     <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
+    <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
+
   </PropertyGroup>
 
   <!-- Extension points for BeforePublish and AfterPublish-->
@@ -37,11 +38,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ***********************************************************************************************
-  Import the PublishProfile
+  Import the Default PublishProfile if the profile is not already imported by the .NET SDK
   ***********************************************************************************************
  -->
-
-  <Import Project="$(_PublishSdkDir)ImportPublishProfile.targets" Condition="Exists('$(_PublishSdkDir)ImportPublishProfile.targets') And '$(PublishProfileImported)' != 'true'" />
+  <Import Project="$(_PublishProfilesDir)$(PublishProfileName).pubxml" Condition="Exists('$(_PublishProfilesDir)$(PublishProfileName).pubxml') And '$(PublishProfileImported)' != 'true'" />
 
   <!--
   ***********************************************************************************************
