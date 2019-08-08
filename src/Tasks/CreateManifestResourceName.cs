@@ -146,6 +146,7 @@ namespace Microsoft.Build.Tasks
                     string fileName = resourceFile.ItemSpec;
                     string dependentUpon = resourceFile.GetMetadata(ItemMetadataNames.dependentUpon);
 
+                    //If opted into convention and no DependentUpon metadata, go by convention "<filename>.cs" if it exists.
                     if(UseDependentUponConvention && string.IsNullOrEmpty(dependentUpon))
                     {
                         string conventionDependentUpon = Path.ChangeExtension(fileName, SourceFileExtension);
