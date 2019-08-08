@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests
 
                 ITaskItem i = new TaskItem(Path.GetFileName(resXFile.Path));
                 i.SetMetadata("BuildAction", "EmbeddedResource");
-                i.SetMetadata("DependentUpon", "");
+                // No need to set DependentUpon
 
                 // Use relative paths to ensure short manifest name based on the path to the resx.
                 // See CreateManifestNameImpl
