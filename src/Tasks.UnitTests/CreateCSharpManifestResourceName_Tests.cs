@@ -390,7 +390,7 @@ namespace Microsoft.Build.UnitTests
         /// Opt into DependentUpon convention and load the expected file properly.
         /// </summary>
         [Fact]
-        public void DependentUpon_UseConvention()
+        public void DependentUponConvention_FindsMatch()
         {
             using (var env = TestEnvironment.Create())
             {
@@ -487,7 +487,7 @@ namespace Microsoft.Build.UnitTests
         /// When disabling UseDependentUponConvention it will find no .cs file and default to filename.
         /// </summary>
         [Fact]
-        public void DependentUpon_DisableConvention()
+        public void DependentUponConvention_ConventionDisabledDoesNotReadConventionFile()
         {
             using (var env = TestEnvironment.Create())
             {
