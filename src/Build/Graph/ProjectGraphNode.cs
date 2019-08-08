@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -10,6 +11,7 @@ namespace Microsoft.Build.Experimental.Graph
 {
     /// <summary>
     /// Represents the node for a particular project in a project graph.
+    /// A node is defined by (ProjectPath, ToolsVersion, GlobalProperties).
     /// </summary>
     [DebuggerDisplay(@"{DebugString()}")]
     public sealed class ProjectGraphNode
@@ -67,6 +69,11 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             _projectReferences.Clear();
+        }
+
+        internal ConfigurationMetadata ToConfigurationMetadata()
+        {
+            return new ConfigurationMetadata(ProjectInstance.FullPath, ProjectInstance.GlobalPropertiesDictionary);
         }
     }
 }

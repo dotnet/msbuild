@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -522,7 +522,9 @@
     <Compile Include="Evaluation\IPropertyProvider.cs" />
     <Compile Include="Evaluation\Preprocessor.cs" />
     <Compile Include="Evaluation\ProjectParser.cs" />
+    <Compile Include="Evaluation\ProjectRootElementCacheBase.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
+    <Compile Include="Evaluation\SimpleProjectRootElementCache.cs" />
     <Compile Include="Evaluation\ProjectStringCache.cs" />
     <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />

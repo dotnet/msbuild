@@ -188,8 +188,14 @@ namespace Microsoft.Build.Experimental.Graph
         {
             if (_queue.TryDequeue(out Lazy<TResult> workItem))
             {
-                TResult _ = workItem.Value;
-                Interlocked.Decrement(ref _pendingCount);
+                try
+                {
+                    TResult _ = workItem.Value;
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _pendingCount);
+                }
             }
         }
     }

@@ -36,7 +36,7 @@ namespace Microsoft.Build.Execution
         /// The one and only project root element cache to be used for the build
         /// on this out of proc node.
         /// </summary>
-        private static ProjectRootElementCache s_projectRootElementCache;
+        private static ProjectRootElementCacheBase s_projectRootElementCacheBase;
 
         /// <summary>
         /// The endpoint used to talk to the host.
@@ -166,9 +166,9 @@ namespace Microsoft.Build.Execution
 
             _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
             
-            if (s_projectRootElementCache == null)
+            if (s_projectRootElementCacheBase == null)
             {
-                s_projectRootElementCache = new ProjectRootElementCache(true /* automatically reload any changes from disk */);
+                s_projectRootElementCacheBase = new ProjectRootElementCache(true /* automatically reload any changes from disk */);
             }
 
             _buildRequestEngine.OnEngineException += OnEngineException;
@@ -526,7 +526,7 @@ namespace Microsoft.Build.Execution
                 // Optionally clear out the cache. This has the advantage of releasing memory,
                 // but the disadvantage of causing the next build to repeat the load and parse.
                 // We'll experiment here and ship with the best default.
-                s_projectRootElementCache = null;
+                s_projectRootElementCacheBase = null;
             }
 
             // Since we aren't going to be doing any more work, lets clean up all our memory usage.
@@ -639,7 +639,7 @@ namespace Microsoft.Build.Execution
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
 
-            _buildParameters.ProjectRootElementCache = s_projectRootElementCache;
+            _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();

@@ -45,7 +45,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectStringCache()
         {
-            ProjectRootElementCache.StrongCacheEntryRemoved += OnStrongCacheEntryRemoved;
+            ProjectRootElementCacheBase.StrongCacheEntryRemoved += OnStrongCacheEntryRemoved;
         }
 
         /// <summary>
