@@ -497,14 +497,16 @@ namespace Microsoft.Build.Experimental.Graph
         /// </summary>
         /// <remarks>
         ///     This method uses the ProjectReferenceTargets items to determine the targets to run per node. The results can then
-        ///     be used
-        ///     to start building each project individually, assuming a given project is built after its references.
+        ///     be used to start building each project individually, assuming a given project is built after its references.
         /// </remarks>
         /// <param name="entryProjectTargets">
         ///     The target list for the <see cref="GraphRoots" />. May be null or empty, in which case the entry projects' default
         ///     targets will be used.
         /// </param>
-        /// <returns>A dictionary containing the target list for each node.</returns>
+        /// <returns>
+        ///     A dictionary containing the target list for each node. If a node's target list is empty, then no targets were
+        ///     inferred for that node and it should get skipped during a graph based build.
+        /// </returns>
         public IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(ICollection<string> entryProjectTargets)
         {
             // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".

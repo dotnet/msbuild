@@ -765,6 +765,47 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
         }
 
         [Fact]
+        public void GetTargetsListReturnsEmptyTargetsForNodeIfNoTargetsPropagatedToIt()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: new Dictionary<string, string[]> { { "A", new []{ "B" }} }, defaultTargets: "A");
+                CreateProjectFile(env: env, projectNumber: 2);
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new []{ "Foo" });
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new []{ "Foo" });
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBeEmpty();
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsReturnsEmptyTargetsForAllNodesWhenDefaultTargetsAreRequestedAndThereAreNoDefaultTargets()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                // Root project has no default targets.
+                TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: new Dictionary<string, string[]> { { "A", new[] { "B" } }}, defaultTargets: string.Empty);
+
+                // Dependency has default targets. Even though it gets called with empty targets, B will not get called,
+                // because target propagation only equates empty targets to default targets for the root nodes.
+                CreateProjectFile(env: env, projectNumber: 2, defaultTargets: "B");
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(null);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBeEmpty();
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBeEmpty();
+            }
+        }
+
+
+        [Fact]
         public void GetTargetListsUsesAllTargetsForNonMultitargetingNodes()
         {
             using (var env = TestEnvironment.Create())
