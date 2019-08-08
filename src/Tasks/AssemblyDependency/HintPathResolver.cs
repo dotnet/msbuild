@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks
             out bool userRequestedSpecificFile
         )
         {
-            if (!string.IsNullOrEmpty(hintPath))
+            if (!string.IsNullOrEmpty(hintPath) && !FileUtilities.PathIsInvalid(hintPath))
             {
                 if (ResolveAsFile(FileUtilities.NormalizePath(hintPath), assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
                 {
