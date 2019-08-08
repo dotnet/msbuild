@@ -4543,7 +4543,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingPropertyReassignment()
         {
             this.VerifyPropertyTrackingLoggingScenario(
-                "PropertyReassignment",
+                "1",
                 logger =>
                 {
                     logger
@@ -4573,7 +4573,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingNone()
         {
             this.VerifyPropertyTrackingLoggingScenario(
-                "None",
+                "0",
                 logger =>
                 {
                     logger
@@ -4602,7 +4602,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingPropertyInitialValue()
         {
             this.VerifyPropertyTrackingLoggingScenario(
-                "PropertyInitialValueSet",
+                "2",
                 logger =>
                 {
                     logger
@@ -4652,7 +4652,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingEnvironmentVariableRead()
         {
             this.VerifyPropertyTrackingLoggingScenario(
-                "EnvironmentVariableRead",
+                "4",
                 logger =>
                 {
                     logger
@@ -4686,7 +4686,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingUninitializedPropertyRead()
         {
             this.VerifyPropertyTrackingLoggingScenario(
-                "UninitializedPropertyRead",
+                "8",
                 logger =>
                 {
                     logger
@@ -4715,7 +4715,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingAll()
         {
             this.VerifyPropertyTrackingLoggingScenario(
-                "All",
+                "15",
                 logger =>
                 {
                     logger

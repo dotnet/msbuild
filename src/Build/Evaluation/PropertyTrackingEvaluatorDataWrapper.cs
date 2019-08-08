@@ -38,14 +38,14 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="dataToWrap">The underlying <see cref="IEvaluatorData{P,I,M,D}"/> to wrap for property tracking.</param>
         /// <param name="evaluationLoggingContext">The <see cref="EvaluationLoggingContext"/> used to log relevant events.</param>
-        public PropertyTrackingEvaluatorDataWrapper(IEvaluatorData<P, I, M, D> dataToWrap, EvaluationLoggingContext evaluationLoggingContext, string settingString)
+        public PropertyTrackingEvaluatorDataWrapper(IEvaluatorData<P, I, M, D> dataToWrap, EvaluationLoggingContext evaluationLoggingContext, int settingValue)
         {
             ErrorUtilities.VerifyThrowInternalNull(dataToWrap, nameof(dataToWrap));
             ErrorUtilities.VerifyThrowInternalNull(evaluationLoggingContext, nameof(evaluationLoggingContext));
 
             _wrapped = dataToWrap;
             _evaluationLoggingContext = evaluationLoggingContext;
-            _settings = ParsePropertyTrackingSettings(settingString);
+            _settings = (PropertyTrackingSetting)settingValue;
         }
 
         #region IEvaluatorData<> members with tracking-related code in them.
@@ -291,20 +291,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             return mayBeReserved ? PropertySource.BuiltIn : PropertySource.Toolset;
-        }
-
-        private static PropertyTrackingSetting ParsePropertyTrackingSettings(string settingString)
-        {
-            // If the environment is NOT defined, or there is a parsing error,
-            // default this to the current functionality: property reassignments are logged.
-            if (
-                string.IsNullOrEmpty(settingString) ||
-                !Enum.TryParse(settingString, true, out PropertyTrackingSetting settings))
-            {
-                return PropertyTrackingSetting.PropertyReassignment;
-            }
-
-            return settings;
         }
 
         #endregion
