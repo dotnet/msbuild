@@ -3498,17 +3498,12 @@ namespace Microsoft.Build.Tasks
             {
                 provider = CodeDomProvider.CreateProvider(stronglyTypedLanguage);
             }
+            catch (Exception e) when
 #if FEATURE_SYSTEM_CONFIGURATION
-            catch (ConfigurationException e)
+             (e is ConfigurationException || e is SecurityException)
 #else
-            // For some reason, ConfigurationException isn't caught on Core
-            catch (ConfigurationErrorsException e)
+             (e is SystemException && e.GetType().Name == "ConfigurationErrorsException") // TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
 #endif
-            {
-                logger.LogErrorWithCodeFromResources("GenerateResource.STRCodeDomProviderFailed", stronglyTypedLanguage, e.Message);
-                return false;
-            }
-            catch (SecurityException e)
             {
                 logger.LogErrorWithCodeFromResources("GenerateResource.STRCodeDomProviderFailed", stronglyTypedLanguage, e.Message);
                 return false;
