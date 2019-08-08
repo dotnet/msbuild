@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class CreateVisualBasicManifestResourceName : CreateManifestResourceName
     {
-        public override string SourceFileExtension => ".vb";
+        internal override string SourceFileExtension => ".vb";
 
         /// <summary>
         /// Utility function for creating a VB-style manifest name from 
