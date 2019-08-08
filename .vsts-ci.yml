@@ -9,6 +9,10 @@ variables:
     value: ''
   - name: _DotNetPublishToBlobFeed
     value: false
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: _DotNetValidationArtifactsCategory
+    value: .NETCore
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
     - name: PB_PublishBlobFeedUrl
       value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
