@@ -21,6 +21,7 @@ jobs:
     enableMicrobuild: true
     enablePublishBuildAssets: true
     enableTelemetry: true
+    enablePublishUsingPipelines: true
     helixRepo: dotnet/sdk
     pool: ${{ parameters.pool }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
