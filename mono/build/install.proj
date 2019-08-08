@@ -15,7 +15,7 @@
 
             <XBuildDir>$(MonoInstallPrefix)\lib\mono\xbuild</XBuildDir>
 
-            <MSBuildBinSrcDir>$(RepoRoot)artifacts\2\bin\MSBuild.Bootstrap\$(Configuration)\net472\</MSBuildBinSrcDir>
+            <MSBuildBinSrcDir>$(RepoRoot)artifacts\bin\MSBuild.Bootstrap\$(Configuration)\net472\</MSBuildBinSrcDir>
 
             <AllInstalledFiles_FileCanonical>$(MSBuildThisFileDirectory)\all_files.canon.txt</AllInstalledFiles_FileCanonical>
             <AllInstalledFiles_File>$(MSBuildThisFileDirectory)\all_files.new.txt</AllInstalledFiles_File>
@@ -48,6 +48,7 @@
             <MSBuildFiles Include="$(MSBuildBinSrcDir)\Newtonsoft*" />
 
             <MSBuildFiles Include="$(MSBuildBinSrcDir)\*.dll*" />
+            <MSBuildFiles Include="$(MSBuildBinSrcDir)\RuntimeIdentifierGraph.json" />
 
             <!-- nuget tasks/targets that are now installed to bin dir -->
             <MSBuildFiles Include="$(RepoRoot)\nuget-support\tasks-targets\*" />

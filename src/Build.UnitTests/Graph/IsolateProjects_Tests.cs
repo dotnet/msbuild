@@ -412,6 +412,12 @@ BuildEngine5.BuildProjectFilesInParallel(
                         .OverallResult.ShouldBe(BuildResultCode.Success);
                 }
 
+                if (buildUndeclaredReference)
+                {
+                    buildManagerSession.BuildProjectFile(undeclaredReferenceFile, new[] {"UndeclaredReferenceTarget"})
+                        .OverallResult.ShouldBe(BuildResultCode.Success);
+                }
+
                 var result = buildManagerSession.BuildProjectFile(rootProjectFile, targets);
 
                 assert(result, buildManagerSession.Logger);

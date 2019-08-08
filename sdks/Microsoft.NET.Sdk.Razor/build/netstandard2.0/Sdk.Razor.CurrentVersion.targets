@@ -214,14 +214,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CopyRazorGenerateFilesToPublishDirectory Condition="'$(MvcRazorExcludeViewFilesFromPublish)'=='true'">false</CopyRazorGenerateFilesToPublishDirectory>
     <CopyRazorGenerateFilesToPublishDirectory Condition="'$(MvcRazorExcludeViewFilesFromPublish)'=='false'">true</CopyRazorGenerateFilesToPublishDirectory>
 
-    <!--
-    In 2.x, setting CopyRefAssembliesToPublishDirectory controlled copying of the refs directory to the publish directory.
-    If explicitly specified, use it to override PreserveCompilationReferences.
-    -->
-    <PreserveCompilationReferences Condition="'$(CopyRefAssembliesToPublishDirectory)'!=''">$(CopyRefAssembliesToPublishDirectory)</PreserveCompilationReferences>
+    <CopyRefAssembliesToPublishDirectory Condition="'$(MvcRazorExcludeRefAssembliesFromPublish)'=='true'">false</CopyRefAssembliesToPublishDirectory>
+    <CopyRefAssembliesToPublishDirectory Condition="'$(MvcRazorExcludeRefAssembliesFromPublish)'=='false'">true</CopyRefAssembliesToPublishDirectory>
 
-    <PreserveCompilationReferences Condition="'$(MvcRazorExcludeRefAssembliesFromPublish)'=='true'">false</PreserveCompilationReferences>
-    <PreserveCompilationReferences Condition="'$(MvcRazorExcludeRefAssembliesFromPublish)'=='false'">true</PreserveCompilationReferences>
+    <!-- Use PreserveCompilationReferences to determine the behavior of CopyRefAssembliesToPublishDirectory if not explicitly specified by the project. -->
+    <CopyRefAssembliesToPublishDirectory Condition="'$(CopyRefAssembliesToPublishDirectory)'==''">$(PreserveCompilationReferences)</CopyRefAssembliesToPublishDirectory>
+
+    <!-- For 2.x projects desktop and .NET Core projects, if they're opting in to runtime compilation (indicated by PreserveCompilationContext=true), set PreserveCompilationReferences = true -->
+    <PreserveCompilationReferences Condition="'$(PreserveCompilationContext)' == 'true' AND (('$(TargetFrameworkIdentifier)' == '.NETFramework') OR ('$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'))">true</PreserveCompilationReferences>
 
     <!--
       We can't set the actual default value here due to evaluation order (depends on $(OutDir)).
@@ -806,6 +806,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <Target
+    Name="_RazorRemoveRefAssembliesFromPublish"
+    BeforeTargets="PrepareForPublish"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnPublish)'=='true' AND '$(CopyRefAssembliesToPublishDirectory)' != ''">
+    <!--
+      Setting PreserveCompilationReferences affects both Build and Publish, but we want CopyRefAssembliesToPublishDirectory to only affect publishing.
+      Use the value of CopyRefAssembliesToPublishDirectory to determine PreserveCompilationReferences during publish.
+    -->
+    <PropertyGroup>
+      <PreserveCompilationReferences>$(CopyRefAssembliesToPublishDirectory)</PreserveCompilationReferences>
+    </PropertyGroup>
+  </Target>
+
   <Target Name="_CheckForMissingRazorCompiler" Condition="'$(IsRazorCompilerReferenced)' != 'true'">
     <Error
       Code="RAZORSDK1003"
@@ -852,14 +865,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(RazorDesignTimeTargets)" />
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(_RazorUpToDateReloadFileTypesAllowWorkaround)' != 'false'">
     <!--
       Defines the list of file extensions that VS will monitor to reload the application.
       We'll only define these for C# projects targeting RazorLangVersion 3.0 or later, and let VS use defaults in other cases.
 
       This property can be removed after the next insertion in to VS.
     -->
-    <UpToDateReloadFileTypes Condition="'$(Language)'=='C#' AND '$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(RazorUpToDateReloadFileTypes)' == ''">$(RazorUpToDateReloadFileTypes)</UpToDateReloadFileTypes>
+    <UpToDateReloadFileTypes Condition="'$(Language)'=='C#' AND '$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(UpToDateReloadFileTypes)' == ''">$(RazorUpToDateReloadFileTypes)</UpToDateReloadFileTypes>
   </PropertyGroup>
 
   <!--

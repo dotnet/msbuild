@@ -255,6 +255,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ExpectedPlatformPackages="@(ExpectedPlatformPackages)"
       SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
       DesignTimeBuild="$(DesignTimeBuild)"
+      ContinueOnError="$(ContinueOnError)"
       PackageReferences="@(PackageReference)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
@@ -376,7 +377,8 @@ Copyright (c) .NET Foundation. All rights reserved.
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="RunProduceContentAssets"
-          DependsOnTargets="ResolvePackageAssets">
+          DependsOnTargets="ResolvePackageAssets"
+          Condition="'@(_ContentFilesToPreprocess)' != ''">
 
     <ProduceContentAssets
       ContentFileDependencies="@(_ContentFilesToPreprocess)"

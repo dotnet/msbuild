@@ -46,6 +46,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup>
     <GenerateRuntimeConfigurationFilesInputs Include="$(ProjectAssetsFile)" />
+    <GenerateRuntimeConfigurationFilesInputs Include="$(ProjectAssetsCacheFile)" />
     <GenerateRuntimeConfigurationFilesInputs Include="$(UserRuntimeConfig)" Condition=" Exists($(UserRuntimeConfig)) " />
   </ItemGroup>
 
@@ -153,7 +154,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputePackageReferencePublish"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition="'$(GenerateDependencyFile)' == 'true'"
-          Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
+          Inputs="$(ProjectAssetsFile);$(ProjectAssetsCacheFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
 
     <ItemGroup>
@@ -522,7 +523,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <None Include="$(AppHostIntermediatePath)">
         <Link>$(AssemblyName)$(_NativeExecutableExtension)</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <!-- Always copy the AppHost because the contents of the apphost binary can change during the publish step (due to single-file bundling). 
+             Always copying the apphost ensures that that the sequence
+                 dotnet publish /p:PublishSingleFile=true 
+                 dotnet publish /p:PublishSingleFile=false
+             places the correct unbundled apphost in the publish directory. -->
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
       </None>
     </ItemGroup>
     

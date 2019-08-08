@@ -37,6 +37,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup Condition="'$(DisableImplicitAspNetCoreAnalyzers)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
     <Analyzer
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Analyzers.dll"
+      Condition="'$(Language)'=='C#'"
+      IsImplicitlyDefined="true" />
+    <Analyzer
       Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Mvc.Analyzers.dll"
       Condition="'$(Language)'=='C#'"
       IsImplicitlyDefined="true" />
@@ -44,6 +48,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Analyzer
       Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Mvc.Api.Analyzers.dll"
       Condition="'$(Language)'=='C#' AND '$(IncludeOpenAPIAnalyzers)' == 'true'"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DisableImplicitComponentsAnalyzers)' != 'true' And '$(DisableImplicitAspNetCoreAnalyzers)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+    <Analyzer
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Components.Analyzers.dll"
+      Condition="'$(Language)'=='C#'"
       IsImplicitlyDefined="true" />
   </ItemGroup>
 

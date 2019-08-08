@@ -77,7 +77,7 @@ function ReadGlobalVersion {
   local pattern="\"$key\" *: *\"(.*)\""
 
   if [[ ! $line =~ $pattern ]]; then
-    Write-PipelineTelemetryError -category 'InitializeTools' "Error: Cannot find \"$key\" in $global_json_file"
+    Write-PipelineTelemetryError -category 'InitializeToolset' "Error: Cannot find \"$key\" in $global_json_file"
     ExitWithExitCode 1
   fi
 
@@ -245,7 +245,7 @@ function InitializeNativeTools() {
   then
     local nativeArgs=""
     if [[ "$ci" == true ]]; then
-      nativeArgs="-InstallDirectory $tools_dir"
+      nativeArgs="--installDirectory $tools_dir"
     fi
     "$_script_dir/init-tools-native.sh" $nativeArgs
   fi
@@ -359,14 +359,11 @@ _script_dir=`dirname "$_ResolvePath"`
 
 eng_root=`cd -P "$_script_dir/.." && pwd`
 repo_root=`cd -P "$_script_dir/../.." && pwd`
-artifacts_dir=${artifacts_dir:-"$repo_root/artifacts"}
+artifacts_dir="$repo_root/artifacts"
 toolset_dir="$artifacts_dir/toolset"
 tools_dir="$repo_root/.tools"
 log_dir="$artifacts_dir/log/$configuration"
 temp_dir="$artifacts_dir/tmp/$configuration"
-
-# This is used by Arcade targets, override it
-export ArtifactsDir=$artifacts_dir/
 
 global_json_file="$repo_root/global.json"
 # determine if global.json contains a "runtimes" entry
@@ -378,7 +375,7 @@ fi
 
 # HOME may not be defined in some scenarios, but it is required by NuGet
 if [[ -z $HOME ]]; then
-  export HOME="$artifacts_dir/.home/"
+  export HOME="$repo_root/artifacts/.home/"
   mkdir -p "$HOME"
 fi
 
