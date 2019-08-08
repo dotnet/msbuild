@@ -5,7 +5,7 @@ if [ $# -lt 1 ]; then
        exit 1
 fi
 
-BOOTSTRAP_DIR_PREFIX="artifacts/2/bin/MSBuild.Bootstrap/"
+BOOTSTRAP_DIR_PREFIX="artifacts/bin/MSBuild.Bootstrap/"
 
 if [ -d "$BOOTSTRAP_DIR_PREFIX/Release-MONO" ]; then
     CONFIG=Release-MONO

@@ -63,6 +63,7 @@ function DownloadMSBuildForMono {
 
 RepoRoot="$ScriptRoot/.."
 artifacts_dir="$RepoRoot/artifacts"
+Stage1Dir="$RepoRoot/stage1"
 
 mono_msbuild_dir="$artifacts_dir/mono-msbuild"
 msbuild_download_url="https://github.com/mono/msbuild/releases/download/0.07/mono_msbuild_xplat-master-8f608e49.zip"
@@ -89,9 +90,7 @@ then
 	/bin/bash "$ScriptRoot/common/build.sh" $run_restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties || exit $?
 fi
 
-bootstrapRoot="$artifacts_dir/bin/bootstrap"
-# export to make this available to `eng/common/build.sh`
-export artifacts_dir="$artifacts_dir/2"
+bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
@@ -118,6 +117,8 @@ else
   echo "Unsupported hostType ($host_type)"
   exit 1
 fi
+
+mv $artifacts_dir $Stage1Dir
 
 # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
 export MSBUILDDONOTLAUNCHDEBUGGER=true
