@@ -410,7 +410,7 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeTrue("Expected the task to succeed.");
 
-                t.ManifestResourceNames.Length.ShouldBe(1, "Only 1 resource file should exist");
+                t.ManifestResourceNames.ShouldHaveSingleItem();
 
                 t.ManifestResourceNames[0].ItemSpec.ShouldBe("MyStuff.Namespace.Class", "Expecting to find the namespace & class name from SR1.cs");
             }
@@ -444,7 +444,7 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeTrue("Expected the task to succeed.");
 
-                t.ManifestResourceNames.Length.ShouldBe(1, "Only 1 resource should exist");
+                t.ManifestResourceNames.ShouldHaveSingleItem();
 
                 t.ManifestResourceNames[0].ItemSpec.ShouldBe("SR1", "Expected only the file name.");
             }
@@ -475,7 +475,7 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeTrue("Expected the task to succeed.");
 
-                t.ManifestResourceNames.Length.ShouldBe(1, "Only 1 resource file should exist");
+                t.ManifestResourceNames.ShouldHaveSingleItem();
 
                 t.ManifestResourceNames[0].ItemSpec.ShouldBe("MyStuff2.Namespace.Class2", "Expected the namespace & class of SR2.");
             }
@@ -511,7 +511,7 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeTrue("Expected the task to succeed.");
 
-                t.ManifestResourceNames.Length.ShouldBe(1, "Only 1 resource file should exist");
+                t.ManifestResourceNames.ShouldHaveSingleItem();
 
                 t.ManifestResourceNames[0].ItemSpec.ShouldBe("SR1", "Expected only the file name.");
             }
