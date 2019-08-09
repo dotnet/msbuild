@@ -25,9 +25,9 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>915722554dc08a7075f89eddb40691caca23b6be</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-alpha1.19403.6">
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-alpha1.19409.3">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>b6f1a505833b552e425a8833f0b4bf9ca0c2e84a</Sha>
+      <Sha>2e4274cb67c049055e321c18cc9e64562da52dcf</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
