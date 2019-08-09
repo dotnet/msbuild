@@ -9,3 +9,18 @@
 
 # Ensure .bin files are stored as binary
 *.bin binary
+
+###############################################################################
+# Linguist customization (https://github.com/github/linguist#overrides)
+###############################################################################
+
+# Include MSBuild in repo stats
+src/Tasks/*.props linguist-detectable=true
+src/Tasks/*.targets linguist-detectable=true
+src/Tasks/*.tasks linguist-detectable=true
+
+# Don't include Arcade-owned path
+eng/common/** linguist-detectable=false
+
+# Display XLF files collapsed by default in PR diffs
+*.xlf linguist-generated=true
