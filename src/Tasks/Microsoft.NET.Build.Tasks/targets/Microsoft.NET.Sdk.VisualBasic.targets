@@ -103,6 +103,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     <VBRuntime>Embed</VBRuntime>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <!--
+      Prevent the .NET Framework compiler from trying to locate assemblies
+      in the .NET Framework directory when not targeting .NET Framework
+    -->
+    <DisableSdkPath Condition="'$(DisableSdkPath)' == ''">true</DisableSdkPath>
+
+    <!--
+      VB Runtime does not yet have enough support for My.* outside .NET Framework,
+      so default MyType=Empty for non .NET Framework. Project templates will be
+      responsible for setting MyType to non-Empty (Console, Windows, etc.) when 
+      the VB Runtime can allow it and as appropriate for the project type.
+     -->
+    <FinalDefineConstants Condition="'$(MyType)' == ''">$(FinalDefineConstants),_MyType=&quot;Empty&quot;</FinalDefineConstants>
+  </PropertyGroup>
+
   <!--
     NOTE: We must hook directly to CoreCompile for compatibility with two phase XAML
           build. We also must not pull in a dependency on ResolveAssemblyReferences
