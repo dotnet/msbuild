@@ -89,6 +89,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And '$(_IsExecutable)' != 'true'"
                  ResourceName="CannotHaveSingleFileWithoutExecutable" />
 
+    <NETSdkWarning Condition="'$(PublishReadyToRun)' == 'true' And '$(_IsExecutable)' != 'true'"
+                 ResourceName="CannotCreateReadyToRunImagesForLibProjects" />
+
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
@@ -143,9 +146,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <!--
-        Not using SkipUnchangedFiles="true" because the application may want to change
-        one of these files and not have an incremental build replace it.
-        -->
+      PreserveNewest means that we will only copy the source to the destination if the source is newer.
+      SkipUnchangedFiles is not used for that purpose because it will copy if the source and destination
+      differ by size too.  Instead, this target uses inputs and outputs to only copy when the source is newer.
+      -->
     <Copy SourceFiles = "@(_ResolvedUnbundledFileToPublishPreserveNewest)"
           DestinationFiles="@(_ResolvedUnbundledFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
@@ -179,11 +183,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <!--
-        Not using SkipUnchangedFiles="true" because the application may want to change
-        one of these files and not have an incremental build replace it.
-        -->
+      Use SkipUnchangedFiles to prevent unnecessary file copies. The copy will occur if the
+      destination doesn't exist, the source is newer than the destination, or if the source and
+      destination differ by file size.
+      -->
     <Copy SourceFiles = "@(_ResolvedUnbundledFileToPublishAlways)"
           DestinationFiles="@(_ResolvedUnbundledFileToPublishAlways->'$(PublishDir)%(RelativePath)')"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
@@ -203,7 +209,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="CreateReadyToRunImages"
-          Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(PublishReadyToRun)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+          Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(PublishReadyToRun)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_IsExecutable)' == 'true'"
           DependsOnTargets="_PrepareForReadyToRunCompilation;
                             _CreateR2RImages;
                             _CreateR2RSymbols">

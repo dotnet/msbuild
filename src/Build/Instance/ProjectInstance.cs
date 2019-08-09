@@ -1120,7 +1120,7 @@ namespace Microsoft.Build.Execution
         /// that began the build. This is a thread-safe object.
         /// It's held here so it can get passed to the build.
         /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache
+        internal ProjectRootElementCacheBase ProjectRootElementCache
         {
             get;
             private set;
@@ -1841,7 +1841,7 @@ namespace Microsoft.Build.Execution
         /// When project instances get serialized between nodes, they need to be initialized with node specific information.
         /// The node specific information cannot come from the constructor, because that information is not available to INodePacketTranslators
         /// </summary>
-        internal void LateInitialize(ProjectRootElementCache projectRootElementCache, HostServices hostServices)
+        internal void LateInitialize(ProjectRootElementCacheBase projectRootElementCache, HostServices hostServices)
         {
             ErrorUtilities.VerifyThrow(ProjectRootElementCache == null, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
             ErrorUtilities.VerifyThrow(_hostServices == null, $"{nameof(HostServices)} is already set. Cannot set again");
@@ -2351,7 +2351,7 @@ namespace Microsoft.Build.Execution
         (string projectFile,
             IDictionary<string, string> globalProperties,
             string toolsVersion,
-            ProjectRootElementCache projectRootElementCache,
+            ProjectRootElementCacheBase projectRootElementCache,
             BuildParameters buildParameters,
             ILoggingService loggingService,
             BuildEventContext projectBuildEventContext,
@@ -2681,7 +2681,7 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, ProjectCollection.Escape(item.Xml.ContainingProject.FullPath));
+                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
 
                 _items.Add(instance);
 

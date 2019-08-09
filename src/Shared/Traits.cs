@@ -47,6 +47,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool UseSimpleInternConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildUseSimpleInternConcurrency"));
 
+        public readonly bool UseSimpleProjectRootElementCacheConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency"));
+
         /// <summary>
         /// Cache wildcard expansions for the entire process
         /// </summary>

@@ -60,4 +60,58 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FinalDefineConstants Condition="'$(ImplicitFrameworkDefine)' != ''">$(FinalDefineConstants),$(ImplicitFrameworkDefine)=-1</FinalDefineConstants>
     <FinalDefineConstants Condition="'$(DefineDebug)' != 'true' and '$(ImplicitConfigurationDefine)' != ''">$(FinalDefineConstants),$(ImplicitConfigurationDefine)=-1</FinalDefineConstants>
   </PropertyGroup>
+
+  <!--
+    By default, VBRuntime is chosen as follows:
+
+    .NET Framework:
+      Same as classic vbproj. $(FrameworkPathOverride) is passed  as
+      /sdkpath to compiler and Microsoft.VisualBasic.dll will be used
+      from there even if there is no explicit reference to it. This is
+      accomplished by leaving $(VBRuntime) unset.
+
+    .NET Core 3.0+:
+      Locate Microsoft.VisualBasic among references and pass it as
+      /vbruntime to compiler.
+
+    .NET Core < 3.0 or .NET Standard:
+      Use embedded VB runtime as there is no Microsoft.VisualBasic.dll
+      available that is complete enough to serve as /vbruntime.
+
+   These defaults can be overridden as follows:
+
+    $(UseReferencedVBRuntime) == true:
+      Use referenced Microsoft.VisualBasic regardless of TFM.
+
+      This is an escape hatch for a custom Microsoft.VisualBasic reference
+      that can work as /vbruntime on a target framework other than .NET Core 3.0+
+
+    $(VBRuntime) != '':
+      Pass it through to compiler unchanged.
+  -->
+
+  <PropertyGroup Condition="'$(UseReferencedVBRuntime)' == ''
+                        and '$(VBRuntime)' == ''
+                        and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                        and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+    <UseReferencedVBRuntime>true</UseReferencedVBRuntime>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(VBRuntime)' == ''
+                        and '$(UseReferencedVBRuntime)' != 'true'
+                        and '$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <VBRuntime>Embed</VBRuntime>
+  </PropertyGroup>
+
+  <!--
+    NOTE: We must hook directly to CoreCompile for compatibility with two phase XAML
+          build. We also must not pull in a dependency on ResolveAssemblyReferences
+          as the generated temporary project for xaml compilation has a hard-coded list
+          of items in ReferencePath, and does not need to run RAR.
+  -->
+  <Target Name="_UseReferencedVBRuntime" Condition="'$(UseReferencedVBRuntime)' == 'true'" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <VBRuntime Condition="'%(ReferencePath.FileName)' == 'Microsoft.VisualBasic'">%(ReferencePath.Identity)</VBRuntime>
+    </PropertyGroup>
+  </Target>
 </Project>

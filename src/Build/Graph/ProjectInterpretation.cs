@@ -25,6 +25,7 @@ namespace Microsoft.Build.Experimental.Graph
         private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
         private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
         private const string ProjectReferenceTargetIsOuterBuildMetadataName = "OuterBuild";
+        internal const string InnerBuildReferenceItemName = "_ProjectSelfReference";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
@@ -41,7 +42,19 @@ namespace Microsoft.Build.Experimental.Graph
             OuterBuild, InnerBuild, NonMultitargeting
         }
 
-        public IEnumerable<(ConfigurationMetadata referenceConfiguration, ProjectItemInstance projectReferenceItem)> GetReferences(ProjectInstance requesterInstance)
+        internal readonly struct ReferenceInfo
+        {
+            public ConfigurationMetadata ReferenceConfiguration { get; }
+            public ProjectItemInstance ProjectReferenceItem { get; }
+
+            public ReferenceInfo(ConfigurationMetadata referenceConfiguration, ProjectItemInstance projectReferenceItem)
+            {
+                ReferenceConfiguration = referenceConfiguration;
+                ProjectReferenceItem = projectReferenceItem;
+            }
+        }
+
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance)
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
@@ -49,7 +62,7 @@ namespace Microsoft.Build.Experimental.Graph
             switch (GetProjectType(requesterInstance))
             {
                 case ProjectType.OuterBuild:
-                    projectReferenceItems = GetInnerBuildReferences(requesterInstance);
+                    projectReferenceItems = ConstructInnerBuildReferences(requesterInstance);
                     break;
                 case ProjectType.InnerBuild:
                     globalPropertiesModifiers = ModifierForNonMultitargetingNodes.Add((parts, reference) => parts.AddPropertyToUndefine(GetInnerBuildPropertyName(requesterInstance)));
@@ -82,7 +95,7 @@ namespace Microsoft.Build.Experimental.Graph
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
 
-                yield return (referenceConfig, projectReferenceItem);
+                yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
             }
         }
 
@@ -123,11 +136,11 @@ namespace Microsoft.Build.Experimental.Graph
         /// OuterAsRoot -> Inner stays the same
         /// Node -> Outer -> Inner goes to: Node -> Outer; Node->Inner; Outer -> empty
         /// </summary>
-        public void PostProcess(Dictionary<ConfigurationMetadata, ProjectGraphNode> allNodes, GraphBuilder graphBuilder)
+        public void PostProcess(Dictionary<ConfigurationMetadata, ParsedProject> allNodes, GraphBuilder graphBuilder)
         {
-            foreach (var nodeKvp in allNodes)
+            foreach (var node in allNodes)
             {
-                var outerBuild = nodeKvp.Value;
+                var outerBuild = node.Value.GraphNode;
 
                 if (GetProjectType(outerBuild.ProjectInstance) == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
                 {
@@ -150,7 +163,7 @@ namespace Microsoft.Build.Experimental.Graph
             }
         }
 
-        private static IEnumerable<ProjectItemInstance> GetInnerBuildReferences(ProjectInstance outerBuild)
+        private static IEnumerable<ProjectItemInstance> ConstructInnerBuildReferences(ProjectInstance outerBuild)
         {
             var globalPropertyName = GetInnerBuildPropertyName(outerBuild);
             var globalPropertyValues = GetInnerBuildPropertyValues(outerBuild);
@@ -162,7 +175,7 @@ namespace Microsoft.Build.Experimental.Graph
             {
                 yield return new ProjectItemInstance(
                     outerBuild,
-                    "_ProjectSelfReference",
+                    InnerBuildReferenceItemName,
                     outerBuild.FullPath,
                     new[] {new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}")},
                     outerBuild.FullPath);

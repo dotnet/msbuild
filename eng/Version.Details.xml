@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19375.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19406.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>3dfa62fddcde597959c323d17426f215384e773a</Sha>
+      <Sha>c155e609f88491128e1a66d09f413062f3344d4b</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="System.Resources.Extensions" Version="4.6.0-preview8.19364.1">
+    <Dependency Name="System.Resources.Extensions" Version="4.6.0-preview8.19379.2">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>c14b80faff694bae4e085bad221e2e83410e5f33</Sha>
+      <Sha>4165f4126d8f2dde6c13a4cff562a18d04d0246b</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>

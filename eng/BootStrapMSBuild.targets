@@ -68,6 +68,8 @@
       <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
       <InstalledSdks Include="$(MSBuildBinPath)\Sdks\**\*" Condition="'$(MonoBuild)' == 'true'" />
 
+      <MonoBinDirOverlayFiles Include="$(RepoRoot)\mono\bin-dir\**\*" Condition="'$(MonoBuild)' == 'true'" />
+
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
       <ShimTargets Include="Microsoft.Data.Entity.targets" />
@@ -134,6 +136,10 @@
           DestinationFolder="$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\"
           Condition="'$(MonoBuild)' != 'true'" />
     <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
+          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\"
+          Condition="'$(MonoBuild)' == 'true'" />
+
+    <Copy SourceFiles="@(MonoBinDirOverlayFiles)"
           DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\"
           Condition="'$(MonoBuild)' == 'true'" />
 

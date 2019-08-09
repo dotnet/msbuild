@@ -233,6 +233,7 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ElementLocation DefaultTargetsLocation { get { throw null; } }
         public string DirectoryPath { get { throw null; } }
         public System.Text.Encoding Encoding { get { throw null; } }
+        public string EscapedFullPath { get { throw null; } }
         public string FullPath { get { throw null; } set { } }
         public bool HasUnsavedChanges { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectImportGroupElement> ImportGroups { get { throw null; } }

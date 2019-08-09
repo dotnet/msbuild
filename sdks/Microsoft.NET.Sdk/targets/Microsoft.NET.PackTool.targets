@@ -103,6 +103,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <GenerateShims
       ApphostsForShimRuntimeIdentifiers="@(_ApphostsForShimRuntimeIdentifiers)"
+      IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
+      OutputType="$(OutputType)"
       PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
       PackageId="$(PackageId)"
       PackageVersion="$(PackageVersion)"
