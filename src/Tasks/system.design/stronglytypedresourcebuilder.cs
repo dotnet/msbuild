@@ -85,20 +85,20 @@ namespace Microsoft.Build.Tasks
             internal ResourceData(Type type, String valueAsString)
             {
                 Type = type;
-                TypeName = type.FullName;
+                TypeFullName = type.FullName;
                 ValueAsString = valueAsString;
             }
 
             internal ResourceData(string typeName)
             {
                 Type = null;
-                TypeName = typeName;
+                TypeFullName = typeName;
                 ValueAsString = null;
             }
 
             internal Type Type { get; }
 
-            internal string TypeName { get; }
+            internal string TypeFullName { get; }
 
             internal String ValueAsString { get; }
         }
@@ -514,7 +514,6 @@ namespace Microsoft.Build.Tasks
 
                 isString = type == typeof(String);
                 isStream = type == typeof(UnmanagedMemoryStream) || type == typeof(MemoryStream);
-
             }
             else
             {
@@ -523,7 +522,7 @@ namespace Microsoft.Build.Tasks
 
                 // TODO: can we do the type gymnastics here, too?
 
-                valueType = new CodeTypeReference(data.TypeName);
+                valueType = new CodeTypeReference(data.TypeFullName);
 
                 // TODO: can we do better here than exact comparisons against something that may vary over time?
                 isString = false;
@@ -563,7 +562,7 @@ namespace Microsoft.Build.Tasks
 
             if (!isString) // Stream or Object
             {
-                typeName = TruncateAndFormatCommentStringForOutput(data.TypeName);
+                typeName = TruncateAndFormatCommentStringForOutput(data.TypeFullName);
             }
 
             if (isString)
