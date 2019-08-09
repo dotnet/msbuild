@@ -100,6 +100,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_TargetNameNullOrEmpty">
+        <source>Target names cannot be null or empty.</source>
+        <target state="new">Target names cannot be null or empty.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph では、ToolsVersion メタデータが設定された ProjectReference 項目はサポートしていません。ToolsVersion が含まれる ProjectReference "{0}" がファイル "{1}" で見つかりました</target>

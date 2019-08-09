@@ -509,6 +509,8 @@ namespace Microsoft.Build.Experimental.Graph
         /// </returns>
         public IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(ICollection<string> entryProjectTargets)
         {
+            ThrowOnEmptyTargetNames(entryProjectTargets);
+
             // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
             var targetLists = ProjectNodes.ToDictionary(node => node, node => ImmutableList<string>.Empty);
 
@@ -548,6 +550,11 @@ namespace Microsoft.Build.Experimental.Graph
                 foreach (var referenceNode in node.ProjectReferences)
                 {
                     var applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(referenceNode.ProjectInstance);
+
+                    if (applicableTargets.IsEmpty)
+                    {
+                        continue;
+                    }
 
                     var expandedTargets = ExpandDefaultTargets(
                         applicableTargets,
@@ -599,6 +606,19 @@ namespace Microsoft.Build.Experimental.Graph
             }
 
             return targetLists;
+
+            void ThrowOnEmptyTargetNames(ICollection<string> targetNames)
+            {
+                if (targetNames == null || targetNames.Count == 0)
+                {
+                    return;
+                }
+
+                if (targetNames.Any(targetName => string.IsNullOrWhiteSpace(targetName)))
+                {
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("OM_TargetNameNullOrEmpty"));
+                }
+            }
         }
 
         private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets, ProjectItemInstance graphEdge)

@@ -1472,6 +1472,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_NameInvalid">
     <value>The name "{0}" contains an invalid character "{1}".</value>
   </data>
+  <data name="OM_TargetNameNullOrEmpty">
+    <value>Target names cannot be null or empty.</value>
+  </data>
   <data name="OM_NoOtherwiseBeforeWhenOrOtherwise">
     <value>An &lt;Otherwise&gt; element cannot be located before a &lt;When&gt; or &lt;Otherwise&gt; element.</value>
   </data>
