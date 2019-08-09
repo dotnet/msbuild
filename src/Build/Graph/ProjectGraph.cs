@@ -616,7 +616,7 @@ namespace Microsoft.Build.Experimental.Graph
 
                 if (targetNames.Any(targetName => string.IsNullOrWhiteSpace(targetName)))
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("OM_TargetNameNullOrEmpty"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("OM_TargetNameNullOrEmpty", nameof(GetTargetLists)));
                 }
             }
         }

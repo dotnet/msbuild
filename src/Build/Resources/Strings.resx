@@ -1473,7 +1473,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>The name "{0}" contains an invalid character "{1}".</value>
   </data>
   <data name="OM_TargetNameNullOrEmpty">
-    <value>Target names cannot be null or empty.</value>
+    <value>Method {0} cannot be called with a collection containing null or empty target names.</value>
   </data>
   <data name="OM_NoOtherwiseBeforeWhenOrOtherwise">
     <value>An &lt;Otherwise&gt; element cannot be located before a &lt;When&gt; or &lt;Otherwise&gt; element.</value>

@@ -100,8 +100,8 @@
     </note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
-        <source>Target names cannot be null or empty.</source>
-        <target state="new">Target names cannot be null or empty.</target>
+        <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
+        <target state="new">Method {0} cannot be called with a collection containing null or empty target names.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
