@@ -14,7 +14,7 @@ parameters:
   # Job timeout
   timeoutInMinutes: 180
 
-phases:
+jobs:
 - template: /eng/common/templates/job/job.yml
   parameters:
     name: ${{ parameters.agentOs }}
@@ -24,6 +24,7 @@ phases:
     enablePublishBuildAssets: true
     enablePublishTestResults: true
     enableTelemetry: true
+    enablePublishUsingPipelines: true
     helixRepo: dotnet/cli
     pool: ${{ parameters.pool }}
     ${{ if ne(parameters.strategy, '') }}:
