@@ -788,6 +788,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 // Root project has no default targets.
+                // The project file does not contain any targets
                 TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: new Dictionary<string, string[]> { { "A", new[] { "B" } }}, defaultTargets: string.Empty);
 
                 // Dependency has default targets. Even though it gets called with empty targets, B will not get called,
@@ -810,6 +811,7 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 // Target protocol produces empty target
+                // The project file also does not contain any targets
                 TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: new Dictionary<string, string[]> { { "A", new[] { " ; ; " } }}, defaultTargets: string.Empty);
 
                 // Dependency has default targets. Even though it gets called with empty targets, B will not get called,
