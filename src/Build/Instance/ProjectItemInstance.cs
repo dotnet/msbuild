@@ -1100,7 +1100,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// This allows an explicit typecast from a "TaskItem" to a "string", returning the ItemSpec for this item.
             /// </summary>
-            public static explicit operator string(TaskItem that)
+            public static explicit operator string (TaskItem that)
             {
                 return that._includeEscaped;
             }
@@ -1117,8 +1117,7 @@ namespace Microsoft.Build.Execution
                 {
                     return left.Equals(right);
                 }
-
-                if (!Object.ReferenceEquals(right, null))
+                else if (!Object.ReferenceEquals(right, null))
                 {
                     return right.Equals(left);
                 }
@@ -1228,7 +1227,7 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
                 }
 
-
+                string value = null;
                 ProjectMetadataInstance metadatum = null;
 
                 if (_directMetadata != null)
@@ -1242,20 +1241,23 @@ namespace Microsoft.Build.Execution
 
                 metadatum = GetItemDefinitionMetadata(metadataName);
 
-                if (null != metadatum)
+                if (null != metadatum && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
-                    if (Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
-                    {
-                        Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
+                    Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
-                        // We don't have a location to use, but this is very unlikely to error
-                        return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
-                    }
+                    // We don't have a location to use, but this is very unlikely to error
+                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
 
+                    return value;
+                }
+                else if (null != metadatum)
+                {
                     return metadatum.EvaluatedValueEscaped;
                 }
 
-                return GetBuiltInMetadataEscaped(metadataName);
+                value = GetBuiltInMetadataEscaped(metadataName);
+
+                return value ?? String.Empty;
             }
 
             /// <summary>
@@ -1610,19 +1612,12 @@ namespace Microsoft.Build.Execution
                     if (translator.TranslateNullable(_directMetadata))
                     {
                         int count = translator.Reader.ReadInt32();
-                        if (count == 0)
+                        _directMetadata = (count == 0) ? null : new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(count);
+                        for (int i = 0; i < count; i++)
                         {
-                            _directMetadata = null;
-                        }
-                        else
-                        {
-                            _directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(count);
-                            for (int i = 0; i < count; i++)
-                            {
-                                int key = translator.Reader.ReadInt32();
-                                int value = translator.Reader.ReadInt32();
-                                _directMetadata.Set(new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value)));
-                            }
+                            int key = translator.Reader.ReadInt32();
+                            int value = translator.Reader.ReadInt32();
+                            _directMetadata.Set(new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value)));
                         }
                     }
                 }
@@ -1737,13 +1732,14 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
             {
+                string value = String.Empty;
 
                 if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name))
                 {
-                    return BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
+                    value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
                 }
 
-                return String.Empty;
+                return value;
             }
 
             /// <summary>
@@ -2076,7 +2072,8 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public string GetEscapedValue(string name)
                 {
-                    return _item.GetBuiltInMetadataEscaped(name);
+                    string value = _item.GetBuiltInMetadataEscaped(name);
+                    return value;
                 }
 
                 /// <summary>
@@ -2097,13 +2094,14 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public string GetEscapedValueIfPresent(string requiredItemType, string name)
                 {
+                    string value = null;
 
                     if ((requiredItemType == null) || MSBuildNameIgnoreCaseComparer.Default.Equals(_itemType, requiredItemType))
                     {
-                        return GetEscapedValue(name);
+                        value = GetEscapedValue(name);
                     }
 
-                    return null;
+                    return value;
                 }
             }
         }
