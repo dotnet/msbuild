@@ -4335,12 +4335,8 @@ namespace Microsoft.Build.Evaluation
 
                 // If the string has no dot, or is nothing but a dot, we have no
                 // namespace to look for, so we can't help.
-                if (assemblyNameEnd <= 0)
-                {
-                    return null;
-                }
 
-                // As long as the string has a dot and is not only a dot, we will work our way up the namespace looking for an assembly that matches.
+                // We will work our way up the namespace looking for an assembly that matches
                 while (assemblyNameEnd > 0)
                 {
                     string candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
@@ -4361,7 +4357,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                // Either we didn't find it, the string has no dot, or the string is nothing but a dot. We need to give up
+                // We didn't find it, so we need to give up
                 return null;
             }
 
