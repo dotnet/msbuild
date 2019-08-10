@@ -17,7 +17,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
-    <MicrosoftNETSdkPackageVersion>5.0.100-alpha1.19401.1</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>5.0.100-alpha1.19408.3</MicrosoftNETSdkPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
