@@ -234,6 +234,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public bool IsShowAllFlagSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "all" });
 
+        public bool IsInteractiveFlagSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "interactive" });
+
         public string TypeFilter => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "type" });
 
         public string Language => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "language" });

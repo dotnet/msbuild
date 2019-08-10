@@ -21,12 +21,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 
         public HashSet<string> Installed { get; private set; }
 
-        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null, false);
+        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null, false, false);
 
         // unconditionally adds the installation requests to the _installed list.
-        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources) => InstallPackages(installationRequests, nuGetSources, false);
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources) => InstallPackages(installationRequests, nuGetSources, false, false);
 
-        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall)
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall) => InstallPackages(installationRequests, nuGetSources, debugAllowDevInstall, false);
+
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall, bool interactive)
         {
             Installed.UnionWith(installationRequests);
         }

@@ -845,6 +845,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication)..
+        /// </summary>
+        public static string InteractiveHelp {
+            get {
+                return ResourceManager.GetString("InteractiveHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid input switch:.
         /// </summary>
         public static string InvalidInputSwitch {

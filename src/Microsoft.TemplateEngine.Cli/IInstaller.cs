@@ -8,5 +8,7 @@ namespace Microsoft.TemplateEngine.Cli
         void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources);
 
         void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall);
+
+        void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall, bool interactive);
     }
 }

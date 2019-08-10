@@ -42,6 +42,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool IsShowAllFlagSpecified { get; }
 
+        bool IsInteractiveFlagSpecified { get; }
+
         string TypeFilter { get; }
 
         string Language { get; }

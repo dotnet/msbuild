@@ -30,11 +30,13 @@ namespace Microsoft.TemplateEngine.Cli
             ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId, out descriptorList);
         }
 
-        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null, false);
+        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null, false, false);
 
-        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources) => InstallPackages(installationRequests, nuGetSources, false);
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources) => InstallPackages(installationRequests, nuGetSources, false, false);
 
-        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall)
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall) => InstallPackages(installationRequests, nuGetSources, debugAllowDevInstall, false);
+
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall, bool interactive)
         {
             List<string> localSources = new List<string>();
             List<Package> packages = new List<Package>();
@@ -68,7 +70,8 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (packages.Count > 0)
             {
-                InstallRemotePackages(packages, nuGetSources);
+                IList<string> additionalDotNetArguments = (interactive) ? new string[] { "--interactive" } : null;
+                InstallRemotePackages(packages, nuGetSources, additionalDotNetArguments);
             }
 
             _environmentSettings.SettingsLoader.Save();
@@ -194,7 +197,7 @@ namespace Microsoft.TemplateEngine.Cli
             return mountPoints;
         }
 
-        private void InstallRemotePackages(List<Package> packages, IList<string> nuGetSources)
+        private void InstallRemotePackages(List<Package> packages, IList<string> nuGetSources, IList<string> additionalDotNetArguments)
         {
             const string packageRef = @"    <PackageReference Include=""{0}"" Version=""{1}"" />";
             const string projectFile = @"<Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk"">
@@ -222,21 +225,26 @@ namespace Microsoft.TemplateEngine.Cli
 
             string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
 
-            int additionalSlots = nuGetSources?.Count * 2 ?? 0;
-
-            string[] restoreArgs = new string[3 + additionalSlots];
-            restoreArgs[0] = proj;
-            restoreArgs[1] = "--packages";
-            restoreArgs[2] = restored;
+            List<string> restoreArgsList = new List<string>();
+            restoreArgsList.Add(proj);
+            restoreArgsList.Add("--packages");
+            restoreArgsList.Add(restored);
 
             if (nuGetSources != null)
             {
-                for (int i = 0; i < nuGetSources.Count; ++i)
+                foreach (string nuGetSource in nuGetSources)
                 {
-                    restoreArgs[3 + 2 * i] = "--source";
-                    restoreArgs[4 + 2 * i] = nuGetSources[i];
+                    restoreArgsList.Add("--source");
+                    restoreArgsList.Add(nuGetSource);
                 }
             }
+
+            if (additionalDotNetArguments != null)
+            {
+                restoreArgsList.AddRange(additionalDotNetArguments);
+            }
+
+            var restoreArgs = restoreArgsList.ToArray();
 
             Dotnet.Restore(restoreArgs).ForwardStdOut().ForwardStdErr().Execute();
             string stagingDir = Path.Combine(_paths.User.ScratchDir, "Staging");

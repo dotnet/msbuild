@@ -239,7 +239,7 @@ namespace Microsoft.TemplateEngine.Cli
             _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, _commandInput.ToInstallList.Count.ToString() } });
 
             bool allowDevInstall = _commandInput.HasDebuggingFlag("--dev:install");
-            Installer.InstallPackages(_commandInput.ToInstallList, _commandInput.InstallNuGetSourceList, allowDevInstall);
+            Installer.InstallPackages(_commandInput.ToInstallList, _commandInput.InstallNuGetSourceList, allowDevInstall, _commandInput.IsInteractiveFlagSpecified);
 
             //TODO: When an installer that directly calls into NuGet is available,
             //  return a more accurate representation of the outcome of the operation
