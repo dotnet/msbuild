@@ -230,6 +230,17 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     return;
                 }
             }
+            else if (IsByteArray(fileRefType))
+            {
+                using (FileStream s = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    byte[] byteArray = new byte[s.Length];
+                    s.Read(byteArray, 0, (int)s.Length);
+
+                    resources.Add(new LiveObjectResource(name, byteArray));
+                    return;
+                }
+            }
 
             resources.Add(new FileStreamResource(name, fileRefType, fileName, resxFilename));
         }
