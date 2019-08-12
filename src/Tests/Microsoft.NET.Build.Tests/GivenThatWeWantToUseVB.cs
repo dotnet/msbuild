@@ -32,11 +32,12 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("net45")]
-        [InlineData("netstandard2.0")]
-        [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
-        public void It_builds_a_simple_vb_project(string targetFramework)
+        [InlineData("net45", true)]
+        [InlineData("netstandard2.0", false)]
+        [InlineData("netcoreapp2.1", true)]
+        [InlineData("netcoreapp3.0", true)]
+        [InlineData("netcoreapp3.0", false)]
+        public void It_builds_a_simple_vb_project(string targetFramework, bool isExe)
         {
             if (targetFramework == "net45" && !TestProject.ReferenceAssembliesAreInstalled("v4.5"))
             {
@@ -45,27 +46,33 @@ namespace Microsoft.NET.Build.Tests
                 return;
             }
 
-            var (expectedVBRuntime, expectedOutputFiles) = GetExpectedOutputs(targetFramework);
+            var (expectedVBRuntime, expectedOutputFiles) = GetExpectedOutputs(targetFramework, isExe);
 
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
                 IsSdkProject = true,
                 TargetFrameworks = targetFramework,
-                IsExe = targetFramework != "netstandard2.0",
-                AdditionalProperties =
-                {
-                    ["MyType"] = "Console" ,
-                },
+                IsExe = isExe,
                 SourceFiles =
                 {
                     ["Program.vb"] = @"
                         Imports System
 
                         Module Program
+                            #If NETFRAMEWORK Or NETCOREAPP3_0
+                                ' https://github.com/dotnet/sdk/issues/2793
+                                Private Const TabChar As Char = Chr(9)
+                            #End If
+
                             Function MyComputerName() As String
-                                #If NETFRAMEWORK Or NETCOREAPP3_0 Then
+                                #If NETFRAMEWORK
                                     Return My.Computer.Name
+                                #End If
+
+                                #If NETFRAMEWORK Or NETCOREAPP_3_0
+                                    ' https://github.com/dotnet/sdk/issues/3379
+                                    End
                                 #End If
                             End Function
 
@@ -78,7 +85,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: targetFramework, targetExtension: ".vbproj")
+                .CreateTestProject(testProject, identifier: targetFramework + isExe, targetExtension: ".vbproj")
                 .Restore(Log, testProject.Name);
 
             var buildCommand = new GetValuesCommand(
@@ -103,11 +110,11 @@ namespace Microsoft.NET.Build.Tests
             actualVBRuntime.Should().Be(expectedVBRuntime);
         }
 
-        private static (VBRuntime, string[]) GetExpectedOutputs(string targetFramework)
+        private static (VBRuntime, string[]) GetExpectedOutputs(string targetFramework, bool isExe)
         {
-            switch (targetFramework)
+            switch ((targetFramework, isExe))
             {
-                case "net45":
+                case ("net45", true):
                     return (VBRuntime.Default, new[]
                     {
                         "HelloWorld.exe",
@@ -115,7 +122,7 @@ namespace Microsoft.NET.Build.Tests
                         "HelloWorld.pdb"
                     });
 
-                case "netcoreapp2.1":
+                case ("netcoreapp2.1", true):
                     return (VBRuntime.Embedded, new[]
                     {
                         "HelloWorld.dll",
@@ -125,7 +132,7 @@ namespace Microsoft.NET.Build.Tests
                         "HelloWorld.deps.json",
                     });
 
-                case "netcoreapp3.0":
+                case ("netcoreapp3.0", true):
                     return (VBRuntime.Referenced, new[]
                     {
                         "HelloWorld.dll",
@@ -136,7 +143,15 @@ namespace Microsoft.NET.Build.Tests
                         "HelloWorld.deps.json",
                     });
 
-                case "netstandard2.0":
+                case ("netcoreapp3.0", false):
+                   return (VBRuntime.Referenced, new[]
+                   {
+                        "HelloWorld.dll",
+                        "HelloWorld.pdb",
+                        "HelloWorld.deps.json",
+                    });
+
+                case ("netstandard2.0", false):
                     return (VBRuntime.Embedded, new[]
                     {
                         "HelloWorld.dll",
@@ -145,7 +160,7 @@ namespace Microsoft.NET.Build.Tests
                     });
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(targetFramework));
+                    throw new ArgumentOutOfRangeException();
             }
         }
 

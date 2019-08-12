@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -46,7 +48,17 @@ namespace Microsoft.NET.Build.Tasks
             {
                 string guidMaybe = property.Name;
                 Guid guid = Guid.Parse(guidMaybe);
-                fileElement.Add(new XElement(ns + "comClass", new XAttribute("clsid", guid.ToString("B")), new XAttribute("threadingModel", "Both")));
+                XElement comClassElement = new XElement(ns + "comClass", new XAttribute("clsid", guid.ToString("B")), new XAttribute("threadingModel", "Both"));
+                if (property.Value is JObject clsidEntry)
+                {
+                    JProperty progIdProperty = clsidEntry.Properties().FirstOrDefault(prop => prop.Name == "progid");
+                    if (!(progIdProperty is null))
+                    {
+                        comClassElement.Add(new XAttribute("progid", progIdProperty.Value.ToString()));
+                    }
+                }
+
+                fileElement.Add(comClassElement);
             }
 
             manifest.Add(fileElement);

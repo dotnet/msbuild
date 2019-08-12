@@ -121,13 +121,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     Trigger an error if targeting a higher version of .NET Core or .NET Standard than is supported by the current SDK.
   -->
-
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NETCoreAppMaximumVersion)' == ''">
-    <!-- Once we've bundled a 2.2 version of .NET Core with the CLI, reset this property to use $(BundledNETCoreAppTargetFrameworkVersion) -->
-    <NETCoreAppMaximumVersion>2.2</NETCoreAppMaximumVersion>
-    <!--<NETCoreAppMaximumVersion>$(BundledNETCoreAppTargetFrameworkVersion)</NETCoreAppMaximumVersion>-->
-  </PropertyGroup>
-    
   <Target Name="_CheckForUnsupportedNETCoreVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NETCoreAppMaximumVersion)' != ''">
 
@@ -138,7 +131,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
-    <!--<NETStandardMaximumVersion>$(BundledNETStandardTargetFrameworkVersion)</NETStandardMaximumVersion>-->
     <NETStandardMaximumVersion>2.1</NETStandardMaximumVersion>
   </PropertyGroup>
 

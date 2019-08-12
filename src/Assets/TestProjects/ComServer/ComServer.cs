@@ -38,4 +38,16 @@ namespace COMServer
     {
 
     }
+
+    [ComVisible(true)]
+    [Guid("e5381440-17ca-4807-803c-7e02fc14ce32")]
+    [ProgId("")]
+    public class ClassWithoutProgId
+    { }
+
+    [ComVisible(true)]
+    [Guid("7d00a362-1dee-49d7-a6a0-9986ea02a676")]
+    [ProgId("Explicit.ProgId")]
+    public class ClassWithExplicitProgId
+    { }
 }

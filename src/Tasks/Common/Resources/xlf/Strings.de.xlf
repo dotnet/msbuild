@@ -12,6 +12,11 @@
         <target state="translated">NETSDK1070: Die Anwendungskonfigurationsdatei muss das Stammkonfigurationselement enthalten.</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
+      <trans-unit id="AppHostCreationFailedWithRetry">
+        <source>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</source>
+        <target state="new">NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</target>
+        <note>{StrBegin="NETSDK1113: "}</note>
+      </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
         <target state="translated">NETSDK1074: Die ausführbare Anwendungshostdatei wird nicht angepasst, weil für das Hinzufügen von Ressourcen eine Ausführung des Builds unter Windows erforderlich ist (Nano Server ausgeschlossen).</target>

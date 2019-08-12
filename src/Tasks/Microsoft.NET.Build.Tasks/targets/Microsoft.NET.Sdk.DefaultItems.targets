@@ -44,17 +44,12 @@ Copyright (c) .NET Foundation. All rights reserved.
        The implicit package references themselves are defined in Microsoft.NET.Sdk.props, so that they can be overridden
        in the project file. -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1'">
-    <!-- If targeting the same release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
-    <!-- This is disabled due to https://github.com/dotnet/sdk/issues/2410
-    <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETStandardTargetFrameworkVersion)'">$(BundledNETStandardPackageVersion)</NETStandardImplicitPackageVersion>
-    -->
-
     <!-- If targeting .NET Standard 1.x, use version 1.6.1 of the package.  This is so that when projects are packed, the dependency on the package produced won't change when
          updating to the 2.0 or higher SDK.  When targeting .NET Standard 2.0 or higher, the NETStandard.Library reference won't show up as a dependency of the package
          produced, so we will roll forward to the latest version. -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0'">1.6.1</NETStandardImplicitPackageVersion>
     
-    <!-- Default to use the latest stable release. -->
+    <!-- Default to use the latest stable 2.0.x release. -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">2.0.3</NETStandardImplicitPackageVersion>
   </PropertyGroup>
 

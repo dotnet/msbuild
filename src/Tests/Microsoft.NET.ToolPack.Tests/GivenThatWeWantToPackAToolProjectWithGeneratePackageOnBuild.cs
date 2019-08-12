@@ -86,6 +86,35 @@ namespace Microsoft.NET.ToolPack.Tests
             }
         }
 
+        [Theory(Skip = "https://github.com/dotnet/sdk/issues/3471")]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void It_packs_successfully(bool generatePackageOnBuild, bool packAsTool)
+        {
+            Console.WriteLine(generatePackageOnBuild.ToString() + packAsTool.ToString());
+
+            TestAsset testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: generatePackageOnBuild.ToString() + packAsTool.ToString())
+                .WithSource()
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    XNamespace ns = project.Root.Name.Namespace;
+                    XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "GeneratePackageOnBuild", generatePackageOnBuild.ToString()));
+                    propertyGroup.Add(new XElement(ns + "PackAsTool", packAsTool.ToString()));
+                });
+
+            var appProjectDirectory = Path.Combine(testAsset.TestRoot);
+            var packCommand = new PackCommand(Log, appProjectDirectory);
+
+            CommandResult result = packCommand.Execute("/restore");
+
+            result.Should()
+                  .Pass();
+        }
+
         private bool IsAppProject(string projectPath)
         {
             return Path.GetFileNameWithoutExtension(projectPath).Equals(AppName, StringComparison.OrdinalIgnoreCase);

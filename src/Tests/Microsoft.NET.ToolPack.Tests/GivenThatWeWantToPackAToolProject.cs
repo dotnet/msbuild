@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -130,6 +131,7 @@ namespace Microsoft.NET.ToolPack.Tests
         [InlineData(false)]
         public void It_does_not_contain_apphost_exe(bool multiTarget)
         {
+            var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
             _targetFrameworkOrFrameworks = "netcoreapp3.0";
 
             var nugetPackage = SetupNuGetPackage(multiTarget);
@@ -140,7 +142,6 @@ namespace Microsoft.NET.ToolPack.Tests
 
                 foreach (NuGet.Frameworks.NuGetFramework framework in supportedFrameworks)
                 {
-                    var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
                     var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
                     allItems.Should().NotContain($"tools/{framework.GetShortFolderName()}/any/consoledemo{extension}");
                 }
@@ -154,8 +155,11 @@ namespace Microsoft.NET.ToolPack.Tests
                GetValuesCommand.ValueType.Property);
 
             getValuesCommand.Execute();
-            Path.GetExtension(getValuesCommand.GetValues().Single())
-                .Should().NotBe(".exe", "Repro https://github.com/dotnet/cli/issues/11299");
+            string runCommandPath = getValuesCommand.GetValues().Single();
+            Path.GetExtension(runCommandPath)
+                .Should().Be(extension);
+            File.Exists(runCommandPath).Should()
+                .BeTrue("run command should be apphost executable (for WinExe) to debug. But it will not be packed");
         }
 
         [Theory]

@@ -387,7 +387,7 @@ public static class {project.Name}
                 .Should().Be(correctHttpReference);
         }
 
-        [FullMSBuildOnlyFact]
+        [Fact]
         public void It_tolerates_newline_in_hint_path()
         {
             string hintPath = BuildReferencedBuildAndReturnOutputDllPath();
@@ -417,7 +417,7 @@ public static class {project.Name}
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, project.Name));
             var msbuildBuildCommand = new MSBuildCommand(Log, "Build", buildCommand.FullPathProjectFile);
             msbuildBuildCommand.Execute().Should().Pass()
-                .And.NotHaveStdOutContaining("Illegal characters in path");
+                .And.NotHaveStdOutContaining("System.ArgumentException");
         }
 
         private string BuildReferencedBuildAndReturnOutputDllPath()

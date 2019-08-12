@@ -12,6 +12,11 @@
         <target state="translated">NETSDK1070: 應用程式組態檔必須有根組態元素。</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
+      <trans-unit id="AppHostCreationFailedWithRetry">
+        <source>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</source>
+        <target state="new">NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</target>
+        <note>{StrBegin="NETSDK1113: "}</note>
+      </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
         <target state="translated">NETSDK1074: 因為正在新增需要在 Windows (不含 Nano 伺服器) 上執行組建的資源，所以該應用程式主機可執行檔無法進行自訂。</target>

@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                 targetFrameworkIdentifier.Substring(1) + "MaximumVersion",
                 GetValuesCommand.ValueType.Property);
 
-             var getSupportedFrameworks = new GetValuesCommand(
+            var getSupportedFrameworks = new GetValuesCommand(
                 Log,
                 testDirectory,
                 project.TargetFrameworks,
@@ -64,6 +64,68 @@ namespace Microsoft.NET.Build.Tests
 
             supportedFrameworks.Should().Contain(expectedTFM,
                 because: $"Microsoft.NET.SupportedTargetFrameworks.props should include an entry for {expectedTFM}");
+        }
+
+        [Fact]
+        public void TheSupportedTargetFrameworkListIsComposed()
+        {
+            var project = new TestProject
+            {
+                Name = "SupportedTargetFrameworkLists",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+            };
+
+            TestAsset asset = _testAssetsManager.CreateTestProject(project);
+
+            string testDirectory = Path.Combine(asset.TestRoot, project.Name);
+
+            var supportedNetCoreAppTFs = GetItems(
+                testDirectory,
+                project.TargetFrameworks,
+                "SupportedNETCoreAppTargetFramework");
+
+            supportedNetCoreAppTFs.Should().NotBeEmpty();
+
+            var supportedNetStandardTFs = GetItems(
+                testDirectory,
+                project.TargetFrameworks,
+                "SupportedNETStandardTargetFramework");
+
+            supportedNetStandardTFs.Should().NotBeEmpty();
+
+            var supportedNetFrameworkTFs = GetItems(
+                testDirectory,
+                project.TargetFrameworks,
+                "SupportedNETFrameworkTargetFramework");
+
+            supportedNetFrameworkTFs.Should().NotBeEmpty();
+
+            var supportedTFs = GetItems(
+                testDirectory,
+                project.TargetFrameworks,
+                "SupportedTargetFramework");
+
+            supportedNetCoreAppTFs
+                .Union(supportedNetStandardTFs)
+                .Union(supportedNetFrameworkTFs)
+                .Should()
+                .Equal(supportedTFs);
+        }
+
+        private List<string> GetItems(string testDirectory, string tfm, string itemName)
+        {
+            var command = new GetValuesCommand(
+                Log,
+                testDirectory,
+                tfm,
+                itemName,
+                GetValuesCommand.ValueType.Item);
+
+            command.DependsOnTargets = "";
+            command.Execute().Should().Pass();
+
+            return command.GetValues();
         }
     }
 }

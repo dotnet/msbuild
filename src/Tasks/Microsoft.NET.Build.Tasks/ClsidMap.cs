@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace Microsoft.NET.Build.Tasks
             public string Type;
             [JsonProperty(PropertyName = "assembly")]
             public string Assembly;
+            [JsonProperty(PropertyName = "progid", NullValueHandling = NullValueHandling.Ignore)]
+            public string ProgId;
         }
 
         public static void Create(MetadataReader metadataReader, string clsidMapPath)
@@ -46,11 +49,14 @@ namespace Microsoft.NET.Build.Tasks
                         throw new BuildErrorException(Strings.ClsidMapConflictingGuids, clsidMap[guid].Type, GetTypeName(metadataReader, definition), guid);
                     }
 
+                    string progId = GetProgId(metadataReader, definition);
+
                     clsidMap.Add(guid,
                         new ClsidEntry
                         {
                             Type = GetTypeName(metadataReader, definition),
-                            Assembly = assemblyName
+                            Assembly = assemblyName,
+                            ProgId = !string.IsNullOrWhiteSpace(progId) ? progId : null
                         });
                 }
             }
@@ -101,9 +107,9 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (!type.GetDeclaringType().IsNil)
             {
-                return $"{GetTypeName(metadataReader, metadataReader.GetTypeDefinition(type.GetDeclaringType()))}.{metadataReader.GetString(type.Name)}";
+                return $"{GetTypeName(metadataReader, metadataReader.GetTypeDefinition(type.GetDeclaringType()))}+{metadataReader.GetString(type.Name)}";
             }
-            return $"{metadataReader.GetString(type.Namespace)}.{metadataReader.GetString(type.Name)}";
+            return $"{metadataReader.GetString(type.Namespace)}{Type.Delimiter}{metadataReader.GetString(type.Name)}";
         }
 
         private static bool HasTypeName(MetadataReader metadataReader, TypeReference type, string ns, string name)
@@ -193,6 +199,22 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
             throw new BuildErrorException(Strings.ClsidMapExportedTypesRequireExplicitGuid, GetTypeName(reader, type));
+        }
+
+        private static string GetProgId(MetadataReader reader, TypeDefinition type)
+        {
+            foreach (CustomAttributeHandle attr in type.GetCustomAttributes())
+            {
+                CustomAttribute attribute = reader.GetCustomAttribute(attr);
+                MemberReference attributeConstructor = reader.GetMemberReference((MemberReferenceHandle)attribute.Constructor);
+                TypeReference attributeType = reader.GetTypeReference((TypeReferenceHandle)attributeConstructor.Parent);
+                if (reader.StringComparer.Equals(attributeType.Namespace, "System.Runtime.InteropServices") && reader.StringComparer.Equals(attributeType.Name, "ProgIdAttribute"))
+                {
+                    CustomAttributeValue<KnownType> data = attribute.DecodeValue(new TypeResolver());
+                    return (string)data.FixedArguments[0].Value;
+                }
+            }
+            return GetTypeName(reader, type);
         }
 
         private enum KnownType
