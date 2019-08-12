@@ -156,7 +156,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
+       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
     <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 

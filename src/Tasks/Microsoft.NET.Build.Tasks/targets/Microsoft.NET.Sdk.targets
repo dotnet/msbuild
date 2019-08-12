@@ -11,6 +11,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
+    <!-- Skip import of Microsoft.NuGet.props and Microsoft.NuGet.targets -->
+    <SkipImportNuGetProps>true</SkipImportNuGetProps>
+    <SkipImportNuGetBuildTargets>true</SkipImportNuGetBuildTargets>
+  </PropertyGroup>
+
   <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1293 -->
   <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core' Or '$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <GenerateResourceMSBuildArchitecture Condition=" '$(GenerateResourceMSBuildArchitecture)' == '' ">CurrentArchitecture</GenerateResourceMSBuildArchitecture>
@@ -156,6 +162,11 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(ProjectAssetsCacheFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
+
+    <!-- Set a dummy Version if it hasn't been set by DefaultAssemblyInfo.targets -->
+    <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
+      <Version>1.0.0</Version>
+    </PropertyGroup>
 
     <ItemGroup>
       <ResolvedCompileFileDefinitions Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' == 'Reference'" />
@@ -783,9 +794,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DesignerSupport.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" Condition="'$(UsingMicrosoftNETSdk)' == 'true'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateSupportedRuntime.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ComposeStore.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ComposeStore.targets" Condition="'$(UsingMicrosoftNETSdk)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.CrossGen.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ObsoleteReferences.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Publish.targets" />

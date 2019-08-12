@@ -157,7 +157,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ShowPreviewMessage />
   </Target>
 
-  <PropertyGroup>
+  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
+       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
     <!-- Projects can opt out of having the RID appended to the output path by setting this to false. -->
     <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">true</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>

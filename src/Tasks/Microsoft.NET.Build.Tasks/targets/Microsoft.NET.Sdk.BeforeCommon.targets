@@ -11,6 +11,21 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <!-- For projects that aren't using Microsoft.NET.Sdk, these props files won't have been imported yet.
+       So import them here. -->
+  <ImportGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
+    <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
+    <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
+  </ImportGroup>
+
+  <!-- RestoreProjectStyle is usually set in Microsoft.NET.Sdk.props, but that's not imported for projects that
+       don't use Microsoft.NET.Sdk, since it has a lot of defaults that they may not expect.  So set it here.
+       This does mean that setting a TargetFramework in your project will opt you in to PackageReference restore
+       style. -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
   </PropertyGroup>
@@ -20,10 +35,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_UsingDefaultForHasRuntimeOutput>true</_UsingDefaultForHasRuntimeOutput>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" Condition="'$(UsingMicrosoftNETSdk)' == 'true'"/>
 
   <!-- Set default intermediate and output paths -->
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" Condition="'$(UsingMicrosoftNETSdk)' == 'true'"/>
   
   <!-- Before any additional SDK targets are imported, import the publish profile.
        This allows the publish profile to set properties like RuntimeIdentifier and them be
@@ -100,6 +115,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     on the TargetFramework.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.NuGetOfflineCache.targets" />
+
+  <!-- Disable some implicit behaviors for "classic" projects which aren't using Microsoft.NET.Sdk -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
+    <!-- Don't disable implicit framework references for .NET Core or .NET Standard, in that case it controls the reference to the
+         "targeting pack" package.  Do disable them for .NET Framework, because in that case it disables the Reference items which
+         will be in the project file for "classic" projects. -->
+    <DisableImplicitFrameworkReferences Condition="'$(DisableImplicitFrameworkReferences)' == '' And '$(_IsNETCoreOrNETStandard)' != 'true'">true</DisableImplicitFrameworkReferences>
+
+    <DisableImplicitFrameworkDefines Condition="'$(DisableImplicitFrameworkDefines)' == ''">true</DisableImplicitFrameworkDefines>
+    <DisableImplicitConfigurationDefines Condition="'$(DisableImplicitConfigurationDefines)' == ''">true</DisableImplicitConfigurationDefines>
+  </PropertyGroup>
   
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
 
