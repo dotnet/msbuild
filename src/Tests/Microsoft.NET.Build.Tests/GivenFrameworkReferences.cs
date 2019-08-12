@@ -792,7 +792,7 @@ namespace FrameworkReferenceTest
             TestFrameworkReferenceProfiles(
                 frameworkReferences: new [] { "Microsoft.WindowsDesktop.App.WindowsForms" },
                 expectedReferenceNames: new[] { "Microsoft.Win32.Registry", "System.Windows.Forms" },
-                notExpectedReferenceNames: new[] { "System.Windows.Presentation", "WindowsFormsIntegration", "PresentationFramework.Aero" },
+                notExpectedReferenceNames: new[] { "System.Windows.Presentation", "WindowsFormsIntegration" },
                 selfContained);
         }
 
@@ -804,7 +804,7 @@ namespace FrameworkReferenceTest
             TestFrameworkReferenceProfiles(
                 frameworkReferences: new[] { "Microsoft.WindowsDesktop.App.WPF" },
                 expectedReferenceNames: new[] { "Microsoft.Win32.Registry", "System.Windows.Presentation" },
-                notExpectedReferenceNames: new[] { "System.Windows.Forms", "WindowsFormsIntegration", "PresentationFramework.Aero" },
+                notExpectedReferenceNames: new[] { "System.Windows.Forms", "WindowsFormsIntegration" },
                 selfContained);
         }
 
@@ -816,7 +816,7 @@ namespace FrameworkReferenceTest
             TestFrameworkReferenceProfiles(
                 frameworkReferences: new[] { "Microsoft.WindowsDesktop.App.WindowsForms", "Microsoft.WindowsDesktop.App.WPF" },
                 expectedReferenceNames: new[] { "Microsoft.Win32.Registry", "System.Windows.Forms", "System.Windows.Presentation" },
-                notExpectedReferenceNames: new[] { "WindowsFormsIntegration", "PresentationFramework.Aero" },
+                notExpectedReferenceNames: new[] { "WindowsFormsIntegration" },
                 selfContained);
         }
 
@@ -829,7 +829,7 @@ namespace FrameworkReferenceTest
                 frameworkReferences: new[] { "Microsoft.WindowsDesktop.App" },
                 expectedReferenceNames: new[] { "Microsoft.Win32.Registry", "System.Windows.Forms",
                                                 "System.Windows.Presentation", "WindowsFormsIntegration" },
-                notExpectedReferenceNames: new[] { "PresentationFramework.Aero" },
+                notExpectedReferenceNames: Enumerable.Empty<string>(),
                 selfContained);
         }
 
