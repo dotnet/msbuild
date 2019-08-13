@@ -1,0 +1,39 @@
+<Project>
+    <PropertyGroup>
+        <MicrosoftNETSdkPackageVersion>3.0.100-preview8.19406.1</MicrosoftNETSdkPackageVersion>
+
+        <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
+
+        <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview8.19405.5</MicrosoftNETSdkRazorPackageVersion>
+
+        <MicrosoftNETSdkWebPackageVersion>3.0.100-preview8.19406.4</MicrosoftNETSdkWebPackageVersion>
+        <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
+        <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
+
+        <NuGetBuildTasksPackageVersion>5.3.0-preview.2.6136</NuGetBuildTasksPackageVersion>
+        <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
+
+        <!-- from https://github.com/dotnet/core-sdk/blob/8bf06ffc8d99abcc7c8a923e90b35d122887976d/eng/Versions.props#L36 -->
+        <MicrosoftDotNetMSBuildSdkResolverPackageVersion>3.0.100-preview8.19406.4</MicrosoftDotNetMSBuildSdkResolverPackageVersion>
+
+        <MicrosoftNETCoreAppPackageVersion>3.0.0-preview8-28405-07</MicrosoftNETCoreAppPackageVersion>
+        <DotNetSdkVersionForLibHostFxr>$(MicrosoftNETCoreAppPackageVersion)</DotNetSdkVersionForLibHostFxr>
+
+        <ILLinkTasksPackageVersion>0.1.6-prerelease.19379.2</ILLinkTasksPackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <BundledSdk Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk.Razor" Version="$(MicrosoftNETSdkRazorPackageVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(MicrosoftNETSdkWebPackageVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(MicrosoftNETSdkPublishPackageVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(MicrosoftNETSdkWebProjectSystemPackageVersion)" />
+
+        <BundledSdk Include="ILLink.Tasks" Version="$(ILLinkTasksPackageVersion)" />
+
+        <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackPackageVersion)" />
+
+        <BundledSdk Include="FSharp.NET.Sdk" Version="1.0.4-bundled-0100" />
+        <BundledSdk Include="Microsoft.Docker.Sdk" Version="1.1.0" />
+    </ItemGroup>
+</Project>

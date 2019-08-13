@@ -7,4 +7,4 @@ test-mono:
 clean-%: clean
 
 clean:
-	rm -Rf artifacts .packages
+	rm -Rf artifacts stage1 .dotnet .packages mono/dotnet-overlay
