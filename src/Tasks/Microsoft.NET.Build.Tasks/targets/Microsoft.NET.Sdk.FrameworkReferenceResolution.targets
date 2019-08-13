@@ -78,7 +78,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ProcessFrameworkReferences>
 
     <PropertyGroup Condition="'$(AppHostRuntimeIdentifier)' == '' And
-                              ('$(UseAppHost)' == 'true' Or '$(EnableComHosting)' == 'true')">
+                              ('$(UseAppHost)' == 'true' Or '$(EnableComHosting)' == 'true' Or '$(UseIJWHost)' == 'true')">
       <AppHostRuntimeIdentifier>$(RuntimeIdentifier)</AppHostRuntimeIdentifier>
       <AppHostRuntimeIdentifier Condition="'$(AppHostRuntimeIdentifier)' == ''">$(DefaultAppHostRuntimeIdentifier)</AppHostRuntimeIdentifier>
     </PropertyGroup>
@@ -92,12 +92,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                      PackAsToolShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
                      DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
                      DotNetComHostLibraryNameWithoutExtension="$(_DotNetComHostLibraryNameWithoutExtension)"
+                     DotNetIjwHostLibraryNameWithoutExtension="$(_DotNetIjwHostLibraryNameWithoutExtension)"
                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                      KnownAppHostPacks="@(KnownAppHostPack)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
       <Output TaskParameter="AppHost" ItemName="AppHostPack" />
       <Output TaskParameter="ComHost" ItemName="ComHostPack" />
+      <Output TaskParameter="IjwHost" ItemName="IjwHostPack" />
       <Output TaskParameter="PackAsToolShimAppHostPacks" ItemName="PackAsToolShimAppHostPack" />
       
     </ResolveAppHosts>
@@ -195,6 +197,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </GetPackageDirectory>
 
+    <GetPackageDirectory
+     Items="@(IjwHostPack)"
+     PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedIjwHostPack" />
+    </GetPackageDirectory>
+
     <ItemGroup>
       <_ApphostsForShimRuntimeIdentifiers Include="%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.PackageDirectory)\%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.PathInPackage)" >
         <RuntimeIdentifier>%(_ApphostsForShimRuntimeIdentifiersGetPackageDirectory.RuntimeIdentifier)</RuntimeIdentifier>
@@ -219,6 +228,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup Condition="'@(ResolvedComHostPack)' != '' And '$(ComHostSourcePath)' == ''">
       <ComHostSourcePath>@(ResolvedComHostPack->'%(Path)')</ComHostSourcePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ResolvedIjwHostPack Condition="'%(ResolvedIjwHostPack.Path)' == '' and '%(ResolvedIjwHostPack.PackageDirectory)' != ''">
+        <Path>%(ResolvedIjwHostPack.PackageDirectory)\%(ResolvedIjwHostPack.PathInPackage)</Path>
+      </ResolvedIjwHostPack>
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(ResolvedIjwHostPack)' != '' And '$(IjwHostSourcePath)' == ''">
+      <IjwHostSourcePath>@(ResolvedIjwHostPack->'%(Path)')</IjwHostSourcePath>
     </PropertyGroup>
 
     <GetPackageDirectory

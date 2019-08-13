@@ -11,7 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
+  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' != 'true'">
     <!-- Skip import of Microsoft.NuGet.props and Microsoft.NuGet.targets -->
     <SkipImportNuGetProps>true</SkipImportNuGetProps>
     <SkipImportNuGetBuildTargets>true</SkipImportNuGetBuildTargets>
@@ -74,6 +74,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <_NativeExecutableExtension Condition="'$(_NativeExecutableExtension)' == '' and ($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win')))">.exe</_NativeExecutableExtension>
     <_ComHostLibraryExtension Condition="'$(_ComHostLibraryExtension)' == '' and ($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win')))">.dll</_ComHostLibraryExtension>
+    <_IjwHostLibraryExtension Condition="'$(_IjwHostLibraryExtension)' == '' and ($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win')))">.dll</_IjwHostLibraryExtension>
 
     <_DotNetHostExecutableName>dotnet$(_NativeExecutableExtension)</_DotNetHostExecutableName>
     <_DotNetAppHostExecutableNameWithoutExtension>apphost</_DotNetAppHostExecutableNameWithoutExtension>
@@ -81,6 +82,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <_DotNetComHostLibraryNameWithoutExtension>comhost</_DotNetComHostLibraryNameWithoutExtension>
     <_DotNetComHostLibraryName>$(_DotNetComHostLibraryNameWithoutExtension)$(_ComHostLibraryExtension)</_DotNetComHostLibraryName>
+    <_DotNetIjwHostLibraryNameWithoutExtension>Ijwhost</_DotNetIjwHostLibraryNameWithoutExtension>
+    <_DotNetIjwHostLibraryName>$(_DotNetIjwHostLibraryNameWithoutExtension)$(_IjwHostLibraryExtension)</_DotNetIjwHostLibraryName>
     <_DotNetHostPolicyLibraryName>$(_NativeLibraryPrefix)hostpolicy$(_NativeLibraryExtension)</_DotNetHostPolicyLibraryName>
     <_DotNetHostFxrLibraryName>$(_NativeLibraryPrefix)hostfxr$(_NativeLibraryExtension)</_DotNetHostFxrLibraryName>
   </PropertyGroup>
@@ -164,8 +167,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="$(ProjectDepsFilePath)">
 
     <!-- Set a dummy Version if it hasn't been set by DefaultAssemblyInfo.targets -->
-    <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
-      <Version>1.0.0</Version>
+    <PropertyGroup Condition="'$(UsingNETSdkDefaults)' != 'true'">
+      <Version Condition="'$(Version)' == ''">1.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -345,6 +348,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(CompileDependsOn);
       _CreateAppHost;
       _CreateComHost;
+      _GetIjwHostPaths;
     </CompileDependsOn>
   </PropertyGroup>
 
@@ -387,7 +391,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
      -->
   <Target Name="_GetAppHostPaths"
-          DependsOnTargets="ResolvePackageAssets"
+          DependsOnTargets="ResolvePackageAssets;ResolveFrameworkReferences"
           Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true'">
 
     <NETSdkError Condition="'@(_NativeRestoredAppHostNETCore->Count())' > 1"
@@ -483,7 +487,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
      -->
   <Target Name="_GetComHostPaths"
-          DependsOnTargets="ResolvePackageAssets"
+          DependsOnTargets="ResolvePackageAssets;ResolveFrameworkReferences"
           Condition="'$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true'">
     <PropertyGroup>
       <ComHostFileName>$(AssemblyName).comhost$(_ComHostLibraryExtension)</ComHostFileName>
@@ -492,6 +496,22 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition="'$(ComHostSourcePath)' == '' or !Exists('$(ComHostSourcePath)')"
              ResourceName="CannotFindComhost" />
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GetIjwHostPaths
+
+    Gets the path to the restored Ijwhost, and if the restored Ijwhost
+    was present, Computes the path for the destination Ijwhost.
+    ============================================================
+     -->
+  <Target Name="_GetIjwHostPaths"
+          DependsOnTargets="ResolvePackageAssets;ResolveFrameworkReferences"
+          Condition="'$(UseIJWHost)' == 'true'">
+
+    <NETSdkError Condition="'$(IjwHostSourcePath)' == '' or !Exists('$(IjwHostSourcePath)')"
+             ResourceName="CannotFindIjwhost" />
   </Target>
   
   <!--
@@ -502,7 +522,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths"
+          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths;_GetIjwHostPaths"
           BeforeTargets="AssignTargetPaths"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
@@ -559,6 +579,14 @@ Copyright (c) .NET Foundation. All rights reserved.
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </None>
 
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(IjwHostSourcePath)' != '' and '$(UseIJWHost)' == 'true'">
+      <None Include="$(IjwHostSourcePath)">
+        <Link>$(_DotNetIjwHostLibraryName)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </None>
     </ItemGroup>
   </Target>
 
@@ -794,9 +822,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DesignerSupport.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" Condition="'$(UsingMicrosoftNETSdk)' == 'true'"/>
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateSupportedRuntime.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ComposeStore.targets" Condition="'$(UsingMicrosoftNETSdk)' == 'true'" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ComposeStore.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.CrossGen.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ObsoleteReferences.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Publish.targets" />
