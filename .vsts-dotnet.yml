@@ -193,3 +193,4 @@ stages:
       # Symbol validation is not entirely reliable as of yet, so should be turned off until
       # https://github.com/dotnet/arcade/issues/2871 is resolved.
       enableSymbolValidation: false
+      enableSourceLinkValidation: false
