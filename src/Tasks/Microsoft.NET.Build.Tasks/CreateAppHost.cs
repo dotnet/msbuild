@@ -19,7 +19,11 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// The number of additional retries to attempt for creating the apphost.
         /// <summary>
-        public const int DefaultRetries = 2;
+        /// <remarks>
+        /// The default is no retries because internally the `HostWriter` attempts to retry
+        /// on different I/O operations. Users can optionally retry at the task level if desired.
+        /// </remarks>
+        public const int DefaultRetries = 0;
 
         /// The default delay, in milliseconds, for each retry attempt for creating the apphost.
         /// </summary>

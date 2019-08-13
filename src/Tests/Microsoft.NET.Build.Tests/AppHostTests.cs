@@ -260,7 +260,12 @@ namespace Microsoft.NET.Build.Tests
 
             using (var stream = new FileStream(intermediateAppHost, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                var result = buildCommand.Execute("/clp:NoSummary");
+                const int Retries = 1;
+
+                var result = buildCommand.Execute(
+                    "/clp:NoSummary",
+                    $"/p:CopyRetryCount={Retries}",
+                    "/p:CopyRetryDelayMilliseconds=0");
 
                 result
                     .Should()
@@ -268,7 +273,7 @@ namespace Microsoft.NET.Build.Tests
                     .And
                     .HaveStdOutContaining("System.IO.IOException");
 
-                Regex.Matches(result.StdOut, "NETSDK1113", RegexOptions.None).Count.Should().Be(2);
+                Regex.Matches(result.StdOut, "NETSDK1113", RegexOptions.None).Count.Should().Be(Retries);
             }
         }
 
