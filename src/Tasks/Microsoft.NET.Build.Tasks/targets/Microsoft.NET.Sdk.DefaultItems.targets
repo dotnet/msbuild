@@ -290,12 +290,6 @@ Copyright (c) .NET Foundation. All rights reserved.
          compilation errors for every API that is used in the project.  Amidst all the compile errors, it would
          be easy to miss the duplicate items error which is the real source of the problem. -->
 
-    <!-- We no longer use the CheckForDuplicateItemsContinueOnError property here, but the WPF repo has a dependency upon it.
-         Remove this assignment if https://github.com/dotnet/wpf/pull/1235 is merged. -->
-    <PropertyGroup>
-      <CheckForDuplicateItemsContinueOnError Condition="'$(CheckForDuplicateItemsContinueOnError)' == ''">$(ContinueOnError)</CheckForDuplicateItemsContinueOnError>
-    </PropertyGroup>
-
     <CheckForDuplicateItems
       Items="@(Compile)"
       ItemName="Compile"
