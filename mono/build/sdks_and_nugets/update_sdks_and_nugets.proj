@@ -1,8 +1,6 @@
 <Project>
     <Import Project="$(MSBuildThisFileDirectory)\..\common.props" />
-    <Import Project="$(MSBuildThisFileDirectory)\..\DependencyVersions.props" />
-    <Import Project="$(MSBuildThisFileDirectory)\..\BundledSdks.props" />
-    <Import Project="$(MSBuildThisFileDirectory)\..\Version.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\DotnetBitsVersions.props" />
 
     <PropertyGroup>
         <HostOSName Condition="'$(HostOSName)' == ''">osx</HostOSName>
@@ -10,20 +8,13 @@
         <HostMonikerRid Condition="'$(HostMonikerRid)' == ''">osx-x64</HostMonikerRid>
     </PropertyGroup>
 
-    <Import Project="$(MSBuildThisFileDirectory)\..\AzureInfo.props" />
-    <Import Project="$(MSBuildThisFileDirectory)\..\BundledRuntimes.props" />
-
     <PropertyGroup>
-        <SdkOutputDirectory>$(RepoRoot)\sdks</SdkOutputDirectory>
-        <MSBuildExtensionsPathOutputDirectory>$(RepoRoot)\mono\ExtensionsPath</MSBuildExtensionsPathOutputDirectory>
-        <MSBuildExtensionsPathToolsVersionOutputDirectory>$(RepoRoot)\mono\ExtensionsPath-ToolsVersion</MSBuildExtensionsPathToolsVersionOutputDirectory>
-
-        <NuGetExtensionsPath>$(RepoRoot)\nuget-support\tasks-targets</NuGetExtensionsPath>
-        <NuGetExtensionsPathToolsVersion>$(RepoRoot)\nuget-support\tv</NuGetExtensionsPathToolsVersion>
-        <TmpDir>$(MSBuildThisFileDirectory)\tmp</TmpDir>
+        <SdkOutputDirectory>$(DotNetOverlayDirectory)\msbuild-bin\Sdks</SdkOutputDirectory>
+        <MSBuildExtensionsPathOutputDirectory>$(DotNetOverlayDirectory)\ExtensionsPath</MSBuildExtensionsPathOutputDirectory>
+        <MSBuildExtensionsPathToolsVersionOutputDirectory>$(DotNetOverlayDirectory)\ExtensionsPath-ToolsVersion</MSBuildExtensionsPathToolsVersionOutputDirectory>
 
         <HostFxrUrl>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</HostFxrUrl>
-        <MSBuildSdkResolverOutDir>$(RepoRoot)\mono\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverOutDir>
+        <MSBuildSdkResolverOutDir>$(DotNetOverlayDirectory)\msbuild-bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverOutDir>
         <RuntimeDepsInstallerUrl>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</RuntimeDepsInstallerUrl>
     </PropertyGroup>
 
@@ -53,94 +44,25 @@
                     MSBuildExtensionsPathOutputDirectory=$(MSBuildExtensionsPathOutputDirectory)
                 </Properties>
             </NuGetsToBundle>
+
+            <NuGetsToBundle Include="deploy_from_nugets.proj">
+                <Properties>
+                    ProjectWithProperties=dotnet_resolver.proj;
+                    DependencyPackageName=Microsoft.DotNet.MSBuildSdkResolver;
+                    DependencyPackageVersion=$(MicrosoftDotNetMSBuildSdkResolverPackageVersion);
+                    NuGetPackagesDir=$(NuGetPackagesDir);
+                    DotnetSdkResolverDir=$(MSBuildSdkResolverOutDir)
+                </Properties>
+            </NuGetsToBundle>
         </ItemGroup>
 
         <MSBuild Projects="@(SdksToBundle);@(NuGetsToBundle)" />
 
-        <MSBuild Projects="$(MSBuildThisFileDirectory)\update_nuget_build_tasks.proj" Targets="UpdateNuGetBuildTasks" />
+        <MSBuild
+            Projects="$(MSBuildThisFileDirectory)\nuget-build-tasks\nuget-build-tasks.csproj"
+            Targets="Restore;Build"
+            Properties="OutputDirectory=$(DotNetOverlayDirectory)\nuget-support\msbuild-bin"/>
+        
+        <Exec Command="$(MSBuildThisFileDirectory)/../extract_and_copy_hostfxr.sh $(DotNetSdkVersionForLibHostFxr) $(MSBuildSdkResolverOutDir)" />
     </Target>
-
-    <Target Name="UpdateSdkResolver" AfterTargets="DeploySdksAndNuGets">
-        <MakeDir Directories="$(TmpDir)" />
-        <Exec Command="curl -s $(HostFxrUrl) -o $(TmpDir)\$(DownloadedHostFxrInstallerFileName)" />
-        <Exec Command="$(MSBuildThisFileDirectory)..\extract_and_copy_hostfxr.sh $(TmpDir)\$(DownloadedHostFxrInstallerFileName) $(MSBuildSdkResolverOutDir)\" />
-        <Delete Files="$(TmpDir)\$(DownloadedHostFxrInstallerFileName)" />
-
-        <WriteLinestoFile Lines="SdkResolver=$(HostFxrVersion)%3B" File="$(SdkVersionsFile)" />
-        <WriteLinestoFile Lines="SdkResolverUrl=$(HostFxrUrl)%3B" File="$(SdkVersionsFile)" />
-        <WriteLinestoFile Lines="RuntimeDepsInstallerUrl=$(RuntimeDepsInstallerUrl)%3B" File="$(SdkVersionsFile)" />
-    </Target>
-
-    <UsingTask
-        TaskName="GenerateCommitMessage"
-        TaskFactory="CodeTaskFactory"
-        AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
-        <ParameterGroup>
-            <Sdks ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
-            <CLIBranchName Required="true" />
-            <CLICommitHash Required="true" />
-            <BuildExtensionsNuGetVersion Required="true" />
-            <NuGetBuildTasksVersion Required="true" />
-            <NuGetSdkResolverVersion Required="true" />
-            <HostFxrVersion Required="true" />
-            <HostFxrUrl Required="true" />
-
-            <CommitMessage Output="true" />
-        </ParameterGroup>
-        <Task>
-            <Using Namespace="System.Text" />
-            <Using Namespace="System.Collections.Generic" />
-            <Code Type="Fragment" Language="cs"><![CDATA[
-                var versions = new List<string> ();
-                var sb = new StringBuilder ();
-                const int nameColWidth = 40;
-
-                sb.Append ($"[mono] Update bundled SDKs from cli branch '{CLIBranchName}'\n");
-                sb.Append ("\n");
-
-                sb.Append ($"cli commit: {CLICommitHash}\n");
-                sb.Append ("\n");
-
-                foreach (var sdk in Sdks)
-                    versions.Add ($"{sdk.ItemSpec, -nameColWidth}: {sdk.GetMetadata ("Version")}\n");
-
-                versions.Add ($"{"Microsoft.NET.Build.Extensions", -nameColWidth}: {BuildExtensionsNuGetVersion}\n");
-                versions.Add ($"{"NuGet.Build.Tasks", -nameColWidth}: {NuGetBuildTasksVersion}\n");
-
-                versions.Sort ();
-                foreach (var ver in versions)
-                    sb.Append (ver);
-                sb.Append ("\n");
-
-                sb.Append ($"{"libhostfxr", -nameColWidth}: {HostFxrVersion}\n");
-                sb.Append ($"{"libhostfxr.dylib url", -nameColWidth}: {HostFxrUrl}\n");
-
-                sb.Append ("\n");
-
-                sb.Append ($"Versions from:\n");
-                sb.Append ($"https://github.com/dotnet/cli/blob/{CLICommitHash}/build/DependencyVersions.props\n");
-
-                sb.Append("\nNote: Above versions list is for all the bundled SDKs including the ones that might not have been updated in this commit.");
-
-                CommitMessage = sb.ToString();
-            ]]></Code>
-        </Task>
-    </UsingTask>
-
-    <Target Name="GenerateCommitMessage">
-        <GenerateCommitMessage
-            Sdks="@(BundledSdk)"
-            CLIBranchName="$(CLIBranchName)"
-            CLICommitHash="$(CLICommitHash)"
-            BuildExtensionsNuGetVersion="$(MicrosoftNETBuildExtensionsPackageVersion)"
-            NuGetBuildTasksVersion="$(NuGetFrameworksPackageVersion)"
-            NuGetSdkResolverVersion="$(HostFxrVersion)"
-            HostFxrUrl="$(HostFxrUrl)"
-            HostFxrVersion="$(HostFxrVersion)">
-            <Output TaskParameter="CommitMessage" PropertyName="CommitMessage" />
-        </GenerateCommitMessage>
-
-        <Message Text="$(CommitMessage)" Importance="High" />
-    </Target>
-
 </Project>

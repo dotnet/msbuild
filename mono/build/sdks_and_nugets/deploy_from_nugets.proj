@@ -17,6 +17,8 @@
             <FilesToCopy Remove="@(FilesToCopy)" Condition="$([System.String]::new('%(FilesToCopy.RecursiveDir)').Contains('netcoreapp'))" />
             <FilesToCopy Remove="@(FilesToCopy)" Condition="$([System.String]::new('%(FilesToCopy.RecursiveDir)').Contains('GenerateDeps'))" />
             <FilesToCopy Remove="@(FilesToCopy)" Condition="'%(FilesToCopy.Extension)' == '.p7s'" />
+            <FilesToCopy Remove="@(FilesToCopy)" Condition="$([System.String]::new('%(FilesToCopy.Identity)').EndsWith('.nupkg.metadata'))" />
+            <FilesToCopy Remove="@(FilesToCopy)" Condition="'%(FilesToCopy.Extension)' == '.pubxml'" />
         </ItemGroup>
 
         <Copy
@@ -40,7 +42,7 @@
         <MSBuild
             Projects="$(MSBuildThisFileDirectory)\sdks\sdks.csproj"
             Targets="Restore"
-            Properties="DependencyPackageName=$(DependencyPackageName);DependencyPackageVersion=$(DependencyPackageVersion)"/>
+            Properties="DependencyPackageName=$(DependencyPackageName);DependencyPackageVersion=$(DependencyPackageVersion);DotNetPackageVersionPropsPath=$(DotNetPackageVersionPropsPath)" />
 
         <Error
             Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')"

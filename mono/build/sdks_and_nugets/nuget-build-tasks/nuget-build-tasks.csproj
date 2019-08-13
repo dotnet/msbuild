@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" / -->
+  <Import Project="$(RepoRoot)\mono\build\common.props" />
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NuGet.Build.Tasks" VersionOverride="$(DependencyPackageVersion)" />
+  </ItemGroup>
+
+  <Target Name="GatherNuGetDependencies" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+        <!-- Collect known NuGet dependencies after resolving packages -->
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGet.'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Newtonsoft.Json'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'True'" />
+
+        <!-- NuGet.targets will be in the ResolvedRuntimeTargets ItemGroup -->
+        <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'True'" />
+
+        <_NuGetRuntimeDependencies Include="@(ResolvedRuntimeTargets)" />
+    </ItemGroup>
+
+    <Message Text="Found: @(_NuGetRuntimeDependencies)" />
+    <Message Text="-- RuntimeTargetsCopyLocalItems: @(RuntimeCopyLocalItems) "/>
+    
+    <Copy
+            SourceFiles="@(_NuGetRuntimeDependencies)"
+            DestinationFolder="$(OutputDirectory)">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
+
+        <Exec Command="chmod -x @(CopiedFiles->'%(Identity)', ' ')"
+              Condition="'$(OS)' != 'Windows_NT' and '@(CopiedFiles)' != ''" />
+  </Target>
+
+  <!-- Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" / -->
+</Project>

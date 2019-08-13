@@ -1,0 +1,15 @@
+<Project>
+    <PropertyGroup>
+        <TargetToGetItemsToCopy>GetResolverFilesToCopy</TargetToGetItemsToCopy>
+        <DependencyNuPkgPath>$(NuGetPackagesDir)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion)</DependencyNuPkgPath>
+    </PropertyGroup>
+
+    <Target Name="GetResolverFilesToCopy">
+		<ItemGroup>
+			<FilesToCopy
+                Include="$(DependencyNuPkgPath)/lib/net472/**"
+                OutputDirectory="$(DotnetSdkResolverDir)" />
+
+		</ItemGroup>
+    </Target>
+</Project>

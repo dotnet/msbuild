@@ -1,6 +1,7 @@
 <Project DefaultTargets="Install">
     <!-- Using this as a kinda config file -->
-    <Import Project="..\..\Directory.Build.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\common.props" />
+    <Import Project="$(RepoRoot)\Directory.Build.props" />
 
     <Target Name="Install">
         <Error Text="%24(MonoInstallPrefix) cannot be empty. Set with /p:MonoInstallPrefix=&lt;directory&gt;" Condition="'$(MonoInstallPrefix)' == ''" />
@@ -50,8 +51,7 @@
             <MSBuildFiles Include="$(MSBuildBinSrcDir)\*.dll*" />
             <MSBuildFiles Include="$(MSBuildBinSrcDir)\RuntimeIdentifierGraph.json" />
 
-            <!-- nuget tasks/targets that are now installed to bin dir -->
-            <MSBuildFiles Include="$(RepoRoot)\nuget-support\tasks-targets\*" />
+            <MSBuildFiles Include="$(DotNetOverlayDirectory)\nuget-support\msbuild-bin\*" />
 
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\TestTask*" />
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\Mono.Build.Tasks.*" />
@@ -69,13 +69,14 @@
             <RemainingMSBuildBinFiles Include="$(MSBuildBinSrcDir)\Sdks\**\*.nupkg.metadata" />
 
             <SdkResolverFiles Include="$(MSBuildBinSrcDir)\SdkResolvers\**\*" />
-            <SdkResolverFiles Include="$(RepoRoot)\mono\SdkResolvers\**\*" />
+            <SdkResolverFiles Include="$(DotNetOverlayDirectory)\msbuild-bin\SdkResolvers\**\*" />
 
-            <ExtensionsPathFiles Include="$(RepoRoot)\mono\ExtensionsPath\**\*" />
+            <ExtensionsPathFiles Include="$(RepoRoot)\mono\layout\ExtensionsPath\**\*" />
+            <ExtensionsPathFiles Include="$(DotNetOverlayDirectory)\ExtensionsPath\**\*" />
             <ExtensionsPathFiles Include="$(MSBuildBinSrcDir)\Mono.Build.Tasks.*" />
 
-            <ExtensionsPathToolsVersionFiles Include="$(RepoRoot)\mono\ExtensionsPath-ToolsVersion\**\*" />
-            <NuGetToolsVersionFiles Include="$(RepoRoot)\nuget-support\tv\**\*" />
+            <ExtensionsPathToolsVersionFiles Include="$(RepoRoot)\mono\layout\ExtensionsPath-ToolsVersion\**\*" />
+            <ExtensionsPathToolsVersionFiles Include="$(DotNetOverlayDirectory)\ExtensionsPath-ToolsVersion\**\*" />
 
             <ExtensionsPathToolsVersionFiles Include="$(MSBuildBinSrcDir)\Microsoft.Common.props" />
             <ExtensionsPathToolsVersionFiles Include="$(MSBuildBinSrcDir)\Microsoft.VisualStudioVersion.v*props" />
