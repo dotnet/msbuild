@@ -106,9 +106,6 @@ lib/mono/msbuild/Current/bin/Sdks/ILLink.Tasks/tools/net472/System.Reflection.Me
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.Docker.Sdk/Sdk/Sdk.props
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.Docker.Sdk/Sdk/Sdk.targets
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/ImportPublishProfile.targets
-lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/PublishProfiles/FileSystem.pubxml
-lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/PublishProfiles/MSDeploy.pubxml
-lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/PublishProfiles/MSDeployPackage.pubxml
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/Sdk.props
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/Sdk.targets
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/targets/ComputeTargets/Microsoft.NET.Sdk.Publish.ComputeFiles.targets
@@ -159,6 +156,8 @@ lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Web.ProjectSystem/targets/Mi
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Web.ProjectSystem/targets/Microsoft.NET.Sdk.Web.ProjectSystem.targets
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Web/Sdk/Sdk.props
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Web/Sdk/Sdk.targets
+lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Web/analyzers/cs/Microsoft.AspNetCore.Analyzers.dll
+lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Web/analyzers/cs/Microsoft.AspNetCore.Components.Analyzers.dll
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Web/analyzers/cs/Microsoft.AspNetCore.Mvc.Analyzers.dll
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Web/analyzers/cs/Microsoft.AspNetCore.Mvc.Api.Analyzers.dll
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk/Sdk/Sdk.props
