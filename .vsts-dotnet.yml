@@ -81,6 +81,7 @@ stages:
                 /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                 /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                 /p:TeamName=MSBuild
+                /p:DotNetPublishUsingPipelines=true
       displayName: Build
       condition: succeeded()
 
