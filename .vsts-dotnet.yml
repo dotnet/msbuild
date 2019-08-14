@@ -10,7 +10,7 @@ trigger:
 #   SkipApplyOptimizationData: false
 stages:
 - stage: build
-  displayName: Build and Test
+  displayName: Build
 
   jobs:
   - job: Windows_NT
