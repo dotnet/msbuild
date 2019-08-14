@@ -61,17 +61,10 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     {
                         string versionString = trimmedOverriddenPackagesAndVersion.Substring(separatorIndex + 1);
                         string overriddenPackage = trimmedOverriddenPackagesAndVersion.Substring(0, separatorIndex);
-#if EXTENSIONS
-                        if (Version.TryParse(versionString, out Version version))
+                        if (OverrideVersion.TryParse(versionString, out OverrideVersion version))
                         {
                             yield return Tuple.Create(overriddenPackage, version);
                         }
-#else
-                        if (NuGetVersion.TryParse(versionString, out NuGetVersion version))
-                        {
-                            yield return Tuple.Create(overriddenPackage, version);
-                        }
-#endif
                     }
                 }
             }
