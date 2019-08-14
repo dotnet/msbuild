@@ -8,6 +8,13 @@ trigger:
 # variables:
 #   SignType: real
 #   SkipApplyOptimizationData: false
+
+variables:
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: _DotNetValidationArtifactsCategory
+    value: .NETCoreValidation
+
 stages:
 - stage: build
   displayName: Build
@@ -33,10 +40,6 @@ stages:
       value: 'int.master'
     - name: VisualStudio.DropName
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
-    - name: _DotNetArtifactsCategory
-      value: .NETCore
-    - name: _DotNetValidationArtifactsCategory
-      value: .NETCoreValidation
 
     steps:
     - task: NuGetToolInstaller@0
