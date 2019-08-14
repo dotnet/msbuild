@@ -758,14 +758,6 @@ namespace Microsoft.Build.UnitTests
                             @"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""",
                             quotedProjectFileName
                         }).ShouldBe(MSBuildApp.ExitType.Success);
-
-                //Should fail as we are not changing existing lines
-                MSBuildApp.Execute(
-                    new[]
-                        {
-                            NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
-                            "/logger:FileLogger,Microsoft.Build,Version=11111", quotedProjectFileName
-                        }).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #endif
             }
             finally
