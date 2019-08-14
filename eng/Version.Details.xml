@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview9-19414-05">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview9-19414-10">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>a46b9aa0efb53f37c7af0760e8ad8eb347f0ea19</Sha>
+      <Sha>da4c59684cb1f42511820e4c7d1ec2af460fc96c</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview9.19408.12">
       <Uri>https://github.com/dotnet/cli</Uri>
@@ -30,9 +30,9 @@
       <Sha>5335245b080acf52c262fb7964d3411d49143f29</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview9.19414.2" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview9.19414.1" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>3e8418c5904f61ff8485ad465d1d70957daac35f</Sha>
+      <Sha>43046934c63e82583fce8a24231a6e9c61257389</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.1.0-rtm.5921">
       <Uri>https://github.com/nuget/nuget.client</Uri>
