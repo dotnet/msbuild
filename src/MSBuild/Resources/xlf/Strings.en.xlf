@@ -335,7 +335,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>  -logger:&lt;logger&gt;   Use this logger to log events from MSBuild. To specify
                      multiple loggers, specify each logger separately.
                      The &lt;logger&gt; syntax is:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[,&gt;options][;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&gt;options][;&lt;parameters&gt;]
                      The &lt;logger class&gt; syntax is:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      The &lt;logger assembly&gt; syntax is:
@@ -350,7 +350,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="new">  -logger:&lt;logger&gt;   Use this logger to log events from MSBuild. To specify
                      multiple loggers, specify each logger separately.
                      The &lt;logger&gt; syntax is:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[,&gt;options][;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&gt;options][;&lt;parameters&gt;]
                      The &lt;logger class&gt; syntax is:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      The &lt;logger assembly&gt; syntax is:
@@ -604,7 +604,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      multiple loggers, specify each logger separately.
                      (Short form -dl)
                      The &lt;logger&gt; syntax is:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[,options][;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,options][;&lt;parameters&gt;]
                      The &lt;logger class&gt; syntax is:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      The &lt;logger assembly&gt; syntax is:
@@ -622,7 +622,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      multiple loggers, specify each logger separately.
                      (Short form -dl)
                      The &lt;logger&gt; syntax is:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[,options][;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,options][;&lt;parameters&gt;]
                      The &lt;logger class&gt; syntax is:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      The &lt;logger assembly&gt; syntax is:
