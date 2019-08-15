@@ -218,7 +218,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RollForward Condition="'$(RollForward)' == '' and '$(EnableDynamicLoading)' == 'true' and '$(_IsRollForwardSupported)' == 'true'">LatestMinor</RollForward>
     </PropertyGroup>
 
-    <NETSdkError Condition="'$(RollForward)' != '' and '$(_IsRollForwardSupported)' != 'true'"
+    <!-- RollForward is only supported since .NET Core 3.0, but we should allow limitted usage when the app is targeting even lower versions
+         This is to let 2.* apps specify that they are OK to run on 3.0 and above. So explicitly allow just Major and LatestMajor
+         other values should still keep failing as they won't have any effect when run on 2.*. -->
+    <NETSdkError Condition="'$(RollForward)' != '' and '$(RollForward.ToLowerInvariant())' != 'major' and '$(RollForward.ToLowerInvariant())' != 'latestmajor' and '$(_IsRollForwardSupported)' != 'true'"
                  ResourceName="RollForwardRequiresVersion30"/>
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
