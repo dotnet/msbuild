@@ -1353,11 +1353,11 @@ namespace Microsoft.Build.Utilities
                         // Use sh rather than bash, as not all 'nix systems necessarily have Bash installed
                         File.AppendAllText(_temporaryBatchFile, "#!/bin/sh\n"); // first line for UNIX is ANSI
                         // This is a hack..!
-                        File.AppendAllText(_temporaryBatchFile, AdjustCommandsForOperatingSystem(commandLineCommands), EncodingUtilities.CurrentSystemOemEncoding);
+                        File.AppendAllText(_temporaryBatchFile, AdjustCommandsForOperatingSystem(commandLineCommands), StandardOutputEncoding);
                     }
                     else
                     {
-                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, EncodingUtilities.CurrentSystemOemEncoding);
+                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, StandardOutputEncoding);
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
