@@ -528,9 +528,8 @@ namespace Microsoft.Build.Tasks
 
                 valueType = new CodeTypeReference(data.TypeFullName);
 
-                // TODO: can we do better here than exact comparisons against something that may vary over time?
-                isString = false;
-                isStream = false;
+                isString = MSBuildResXReader.IsString(data.TypeAssemblyQualifiedName);
+                isStream = MSBuildResXReader.IsMemoryStream(data.TypeAssemblyQualifiedName);
             }
 
             var prop = new CodeMemberProperty

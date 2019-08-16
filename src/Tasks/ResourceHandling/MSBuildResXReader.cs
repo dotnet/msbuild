@@ -271,7 +271,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             return fileRefType == StringTypeName;
         }
 
-        private static bool IsMemoryStream(string fileRefType)
+        internal static bool IsMemoryStream(string fileRefType)
         {
             return fileRefType.Equals(MemoryStreamTypeNameDesktopFramework, StringComparison.Ordinal);
         }
