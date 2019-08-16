@@ -223,7 +223,7 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ApphostsForShimRuntimeIdentifiers { get; private set; }
 
         [Output]
-        public ITaskItem[] PackagesReferenced { get; private set; }
+        public ITaskItem[] PackageDependencies { get; private set; }
 
         /// <summary>
         /// Messages from the assets file.
@@ -308,8 +308,8 @@ namespace Microsoft.NET.Build.Tasks
                 FrameworkAssemblies = reader.ReadItemGroup();
                 FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
+                PackageDependencies = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
-                PackagesReferenced = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
                 RuntimeAssemblies = reader.ReadItemGroup();
                 RuntimeTargets = reader.ReadItemGroup();
@@ -772,8 +772,8 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteFrameworkAssemblies);
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
-                WriteItemGroup(WritePackageFolders);
-                WriteItemGroup(WritePackagesReferenced);
+                WriteItemGroup(WritePackageDependencies);
+                WriteItemGroup(WritePackageFolders);                
                 WriteItemGroup(WriteResourceAssemblies);
                 WriteItemGroup(WriteRuntimeAssemblies);
                 WriteItemGroup(WriteRuntimeTargets);
@@ -1096,7 +1096,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            private void WritePackagesReferenced()
+            private void WritePackageDependencies()
             {
                 foreach (var library in _runtimeTarget.Libraries)
                 {
