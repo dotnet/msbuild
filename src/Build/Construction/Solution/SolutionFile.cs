@@ -265,7 +265,7 @@ namespace Microsoft.Build.Construction
             {
                 // Open the file
                 fileStream = File.OpenRead(solutionFile);
-                reader = new StreamReader(fileStream, Encoding.UTF8); // HIGHCHAR: If solution files have no byte-order marks, then assume UFT8-8.
+                reader = new StreamReader(fileStream, Encoding.UTF8); // HIGHCHAR: If solution files have no byte-order marks, then assume UFT-8.
 
                 // Read first 4 lines of the solution file. 
                 // The header is expected to be in line 1 or 2
