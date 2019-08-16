@@ -55,9 +55,12 @@ namespace Microsoft.NET.Build.Tests
 
         //  Windows only because default RuntimeIdentifier only applies when current OS is Windows
         [WindowsOnlyTheory]
-        [InlineData(false, "AnyCPU")]
-        [InlineData(true, "x86")]
-        public void RuntimeIdentifierIsOnlyInferredIfPlatformsPackageIsReferenced(bool referencePlatformPackage, string expectedPlatform)
+        [InlineData("Microsoft.DiasymReader.Native/1.7.0", false, "AnyCPU")]
+        [InlineData("Microsoft.DiasymReader.Native/1.7.0", true, "x86")]
+        [InlineData("SQLite/3.13.0", false, "x86")]
+        [InlineData("SQLite/3.13.0", true, "x86")]
+
+        public void PlatformTargetInferredCorrectly(string packageToReference, bool referencePlatformPackage, string expectedPlatform)
         {
             var testProject = new TestProject()
             {
@@ -67,13 +70,17 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DiasymReader.Native", "1.7.0"));
+            var packageElements = packageToReference.Split('/');
+            string packageName = packageElements[0];
+            string packageVersion = packageElements[1];
+
+            testProject.PackageReferences.Add(new TestPackageReference(packageName, packageVersion));
             if (referencePlatformPackage)
             {
                 testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NETCore.Platforms", "2.1.0"));
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: referencePlatformPackage.ToString())
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: packageName + "_" + referencePlatformPackage.ToString())
                 .Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
