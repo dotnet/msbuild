@@ -53,6 +53,41 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        //  Windows only because default RuntimeIdentifier only applies when current OS is Windows
+        [WindowsOnlyTheory]
+        [InlineData(false, "AnyCPU")]
+        [InlineData(true, "x86")]
+        public void RuntimeIdentifierIsOnlyInferredIfPlatformsPackageIsReferenced(bool referencePlatformPackage, string expectedPlatform)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AutoRuntimeIdentifierTest",
+                TargetFrameworks = "net472",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DiasymReader.Native", "1.7.0"));
+            if (referencePlatformPackage)
+            {
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NETCore.Platforms", "2.1.0"));
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: referencePlatformPackage.ToString())
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getValueCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, "PlatformTarget");
+
+            getValueCommand.Execute().Should().Should();
+            getValueCommand.GetValues().Single().Should().Be(expectedPlatform);
+        }
+
         [WindowsOnlyTheory]
         // If we don't set platformTarget and don't use native dependency, we get working AnyCPU app.
         [InlineData("defaults", null, false, "Native code was not used (MSIL)")]

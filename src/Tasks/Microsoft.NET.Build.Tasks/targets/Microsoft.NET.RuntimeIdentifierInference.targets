@@ -182,9 +182,19 @@ Copyright (c) .NET Foundation. All rights reserved.
           AfterTargets="ResolvePackageAssets"
           BeforeTargets="CoreCompile"
           Condition="'$(_UsingDefaultPlatformTarget)' == 'true' and
-                     '$(_UsingDefaultRuntimeIdentifier)' == 'true' and
-                     '@(NativeCopyLocalItems)' == ''">
-    <PropertyGroup>
+                     '$(_UsingDefaultRuntimeIdentifier)' == 'true'">
+
+    <ItemGroup>
+      <_ReferencedPlatformPackage Include="@(PackagesReferenced)" Condition="'%(Identity)' == 'Microsoft.NETCore.Platforms'" />
+    </ItemGroup>
+    
+    <!-- If there were no native assets, or if the Microsoft.NETCore.Platforms package was not referenced, then revert to AnyCPU.
+         The reason we use AnyCPU if Microsoft.NETCore.Platforms is not referenced is to preserve behavior from before 3.0 when
+         the RuntimeIdentifier graph wasn't included in the SDK, and assets where the RuntimeIdentifier didn't match exactly wouldn't
+         be picked up unless the platforms package was referenced. -->
+    
+    <PropertyGroup Condition="('@(NativeCopyLocalItems)' == '' or
+                             '@(_ReferencedPlatformPackage)' == '')">
       <PlatformTarget>AnyCPU</PlatformTarget>
     </PropertyGroup>
   </Target>
