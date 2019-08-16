@@ -207,7 +207,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     fileName);
             }
 
-            if (fileRefType == StringTypeName)
+            if (IsString(fileRefType))
             {
                 string fileRefEncoding = null;
                 if (fileRefInfo.Length == 3)
@@ -264,6 +264,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         private static bool IsByteArray(string fileRefType)
         {
             return fileRefType.IndexOf("System.Byte[]") != -1 && fileRefType.IndexOf("mscorlib") != -1;
+        }
+
+        internal static bool IsString(string fileRefType)
+        {
+            return fileRefType == StringTypeName;
         }
 
         private static bool IsMemoryStream(string fileRefType)
