@@ -85,13 +85,15 @@ namespace Microsoft.Build.Tasks
             internal ResourceData(Type type, String valueAsString)
             {
                 Type = type;
+                TypeAssemblyQualifiedName = type.AssemblyQualifiedName;
                 TypeFullName = type.FullName;
                 ValueAsString = valueAsString;
             }
 
-            internal ResourceData(string typeName)
+            internal ResourceData(string typeName, string typeAssemblyQualifiedName)
             {
                 Type = null;
+                TypeAssemblyQualifiedName = typeAssemblyQualifiedName;
                 TypeFullName = typeName;
                 ValueAsString = null;
             }
@@ -99,6 +101,8 @@ namespace Microsoft.Build.Tasks
             internal Type Type { get; }
 
             internal string TypeFullName { get; }
+
+            internal string TypeAssemblyQualifiedName { get; }
 
             internal String ValueAsString { get; }
         }
@@ -115,7 +119,7 @@ namespace Microsoft.Build.Tasks
             {
                 ResourceData data = resource.Value is LiveObjectResource liveObject
                     ? new ResourceData(liveObject.Value.GetType(), liveObject.Value.ToString())
-                    : new ResourceData(resource.Value.TypeFullName);
+                    : new ResourceData(resource.Value.TypeFullName, resource.Value.TypeAssemblyQualifiedName);
                 resourceTypes.Add(resource.Key, data);
             }
 

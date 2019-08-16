@@ -13,6 +13,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         string Name { get; }
 
         /// <summary>
+        /// The resource's type's assembly-qualified name. May be null when the type is not knowable from the source.
+        /// </summary>
+        string TypeAssemblyQualifiedName { get; }
+
+        /// <summary>
         /// The resource's type's full name. May be null when the type is not knowable from the source.
         /// </summary>
         string TypeFullName { get; }

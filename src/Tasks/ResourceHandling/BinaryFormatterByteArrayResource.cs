@@ -22,6 +22,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         /// <summary>
         /// BinaryFormatter byte arrays contain the type name, but it is not directly accessible from the resx.
         /// </summary>
+        public string TypeAssemblyQualifiedName => null;
+
+        /// <summary>
+        /// BinaryFormatter byte arrays contain the type name, but it is not directly accessible from the resx.
+        /// </summary>
         public string TypeFullName => null;
 
         public BinaryFormatterByteArrayResource(string name, byte[] bytes, string originatingFile)
