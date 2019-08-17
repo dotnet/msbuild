@@ -99,8 +99,7 @@ namespace Microsoft.Build.Framework.XamlTypes
                 throw new ArgumentNullException("metadataName");
             }
 
-            string value;
-            _metadata.Value.TryGetValue(metadataName, out value);
+            _metadata.Value.TryGetValue(metadataName, out string value);
             return value;
         }
 
@@ -154,7 +153,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// </remarks>
         private Dictionary<string, string> InitializeMetadata()
         {
-            var metadata = new Dictionary<string, string>(this.Metadata.Count, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> metadata = new Dictionary<string, string>(this.Metadata.Count, StringComparer.OrdinalIgnoreCase);
             foreach (NameValuePair pair in this.Metadata)
             {
                 metadata.Add(pair.Name, pair.Value);
