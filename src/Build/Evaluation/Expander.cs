@@ -983,7 +983,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Search for "$(" in the expression.  Loop until we don't find it 
                 // any more.
-                do
+                while (propertyStartIndex != -1)
                 {
                     if (lastResult != null)
                     {
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     propertyStartIndex = s_invariantCompareInfo.IndexOf(expression, "$(", sourceIndex, CompareOptions.Ordinal);
-                } while (propertyStartIndex != -1);
+                }
 
                 // If we have only a single result, then just return it
                 if (results == null && expression.Length == sourceIndex)
