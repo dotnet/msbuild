@@ -39,8 +39,7 @@ namespace Microsoft.Build.BackEnd
                 sb.Append(prefix);
 
                 bool firstEntryIsTaskItemWithSomeCustomMetadata = false;
-                var firstItem = parameterValue[0] as ITaskItem;
-                if (firstItem != null)
+                if (parameterValue[0] is ITaskItem firstItem)
                 {
                     if (firstItem.CloneCustomMetadata().Count > 0)
                     {
