@@ -952,10 +952,9 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
-                    ITaskFactory2 taskFactory2 = _taskFactoryWrapper.TaskFactory as ITaskFactory2;
                     try
                     {
-                        if (taskFactory2 == null)
+                        if (!(_taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2))
                         {
                             task = _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
                         }

@@ -1386,8 +1386,7 @@ namespace Microsoft.Build.Execution
                                 bool initialized = false;
                                 try
                                 {
-                                    ITaskFactory2 factory2 = factory as ITaskFactory2;
-                                    if (factory2 != null)
+                                    if (factory is ITaskFactory2 factory2)
                                     {
                                         initialized = factory2.Initialize(RegisteredName, TaskFactoryParameters, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
                                     }

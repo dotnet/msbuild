@@ -81,8 +81,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                ICollection<T> backingCollection = _backing as ICollection<T>;
-                if (backingCollection == null)
+                if (!(_backing is ICollection<T> backingCollection))
                 {
                     backingCollection = new List<T>(_backing);
                     _backing = backingCollection;
@@ -130,8 +129,7 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentNull(array, "array");
 
-            ICollection<T> backingCollection = _backing as ICollection<T>;
-            if (backingCollection != null)
+            if (_backing is ICollection<T> backingCollection)
             {
                 backingCollection.CopyTo(array, arrayIndex);
             }

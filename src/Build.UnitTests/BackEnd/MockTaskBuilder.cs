@@ -91,8 +91,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Canceled, WorkUnitActionCode.Stop, null));
             }
 
-            ProjectOnErrorInstance errorTask = task as ProjectOnErrorInstance;
-            if (null != errorTask)
+            if (task is ProjectOnErrorInstance errorTask)
             {
                 ErrorTasks.Add(errorTask);
             }

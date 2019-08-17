@@ -86,12 +86,6 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the name of the task that raised this event.
         /// </summary>
-        public string TaskName
-        {
-            get
-            {
-                return SenderName;
-            }
-        }
+        public string TaskName => SenderName;
     }
 }

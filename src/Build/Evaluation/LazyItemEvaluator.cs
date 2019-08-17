@@ -330,8 +330,7 @@ namespace Microsoft.Build.Evaluation
 
                     //  If this is a remove operation, then add any globs that will be removed
                     //  to a list of globs to ignore in previous operations
-                    var removeOperation = currentList._memoizedOperation.Operation as RemoveOperation;
-                    if (removeOperation != null)
+                    if (currentList._memoizedOperation.Operation is RemoveOperation removeOperation)
                     {
                         if (globsToIgnoreStack == null)
                         {
@@ -364,8 +363,7 @@ namespace Microsoft.Build.Evaluation
 
                     //  If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
                     //  modified entry off the stack of globs to ignore
-                    var removeOperation = currentList._memoizedOperation.Operation as RemoveOperation;
-                    if (removeOperation != null)
+                    if (currentList._memoizedOperation.Operation is RemoveOperation removeOperation)
                     {
                         globsToIgnoreStack.Pop();
                         currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? globsToIgnore : globsToIgnoreStack.Peek();
@@ -528,8 +526,7 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ItemFragment fragment in builder.ItemSpec.Fragments)
             {
-                ItemExpressionFragment<P, I> itemExpression = fragment as ItemExpressionFragment<P, I>;
-                if (itemExpression != null)
+                if (fragment is ItemExpressionFragment<P, I> itemExpression)
                 {
                     AddReferencedItemLists(builder, itemExpression.Capture);
                 }

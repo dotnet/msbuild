@@ -7,14 +7,12 @@ namespace Microsoft.Build.Globbing.Visitor
     {
         public void Visit(IMSBuildGlob glob)
         {
-            var msbuildGlob = glob as MSBuildGlob;
-            if (msbuildGlob != null)
+            if (glob is MSBuildGlob msbuildGlob)
             {
                 VisitMSBuildGlob(msbuildGlob);
             }
 
-            var compositGlob = glob as CompositeGlob;
-            if (compositGlob != null)
+            if (glob is CompositeGlob compositGlob)
             {
                 VisitCompositeGlob(compositGlob);
 
@@ -24,8 +22,7 @@ namespace Microsoft.Build.Globbing.Visitor
                 }
             }
 
-            var globWithGaps = glob as MSBuildGlobWithGaps;
-            if (globWithGaps != null)
+            if (glob is MSBuildGlobWithGaps globWithGaps)
             {
                 VisitGlobWithGaps(globWithGaps);
 

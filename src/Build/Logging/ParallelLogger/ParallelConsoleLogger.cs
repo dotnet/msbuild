@@ -1085,9 +1085,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (showPerfSummary)
             {
-                ProjectEvaluationStartedEventArgs projectEvaluationStarted = e as ProjectEvaluationStartedEventArgs;
-
-                if (projectEvaluationStarted != null)
+                if (e is ProjectEvaluationStartedEventArgs projectEvaluationStarted)
                 {
                     MPPerformanceCounter counter = GetPerformanceCounter(projectEvaluationStarted.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.AddEventStarted(null, e.BuildEventContext, e.Timestamp, s_compareContextNodeId);
@@ -1095,9 +1093,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     return;
                 }
 
-                ProjectEvaluationFinishedEventArgs projectEvaluationFinished = e as ProjectEvaluationFinishedEventArgs;
 
-                if (projectEvaluationFinished != null)
+                if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinished)
                 {
                     MPPerformanceCounter counter = GetPerformanceCounter(projectEvaluationFinished.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.AddEventFinished(null, e.BuildEventContext, e.Timestamp);

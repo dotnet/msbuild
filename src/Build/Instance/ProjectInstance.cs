@@ -2375,9 +2375,8 @@ namespace Microsoft.Build.Execution
                     // We're going to just skip environment variables that contain names
                     // with characters we can't handle. There's no logger registered yet
                     // when this method is called, so we can't really log anything.
-                    string environmentVariableName = environmentVariable.Key as string;
 
-                    if (environmentVariableName != null &&
+                    if (environmentVariable.Key is string environmentVariableName &&
                         (!XmlUtilities.IsValidElementName(environmentVariableName)
                         || XMakeElements.ReservedItemNames.Contains(environmentVariableName)
                         || ReservedPropertyNames.IsReservedProperty(environmentVariableName))

@@ -582,8 +582,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
                 if (FileSystems.Default.FileExists(manifestPath))
                 {
-                    ApplicationManifest entryPointManifest = ManifestReader.ReadManifest(manifestPath, false) as ApplicationManifest;
-                    if (entryPointManifest != null)
+                    if (ManifestReader.ReadManifest(manifestPath, false) is ApplicationManifest entryPointManifest)
                     {
                         if (Install)
                         {

@@ -16,10 +16,6 @@ namespace Microsoft.Build.Framework
     [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "Would require a public API change -- currently we're trying to keep our surface area static.")]
     public struct BuildEngineResult
     {
-        /// <summary>
-        /// Did the build pass or fail
-        /// </summary>
-        private bool buildResult;
 
         /// <summary>
         /// Target outputs by project
@@ -31,7 +27,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public BuildEngineResult(bool result, List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject)
         {
-            buildResult = result;
+            Result = result;
             this.targetOutputsPerProject = targetOutputsPerProject;
             if (this.targetOutputsPerProject == null)
             {
@@ -42,13 +38,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Did the build pass or fail. True means the build succeeded, False means the build failed.
         /// </summary>
-        public bool Result
-        {
-            get
-            {
-                return buildResult;
-            }
-        }
+        public bool Result { get; private set; }
 
         /// <summary>
         /// Outputs of the targets per project.
