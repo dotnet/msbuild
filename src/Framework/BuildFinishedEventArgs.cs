@@ -118,12 +118,6 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Succeeded is true if the build succeeded; false otherwise.
         /// </summary>
-        public bool Succeeded
-        {
-            get
-            {
-                return succeeded;
-            }
-        }
+        public bool Succeeded => succeeded;
     }
 }
