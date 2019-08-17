@@ -179,7 +179,8 @@ namespace Microsoft.Build.Collections
             // may contain duplicates, so call TrimExcess if resulting hashset is larger than
             // threshold
             int suggestedCapacity = 0;
-            if (collection is ICollection<T> coll)
+            ICollection<T> coll = collection as ICollection<T>;
+            if (coll != null)
             {
                 suggestedCapacity = coll.Count;
             }

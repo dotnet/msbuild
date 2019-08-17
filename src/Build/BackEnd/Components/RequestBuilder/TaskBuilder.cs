@@ -207,7 +207,8 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(_taskExecutionHost != null, "taskExecutionHost not initialized.");
                 _componentHost = null;
 
-                if (_taskExecutionHost is IDisposable disposable)
+                IDisposable disposable = _taskExecutionHost as IDisposable;
+                if (disposable != null)
                 {
                     disposable.Dispose();
                 }
@@ -252,13 +253,15 @@ namespace Microsoft.Build.BackEnd
             // Add parameters on any output tags
             foreach (ProjectTaskInstanceChild taskOutputSpecification in _taskNode.Outputs)
             {
-                if (taskOutputSpecification is ProjectTaskOutputItemInstance outputItemInstance)
+                ProjectTaskOutputItemInstance outputItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
+                if (outputItemInstance != null)
                 {
                     taskParameters.Add(outputItemInstance.TaskParameter);
                     taskParameters.Add(outputItemInstance.ItemType);
                 }
 
-                if (taskOutputSpecification is ProjectTaskOutputPropertyInstance outputPropertyInstance)
+                ProjectTaskOutputPropertyInstance outputPropertyInstance = taskOutputSpecification as ProjectTaskOutputPropertyInstance;
+                if (outputPropertyInstance != null)
                 {
                     taskParameters.Add(outputPropertyInstance.TaskParameter);
                     taskParameters.Add(outputPropertyInstance.PropertyName);
@@ -1056,8 +1059,9 @@ namespace Microsoft.Build.BackEnd
                     string outputTargetName = null;
 
                     // check where the outputs are going -- into a vector, or a property?
+                    ProjectTaskOutputItemInstance taskOutputItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
 
-                    if (taskOutputSpecification is ProjectTaskOutputItemInstance taskOutputItemInstance)
+                    if (taskOutputItemInstance != null)
                     {
                         // expand all embedded properties, item metadata and item vectors in the item type name
                         outputTargetIsItem = true;
@@ -1157,7 +1161,8 @@ namespace Microsoft.Build.BackEnd
 
             if (null != taskParameterAttribute)
             {
-                if (taskOutputSpecification is ProjectTaskOutputItemInstance taskItemInstance)
+                ProjectTaskOutputItemInstance taskItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
+                if (taskItemInstance != null)
                 {
                     // This is an output item.
                     // Expand only with properties first, so that expressions like Include="@(foo)" will transfer the metadata of the "foo" items as well, not just their item specs.

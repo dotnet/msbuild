@@ -290,14 +290,16 @@ namespace Microsoft.Build.Shared
 
             if (v != null)
             {
-                Version minVersion = !(keyPlatform.GetValue("MinOSVersion", null) is string minVersionAsString) ? null : VersionUtilities.ConvertToVersion(minVersionAsString);
+                string minVersionAsString = keyPlatform.GetValue("MinOSVersion", null) as string;
+                Version minVersion = minVersionAsString == null ? null : VersionUtilities.ConvertToVersion(minVersionAsString);
                 if (minVersion != null && minVersion > v)
                 {
                     // Filter keys with MinOSVersion > OSVersion
                     insideRange = false;
                 }
 
-                Version maxVersion = !(keyPlatform.GetValue("MaxOSVersion", null) is string maxVersionAsString) ? null : VersionUtilities.ConvertToVersion(maxVersionAsString);
+                string maxVersionAsString = keyPlatform.GetValue("MaxOSVersion", null) as string;
+                Version maxVersion = maxVersionAsString == null ? null : VersionUtilities.ConvertToVersion(maxVersionAsString);
                 if (maxVersion != null && maxVersion < v)
                 {
                     // Filter keys with MaxOSVersion < OSVersion

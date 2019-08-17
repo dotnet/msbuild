@@ -33,7 +33,8 @@ namespace Microsoft.Build.CommandLine
                 return true;
             }
 
-            if (wrappedTask is ICancelableTask cancelableTask)
+            ICancelableTask cancelableTask = wrappedTask as ICancelableTask;
+            if (cancelableTask != null)
             {
                 cancelableTask.Cancel();
                 return true;

@@ -3805,7 +3805,8 @@ namespace Microsoft.Build.Tasks
                 {
                     String key = entry.Name;
                     Object v = entry.Value;
-                    if (!(v is String value))
+                    String value = v as String;
+                    if (value == null)
                     {
                         _logger.LogErrorWithCodeFromResources(null, fileName, 0, 0, 0, 0, "GenerateResource.OnlyStringsSupported", key, v.GetType().FullName);
                     }

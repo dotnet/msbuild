@@ -85,8 +85,9 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
+            AssemblyLoadInfo otherAssemblyInfo = obj as AssemblyLoadInfo;
 
-            if (!(obj is AssemblyLoadInfo otherAssemblyInfo))
+            if (otherAssemblyInfo == null)
             {
                 return false;
             }

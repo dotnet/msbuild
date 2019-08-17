@@ -185,7 +185,8 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(task, "task");
             ErrorUtilities.VerifyThrowArgumentNull(property, "property");
 
-            if (task is IGeneratedTask generatedTask)
+            IGeneratedTask generatedTask = task as IGeneratedTask;
+            if (generatedTask != null)
             {
                 generatedTask.SetPropertyValue(property, value);
             }
@@ -204,13 +205,15 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(task, "task");
             ErrorUtilities.VerifyThrowArgumentNull(property, "property");
 
-            if (task is IGeneratedTask generatedTask)
+            IGeneratedTask generatedTask = task as IGeneratedTask;
+            if (generatedTask != null)
             {
                 return generatedTask.GetPropertyValue(property);
             }
             else
             {
-                if (property is ReflectableTaskPropertyInfo propertyInfo)
+                ReflectableTaskPropertyInfo propertyInfo = property as ReflectableTaskPropertyInfo;
+                if (propertyInfo != null)
                 {
                     return propertyInfo.Reflection.GetValue(task, null);
                 }

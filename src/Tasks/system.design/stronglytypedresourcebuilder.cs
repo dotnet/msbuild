@@ -106,8 +106,9 @@ namespace Microsoft.Build.Tasks
             var resourceTypes = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
             foreach (DictionaryEntry de in resourceList)
             {
+                var node = de.Value as ResXDataNode;
                 ResourceData data;
-                if (de.Value is ResXDataNode node)
+                if (node != null)
                 {
                     string keyname = (string)de.Key;
                     if (keyname != node.Name)

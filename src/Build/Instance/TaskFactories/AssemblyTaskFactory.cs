@@ -225,10 +225,10 @@ namespace Microsoft.Build.BackEnd
                     Task.Run(() => AppDomain.Unload(appDomain));
                 }
             }
-
 #endif
 
-            if (task is TaskHostTask taskAsTaskHostTask)
+            TaskHostTask taskAsTaskHostTask = task as TaskHostTask;
+            if (taskAsTaskHostTask != null)
             {
                 taskAsTaskHostTask.Cleanup();
             }

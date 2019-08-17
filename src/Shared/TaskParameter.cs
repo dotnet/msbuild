@@ -273,11 +273,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ITaskItem CreateNewTaskItemFrom(ITaskItem copyFrom)
         {
+            ITaskItem2 copyFromAsITaskItem2 = copyFrom as ITaskItem2;
+
             string escapedItemSpec = null;
             string escapedDefiningProject = null;
             Dictionary<string, string> escapedMetadata = null;
 
-            if (copyFrom is ITaskItem2 copyFromAsITaskItem2)
+            if (copyFromAsITaskItem2 != null)
             {
                 escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
                 escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
@@ -393,8 +395,9 @@ namespace Microsoft.Build.BackEnd
             IDictionary wrappedMetadata;
             bool wrappedMetadataIsEscaped;
 
+            ITaskItem2 wrappedItemAsITaskItem2 = wrappedItem as ITaskItem2;
 
-            if (wrappedItem is ITaskItem2 wrappedItemAsITaskItem2)
+            if (wrappedItemAsITaskItem2 != null)
             {
                 escapedItemSpec = wrappedItemAsITaskItem2.EvaluatedIncludeEscaped;
                 escapedDefiningProject = wrappedItemAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
@@ -411,8 +414,9 @@ namespace Microsoft.Build.BackEnd
                 wrappedMetadataIsEscaped = false;
             }
 
+            Dictionary<string, string> escapedGenericWrappedMetadata = wrappedMetadata as Dictionary<string, string>;
 
-            if (!(wrappedMetadata is Dictionary<string, string> escapedGenericWrappedMetadata))
+            if (escapedGenericWrappedMetadata == null)
             {
                 escapedGenericWrappedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 

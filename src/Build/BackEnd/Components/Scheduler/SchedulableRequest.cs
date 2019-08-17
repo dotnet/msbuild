@@ -691,7 +691,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (obj != null)
                 {
-                    if (obj is BlockingRequestKey other)
+                    BlockingRequestKey other = obj as BlockingRequestKey;
+                    if (other != null)
                     {
                         return (other._globalRequestId == _globalRequestId) && (other._nodeRequestId == _nodeRequestId);
                     }

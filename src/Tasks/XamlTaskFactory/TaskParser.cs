@@ -184,11 +184,13 @@ namespace Microsoft.Build.Tasks.Xaml
             object rootObject = XamlServices.Load(reader);
             if (null != rootObject)
             {
-                if (rootObject is XamlTypes.ProjectSchemaDefinitions schemas)
+                XamlTypes.ProjectSchemaDefinitions schemas = rootObject as XamlTypes.ProjectSchemaDefinitions;
+                if (schemas != null)
                 {
                     foreach (XamlTypes.IProjectSchemaNode node in schemas.Nodes)
                     {
-                        if (node is XamlTypes.Rule rule)
+                        XamlTypes.Rule rule = node as XamlTypes.Rule;
+                        if (rule != null)
                         {
                             if (String.Equals(rule.Name, desiredRule, StringComparison.OrdinalIgnoreCase))
                             {
@@ -315,7 +317,8 @@ namespace Microsoft.Build.Tasks.Xaml
             }
 
             // If the property is an enum type, parse that.
-            if (baseProperty is XamlTypes.EnumProperty enumProperty)
+            XamlTypes.EnumProperty enumProperty = baseProperty as XamlTypes.EnumProperty;
+            if (enumProperty != null)
             {
                 foreach (XamlTypes.EnumValue enumValue in enumProperty.AdmissibleValues)
                 {
@@ -413,7 +416,10 @@ namespace Microsoft.Build.Tasks.Xaml
             }
 
             XamlTypes.BoolProperty boolProperty = baseProperty as XamlTypes.BoolProperty;
+            XamlTypes.DynamicEnumProperty dynamicEnumProperty = baseProperty as XamlTypes.DynamicEnumProperty;
+            XamlTypes.EnumProperty enumProperty = baseProperty as XamlTypes.EnumProperty;
             XamlTypes.IntProperty intProperty = baseProperty as XamlTypes.IntProperty;
+            XamlTypes.StringProperty stringProperty = baseProperty as XamlTypes.StringProperty;
             XamlTypes.StringListProperty stringListProperty = baseProperty as XamlTypes.StringListProperty;
 
             parameter.IncludeInCommandLine = baseProperty.IncludeInCommandLine;
@@ -433,11 +439,11 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 parameter.Type = PropertyType.Boolean;
             }
-            else if (baseProperty is XamlTypes.EnumPropertyenumProperty)
+            else if (enumProperty != null)
             {
                 parameter.Type = PropertyType.String;
             }
-            else if (baseProperty is XamlTypes.DynamicEnumPropertydynamicEnumProperty)
+            else if (dynamicEnumProperty != null)
             {
                 parameter.Type = PropertyType.String;
             }
@@ -445,7 +451,7 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 parameter.Type = PropertyType.Integer;
             }
-            else if (baseProperty is XamlTypes.StringPropertystringProperty)
+            else if (stringProperty != null)
             {
                 parameter.Type = PropertyType.String;
             }

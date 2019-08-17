@@ -521,7 +521,9 @@ namespace Microsoft.Build.Evaluation
             {
                 using (evaluationProfiler.TrackElement(targetChildElement))
                 {
-                    if (targetChildElement is ProjectTaskElement task)
+                    ProjectTaskElement task = targetChildElement as ProjectTaskElement;
+
+                    if (task != null)
                     {
                         ProjectTaskInstance taskInstance = ReadTaskElement(task);
 
@@ -529,8 +531,9 @@ namespace Microsoft.Build.Evaluation
                         continue;
                     }
 
+                    ProjectPropertyGroupElement propertyGroup = targetChildElement as ProjectPropertyGroupElement;
 
-                    if (targetChildElement is ProjectPropertyGroupElement propertyGroup)
+                    if (propertyGroup != null)
                     {
                         ProjectPropertyGroupTaskInstance propertyGroupInstance = ReadPropertyGroupUnderTargetElement(propertyGroup);
 
@@ -538,8 +541,9 @@ namespace Microsoft.Build.Evaluation
                         continue;
                     }
 
+                    ProjectItemGroupElement itemGroup = targetChildElement as ProjectItemGroupElement;
 
-                    if (targetChildElement is ProjectItemGroupElement itemGroup)
+                    if (itemGroup != null)
                     {
                         ProjectItemGroupTaskInstance itemGroupInstance = ReadItemGroupUnderTargetElement(itemGroup);
 
@@ -547,8 +551,9 @@ namespace Microsoft.Build.Evaluation
                         continue;
                     }
 
+                    ProjectOnErrorElement onError = targetChildElement as ProjectOnErrorElement;
 
-                    if (targetChildElement is ProjectOnErrorElement onError)
+                    if (onError != null)
                     {
                         ProjectOnErrorInstance onErrorInstance = ReadOnErrorElement(onError);
 
@@ -872,30 +877,35 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (ProjectElement element in currentProjectOrImport.Children)
                 {
-                    if (element is ProjectPropertyGroupElement propertyGroup)
+                    ProjectPropertyGroupElement propertyGroup = element as ProjectPropertyGroupElement;
+
+                    if (propertyGroup != null)
                     {
                         EvaluatePropertyGroupElement(propertyGroup);
                         continue;
                     }
 
+                    ProjectItemGroupElement itemGroup = element as ProjectItemGroupElement;
 
-                    if (element is ProjectItemGroupElement itemGroup)
+                    if (itemGroup != null)
                     {
                         _itemGroupElements.Add(itemGroup);
 
                         continue;
                     }
 
+                    ProjectItemDefinitionGroupElement itemDefinitionGroup = element as ProjectItemDefinitionGroupElement;
 
-                    if (element is ProjectItemDefinitionGroupElement itemDefinitionGroup)
+                    if (itemDefinitionGroup != null)
                     {
                         _itemDefinitionGroupElements.Add(itemDefinitionGroup);
 
                         continue;
                     }
 
+                    ProjectTargetElement target = element as ProjectTargetElement;
 
-                    if (element is ProjectTargetElement target)
+                    if (target != null)
                     {
                         if (_projectSupportsReturnsAttribute.ContainsKey(currentProjectOrImport))
                         {
@@ -911,28 +921,32 @@ namespace Microsoft.Build.Evaluation
                         continue;
                     }
 
-                    if (element is ProjectImportElement import)
+                    ProjectImportElement import = element as ProjectImportElement;
+                    if (import != null)
                     {
                         EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
                         continue;
                     }
 
+                    ProjectImportGroupElement importGroup = element as ProjectImportGroupElement;
 
-                    if (element is ProjectImportGroupElement importGroup)
+                    if (importGroup != null)
                     {
                         EvaluateImportGroupElement(currentProjectOrImport.DirectoryPath, importGroup);
                         continue;
                     }
 
+                    ProjectUsingTaskElement usingTask = element as ProjectUsingTaskElement;
 
-                    if (element is ProjectUsingTaskElement usingTask)
+                    if (usingTask != null)
                     {
                         _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
                         continue;
                     }
 
+                    ProjectChooseElement choose = element as ProjectChooseElement;
 
-                    if (element is ProjectChooseElement choose)
+                    if (choose != null)
                     {
                         EvaluateChooseElement(choose);
                         continue;
@@ -1810,21 +1824,25 @@ namespace Microsoft.Build.Evaluation
             {
                 using (_evaluationProfiler.TrackElement(element))
                 {
-                    if (element is ProjectPropertyGroupElement propertyGroup)
+                    ProjectPropertyGroupElement propertyGroup = element as ProjectPropertyGroupElement;
+
+                    if (propertyGroup != null)
                     {
                         EvaluatePropertyGroupElement(propertyGroup);
                         continue;
                     }
 
+                    ProjectItemGroupElement itemGroup = element as ProjectItemGroupElement;
 
-                    if (element is ProjectItemGroupElement itemGroup)
+                    if (itemGroup != null)
                     {
                         _itemGroupElements.Add(itemGroup);
                         continue;
                     }
 
+                    ProjectChooseElement choose = element as ProjectChooseElement;
 
-                    if (element is ProjectChooseElement choose)
+                    if (choose != null)
                     {
                         EvaluateChooseElement(choose);
                         continue;

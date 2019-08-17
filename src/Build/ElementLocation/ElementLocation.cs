@@ -104,8 +104,9 @@ namespace Microsoft.Build.Construction
                 return false;
             }
 
+            IElementLocation that = obj as IElementLocation;
 
-            if (!(obj is IElementLocation that))
+            if (that == null)
             {
                 return false;
             }

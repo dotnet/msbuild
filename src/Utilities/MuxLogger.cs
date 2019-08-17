@@ -1229,7 +1229,8 @@ namespace Microsoft.Build.Utilities
                     // Because of the way the event source works, we actually have to process this here rather than in project finished because if the 
                     // logger is registered without a ProjectFinished handler, but does have an Any handler (as the mock logger does) then we would end up
                     // sending the BuildFinished event before the ProjectFinished event got processed in the Any handler.
-                    if (buildEvent is ProjectFinishedEventArgs projectFinishedEvent && buildEvent.BuildEventContext != null && buildEvent.BuildEventContext.Equals(_firstProjectStartedEventContext))
+                    ProjectFinishedEventArgs projectFinishedEvent = buildEvent as ProjectFinishedEventArgs;
+                    if (projectFinishedEvent != null && buildEvent.BuildEventContext != null && buildEvent.BuildEventContext.Equals(_firstProjectStartedEventContext))
                     {
                         string message = projectFinishedEvent.Succeeded ? ResourceUtilities.GetResourceString("MuxLogger_BuildFinishedSuccess") : ResourceUtilities.GetResourceString("MuxLogger_BuildFinishedFailure");
                         RaiseBuildFinishedEvent(sender, new BuildFinishedEventArgs(message, null, projectFinishedEvent.Succeeded));

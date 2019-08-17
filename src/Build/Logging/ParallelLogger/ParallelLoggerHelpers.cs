@@ -596,7 +596,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public override bool Equals(object obj)
         {
-            if (!(obj is ErrorWarningSummaryDictionaryKey key))
+            ErrorWarningSummaryDictionaryKey key = obj as ErrorWarningSummaryDictionaryKey;
+            if (key == null)
             {
                 return false;
             }
@@ -688,7 +689,8 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Equality
         public override bool Equals(object obj)
         {
-            if (obj is ProjectFullKey compareKey)
+            ProjectFullKey compareKey = obj as ProjectFullKey;
+            if (compareKey != null)
             {
                 return ((compareKey._projectKey == _projectKey) && (compareKey._entryPointKey == _entryPointKey));
             }

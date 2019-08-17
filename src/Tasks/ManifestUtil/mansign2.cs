@@ -284,7 +284,8 @@ namespace System.Deployment.Internal.CodeSigning
             if (context == null)
                 return null;
 
-            if (context.SelectSingleNode("//*[@Id=\"" + idValue + "\"]") is XmlElement idReference)
+            XmlElement idReference = context.SelectSingleNode("//*[@Id=\"" + idValue + "\"]") as XmlElement;
+            if (idReference != null)
                 return idReference;
             idReference = context.SelectSingleNode("//*[@id=\"" + idValue + "\"]") as XmlElement;
             if (idReference != null)
@@ -411,13 +412,15 @@ namespace System.Deployment.Internal.CodeSigning
             nsm.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
 
             XmlElement assembly = manifestDom.SelectSingleNode("asm:assembly", nsm) as XmlElement;
-            if (!(manifestDom.SelectSingleNode("asm:assembly/asm:assemblyIdentity", nsm) is XmlElement assemblyIdentity))
+            XmlElement assemblyIdentity = manifestDom.SelectSingleNode("asm:assembly/asm:assemblyIdentity", nsm) as XmlElement;
+            if (assemblyIdentity == null)
             {
                 throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
             }
 
             // Reuse existing node if exists
-            if (!(manifestDom.SelectSingleNode("asm:assembly/asm2:publisherIdentity", nsm) is XmlElement publisherIdentity))
+            XmlElement publisherIdentity = manifestDom.SelectSingleNode("asm:assembly/asm2:publisherIdentity", nsm) as XmlElement;
+            if (publisherIdentity == null)
             {
                 // create new if not exist
                 publisherIdentity = manifestDom.CreateElement("publisherIdentity", AssemblyV2NamespaceUri);
@@ -436,7 +439,8 @@ namespace System.Deployment.Internal.CodeSigning
             publisherIdentity.SetAttribute("name", signerCert.SubjectName.Name);
             publisherIdentity.SetAttribute("issuerKeyHash", issuerKeyHash);
 
-            if (manifestDom.SelectSingleNode("asm:assembly/ds:Signature", nsm) is XmlElement signature)
+            XmlElement signature = manifestDom.SelectSingleNode("asm:assembly/ds:Signature", nsm) as XmlElement;
+            if (signature != null)
             {
                 assembly.InsertBefore(publisherIdentity, signature);
             }
@@ -496,7 +500,8 @@ namespace System.Deployment.Internal.CodeSigning
             // Make sure we can find the publicKeyToken attribute.
             XmlNamespaceManager nsm = new XmlNamespaceManager(manifestDom.NameTable);
             nsm.AddNamespace("asm", AssemblyNamespaceUri);
-            if (!(manifestDom.SelectSingleNode("asm:assembly/asm:assemblyIdentity", nsm) is XmlElement assemblyIdentity))
+            XmlElement assemblyIdentity = manifestDom.SelectSingleNode("asm:assembly/asm:assemblyIdentity", nsm) as XmlElement;
+            if (assemblyIdentity == null)
             {
                 throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
             }
@@ -895,8 +900,10 @@ namespace System.Deployment.Internal.CodeSigning
 
         private static void StrongNameSignManifestDom(XmlDocument manifestDom, XmlDocument licenseDom, CmiManifestSigner2 signer, bool useSha256)
         {
+            RSA snKey = signer.StrongNameKey as RSA;
+
             // Make sure it is RSA, as this is the only one Fusion will support.
-            if (!(signer.StrongNameKey is RSA snKey))
+            if (snKey == null)
             {
                 throw new NotSupportedException();
             }
@@ -906,7 +913,8 @@ namespace System.Deployment.Internal.CodeSigning
             nsm.AddNamespace("asm", AssemblyNamespaceUri);
 
             // Get to root element.
-            if (!(manifestDom.SelectSingleNode("asm:assembly", nsm) is XmlElement signatureParent))
+            XmlElement signatureParent = manifestDom.SelectSingleNode("asm:assembly", nsm) as XmlElement;
+            if (signatureParent == null)
             {
                 throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
             }
@@ -1044,7 +1052,8 @@ namespace System.Deployment.Internal.CodeSigning
                 throw new ArgumentNullException("strongNameKey");
 
 #if (true) // BUGBUG: Fusion only supports RSA. Do we throw if not RSA???
-            if (!(strongNameKey is RSA rsa))
+            RSA rsa = strongNameKey as RSA;
+            if (rsa == null)
                 throw new ArgumentNullException("strongNameKey");
 #endif
             _strongNameKey = strongNameKey;

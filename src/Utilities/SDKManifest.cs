@@ -337,7 +337,8 @@ namespace Microsoft.Build.Utilities
                         ReadFileListAttributes(rootElement.Attributes);
                         foreach (XmlNode childNode in rootElement.ChildNodes)
                         {
-                            if (!(childNode is XmlElement childElement))
+                            XmlElement childElement = childNode as XmlElement;
+                            if (childElement == null)
                             {
                                 continue;
                             }

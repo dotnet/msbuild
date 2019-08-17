@@ -139,7 +139,8 @@ namespace Microsoft.Build.Tasks
             {
                 for (int i = 0; i < args.Length; i++)
                 {
-                    if (args[i] is String value && value.Length > 1024)
+                    String value = args[i] as String;
+                    if (value != null && value.Length > 1024)
                     {
                         args[i] = value.Substring(0, 1024 - 3) + "...";
                     }
