@@ -595,10 +595,8 @@ namespace Microsoft.Build.Framework.XamlTypes
                     // create a category object ourselves.
                     if (!_categoryNamePropertyListMap.Contains(property.Category))
                     {
-                        Category category = new Category
-                        {
-                            Name = property.Category
-                        };
+                        Category category = new Category();
+                        category.Name = property.Category;
 
                         _evaluatedCategories.Add(category);
                         _categoryNamePropertyListMap.Add(category.Name, new List<BaseProperty>());
