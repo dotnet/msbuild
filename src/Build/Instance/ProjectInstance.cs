@@ -1736,7 +1736,9 @@ namespace Microsoft.Build.Execution
         {
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default);
 
-            return expander.ExpandIntoStringAndUnescape(unexpandedValue, ExpanderOptions.ExpandPropertiesAndItems, ProjectFileLocation);
+            string result = expander.ExpandIntoStringAndUnescape(unexpandedValue, ExpanderOptions.ExpandPropertiesAndItems, ProjectFileLocation);
+
+            return result;
         }
 
         /// <summary>
@@ -1752,7 +1754,7 @@ namespace Microsoft.Build.Execution
         {
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default);
 
-            return ConditionEvaluator.EvaluateCondition(
+            bool result = ConditionEvaluator.EvaluateCondition(
                 condition,
                 ParserOptions.AllowPropertiesAndItemLists,
                 expander,
@@ -1762,6 +1764,8 @@ namespace Microsoft.Build.Execution
                 null /* no logging service */,
                 BuildEventContext.Invalid,
                 FileSystems.Default);
+
+            return result;
         }
 
         /// <summary>
