@@ -711,7 +711,12 @@ namespace Microsoft.Build.Evaluation
             {
                 try
                 {
-                    if (((options & ExpanderOptions.ExpandMetadata) == 0) || (expression.Length == 0))
+                    if (((options & ExpanderOptions.ExpandMetadata) == 0))
+                    {
+                        return expression;
+                    }
+
+                    if (expression.Length == 0)
                     {
                         return expression;
                     }
