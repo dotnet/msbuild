@@ -3903,7 +3903,7 @@ namespace Microsoft.Build.Evaluation
                                 default:
                                     if (ElementsOfType(args, typeof(string)))
                                     {
-                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string) o));
+                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string)o));
                                         return true;
                                     }
                                     break;
