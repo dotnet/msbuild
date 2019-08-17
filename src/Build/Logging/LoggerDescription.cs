@@ -216,13 +216,12 @@ namespace Microsoft.Build.Logging
                 // the outer exception is System.Reflection stuff that says nothing
                 // about the nature of the logger failure.
                 Exception innerException = e.InnerException;
+                // Logger failed politely during construction. In order to preserve
+                // the stack trace at which the error occured we wrap the original
+                // exception instead of throwing.
 
-                if (innerException is LoggerException)
+                if (innerException is LoggerException l)
                 {
-                    // Logger failed politely during construction. In order to preserve
-                    // the stack trace at which the error occured we wrap the original
-                    // exception instead of throwing.
-                    LoggerException l = ((LoggerException)innerException);
                     throw new LoggerException(l.Message, innerException, l.ErrorCode, l.HelpKeyword);
                 }
                 else
