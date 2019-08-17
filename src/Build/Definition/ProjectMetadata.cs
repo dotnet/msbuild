@@ -189,7 +189,11 @@ namespace Microsoft.Build.Evaluation
         public bool IsImported
         {
             get
-            { return !Object.ReferenceEquals(_xml.ContainingProject, _parent.Project.Xml); }
+            {
+                bool isImported = !Object.ReferenceEquals(_xml.ContainingProject, _parent.Project.Xml);
+
+                return isImported;
+            }
         }
 
         /// <summary>
