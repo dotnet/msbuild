@@ -273,7 +273,7 @@ namespace Microsoft.Build.Framework
                 return true;
             }
 
-            if (left is null)
+            if (ReferenceEquals(left, null))
             {
                 return false;
             }
