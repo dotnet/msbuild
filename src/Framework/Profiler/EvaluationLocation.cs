@@ -253,7 +253,7 @@ namespace Microsoft.Build.Framework.Profiler
         /// <nodoc/>
         public override int GetHashCode()
         {
-            int hashCode = 1198539463;
+            var hashCode = 1198539463;
             hashCode = hashCode * -1521134295 + base.GetHashCode();
             hashCode = hashCode * -1521134295 + Id.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<long?>.Default.GetHashCode(ParentId);
