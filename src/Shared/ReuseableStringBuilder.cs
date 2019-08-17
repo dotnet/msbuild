@@ -254,7 +254,7 @@ namespace Microsoft.Build.Shared
             /// because we could otherwise hold a huge builder indefinitely.
             /// This size seems reasonable for MSBuild uses (mostly expression expansion)
             /// </summary>
-            private const int MaxBuilderSize = 2048;
+            private const int MaxBuilderSize = 1024;
 
             /// <summary>
             /// The shared builder.

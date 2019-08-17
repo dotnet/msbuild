@@ -558,7 +558,7 @@ namespace Microsoft.Build.BuildEngine
                 // We couldn't find anymore property tags in the expression,
                 // so just literally copy the remainder into the result
                 // and return.
-                if (expression.Length > sourceIndex)
+                if (expression.Length > sourseIndex)
                 {
                     results.Add(expression.Substring(sourceIndex, expression.Length - sourceIndex));
                 }
