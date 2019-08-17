@@ -1000,7 +1000,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Append the result with the portion of the expression up to
                     // (but not including) the "$(", and advance the sourceIndex pointer.
-                    if (propertyStartIndex > sourceIndex)
+                    if (propertyStartIndex - sourceIndex > 0)
                     {
                         if (results == null)
                         {
@@ -1140,7 +1140,7 @@ namespace Microsoft.Build.Evaluation
 
                         // And if we couldn't find anymore property tags in the expression,
                         // so just literally copy the remainder into the result.
-                        if (expression.Length > sourceIndex)
+                        if (expression.Length - sourceIndex > 0)
                         {
                             result.Append(expression, sourceIndex, expression.Length - sourceIndex);
                         }
