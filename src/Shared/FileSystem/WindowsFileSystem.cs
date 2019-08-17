@@ -109,10 +109,9 @@ namespace Microsoft.Build.Shared.FileSystem
             WindowsNative.Win32FindData findResult;
             using (var findHandle = WindowsNative.FindFirstFileW(searchDirectoryPath, out findResult))
             {
-                int hr;
                 if (findHandle.IsInvalid)
                 {
-                    hr = Marshal.GetLastWin32Error();
+                    int hr = Marshal.GetLastWin32Error();
                     Debug.Assert(hr != WindowsNative.ErrorFileNotFound);
 
                     WindowsNative.EnumerateDirectoryStatus findHandleOpenStatus;
@@ -138,7 +137,7 @@ namespace Microsoft.Build.Shared.FileSystem
                     return new WindowsNative.EnumerateDirectoryResult(directoryPath, findHandleOpenStatus, hr);
                 }
 
-                do
+                while (true)
                 {
                     var isDirectory = (findResult.DwFileAttributes & FileAttributes.Directory) != 0;
 
@@ -175,23 +174,26 @@ namespace Microsoft.Build.Shared.FileSystem
                             }
                         }
                     }
-                } while (WindowsNative.FindNextFileW(findHandle, out findResult));
 
-                hr = Marshal.GetLastWin32Error();
-                if (hr == WindowsNative.ErrorNoMoreFiles)
-                {
-                    // Graceful completion of enumeration.
-                    return new WindowsNative.EnumerateDirectoryResult(
-                        directoryPath,
-                        WindowsNative.EnumerateDirectoryStatus.Success,
-                        hr);
+                    if (!WindowsNative.FindNextFileW(findHandle, out findResult))
+                    {
+                        int hr = Marshal.GetLastWin32Error();
+                        if (hr == WindowsNative.ErrorNoMoreFiles)
+                        {
+                            // Graceful completion of enumeration.
+                            return new WindowsNative.EnumerateDirectoryResult(
+                                directoryPath,
+                                WindowsNative.EnumerateDirectoryStatus.Success,
+                                hr);
+                        }
+
+                        Debug.Assert(hr != WindowsNative.ErrorSuccess);
+                        return new WindowsNative.EnumerateDirectoryResult(
+                            directoryPath,
+                            WindowsNative.EnumerateDirectoryStatus.UnknownError,
+                            hr);
+                    }
                 }
-
-                Debug.Assert(hr != WindowsNative.ErrorSuccess);
-                return new WindowsNative.EnumerateDirectoryResult(
-                    directoryPath,
-                    WindowsNative.EnumerateDirectoryStatus.UnknownError,
-                    hr);
             }
         }
     }
