@@ -100,9 +100,9 @@ namespace Microsoft.Build.Internal
         {
             var encodingAttributeString = reader.GetAttribute("encoding");
 
-            return string.IsNullOrEmpty(encodingAttributeString)
-                ? null
-                : Encoding.GetEncoding(encodingAttributeString);
+            return !string.IsNullOrEmpty(encodingAttributeString)
+                ? Encoding.GetEncoding(encodingAttributeString)
+                : null;
         }
     }
 }
