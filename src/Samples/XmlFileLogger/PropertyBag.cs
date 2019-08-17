@@ -63,7 +63,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
                 throw new ArgumentNullException("newProperties");
             }
 
-            foreach (var property in newProperties)
+            foreach (KeyValuePair<string, string> property in newProperties)
             {
                 AddProperty(property.Key, property.Value);
             }
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
                 throw new ArgumentNullException("newProperties");
             }
 
-            foreach (var property in newProperties)
+            foreach (DictionaryEntry property in newProperties)
             {
                 AddProperty(property.Key.ToString(), property.Value.ToString());
             }
