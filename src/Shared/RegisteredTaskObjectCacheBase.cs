@@ -154,8 +154,7 @@ namespace Microsoft.Build.Shared
                 {
                     try
                     {
-                        IDisposable disposable = obj as IDisposable;
-                        if (disposable != null)
+                        if (obj is IDisposable disposable)
                         {
                             disposable.Dispose();
                         }
