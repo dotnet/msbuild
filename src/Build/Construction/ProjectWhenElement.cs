@@ -68,9 +68,9 @@ namespace Microsoft.Build.Construction
         /// Overridden to verify that the potential parent and siblings
         /// are acceptable. Throws InvalidOperationException if they are not.
         /// </summary>
-        internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer proposedParent, ProjectElement previousSibling, ProjectElement nextSibling)
+        internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer parent, ProjectElement previousSibling, ProjectElement nextSibling)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(proposedParent is ProjectChooseElement, "OM_CannotAcceptParent");
+            ErrorUtilities.VerifyThrowInvalidOperation(parent is ProjectChooseElement, "OM_CannotAcceptParent");
             ErrorUtilities.VerifyThrowInvalidOperation(!(previousSibling is ProjectOtherwiseElement), "OM_NoOtherwiseBeforeWhenOrOtherwise");
         }
 
