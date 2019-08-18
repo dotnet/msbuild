@@ -158,49 +158,6 @@ namespace Microsoft.Build.Shared
         {
             var line = 0;
             var column = 0;
-
-
-/* Unmerged change from project 'Microsoft.Build (netcoreapp2.1)'
-Before:
-            var xmlException = e as XmlException;
-After:
-            if (e as XmlException;
-*/
-
-/* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (netcoreapp2.1)'
-Before:
-            var xmlException = e as XmlException;
-After:
-            if (e as XmlException;
-*/
-
-/* Unmerged change from project 'Microsoft.Build.Framework.UnitTests (netcoreapp2.1)'
-Before:
-            var xmlException = e as XmlException;
-After:
-            if (e as XmlException;
-*/
-
-/* Unmerged change from project 'MSBuild (netcoreapp2.1)'
-Before:
-            var xmlException = e as XmlException;
-After:
-            if (e as XmlException;
-*/
-
-/* Unmerged change from project 'Microsoft.Build.Tasks (netstandard2.0)'
-Before:
-            var xmlException = e as XmlException;
-After:
-            if (e as XmlException;
-*/
-
-/* Unmerged change from project 'Microsoft.Build.Utilities (netstandard2.0)'
-Before:
-            var xmlException = e as XmlException;
-After:
-            if (e as XmlException;
-*/
             if (e is XmlException xmlException)
             {
                 line = xmlException.LineNumber;
