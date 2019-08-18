@@ -2646,8 +2646,9 @@ namespace Microsoft.Build.Tasks
             }
             catch (ArgumentException ae)
             {
-                if (ae.InnerException is XmlException xe)
+                if (ae.InnerException is XmlException)
                 {
+                    XmlException xe = (XmlException) ae.InnerException;
                     _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
                         xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 }
