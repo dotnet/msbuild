@@ -91,16 +91,16 @@ namespace Microsoft.Build.Construction
         /// Sets the parent of this element if it is a valid parent,
         /// otherwise throws.
         /// </summary>
-        internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer parent, ProjectElement previousSibling, ProjectElement nextSibling)
+        internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer proposedParent, ProjectElement previousSibling, ProjectElement nextSibling)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(parent is ProjectRootElement || parent is ProjectWhenElement || parent is ProjectOtherwiseElement, "OM_CannotAcceptParent");
+            ErrorUtilities.VerifyThrowInvalidOperation(proposedParent is ProjectRootElement || proposedParent is ProjectWhenElement || proposedParent is ProjectOtherwiseElement, "OM_CannotAcceptParent");
 
             int nestingDepth = 0;
-            ProjectElementContainer immediateParent = parent;
+            ProjectElementContainer immediateParent = proposedParent;
 
-            while (parent != null)
+            while (proposedParent != null)
             {
-                parent = parent.Parent;
+                proposedParent = proposedParent.Parent;
 
                 nestingDepth++;
 
@@ -110,9 +110,6 @@ namespace Microsoft.Build.Construction
         }
 
         /// <inheritdoc />
-        protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
-        {
-            return owner.CreateChooseElement();
-        }
+        protected override ProjectElement CreateNewInstance(ProjectRootElement owner) => owner.CreateChooseElement();
     }
 }
