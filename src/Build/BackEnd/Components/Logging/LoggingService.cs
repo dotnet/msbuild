@@ -1018,6 +1018,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 BuildWarningEventArgs warningEvent = null;
                 BuildErrorEventArgs errorEvent = null;
+                BuildMessageEventArgs messageEvent = null;
 
                 if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
@@ -1027,7 +1028,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent.BuildEventContext);
                 }
-                else if (buildEvent is BuildMessageEventArgs messageEvent && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+                else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
                     messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent.BuildEventContext);
                 }
@@ -1112,7 +1113,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (loggingPacket != null && loggingPacket.NodeBuildEvent != null && _componentHost != null)
             {
-                if (loggingPacket.NodeBuildEvent.Value.Value is ProjectStartedEventArgs projectStartedEventArgs && _configCache.Value != null)
+                var projectStartedEventArgs = loggingPacket.NodeBuildEvent.Value.Value as ProjectStartedEventArgs;
+                if (projectStartedEventArgs != null && _configCache.Value != null)
                 {
                     ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                     BuildRequestConfiguration buildRequestConfiguration = _configCache.Value[projectStartedEventArgs.ProjectId];
@@ -1462,7 +1464,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             try
             {
-                if (logger is INodeLogger nodeLogger)
+                INodeLogger nodeLogger = logger as INodeLogger;
+                if (null != nodeLogger)
                 {
                     nodeLogger.Initialize(sourceForLogger, _maxCPUCount);
                 }
@@ -1516,7 +1519,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (eventHandler != null)
             {
-                if (args is ProjectStartedEventArgs startedEventArgs)
+                ProjectStartedEventArgs startedEventArgs = args as ProjectStartedEventArgs;
+                if (startedEventArgs != null)
                 {
                     eventHandler(this, startedEventArgs);
                 }
@@ -1532,7 +1536,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (eventHandler != null)
             {
-                if (args is ProjectFinishedEventArgs finishedEventArgs)
+                ProjectFinishedEventArgs finishedEventArgs = args as ProjectFinishedEventArgs;
+                if (finishedEventArgs != null)
                 {
                     eventHandler(this, finishedEventArgs);
                 }

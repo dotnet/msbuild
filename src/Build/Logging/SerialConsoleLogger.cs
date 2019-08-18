@@ -577,7 +577,9 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (showPerfSummary)
             {
-                if (e is ProjectEvaluationStartedEventArgs projectEvaluationStarted)
+                ProjectEvaluationStartedEventArgs projectEvaluationStarted = e as ProjectEvaluationStartedEventArgs;
+
+                if (projectEvaluationStarted != null)
                 {
                     PerformanceCounter counter = GetPerformanceCounter(projectEvaluationStarted.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.InScope = true;
@@ -585,8 +587,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     return;
                 }
 
+                ProjectEvaluationFinishedEventArgs projectEvaluationFinished = e as ProjectEvaluationFinishedEventArgs;
 
-                if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinished)
+                if (projectEvaluationFinished != null)
                 {
                     PerformanceCounter counter = GetPerformanceCounter(projectEvaluationFinished.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.InScope = false;
