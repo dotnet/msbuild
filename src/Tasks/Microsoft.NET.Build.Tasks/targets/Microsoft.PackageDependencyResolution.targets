@@ -272,6 +272,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="CompileTimeAssemblies" ItemName="ResolvedCompileFileDefinitions" />
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
       <Output TaskParameter="PackageFolders" ItemName="AssetsFilePackageFolder" />
+      <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
     </ResolvePackageAssets>
 
     <ItemGroup Condition="'$(UseAppHostFromAssetsFile)' == 'true'">
