@@ -3284,7 +3284,7 @@ namespace Microsoft.Build.CommandLine
 
                 LoggerDescription loggerDescription = ParseLoggingParameter(parameter, unquotedParameter, verbosity);
 
-                if (TryCreateAndConfigureLogger(loggerDescription, verbosity, unquotedParameter, out ILogger logger))
+                if (CreateAndConfigureLogger(loggerDescription, verbosity, unquotedParameter, out ILogger logger))
                 {
                     loggers.Add(logger);
                 }
@@ -3314,7 +3314,7 @@ namespace Microsoft.Build.CommandLine
                 LoggerDescription centralLoggerDescription =
                     ParseLoggingParameter((string)loggerSpec[0], unquotedParameter, verbosity);
 
-                if(!TryCreateAndConfigureLogger(centralLoggerDescription, verbosity, unquotedParameter, out ILogger centralLogger))
+                if(!CreateAndConfigureLogger(centralLoggerDescription, verbosity, unquotedParameter, out ILogger centralLogger))
                 {
                     continue;
                 }
@@ -3429,7 +3429,7 @@ namespace Microsoft.Build.CommandLine
         /// Loads a logger from its assembly, instantiates it, and handles errors.
         /// </summary>
         /// <returns>Instantiated logger.</returns>
-        private static bool TryCreateAndConfigureLogger
+        private static bool CreateAndConfigureLogger
         (
             LoggerDescription loggerDescription,
             LoggerVerbosity verbosity,
