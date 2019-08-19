@@ -96,6 +96,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
+    <EmbeddedResourceUseDependentUponConvention 
+      Condition="'$(EmbeddedResourceUseDependentUponConvention)' == '' and
+                 (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.0') or
+                  ('$(TargetFrameworkIdentifier)' == '.NETStandard' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1'))">true</EmbeddedResourceUseDependentUponConvention>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <CoreBuildDependsOn>
       _CheckForBuildWithNoBuild;
       $(CoreBuildDependsOn);
