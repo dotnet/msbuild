@@ -1,0 +1,14 @@
+<Project DefaultTargets="FetchAndUpdateSdksAndNuGets">
+    <Import Project="$(MSBuildThisFileDirectory)\DotnetBitsVersions.props" />
+
+    <Target Name="Build" DependsOnTargets="FetchAndUpdateSdksAndNuGets" />
+
+    <Target Name="FetchAndUpdateSdksAndNuGets">
+        <MSBuild Projects="sdks_and_nugets/update_sdks_and_nugets.proj" Properties="_RunningFromBuildProject=true"/>
+    </Target>
+
+    <Target Name="GenerateCommitMessage">
+        <MSBuild Projects="sdks_and_nugets/update_sdks_and_nugets.proj" Properties="_RunningFromBuildProject=true" Targets="GenerateCommitMessage" />
+    </Target>
+
+</Project>
