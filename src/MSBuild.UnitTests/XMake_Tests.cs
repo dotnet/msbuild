@@ -749,8 +749,6 @@ namespace Microsoft.Build.UnitTests
                 //Should pass
                 MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 
-                //Should fail as we are not changing existing lines
-                MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,Microsoft.Build,Version=11111 " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #else
                 //Should pass
                 MSBuildApp.Execute(
@@ -760,14 +758,6 @@ namespace Microsoft.Build.UnitTests
                             @"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""",
                             quotedProjectFileName
                         }).ShouldBe(MSBuildApp.ExitType.Success);
-
-                //Should fail as we are not changing existing lines
-                MSBuildApp.Execute(
-                    new[]
-                        {
-                            NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
-                            "/logger:FileLogger,Microsoft.Build,Version=11111", quotedProjectFileName
-                        }).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #endif
             }
             finally
@@ -2040,6 +2030,33 @@ namespace Microsoft.Build.UnitTests
 
             logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", () => logContents);
             logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", () => logContents);
+        }
+
+        [Theory]
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
+        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
+        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
+        public void MissingOptionalLoggersAreIgnored(string logger)
+        {
+            string projectString =
+                "<Project>" +
+                "<Target Name=\"t\"><Message Text=\"Hello\"/></Target>" +
+                "</Project>";
+            using (var env = UnitTests.TestEnvironment.Create())
+            {
+                var tempDir = env.CreateFolder();
+                var projectFile = tempDir.CreateFile("missingloggertest.proj", projectString);
+
+                var parametersLoggerOptional = $"{logger} -verbosity:diagnostic \"{projectFile.Path}\"";
+
+                var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
+                successfulExit.ShouldBe(true);
+                output.ShouldContain("Hello", output);
+                output.ShouldContain("The specified logger could not be created and will not be used.", output);
+            }
         }
 
         [Theory]

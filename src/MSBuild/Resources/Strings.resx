@@ -252,11 +252,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <value>  -logger:&lt;logger&gt;   Use this logger to log events from MSBuild. To specify
                      multiple loggers, specify each logger separately.
                      The &lt;logger&gt; syntax is:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      The &lt;logger class&gt; syntax is:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      The &lt;logger assembly&gt; syntax is:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Logger options specify how MSBuild creates the logger.
                      The &lt;logger parameters&gt; are optional, and are passed
                      to the logger exactly as you typed them. (Short form: -l)
                      Examples:
@@ -406,11 +407,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      multiple loggers, specify each logger separately.
                      (Short form -dl)
                      The &lt;logger&gt; syntax is:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      The &lt;logger class&gt; syntax is:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      The &lt;logger assembly&gt; syntax is:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Logger options specify how MSBuild creates the logger.
                      The &lt;logger parameters&gt; are optional, and are passed
                      to the logger exactly as you typed them. (Short form: -l)
                      Examples:
@@ -1215,6 +1217,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <data name="DuplicateOutputResultsCache" UESanitized="true" Visibility="Public">
     <value>MSBUILD : error MSB1058: Only one output results cache can be specified.</value>
     <comment>{StrBegin="MSBUILD : error MSB1058: "}</comment>
+  </data>
+  <data name="OptionalLoggerCreationMessage" UESanitized="true" Visibility="Public">
+    <value>The specified logger could not be created and will not be used. {0}</value>
+    <comment>
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: {0} contains the exception message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.
+    </comment>
   </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
