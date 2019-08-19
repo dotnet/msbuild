@@ -293,7 +293,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/aspnet/AspNetCore/issues/12064")]
         public void ILLink_and_crossgen_process_razor_assembly()
         { 
             var targetFramework = "netcoreapp3.0";
