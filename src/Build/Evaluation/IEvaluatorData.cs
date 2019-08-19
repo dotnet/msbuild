@@ -206,6 +206,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// A dictionary of all of the environment variable properties.
+        /// </summary>
+        PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary { get; }
+
+        /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
         void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem);
@@ -263,16 +268,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved);
+        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false);
 
         /// <summary>
         /// Sets a property which comes from the Xml.
-        /// Predecessor is any immediately previous property that was overridden by this one during evaluation.
-        /// This would include all properties with the same name that lie above in the logical
-        /// project file, and whose conditions evaluated to true.
-        /// If there are none above this is null.
         /// </summary>
-        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, P predecessor);
+        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped);
 
         /// <summary>
         /// Retrieves an existing target, if any.
