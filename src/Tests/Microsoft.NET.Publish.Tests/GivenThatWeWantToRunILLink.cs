@@ -293,6 +293,50 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink");
         }
 
+        [Fact]
+        public void ILLink_and_crossgen_process_razor_assembly()
+        { 
+            var targetFramework = "netcoreapp3.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = new TestProject
+            {
+                Name = "TestWeb",
+                IsSdkProject = true,
+                IsExe = true,
+                ProjectSdk = "Microsoft.NET.Sdk.Web",
+                TargetFrameworks = targetFramework,
+                SourceFiles =
+                {
+                    ["Program.cs"] = @"
+                        class Program
+                        {
+                            static void Main() {}
+                        }",
+                    ["Test.cshtml"] = @"
+                        @page
+                        @{
+                            System.IO.Compression.ZipFile.OpenRead(""test.zip"");
+                        }
+                    ",
+                },
+                AdditionalProperties =
+                {
+                    ["RuntimeIdentifier"] = rid,
+                    ["PublishTrimmed"] = "true",
+                    ["PublishReadyToRun"] = "true",
+                }
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject).Restore(Log, testProject.Name);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute().Should().Pass();
+
+            var publishDir = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid);
+            publishDir.Should().HaveFile("System.IO.Compression.ZipFile.dll");
+            GivenThatWeWantToRunCrossgen.DoesImageHaveR2RInfo(publishDir.File("TestWeb.Views.dll").FullName);
+        }
+
         private static bool DoesImageHaveMethod(string path, string methodNameToCheck)
         {
             using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
