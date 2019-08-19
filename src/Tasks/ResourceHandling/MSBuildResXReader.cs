@@ -81,14 +81,15 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         private const string ByteArraySerializedObjectMimeType = "application/x-microsoft.net.object.bytearray.base64";
         private const string ResMimeType = "text/microsoft-resx";
 
-        private const string StringTypeName = "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+        private const string StringTypeName20 = "System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+        private const string StringTypeName40 = "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
         private const string MemoryStreamTypeNameDesktopFramework = "System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
         private static string GetFullTypeNameFromAlias(string aliasedTypeName, Dictionary<string, string> aliases)
         {
             if (aliasedTypeName == null)
             {
-                return StringTypeName;
+                return StringTypeName40;
             }
 
             int indexStart = aliasedTypeName.IndexOf(',');
@@ -100,7 +101,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             // Allow "System.String" bare
             if (aliasedTypeName.Equals("System.String", StringComparison.Ordinal))
             {
-                return StringTypeName;
+                return StringTypeName40;
             }
 
             // No alias found. Hope it's sufficiently complete to be resolved at runtime
@@ -132,7 +133,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             typename = GetFullTypeNameFromAlias(typename, aliases);
 
-            if (typename == StringTypeName)
+            if (IsString(typename))
             {
                 if (mimetype == null)
                 {
@@ -274,7 +275,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
         internal static bool IsString(string fileRefType)
         {
-            return fileRefType == StringTypeName;
+            return fileRefType.Equals(StringTypeName40, StringComparison.Ordinal) ||
+                fileRefType.Equals(StringTypeName20, StringComparison.Ordinal);
         }
 
         internal static bool IsMemoryStream(string fileRefType)

@@ -93,16 +93,18 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                 .Value.ShouldBeNull();
         }
 
-        [Fact]
-        public void LoadsStringFromFileRefAsString()
+        [Theory]
+        [InlineData("System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData("System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        public void LoadsStringFromFileRefAsString(string stringType)
         {
             File.Exists(Path.Combine("ResourceHandling", "TextFile1.txt")).ShouldBeTrue("Test deployment is missing None files");
 
             var resxWithLinkedString = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
-@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
+$@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
-    <value>ResourceHandling\TextFile1.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>ResourceHandling\TextFile1.txt;{stringType};utf-8</value>
   </data>"));
 
             AssertSingleStringResource(resxWithLinkedString, "TextFile1", "Contents of TextFile1");
