@@ -82,6 +82,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         private const string ResMimeType = "text/microsoft-resx";
 
         private const string StringTypeName = "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+        private const string MemoryStreamTypeNameDesktopFramework = "System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
         private static string GetFullTypeNameFromAlias(string aliasedTypeName, Dictionary<string, string> aliases)
         {
@@ -155,14 +156,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (mimetype == null)
             {
-                if (typename.IndexOf("System.Byte[]") != -1 && typename.IndexOf("mscorlib") != -1)
+                if (IsByteArray(typename))
                 {
+                    // Handle byte[]'s, which are stored as base-64 encoded strings.
                     byte[] byteArray = Convert.FromBase64String(value);
 
-                    // Comment and logic from https://github.com/dotnet/winforms/blob/16b192389b377c647ab3d280130781ab1a9d3385/src/System.Windows.Forms/src/System/Resources/ResXDataNode.cs#L411-L416
-                    // Handle byte[]'s, which are stored as base-64 encoded strings.
-                    // We can't hard-code byte[] type name due to version number
-                    // updates & potential whitespace issues with ResX files.
                     resources.Add(new LiveObjectResource(name, byteArray));
                     return;
                 }
@@ -234,8 +232,43 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     return;
                 }
             }
+            else if (IsByteArray(fileRefType))
+            {
+                byte[] byteArray = File.ReadAllBytes(fileName);
+
+                resources.Add(new LiveObjectResource(name, byteArray));
+                return;
+            }
+            else if (IsMemoryStream(fileRefType))
+            {
+                // See special-case handling in ResXFileRef
+                // https://github.com/dotnet/winforms/blob/689cd9c69e632997bc85bf421af221d79b12ddd4/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L293-L297
+                byte[] byteArray = File.ReadAllBytes(fileName);
+
+                resources.Add(new LiveObjectResource(name, new MemoryStream(byteArray)));
+                return;
+            }
 
             resources.Add(new FileStreamResource(name, fileRefType, fileName, resxFilename));
+        }
+
+        /// <summary>
+        /// Does this assembly-qualified type name represent an array of bytes?
+        /// </summary>
+        /// <remarks>
+        /// We can't hard-code byte[] type name due to version number
+        /// updates & potential whitespace issues with ResX files.
+        ///
+        /// Comment and logic from https://github.com/dotnet/winforms/blob/16b192389b377c647ab3d280130781ab1a9d3385/src/System.Windows.Forms/src/System/Resources/ResXDataNode.cs#L411-L416
+        /// </remarks>
+        private static bool IsByteArray(string fileRefType)
+        {
+            return fileRefType.IndexOf("System.Byte[]") != -1 && fileRefType.IndexOf("mscorlib") != -1;
+        }
+
+        private static bool IsMemoryStream(string fileRefType)
+        {
+            return fileRefType.Equals(MemoryStreamTypeNameDesktopFramework, StringComparison.Ordinal);
         }
 
         /// <summary>
