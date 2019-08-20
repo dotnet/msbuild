@@ -5,6 +5,13 @@ using Microsoft.Build.Framework;
 using System;
 using System.IO;
 
+#if EXTENSIONS
+using ConflictVersion = System.Version;
+#else
+using ConflictVersion = NuGet.Versioning.NuGetVersion;
+using NuGet.Versioning;
+#endif
+
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     internal enum ConflictItemType
@@ -25,10 +32,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         string PackageId { get; }
         string DisplayName { get; }
 
-        // NOTE: Technically this should be NuGetVersion because System.Version doesn't work with semver.
-        // However, the only scenarios we need to support this property for in conflict resolution is stable versions
-        // of System packages. PackageVersion will be null if System.Version can't parse the version (i.e. if is pre-release)
-        Version PackageVersion { get; }
+        ConflictVersion PackageVersion { get; }
     }
 
     // Wraps an ITask item and adds lazy evaluated properties used by Conflict resolution.
@@ -178,8 +182,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         }
 
         private bool _hasPackageVersion;
-        private Version _packageVersion;
-        public Version PackageVersion
+        private ConflictVersion _packageVersion;
+        public ConflictVersion PackageVersion
         {
             get
             {
@@ -191,7 +195,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     if (packageVersionString.Length != 0)
                     {
-                        Version.TryParse(packageVersionString, out _packageVersion);
+                        ConflictVersion.TryParse(packageVersionString, out _packageVersion);
                     }
 
                     // PackageVersion may be null but don't try to recalculate it

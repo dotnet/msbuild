@@ -12,7 +12,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <ItemGroup Condition="'$(DisableDefaultPackageConflictOverrides)' != 'true'">
-    <PackageConflictOverrides Include="Microsoft.NETCore.App">
+    <PackageConflictOverrides Include="Microsoft.NETCore.App"
+                              Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0')">
       <OverriddenPackages>
         Microsoft.CSharp|4.4.0;
         Microsoft.Win32.Primitives|4.3.0;
