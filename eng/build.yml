@@ -14,6 +14,9 @@ parameters:
   # Job timeout
   timeoutInMinutes: 180
 
+  # Publish using pipelines
+  enablePublishUsingPipelines: false
+
 jobs:
 - template: /eng/common/templates/job/job.yml
   parameters:
@@ -23,6 +26,7 @@ jobs:
     enablePublishBuildArtifacts: true
     enablePublishBuildAssets: true
     enablePublishTestResults: true
+    enablePublishUsingPipelines: ${{parameters.enablePublishUsingPipelines}}
     enableTelemetry: true
     helixRepo: dotnet/toolset
     pool: ${{ parameters.pool }}
@@ -49,6 +53,7 @@ jobs:
                   /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                   /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                   /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                  /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
                   /p:PB_PublishType=$(_PublishType)
 
     steps:
@@ -77,7 +82,7 @@ jobs:
                   --configuration $(BuildConfig)
         displayName: Build
 
-    - ${{ if and(eq(parameters.enablePublishBuildAssets, true), eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - ${{ if and(eq(parameters.enablePublishBuildAssets, true), ne(parameters.enablePublishUsingPipelines, 'true'), eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
       - task: CopyFiles@2
         displayName: Gather Asset Manifests
         inputs:
