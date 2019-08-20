@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 
             var resource = (TypeConverterByteArrayResource)resxWithEmbeddedBitmap[0];
             resource.Name.ShouldBe("pictureBox1.Image");
-            resource.TypeName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            resource.TypeAssemblyQualifiedName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
         }
 
         [Fact]
@@ -176,7 +176,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 
             var resource = (TypeConverterStringResource)resxWithEmbeddedBitmap[0];
             resource.Name.ShouldBe("color");
-            resource.TypeName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            resource.TypeAssemblyQualifiedName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             resource.StringRepresentation.ShouldBe("Blue");
         }
 
@@ -200,7 +200,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 
             var resource = (TypeConverterStringResource)resxWithEmbeddedBitmap[0];
             resource.Name.ShouldBe("Color1");
-            resource.TypeName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            resource.TypeAssemblyQualifiedName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             resource.StringRepresentation.ShouldBe("Blue");
         }
 
@@ -220,7 +220,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
 
             var resource = (FileStreamResource)resxWithLinkedBitmap[0];
             resource.Name.ShouldBe("Image1");
-            resource.TypeName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            resource.TypeAssemblyQualifiedName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
         }
 
         [Fact]
@@ -236,7 +236,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
 
             var resource = (TypeConverterStringResource)resxWithEmbeddedBitmap[0];
             resource.Name.ShouldBe("Color1");
-            resource.TypeName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            resource.TypeAssemblyQualifiedName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             resource.StringRepresentation.ShouldBe("Blue");
         }
 

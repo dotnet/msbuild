@@ -10,14 +10,16 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     internal class TypeConverterStringResource : IResource
     {
         public string Name { get; }
-        public string TypeName { get; }
+        public string TypeAssemblyQualifiedName { get; }
         public string OriginatingFile { get; }
         public string StringRepresentation { get; }
 
-        public TypeConverterStringResource(string name, string typeName, string stringRepresentation, string originatingFile)
+        public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
+
+        public TypeConverterStringResource(string name, string assemblyQualifiedTypeName, string stringRepresentation, string originatingFile)
         {
             Name = name;
-            TypeName = typeName;
+            TypeAssemblyQualifiedName = assemblyQualifiedTypeName;
             StringRepresentation = stringRepresentation;
             OriginatingFile = originatingFile;
         }
@@ -26,7 +28,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
-                preserializedResourceWriter.AddResource(Name, StringRepresentation, TypeName);
+                preserializedResourceWriter.AddResource(Name, StringRepresentation, TypeAssemblyQualifiedName);
             }
             else
             {
