@@ -104,7 +104,13 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool AlwaysUseContentTimestamp = Environment.GetEnvironmentVariable("MSBUILDALWAYSCHECKCONTENTTIMESTAMP") == "1";
 
-        public readonly bool LogProjectImports = Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS") == "1";
+        /// <summary>
+        /// Emit events for project imports.
+        /// </summary>
+        /// <remarks>
+        /// This is not cached because the environment variable can be modified inside msbuild.exe
+        /// </remarks>
+        public bool LogProjectImports => Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS") == "1";
 
         /// <summary>
         /// Read information only once per file per ResolveAssemblyReference invocation.
