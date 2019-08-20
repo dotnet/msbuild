@@ -23,6 +23,5 @@ Documents Index
 ## Specifications
 
 - [CLI installation scenarios](specs/cli-installation-scenarios.md)
-- [Corehost specification](specs/corehost.md)
 - [Runtime configuration file specification](specs/runtime-configuration-file.md)
 
