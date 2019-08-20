@@ -58,16 +58,17 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
-        public void ILLink_runs_and_creates_linked_app(string targetFramework)
+        [InlineData("netcoreapp3.0", true)]
+        [InlineData("netcoreapp3.0", false)]
+        public void ILLink_runs_and_creates_linked_app(string targetFramework, bool referenceClassLibAsPackage)
         {
             var projectName = "HelloWorld";
             var referenceProjectName = "ClassLibForILLink";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName, referenceClassLibAsPackage);
             string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + referenceClassLibAsPackage)
                 .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
                 .Restore(Log, testProject.Name, restoreArgs);
 
@@ -424,7 +425,7 @@ namespace Microsoft.NET.Publish.Tests
                                                  new XElement("action"))));
         }
 
-        private TestProject CreateTestProjectForILLinkTesting(string targetFramework, string mainProjectName, string referenceProjectName)
+        private TestProject CreateTestProjectForILLinkTesting(string targetFramework, string mainProjectName, string referenceProjectName, bool usePackageReference = true)
         {
             var referenceProject = new TestProject()
             {
@@ -445,19 +446,25 @@ public class ClassLib
     }
 }
 ";
-
-            var packageReference = GetPackageReference(referenceProject);
-
             var testProject = new TestProject()
             {
                 Name = mainProjectName,
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true,
-                PackageReferences = { packageReference }
             };
 
-            testProject.AdditionalProperties.Add("RestoreAdditionalProjectSources", 
-                                                 "$(RestoreAdditionalProjectSources);" + Path.GetDirectoryName(packageReference.NupkgPath));
+            if (usePackageReference)
+            {
+                var packageReference = GetPackageReference(referenceProject);
+                testProject.PackageReferences.Add(packageReference);
+                testProject.AdditionalProperties.Add(
+                    "RestoreAdditionalProjectSources",
+                    "$(RestoreAdditionalProjectSources);" + Path.GetDirectoryName(packageReference.NupkgPath));
+            }
+            else
+            {
+                testProject.ReferencedProjects.Add(referenceProject);
+            }
 
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"
 using System;
