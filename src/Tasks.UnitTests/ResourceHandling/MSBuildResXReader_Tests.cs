@@ -76,6 +76,24 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         }
 
         [Fact]
+        public void ResXNullRefProducesNullLiveObject()
+        {
+            var resxWithNullRef = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
+  <data name=""$this.AccessibleDescription"" type=""System.Resources.ResXNullRef, System.Windows.Forms, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"">
+    <value />
+  </data>"));
+
+            resxWithNullRef.ShouldHaveSingleItem();
+
+            resxWithNullRef[0].Name.ShouldBe("$this.AccessibleDescription");
+
+            resxWithNullRef[0].ShouldBeOfType<LiveObjectResource>()
+                .Value.ShouldBeNull();
+        }
+
+        [Fact]
         public void LoadsStringFromFileRefAsString()
         {
             File.Exists(Path.Combine("ResourceHandling", "TextFile1.txt")).ShouldBeTrue("Test deployment is missing None files");

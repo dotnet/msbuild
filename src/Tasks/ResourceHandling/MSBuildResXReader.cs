@@ -152,6 +152,12 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 return;
             }
 
+            if (typename.StartsWith("System.Resources.ResXNullRef", StringComparison.Ordinal))
+            {
+                resources.Add(new LiveObjectResource(name, null));
+                return;
+            }
+
             // TODO: validate typename at this point somehow to make sure it's vaguely right?
 
             if (mimetype == null)
