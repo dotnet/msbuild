@@ -107,10 +107,27 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Emit events for project imports.
         /// </summary>
-        /// <remarks>
-        /// This is not cached because the environment variable can be modified inside msbuild.exe
-        /// </remarks>
-        public bool LogProjectImports => Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS") == "1";
+        private bool? _logProjectImports;
+
+        /// <summary>
+        /// Emit events for project imports.
+        /// </summary>
+        public bool LogProjectImports
+        {
+            get
+            {
+                // Cache the first time
+                if (_logProjectImports == null)
+                {
+                    _logProjectImports = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS"));
+                }
+                return _logProjectImports.Value;
+            }
+            set
+            {
+                _logProjectImports = value;
+            }
+        }
 
         /// <summary>
         /// Read information only once per file per ResolveAssemblyReference invocation.
