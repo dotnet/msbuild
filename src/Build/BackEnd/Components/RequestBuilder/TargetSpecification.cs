@@ -55,8 +55,8 @@ namespace Microsoft.Build.BackEnd
 
         internal static TargetSpecification FactoryForDeserialization(ITranslator translator)
         {
-            var instance = new TargetSpecification();
-            ((ITranslatable) instance).Translate(translator);
+            TargetSpecification instance = new TargetSpecification();
+            ((ITranslatable)instance).Translate(translator);
 
             return instance;
         }

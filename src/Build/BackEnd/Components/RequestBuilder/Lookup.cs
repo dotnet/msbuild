@@ -659,7 +659,7 @@ namespace Microsoft.Build.BackEnd
                 itemsToAdd = itemsToAdd.Distinct(ProjectItemInstance.EqualityComparer);
 
                 // Ensure we don't also add any that already exist.
-                var existingItems = GetItems(itemType);
+                ICollection<ProjectItemInstance> existingItems = GetItems(itemType);
                 if (existingItems.Count > 0)
                 {
                     itemsToAdd = itemsToAdd.Where(item => !(existingItems.Contains(item, ProjectItemInstance.EqualityComparer)));
@@ -765,7 +765,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // Each item needs its own collection for metadata changes, even if this particular change is the same
                 // for more than one item, subsequent changes might not be.
-                var metadataChangeCopy = metadataChanges.Clone();
+                MetadataModifications metadataChangeCopy = metadataChanges.Clone();
 
                 // If we're asked to modify a clone we handed out, record it as a modify of the original
                 // instead

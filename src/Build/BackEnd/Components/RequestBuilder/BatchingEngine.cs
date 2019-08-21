@@ -356,7 +356,7 @@ namespace Microsoft.Build.BackEnd
 
             // Put the buckets back in the order in which they were discovered, so that the first
             // item declared in the project file ends up in the first batch passed into the target/task.
-            var orderedBuckets = new List<ItemBucket>(buckets.Count);
+            List<ItemBucket> orderedBuckets = new List<ItemBucket>(buckets.Count);
             for (int i = 0; i < buckets.Count; ++i)
             {
                 orderedBuckets.Add(null);

@@ -78,7 +78,7 @@ namespace Microsoft.Build.BackEnd
                 typeof(ITranslatable).IsAssignableFrom(type),
                 $"{typeName} must be a {nameof(ITranslatable)}");
 
-            var parameterlessConstructor = parameterlessConstructorCache.Value.GetOrAdd(
+            ConstructorInfo parameterlessConstructor = parameterlessConstructorCache.Value.GetOrAdd(
                 type,
                 t =>
                 {
@@ -98,7 +98,7 @@ namespace Microsoft.Build.BackEnd
                     return constructor;
                 });
 
-            var targetInstanceChild = (ITranslatable) parameterlessConstructor.Invoke(Array.Empty<object>());
+            ITranslatable targetInstanceChild = (ITranslatable)parameterlessConstructor.Invoke(Array.Empty<object>());
 
             targetInstanceChild.Translate(translator);
 

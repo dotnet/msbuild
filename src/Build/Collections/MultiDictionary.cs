@@ -243,7 +243,7 @@ namespace Microsoft.Build.Collections
                 }
                 else if (_entry is TT)
                 {
-                    var list = new List<TT> { (TT) _entry, value };
+                    List<TT> list = new List<TT> { (TT) _entry, value };
                     _entry = list;
                 }
                 else

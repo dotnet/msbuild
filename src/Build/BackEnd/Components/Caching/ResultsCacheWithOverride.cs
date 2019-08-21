@@ -47,7 +47,7 @@ namespace Microsoft.Build.Execution
 
         public BuildResult GetResultForRequest(BuildRequest request)
         {
-            var overrideResult = _override.GetResultForRequest(request);
+            BuildResult overrideResult = _override.GetResultForRequest(request);
             if (overrideResult != null)
             {
 #if DEBUG
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Execution
 
         public BuildResult GetResultsForConfiguration(int configurationId)
         {
-            var overrideResult = _override.GetResultsForConfiguration(configurationId);
+            BuildResult overrideResult = _override.GetResultsForConfiguration(configurationId);
             if (overrideResult != null)
             {
 #if DEBUG
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Execution
             List<string> additionalTargetsToCheckForOverallResult,
             bool skippedResultsDoNotCauseCacheMiss)
         {
-            var overrideRequest = _override.SatisfyRequest(
+            ResultsCacheResponse overrideRequest = _override.SatisfyRequest(
                 request,
                 configInitialTargets,
                 configDefaultTargets,

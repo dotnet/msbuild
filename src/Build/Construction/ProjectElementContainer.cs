@@ -661,7 +661,7 @@ namespace Microsoft.Build.Construction
                 return false;
             }
 
-            var sibling = initialElement;
+            ProjectElement sibling = initialElement;
 
             while (sibling != null && !siblingIsAcceptable(sibling))
             {

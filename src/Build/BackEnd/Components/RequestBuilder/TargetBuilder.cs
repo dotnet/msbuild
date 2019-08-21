@@ -144,7 +144,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (string targetName in targetNames)
             {
-                var targetExists = _projectInstance.Targets.ContainsKey(targetName);
+                bool targetExists = _projectInstance.Targets.ContainsKey(targetName);
                 if (!targetExists && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets))
                 {
                     _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
@@ -543,7 +543,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we've already dealt with this target and it didn't skip, let's log appropriately
                     // Otherwise we don't want anything more to do with it.
-                    var skippedTargetEventArgs = new TargetSkippedEventArgs(
+                    TargetSkippedEventArgs skippedTargetEventArgs = new TargetSkippedEventArgs(
                         ResourceUtilities.GetResourceString(targetResult.ResultCode == TargetResultCode.Success
                             ? "TargetAlreadyCompleteSuccess"
                             : "TargetAlreadyCompleteFailure"),

@@ -61,7 +61,7 @@ namespace Microsoft.Build.BackEnd
         public TaskPropertyInfo[] GetTaskParameters()
         {
             PropertyInfo[] infos = TaskType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            var propertyInfos = new TaskPropertyInfo[infos.Length];
+            TaskPropertyInfo[] propertyInfos = new TaskPropertyInfo[infos.Length];
             for (int i = 0; i < infos.Length; i++)
             {
                 propertyInfos[i] = new ReflectableTaskPropertyInfo(infos[i]);

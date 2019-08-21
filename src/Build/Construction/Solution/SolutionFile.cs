@@ -767,7 +767,7 @@ namespace Microsoft.Build.Construction
                     if (fileElementValue != null)
                     {
                         // Create and populate a ProjectInSolution for the project
-                        var proj = new ProjectInSolution(this)
+                        ProjectInSolution proj = new ProjectInSolution(this)
                         {
                             RelativePath = Path.Combine(etpProjectRelativeDir, fileElementValue)
                         };

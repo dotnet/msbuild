@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
             // the targets together, or we call the engine separately for each target.
             List<string[]> targetLists = MSBuild.CreateTargetLists(Targets, RunEachTargetSeparately);
 
-            var singleProject = new ITaskItem[1];
+            ITaskItem[] singleProject = new ITaskItem[1];
             singleProject[0] = null;
 
             // Build the specified targets in the current project.

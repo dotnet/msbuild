@@ -58,7 +58,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                var keys = new List<K>();
+                List<K> keys = new List<K>();
 
                 foreach (KeyValuePair<K, WeakReference<V>> pair in _dictionary)
                 {

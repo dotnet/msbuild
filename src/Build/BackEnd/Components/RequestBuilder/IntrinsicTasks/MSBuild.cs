@@ -401,7 +401,7 @@ namespace Microsoft.Build.BackEnd
                     projectsToBuildList.Add(Projects[i]);
                 }
             }
-            var projectToBuildInParallel = projectsToBuildList.ToArray();
+            ITaskItem[] projectToBuildInParallel = projectsToBuildList.ToArray();
 
             // Make the call to build the projects
             if (projectToBuildInParallel.Length <= 0) return success;

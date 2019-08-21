@@ -325,10 +325,10 @@ namespace Microsoft.Build.BackEnd
                 WorkUnitResult aggregateResult = new WorkUnitResult();
 
                 // Loop through each of the batch buckets and execute them one at a time
-                for (int i = 0; i < buckets.Count; i++)
+                foreach (ItemBucket v in buckets)
                 {
                     // Execute the batch bucket, pass in which bucket we are executing so that we know when to get a new taskId for the bucket.
-                    taskResult = await ExecuteBucket(taskHost, (ItemBucket)buckets[i], mode, lookupHash);
+                    taskResult = await ExecuteBucket(taskHost, v, mode, lookupHash);
 
                     aggregateResult = aggregateResult.AggregateResult(taskResult);
 
@@ -828,7 +828,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    var type = taskException.GetType();
+                    Type type = taskException.GetType();
 
                     if (type == typeof(LoggerException))
                     {

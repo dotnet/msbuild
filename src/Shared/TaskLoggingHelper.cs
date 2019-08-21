@@ -622,7 +622,7 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            var e = new BuildErrorEventArgs
+            BuildErrorEventArgs e = new BuildErrorEventArgs
                 (
                     subcategory,
                     errorCode,
@@ -858,7 +858,7 @@ namespace Microsoft.Build.Utilities
             {
                 // The more comprehensive output, showing exception types
                 // and inner exceptions
-                var builder = new StringBuilder(200);
+                StringBuilder builder = new StringBuilder(200);
                 do
                 {
                     builder.Append(exception.GetType().Name);
@@ -940,7 +940,7 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            var e = new BuildWarningEventArgs
+            BuildWarningEventArgs e = new BuildWarningEventArgs
                 (
                     subcategory,
                     warningCode,
