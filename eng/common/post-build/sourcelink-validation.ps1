@@ -13,6 +13,12 @@ param(
 # all files present in the repo at a specific commit point.
 $global:RepoFiles = @{}
 
+# Maximum number of jobs to run in parallel
+$MaxParallelJobs = 6
+
+# Wait time between check for system load
+$SecondsBetweenLoadChecks = 10
+
 $ValidatePackage = {
   param( 
     [string] $PackagePath                                 # Full path to a Symbols.NuGet package
@@ -191,10 +197,21 @@ function ValidateSourceLinkLinks {
   }
 
   # Process each NuGet package in parallel
-  $Jobs = @()
   Get-ChildItem "$InputPath\*.symbols.nupkg" |
     ForEach-Object {
-      $Jobs += Start-Job -ScriptBlock $ValidatePackage -ArgumentList $_.FullName
+      Start-Job -ScriptBlock $ValidatePackage -ArgumentList $_.FullName | Out-Null
+      $NumJobs = @(Get-Job -State 'Running').Count
+      
+      while ($NumJobs -ge $MaxParallelJobs) {
+        Write-Host "There are $NumJobs validation jobs running right now. Waiting $SecondsBetweenLoadChecks seconds to check again."
+        sleep $SecondsBetweenLoadChecks
+        $NumJobs = @(Get-Job -State 'Running').Count
+      }
+
+      foreach ($Job in @(Get-Job -State 'Completed')) {
+        Receive-Job -Id $Job.Id
+        Remove-Job -Id $Job.Id
+      }
     }
 
   $ValidationFailures = 0
