@@ -449,6 +449,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             {
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
+                string outputResource = Path.ChangeExtension(Path.GetFullPath(resxFile), ".resources");
+
 #if NETFRAMEWORK
                 if (!usePreserialized)
                 {
@@ -477,9 +479,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 else
                 {
                     Utilities.AssertLogContainsResource(t, "GenerateResource.PreserializedResourcesRequiresExtensions");
+                    Utilities.AssertLogContainsResource(t, "GenerateResource.CorruptOutput", outputResource);
                 }
 
-                File.Exists(Path.ChangeExtension(Path.GetFullPath(resxFile), ".resources"))
+                File.Exists(outputResource)
                     .ShouldBeFalse("Resources file was left on disk even though resource creation failed.");
             }
             finally

@@ -3361,6 +3361,10 @@ namespace Microsoft.Build.Tasks
 
                 // one of the above should have been logged as we would have used preserialized writer otherwise.
                 Debug.Assert(_logger.HasLoggedErrors);
+
+                // We may have partially written some string resources to a file, then bailed out
+                // because we encountered a non-string resource but don't meet the prereqs.
+                RemoveCorruptedFile(filename);
             }
         }
 
