@@ -17,7 +17,6 @@ using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
-using Microsoft.Build.Logging;
 using System.IO.Compression;
 
 namespace Microsoft.Build.UnitTests
