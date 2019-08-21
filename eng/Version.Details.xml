@@ -7,9 +7,9 @@
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="System.Resources.Extensions" Version="4.6.0-preview9.19416.11">
+    <Dependency Name="System.Resources.Extensions" Version="4.6.0-preview9.19420.9">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>b3a4cdd6cd9b000ab05e585236455f1482a0bbf9</Sha>
+      <Sha>b9b3e8ea93edecdd886e56fbbd5501e56c55928b</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>
