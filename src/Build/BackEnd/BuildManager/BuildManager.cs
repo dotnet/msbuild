@@ -792,7 +792,7 @@ namespace Microsoft.Build.Execution
 
             void SerializeCaches()
             {
-                var errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
+                string errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
 
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
@@ -1021,7 +1021,7 @@ namespace Microsoft.Build.Execution
                         catch (BuildAbortedException bae)
                         {
                             // We were canceled before we got issued by the work queue.
-                            var result = new BuildResult(submission.BuildRequest, bae);
+                            BuildResult result = new BuildResult(submission.BuildRequest, bae);
                             submission.CompleteResults(result);
                             submission.CompleteLogging(true);
                             CheckSubmissionCompletenessAndRemove(submission);
