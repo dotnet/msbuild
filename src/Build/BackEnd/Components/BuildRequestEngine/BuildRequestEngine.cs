@@ -512,7 +512,7 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     // If we have results already in the cache for this request, give them to the
                                     // entry now.
-                                    var cacheResponse = resultsCache.SatisfyRequest(
+                                    ResultsCacheResponse cacheResponse = resultsCache.SatisfyRequest(
                                         request: request,
                                         configInitialTargets: config.ProjectInitialTargets,
                                         configDefaultTargets: config.ProjectDefaultTargets,

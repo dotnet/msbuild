@@ -238,8 +238,8 @@ namespace Microsoft.Build.Tasks
                 haveGeneratedContent = true;
             }
 
-            var generatedCode = new StringBuilder();
-            using (var writer = new StringWriter(generatedCode, CultureInfo.CurrentCulture))
+            StringBuilder generatedCode = new StringBuilder();
+            using (StringWriter writer = new StringWriter(generatedCode, CultureInfo.CurrentCulture))
             {
                 provider.GenerateCodeFromCompileUnit(unit, writer, new CodeGeneratorOptions());
             }

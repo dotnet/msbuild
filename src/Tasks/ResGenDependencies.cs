@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static ResGenDependencies DeserializeCache(string stateFile, bool useSourcePath, TaskLoggingHelper log)
         {
-            var retVal = (ResGenDependencies)DeserializeCache(stateFile, log, typeof(ResGenDependencies)) ?? new ResGenDependencies();
+            ResGenDependencies retVal = (ResGenDependencies)DeserializeCache(stateFile, log, typeof(ResGenDependencies)) ?? new ResGenDependencies();
 
             // Ensure that the cache is properly initialized with respect to how resgen will 
             // resolve linked files within .resx files.  ResGen has two different
@@ -235,7 +235,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
 #if FEATURE_RESX_RESOURCE_READER
-                    using (var resxReader = new ResXResourceReader(filename))
+                    using (ResXResourceReader resxReader = new ResXResourceReader(filename))
                     {
                         // Tell the reader to return ResXDataNode's instead of the object type
                         // the resource becomes at runtime so we can figure out which files

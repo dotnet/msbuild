@@ -37,14 +37,14 @@ namespace Microsoft.Build.Shared
                 var e = query.EnumAllInstances();
 
                 int fetched;
-                var instances = new ISetupInstance[1];
+                ISetupInstance[] instances = new ISetupInstance[1];
                 do
                 {
                     // Call e.Next to query for the next instance (single item or nothing returned).
                     e.Next(1, instances, out fetched);
                     if (fetched <= 0) continue;
 
-                    var instance = instances[0];
+                    ISetupInstance instance = instances[0];
                     var state = ((ISetupInstance2) instance).GetState();
                     Version version;
 

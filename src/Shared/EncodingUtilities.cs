@@ -117,7 +117,7 @@ namespace Microsoft.Build.Shared
             int bytesRead;
             var buffer = new byte[preamble.Length];
 
-            var position = stream.Position;
+            long position = stream.Position;
             if (stream.Position != 0)
             {
                 stream.Seek(0, SeekOrigin.Begin);
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Shared
         /// <returns>True when the first 3 bytes of the file are equal to the UTF8 BOM.</returns>
         internal static bool FileStartsWithPreamble(string file)
         {
-            using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 return StartsWithPreamble(stream);
             }

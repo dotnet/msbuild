@@ -75,7 +75,7 @@ namespace Microsoft.Build.Execution
                 _lastConfigurationId = _nextConfigurationId();
                 configIdMapping[config.ConfigurationId] = _lastConfigurationId;
 
-                var newConfig = config.ShallowCloneWithNewId(_lastConfigurationId);
+                BuildRequestConfiguration newConfig = config.ShallowCloneWithNewId(_lastConfigurationId);
                 newConfig.ResultsNodeId = Scheduler.InvalidNodeId;
 
                 _aggregatedConfigCache.AddConfiguration(newConfig);

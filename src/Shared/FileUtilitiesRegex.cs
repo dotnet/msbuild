@@ -139,7 +139,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if(!hasShare)
+            if (!hasShare)
             {
                 //no subfolder means no unc pattern. string is something like "\\abc" in this case
                 return -1;

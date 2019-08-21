@@ -1114,7 +1114,7 @@ namespace Microsoft.Build.Shared
             if (count < 1)
                 return path;
 
-            var parent = Directory.GetParent(path);
+            DirectoryInfo parent = Directory.GetParent(path);
 
             while (count > 1 && parent?.Parent != null)
             {

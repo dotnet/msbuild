@@ -71,8 +71,8 @@ namespace Microsoft.Build.Tasks
 
             // Go through all files and touch 'em
             bool retVal = true;
-            var touchedItems = new List<ITaskItem>();
-            var touchedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<ITaskItem> touchedItems = new List<ITaskItem>();
+            HashSet<string> touchedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ITaskItem file in Files)
             {

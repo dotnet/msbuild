@@ -112,12 +112,12 @@ namespace Microsoft.Build.Shared
             Directory.CreateDirectory(dest);
 
             DirectoryInfo sourceInfo = new DirectoryInfo(source);
-            foreach (var fileInfo in sourceInfo.GetFiles())
+            foreach (FileInfo fileInfo in sourceInfo.GetFiles())
             {
                 string destFile = Path.Combine(dest, fileInfo.Name);
                 fileInfo.CopyTo(destFile);
             }
-            foreach (var subdirInfo in sourceInfo.GetDirectories())
+            foreach (DirectoryInfo subdirInfo in sourceInfo.GetDirectories())
             {
                 string destDir = Path.Combine(dest, subdirInfo.Name);
                 CopyDirectory(subdirInfo.FullName, destDir);

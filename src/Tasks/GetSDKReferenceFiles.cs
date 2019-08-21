@@ -668,7 +668,7 @@ namespace Microsoft.Build.Tasks
                 {
                     info = sdkFilesCache.GetCacheFileInfoFromSDK(sdkRoot, GetReferencePathsFromManifest(sdk));
 
-                    var saveContext = new SaveContext(sdkIdentity, sdkRoot, info);
+                    SaveContext saveContext = new SaveContext(sdkIdentity, sdkRoot, info);
 
                     if (_synchronous)
                     {

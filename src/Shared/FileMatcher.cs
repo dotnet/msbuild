@@ -1942,7 +1942,7 @@ namespace Microsoft.Build.Shared
                     // Ideally, ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
                     // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
 
-                    var filespecUnescapedFullyQualified = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
+                    string filespecUnescapedFullyQualified = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
 
                     if (filespecUnescapedFullyQualified.Equals(filespecUnescaped, StringComparison.Ordinal))
                     {
@@ -2099,8 +2099,8 @@ namespace Microsoft.Build.Shared
                 return aString;
             }
 
-            var sb = new StringBuilder(aString.Length);
-            var index = 0;
+            StringBuilder sb = new StringBuilder(aString.Length);
+            int index = 0;
 
             // preserve meaningful roots and their slashes
             if (aString.Length >= 2 && IsValidDriveChar(aString[0]) && aString[1] == ':')
@@ -2108,7 +2108,7 @@ namespace Microsoft.Build.Shared
                 sb.Append(aString[0]);
                 sb.Append(aString[1]);
 
-                var i = SkipCharacters(aString, 2, c => FileUtilities.IsAnySlash(c));
+                int i = SkipCharacters(aString, 2, c => FileUtilities.IsAnySlash(c));
 
                 if (index != i)
                 {
@@ -2135,7 +2135,7 @@ namespace Microsoft.Build.Shared
 
             while (index < aString.Length)
             {
-                var afterSlashesIndex = SkipCharacters(aString, index, c => FileUtilities.IsAnySlash(c));
+                int afterSlashesIndex = SkipCharacters(aString, index, c => FileUtilities.IsAnySlash(c));
 
                 // do not append separator at the end of the string
                 if (afterSlashesIndex >= aString.Length)
@@ -2148,7 +2148,7 @@ namespace Microsoft.Build.Shared
                     sb.Append(s_directorySeparator);
                 }
 
-                var afterNonSlashIndex = SkipCharacters(aString, afterSlashesIndex, c => !FileUtilities.IsAnySlash(c));
+                int afterNonSlashIndex = SkipCharacters(aString, afterSlashesIndex, c => !FileUtilities.IsAnySlash(c));
 
                 sb.Append(aString, afterSlashesIndex, afterNonSlashIndex - afterSlashesIndex);
 
@@ -2166,7 +2166,7 @@ namespace Microsoft.Build.Shared
         /// <returns>First index that does not satisfy the condition. Returns the string's length if end of string is reached</returns>
         private static int SkipCharacters(string aString, int startingIndex, Func<char, bool> jumpOverCharacter)
         {
-            var index = startingIndex;
+            int index = startingIndex;
 
             while (index < aString.Length && jumpOverCharacter(aString[index]))
             {

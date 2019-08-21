@@ -25,7 +25,7 @@ namespace Microsoft.Build.Execution
 
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                using (var fileStream = File.OpenWrite(fullPath))
+                using (FileStream fileStream = File.OpenWrite(fullPath))
                 {
                     var translator = BinaryTranslator.GetWriteTranslator(fileStream);
 
@@ -77,9 +77,9 @@ namespace Microsoft.Build.Execution
                 ConfigCache configCache = null;
                 ResultsCache resultsCache = null;
 
-                using (var fileStream = File.OpenRead(inputCacheFile))
+                using (FileStream fileStream = File.OpenRead(inputCacheFile))
                 {
-                    var translator = BinaryTranslator.GetReadTranslator(fileStream, null);
+                    ITranslator translator = BinaryTranslator.GetReadTranslator(fileStream, null);
 
                     translator.Translate(ref configCache);
                     translator.Translate(ref resultsCache);

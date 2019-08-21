@@ -75,7 +75,7 @@ namespace Microsoft.Build.Execution
 
         public BuildRequestConfiguration GetMatchingConfiguration(BuildRequestConfiguration config)
         {
-            var overrideConfig = _override.GetMatchingConfiguration(config);
+            BuildRequestConfiguration overrideConfig = _override.GetMatchingConfiguration(config);
 
             if (overrideConfig != null)
             {
@@ -114,7 +114,7 @@ namespace Microsoft.Build.Execution
 
         public bool HasConfiguration(int configId)
         {
-            var overrideHasConfiguration = _override.HasConfiguration(configId);
+            bool overrideHasConfiguration = _override.HasConfiguration(configId);
 
             if (overrideHasConfiguration)
             {

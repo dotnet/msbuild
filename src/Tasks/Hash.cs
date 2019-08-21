@@ -44,7 +44,7 @@ namespace Microsoft.Build.Tasks
         {
             if (ItemsToHash != null && ItemsToHash.Length > 0)
             {
-                using (var sha1 = SHA1.Create())
+                using (SHA1 sha1 = SHA1.Create())
                 {
                     var concatenatedItemStringSize = ComputeStringSize(ItemsToHash);
 
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks
 
                     using (var stringBuilder = new ReuseableStringBuilder(Math.Max(concatenatedItemStringSize, hashStringSize)))
                     {
-                        foreach (var item in ItemsToHash)
+                        foreach (ITaskItem item in ItemsToHash)
                         {
                             string itemSpec = item.ItemSpec;
                             stringBuilder.Append(IgnoreCase ? itemSpec.ToUpperInvariant() : itemSpec);

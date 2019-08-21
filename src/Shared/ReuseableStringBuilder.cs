@@ -191,9 +191,9 @@ namespace Microsoft.Build.Shared
             LazyPrepare();
             _cachedString = null;
 
-            var separatorsRemaining = strings.Count - 1;
+            int separatorsRemaining = strings.Count - 1;
 
-            foreach (var s in strings)
+            foreach (string s in strings)
             {
                 _borrowedBuilder.Append(s);
 

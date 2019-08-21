@@ -57,7 +57,7 @@ namespace Microsoft.Build.Utilities
                 {
                     while (true)
                     {
-                        var text = reader.ReadLine();
+                        string text = reader.ReadLine();
                         if (text == null)
                         {
                             return;

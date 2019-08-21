@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (string pair in EventData.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    var item = pair.Split(MSBuildConstants.EqualsChar, 2, StringSplitOptions.RemoveEmptyEntries);
+                    string[] item = pair.Split(MSBuildConstants.EqualsChar, 2, StringSplitOptions.RemoveEmptyEntries);
 
                     if (item.Length != 2)
                     {

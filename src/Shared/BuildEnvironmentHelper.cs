@@ -75,8 +75,7 @@ namespace Microsoft.Build.Shared
         private static BuildEnvironment Initialize()
         {
             // See https://github.com/Microsoft/msbuild/issues/1461 for specification of ordering and details.
-            var possibleLocations = new Func<BuildEnvironment>[]
-            {
+            Func<BuildEnvironment>[] possibleLocations = {
                 TryFromEnvironmentVariable,
                 TryFromVisualStudioProcess,
                 TryFromMSBuildProcess,
@@ -86,9 +85,9 @@ namespace Microsoft.Build.Shared
                 TryFromAppContextBaseDirectory
             };
 
-            foreach (var location in possibleLocations)
+            foreach (Func<BuildEnvironment> location in possibleLocations)
             {
-                var env = location();
+                BuildEnvironment env = location();
                 if (env != null)
                     return env;
             }

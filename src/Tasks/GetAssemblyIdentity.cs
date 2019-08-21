@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            var list = new List<ITaskItem>();
+            List<ITaskItem> list = new List<ITaskItem>();
             foreach (ITaskItem item in AssemblyFiles)
             {
                 AssemblyName an;

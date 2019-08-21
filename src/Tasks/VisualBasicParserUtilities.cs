@@ -40,8 +40,8 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private static ExtractedClassName Extract(VisualBasicTokenizer tokens)
         {
-            var state = new ParseState();
-            var result = new ExtractedClassName();
+            ParseState state = new ParseState();
+            ExtractedClassName result = new ExtractedClassName();
 
             foreach (Token t in tokens)
             {
