@@ -483,8 +483,8 @@ namespace Microsoft.Build.BackEnd
             // string[] represents a set of target names to build.  Depending on the value 
             // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
             // the targets together, or we call the engine separately for each target.
-            var targetLists = new List<string[]>();
-            if ((runEachTargetSeparately) && (targets != null) && (targets.Length > 0))
+            List<string[]> targetLists = new List<string[]>();
+            if (runEachTargetSeparately && (targets != null) && (targets.Length > 0))
             {
                 // Separate target invocations for each individual target.
                 foreach (string targetName in targets)
@@ -646,7 +646,7 @@ namespace Microsoft.Build.BackEnd
                 // first param, we are indicating that the project to build is the same
                 // as the *calling* project file.
 
-                var taskHost = (TaskHost)buildEngine;
+                TaskHost taskHost = (TaskHost)buildEngine;
                 BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
 
                 bool currentTargetResult = result.Result;
