@@ -242,15 +242,16 @@ namespace FrameworkReferenceTest
         }
 
         [Theory]
-        [InlineData("Major", true)]
-        [InlineData("latestMinor", true)]
-        [InlineData("Invalid", false)]
-        public void RollForwardCanBeSpecifiedViaProperty(string rollForwardValue, bool valid)
+        [InlineData("Major", "netcoreapp3.0", true)]
+        [InlineData("Major", "netcoreapp2.0", true)]
+        [InlineData("latestMinor", "netcoreapp3.0", true)]
+        [InlineData("Invalid", "netcoreapp3.0", false)]
+        public void RollForwardCanBeSpecifiedViaProperty(string rollForwardValue, string tfm, bool valid)
         {
             var testProject = new TestProject()
             {
                 Name = "RollForwardSetting",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = tfm,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -287,8 +288,16 @@ namespace FrameworkReferenceTest
             }
         }
 
-        [Fact]
-        public void RollForwardIsNotSupportedOn22()
+        [Theory]
+        [InlineData("Major", true)]
+        [InlineData("LatestMajor", true)]
+        [InlineData("latestMAJOR", true)]
+        [InlineData("Disable", false)]
+        [InlineData("LatestPatch", false)]
+        [InlineData("Minor", false)]
+        [InlineData("LatestMinor", false)]
+        [InlineData("LATESTminor", false)]
+        public void RollForwardIsNotSupportedOn22(string rollForwardValue, bool valid)
         {
             var testProject = new TestProject()
             {
@@ -298,19 +307,29 @@ namespace FrameworkReferenceTest
                 IsExe = true
             };
 
-            testProject.AdditionalProperties["RollForward"] = "Major";
+            testProject.AdditionalProperties["RollForward"] = rollForwardValue;
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
-            buildCommand
-                .Execute()
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining("NETSDK1103");
+            var result = buildCommand.Execute();
+
+            if (valid)
+            {
+                result
+                    .Should()
+                    .Pass();
+            }
+            else
+            {
+                result
+                    .Should()
+                    .Fail()
+                    .And
+                    .HaveStdOutContaining("NETSDK1103");
+            }
         }
 
         [CoreMSBuildAndWindowsOnlyFact]

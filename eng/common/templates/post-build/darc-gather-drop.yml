@@ -5,9 +5,8 @@ jobs:
 - job: gatherDrop
   displayName: Gather Drop
   dependsOn: setupMaestroVars
-  condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], ${{ parameters.ChannelId }})
+  condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', ${{ parameters.ChannelId }}))
   variables:
-    - group: Publish-Build-Assets
     - name: BARBuildId
       value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.BARBuildId'] ]
   pool:
@@ -19,4 +18,6 @@ jobs:
         filePath: $(Build.SourcesDirectory)/eng/common/post-build/darc-gather-drop.ps1
         arguments: -BarBuildId $(BARBuildId) 
           -DropLocation $(Agent.BuildDirectory)/Temp/Drop/ 
-          -MaestroAccessToken $(MaestroAccessToken)
+          -MaestroApiAccessToken $(MaestroApiAccessToken)
+          -MaestroApiEndPoint $(MaestroApiEndPoint)
+          -MaestroApiVersion $(MaestroApiVersion)

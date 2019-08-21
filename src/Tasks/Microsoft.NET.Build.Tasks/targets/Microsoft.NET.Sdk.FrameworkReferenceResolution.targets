@@ -33,7 +33,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   
-  <Target Name="ProcessFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads">
+  <Target Name="ProcessFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads"
+          Condition="'@(FrameworkReference)' != ''">
     
     <CheckForDuplicateFrameworkReferences
         FrameworkReferences="@(FrameworkReference)"
