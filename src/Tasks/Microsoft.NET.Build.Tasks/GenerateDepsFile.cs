@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tasks
         // Full set of @(ReferenceSatellitePaths) found by RAR
         public ITaskItem[] ReferenceSatellitePaths { get; set; } = Array.Empty<ITaskItem>();
 
-        // Subset of @(ReferencePath) that is not CopyLoca:, used for compilation, but not runtime assets
+        // Subset of @(ReferencePath) that is not CopyLocal, used for compilation, but not runtime assets
         public ITaskItem[] ReferenceAssemblies { get; set; } = Array.Empty<ITaskItem>();
 
         // Runtime assets for self-contained deployment from runtime pack
@@ -84,7 +84,8 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ResolvedRuntimeTargetsFiles { get; set; }
 
         // CopyLocal subset ot of @(ReferencePath), @(ReferenceDependencyPath)
-        // Only the item spec is needed as it is used to filter the other items
+        // Used to filter out non-runtime assemblies from deps file. Only project and direct references in this
+        // set will be written to deps file as runtime dependencies.
         public string[] UserRuntimeAssemblies { get; set; }
 
         public bool IsSelfContained { get; set; }
