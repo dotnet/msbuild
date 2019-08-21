@@ -53,6 +53,48 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        //  Windows only because default RuntimeIdentifier only applies when current OS is Windows
+        [WindowsOnlyTheory]
+        [InlineData("Microsoft.DiasymReader.Native/1.7.0", false, "AnyCPU")]
+        [InlineData("Microsoft.DiasymReader.Native/1.7.0", true, "x86")]
+        [InlineData("SQLite/3.13.0", false, "x86")]
+        [InlineData("SQLite/3.13.0", true, "x86")]
+
+        public void PlatformTargetInferredCorrectly(string packageToReference, bool referencePlatformPackage, string expectedPlatform)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AutoRuntimeIdentifierTest",
+                TargetFrameworks = "net472",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var packageElements = packageToReference.Split('/');
+            string packageName = packageElements[0];
+            string packageVersion = packageElements[1];
+
+            testProject.PackageReferences.Add(new TestPackageReference(packageName, packageVersion));
+            if (referencePlatformPackage)
+            {
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NETCore.Platforms", "2.1.0"));
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: packageName + "_" + referencePlatformPackage.ToString())
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getValueCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, "PlatformTarget");
+
+            getValueCommand.Execute().Should().Should();
+            getValueCommand.GetValues().Single().Should().Be(expectedPlatform);
+        }
+
         [WindowsOnlyTheory]
         // If we don't set platformTarget and don't use native dependency, we get working AnyCPU app.
         [InlineData("defaults", null, false, "Native code was not used (MSIL)")]

@@ -21,6 +21,7 @@ jobs:
     enableMicrobuild: true
     enablePublishBuildAssets: true
     enableTelemetry: true
+    enablePublishUsingPipelines: true
     helixRepo: dotnet/sdk
     pool: ${{ parameters.pool }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
@@ -47,6 +48,7 @@ jobs:
                     /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                     /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                     /p:PB_PublishType=$(_PublishType)
+                    /p:DotNetPublishUsingPipelines=true
         - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
         - _PerfIterations: 25
     steps:
