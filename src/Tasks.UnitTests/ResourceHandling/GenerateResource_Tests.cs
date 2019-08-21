@@ -478,6 +478,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 {
                     Utilities.AssertLogContainsResource(t, "GenerateResource.PreserializedResourcesRequiresExtensions");
                 }
+
+                File.Exists(Path.ChangeExtension(Path.GetFullPath(resxFile), ".resources"))
+                    .ShouldBeFalse("Resources file was left on disk even though resource creation failed.");
             }
             finally
             {
