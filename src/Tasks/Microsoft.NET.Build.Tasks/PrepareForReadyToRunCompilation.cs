@@ -124,10 +124,12 @@ namespace Microsoft.NET.Build.Tasks
             {
                 return;
             }
+            
+            var exclusionSet = ExcludeList == null ? null : new HashSet<string>(ExcludeList, StringComparer.OrdinalIgnoreCase);
 
             foreach (var file in inputFiles)
             {
-                var eligibility = GetInputFileEligibility(file);
+                var eligibility = GetInputFileEligibility(file, exclusionSet);
 
                 if (eligibility == Eligibility.None)
                 {
@@ -220,7 +222,7 @@ namespace Microsoft.NET.Build.Tasks
             CompileAndReference
         };
 
-        Eligibility GetInputFileEligibility(ITaskItem file)
+        Eligibility GetInputFileEligibility(ITaskItem file, HashSet<string> exclusionSet)
         {
             // Check to see if this is a valid ILOnly image that we can compile
             using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
@@ -265,15 +267,9 @@ namespace Microsoft.NET.Build.Tasks
             }
   
             // Check if the file is explicitly excluded from being compiled
-            if (ExcludeList != null)
+            if (exclusionSet != null && exclusionSet.Contains(Path.GetFileName(file.ItemSpec)))
             {
-                foreach (var item in ExcludeList)
-                {
-                    if (String.Compare(Path.GetFileName(file.ItemSpec), item, true) == 0)
-                    {
-                        return Eligibility.ReferenceOnly;
-                    }
-                }
+                return Eligibility.ReferenceOnly;
             }
 
             return Eligibility.CompileAndReference;
