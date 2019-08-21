@@ -762,11 +762,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </ItemGroup>
   </Target>
-  
+
+  <PropertyGroup Condition="'$(SelfContained)' == 'true'">
+    <_ComputeManagedRuntimePackAssembliesIfSelfContained>_ComputeManagedRuntimePackAssemblies</_ComputeManagedRuntimePackAssembliesIfSelfContained>
+  </PropertyGroup>
+
   <!-- Determine the managed assembly subset of ResolvedFileToPublish that should be post-processed by linker, and ready to run compilation -->
-  <!-- -->
   <Target Name="_ComputeAssembliesToPostprocessOnPublish" 
-          DependsOnTargets="_ComputeUserRuntimeAssemblies">
+          DependsOnTargets="_ComputeUserRuntimeAssemblies;$(_ComputeManagedRuntimePackAssembliesIfSelfContained)">
     
     <!-- 
       Default set of files to post-process correspond to the items that would be designated
@@ -786,11 +789,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- Assembly produced by this project -->
       <_ManagedRuntimeAssembly Include="@(IntermediateAssembly)" />
     </ItemGroup>
-    
+
     <!-- Assemblies from runtime packs for self-contained apps -->
-    <CallTarget Targets="_ComputeManagedRuntimePackAssemblies" Condition="'$(SelfContained)' == 'true'">
-      <Output TaskParameter="TargetOutputs" ItemName="_ManagedRuntimeAssembly" />
-    </CallTarget>
+    <ItemGroup Condition="'$(SelfContained)' == 'true'">
+      <_ManagedRuntimeAssembly Include="@(_ManagedRuntimePackAssembly)" />
+    </ItemGroup>
     
     <!-- 
       Match above with ResolvedFileToPublish. Some of above would have been excluded from publish in
