@@ -125,28 +125,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             AssertLoggingEvents(
                 (project, firstEvaluationLogger) =>
                 {
-                    var allBuildEvents = firstEvaluationLogger.AllBuildEvents;
+                    var allBuildEvents = firstEvaluationLogger.AllBuildEvents.Where(be => be is ProjectEvaluationStartedEventArgs || be is ProjectEvaluationFinishedEventArgs).ToList();
 
-                    allBuildEvents.Count.ShouldBeGreaterThan(2);
-
-                    for (var i = 0; i < allBuildEvents.Count; i++)
-                    {
-                        var buildEvent = allBuildEvents[i];
-
-                        if (i == 0)
-                        {
-                            buildEvent.Message.ShouldStartWith("Evaluation started");
-                        }
-                        else if (i == allBuildEvents.Count - 1)
-                        {
-                            buildEvent.Message.ShouldStartWith("Evaluation finished");
-                        }
-                        else
-                        {
-                            buildEvent.Message.ShouldNotStartWith("Evaluation started");
-                            buildEvent.Message.ShouldNotStartWith("Evaluation finished");
-                        }
-                    }
+                    allBuildEvents.Count.ShouldBe(2);
+                    allBuildEvents[0].GetType().ShouldBe(typeof(ProjectEvaluationStartedEventArgs));
+                    allBuildEvents[1].GetType().ShouldBe(typeof(ProjectEvaluationFinishedEventArgs));
                 });
         }
 
