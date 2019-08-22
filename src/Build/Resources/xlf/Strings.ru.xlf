@@ -67,6 +67,11 @@
         <target state="translated">MSB4257: указанный выходной файл кэша результатов пустой.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentVariableRead">
+        <source>Read environment variable "{0}"</source>
+        <target state="new">Read environment variable "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: произошла ошибка при чтении входных файлов кэша результатов из пути "{0}": {1}</target>
@@ -108,11 +113,45 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: проект "{0}" пропустил ограничения изоляции графа в проекте "{1}", на который указывает ссылка.</target>
         <note>
       LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
+      <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
+        <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
+        <target state="new">MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</target>
+        <note>
+      LOCALIZATION: {0} is a semicolon delimited list of files
+    </note>
+      </trans-unit>
+      <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
+        <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+    </source>
+        <target state="new">MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+    </target>
+        <note>
+      LOCALIZATION: {0} and {1} are file paths
+    </note>
+      </trans-unit>
+      <trans-unit id="StaticGraphSolutionLoaderEncounteredSolutionWarningsAndErrors">
+        <source>MSB4262: Solution file "{0}" contains the following warnings and errors:
+           Warnings: {1}
+           Errors: {2}
+    </source>
+        <target state="new">MSB4262: Solution file "{0}" contains the following warnings and errors:
+           Warnings: {1}
+           Errors: {2}
+    </target>
+        <note>
+      LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
@@ -122,6 +161,11 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UninitializedPropertyRead">
+        <source>Read uninitialized property "{0}"</source>
+        <target state="new">Read uninitialized property "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>

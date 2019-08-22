@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -3120,7 +3121,7 @@ namespace Microsoft.Build.Evaluation
                 FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> {FileSystem = fileSystem};
 
                 // By default the expression root is the whole function expression
-                var expressionRoot = expressionFunction;
+                ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
 
                 // The arguments for this function start at the first '('
                 // If there are no arguments, then we're a property getter
@@ -3129,11 +3130,11 @@ namespace Microsoft.Build.Evaluation
                 // If we have arguments, then we only want the content up to but not including the '('
                 if (argumentStartIndex > -1)
                 {
-                    expressionRoot = expressionFunction.Substring(0, argumentStartIndex);
+                    expressionRoot = expressionRoot.Slice(0, argumentStartIndex);
                 }
 
                 // In case we ended up with something we don't understand
-                ProjectErrorUtilities.VerifyThrowInvalidProject(!String.IsNullOrEmpty(expressionRoot), elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!(expressionRoot.IsEmpty), elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
                 functionBuilder.Expression = expressionFunction;
                 functionBuilder.UsedUninitializedProperties = usedUnInitializedProperties;
@@ -3142,7 +3143,7 @@ namespace Microsoft.Build.Evaluation
                 // A static method is the content that follows the last "::", the rest being the type
                 if (propertyValue == null && expressionRoot[0] == '[')
                 {
-                    var typeEndIndex = expressionRoot.IndexOf(']', 1);
+                    var typeEndIndex = expressionRoot.IndexOf(']');
 
                     if (typeEndIndex < 1)
                     {
@@ -3150,7 +3151,7 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionStaticMethodSyntax", expressionFunction, String.Empty);
                     }
 
-                    var typeName = expressionRoot.Substring(1, typeEndIndex - 1);
+                    var typeName = expressionRoot.Slice(1, typeEndIndex - 1).ToString();
                     var methodStartIndex = typeEndIndex + 1;
 
                     if (expressionRoot.Length > methodStartIndex + 2 && expressionRoot[methodStartIndex] == ':' && expressionRoot[methodStartIndex + 1] == ':')
@@ -3208,7 +3209,7 @@ namespace Microsoft.Build.Evaluation
                     var rootEndIndex = expressionRoot.IndexOf('.');
 
                     // If this is an instance function rather than a static, then we'll capture the name of the property referenced
-                    var functionReceiver = expressionRoot.AsSpan().Slice(0, rootEndIndex).Trim().ToString();
+                    var functionReceiver = expressionRoot.Slice(0, rootEndIndex).Trim().ToString();
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
                     if (propertyValue == null && !IsValidPropertyName(functionReceiver))

@@ -95,6 +95,7 @@ namespace Microsoft.Build.Construction
         #region Member data
         private string _relativePath;         // Relative from .SLN file.  For example, "WindowsApplication1\WindowsApplication1.csproj"
         private readonly List<string> _dependencies;     // A list of strings representing the Guids of the dependent projects.
+        private IReadOnlyList<string> _dependenciesAsReadonly;
         private string _uniqueProjectName;    // For example, "MySlnFolder\MySubSlnFolder\WindowsApplication1"
 
         /// <summary>
@@ -103,6 +104,7 @@ namespace Microsoft.Build.Construction
         /// V: project configuration 
         /// </summary>
         private readonly Dictionary<string, ProjectConfigurationInSolution> _projectConfigurations;
+        private IReadOnlyDictionary<string, ProjectConfigurationInSolution> _projectConfigurationsReadOnly;
 
         #endregion
 
@@ -176,13 +178,16 @@ namespace Microsoft.Build.Construction
         /// List of guids, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form, mapping to projects 
         /// that this project has a build order dependency on, as defined in the solution file. 
         /// </summary>
-        public IReadOnlyList<string> Dependencies => _dependencies.AsReadOnly();
+        public IReadOnlyList<string> Dependencies => _dependenciesAsReadonly ?? (_dependenciesAsReadonly = _dependencies.AsReadOnly());
 
         /// <summary>
         /// Configurations for this project, keyed off the configuration's full name, e.g. "Debug|x86"
+        /// They contain only the project configurations from the solution file that fully matched (configuration and platform) against the solution configurations.
         /// </summary>
-        public IReadOnlyDictionary<string, ProjectConfigurationInSolution> ProjectConfigurations =>
-            new ReadOnlyDictionary<string, ProjectConfigurationInSolution>(_projectConfigurations);
+        public IReadOnlyDictionary<string, ProjectConfigurationInSolution> ProjectConfigurations
+            =>
+                _projectConfigurationsReadOnly
+                ?? (_projectConfigurationsReadOnly = new ReadOnlyDictionary<string, ProjectConfigurationInSolution>(_projectConfigurations));
 
         /// <summary>
         /// Extension of the project file, if any
@@ -222,6 +227,7 @@ namespace Microsoft.Build.Construction
         internal void AddDependency(string referencedProjectGuid)
         {
             _dependencies.Add(referencedProjectGuid);
+            _dependenciesAsReadonly = null;
         }
 
         /// <summary>
@@ -230,6 +236,7 @@ namespace Microsoft.Build.Construction
         internal void SetProjectConfiguration(string configurationName, ProjectConfigurationInSolution configuration)
         {
             _projectConfigurations[configurationName] = configuration;
+            _projectConfigurationsReadOnly = null;
         }
 
         /// <summary>

@@ -33,6 +33,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool PrependCultureAsDirectory { get; set; } = true;
 
+        public bool UseDependentUponConvention { get; set; }
+
+        internal abstract string SourceFileExtension { get; }
+
         /// <summary>
         /// The possibly dependent resource files.
         /// </summary>
@@ -141,6 +145,17 @@ namespace Microsoft.Build.Tasks
                 {
                     string fileName = resourceFile.ItemSpec;
                     string dependentUpon = resourceFile.GetMetadata(ItemMetadataNames.dependentUpon);
+
+                    // If opted into convention and no DependentUpon metadata, reference "<filename>.cs" if it exists.
+                    if (UseDependentUponConvention && string.IsNullOrEmpty(dependentUpon))
+                    {
+                        string conventionDependentUpon = Path.ChangeExtension(fileName, SourceFileExtension);
+
+                        if (File.Exists(conventionDependentUpon))
+                        {
+                            dependentUpon = conventionDependentUpon;
+                        }
+                    }
 
                     // Pre-log some information.
                     bool isDependentOnSourceFile = !string.IsNullOrEmpty(dependentUpon) && IsSourceFile(dependentUpon);

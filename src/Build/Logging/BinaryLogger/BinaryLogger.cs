@@ -4,6 +4,7 @@ using System.IO.Compression;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Logging
 {
@@ -28,17 +29,19 @@ namespace Microsoft.Build.Logging
         // version 5:
         //   - new EvaluationFinished.ProfilerResult
         // version 6:
-        //   -  Ids and parent ids for the evaluation locations
+        //   - Ids and parent ids for the evaluation locations
         // version 7:
-        //   -  Include ProjectStartedEventArgs.GlobalProperties
-        internal const int FileFormatVersion = 7;
+        //   - Include ProjectStartedEventArgs.GlobalProperties
+        // version 8:
+        //   - new record kinds: EnvironmentVariableRead, PropertyReassignment, UninitializedPropertyRead
+        internal const int FileFormatVersion = 8;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
         private BuildEventArgsWriter eventArgsWriter;
         private ProjectImportsCollector projectImportsCollector;
         private string _initialTargetOutputLogging;
-        private string _initialLogImports;
+        private bool _initialLogImports;
 
         /// <summary>
         /// Describes whether to collect the project files (including imported project files) used during the build.
@@ -86,10 +89,11 @@ namespace Microsoft.Build.Logging
         public void Initialize(IEventSource eventSource)
         {
             _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
-            _initialLogImports = Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS");
+            _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
 
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "true");
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+            Traits.Instance.EscapeHatches.LogProjectImports = true;
 
             ProcessParameters();
 
@@ -146,7 +150,8 @@ namespace Microsoft.Build.Logging
         public void Shutdown()
         {
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
-            Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports);
+            Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports ? "1" : "");
+            Traits.Instance.EscapeHatches.LogProjectImports = _initialLogImports;
 
             if (projectImportsCollector != null)
             {

@@ -56,9 +56,9 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The singleton delegate that loads projects into the ProjectRootElement
         /// </summary>
-        private static readonly ProjectRootElementCache.OpenProjectRootElement s_openLoaderDelegate = OpenLoader;
+        private static readonly ProjectRootElementCacheBase.OpenProjectRootElement s_openLoaderDelegate = OpenLoader;
 
-        private static readonly ProjectRootElementCache.OpenProjectRootElement s_openLoaderPreserveFormattingDelegate = OpenLoaderPreserveFormatting;
+        private static readonly ProjectRootElementCacheBase.OpenProjectRootElement s_openLoaderPreserveFormattingDelegate = OpenLoaderPreserveFormatting;
 
         /// <summary>
         /// Used to determine if a file is an empty XML file if it ONLY contains an XML declaration like &lt;?xml version="1.0" encoding="utf-8"?&gt;.
@@ -108,6 +108,11 @@ namespace Microsoft.Build.Construction
         private ElementLocation _projectFileLocation;
 
         /// <summary>
+        /// The project file's full path, escaped.
+        /// </summary>
+        private string _escapedFullPath;
+
+        /// <summary>
         /// The directory that the project is in. 
         /// Essential for evaluating relative paths.
         /// If the project is not loaded from disk, returns the current-directory from 
@@ -145,7 +150,7 @@ namespace Microsoft.Build.Construction
         /// Leaves the project dirty, indicating there are unsaved changes.
         /// Used to create a root element for solutions loaded by the 3.5 version of the solution wrapper.
         /// </summary>
-        internal ProjectRootElement(XmlReader xmlReader, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded,
+        internal ProjectRootElement(XmlReader xmlReader, ProjectRootElementCacheBase projectRootElementCache, bool isExplicitlyLoaded,
             bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
@@ -165,7 +170,7 @@ namespace Microsoft.Build.Construction
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
         /// Leaves the project dirty, indicating there are unsaved changes.
         /// </summary>
-        private ProjectRootElement(ProjectRootElementCache projectRootElementCache, NewProjectFileOptions projectFileOptions)
+        private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
 
@@ -194,7 +199,7 @@ namespace Microsoft.Build.Construction
         /// Assumes path is already normalized.
         /// May throw InvalidProjectFileException.
         /// </summary>
-        private ProjectRootElement(string path, ProjectRootElementCache projectRootElementCache,
+        private ProjectRootElement(string path, ProjectRootElementCacheBase projectRootElementCache,
             bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
@@ -221,7 +226,7 @@ namespace Microsoft.Build.Construction
         /// <remarks>
         /// Do not make public: we do not wish to expose particular XML API's.
         /// </remarks>
-        private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCache projectRootElementCache)
+        private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCacheBase  projectRootElementCache)
         {
             ErrorUtilities.VerifyThrowArgumentNull(document, nameof(document));
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
@@ -365,6 +370,8 @@ namespace Microsoft.Build.Construction
             // Used during solution load to ensure solutions which were created from a file have a location.
         }
 
+        public string EscapedFullPath => _escapedFullPath ?? (_escapedFullPath = ProjectCollection.Escape(FullPath));
+
         /// <summary>
         /// Full path to the project file.
         /// If the project has not been loaded from disk and has not been given a path, returns null.
@@ -394,6 +401,7 @@ namespace Microsoft.Build.Construction
                 }
 
                 _projectFileLocation = ElementLocation.Create(newFullPath);
+                _escapedFullPath = null;
                 _directory = Path.GetDirectoryName(newFullPath);
 
                 if (XmlDocument != null)
@@ -661,7 +669,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Retrieves the root element cache with which this root element is associated.
         /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache { get; }
+        internal ProjectRootElementCacheBase ProjectRootElementCache { get; }
 
         /// <summary>
         /// Gets a value indicating whether this PRE is known by its containing collection.
@@ -1661,12 +1669,12 @@ namespace Microsoft.Build.Construction
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
         /// Uses the specified project root element cache.
         /// </summary>
-        internal static ProjectRootElement Create(ProjectRootElementCache projectRootElementCache)
+        internal static ProjectRootElement Create(ProjectRootElementCacheBase projectRootElementCache)
         {
             return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions);
         }
 
-        internal static ProjectRootElement Create(ProjectRootElementCache projectRootElementCache, NewProjectFileOptions projectFileOptions)
+        internal static ProjectRootElement Create(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions)
         {
             return new ProjectRootElement(projectRootElementCache, projectFileOptions);
         }
@@ -1677,7 +1685,7 @@ namespace Microsoft.Build.Construction
         /// Uses the specified project root element cache.
         /// May throw InvalidProjectFileException.
         /// </summary>
-        internal static ProjectRootElement Open(string path, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded,
+        internal static ProjectRootElement Open(string path, ProjectRootElementCacheBase projectRootElementCache, bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowInternalRooted(path);
@@ -1710,7 +1718,7 @@ namespace Microsoft.Build.Construction
         /// Path provided must be a canonicalized full path.
         /// May throw InvalidProjectFileException or an IO-related exception.
         /// </summary>
-        internal static ProjectRootElement OpenProjectOrSolution(string fullPath, IDictionary<string, string> globalProperties, string toolsVersion, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded)
+        internal static ProjectRootElement OpenProjectOrSolution(string fullPath, IDictionary<string, string> globalProperties, string toolsVersion, ProjectRootElementCacheBase projectRootElementCache, bool isExplicitlyLoaded)
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);
 
@@ -1774,7 +1782,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Bubbles a Project dirty notification up to the ProjectRootElementCache and ultimately to the ProjectCollection.
+        /// Bubbles a Project dirty notification up to the ProjectRootElementCacheBase and ultimately to the ProjectCollection.
         /// </summary>
         /// <param name="project">The dirtied project.</param>
         internal void MarkProjectDirty(Project project)
@@ -1915,17 +1923,17 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <param name="path">The path to the file to load.</param>
         /// <param name="projectRootElementCache">The cache to load the PRE into.</param>
-        private static ProjectRootElement OpenLoader(string path, ProjectRootElementCache projectRootElementCache)
+        private static ProjectRootElement OpenLoader(string path, ProjectRootElementCacheBase projectRootElementCache)
         {
             return OpenLoader(path, projectRootElementCache, preserveFormatting: false);
         }
 
-        private static ProjectRootElement OpenLoaderPreserveFormatting(string path, ProjectRootElementCache projectRootElementCache)
+        private static ProjectRootElement OpenLoaderPreserveFormatting(string path, ProjectRootElementCacheBase projectRootElementCache)
         {
             return OpenLoader(path, projectRootElementCache, preserveFormatting: true);
         }
 
-        private static ProjectRootElement OpenLoader(string path, ProjectRootElementCache projectRootElementCache, bool preserveFormatting)
+        private static ProjectRootElement OpenLoader(string path, ProjectRootElementCacheBase projectRootElementCache, bool preserveFormatting)
         {
             return new ProjectRootElement(
                 path,
@@ -1943,7 +1951,7 @@ namespace Microsoft.Build.Construction
         private static ProjectRootElement CreateProjectFromPath
             (
                 string projectFile,
-                ProjectRootElementCache projectRootElementCache,
+                ProjectRootElementCacheBase projectRootElementCache,
                 bool preserveFormatting
             )
         {
@@ -2005,6 +2013,7 @@ namespace Microsoft.Build.Construction
                     }
 
                     _projectFileLocation = ElementLocation.Create(fullPath);
+                    _escapedFullPath = null;
                     _directory = Path.GetDirectoryName(fullPath);
 
                     if (XmlDocument != null)

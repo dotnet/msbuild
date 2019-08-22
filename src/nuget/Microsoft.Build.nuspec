@@ -58,7 +58,7 @@
         <dependency id="System.Text.RegularExpressions" version="4.1.0" />
         <dependency id="System.Threading" version="4.0.11" />
         <dependency id="System.Threading.Tasks" version="4.0.11" />
-        <dependency id="System.Threading.Tasks.Dataflow" version="4.6.0" />
+        <dependency id="System.Threading.Tasks.Dataflow" version="4.9.0" />
         <dependency id="System.Threading.Thread" version="4.0.0" />
         <dependency id="System.Threading.ThreadPool" version="4.0.10" />
         <dependency id="System.Xml.ReaderWriter" version="4.0.11" />

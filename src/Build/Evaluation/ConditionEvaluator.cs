@@ -180,7 +180,7 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCache projectRootElementCache = null)
+            ProjectRootElementCacheBase projectRootElementCache = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -217,7 +217,7 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCache projectRootElementCache = null
+            ProjectRootElementCacheBase projectRootElementCache = null
         )
             where P : class, IProperty
             where I : class, IItem
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             ///     PRE cache
             /// </summary>
-            ProjectRootElementCache LoadedProjectsCache { get; }
+            ProjectRootElementCacheBase LoadedProjectsCache { get; }
 
             IFileSystem FileSystem { get; }
         }
@@ -406,7 +406,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// PRE collection. 
             /// </summary>
-            public ProjectRootElementCache LoadedProjectsCache { get; }
+            public ProjectRootElementCacheBase LoadedProjectsCache { get; }
 
             internal ConditionEvaluationState
                 (
@@ -417,7 +417,7 @@ namespace Microsoft.Build.Evaluation
                 string evaluationDirectory,
                 ElementLocation elementLocation,
                 IFileSystem fileSystem,
-                ProjectRootElementCache projectRootElementCache = null
+                ProjectRootElementCacheBase projectRootElementCache = null
                 )
             {
                 ErrorUtilities.VerifyThrowArgumentNull(condition, "condition");

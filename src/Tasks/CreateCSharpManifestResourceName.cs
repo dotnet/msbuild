@@ -17,6 +17,8 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class CreateCSharpManifestResourceName : CreateManifestResourceName
     {
+        internal override string SourceFileExtension => ".cs";
+
         /// <summary>
         /// Utility function for creating a C#-style manifest name from 
         /// a resource name. 

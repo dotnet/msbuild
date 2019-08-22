@@ -106,7 +106,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- Create manifest names for culture and non-culture Resx files, and for non-culture Non-Resx resources -->
         <CreateCSharpManifestResourceName
               ResourceFiles="@(EmbeddedResource)"
-              RootNamespace="$(RootNamespace)"              
+              RootNamespace="$(RootNamespace)"
+              UseDependentUponConvention="$(EmbeddedResourceUseDependentUponConvention)"
               Condition="'%(EmbeddedResource.ManifestResourceName)' == '' and ('%(EmbeddedResource.WithCulture)' == 'false' or '%(EmbeddedResource.Type)' == 'Resx')">
 
             <Output TaskParameter="ResourceFilesWithManifestResourceNames" ItemName="_Temporary" />
@@ -118,6 +119,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               ResourceFiles="@(EmbeddedResource)"
               RootNamespace="$(RootNamespace)"
               PrependCultureAsDirectory="false"
+              UseDependentUponConvention="$(EmbeddedResourceUseDependentUponConvention)"
               Condition="'%(EmbeddedResource.ManifestResourceName)' == '' and '%(EmbeddedResource.WithCulture)' == 'true' and '%(EmbeddedResource.Type)' == 'Non-Resx'">
 
             <Output TaskParameter="ResourceFilesWithManifestResourceNames" ItemName="_Temporary" />

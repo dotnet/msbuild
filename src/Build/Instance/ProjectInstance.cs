@@ -877,6 +877,11 @@ namespace Microsoft.Build.Execution
             { return _globalProperties; }
         }
 
+        PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.EnvironmentVariablePropertiesDictionary
+        {
+            get => _environmentVariableProperties;
+        }
+
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable 
         /// </summary>
@@ -1120,7 +1125,7 @@ namespace Microsoft.Build.Execution
         /// that began the build. This is a thread-safe object.
         /// It's held here so it can get passed to the build.
         /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache
+        internal ProjectRootElementCacheBase ProjectRootElementCache
         {
             get;
             private set;
@@ -1314,7 +1319,7 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable);
@@ -1327,7 +1332,7 @@ namespace Microsoft.Build.Execution
         /// Predecessor is discarded as it is a design time only artefact.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, ProjectPropertyInstance predecessor)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(propertyElement.Name, evaluatedValueEscaped, false /* may not be reserved */, _isImmutable);
@@ -1841,7 +1846,7 @@ namespace Microsoft.Build.Execution
         /// When project instances get serialized between nodes, they need to be initialized with node specific information.
         /// The node specific information cannot come from the constructor, because that information is not available to INodePacketTranslators
         /// </summary>
-        internal void LateInitialize(ProjectRootElementCache projectRootElementCache, HostServices hostServices)
+        internal void LateInitialize(ProjectRootElementCacheBase projectRootElementCache, HostServices hostServices)
         {
             ErrorUtilities.VerifyThrow(ProjectRootElementCache == null, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
             ErrorUtilities.VerifyThrow(_hostServices == null, $"{nameof(HostServices)} is already set. Cannot set again");
@@ -2351,7 +2356,7 @@ namespace Microsoft.Build.Execution
         (string projectFile,
             IDictionary<string, string> globalProperties,
             string toolsVersion,
-            ProjectRootElementCache projectRootElementCache,
+            ProjectRootElementCacheBase projectRootElementCache,
             BuildParameters buildParameters,
             ILoggingService loggingService,
             BuildEventContext projectBuildEventContext,
@@ -2681,7 +2686,7 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, ProjectCollection.Escape(item.Xml.ContainingProject.FullPath));
+                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
 
                 _items.Add(instance);
 
