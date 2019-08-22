@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyTheory]
+        [FullMSBuildOnlyTheory(Skip ="Too much dependency on build machine state.")]
         [InlineData(true)]
         [InlineData(false)]
         public void COMReferenceBuildsAndRuns(bool embedInteropTypes)
