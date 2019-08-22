@@ -233,6 +233,7 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ElementLocation DefaultTargetsLocation { get { throw null; } }
         public string DirectoryPath { get { throw null; } }
         public System.Text.Encoding Encoding { get { throw null; } }
+        public string EscapedFullPath { get { throw null; } }
         public string FullPath { get { throw null; } set { } }
         public bool HasUnsavedChanges { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectImportGroupElement> ImportGroups { get { throw null; } }
@@ -1610,6 +1611,8 @@ namespace Microsoft.Build.Logging
     public partial class LoggerDescription
     {
         public LoggerDescription(string loggerClassName, string loggerAssemblyName, string loggerAssemblyFile, string loggerSwitchParameters, Microsoft.Build.Framework.LoggerVerbosity verbosity) { }
+        public LoggerDescription(string loggerClassName, string loggerAssemblyName, string loggerAssemblyFile, string loggerSwitchParameters, Microsoft.Build.Framework.LoggerVerbosity verbosity, bool isOptional) { }
+        public bool IsOptional { get { throw null; } }
         public string LoggerSwitchParameters { get { throw null; } }
         public Microsoft.Build.Framework.LoggerVerbosity Verbosity { get { throw null; } }
         public Microsoft.Build.Framework.ILogger CreateLogger() { throw null; }

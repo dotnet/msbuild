@@ -19,4 +19,4 @@ fi
 MONO_PREFIX=$1
 shift
 
-msbuild mono/build/install.proj /p:MonoInstallPrefix=$MONO_PREFIX /p:Configuration=$CONFIG "$@"
+msbuild mono/build/install.proj /p:MonoInstallPrefix=$MONO_PREFIX /p:Configuration=$CONFIG /p:IgnoreDiffFailure=true "$@"

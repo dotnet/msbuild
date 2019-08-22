@@ -535,6 +535,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void CannotNormalizePathWithNewLineAndSpace()
+        {
+            string filePath = "\r\n      C:\\work\\sdk3\\artifacts\\tmp\\Debug\\SimpleNamesWi---6143883E\\NETFrameworkLibrary\\bin\\Debug\\net462\\NETFrameworkLibrary.dll\r\n      ";
+
+#if FEATURE_LEGACY_GETFULLPATH
+            Assert.Throws<ArgumentException>(() => FileUtilities.NormalizePath(filePath));
+#else
+            Assert.NotEqual("C:\\work\\sdk3\\artifacts\\tmp\\Debug\\SimpleNamesWi---6143883E\\NETFrameworkLibrary\\bin\\Debug\\net462\\NETFrameworkLibrary.dll", FileUtilities.NormalizePath(filePath));
+#endif
+        }
+
+        [Fact]
         public void FileOrDirectoryExistsNoThrow()
         {
             var isWindows = NativeMethodsShared.IsWindows;

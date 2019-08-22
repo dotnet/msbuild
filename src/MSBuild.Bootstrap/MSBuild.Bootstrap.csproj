@@ -24,12 +24,15 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <!-- Include the bundled SDKs -->
-    <Content Include="$(RepoRoot)sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="$(RepoRoot)mono\bin-dir\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)mono\layout\msbuild-bin\**\*" CopyToOutputDirectory="PreserveNewest" />
+
+    <Content
+        Include="$(RepoRoot)mono\dotnet-overlay\msbuild-bin\**\*"
+        Exclude="$(RepoRoot)\mono\dotnet-overlay\msbuild-bin\SdkResolvers\**\*"
+        CopyToOutputDirectory="PreserveNewest" />
 
     <!-- Use the NuGet.targets that we bundle, since that is what we will install so we should be testing against that -->
-    <Content Include="$(RepoRoot)nuget-support\tasks-targets\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)mono\dotnet-overlay\nuget-support\msbuild-bin\*" CopyToOutputDirectory="PreserveNewest" />
 
     <!-- This is for the second build. Copy over the resolvers from the bootstrap directory, which will include the
          nuget resolver also -->

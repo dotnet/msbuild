@@ -8,10 +8,7 @@
         <NuGetPackagesDir>$(HOME)\.nuget\packages</NuGetPackagesDir>
 
         <SdkVersionsFile>$(MSBuildThisFileDirectory)\SdkVersions.txt</SdkVersionsFile>
-
-        <RestoreSources>$(RestoreSources);https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json</RestoreSources>
-        <RestoreSources>$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
-        <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/nuget-build/api/v3/index.json</RestoreSources>
-        <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/dotnet-web/api/v3/index.json</RestoreSources>
+        <DotNetOverlayDirectory>$(RepoRoot)\mono\dotnet-overlay</DotNetOverlayDirectory>
+        <DotNetPackageVersionPropsPath>$(RepoRoot)\mono\build\RestoreSourcesOverrides.props</DotNetPackageVersionPropsPath>
 	</PropertyGroup>
 </Project>

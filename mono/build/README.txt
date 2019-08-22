@@ -1,33 +1,26 @@
 Update various SDKs that we bundle with mono.
 
-The versions for the SDKs are obtained from some props files in the `cli` repo, based on
-a particular commit hash. And that commit hash is from the branch that is being tracked,
-eg. `release/2.1.1xx` branch corresponding to msbuild's `vs15.6` branch.
+- Update the various versions in `mono/build/DotNetBitsVersions.props`.
+- If any nuget sources need to be updated, then do that in `mono/build/RestoreSourcesOverrides.props`.
 
-The scripts don't remove the existing files first, so that has to be done manually:
+- For NuGet update, ensure that the version is updated in `eng/Packages.props`:
+```
+      <NuGetPackageVersion>5.3.0-preview.2.6136</NuGetPackageVersion>
+````
 
-	$ rm -Rf sdks/Microsoft.NET.Sdk* sdks/NuGet.Build.Tasks.Pack/ sdks/FSharp.NET.Sdk/
-	$ rm -Rf nuget-support/tasks-targets/ nuget-support/tv/ mono/ExtensionsPath/Microsoft/Microsoft.NET.Build.Extensions/
-	
-Usage:
-	$ msbuild mono/build/build.proj /p:CLICommitHash=<cli_commit_hash>
+- For Roslyn update `eng/Packages.props`:
+```
+      <MicrosoftNetCompilersVersion>3.3.0-beta2-19381-14</MicrosoftNetCompilersVersion>
+      <CompilerToolsVersion>3.3.0-beta2-19381-14</CompilerToolsVersion>
+```
 
-To generate a commit message:
-    $ msbuild build.proj /p:CLICommitHash=<cli_commit_hash> /p:CLIBranchName=<cli_branch_name> /t:GenerateCommitMessage
-The generated message includes versions for all the SDKs. Edit this manually to remove the sdks
-that were unchanged in this commit.
+Test:
 
-Also, whenever this is updated, please add the Microsoft.NET.Build.Extensions version in mono's
-`tools/nuget-hash-extractor/download.sh` and update the denied lists.
+```
+$ make clean; make
 
-MSBuildSdkResolver also needs to be updated in sync with the SDKs. This has two parts:
+# test installation to see if any files changed or were added by installing to a new directory
 
-    1. libhostfxr*: native library. We can get the nuget version for this and can fetch that given a
-       `$(HostMonikerRid)` like `osx-x64`.
-
-    2. The resolver assembly itself which is distributed as part of the CLI sdk nuget, but we can't
-       reliably get the version for that, given a cli commit hash. So, for now we build `cli` repo locally
-       and just copy over the assembly.
-
-       Note: Currently they use commit count to get the full version, but we can't depend on that. And
-       even this version can be overridden when builds are generated.
+$ ./install-mono-prefix.sh /tmp/random-new-directory
+    # this should pass if nothing "unknown" got added to the installation.
+```

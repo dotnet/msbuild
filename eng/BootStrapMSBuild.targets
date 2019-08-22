@@ -68,7 +68,8 @@
       <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
       <InstalledSdks Include="$(MSBuildBinPath)\Sdks\**\*" Condition="'$(MonoBuild)' == 'true'" />
 
-      <MonoBinDirOverlayFiles Include="$(RepoRoot)\mono\bin-dir\**\*" Condition="'$(MonoBuild)' == 'true'" />
+      <!-- Note: we are not copying *everything* under msbuild-bin -->
+      <MonoBinDirOverlayFiles Include="$(RepoRoot)\mono\layout\msbuild-bin\*" Condition="'$(MonoBuild)' == 'true'" />
 
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 

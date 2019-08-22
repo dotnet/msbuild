@@ -325,18 +325,19 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         <source>  -logger:&lt;logger&gt;   Use this logger to log events from MSBuild. To specify
                      multiple loggers, specify each logger separately.
                      The &lt;logger&gt; syntax is:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      The &lt;logger class&gt; syntax is:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      The &lt;logger assembly&gt; syntax is:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Logger options specify how MSBuild creates the logger.
                      The &lt;logger parameters&gt; are optional, and are passed
                      to the logger exactly as you typed them. (Short form: -l)
                      Examples:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;記錄器&gt;   使用此記錄器可記錄 MSBuild 的事件。
+        <target state="needs-review-translation">  -logger:&lt;記錄器&gt;   使用此記錄器可記錄 MSBuild 的事件。
                      若要指定多個記錄器，請各別指定每個記錄器。
                      &lt;logger&gt; 語法為:
                        [&lt;記錄器類別&gt;,]&lt;記錄器組件&gt;[;&lt;記錄器參數&gt;]
@@ -592,18 +593,19 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      multiple loggers, specify each logger separately.
                      (Short form -dl)
                      The &lt;logger&gt; syntax is:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      The &lt;logger class&gt; syntax is:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      The &lt;logger assembly&gt; syntax is:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Logger options specify how MSBuild creates the logger.
                      The &lt;logger parameters&gt; are optional, and are passed
                      to the logger exactly as you typed them. (Short form: -l)
                      Examples:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;中央記錄器&gt;*&lt;轉寄記錄器&gt;
+        <target state="needs-review-translation">  -distributedLogger:&lt;中央記錄器&gt;*&lt;轉寄記錄器&gt;
                      使用此記錄器可記錄 MSBuild 的事件，
                      同時為每個節點附加一個不同的記錄器執行個體。
                      若要指定多個記錄器，請各別指定每個記錄器。
@@ -1123,6 +1125,15 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         <note>
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="OptionalLoggerCreationMessage">
+        <source>The specified logger could not be created and will not be used. {0}</source>
+        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <note>
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: {0} contains the exception message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.
     </note>
       </trans-unit>
       <trans-unit id="PickedUpSwitchesFromAutoResponse">

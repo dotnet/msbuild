@@ -51,7 +51,11 @@ namespace Microsoft.Build.Tasks
             out bool userRequestedSpecificFile
         )
         {
-            if (!string.IsNullOrEmpty(hintPath))
+            // If there is newline or white space `FileUtilities.NormalizePath` will get garbage result(throw on fullframework).
+            // Adding FileUtilities.NormalizePath (https://github.com/microsoft/msbuild/pull/4414) caused https://github.com/microsoft/msbuild/issues/4593
+            // It is fixed by adding skip when the path is not valid
+            // However, we should consider Trim() the hintpath https://github.com/microsoft/msbuild/issues/4603
+            if (!string.IsNullOrEmpty(hintPath) && !FileUtilities.PathIsInvalid(hintPath))
             {
                 if (ResolveAsFile(FileUtilities.NormalizePath(hintPath), assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
                 {
