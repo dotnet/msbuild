@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace Microsoft.NET.TestFramework
@@ -28,7 +31,9 @@ namespace Microsoft.NET.TestFramework
 
         public string TestExecutionDirectory { get; set; }
 
-        public string TestConfigFile { get; private set; }
+        public List<string> TestConfigFiles { get; private set; } = new List<string>();
+
+        public HashSet<string> TestListsToRun { get; private set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public bool ShowSdkInfo { get; private set; }
 
@@ -73,15 +78,22 @@ namespace Microsoft.NET.TestFramework
                 {
                     ret.TestExecutionDirectory = argStack.Pop();
                 }
-                else if (arg.Equals("-testConfigFile", StringComparison.CurrentCultureIgnoreCase))
+                else if (arg.Equals("-testConfigFile", StringComparison.CurrentCultureIgnoreCase) ||
+                         arg.Equals("-testConfig", StringComparison.CurrentCultureIgnoreCase))
                 {
-                    ret.TestConfigFile = argStack.Pop();
+                    ret.TestConfigFiles.Add(argStack.Pop());
+                }
+                else if (arg.Equals("-testList", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    ret.TestListsToRun.Add(argStack.Pop());
                 }
                 else if (arg.Equals("-showSdkInfo", StringComparison.CurrentCultureIgnoreCase))
                 {
                     ret.ShowSdkInfo = true;
                 }
-                else if (arg.Equals("-help", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("/?"))
+                else if (arg.Equals("-help", StringComparison.CurrentCultureIgnoreCase) ||
+                         arg.Equals("--help", StringComparison.CurrentCultureIgnoreCase) ||
+                         arg.Equals("/?") || arg.Equals("-?"))
                 {
                     ret.ShouldShowHelp = true;
                 }
@@ -109,30 +121,140 @@ namespace Microsoft.NET.TestFramework
             return ret;
         }
 
-        public static List<string> GetXunitArgsFromTestConfig(string testConfigFile)
+        public List<string> GetXunitArgsFromTestConfig()
         {
+            List<TestSpecifier> testsToSkip = new List<TestSpecifier>();
+            List<TestList> testLists = new List<TestList>();
+
             List<string> ret = new List<string>();
-            if (!string.IsNullOrEmpty(testConfigFile))
+            foreach (var testConfigFile in TestConfigFiles)
             {
                 var testConfig = XDocument.Load(testConfigFile);
                 foreach (var item in testConfig.Root.Elements())
                 {
-                    if (item.Name.LocalName.Equals("Method", StringComparison.OrdinalIgnoreCase))
+                    if (item.Name.LocalName.Equals("TestList", StringComparison.OrdinalIgnoreCase))
                     {
-                        var methodToSkip = item.Attribute("Name")?.Value;
-                        
-                        if (!string.IsNullOrEmpty(methodToSkip) &&
-                            bool.TryParse(item.Attribute("Skip").Value, out bool shouldSkip) &&
+                        testLists.Add(TestList.Parse(item));
+                    }
+                    else if (item.Name.LocalName.Equals("SkippedTests", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var skippedGroup = TestList.Parse(item);
+                        testsToSkip.AddRange(skippedGroup.TestSpecifiers);
+                    }
+                    else
+                    {
+                        if (bool.TryParse(item.Attribute("Skip")?.Value ?? string.Empty, out bool shouldSkip) &&
                             shouldSkip)
                         {
-                            ret.Add("-nomethod");
-                            ret.Add(methodToSkip);
+                            testsToSkip.Add(TestSpecifier.Parse(item));
                         }
                     }
                 }
             }
 
+            foreach (var testList in testLists.Where(g => TestListsToRun.Contains(g.Name)))
+            {
+                foreach (var testSpec in testList.TestSpecifiers)
+                {
+                    if (testSpec.Type == TestSpecifier.TestSpecifierType.Method)
+                    {
+                        ret.Add("-method");
+                    }
+                    else if (testSpec.Type == TestSpecifier.TestSpecifierType.Class)
+                    {
+                        ret.Add("-class");
+                    }
+                    else if (testSpec.Type == TestSpecifier.TestSpecifierType.Namespace)
+                    {
+                        ret.Add("-namespace");
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Unrecognized test specifier type: " + testSpec.Type);
+                    }
+                    ret.Add(testSpec.Specifier);
+                }
+            }
+
+            foreach (var testSpec in testsToSkip)
+            {
+                if (testSpec.Type == TestSpecifier.TestSpecifierType.Method)
+                {
+                    ret.Add("-nomethod");
+                }
+                else if (testSpec.Type == TestSpecifier.TestSpecifierType.Class)
+                {
+                    ret.Add("-noclass");
+                }
+                else if (testSpec.Type == TestSpecifier.TestSpecifierType.Namespace)
+                {
+                    ret.Add("-nonamespace");
+                }
+                else
+                {
+                    throw new ArgumentException("Unrecognized test specifier type: " + testSpec.Type);
+                }
+                ret.Add(testSpec.Specifier);
+            }
+
             return ret;
+        }
+
+        private class TestList
+        {
+            public string Name { get; set; }
+
+            public List<TestSpecifier> TestSpecifiers { get; set; } = new List<TestSpecifier>();
+
+            public static TestList Parse(XElement element)
+            {
+                TestList group = new TestList();
+
+                group.Name = element.Attribute("Name")?.Value;
+
+                foreach (var item in element.Elements())
+                {
+                    group.TestSpecifiers.Add(TestSpecifier.Parse(item));
+                }
+
+                return group;
+            }
+        }
+
+        private class TestSpecifier
+        {
+            public enum TestSpecifierType
+            {
+                Method,
+                Class,
+                Namespace
+            }
+
+            public TestSpecifierType Type { get; set; }
+            public string Specifier { get; set; }
+
+            public static TestSpecifier Parse(XElement element)
+            {
+                TestSpecifier spec = new TestSpecifier();
+                switch (element.Name.LocalName.ToLowerInvariant())
+                {
+                    case "method":
+                        spec.Type = TestSpecifierType.Method;
+                        break;
+                    case "class":
+                        spec.Type = TestSpecifierType.Class;
+                        break;
+                    case "namespace":
+                        spec.Type = TestSpecifierType.Namespace;
+                        break;
+                    default:
+                        throw new XmlException("Unrecognized node: " + element.Name);
+                }
+
+                spec.Specifier = element.Attribute("Name").Value;
+
+                return spec;
+            }
         }
 
         public static TestCommandLine HandleCommandLine(string [] args)
@@ -162,6 +284,10 @@ Options to control toolset to test:
   -sdkConfig <config>     : Use specified configuration for SDK repo
   -noRepoInference        : Don't automatically find SDK repo to use based on path to test binaries
   -sdkVersion             : Use specified SDK version
+
+Other options:
+  -testConfigFile         : XML file with tests to skip, or test lists that can be run (can specify multiple)
+  -testList               : List of tests (from config file) which should be run (can specify multiple)
   -testExecutionDirectory : Folder for tests to create and build projects
   -showSdkInfo            : Shows SDK info (dotnet --info) for SDK which will be used
   -help                   : Show help");
