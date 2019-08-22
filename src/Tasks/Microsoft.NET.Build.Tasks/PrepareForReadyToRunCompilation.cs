@@ -118,7 +118,7 @@ namespace Microsoft.NET.Build.Tasks
             ProcessInputFileList(Assemblies, _compileList, _symbolsCompileList, _r2rFiles, _r2rReferences);
         }
 
-        void ProcessInputFileList(ITaskItem[] inputFiles, List<ITaskItem> imageCompilationList, List<ITaskItem> symbolsCompilationList, List<ITaskItem> r2rFilesPublishList, List<ITaskItem> r2rReferenceList)
+        private void ProcessInputFileList(ITaskItem[] inputFiles, List<ITaskItem> imageCompilationList, List<ITaskItem> symbolsCompilationList, List<ITaskItem> r2rFilesPublishList, List<ITaskItem> r2rReferenceList)
         {
             if (inputFiles == null)
             {
@@ -222,7 +222,7 @@ namespace Microsoft.NET.Build.Tasks
             CompileAndReference
         };
 
-        Eligibility GetInputFileEligibility(ITaskItem file, HashSet<string> exclusionSet)
+        private static Eligibility GetInputFileEligibility(ITaskItem file, HashSet<string> exclusionSet)
         {
             // Check to see if this is a valid ILOnly image that we can compile
             using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
@@ -280,7 +280,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private bool IsReferenceAssembly(MetadataReader mdReader)
+        private static bool IsReferenceAssembly(MetadataReader mdReader)
         {
             foreach (var attributeHandle in mdReader.GetAssemblyDefinition().GetCustomAttributes())
             {
@@ -319,7 +319,7 @@ namespace Microsoft.NET.Build.Tasks
             return false;
         }
 
-        private bool ReferencesWinMD(MetadataReader mdReader)
+        private static bool ReferencesWinMD(MetadataReader mdReader)
         {
             foreach (var assemblyRefHandle in mdReader.AssemblyReferences)
             {
@@ -331,7 +331,7 @@ namespace Microsoft.NET.Build.Tasks
             return false;
         }
 
-        private bool HasILCode(PEReader peReader, MetadataReader mdReader)
+        private static bool HasILCode(PEReader peReader, MetadataReader mdReader)
         {
             foreach (var methoddefHandle in mdReader.MethodDefinitions)
             {
@@ -345,7 +345,7 @@ namespace Microsoft.NET.Build.Tasks
             return false;
         }
 
-        bool ExtractTargetPlatformAndArchitecture(string runtimeIdentifier, out string platform, out Architecture architecture)
+        private static bool ExtractTargetPlatformAndArchitecture(string runtimeIdentifier, out string platform, out Architecture architecture)
         {
             platform = null;
             architecture = default;
@@ -380,7 +380,7 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        bool GetCrossgenComponentsPaths()
+        private bool GetCrossgenComponentsPaths()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
