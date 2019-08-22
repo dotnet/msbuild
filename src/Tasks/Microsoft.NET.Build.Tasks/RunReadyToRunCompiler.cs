@@ -89,44 +89,6 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        private bool IsReferenceAssembly(MetadataReader mdReader)
-        {
-            foreach (var attributeHandle in mdReader.GetAssemblyDefinition().GetCustomAttributes())
-            {
-                StringHandle attributeTypeName = default;
-                StringHandle attributeTypeNamespace = default;
-                EntityHandle attributeCtor = mdReader.GetCustomAttribute(attributeHandle).Constructor;
-
-                if (attributeCtor.Kind == HandleKind.MemberReference)
-                {
-                    EntityHandle attributeMemberParent = mdReader.GetMemberReference((MemberReferenceHandle)attributeCtor).Parent;
-                    if (attributeMemberParent.Kind == HandleKind.TypeReference)
-                    {
-                        TypeReference attributeTypeRef = mdReader.GetTypeReference((TypeReferenceHandle)attributeMemberParent);
-                        attributeTypeName = attributeTypeRef.Name;
-                        attributeTypeNamespace = attributeTypeRef.Namespace;
-                    }
-                }
-                else if (attributeCtor.Kind == HandleKind.MethodDefinition)
-                {
-                    TypeDefinitionHandle attributeTypeDefHandle = mdReader.GetMethodDefinition((MethodDefinitionHandle)attributeCtor).GetDeclaringType();
-                    TypeDefinition attributeTypeDef = mdReader.GetTypeDefinition(attributeTypeDefHandle);
-                    attributeTypeName = attributeTypeDef.Name;
-                    attributeTypeNamespace = attributeTypeDef.Namespace;
-                }
-
-                if (!attributeTypeName.IsNil &&
-                    !attributeTypeNamespace.IsNil &&
-                    mdReader.StringComparer.Equals(attributeTypeName, "ReferenceAssemblyAttribute") &&
-                    mdReader.StringComparer.Equals(attributeTypeNamespace, "System.Runtime.CompilerServices"))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private string GetAssemblyReferencesCommands()
         {
             StringBuilder result = new StringBuilder();
