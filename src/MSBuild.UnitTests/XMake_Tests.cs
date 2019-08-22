@@ -17,6 +17,7 @@ using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
+using System.IO.Compression;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -2076,6 +2077,46 @@ namespace Microsoft.Build.UnitTests
             string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: arguments);
 
             logContents.ShouldContain("MSBuildInteractive = [true]");
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/microsoft/msbuild/issues/4631
+        /// </summary>
+        [Fact]
+        public void BinaryLogContainsImportedFiles()
+        {
+            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
+            {
+                var testProject = testEnvironment.CreateFile("Importer.proj", ObjectModelHelpers.CleanupFileContents(@"
+                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Import Project=""TestProject.proj"" />
+
+                    <Target Name=""Build"">
+                    </Target>
+  
+                </Project>"));
+
+                testEnvironment.CreateFile("TestProject.proj", @"
+                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                  <Target Name=""Build"">
+                    <Message Text=""Hello from TestProject!"" />
+                  </Target>
+                </Project>
+                ");
+
+                string binLogLocation = testEnvironment.DefaultTestDirectory.Path;
+
+                string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLogLocation}/output.binlog\"", out var success, _output);
+
+                success.ShouldBeTrue(output);
+
+                RunnerUtilities.ExecMSBuild($"\"{binLogLocation}/output.binlog\" \"/bl:{binLogLocation}/replay.binlog;ProjectImports=ZipFile\"", out success, _output);
+
+                using (ZipArchive archive = ZipFile.OpenRead($"{binLogLocation}/replay.ProjectImports.zip"))
+                {
+                     archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
+                }
+            }
         }
 
         private string CopyMSBuild()
