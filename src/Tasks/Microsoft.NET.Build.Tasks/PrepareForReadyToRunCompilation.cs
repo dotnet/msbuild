@@ -241,17 +241,35 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             return Eligibility.None;
                         }
+                        
+                        if (IsReferenceAssembly(mdReader))
+                        {
+                            // crossgen can only take implementation assemblies, even as references
+                            return Eligibility.None;
+                        }
 
                         if ((pereader.PEHeaders.CorHeader.Flags & CorFlags.ILOnly) != CorFlags.ILOnly)
                         {
                             return Eligibility.ReferenceOnly;
                         }
 
-                        // Skip reference assemblies and assemblies that reference winmds
-                        if (ReferencesWinMD(mdReader) || IsReferenceAssembly(mdReader) || !HasILCode(pereader, mdReader))
+                        if (file.HasMetadataValue(MetadataKeys.ReferenceOnly, "true"))
                         {
                             return Eligibility.ReferenceOnly;
                         }
+
+                        if (exclusionSet != null && exclusionSet.Contains(Path.GetFileName(file.ItemSpec)))
+                        {
+                            return Eligibility.ReferenceOnly;
+                        }
+
+                        // save these most expensive checks for last. We don't want to scan all references for IL code
+                        if (ReferencesWinMD(mdReader) || !HasILCode(pereader, mdReader))
+                        {
+                            return Eligibility.ReferenceOnly;
+                        }
+
+                        return Eligibility.CompileAndReference;
                     }
                 }
                 catch (BadImageFormatException)
@@ -260,19 +278,6 @@ namespace Microsoft.NET.Build.Tasks
                     return Eligibility.None;
                 }
             }
-
-            if (file.HasMetadataValue(MetadataKeys.ReferenceOnly, "true"))
-            {
-                return Eligibility.ReferenceOnly;
-            }
-  
-            // Check if the file is explicitly excluded from being compiled
-            if (exclusionSet != null && exclusionSet.Contains(Path.GetFileName(file.ItemSpec)))
-            {
-                return Eligibility.ReferenceOnly;
-            }
-
-            return Eligibility.CompileAndReference;
         }
 
         private bool IsReferenceAssembly(MetadataReader mdReader)
