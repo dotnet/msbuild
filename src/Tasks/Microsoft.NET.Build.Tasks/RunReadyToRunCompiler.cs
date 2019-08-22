@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem CompilationEntry { get; set; }
         [Required]
-        public ITaskItem[] References { get; set; }
+        public ITaskItem[] ImplementationAssemblyReferences { get; set; }
         public bool ShowCompilerWarnings { get; set; }
 
         [Output]
@@ -93,7 +93,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             StringBuilder result = new StringBuilder();
 
-            foreach (var reference in References)
+            foreach (var reference in ImplementationAssemblyReferences)
             {
                 // When generating PDBs, we must not add a reference to the IL version of the R2R image for which we're trying to generate a PDB
                 if (IsPdbCompilation && String.Equals(Path.GetFileName(reference.ItemSpec), Path.GetFileName(_outputR2RImage), StringComparison.OrdinalIgnoreCase))

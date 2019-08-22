@@ -286,7 +286,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="ReadyToRunSymbolsCompileList" ItemName="_ReadyToRunSymbolsCompileList" />
 
       <Output TaskParameter="ReadyToRunFilesToPublish" ItemName="_ReadyToRunFilesToPublish" />
-      <Output TaskParameter="ReadyToRunFilesToReference" ItemName="_ReadyToRunFilesToReference" />
+      <Output TaskParameter="ReadyToRunAssembliesToReference" ItemName="_ReadyToRunAssembliesToReference" />
 
     </PrepareForReadyToRunCompilation>
   </Target>
@@ -304,7 +304,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="%(_ReadyToRunCompileList.OutputR2RImage)">
 
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
-                           References="@(_ReadyToRunFilesToReference)"
+                           ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
                            ShowCompilerWarnings="$(PublishReadyToRunShowWarnings)"
                            CompilationEntry="@(_ReadyToRunCompileList)"
                            ContinueOnError="ErrorAndContinue">
@@ -335,7 +335,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="%(_ReadyToRunSymbolsCompileList.OutputPDBImage)">
 
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
-                           References="@(_ReadyToRunFilesToReference)"
+                           ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
                            ShowCompilerWarnings="$(PublishReadyToRunShowWarnings)"
                            CompilationEntry="@(_ReadyToRunSymbolsCompileList)"
                            ContinueOnError="ErrorAndContinue">
