@@ -40,14 +40,17 @@ stages:
               _BuildConfig: Debug
               _PublishType: none
               _SignType: test
+              _Test: -test
           Build_Release:
             _BuildConfig: Release
             ${{ if eq(variables['System.TeamProject'], 'public') }}:
               _PublishType: none
               _SignType: test
+              _Test: -test
             ${{ if ne(variables['System.TeamProject'], 'public') }}:
               _PublishType: blob
               _SignType: real
+              _Test: ''
 
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
     - template: /eng/build.yml
