@@ -69,8 +69,7 @@ namespace Microsoft.Build.Evaluation
         public Project Project
         {
             [DebuggerStepThrough]
-            get
-            { return _project; }
+            get => _project;
         }
 
         /// <summary>
@@ -80,8 +79,7 @@ namespace Microsoft.Build.Evaluation
         public string ItemType
         {
             [DebuggerStepThrough]
-            get
-            { return _itemType; }
+            get => _itemType;
         }
 
         /// <summary>

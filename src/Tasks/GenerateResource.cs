@@ -175,8 +175,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] Sources
         {
-            set { _sources = value; }
-            get { return _sources; }
+            set => _sources = value;
+            get => _sources;
         }
 
         /// <summary>
@@ -185,8 +185,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool UseSourcePath
         {
-            set { _useSourcePath = value; }
-            get { return _useSourcePath; }
+            set => _useSourcePath = value;
+            get => _useSourcePath;
         }
 
         /// <summary>
@@ -194,8 +194,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] References
         {
-            set { _references = value; }
-            get { return _references; }
+            set => _references = value;
+            get => _references;
         }
 
         /// <summary>
@@ -212,8 +212,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] AdditionalInputs
         {
-            set { _additionalInputs = value; }
-            get { return _additionalInputs; }
+            set => _additionalInputs = value;
+            get => _additionalInputs;
         }
 
         /// <summary>
@@ -221,8 +221,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem StateFile
         {
-            set { _stateFile = value; }
-            get { return _stateFile; }
+            set => _stateFile = value;
+            get => _stateFile;
         }
 
         /// <summary>
@@ -235,8 +235,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] OutputResources
         {
-            set { _outputResources = value; }
-            get { return _outputResources; }
+            set => _outputResources = value;
+            get => _outputResources;
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
                 // try to validate it -- that might prevent future expansion of supported languages.
                 _stronglyTypedLanguage = value;
             }
-            get { return _stronglyTypedLanguage; }
+            get => _stronglyTypedLanguage;
         }
 
         /// <summary>
@@ -275,8 +275,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string StronglyTypedNamespace
         {
-            set { _stronglyTypedNamespace = value; }
-            get { return _stronglyTypedNamespace; }
+            set => _stronglyTypedNamespace = value;
+            get => _stronglyTypedNamespace;
         }
 
         /// <summary>
@@ -285,8 +285,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string StronglyTypedManifestPrefix
         {
-            set { _stronglyTypedManifestPrefix = value; }
-            get { return _stronglyTypedManifestPrefix; }
+            set => _stronglyTypedManifestPrefix = value;
+            get => _stronglyTypedManifestPrefix;
         }
 
         /// <summary>
@@ -296,8 +296,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string StronglyTypedClassName
         {
-            set { _stronglyTypedClassName = value; }
-            get { return _stronglyTypedClassName; }
+            set => _stronglyTypedClassName = value;
+            get => _stronglyTypedClassName;
         }
 
         /// <summary>
@@ -307,8 +307,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string StronglyTypedFileName
         {
-            set { _stronglyTypedFileName = value; }
-            get { return _stronglyTypedFileName; }
+            set => _stronglyTypedFileName = value;
+            get => _stronglyTypedFileName;
         }
 
         /// <summary>
@@ -317,8 +317,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool PublicClass
         {
-            set { _publicClass = value; }
-            get { return _publicClass; }
+            set => _publicClass = value;
+            get => _publicClass;
         }
 
         /// <summary>
@@ -339,8 +339,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool NeverLockTypeAssemblies
         {
-            set { _neverLockTypeAssemblies = value; }
-            get { return _neverLockTypeAssemblies; }
+            set => _neverLockTypeAssemblies = value;
+            get => _neverLockTypeAssemblies;
         }
 
         /// <summary>
@@ -349,8 +349,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string SdkToolsPath
         {
-            get { return _sdkToolsPath; }
-            set { _sdkToolsPath = value; }
+            get => _sdkToolsPath;
+            set => _sdkToolsPath = value;
         }
 
         /// <summary>
@@ -360,8 +360,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool ExecuteAsTool
         {
-            set { _executeAsTool = value; }
-            get { return _executeAsTool; }
+            set => _executeAsTool = value;
+            get => _executeAsTool;
         }
 
         /// <summary>
@@ -382,8 +382,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] ExcludedInputPaths
         {
-            get { return _excludedInputPaths; }
-            set { _excludedInputPaths = value; }
+            get => _excludedInputPaths;
+            set => _excludedInputPaths = value;
         }
 
         /// <summary>
@@ -392,11 +392,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool MinimalRebuildFromTracking
         {
-            get
-            {
+            get =>
                 // not using tracking anymore
-                return false;
-            }
+                false;
 
             set
             {
@@ -410,11 +408,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool TrackFileAccess
         {
-            get
-            {
+            get =>
                 // not using tracking anymore
-                return false;
-            }
+                false;
             set
             {
                 // do nothing 
@@ -450,10 +446,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string TrackerLogDirectory
         {
-            get
-            {
-                return String.Empty;
-            }
+            get => String.Empty;
             set
             {
                 // do nothing
@@ -467,10 +460,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string ToolArchitecture
         {
-            get
-            {
-                return String.Empty;
-            }
+            get => String.Empty;
 
             set
             {
@@ -489,10 +479,7 @@ namespace Microsoft.Build.Tasks
         /// </comments>
         public string TrackerFrameworkPath
         {
-            get
-            {
-                return String.Empty;
-            }
+            get => String.Empty;
 
             set
             {
@@ -511,10 +498,7 @@ namespace Microsoft.Build.Tasks
         /// </comments>
         public string TrackerSdkPath
         {
-            get
-            {
-                return String.Empty;
-            }
+            get => String.Empty;
 
             set
             {

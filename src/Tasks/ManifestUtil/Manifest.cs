@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public virtual AssemblyReference EntryPoint
         {
-            get { return null; }
+            get => null;
             set { }
         }
 
@@ -719,7 +719,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Schema")]
         public string XmlSchema
         {
-            get { return Util.Schema; }
+            get => Util.Schema;
             set { }
         }
 

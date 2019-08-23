@@ -140,8 +140,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildLoggingContext LoggingContext
         {
             [DebuggerStepThrough]
-            get
-            { return _loggingContext; }
+            get => _loggingContext;
         }
 
         #region IBuildEngine Members

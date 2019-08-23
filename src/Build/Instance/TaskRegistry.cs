@@ -186,8 +186,7 @@ namespace Microsoft.Build.Execution
         internal Toolset Toolset
         {
             [DebuggerStepThrough]
-            get
-            { return _toolset; }
+            get => _toolset;
         }
 
         /// <summary>
@@ -1115,8 +1114,7 @@ namespace Microsoft.Build.Execution
             internal string RegisteredName
             {
                 [DebuggerStepThrough]
-                get
-                { return _registeredName; }
+                get => _registeredName;
             }
 
             /// <summary>
@@ -1125,8 +1123,7 @@ namespace Microsoft.Build.Execution
             internal AssemblyLoadInfo TaskFactoryAssemblyLoadInfo
             {
                 [DebuggerStepThrough]
-                get
-                { return _taskFactoryAssemblyLoadInfo; }
+                get => _taskFactoryAssemblyLoadInfo;
             }
 
             /// <summary>
@@ -1135,8 +1132,7 @@ namespace Microsoft.Build.Execution
             internal string TaskFactoryAttributeName
             {
                 [DebuggerStepThrough]
-                get
-                { return _taskFactory; }
+                get => _taskFactory;
             }
 
             /// <summary>
@@ -1145,8 +1141,7 @@ namespace Microsoft.Build.Execution
             internal IDictionary<string, string> TaskFactoryParameters
             {
                 [DebuggerStepThrough]
-                get
-                { return _taskFactoryParameters; }
+                get => _taskFactoryParameters;
             }
 
             /// <summary>
@@ -1155,8 +1150,7 @@ namespace Microsoft.Build.Execution
             internal ParameterGroupAndTaskElementRecord ParameterGroupAndTaskBody
             {
                 [DebuggerStepThrough]
-                get
-                { return _parameterGroupAndTaskBody; }
+                get => _parameterGroupAndTaskBody;
             }
 
             /// <summary>

@@ -260,15 +260,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public IDictionary<string, string> GlobalProperties
         {
-            get
-            {
-                return globalProperties;
-            }
+            get => globalProperties;
 
-            internal set
-            {
-                globalProperties = value;
-            }
+            internal set => globalProperties = value;
         }
 
         [OptionalField(VersionAdded = 2)]
@@ -279,15 +273,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public string ToolsVersion
         {
-            get
-            {
-                return toolsVersion;
-            }
+            get => toolsVersion;
 
-            internal set
-            {
-                toolsVersion = value;
-            }
+            internal set => toolsVersion = value;
         }
 
         // IEnumerable is not a serializable type. That is okay because

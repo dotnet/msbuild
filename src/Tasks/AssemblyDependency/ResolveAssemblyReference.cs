@@ -117,14 +117,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool UnresolveFrameworkAssembliesFromHigherFrameworks
         {
-            get
-            {
-                return _unresolveFrameworkAssembliesFromHigherFrameworks;
-            }
-            set
-            {
-                _unresolveFrameworkAssembliesFromHigherFrameworks = value;
-            }
+            get => _unresolveFrameworkAssembliesFromHigherFrameworks;
+            set => _unresolveFrameworkAssembliesFromHigherFrameworks = value;
         }
 
         /// <summary>
@@ -138,10 +132,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string WarnOrErrorOnTargetArchitectureMismatch
         {
-            get
-            {
-                return _warnOrErrorOnTargetArchitectureMismatch.ToString();
-            }
+            get => _warnOrErrorOnTargetArchitectureMismatch.ToString();
 
             set
             {
@@ -166,8 +157,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] AssemblyFiles
         {
-            get { return _assemblyFiles; }
-            set { _assemblyFiles = value; }
+            get => _assemblyFiles;
+            set => _assemblyFiles = value;
         }
 
         /// <summary>
@@ -178,15 +169,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] LatestTargetFrameworkDirectories
         {
-            get
-            {
-                return _latestTargetFrameworkDirectories;
-            }
+            get => _latestTargetFrameworkDirectories;
 
-            set
-            {
-                _latestTargetFrameworkDirectories = value;
-            }
+            set => _latestTargetFrameworkDirectories = value;
         }
 
         /// <summary>
@@ -194,15 +179,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool IgnoreTargetFrameworkAttributeVersionMismatch
         {
-            get
-            {
-                return _ignoreTargetFrameworkAttributeVersionMismatch;
-            }
+            get => _ignoreTargetFrameworkAttributeVersionMismatch;
 
-            set
-            {
-                _ignoreTargetFrameworkAttributeVersionMismatch = value;
-            }
+            set => _ignoreTargetFrameworkAttributeVersionMismatch = value;
         }
 
         /// <summary>
@@ -220,7 +199,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetFrameworkSubsets
         {
-            get { return _targetFrameworkSubsets; }
+            get => _targetFrameworkSubsets;
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "TargetFrameworkSubsets");
@@ -265,8 +244,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] Assemblies
         {
-            get { return _assemblyNames; }
-            set { _assemblyNames = value; }
+            get => _assemblyNames;
+            set => _assemblyNames = value;
         }
 
         /// <summary>
@@ -278,8 +257,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] CandidateAssemblyFiles
         {
-            get { return _candidateAssemblyFiles; }
-            set { _candidateAssemblyFiles = value; }
+            get => _candidateAssemblyFiles;
+            set => _candidateAssemblyFiles = value;
         }
 
         /// <summary>
@@ -288,8 +267,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] ResolvedSDKReferences
         {
-            get { return _resolvedSDKReferences; }
-            set { _resolvedSDKReferences = value; }
+            get => _resolvedSDKReferences;
+            set => _resolvedSDKReferences = value;
         }
 
         /// <summary>
@@ -300,8 +279,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetFrameworkDirectories
         {
-            get { return _targetFrameworkDirectories; }
-            set { _targetFrameworkDirectories = value; }
+            get => _targetFrameworkDirectories;
+            set => _targetFrameworkDirectories = value;
         }
 
         /// <summary>
@@ -326,8 +305,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] InstalledAssemblyTables
         {
-            get { return _installedAssemblyTables; }
-            set { _installedAssemblyTables = value; }
+            get => _installedAssemblyTables;
+            set => _installedAssemblyTables = value;
         }
 
         /// <summary>
@@ -348,7 +327,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] InstalledAssemblySubsetTables
         {
-            get { return _installedAssemblySubsetTables; }
+            get => _installedAssemblySubsetTables;
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "InstalledAssemblySubsetTables");
@@ -375,7 +354,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] FullFrameworkAssemblyTables
         {
-            get { return _fullFrameworkAssemblyTables; }
+            get => _fullFrameworkAssemblyTables;
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkAssemblyTables");
@@ -391,8 +370,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool IgnoreDefaultInstalledAssemblyTables
         {
-            get { return _ignoreDefaultInstalledAssemblyTables; }
-            set { _ignoreDefaultInstalledAssemblyTables = value; }
+            get => _ignoreDefaultInstalledAssemblyTables;
+            set => _ignoreDefaultInstalledAssemblyTables = value;
         }
 
         /// <summary>
@@ -403,8 +382,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool IgnoreDefaultInstalledAssemblySubsetTables
         {
-            get { return _ignoreDefaultInstalledAssemblySubsetTables; }
-            set { _ignoreDefaultInstalledAssemblySubsetTables = value; }
+            get => _ignoreDefaultInstalledAssemblySubsetTables;
+            set => _ignoreDefaultInstalledAssemblySubsetTables = value;
         }
 
         /// <summary>
@@ -412,8 +391,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool IgnoreVersionForFrameworkReferences
         {
-            get { return _ignoreVersionForFrameworkReferences; }
-            set { _ignoreVersionForFrameworkReferences = value; }
+            get => _ignoreVersionForFrameworkReferences;
+            set => _ignoreVersionForFrameworkReferences = value;
         }
 
         /// <summary>
@@ -430,8 +409,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string TargetProcessorArchitecture
         {
-            get { return _targetProcessorArchitecture; }
-            set { _targetProcessorArchitecture = value; }
+            get => _targetProcessorArchitecture;
+            set => _targetProcessorArchitecture = value;
         }
 
         /// <summary>
@@ -439,8 +418,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string TargetedRuntimeVersion
         {
-            get { return _targetedRuntimeVersionRawValue; }
-            set { _targetedRuntimeVersionRawValue = value; }
+            get => _targetedRuntimeVersionRawValue;
+            set => _targetedRuntimeVersionRawValue = value;
         }
 
         /// <summary>
@@ -484,8 +463,8 @@ namespace Microsoft.Build.Tasks
         [Required]
         public string[] SearchPaths
         {
-            get { return _searchPaths; }
-            set { _searchPaths = value; }
+            get => _searchPaths;
+            set => _searchPaths = value;
         }
 
         /// <summary>
@@ -494,8 +473,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] AllowedAssemblyExtensions
         {
-            get { return _allowedAssemblyExtensions; }
-            set { _allowedAssemblyExtensions = value; }
+            get => _allowedAssemblyExtensions;
+            set => _allowedAssemblyExtensions = value;
         }
 
 
@@ -505,8 +484,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] AllowedRelatedFileExtensions
         {
-            get { return _relatedFileExtensions; }
-            set { _relatedFileExtensions = value; }
+            get => _relatedFileExtensions;
+            set => _relatedFileExtensions = value;
         }
 
 
@@ -519,8 +498,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public string AppConfigFile
         {
-            get { return _appConfigFile; }
-            set { _appConfigFile = value; }
+            get => _appConfigFile;
+            set => _appConfigFile = value;
         }
 
         /// <summary>
@@ -529,8 +508,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public bool SupportsBindingRedirectGeneration
         {
-            get { return _supportsBindingRedirectGeneration; }
-            set { _supportsBindingRedirectGeneration = value; }
+            get => _supportsBindingRedirectGeneration;
+            set => _supportsBindingRedirectGeneration = value;
         }
 
         /// <summary>
@@ -561,8 +540,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public bool AutoUnify
         {
-            get { return _autoUnify; }
-            set { _autoUnify = value; }
+            get => _autoUnify;
+            set => _autoUnify = value;
         }
 
 
@@ -586,8 +565,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool CopyLocalDependenciesWhenParentReferenceInGac
         {
-            get { return _copyLocalDependenciesWhenParentReferenceInGac; }
-            set { _copyLocalDependenciesWhenParentReferenceInGac = value; }
+            get => _copyLocalDependenciesWhenParentReferenceInGac;
+            set => _copyLocalDependenciesWhenParentReferenceInGac = value;
         }
 
         /// <summary>
@@ -608,8 +587,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public string StateFile
         {
-            get { return _stateFile; }
-            set { _stateFile = value; }
+            get => _stateFile;
+            set => _stateFile = value;
         }
 
         /// <summary>
@@ -621,8 +600,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public bool FindDependencies
         {
-            get { return _findDependencies; }
-            set { _findDependencies = value; }
+            get => _findDependencies;
+            set => _findDependencies = value;
         }
 
         /// <summary>
@@ -633,8 +612,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public bool FindSatellites
         {
-            get { return _findSatellites; }
-            set { _findSatellites = value; }
+            get => _findSatellites;
+            set => _findSatellites = value;
         }
 
         /// <summary>
@@ -645,8 +624,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public bool FindSerializationAssemblies
         {
-            get { return _findSerializationAssemblies; }
-            set { _findSerializationAssemblies = value; }
+            get => _findSerializationAssemblies;
+            set => _findSerializationAssemblies = value;
         }
 
         /// <summary>
@@ -657,8 +636,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public bool FindRelatedFiles
         {
-            get { return _findRelatedFiles; }
-            set { _findRelatedFiles = value; }
+            get => _findRelatedFiles;
+            set => _findRelatedFiles = value;
         }
 
         /// <summary>
@@ -669,8 +648,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public bool Silent
         {
-            get { return _silent; }
-            set { _silent = value; }
+            get => _silent;
+            set => _silent = value;
         }
 
         /// <summary>
@@ -681,8 +660,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public string TargetFrameworkVersion
         {
-            get { return _projectTargetFrameworkAsString; }
-            set { _projectTargetFrameworkAsString = value; }
+            get => _projectTargetFrameworkAsString;
+            set => _projectTargetFrameworkAsString = value;
         }
 
         /// <summary>
@@ -693,8 +672,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public string TargetFrameworkMoniker
         {
-            get { return _targetedFrameworkMoniker; }
-            set { _targetedFrameworkMoniker = value; }
+            get => _targetedFrameworkMoniker;
+            set => _targetedFrameworkMoniker = value;
         }
 
         /// <summary>
@@ -714,10 +693,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] FullTargetFrameworkSubsetNames
         {
-            get
-            {
-                return _fullTargetFrameworkSubsetNames;
-            }
+            get => _fullTargetFrameworkSubsetNames;
 
             set
             {
@@ -732,10 +708,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string ProfileName
         {
-            get
-            {
-                return _profileName;
-            }
+            get => _profileName;
 
             set
             {
@@ -751,10 +724,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] FullFrameworkFolders
         {
-            get
-            {
-                return _fullFrameworkFolders;
-            }
+            get => _fullFrameworkFolders;
 
             set
             {
@@ -884,7 +854,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] FilesWritten
         {
             set { /*Do Nothing, Inputs not Allowed*/ }
-            get { return _filesWritten.ToArray(); }
+            get => _filesWritten.ToArray();
         }
 
         /// <summary>

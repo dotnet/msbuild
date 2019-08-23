@@ -103,10 +103,7 @@ namespace Microsoft.Build.Construction
         public string Inputs
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.inputs);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.inputs);
 
             set
             {
@@ -124,10 +121,7 @@ namespace Microsoft.Build.Construction
         public string Outputs
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.outputs);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.outputs);
 
             set
             {
@@ -174,10 +168,7 @@ namespace Microsoft.Build.Construction
         public string DependsOnTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.dependsOnTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.dependsOnTargets);
 
             set
             {
@@ -195,10 +186,7 @@ namespace Microsoft.Build.Construction
         public string BeforeTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.beforeTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.beforeTargets);
 
             set
             {
@@ -216,10 +204,7 @@ namespace Microsoft.Build.Construction
         public string AfterTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.afterTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.afterTargets);
 
             set
             {

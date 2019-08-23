@@ -734,8 +734,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public int EvaluationId
         {
-            get { return _evaluationId; }
-            set { _evaluationId = value; }
+            get => _evaluationId;
+            set => _evaluationId = value;
         }
 
         /// <summary>
@@ -747,8 +747,7 @@ namespace Microsoft.Build.Execution
         public string Directory
         {
             [DebuggerStepThrough]
-            get
-            { return _directory; }
+            get => _directory;
         }
 
         /// <summary>
@@ -758,8 +757,7 @@ namespace Microsoft.Build.Execution
         public string FullPath
         {
             [DebuggerStepThrough]
-            get
-            { return _projectFileLocation.File; }
+            get => _projectFileLocation.File;
         }
 
         /// <summary>
@@ -769,8 +767,7 @@ namespace Microsoft.Build.Execution
         public IDictionary<string, ProjectItemDefinitionInstance> ItemDefinitions
         {
             [DebuggerStepThrough]
-            get
-            { return _itemDefinitions; }
+            get => _itemDefinitions;
         }
 
         /// <summary>
@@ -782,8 +779,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> DefaultTargets
         {
-            get { return _defaultTargets; }
-            private set { _defaultTargets = value; }
+            get => _defaultTargets;
+            private set => _defaultTargets = value;
         }
 
         /// <summary>
@@ -793,8 +790,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> InitialTargets
         {
-            get { return _initialTargets; }
-            private set { _initialTargets = value; }
+            get => _initialTargets;
+            private set => _initialTargets = value;
         }
 
         /// <summary>
@@ -805,8 +802,7 @@ namespace Microsoft.Build.Execution
         public IDictionary<string, ProjectTargetInstance> Targets
         {
             [DebuggerStepThrough]
-            get
-            { return _targets; }
+            get => _targets;
         }
 
         /// <summary>
@@ -827,9 +823,8 @@ namespace Microsoft.Build.Execution
         TaskRegistry IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.TaskRegistry
         {
             [DebuggerStepThrough]
-            get
-            { return TaskRegistry; }
-            set { TaskRegistry = value; }
+            get => TaskRegistry;
+            set => TaskRegistry = value;
         }
 
         /// <summary>
@@ -838,8 +833,7 @@ namespace Microsoft.Build.Execution
         Toolset IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Toolset
         {
             [DebuggerStepThrough]
-            get
-            { return Toolset; }
+            get => Toolset;
         }
 
         /// <summary>
@@ -849,8 +843,7 @@ namespace Microsoft.Build.Execution
         string IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SubToolsetVersion
         {
             [DebuggerStepThrough]
-            get
-            { return SubToolsetVersion; }
+            get => SubToolsetVersion;
         }
 
         /// <summary>
@@ -863,8 +856,7 @@ namespace Microsoft.Build.Execution
         string IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ExplicitToolsVersion
         {
             [DebuggerStepThrough]
-            get
-            { return ExplicitToolsVersion; }
+            get => ExplicitToolsVersion;
         }
 
         /// <summary>
@@ -873,8 +865,7 @@ namespace Microsoft.Build.Execution
         PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.GlobalPropertiesDictionary
         {
             [DebuggerStepThrough]
-            get
-            { return _globalProperties; }
+            get => _globalProperties;
         }
 
         PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.EnvironmentVariablePropertiesDictionary
@@ -904,8 +895,7 @@ namespace Microsoft.Build.Execution
         PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Properties
         {
             [DebuggerStepThrough]
-            get
-            { return _properties; }
+            get => _properties;
         }
 
         /// <summary>
@@ -914,8 +904,7 @@ namespace Microsoft.Build.Execution
         IEnumerable<ProjectItemDefinitionInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ItemDefinitionsEnumerable
         {
             [DebuggerStepThrough]
-            get
-            { return _itemDefinitions.Values; }
+            get => _itemDefinitions.Values;
         }
 
         /// <summary>
@@ -924,8 +913,7 @@ namespace Microsoft.Build.Execution
         ItemDictionary<ProjectItemInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Items
         {
             [DebuggerStepThrough]
-            get
-            { return _items; }
+            get => _items;
         }
 
         /// <summary>
@@ -935,9 +923,8 @@ namespace Microsoft.Build.Execution
         List<string> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.InitialTargets
         {
             [DebuggerStepThrough]
-            get
-            { return InitialTargets; }
-            set { InitialTargets = value; }
+            get => InitialTargets;
+            set => InitialTargets = value;
         }
 
         /// <summary>
@@ -947,9 +934,8 @@ namespace Microsoft.Build.Execution
         List<string> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.DefaultTargets
         {
             [DebuggerStepThrough]
-            get
-            { return DefaultTargets; }
-            set { DefaultTargets = value; }
+            get => DefaultTargets;
+            set => DefaultTargets = value;
         }
 
         /// <summary>
@@ -958,8 +944,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         IDictionary<string, List<TargetSpecification>> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.BeforeTargets
         {
-            get { return _beforeTargets; }
-            set { _beforeTargets = value; }
+            get => _beforeTargets;
+            set => _beforeTargets = value;
         }
 
         /// <summary>
@@ -968,8 +954,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         IDictionary<string, List<TargetSpecification>> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AfterTargets
         {
-            get { return _afterTargets; }
-            set { _afterTargets = value; }
+            get => _afterTargets;
+            set => _afterTargets = value;
         }
 
         /// <summary>
@@ -1014,8 +1000,7 @@ namespace Microsoft.Build.Execution
         internal PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary
         {
             [DebuggerStepThrough]
-            get
-            { return _globalProperties; }
+            get => _globalProperties;
         }
 
         /// <summary>
@@ -1023,8 +1008,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal Toolset Toolset
         {
-            get { return _toolset; }
-            private set { _toolset = value; }
+            get => _toolset;
+            private set => _toolset = value;
         }
 
         /// <summary>
@@ -1070,8 +1055,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal string SubToolsetVersion
         {
-            get { return _subToolsetVersion; }
-            private set { _subToolsetVersion = value; }
+            get => _subToolsetVersion;
+            private set => _subToolsetVersion = value;
         }
 
         /// <summary>
@@ -1081,8 +1066,7 @@ namespace Microsoft.Build.Execution
         internal PropertyDictionary<ProjectPropertyInstance> PropertiesToBuildWith
         {
             [DebuggerStepThrough]
-            get
-            { return _properties; }
+            get => _properties;
         }
 
         internal ICollection<ProjectPropertyInstance> TestEnvironmentalProperties => new ReadOnlyCollection<ProjectPropertyInstance>(_environmentVariableProperties);
@@ -1094,8 +1078,7 @@ namespace Microsoft.Build.Execution
         internal ItemDictionary<ProjectItemInstance> ItemsToBuildWith
         {
             [DebuggerStepThrough]
-            get
-            { return _items; }
+            get => _items;
         }
 
         /// <summary>
@@ -1108,8 +1091,8 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal TaskRegistry TaskRegistry
         {
-            get { return _taskRegistry; }
-            private set { _taskRegistry = value; }
+            get => _taskRegistry;
+            private set => _taskRegistry = value;
         }
 
         /// <summary>
