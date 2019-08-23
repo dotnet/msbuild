@@ -194,8 +194,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal bool WarnForUninitializedProperties
         {
-            get { return _usedUninitializedProperties.Warn; }
-            set { _usedUninitializedProperties.Warn = value; }
+            get => _usedUninitializedProperties.Warn;
+            set => _usedUninitializedProperties.Warn = value;
         }
 
         /// <summary>
@@ -204,8 +204,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal IMetadataTable Metadata
         {
-            get { return _metadata; }
-            set { _metadata = value; }
+            get => _metadata;
+            set => _metadata = value;
         }
 
         /// <summary>
@@ -214,8 +214,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal UsedUninitializedProperties UsedUninitializedProperties
         {
-            get { return _usedUninitializedProperties; }
-            set { _usedUninitializedProperties = value; }
+            get => _usedUninitializedProperties;
+            set => _usedUninitializedProperties = value;
         }
 
         /// <summary>

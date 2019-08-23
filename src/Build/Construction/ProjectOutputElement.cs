@@ -40,10 +40,7 @@ namespace Microsoft.Build.Construction
         public string TaskParameter
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskParameter);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskParameter);
 
             [DebuggerStepThrough]
             set
@@ -75,10 +72,7 @@ namespace Microsoft.Build.Construction
         public string ItemType
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.itemName);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.itemName);
 
             set
             {
@@ -96,10 +90,7 @@ namespace Microsoft.Build.Construction
         public string PropertyName
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.propertyName);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.propertyName);
 
             set
             {

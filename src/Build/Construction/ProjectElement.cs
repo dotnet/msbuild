@@ -112,10 +112,7 @@ namespace Microsoft.Build.Construction
         public string Label
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.label);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.label);
 
             [DebuggerStepThrough]
             set
@@ -295,10 +292,7 @@ namespace Microsoft.Build.Construction
         internal XmlDocumentWithLocation XmlDocument
         {
             [DebuggerStepThrough]
-            get
-            {
-                return (XmlDocumentWithLocation) XmlElement?.OwnerDocument;
-            }
+            get => (XmlDocumentWithLocation)XmlElement?.OwnerDocument;
         }
 
         /// <summary>

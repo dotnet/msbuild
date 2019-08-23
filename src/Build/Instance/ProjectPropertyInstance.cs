@@ -57,10 +57,7 @@ namespace Microsoft.Build.Execution
         public string EvaluatedValue
         {
             [DebuggerStepThrough]
-            get
-            {
-                return EscapingUtilities.UnescapeAll(_escapedValue);
-            }
+            get => EscapingUtilities.UnescapeAll(_escapedValue);
 
             [DebuggerStepThrough]
             set

@@ -195,8 +195,7 @@ namespace Microsoft.Build.Execution
         public string ItemType
         {
             [DebuggerStepThrough]
-            get
-            { return _itemType; }
+            get => _itemType;
         }
 
         /// <summary>
@@ -205,8 +204,7 @@ namespace Microsoft.Build.Execution
         public string Include
         {
             [DebuggerStepThrough]
-            get
-            { return _include; }
+            get => _include;
         }
 
         /// <summary>
@@ -215,8 +213,7 @@ namespace Microsoft.Build.Execution
         public string Exclude
         {
             [DebuggerStepThrough]
-            get
-            { return _exclude; }
+            get => _exclude;
         }
 
         /// <summary>
@@ -225,8 +222,7 @@ namespace Microsoft.Build.Execution
         public string Remove
         {
             [DebuggerStepThrough]
-            get
-            { return _remove; }
+            get => _remove;
         }
 
         /// <summary>
@@ -235,8 +231,7 @@ namespace Microsoft.Build.Execution
         public string KeepMetadata
         {
             [DebuggerStepThrough]
-            get
-            { return _keepMetadata; }
+            get => _keepMetadata;
         }
 
         /// <summary>
@@ -245,8 +240,7 @@ namespace Microsoft.Build.Execution
         public string RemoveMetadata
         {
             [DebuggerStepThrough]
-            get
-            { return _removeMetadata; }
+            get => _removeMetadata;
         }
 
         /// <summary>
@@ -255,8 +249,7 @@ namespace Microsoft.Build.Execution
         public string KeepDuplicates
         {
             [DebuggerStepThrough]
-            get
-            { return _keepDuplicates; }
+            get => _keepDuplicates;
         }
 
         /// <summary>
@@ -265,8 +258,7 @@ namespace Microsoft.Build.Execution
         public string Condition
         {
             [DebuggerStepThrough]
-            get
-            { return _condition; }
+            get => _condition;
         }
 
         /// <summary>
@@ -290,8 +282,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation Location
         {
             [DebuggerStepThrough]
-            get
-            { return _location; }
+            get => _location;
         }
 
         /// <summary>
@@ -300,8 +291,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation IncludeLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _includeLocation; }
+            get => _includeLocation;
         }
 
         /// <summary>
@@ -310,8 +300,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation ExcludeLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _excludeLocation; }
+            get => _excludeLocation;
         }
 
         /// <summary>
@@ -320,8 +309,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation RemoveLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _removeLocation; }
+            get => _removeLocation;
         }
 
         /// <summary>
@@ -330,8 +318,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation KeepMetadataLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _keepMetadataLocation; }
+            get => _keepMetadataLocation;
         }
 
         /// <summary>
@@ -340,8 +327,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation RemoveMetadataLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _removeMetadataLocation; }
+            get => _removeMetadataLocation;
         }
 
         /// <summary>
@@ -350,8 +336,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation KeepDuplicatesLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _keepDuplicatesLocation; }
+            get => _keepDuplicatesLocation;
         }
 
         /// <summary>
@@ -360,8 +345,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation ConditionLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _conditionLocation; }
+            get => _conditionLocation;
         }
 
         /// <summary>

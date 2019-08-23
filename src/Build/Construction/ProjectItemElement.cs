@@ -176,10 +176,7 @@ namespace Microsoft.Build.Construction
         public string KeepMetadata
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepMetadata);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepMetadata);
 
             set
             {
@@ -198,10 +195,7 @@ namespace Microsoft.Build.Construction
         public string RemoveMetadata
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.removeMetadata);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.removeMetadata);
 
             set
             {
@@ -220,10 +214,7 @@ namespace Microsoft.Build.Construction
         public string KeepDuplicates
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepDuplicates);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepDuplicates);
 
             set
             {

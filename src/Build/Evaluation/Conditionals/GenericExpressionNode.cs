@@ -79,13 +79,13 @@ namespace Microsoft.Build.Evaluation
         internal virtual bool PossibleAndCollision
         {
             set { /* do nothing */ }
-            get { return false; }
+            get => false;
         }
 
         internal virtual bool PossibleOrCollision
         {
             set { /* do nothing */ }
-            get { return false; }
+            get => false;
         }
 
         internal bool PotentialAndOrConflict()

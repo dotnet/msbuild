@@ -346,14 +346,8 @@ namespace Microsoft.Build.Exceptions
         /// </summary>
         public bool HasBeenLogged
         {
-            get
-            {
-                return hasBeenLogged;
-            }
-            internal set
-            {
-                hasBeenLogged = value;
-            }
+            get => hasBeenLogged;
+            internal set => hasBeenLogged = value;
         }
 
         #endregion

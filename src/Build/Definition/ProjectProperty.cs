@@ -69,8 +69,7 @@ namespace Microsoft.Build.Evaluation
         public string EvaluatedValue
         {
             [DebuggerStepThrough]
-            get
-            { return EscapingUtilities.UnescapeAll(_evaluatedValueEscaped); }
+            get => EscapingUtilities.UnescapeAll(_evaluatedValueEscaped);
         }
 
         /// <summary>
@@ -85,8 +84,7 @@ namespace Microsoft.Build.Evaluation
         string IProperty.EvaluatedValueEscaped
         {
             [DebuggerStepThrough]
-            get
-            { return _evaluatedValueEscaped; }
+            get => _evaluatedValueEscaped;
         }
 
         /// <summary>
@@ -147,8 +145,7 @@ namespace Microsoft.Build.Evaluation
         public Project Project
         {
             [DebuggerStepThrough]
-            get
-            { return _project; }
+            get => _project;
         }
 
         /// <summary>
@@ -182,8 +179,7 @@ namespace Microsoft.Build.Evaluation
         string IKeyed.Key
         {
             [DebuggerStepThrough]
-            get
-            { return Name; }
+            get => Name;
         }
 
         /// <summary>
@@ -193,8 +189,7 @@ namespace Microsoft.Build.Evaluation
         string IValued.EscapedValue
         {
             [DebuggerStepThrough]
-            get
-            { return _evaluatedValueEscaped; }
+            get => _evaluatedValueEscaped;
         }
 
         #region IEquatable<ProjectProperty> Members
@@ -331,8 +326,7 @@ namespace Microsoft.Build.Evaluation
             public override string Name
             {
                 [DebuggerStepThrough]
-                get
-                { return _xml.Name; }
+                get => _xml.Name;
             }
 
             /// <summary>
@@ -347,10 +341,7 @@ namespace Microsoft.Build.Evaluation
             public override string UnevaluatedValue
             {
                 [DebuggerStepThrough]
-                get
-                {
-                    return _xml.Value;
-                }
+                get => _xml.Value;
 
                 set
                 {
@@ -369,8 +360,7 @@ namespace Microsoft.Build.Evaluation
             public override bool IsEnvironmentProperty
             {
                 [DebuggerStepThrough]
-                get
-                { return false; }
+                get => false;
             }
 
             /// <summary>
@@ -379,8 +369,7 @@ namespace Microsoft.Build.Evaluation
             public override bool IsGlobalProperty
             {
                 [DebuggerStepThrough]
-                get
-                { return false; }
+                get => false;
             }
 
             /// <summary>
@@ -390,8 +379,7 @@ namespace Microsoft.Build.Evaluation
             public override bool IsReservedProperty
             {
                 [DebuggerStepThrough]
-                get
-                { return false; }
+                get => false;
             }
 
             /// <summary>
@@ -401,8 +389,7 @@ namespace Microsoft.Build.Evaluation
             public override ProjectPropertyElement Xml
             {
                 [DebuggerStepThrough]
-                get
-                { return _xml; }
+                get => _xml;
             }
 
             /// <summary>
@@ -415,8 +402,7 @@ namespace Microsoft.Build.Evaluation
             public override ProjectProperty Predecessor
             {
                 [DebuggerStepThrough]
-                get
-                { return null; }
+                get => null;
             }
 
             /// <summary>
@@ -472,8 +458,7 @@ namespace Microsoft.Build.Evaluation
             public override ProjectProperty Predecessor
             {
                 [DebuggerStepThrough]
-                get
-                { return _predecessor; }
+                get => _predecessor;
             }
         }
 
@@ -518,8 +503,7 @@ namespace Microsoft.Build.Evaluation
             public override string Name
             {
                 [DebuggerStepThrough]
-                get
-                { return _name; }
+                get => _name;
             }
 
             /// <summary>
@@ -534,10 +518,7 @@ namespace Microsoft.Build.Evaluation
             public override string UnevaluatedValue
             {
                 [DebuggerStepThrough]
-                get
-                {
-                    return ((IProperty)this).EvaluatedValueEscaped;
-                }
+                get => ((IProperty)this).EvaluatedValueEscaped;
 
                 set
                 {
@@ -574,8 +555,7 @@ namespace Microsoft.Build.Evaluation
             public override bool IsGlobalProperty
             {
                 [DebuggerStepThrough]
-                get
-                { return _project.GlobalProperties.ContainsKey(Name); }
+                get => _project.GlobalProperties.ContainsKey(Name);
             }
 
             /// <summary>
@@ -585,8 +565,7 @@ namespace Microsoft.Build.Evaluation
             public override bool IsReservedProperty
             {
                 [DebuggerStepThrough]
-                get
-                { return ReservedPropertyNames.IsReservedProperty(Name); }
+                get => ReservedPropertyNames.IsReservedProperty(Name);
             }
 
             /// <summary>
@@ -597,8 +576,7 @@ namespace Microsoft.Build.Evaluation
             public override ProjectPropertyElement Xml
             {
                 [DebuggerStepThrough]
-                get
-                { return null; }
+                get => null;
             }
 
             /// <summary>
@@ -608,8 +586,7 @@ namespace Microsoft.Build.Evaluation
             public override ProjectProperty Predecessor
             {
                 [DebuggerStepThrough]
-                get
-                { return null; }
+                get => null;
             }
 
             /// <summary>

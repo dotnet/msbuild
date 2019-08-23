@@ -144,7 +144,14 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string RelativePath
         {
+
+/* Unmerged change from project 'Microsoft.Build (netcoreapp2.1)'
+Before:
             get { return _relativePath; }
+After:
+            get => _relativePath; }
+*/
+            get => _relativePath;
             internal set
             {
 #if NETFRAMEWORK && !MONO
@@ -153,7 +160,7 @@ namespace Microsoft.Build.Construction
                 _relativePath = value;
 #else
                 _relativePath = FileUtilities.MaybeAdjustFilePath(value,
-                                                    baseDirectory:ParentSolution.SolutionFileDirectory ?? String.Empty);
+                                                    baseDirectory: ParentSolution.SolutionFileDirectory ?? String.Empty);
 #endif
             }
         }

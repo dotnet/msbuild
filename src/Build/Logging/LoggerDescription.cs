@@ -82,14 +82,8 @@ namespace Microsoft.Build.Logging
         /// </summary>
         internal int LoggerId
         {
-            get
-            {
-                return _loggerId;
-            }
-            set
-            {
-                _loggerId = value;
-            }
+            get => _loggerId;
+            set => _loggerId = value;
         }
 
         /// <summary>
