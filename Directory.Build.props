@@ -15,7 +15,7 @@
     <IsShippingPackage>false</IsShippingPackage>
 
     <!-- Workaround for https://github.com/NuGet/NuGet.Client/pull/3016 -->
-    <NoWarn>$(NoWarn);5131</NoWarn>
+    <NoWarn>$(NoWarn);NU5131</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
