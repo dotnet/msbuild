@@ -22,6 +22,7 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
@@ -31,18 +32,21 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
+    continueOnError: true
     condition: always()
 
 - job: BootstrapMSBuildOnCoreWindows
@@ -64,6 +68,7 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
@@ -73,18 +78,21 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnWindows build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnWindows test logs'
+    continueOnError: true
     condition: always()
 
 - job: FullReleaseOnWindows
@@ -106,6 +114,7 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
@@ -115,18 +124,21 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/Log/Release'
       ArtifactName: 'FullOnWindows Release build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows Release test logs'
+    continueOnError: true
     condition: always()
 
 - job: CoreBootstrappedOnLinux
@@ -144,18 +156,21 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnLinux build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
+    continueOnError: true
     condition: always()
 
 - job: CoreOnMac
@@ -173,17 +188,20 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnMac build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnMac test logs'
+    continueOnError: true
     condition: always()
 
