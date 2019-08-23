@@ -1,25 +1,24 @@
 <Project>
     <PropertyGroup>
-        <MicrosoftNETSdkPackageVersion>3.0.100-preview8.19406.1</MicrosoftNETSdkPackageVersion>
+        <MicrosoftNETSdkPackageVersion>3.0.100-preview9.19413.5</MicrosoftNETSdkPackageVersion>
 
         <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
 
-        <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview8.19405.5</MicrosoftNETSdkRazorPackageVersion>
+        <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview9.19422.6</MicrosoftNETSdkRazorPackageVersion>
 
-        <MicrosoftNETSdkWebPackageVersion>3.0.100-preview8.19406.4</MicrosoftNETSdkWebPackageVersion>
+        <MicrosoftNETSdkWebPackageVersion>3.0.100-preview9.19422.5</MicrosoftNETSdkWebPackageVersion>
         <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
         <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
 
-        <NuGetBuildTasksPackageVersion>5.3.0-preview.2.6136</NuGetBuildTasksPackageVersion>
+        <NuGetBuildTasksPackageVersion>5.3.0-preview.2.6167</NuGetBuildTasksPackageVersion>
         <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
 
-        <!-- from https://github.com/dotnet/core-sdk/blob/8bf06ffc8d99abcc7c8a923e90b35d122887976d/eng/Versions.props#L36 -->
-        <MicrosoftDotNetMSBuildSdkResolverPackageVersion>3.0.100-preview8.19406.4</MicrosoftDotNetMSBuildSdkResolverPackageVersion>
+        <MicrosoftDotNetMSBuildSdkResolverPackageVersion>3.0.100-preview9.19422.5</MicrosoftDotNetMSBuildSdkResolverPackageVersion>
 
-        <MicrosoftNETCoreAppPackageVersion>3.0.0-preview8-28405-07</MicrosoftNETCoreAppPackageVersion>
+        <MicrosoftNETCoreAppPackageVersion>3.0.0-preview9-19421-20</MicrosoftNETCoreAppPackageVersion>
         <DotNetSdkVersionForLibHostFxr>$(MicrosoftNETCoreAppPackageVersion)</DotNetSdkVersionForLibHostFxr>
 
-        <ILLinkTasksPackageVersion>0.1.6-prerelease.19379.2</ILLinkTasksPackageVersion>
+        <ILLinkTasksPackageVersion>0.1.6-prerelease.19380.1</ILLinkTasksPackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
