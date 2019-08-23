@@ -85,13 +85,7 @@ namespace Microsoft.Build.CommandLine
         /// Gets the invalid switch that caused the exception.
         /// </summary>
         /// <value>Can be null.</value>
-        internal string CommandLineArg
-        {
-            get
-            {
-                return commandLineArg;
-            }
-        }
+        internal string CommandLineArg => commandLineArg;
 
         // the invalid switch causing this exception
         private string commandLineArg;

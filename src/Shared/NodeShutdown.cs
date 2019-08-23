@@ -75,28 +75,19 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the packet type.
         /// </summary>
-        public NodePacketType Type
-        {
-            get { return NodePacketType.NodeShutdown; }
-        }
+        public NodePacketType Type => NodePacketType.NodeShutdown;
 
         #endregion
 
         /// <summary>
         /// The reason for shutting down.
         /// </summary>
-        public NodeShutdownReason Reason
-        {
-            get { return _reason; }
-        }
+        public NodeShutdownReason Reason => _reason;
 
         /// <summary>
         /// The exception, if any.
         /// </summary>
-        public Exception Exception
-        {
-            get { return _exception; }
-        }
+        public Exception Exception => _exception;
 
         #region INodePacketTranslatable Members
 

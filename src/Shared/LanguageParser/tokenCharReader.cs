@@ -54,10 +54,7 @@ namespace Microsoft.Build.Shared.LanguageParser
          * 
          * The current line number   
          */
-        internal int CurrentLine
-        {
-            get { return _currentLine; }
-        }
+        internal int CurrentLine => _currentLine;
 
         /*
          * Method:  Position
@@ -107,20 +104,14 @@ namespace Microsoft.Build.Shared.LanguageParser
          * 
          * Get the current character.
          */
-        internal char CurrentCharacter
-        {
-            get { return _sources.GetAt(_position); }
-        }
+        internal char CurrentCharacter => _sources.GetAt(_position);
 
         /*
          * Method:  EndOfLines
          * 
          * Return true if we've reached the end of sources.
          */
-        internal bool EndOfLines
-        {
-            get { return _sources.IsPastEnd(_position); }
-        }
+        internal bool EndOfLines => _sources.IsPastEnd(_position);
 
 
         /*

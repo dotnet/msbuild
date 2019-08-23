@@ -42,37 +42,22 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Return the number of items in the backing collection
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return BackingCollection.Count;
-            }
-        }
+        public int Count => BackingCollection.Count;
 
         /// <summary>
         /// Returns true.
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
+        public bool IsReadOnly => true;
 
         /// <summary>
         /// Whether collection is synchronized
         /// </summary>
-        bool ICollection.IsSynchronized
-        {
-            get { return false; }
-        }
+        bool ICollection.IsSynchronized => false;
 
         /// <summary>
         /// Sync root
         /// </summary>
-        object ICollection.SyncRoot
-        {
-            get { return this; }
-        }
+        object ICollection.SyncRoot => this;
 
         /// <summary>
         /// Get a backing ICollection.

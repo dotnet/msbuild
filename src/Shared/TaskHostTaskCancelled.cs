@@ -24,10 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The type of this NodePacket
         /// </summary>
-        public NodePacketType Type
-        {
-            get { return NodePacketType.TaskHostTaskCancelled; }
-        }
+        public NodePacketType Type => NodePacketType.TaskHostTaskCancelled;
 
         /// <summary>
         /// Translates the packet to/from binary form.

@@ -52,13 +52,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// VisualStudioVersion that corresponds to this subtoolset
         /// </summary>
-        public string SubToolsetVersion
-        {
-            get
-            {
-                return _subToolsetVersion;
-            }
-        }
+        public string SubToolsetVersion => _subToolsetVersion;
 
         /// <summary>
         /// The properties that correspond to this particular sub-toolset. 

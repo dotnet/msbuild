@@ -194,10 +194,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Sets or sets the location from which this target was referred.
         /// </summary>
-        internal ElementLocation ReferenceLocation
-        {
-            get { return _targetSpecification.ReferenceLocation; }
-        }
+        internal ElementLocation ReferenceLocation => _targetSpecification.ReferenceLocation;
 
         /// <summary>
         /// Gets or sets a flag indicating that the target builder should stop processing the target
@@ -212,47 +209,23 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves the name of the target.
         /// </summary>
-        internal string Name
-        {
-            get
-            {
-                return _targetSpecification.TargetName;
-            }
-        }
+        internal string Name => _targetSpecification.TargetName;
 
         /// <summary>
         /// Gets the current state of the target
         /// </summary>
-        internal TargetEntryState State
-        {
-            get
-            {
-                return _state;
-            }
-        }
+        internal TargetEntryState State => _state;
 
         /// <summary>
         /// The result of this target.
         /// </summary>
-        internal TargetResult Result
-        {
-            get
-            {
-                return _targetResult;
-            }
-        }
+        internal TargetResult Result => _targetResult;
 
         /// <summary>
         /// Retrieves the Lookup this target was initialized with, including any modifications which have 
         /// been made to it while running.
         /// </summary>
-        internal Lookup Lookup
-        {
-            get
-            {
-                return _baseLookup;
-            }
-        }
+        internal Lookup Lookup => _baseLookup;
 
         /// <summary>
         /// The target contained by the entry.
@@ -273,35 +246,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The build request entry to which this target belongs.
         /// </summary>
-        internal BuildRequestEntry RequestEntry
-        {
-            get
-            {
-                return _requestEntry;
-            }
-        }
+        internal BuildRequestEntry RequestEntry => _requestEntry;
 
         /// <summary>
         /// The target entry for which we are a dependency.
         /// </summary>
-        internal TargetEntry ParentEntry
-        {
-            get
-            {
-                return _parentTarget;
-            }
-        }
+        internal TargetEntry ParentEntry => _parentTarget;
 
         /// <summary>
         /// Why the parent target built this target.
         /// </summary>
-        internal TargetBuiltReason BuildReason
-        {
-            get
-            {
-                return _buildReason;
-            }
-        }
+        internal TargetBuiltReason BuildReason => _buildReason;
 
         #region IEquatable<TargetEntry> Members
 

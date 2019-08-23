@@ -35,10 +35,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         static RegisteredTaskObjectCacheBase()
         {
-            AppDomain.CurrentDomain.DomainUnload += new EventHandler((sender, args) =>
-            {
-                DisposeObjects(s_appDomainLifetimeObjects);
-            });
+            AppDomain.CurrentDomain.DomainUnload += new EventHandler((sender, args) => DisposeObjects(s_appDomainLifetimeObjects));
         }
 #endif
 

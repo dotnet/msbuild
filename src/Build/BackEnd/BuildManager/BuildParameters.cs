@@ -396,14 +396,8 @@ namespace Microsoft.Build.Execution
         /// This differs from the BuildProcessEnvironment in that there are certain MSBuild-specific properties which are added, and those environment variables which
         /// would not be valid as MSBuild properties are removed.
         /// </remarks>
-        public IDictionary<string, string> EnvironmentProperties
-        {
-            get
-            {
-                return new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_environmentProperties,
-                    instance => ((IProperty) instance).EvaluatedValueEscaped);
-            }
-        }
+        public IDictionary<string, string> EnvironmentProperties => new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_environmentProperties,
+                    instance => ((IProperty)instance).EvaluatedValueEscaped);
 
         /// <summary>
         /// The collection of forwarding logger descriptions.

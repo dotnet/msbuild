@@ -86,13 +86,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The task factory wrapped by the wrapper
         /// </summary>
-        public ITaskFactory TaskFactory
-        {
-            get
-            {
-                return _taskFactory;
-            }
-        }
+        public ITaskFactory TaskFactory => _taskFactory;
 
         /// <summary>
         /// Gets the list of names of public instance properties that have the required attribute applied.
@@ -127,25 +121,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Get the name of the factory wrapped by the wrapper
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return _taskFactory.FactoryName;
-            }
-        }
+        public string Name => _taskFactory.FactoryName;
 
         /// <summary>
         /// The set of task identity parameters that were set on 
         /// this particular factory's UsingTask statement. 
         /// </summary>
-        public IDictionary<string, string> FactoryIdentityParameters
-        {
-            get
-            {
-                return _factoryIdentityParameters;
-            }
-        }
+        public IDictionary<string, string> FactoryIdentityParameters => _factoryIdentityParameters;
 
         #endregion
 

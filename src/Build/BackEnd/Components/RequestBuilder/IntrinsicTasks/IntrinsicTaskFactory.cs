@@ -28,10 +28,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the factory name
         /// </summary>
-        public string FactoryName
-        {
-            get { return "Intrinsic Task Factory"; }
-        }
+        public string FactoryName => "Intrinsic Task Factory";
 
         /// <summary>
         /// Returns the task type.

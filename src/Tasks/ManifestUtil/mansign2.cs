@@ -372,21 +372,9 @@ namespace System.Deployment.Internal.CodeSigning
             StrongNameSignManifestDom(_manifestDom, licenseDom, signer, _useSha256);
         }
 
-        internal CmiStrongNameSignerInfo StrongNameSignerInfo
-        {
-            get
-            {
-                return _strongNameSignerInfo;
-            }
-        }
+        internal CmiStrongNameSignerInfo StrongNameSignerInfo => _strongNameSignerInfo;
 
-        internal CmiAuthenticodeSignerInfo AuthenticodeSignerInfo
-        {
-            get
-            {
-                return _authenticodeSignerInfo;
-            }
-        }
+        internal CmiAuthenticodeSignerInfo AuthenticodeSignerInfo => _authenticodeSignerInfo;
 
         //
         // Privates.
@@ -1064,29 +1052,11 @@ namespace System.Deployment.Internal.CodeSigning
             _useSha256 = useSha256;
         }
 
-        internal bool UseSha256
-        {
-            get
-            {
-                return _useSha256;
-            }
-        }
+        internal bool UseSha256 => _useSha256;
 
-        internal AsymmetricAlgorithm StrongNameKey
-        {
-            get
-            {
-                return _strongNameKey;
-            }
-        }
+        internal AsymmetricAlgorithm StrongNameKey => _strongNameKey;
 
-        internal X509Certificate2 Certificate
-        {
-            get
-            {
-                return _certificate;
-            }
-        }
+        internal X509Certificate2 Certificate => _certificate;
 
         internal string Description
         {
@@ -1100,13 +1070,7 @@ namespace System.Deployment.Internal.CodeSigning
             set => _url = value;
         }
 
-        internal X509Certificate2Collection ExtraStore
-        {
-            get
-            {
-                return _certificates;
-            }
-        }
+        internal X509Certificate2Collection ExtraStore => _certificates;
 
         internal X509IncludeOption IncludeOption
         {
@@ -1249,13 +1213,7 @@ namespace System.Deployment.Internal.CodeSigning
             set => _descriptionUrl = value;
         }
 
-        internal CmiAuthenticodeTimestamperInfo TimestamperInfo
-        {
-            get
-            {
-                return _timestamperInfo;
-            }
-        }
+        internal CmiAuthenticodeTimestamperInfo TimestamperInfo => _timestamperInfo;
 
         internal X509Chain SignerChain
         {
@@ -1285,37 +1243,13 @@ namespace System.Deployment.Internal.CodeSigning
             }
         }
 
-        internal int ErrorCode
-        {
-            get
-            {
-                return _error;
-            }
-        }
+        internal int ErrorCode => _error;
 
-        internal uint HashAlgId
-        {
-            get
-            {
-                return _algHash;
-            }
-        }
+        internal uint HashAlgId => _algHash;
 
-        internal DateTime TimestampTime
-        {
-            get
-            {
-                return _timestampTime;
-            }
-        }
+        internal DateTime TimestampTime => _timestampTime;
 
-        internal X509Chain TimestamperChain
-        {
-            get
-            {
-                return _timestamperChain;
-            }
-        }
+        internal X509Chain TimestamperChain => _timestamperChain;
     }
 }
 

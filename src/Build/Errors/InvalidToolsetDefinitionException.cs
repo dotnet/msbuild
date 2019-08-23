@@ -106,13 +106,7 @@ namespace Microsoft.Build.Exceptions
         /// The MSBuild error code corresponding with this exception, or
         /// null if none was specified.
         /// </summary>
-        public string ErrorCode
-        {
-            get
-            {
-                return errorCode;
-            }
-        }
+        public string ErrorCode => errorCode;
 
         #region Static Throw Helpers
 

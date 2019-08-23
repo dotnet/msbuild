@@ -193,10 +193,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The type of this packet.
         /// </summary>
-        public NodePacketType Type
-        {
-            get { return NodePacketType.TaskHostTaskComplete; }
-        }
+        public NodePacketType Type => NodePacketType.TaskHostTaskComplete;
 
         /// <summary>
         /// Translates the packet to/from binary form.

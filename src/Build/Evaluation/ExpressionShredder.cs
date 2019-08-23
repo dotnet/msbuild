@@ -769,59 +769,38 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Captures within this capture
             /// </summary>
-            public List<ItemExpressionCapture> Captures
-            {
-                get { return _captures; }
-            }
+            public List<ItemExpressionCapture> Captures => _captures;
 
             /// <summary>
             /// The position in the original string where the first character of the captured
             /// substring was found.
             /// </summary>
-            public int Index
-            {
-                get { return _index; }
-            }
+            public int Index => _index;
 
             /// <summary>
             /// The length of the captured substring.
             /// </summary>
-            public int Length
-            {
-                get { return _length; }
-            }
+            public int Length => _length;
 
             /// <summary>
             /// Gets the captured substring from the input string.
             /// </summary>
-            public string Value
-            {
-                get { return _value; }
-            }
+            public string Value => _value;
 
             /// <summary>
             /// Gets the captured itemtype.
             /// </summary>
-            public string ItemType
-            {
-                get { return _itemType; }
-            }
+            public string ItemType => _itemType;
 
             /// <summary>
             /// Gets the captured itemtype.
             /// </summary>
-            public string Separator
-            {
-                get { return _separator; }
-            }
+            public string Separator => _separator;
 
             /// <summary>
             /// The starting character of the separator.
             /// </summary>
-            public int SeparatorStart
-            {
-                get { return _separatorStart; }
-            }
+            public int SeparatorStart => _separatorStart;
 
             /// <summary>
             /// The function name, if any, within this expression

@@ -608,7 +608,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newState">The event's new state.</param>
         private void BuildRequestEntry_StateChanged(BuildRequestEntry entry, BuildRequestEntryState newState)
         {
-            QueueAction(() => { EvaluateRequestStates(); }, isLastTask: false);
+            QueueAction(() => EvaluateRequestStates(), isLastTask: false);
         }
 
         #region RaiseEvents

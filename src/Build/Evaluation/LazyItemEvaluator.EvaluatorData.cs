@@ -25,21 +25,9 @@ namespace Microsoft.Build.Evaluation
                 _itemGetter = itemGetter;
             }
 
-            public ItemDictionary<I> Items
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            public ItemDictionary<I> Items => throw new NotImplementedException();
 
-            public List<ProjectItemElement> EvaluatedItemElements
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            public List<ProjectItemElement> EvaluatedItemElements => throw new NotImplementedException();
 
             public ICollection<I> GetItems(string itemType)
             {
@@ -61,13 +49,7 @@ namespace Microsoft.Build.Evaluation
                 set => _wrappedData.BeforeTargets = value;
             }
 
-            public Dictionary<string, List<string>> ConditionedProperties
-            {
-                get
-                {
-                    return _wrappedData.ConditionedProperties;
-                }
-            }
+            public Dictionary<string, List<string>> ConditionedProperties => _wrappedData.ConditionedProperties;
 
             public List<string> DefaultTargets
             {
@@ -82,45 +64,15 @@ namespace Microsoft.Build.Evaluation
                 set => _wrappedData.EvaluationId = value;
             }
 
-            public string Directory
-            {
-                get
-                {
-                    return _wrappedData.Directory;
-                }
-            }
+            public string Directory => _wrappedData.Directory;
 
-            public string ExplicitToolsVersion
-            {
-                get
-                {
-                    return _wrappedData.ExplicitToolsVersion;
-                }
-            }
+            public string ExplicitToolsVersion => _wrappedData.ExplicitToolsVersion;
 
-            public PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary
-            {
-                get
-                {
-                    return _wrappedData.GlobalPropertiesDictionary;
-                }
-            }
+            public PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary => _wrappedData.GlobalPropertiesDictionary;
 
-            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary
-            {
-                get
-                {
-                    return _wrappedData.EnvironmentVariablePropertiesDictionary;
-                }
-            }
+            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => _wrappedData.EnvironmentVariablePropertiesDictionary;
 
-            public ISet<string> GlobalPropertiesToTreatAsLocal
-            {
-                get
-                {
-                    return _wrappedData.GlobalPropertiesToTreatAsLocal;
-                }
-            }
+            public ISet<string> GlobalPropertiesToTreatAsLocal => _wrappedData.GlobalPropertiesToTreatAsLocal;
 
             public List<string> InitialTargets
             {
@@ -129,46 +81,16 @@ namespace Microsoft.Build.Evaluation
                 set => _wrappedData.InitialTargets = value;
             }
 
-            public IEnumerable<D> ItemDefinitionsEnumerable
-            {
-                get
-                {
-                    return _wrappedData.ItemDefinitionsEnumerable;
-                }
-            }
+            public IEnumerable<D> ItemDefinitionsEnumerable => _wrappedData.ItemDefinitionsEnumerable;
 
 
-            public bool CanEvaluateElementsWithFalseConditions
-            {
-                get
-                {
-                    return _wrappedData.CanEvaluateElementsWithFalseConditions;
-                }
-            }
+            public bool CanEvaluateElementsWithFalseConditions => _wrappedData.CanEvaluateElementsWithFalseConditions;
 
-            public PropertyDictionary<P> Properties
-            {
-                get
-                {
-                    return _wrappedData.Properties;
-                }
-            }
+            public PropertyDictionary<P> Properties => _wrappedData.Properties;
 
-            public bool ShouldEvaluateForDesignTime
-            {
-                get
-                {
-                    return _wrappedData.ShouldEvaluateForDesignTime;
-                }
-            }
+            public bool ShouldEvaluateForDesignTime => _wrappedData.ShouldEvaluateForDesignTime;
 
-            public string SubToolsetVersion
-            {
-                get
-                {
-                    return _wrappedData.SubToolsetVersion;
-                }
-            }
+            public string SubToolsetVersion => _wrappedData.SubToolsetVersion;
 
             public TaskRegistry TaskRegistry
             {
@@ -177,13 +99,7 @@ namespace Microsoft.Build.Evaluation
                 set => _wrappedData.TaskRegistry = value;
             }
 
-            public Toolset Toolset
-            {
-                get
-                {
-                    return _wrappedData.Toolset;
-                }
-            }
+            public Toolset Toolset => _wrappedData.Toolset;
 
             public void AddItem(I item)
             {

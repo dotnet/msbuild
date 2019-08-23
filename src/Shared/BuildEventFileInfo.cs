@@ -113,61 +113,31 @@ namespace Microsoft.Build.Shared
         /// Gets the filename/path to be associated with some build event.
         /// </summary>
         /// <value>The filename/path string.</value>
-        internal string File
-        {
-            get
-            {
-                return _file;
-            }
-        }
+        internal string File => _file;
 
         /// <summary>
         /// Gets the line number of interest in the file.
         /// </summary>
         /// <value>Line number, or zero if not available.</value>
-        internal int Line
-        {
-            get
-            {
-                return _line;
-            }
-        }
+        internal int Line => _line;
 
         /// <summary>
         /// Gets the column number of interest in the file.
         /// </summary>
         /// <value>Column number, or zero if not available.</value>
-        internal int Column
-        {
-            get
-            {
-                return _column;
-            }
-        }
+        internal int Column => _column;
 
         /// <summary>
         /// Gets the last line number of a range of interesting lines in the file.
         /// </summary>
         /// <value>Last line number, or zero if not available.</value>
-        internal int EndLine
-        {
-            get
-            {
-                return _endLine;
-            }
-        }
+        internal int EndLine => _endLine;
 
         /// <summary>
         /// Gets the last column number of a range of interesting columns in the file.
         /// </summary>
         /// <value>Last column number, or zero if not available.</value>
-        internal int EndColumn
-        {
-            get
-            {
-                return _endColumn;
-            }
-        }
+        internal int EndColumn => _endColumn;
 
         #endregion
 
