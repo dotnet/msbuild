@@ -46,7 +46,10 @@ namespace Microsoft.Build.Evaluation
                 _current = default(string);
             }
 
-            public string Current => _current;
+            public string Current
+            {
+                get { return _current; }
+            }
 
             object IEnumerator.Current => Current;
 

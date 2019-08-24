@@ -47,7 +47,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Enumerator over all registered loggers.
         /// </summary>
-        public ICollection<ILogger> Loggers => throw new NotImplementedException();
+        public ICollection<ILogger> Loggers
+        {
+            get { throw new NotImplementedException(); }
+        }
 
         /// <summary>
         /// The logging service state
@@ -66,7 +69,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The logging mode.
         /// </summary>
-        public LoggerMode LoggingMode => LoggerMode.Synchronous;
+        public LoggerMode LoggingMode
+        {
+            get
+            {
+                return LoggerMode.Synchronous;
+            }
+        }
 
         /// <summary>
         /// Whether to log critical events
@@ -93,17 +102,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Gets the logger descriptions
         /// </summary>
-        public ICollection<LoggerDescription> LoggerDescriptions => throw new NotImplementedException();
+        public ICollection<LoggerDescription> LoggerDescriptions
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         /// <summary>
         /// Gets the registered logger type names.
         /// </summary>
-        public ICollection<string> RegisteredLoggerTypeNames => throw new NotImplementedException();
+        public ICollection<string> RegisteredLoggerTypeNames
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         /// <summary>
         /// Retrieves the registered sink names.
         /// </summary>
-        public ICollection<string> RegisteredSinkNames => throw new NotImplementedException();
+        public ICollection<string> RegisteredSinkNames
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         /// <summary>
         /// Properties to serialize from the child node to the parent node

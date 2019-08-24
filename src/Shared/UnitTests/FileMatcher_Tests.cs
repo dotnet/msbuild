@@ -1919,17 +1919,26 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Number of times a file from set 1 was requested.
             /// </summary>
-            internal int FileHits1 => _fileSet1Hits;
+            internal int FileHits1
+            {
+                get { return _fileSet1Hits; }
+            }
 
             /// <summary>
             /// Number of times a file from set 2 was requested.
             /// </summary>
-            internal int FileHits2 => _fileSet2Hits;
+            internal int FileHits2
+            {
+                get { return _fileSet2Hits; }
+            }
 
             /// <summary>
             /// Number of times a file from set 3 was requested.
             /// </summary>
-            internal int FileHits3 => _fileSet3Hits;
+            internal int FileHits3
+            {
+                get { return _fileSet3Hits; }
+            }
 
             /// <summary>
             /// Return files that match the given files.

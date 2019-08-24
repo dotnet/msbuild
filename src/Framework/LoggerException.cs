@@ -112,13 +112,25 @@ namespace Microsoft.Build.Framework
         /// Gets the error code associated with this exception's message (not the inner exception).
         /// </summary>
         /// <value>The error code string.</value>
-        public string ErrorCode => errorCode;
+        public string ErrorCode
+        {
+            get
+            {
+                return errorCode;
+            }
+        }
 
         /// <summary>
         /// Gets the F1-help keyword associated with this error, for the host IDE.
         /// </summary>
         /// <value>The keyword string.</value>
-        public string HelpKeyword => helpKeyword;
+        public string HelpKeyword
+        {
+            get
+            {
+                return helpKeyword;
+            }
+        }
 
         #endregion
 

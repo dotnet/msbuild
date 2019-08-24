@@ -75,28 +75,43 @@ namespace Microsoft.Build.Execution
         /// Unevaluated condition.
         /// May be empty string.
         /// </summary>
-        public override string Condition => _condition;
+        public override string Condition
+        {
+            get { return _condition; }
+        }
 
         /// <summary>
         /// Unevaluated ExecuteTargets value.
         /// May be empty string.
         /// </summary>
-        public string ExecuteTargets => _executeTargets;
+        public string ExecuteTargets
+        {
+            get { return _executeTargets; }
+        }
 
         /// <summary>
         /// Location of the element
         /// </summary>
-        public override ElementLocation Location => _location;
+        public override ElementLocation Location
+        {
+            get { return _location; }
+        }
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        public override ElementLocation ConditionLocation => _conditionLocation;
+        public override ElementLocation ConditionLocation
+        {
+            get { return _conditionLocation; }
+        }
 
         /// <summary>
         /// Location of the execute targets attribute, if any
         /// </summary>
-        public ElementLocation ExecuteTargetsLocation => _executeTargetsLocation;
+        public ElementLocation ExecuteTargetsLocation
+        {
+            get { return _executeTargetsLocation; }
+        }
 
         void ITranslatable.Translate(ITranslator translator)
         {

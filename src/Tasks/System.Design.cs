@@ -115,9 +115,18 @@ namespace Microsoft.Build.Tasks
             return s_loader;
         }
 
-        private static CultureInfo Culture => null/*use ResourceManager default, CultureInfo.CurrentUICulture*/;
+        private static CultureInfo Culture
+        {
+            get { return null/*use ResourceManager default, CultureInfo.CurrentUICulture*/; }
+        }
 
-        public static ResourceManager Resources => GetLoader()._resources;
+        public static ResourceManager Resources
+        {
+            get
+            {
+                return GetLoader()._resources;
+            }
+        }
 
         public static string GetString(string name, params object[] args)
         {

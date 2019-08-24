@@ -21,20 +21,38 @@ namespace Microsoft.Build.Tasks
         /// The name of the app.config file.
         /// </summary>
         private string fileName = String.Empty;
-        internal string FileName => fileName;
+        internal string FileName
+        {
+            get
+            {
+                return fileName;
+            }
+        }
 
 
         /// <summary>
         /// The line number with the error. Is initialized to zero
         /// </summary>
         private int line;
-        internal int Line => line;
+        internal int Line
+        {
+            get
+            {
+                return line;
+            }
+        }
 
         /// <summary>
         /// The column with the error. Is initialized to zero
         /// </summary>
         private int column;
-        internal int Column => column;
+        internal int Column
+        {
+            get
+            {
+                return column;
+            }
+        }
 
 
         /// <summary>

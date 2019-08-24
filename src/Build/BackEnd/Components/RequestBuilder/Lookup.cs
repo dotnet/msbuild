@@ -1047,12 +1047,18 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// A flag indicating whether or not there are any changes which might apply.
             /// </summary>
-            public bool HasChanges => _modifications.Count > 0 || _keepOnlySpecified;
+            public bool HasChanges
+            {
+                get { return _modifications.Count > 0 || _keepOnlySpecified; }
+            }
 
             /// <summary>
             /// A flag indicating whether only those metadata explicitly-specified should be retained on a target item.
             /// </summary>
-            public bool KeepOnlySpecified => _keepOnlySpecified;
+            public bool KeepOnlySpecified
+            {
+                get { return _keepOnlySpecified; }
+            }
 
             /// <summary>
             /// Applies the modifications from the specified modifications to this one, performing a proper merge.
@@ -1116,7 +1122,10 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Provides an enumeration of the explicit metadata modifications.
             /// </summary>
-            public IEnumerable<KeyValuePair<string, MetadataModification>> ExplicitModifications => _modifications;
+            public IEnumerable<KeyValuePair<string, MetadataModification>> ExplicitModifications
+            {
+                get { return _modifications; }
+            }
 
             /// <summary>
             /// Sets or retrieves a modification from the modifications table.
@@ -1252,17 +1261,26 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// When true, this modification indicates the associated metadata should be removed.
             /// </summary>
-            public bool Remove => _remove;
+            public bool Remove
+            {
+                get { return _remove; }
+            }
 
             /// <summary>
             /// When true, this modification indicates the associated metadata should retain its existing value.
             /// </summary>
-            public bool KeepValue => (_remove == false && _newValue == null);
+            public bool KeepValue
+            {
+                get { return (_remove == false && _newValue == null); }
+            }
 
             /// <summary>
             /// The new value of the metadata.  Only valid when <see cref="Remove"/> is false.
             /// </summary>
-            public string NewValue => _newValue;
+            public string NewValue
+            {
+                get { return _newValue; }
+            }
         }
 
         /// <summary>
@@ -1393,16 +1411,25 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// ID of thread owning this scope
             /// </summary>
-            internal int ThreadIdThatEnteredScope => _threadIdThatEnteredScope;
+            internal int ThreadIdThatEnteredScope
+            {
+                get { return _threadIdThatEnteredScope; }
+            }
             /// <summary>
             /// Whether to stop lookups going beyond this scope downwards
             /// </summary>
-            internal bool TruncateLookupsAtThisScope => _truncateLookupsAtThisScope;
+            internal bool TruncateLookupsAtThisScope
+            {
+                get { return _truncateLookupsAtThisScope; }
+            }
 
             /// <summary>
             /// The description assigned to this scope.
             /// </summary>
-            internal string Description => _description;
+            internal string Description
+            {
+                get { return _description; }
+            }
 
             /// <summary>
             /// Leaves the current lookup scope.

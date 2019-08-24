@@ -149,7 +149,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the object that knows how to handle all kinds of expansion for this bucket.
         /// </summary>
-        internal Expander<ProjectPropertyInstance, ProjectItemInstance> Expander => _expander;
+        internal Expander<ProjectPropertyInstance, ProjectItemInstance> Expander
+        {
+            get
+            {
+                return _expander;
+            }
+        }
 
 
         /// <summary>
@@ -159,12 +165,24 @@ namespace Microsoft.Build.BackEnd
         /// bucket created gets bucketSequenceNumber=0, the second bucket created gets 
         /// bucketSequenceNumber=1, etc.
         /// </summary>
-        internal int BucketSequenceNumber => _bucketSequenceNumber;
+        internal int BucketSequenceNumber
+        {
+            get
+            {
+                return _bucketSequenceNumber;
+            }
+        }
 
         /// <summary>
         /// The items for this bucket.
         /// </summary>
-        internal Lookup Lookup => _lookup;
+        internal Lookup Lookup
+        {
+            get
+            {
+                return _lookup;
+            }
+        }
 
         #endregion
 

@@ -25,7 +25,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieves a new instance of the class.
         /// </summary>
-        public static IComparer<ITaskItem> Instance => new TaskItemComparer();
+        public static IComparer<ITaskItem> Instance
+        {
+            get { return new TaskItemComparer(); }
+        }
 
         #region IComparer<ITaskItem> Members
 

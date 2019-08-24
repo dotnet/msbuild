@@ -46,17 +46,35 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Return the current Visual Studio version
         /// </summary>
-        internal static string CurrentVisualStudioVersion => s_currentVisualStudioVersion;
+        internal static string CurrentVisualStudioVersion
+        {
+            get
+            {
+                return s_currentVisualStudioVersion;
+            }
+        }
 
         /// <summary>
         /// Return the default tools version
         /// </summary>
-        internal static string MSBuildDefaultToolsVersion => s_msbuildDefaultToolsVersion;
+        internal static string MSBuildDefaultToolsVersion
+        {
+            get
+            {
+                return s_msbuildDefaultToolsVersion;
+            }
+        }
 
         /// <summary>
         /// Return the current assembly version
         /// </summary>
-        internal static string MSBuildAssemblyVersion => s_msbuildAssemblyVersion;
+        internal static string MSBuildAssemblyVersion
+        {
+            get
+            {
+                return s_msbuildAssemblyVersion;
+            }
+        }
 
 
         /// <summary>

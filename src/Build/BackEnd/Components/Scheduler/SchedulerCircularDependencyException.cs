@@ -37,11 +37,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets an enumeration of the ancestors which led to this circular dependency.
         /// </summary>
-        public IEnumerable<SchedulableRequest> Ancestors => _ancestors;
+        public IEnumerable<SchedulableRequest> Ancestors
+        {
+            get { return _ancestors; }
+        }
 
         /// <summary>
         /// Gets the request which caused the circular dependency.
         /// </summary>
-        public BuildRequest Request => _request;
+        public BuildRequest Request
+        {
+            get { return _request; }
+        }
     }
 }

@@ -428,7 +428,13 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Accessor which indicates if there are any registered in process host objects.
             /// </summary>
-            internal bool HasRegisteredInProcessHostObjects => _hostObjects.Any(h => h.Value.IsTaskHost);
+            internal bool HasRegisteredInProcessHostObjects
+            {
+                get
+                {
+                    return _hostObjects.Any(h => h.Value.IsTaskHost);
+                }
+            }
 
             /// <summary>
             /// Registers a host object for this project file

@@ -2274,12 +2274,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Collection of metadataNames on the item
             /// </summary>
-            public ICollection MetadataNames => throw new NotImplementedException();
+            public ICollection MetadataNames
+            {
+                get { throw new NotImplementedException(); }
+            }
 
             /// <summary>
             /// Number of metadata items on the item
             /// </summary>
-            public int MetadataCount => throw new NotImplementedException();
+            public int MetadataCount
+            {
+                get { throw new NotImplementedException(); }
+            }
 
             /// <summary>
             /// Get the metadata on the item based on the metadataName

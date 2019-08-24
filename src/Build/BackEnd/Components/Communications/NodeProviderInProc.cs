@@ -103,7 +103,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the type of nodes managed by this provider.
         /// </summary>
-        public NodeProviderType ProviderType => NodeProviderType.InProc;
+        public NodeProviderType ProviderType
+        {
+            get { return NodeProviderType.InProc; }
+        }
 
         /// <summary>
         /// Returns the number of nodes available to create on this provider.

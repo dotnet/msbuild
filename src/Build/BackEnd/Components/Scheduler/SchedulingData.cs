@@ -118,57 +118,90 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves all of the build events.
         /// </summary>
-        public IEnumerable<SchedulingEvent> BuildEvents => _buildEvents;
+        public IEnumerable<SchedulingEvent> BuildEvents
+        {
+            get { return _buildEvents; }
+        }
 
         /// <summary>
         /// Retrieves all of the executing requests.
         /// </summary>
-        public IEnumerable<SchedulableRequest> ExecutingRequests => _executingRequests.Values;
+        public IEnumerable<SchedulableRequest> ExecutingRequests
+        {
+            get { return _executingRequests.Values; }
+        }
 
         /// <summary>
         /// Gets a count of all executing requests.
         /// </summary>
-        public int ExecutingRequestsCount => _executingRequests.Count;
+        public int ExecutingRequestsCount
+        {
+            get { return _executingRequests.Count; }
+        }
 
         /// <summary>
         /// Retrieves all of the ready requests.
         /// </summary>
-        public IEnumerable<SchedulableRequest> ReadyRequests => _readyRequests.Values;
+        public IEnumerable<SchedulableRequest> ReadyRequests
+        {
+            get { return _readyRequests.Values; }
+        }
 
         /// <summary>
         /// Gets a count of all the ready requests.
         /// </summary>
-        public int ReadyRequestsCount => _readyRequests.Count;
+        public int ReadyRequestsCount
+        {
+            get { return _readyRequests.Count; }
+        }
 
         /// <summary>
         /// Retrieves all of the blocked requests.
         /// </summary>
-        public IEnumerable<SchedulableRequest> BlockedRequests => _blockedRequests.Values;
+        public IEnumerable<SchedulableRequest> BlockedRequests
+        {
+            get { return _blockedRequests.Values; }
+        }
 
         /// <summary>
         /// Gets a count of all of the blocked requests.
         /// </summary>
-        public int BlockedRequestsCount => _blockedRequests.Count;
+        public int BlockedRequestsCount
+        {
+            get { return _blockedRequests.Count; }
+        }
 
         /// <summary>
         /// Retrieves all of the yielded requests.
         /// </summary>
-        public IEnumerable<SchedulableRequest> YieldingRequests => _yieldingRequests.Values;
+        public IEnumerable<SchedulableRequest> YieldingRequests
+        {
+            get { return _yieldingRequests.Values; }
+        }
 
         /// <summary>
         /// Gets a count of all of the yielded requests.
         /// </summary>
-        public int YieldingRequestsCount => _yieldingRequests.Count;
+        public int YieldingRequestsCount
+        {
+            get { return _yieldingRequests.Count; }
+        }
 
         /// <summary>
         /// Retrieves all of the unscheduled requests.
         /// </summary>
-        public IEnumerable<SchedulableRequest> UnscheduledRequests => _unscheduledRequests;
+        public IEnumerable<SchedulableRequest> UnscheduledRequests
+        {
+            get { return _unscheduledRequests; }
+        }
 
         /// <summary>
         /// Gets a count of all the unscheduled requests.
         /// </summary>
-        public int UnscheduledRequestsCount => _unscheduledRequests.Count;
+        public int UnscheduledRequestsCount
+        {
+            get { return _unscheduledRequests.Count; }
+        }
 
         /// <summary>
         /// Enumerates the unscheduled requests which don't have other instances scheduled already.
@@ -191,7 +224,13 @@ namespace Microsoft.Build.BackEnd
         /// Gets all of the configurations for this build.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<int> Configurations => _configurationToNode.Keys;
+        public IEnumerable<int> Configurations
+        {
+            get
+            {
+                return _configurationToNode.Keys;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the current event time.
@@ -697,22 +736,34 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// The time the event took place.
             /// </summary>
-            public DateTime EventTime => _eventTime;
+            public DateTime EventTime
+            {
+                get { return _eventTime; }
+            }
 
             /// <summary>
             /// The request involved in the event.
             /// </summary>
-            public SchedulableRequest Request => _request;
+            public SchedulableRequest Request
+            {
+                get { return _request; }
+            }
 
             /// <summary>
             /// The state of the request before the event.
             /// </summary>
-            public SchedulableRequestState OldState => _oldState;
+            public SchedulableRequestState OldState
+            {
+                get { return _oldState; }
+            }
 
             /// <summary>
             /// The state of the request as a result of the event.
             /// </summary>
-            public SchedulableRequestState NewState => _newState;
+            public SchedulableRequestState NewState
+            {
+                get { return _newState; }
+            }
         }
     }
 }

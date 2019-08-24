@@ -49,22 +49,34 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Pass through for underlying collection
         /// </summary>
-        public int Count => 0;
+        public int Count
+        {
+            get { return 0; }
+        }
 
         /// <summary>
         /// Returns true.
         /// </summary>
-        public bool IsReadOnly => true;
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
 
         /// <summary>
         /// Whether collection is synchronized
         /// </summary>
-        bool ICollection.IsSynchronized => false;
+        bool ICollection.IsSynchronized
+        {
+            get { return false; }
+        }
 
         /// <summary>
         /// Sync root
         /// </summary>
-        object ICollection.SyncRoot => this;
+        object ICollection.SyncRoot
+        {
+            get { return this; }
+        }
 
         /// <summary>
         /// Prohibited on read only collection: throws

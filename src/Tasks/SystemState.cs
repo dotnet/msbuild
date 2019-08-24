@@ -198,7 +198,10 @@ namespace Microsoft.Build.Tasks
             /// Gets the last modified date.
             /// </summary>
             /// <value></value>
-            internal DateTime LastModified => lastModified;
+            internal DateTime LastModified
+            {
+                get { return lastModified; }
+            }
 
             /// <summary>
             /// Get or set the assemblyName.
@@ -279,7 +282,10 @@ namespace Microsoft.Build.Tasks
         /// Flag that indicates
         /// </summary>
         /// <value></value>
-        internal bool IsDirty => isDirty;
+        internal bool IsDirty
+        {
+            get { return isDirty; }
+        }
 
         /// <summary>
         /// Set the GetLastWriteTime delegate.

@@ -592,7 +592,10 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Retrieves the metadata table used to collect additions.
             /// </summary>
-            internal Dictionary<string, string> AddedMetadata => _addTable;
+            internal Dictionary<string, string> AddedMetadata
+            {
+                get { return _addTable; }
+            }
 
             #region IMetadataTable Members
             // NOTE:  Leaving these methods public so as to avoid having to explicitly define them

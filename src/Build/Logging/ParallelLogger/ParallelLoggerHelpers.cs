@@ -315,21 +315,69 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region Properties
 
-        internal DateTime TimeStamp => _timeStamp;
+        internal DateTime TimeStamp
+        {
+            get
+            {
+                return _timeStamp;
+            }
+        }
 
-        internal int ProjectKey => _projectFullKey.ProjectKey;
+        internal int ProjectKey
+        {
+            get
+            {
+                return _projectFullKey.ProjectKey;
+            }
+        }
 
-        internal int EntryPointKey => _projectFullKey.EntryPointKey;
+        internal int EntryPointKey
+        {
+            get
+            {
+                return _projectFullKey.EntryPointKey;
+            }
+        }
 
-        internal string FullProjectKey => _projectFullKey.ToString();
+        internal string FullProjectKey
+        {
+            get
+            {
+                return _projectFullKey.ToString();
+            }
+        }
 
-        internal ProjectStartedEventMinimumFields ParentProjectStartedEvent => _parentProjectStartedEvent;
+        internal ProjectStartedEventMinimumFields ParentProjectStartedEvent
+        {
+            get
+            {
+                return _parentProjectStartedEvent;
+            }
+        }
 
-        internal string TargetNames => _targetNames;
+        internal string TargetNames
+        {
+            get
+            {
+                return _targetNames;
+            }
+        }
 
-        internal int ProjectId => _projectId;
+        internal int ProjectId
+        {
+            get
+            {
+                return _projectId;
+            }
+        }
 
-        internal string ProjectFile => _projectFile;
+        internal string ProjectFile
+        {
+            get
+            {
+                return _projectFile;
+            }
+        }
 
         internal bool ShowProjectFinishedEvent
         {
@@ -345,7 +393,13 @@ namespace Microsoft.Build.BackEnd.Logging
             set => _errorInProject = value;
         }
 
-        internal BuildEventContext ProjectBuildEventContext => _buildEventContext;
+        internal BuildEventContext ProjectBuildEventContext
+        {
+            get
+            {
+                return _buildEventContext;
+            }
+        }
         #endregion
 
         #region Constructors
@@ -386,15 +440,45 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
-        internal DateTime TimeStamp => _timeStamp;
+        internal DateTime TimeStamp
+        {
+            get
+            {
+                return _timeStamp;
+            }
+        }
 
-        internal string TargetName => _targetName;
+        internal string TargetName
+        {
+            get
+            {
+                return _targetName;
+            }
+        }
 
-        internal string TargetFile => _targetFile;
+        internal string TargetFile
+        {
+            get
+            {
+                return _targetFile;
+            }
+        }
 
-        internal string ProjectFile => _projectFile;
+        internal string ProjectFile
+        {
+            get
+            {
+                return _projectFile;
+            }
+        }
 
-        internal string Message => _message;
+        internal string Message
+        {
+            get
+            {
+                return _message;
+            }
+        }
 
         internal bool ShowTargetFinishedEvent
         {
@@ -409,9 +493,21 @@ namespace Microsoft.Build.BackEnd.Logging
 
             set => _errorInTarget = value;
         }
-        internal BuildEventContext ProjectBuildEventContext => _buildEventContext;
+        internal BuildEventContext ProjectBuildEventContext
+        {
+            get
+            {
+                return _buildEventContext;
+            }
+        }
 
-        internal string ParentTarget => _parentTarget;
+        internal string ParentTarget
+        {
+            get
+            {
+                return _parentTarget;
+            }
+        }
         #endregion
 
         #region Constructors
@@ -454,9 +550,21 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
-        internal BuildEventContext EntryPointContext => _entryPointContext;
+        internal BuildEventContext EntryPointContext
+        {
+            get
+            {
+                return _entryPointContext;
+            }
+        }
 
-        internal string TargetName => _targetName;
+        internal string TargetName
+        {
+            get
+            {
+                return _targetName;
+            }
+        }
 
         #endregion
 

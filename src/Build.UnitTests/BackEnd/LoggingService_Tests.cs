@@ -1432,7 +1432,13 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Inform users of the class, this class is a BuildRequest packet
             /// </summary>
-            public NodePacketType Type => NodePacketType.BuildRequest;
+            public NodePacketType Type
+            {
+                get
+                {
+                    return NodePacketType.BuildRequest;
+                }
+            }
 
             /// <summary>
             /// Serialize the packet
