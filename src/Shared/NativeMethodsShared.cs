@@ -573,12 +573,9 @@ namespace Microsoft.Build.Shared
 #if CLR2COMPATIBILITY
             get { return false; }
 #else
-            get
-            {
-                return RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")) ||
+            get => RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")) ||
                        RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD")) ||
                        RuntimeInformation.IsOSPlatform(OSPlatform.Create("OPENBSD"));
-            }
 #endif
         }
 

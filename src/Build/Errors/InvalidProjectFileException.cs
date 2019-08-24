@@ -219,12 +219,9 @@ namespace Microsoft.Build.Exceptions
         /// <value>The complete message string.</value>
         public override string Message
         {
-            get
-            {
-                return base.Message + ((!String.IsNullOrEmpty(ProjectFile))
+            get => base.Message + ((!String.IsNullOrEmpty(ProjectFile))
                     ? ("  " + ProjectFile)
                     : null);
-            }
         }
 
         /// <summary>
@@ -346,14 +343,8 @@ namespace Microsoft.Build.Exceptions
         /// </summary>
         public bool HasBeenLogged
         {
-            get
-            {
-                return hasBeenLogged;
-            }
-            internal set
-            {
-                hasBeenLogged = value;
-            }
+            get => hasBeenLogged;
+            internal set => hasBeenLogged = value;
         }
 
         #endregion

@@ -398,11 +398,8 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         public IDictionary<string, string> EnvironmentProperties
         {
-            get
-            {
-                return new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_environmentProperties,
+            get => new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_environmentProperties,
                     instance => ((IProperty) instance).EvaluatedValueEscaped);
-            }
         }
 
         /// <summary>
@@ -433,11 +430,8 @@ namespace Microsoft.Build.Execution
             "Accessor returns a readonly collection, and the BuildParameters class is immutable.")]
         public IDictionary<string, string> GlobalProperties
         {
-            get
-            {
-                return new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_globalProperties,
+            get => new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_globalProperties,
                     instance => ((IProperty) instance).EvaluatedValueEscaped);
-            }
 
             set
             {

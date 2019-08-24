@@ -52,8 +52,7 @@ namespace Microsoft.Build.BackEnd
         public NodeProviderType ProviderType
         {
             [DebuggerStepThrough]
-            get
-            { return NodeProviderType.OutOfProc; }
+            get => NodeProviderType.OutOfProc;
         }
 
         /// <summary>

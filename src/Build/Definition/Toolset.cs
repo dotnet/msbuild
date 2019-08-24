@@ -403,10 +403,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public string ToolsPath
         {
-            get
-            {
-                return _toolsPath;
-            }
+            get => _toolsPath;
 
             private set
             {

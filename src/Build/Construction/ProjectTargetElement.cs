@@ -70,12 +70,10 @@ namespace Microsoft.Build.Construction
         public string Name
         {
             [DebuggerStepThrough]
-            get
-            {
+            get =>
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _name ?? (_name = EscapingUtilities.UnescapeAll(
+                _name ?? (_name = EscapingUtilities.UnescapeAll(
                            ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.name)));
-            }
 
             set
             {
@@ -103,10 +101,7 @@ namespace Microsoft.Build.Construction
         public string Inputs
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.inputs);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.inputs);
 
             set
             {
@@ -124,10 +119,7 @@ namespace Microsoft.Build.Construction
         public string Outputs
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.outputs);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.outputs);
 
             set
             {
@@ -174,10 +166,7 @@ namespace Microsoft.Build.Construction
         public string DependsOnTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.dependsOnTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.dependsOnTargets);
 
             set
             {
@@ -195,10 +184,7 @@ namespace Microsoft.Build.Construction
         public string BeforeTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.beforeTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.beforeTargets);
 
             set
             {
@@ -216,10 +202,7 @@ namespace Microsoft.Build.Construction
         public string AfterTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.afterTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.afterTargets);
 
             set
             {
@@ -238,15 +221,12 @@ namespace Microsoft.Build.Construction
         public string Returns
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue
+            get => ProjectXmlUtilities.GetAttributeValue
                     (
                         XmlElement,
                         XMakeAttributes.returns,
                         true /* If the element is not there, return null */
                     );
-            }
 
             set
             {
@@ -265,7 +245,7 @@ namespace Microsoft.Build.Construction
                 // contains targets with the Returns attribute.  Do we care? 
                 if (returnsAttribute != null)
                 {
-                    ((ProjectRootElement)Parent).ContainsTargetsWithReturnsAttribute = true;
+                    ((ProjectRootElement) Parent).ContainsTargetsWithReturnsAttribute = true;
                 }
 
                 MarkDirty("Set target Returns {0}", value);

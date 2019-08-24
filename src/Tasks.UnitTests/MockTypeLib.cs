@@ -70,10 +70,7 @@ namespace Microsoft.Build.UnitTests
 
         public string ExportedFromComPlus
         {
-            set
-            {
-                _exportedFromComPlus = value;
-            }
+            set => _exportedFromComPlus = value;
         }
 
         // helper class for unmanaged allocations and leak tracking

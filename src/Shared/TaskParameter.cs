@@ -180,8 +180,7 @@ namespace Microsoft.Build.BackEnd
         public TaskParameterType ParameterType
         {
             [DebuggerStepThrough]
-            get
-            { return _parameterType; }
+            get => _parameterType;
         }
 
         /// <summary>
@@ -190,8 +189,7 @@ namespace Microsoft.Build.BackEnd
         public object WrappedParameter
         {
             [DebuggerStepThrough]
-            get
-            { return _wrappedParameter; }
+            get => _wrappedParameter;
         }
 
         /// <summary>
@@ -539,15 +537,9 @@ namespace Microsoft.Build.BackEnd
             /// <value>The item-spec string.</value>
             public string ItemSpec
             {
-                get
-                {
-                    return (_escapedItemSpec == null) ? String.Empty : EscapingUtilities.UnescapeAll(_escapedItemSpec);
-                }
+                get => (_escapedItemSpec == null) ? String.Empty : EscapingUtilities.UnescapeAll(_escapedItemSpec);
 
-                set
-                {
-                    _escapedItemSpec = value;
-                }
+                set => _escapedItemSpec = value;
             }
 
             /// <summary>
@@ -585,15 +577,9 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             string ITaskItem2.EvaluatedIncludeEscaped
             {
-                get
-                {
-                    return _escapedItemSpec;
-                }
+                get => _escapedItemSpec;
 
-                set
-                {
-                    _escapedItemSpec = value;
-                }
+                set => _escapedItemSpec = value;
             }
 
             /// <summary>

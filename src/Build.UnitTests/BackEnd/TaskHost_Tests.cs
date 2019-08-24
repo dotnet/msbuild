@@ -663,15 +663,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             internal string CustomMessage
             {
-                get
-                {
-                    return _customMessage;
-                }
+                get => _customMessage;
 
-                set
-                {
-                    _customMessage = value;
-                }
+                set => _customMessage = value;
             }
         }
 
@@ -723,15 +717,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             internal string FXCopRule
             {
-                get
-                {
-                    return _fxcopRule;
-                }
+                get => _fxcopRule;
 
-                set
-                {
-                    _fxcopRule = value;
-                }
+                set => _fxcopRule = value;
             }
         }
 
@@ -762,15 +750,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             internal string FXCopRule
             {
-                get
-                {
-                    return _fxcopRule;
-                }
+                get => _fxcopRule;
 
-                set
-                {
-                    _fxcopRule = value;
-                }
+                set => _fxcopRule = value;
             }
         }
 
@@ -800,15 +782,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             internal string CustomMessage
             {
-                get
-                {
-                    return _customMessage;
-                }
+                get => _customMessage;
 
-                set
-                {
-                    _customMessage = value;
-                }
+                set => _customMessage = value;
             }
         }
 
@@ -860,15 +836,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             internal string FXCopRule
             {
-                get
-                {
-                    return _fxcopRule;
-                }
+                get => _fxcopRule;
 
-                set
-                {
-                    _fxcopRule = value;
-                }
+                set => _fxcopRule = value;
             }
         }
 
@@ -898,15 +868,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             internal string FXCopRule
             {
-                get
-                {
-                    return _fxcopRule;
-                }
+                get => _fxcopRule;
 
-                set
-                {
-                    _fxcopRule = value;
-                }
+                set => _fxcopRule = value;
             }
         }
 
@@ -960,8 +924,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public BuildErrorEventArgs LastError
             {
-                get { return _lastError; }
-                set { _lastError = value; }
+                get => _lastError;
+                set => _lastError = value;
             }
 
             /// <summary>
@@ -969,8 +933,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public BuildWarningEventArgs LastWarning
             {
-                get { return _lastWarning; }
-                set { _lastWarning = value; }
+                get => _lastWarning;
+                set => _lastWarning = value;
             }
 
             /// <summary>
@@ -978,8 +942,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public BuildMessageEventArgs LastMessage
             {
-                get { return _lastMessage; }
-                set { _lastMessage = value; }
+                get => _lastMessage;
+                set => _lastMessage = value;
             }
 
             /// <summary>
@@ -987,8 +951,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public CustomBuildEventArgs LastCustom
             {
-                get { return _lastCustom; }
-                set { _lastCustom = value; }
+                get => _lastCustom;
+                set => _lastCustom = value;
             }
 
             /// <summary>
@@ -996,8 +960,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public int NumberOfError
             {
-                get { return _numberOfError; }
-                set { _numberOfError = value; }
+                get => _numberOfError;
+                set => _numberOfError = value;
             }
 
             /// <summary>
@@ -1005,8 +969,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public int NumberOfWarning
             {
-                get { return _numberOfWarning; }
-                set { _numberOfWarning = value; }
+                get => _numberOfWarning;
+                set => _numberOfWarning = value;
             }
 
             /// <summary>
@@ -1014,8 +978,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public int NumberOfMessage
             {
-                get { return _numberOfMessage; }
-                set { _numberOfMessage = value; }
+                get => _numberOfMessage;
+                set => _numberOfMessage = value;
             }
 
             /// <summary>
@@ -1023,8 +987,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public int NumberOfCustom
             {
-                get { return _numberOfCustom; }
-                set { _numberOfCustom = value; }
+                get => _numberOfCustom;
+                set => _numberOfCustom = value;
             }
 
             /// <summary>
@@ -1032,10 +996,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public LoggerVerbosity Verbosity
             {
-                get
-                {
-                    return LoggerVerbosity.Normal;
-                }
+                get => LoggerVerbosity.Normal;
 
                 set
                 {
@@ -1047,10 +1008,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public string Parameters
             {
-                get
-                {
-                    return String.Empty;
-                }
+                get => String.Empty;
 
                 set
                 {
@@ -1183,8 +1141,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public BuildResult[] BuildResultsToReturn
             {
-                get { return _buildResultsToReturn; }
-                set { _buildResultsToReturn = value; }
+                get => _buildResultsToReturn;
+                set => _buildResultsToReturn = value;
             }
 
             /// <summary>

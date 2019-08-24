@@ -43,10 +43,7 @@ namespace Microsoft.Build.Evaluation
                     return _wrappedItemFactory.ItemType;
                 }
 
-                set
-                {
-                    throw new NotSupportedException();
-                }
+                set => throw new NotSupportedException();
             }
 
             public I CreateItem(I source, string definingProject)

@@ -310,14 +310,8 @@ namespace Microsoft.Build.UnitTests
 
             public override long Position
             {
-                get
-                {
-                    return _stream.Position;
-                }
-                set
-                {
-                    throw new Exception("The method or operation is not implemented.");
-                }
+                get => _stream.Position;
+                set => throw new Exception("The method or operation is not implemented.");
             }
 
             public override int Read(byte[] buffer, int offset, int count)

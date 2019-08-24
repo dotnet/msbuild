@@ -77,8 +77,7 @@ namespace Microsoft.Build.Execution
         public string ItemType
         {
             [DebuggerStepThrough]
-            get
-            { return _itemType; }
+            get => _itemType;
         }
 
         /// <summary>

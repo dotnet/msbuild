@@ -121,30 +121,21 @@ namespace Microsoft.Build.UnitTests
 
         public MockTypeLib ContainingTypeLib
         {
-            set
-            {
-                _containingTypeLib = value;
-            }
+            set => _containingTypeLib = value;
         }
 
         private int _indexInContainingTypeLib;
 
         public int IndexInContainingTypeLib
         {
-            set
-            {
-                _indexInContainingTypeLib = value;
-            }
+            set => _indexInContainingTypeLib = value;
         }
 
         private string _typeName;
 
         public string TypeName
         {
-            set
-            {
-                _typeName = value;
-            }
+            set => _typeName = value;
         }
 
         private TYPEATTR _typeAttributes;

@@ -49,28 +49,16 @@ namespace Microsoft.Build.Evaluation
 
             public IDictionary<string, List<TargetSpecification>> AfterTargets
             {
-                get
-                {
-                    return _wrappedData.AfterTargets;
-                }
+                get => _wrappedData.AfterTargets;
 
-                set
-                {
-                    _wrappedData.AfterTargets = value;
-                }
+                set => _wrappedData.AfterTargets = value;
             }
 
             public IDictionary<string, List<TargetSpecification>> BeforeTargets
             {
-                get
-                {
-                    return _wrappedData.BeforeTargets;
-                }
+                get => _wrappedData.BeforeTargets;
 
-                set
-                {
-                    _wrappedData.BeforeTargets = value;
-                }
+                set => _wrappedData.BeforeTargets = value;
             }
 
             public Dictionary<string, List<string>> ConditionedProperties
@@ -83,21 +71,15 @@ namespace Microsoft.Build.Evaluation
 
             public List<string> DefaultTargets
             {
-                get
-                {
-                    return _wrappedData.DefaultTargets;
-                }
+                get => _wrappedData.DefaultTargets;
 
-                set
-                {
-                    _wrappedData.DefaultTargets = value;
-                }
+                set => _wrappedData.DefaultTargets = value;
             }
 
             public int EvaluationId
             {
-                get { return _wrappedData.EvaluationId; }
-                set { _wrappedData.EvaluationId = value; }
+                get => _wrappedData.EvaluationId;
+                set => _wrappedData.EvaluationId = value;
             }
 
             public string Directory
@@ -142,15 +124,9 @@ namespace Microsoft.Build.Evaluation
 
             public List<string> InitialTargets
             {
-                get
-                {
-                    return _wrappedData.InitialTargets;
-                }
+                get => _wrappedData.InitialTargets;
 
-                set
-                {
-                    _wrappedData.InitialTargets = value;
-                }
+                set => _wrappedData.InitialTargets = value;
             }
 
             public IEnumerable<D> ItemDefinitionsEnumerable
@@ -196,15 +172,9 @@ namespace Microsoft.Build.Evaluation
 
             public TaskRegistry TaskRegistry
             {
-                get
-                {
-                    return _wrappedData.TaskRegistry;
-                }
+                get => _wrappedData.TaskRegistry;
 
-                set
-                {
-                    _wrappedData.TaskRegistry = value;
-                }
+                set => _wrappedData.TaskRegistry = value;
             }
 
             public Toolset Toolset

@@ -84,8 +84,7 @@ namespace Microsoft.Build.Execution
         public override string Condition
         {
             [DebuggerStepThrough]
-            get
-            { return _condition; }
+            get => _condition;
         }
 
         /// <summary>
@@ -94,12 +93,9 @@ namespace Microsoft.Build.Execution
         public ICollection<ProjectItemGroupTaskItemInstance> Items
         {
             [DebuggerStepThrough]
-            get
-            {
-                return (_items == null) ?
-                    (ICollection<ProjectItemGroupTaskItemInstance>)ReadOnlyEmptyCollection<ProjectItemGroupTaskItemInstance>.Instance :
+            get => (_items == null) ?
+                    (ICollection<ProjectItemGroupTaskItemInstance>) ReadOnlyEmptyCollection<ProjectItemGroupTaskItemInstance>.Instance :
                     new ReadOnlyCollection<ProjectItemGroupTaskItemInstance>(_items);
-            }
         }
 
         /// <summary>

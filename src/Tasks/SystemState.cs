@@ -209,8 +209,8 @@ namespace Microsoft.Build.Tasks
             /// <value></value>
             internal AssemblyNameExtension Assembly
             {
-                get { return assemblyName; }
-                set { assemblyName = value; }
+                get => assemblyName;
+                set => assemblyName = value;
             }
 
             /// <summary>
@@ -219,8 +219,8 @@ namespace Microsoft.Build.Tasks
             /// <value></value>
             internal string RuntimeVersion
             {
-                get { return runtimeVersion; }
-                set { runtimeVersion = value; }
+                get => runtimeVersion;
+                set => runtimeVersion = value;
             }
 
             /// <summary>
@@ -229,8 +229,8 @@ namespace Microsoft.Build.Tasks
             [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Could be used in other assemblies")]
             internal FrameworkName FrameworkNameAttribute
             {
-                get { return frameworkName; }
-                set { frameworkName = value; }
+                get => frameworkName;
+                set => frameworkName = value;
             }
         }
 

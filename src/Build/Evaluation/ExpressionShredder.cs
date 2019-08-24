@@ -828,8 +828,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string FunctionName
             {
-                get { return _functionName; }
-                set { _functionName = value; }
+                get => _functionName;
+                set => _functionName = value;
             }
 
             /// <summary>
@@ -837,8 +837,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string FunctionArguments
             {
-                get { return _functionArguments; }
-                set { _functionArguments = value; }
+                get => _functionArguments;
+                set => _functionArguments = value;
             }
 
             /// <summary>

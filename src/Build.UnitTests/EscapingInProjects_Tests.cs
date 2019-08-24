@@ -34,15 +34,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         private ITaskItem _taskItemParam;
         public ITaskItem TaskItemParam
         {
-            get
-            {
-                return _taskItemParam;
-            }
+            get => _taskItemParam;
 
-            set
-            {
-                _taskItemParam = value;
-            }
+            set => _taskItemParam = value;
         }
 
         override public bool Execute()

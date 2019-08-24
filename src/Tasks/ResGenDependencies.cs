@@ -75,8 +75,7 @@ namespace Microsoft.Build.Tasks
 
         internal bool UseSourcePath
         {
-            set
-            {
+            set =>
                 // Ensure that the cache is properly initialized with respect to how resgen will 
                 // resolve linked files within .resx files.  ResGen has two different
                 // ways for resolving relative file-paths in linked files. The way
@@ -87,7 +86,6 @@ namespace Microsoft.Build.Tasks
                 // relative paths. So we should base our timestamp/existence checking
                 // on the same switch & resolve in the same manner as ResGen.
                 BaseLinkedFileDirectory = value ? null : Directory.GetCurrentDirectory();
-            }
         }
 
         internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader)

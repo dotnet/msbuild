@@ -40,10 +40,7 @@ namespace Microsoft.Build.Construction
         public string ExecuteTargetsAttribute
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.executeTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.executeTargets);
 
             set
             {

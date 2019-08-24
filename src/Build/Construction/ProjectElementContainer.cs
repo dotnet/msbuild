@@ -53,13 +53,10 @@ namespace Microsoft.Build.Construction
         public ICollection<ProjectElement> Children
         {
             [DebuggerStepThrough]
-            get
-            {
-                return new Collections.ReadOnlyCollection<ProjectElement>
+            get => new Collections.ReadOnlyCollection<ProjectElement>
                     (
                         new ProjectElementSiblingEnumerable(FirstChild)
                     );
-            }
         }
 
         /// <summary>
@@ -68,13 +65,10 @@ namespace Microsoft.Build.Construction
         public ICollection<ProjectElement> ChildrenReversed
         {
             [DebuggerStepThrough]
-            get
-            {
-                return new Collections.ReadOnlyCollection<ProjectElement>
+            get => new Collections.ReadOnlyCollection<ProjectElement>
                     (
                         new ProjectElementSiblingEnumerable(LastChild, false /* reverse */)
                     );
-            }
         }
 
         /// <summary>

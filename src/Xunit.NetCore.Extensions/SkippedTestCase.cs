@@ -30,7 +30,7 @@ namespace Xunit.NetCore.Extensions
 
         public string SkipReason { get { return _skippedReason; } }
 
-        public ISourceInformation SourceInformation { get { return _testCase.SourceInformation; } set { _testCase.SourceInformation = value; } }
+        public ISourceInformation SourceInformation { get => _testCase.SourceInformation; set => _testCase.SourceInformation = value; }
 
         public ITestMethod TestMethod { get { return _testCase.TestMethod; } }
 

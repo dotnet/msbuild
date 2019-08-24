@@ -80,17 +80,15 @@ namespace Microsoft.Build.Construction
         public string Include
         {
             [DebuggerStepThrough]
-            get
-            {
+            get =>
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _include ?? (_include = ProjectXmlUtilities.GetAttributeValue(
+                _include ?? (_include = ProjectXmlUtilities.GetAttributeValue(
                            XmlElement,
                            XMakeAttributes.include));
-            }
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Update.Length == 0) , "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Update.Length == 0), "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.include, value);
                 _include = value;
                 _includeHasWildcards = null;
@@ -106,13 +104,11 @@ namespace Microsoft.Build.Construction
         public string Exclude
         {
             [DebuggerStepThrough]
-            get
-            {
+            get =>
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _exclude ?? (_exclude = ProjectXmlUtilities.GetAttributeValue(
+                _exclude ?? (_exclude = ProjectXmlUtilities.GetAttributeValue(
                            XmlElement,
                            XMakeAttributes.exclude));
-            }
 
             set
             {
@@ -132,11 +128,9 @@ namespace Microsoft.Build.Construction
         public string Remove
         {
             [DebuggerStepThrough]
-            get
-            {
+            get =>
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _remove ?? (_remove = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.remove));
-            }
+                _remove ?? (_remove = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.remove));
 
             set
             {
@@ -153,11 +147,9 @@ namespace Microsoft.Build.Construction
         public string Update
         {
             [DebuggerStepThrough]
-            get
-            {
+            get =>
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _update ?? (_update = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.update));
-            }
+                _update ?? (_update = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.update));
 
             set
             {
@@ -176,10 +168,7 @@ namespace Microsoft.Build.Construction
         public string KeepMetadata
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepMetadata);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepMetadata);
 
             set
             {
@@ -198,10 +187,7 @@ namespace Microsoft.Build.Construction
         public string RemoveMetadata
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.removeMetadata);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.removeMetadata);
 
             set
             {
@@ -220,10 +206,7 @@ namespace Microsoft.Build.Construction
         public string KeepDuplicates
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepDuplicates);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepDuplicates);
 
             set
             {

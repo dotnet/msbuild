@@ -93,15 +93,9 @@ namespace Microsoft.Build.Evaluation
         [ConfigurationProperty("toolsVersion", IsKey = true, IsRequired = true)]
         public string toolsVersion
         {
-            get
-            {
-                return (string)base["toolsVersion"];
-            }
+            get => (string) base["toolsVersion"];
 
-            set
-            {
-                base["toolsVersion"] = value;
-            }
+            set => base["toolsVersion"] = value;
         }
 
         /// <summary>
@@ -277,15 +271,9 @@ namespace Microsoft.Build.Evaluation
             [ConfigurationProperty("os", IsKey = true, IsRequired = true)]
             public string OS
             {
-                get
-                {
-                    return (string)base["os"];
-                }
+                get => (string) base["os"];
 
-                set
-                {
-                    base["os"] = value;
-                }
+                set => base["os"] = value;
             }
 
             /// <summary>
@@ -449,15 +437,9 @@ namespace Microsoft.Build.Evaluation
             [ConfigurationProperty("name", IsKey = true, IsRequired = true)]
             public string Name
             {
-                get
-                {
-                    return (string)base["name"];
-                }
+                get => (string) base["name"];
 
-                set
-                {
-                    base["name"] = value;
-                }
+                set => base["name"] = value;
             }
 
             /// <summary>
@@ -466,15 +448,9 @@ namespace Microsoft.Build.Evaluation
             [ConfigurationProperty("value", IsRequired = true)]
             public string Value
             {
-                get
-                {
-                    return (string)base["value"];
-                }
+                get => (string) base["value"];
 
-                set
-                {
-                    base["value"] = value;
-                }
+                set => base["value"] = value;
             }
         }
     }
@@ -654,14 +630,11 @@ namespace Microsoft.Build.Evaluation
                 // whenever the base class gives us an empty string.
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
-                string defaultValue = (string)base["default"];
+                string defaultValue = (string) base["default"];
                 return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
             }
 
-            set
-            {
-                base["default"] = value;
-            }
+            set => base["default"] = value;
         }
 
         /// <summary>
@@ -677,14 +650,11 @@ namespace Microsoft.Build.Evaluation
                 // whenever the base class gives us an empty string.
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
-                string defaultValue = (string)base["msbuildOverrideTasksPath"];
+                string defaultValue = (string) base["msbuildOverrideTasksPath"];
                 return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
             }
 
-            set
-            {
-                base["msbuildOverrideTasksPath"] = value;
-            }
+            set => base["msbuildOverrideTasksPath"] = value;
         }
 
         /// <summary>
@@ -701,14 +671,11 @@ namespace Microsoft.Build.Evaluation
                 // whenever the base class gives us an empty string.
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
-                string defaultValue = (string)base["DefaultOverrideToolsVersion"];
+                string defaultValue = (string) base["DefaultOverrideToolsVersion"];
                 return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
             }
 
-            set
-            {
-                base["DefaultOverrideToolsVersion"] = value;
-            }
+            set => base["DefaultOverrideToolsVersion"] = value;
         }
     }
 #endif

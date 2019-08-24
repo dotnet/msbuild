@@ -53,15 +53,9 @@ namespace Microsoft.Build.Framework.XamlTypes
         [Localizable(true)]
         public string DisplayName
         {
-            get
-            {
-                return _displayName ?? String.Empty;
-            }
+            get => _displayName ?? String.Empty;
 
-            set
-            {
-                _displayName = value;
-            }
+            set => _displayName = value;
         }
 
         /// <summary>

@@ -144,18 +144,17 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string RelativePath
         {
-            get { return _relativePath; }
-            internal set
-            {
+            get => _relativePath;
+            internal set =>
 #if NETFRAMEWORK && !MONO
                 // Avoid loading System.Runtime.InteropServices.RuntimeInformation in full-framework
                 // cases. It caused https://github.com/NuGet/Home/issues/6918.
                 _relativePath = value;
 #else
                 _relativePath = FileUtilities.MaybeAdjustFilePath(value,
-                                                    baseDirectory:ParentSolution.SolutionFileDirectory ?? String.Empty);
+                                                    baseDirectory: ParentSolution.SolutionFileDirectory ?? String.Empty);
 #endif
-            }
+
         }
 
         /// <summary>

@@ -207,8 +207,7 @@ namespace Microsoft.Build.Execution
         public string Name
         {
             [DebuggerStepThrough]
-            get
-            { return _name; }
+            get => _name;
         }
 
         /// <summary>
@@ -218,8 +217,7 @@ namespace Microsoft.Build.Execution
         public string Condition
         {
             [DebuggerStepThrough]
-            get
-            { return _condition; }
+            get => _condition;
         }
 
         /// <summary>
@@ -229,8 +227,7 @@ namespace Microsoft.Build.Execution
         public string Inputs
         {
             [DebuggerStepThrough]
-            get
-            { return _inputs; }
+            get => _inputs;
         }
 
         /// <summary>
@@ -240,8 +237,7 @@ namespace Microsoft.Build.Execution
         public string Outputs
         {
             [DebuggerStepThrough]
-            get
-            { return _outputs; }
+            get => _outputs;
         }
 
         /// <summary>
@@ -251,8 +247,7 @@ namespace Microsoft.Build.Execution
         public string Returns
         {
             [DebuggerStepThrough]
-            get
-            { return _returns; }
+            get => _returns;
         }
 
         /// <summary>
@@ -262,8 +257,7 @@ namespace Microsoft.Build.Execution
         public string KeepDuplicateOutputs
         {
             [DebuggerStepThrough]
-            get
-            { return _keepDuplicateOutputs; }
+            get => _keepDuplicateOutputs;
         }
 
         /// <summary>
@@ -273,8 +267,7 @@ namespace Microsoft.Build.Execution
         public string DependsOnTargets
         {
             [DebuggerStepThrough]
-            get
-            { return _dependsOnTargets; }
+            get => _dependsOnTargets;
         }
 
         /// <summary>
@@ -284,8 +277,7 @@ namespace Microsoft.Build.Execution
         public string BeforeTargets
         {
             [DebuggerStepThrough]
-            get
-            { return _beforeTargets; }
+            get => _beforeTargets;
         }
 
         /// <summary>
@@ -295,8 +287,7 @@ namespace Microsoft.Build.Execution
         public string AfterTargets
         {
             [DebuggerStepThrough]
-            get
-            { return _afterTargets; }
+            get => _afterTargets;
         }
 
         /// <summary>
@@ -308,8 +299,7 @@ namespace Microsoft.Build.Execution
         public IList<ProjectTargetInstanceChild> Children
         {
             [DebuggerStepThrough]
-            get
-            { return _children; }
+            get => _children;
         }
 
         /// <summary>
@@ -320,8 +310,7 @@ namespace Microsoft.Build.Execution
         public IList<ProjectOnErrorInstance> OnErrorChildren
         {
             [DebuggerStepThrough]
-            get
-            { return _onErrorChildren; }
+            get => _onErrorChildren;
         }
 
         /// <summary>
@@ -352,8 +341,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation Location
         {
             [DebuggerStepThrough]
-            get
-            { return _location; }
+            get => _location;
         }
 
         /// <summary>
@@ -362,8 +350,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation ConditionLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _conditionLocation; }
+            get => _conditionLocation;
         }
 
         /// <summary>
@@ -372,8 +359,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation InputsLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _inputsLocation; }
+            get => _inputsLocation;
         }
 
         /// <summary>
@@ -382,8 +368,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation OutputsLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _outputsLocation; }
+            get => _outputsLocation;
         }
 
         /// <summary>
@@ -392,8 +377,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation ReturnsLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _returnsLocation; }
+            get => _returnsLocation;
         }
 
         /// <summary>
@@ -402,8 +386,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation KeepDuplicateOutputsLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _keepDuplicateOutputsLocation; }
+            get => _keepDuplicateOutputsLocation;
         }
 
         /// <summary>
@@ -412,8 +395,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation DependsOnTargetsLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _dependsOnTargetsLocation; }
+            get => _dependsOnTargetsLocation;
         }
 
         /// <summary>
@@ -422,8 +404,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation BeforeTargetsLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _beforeTargetsLocation; }
+            get => _beforeTargetsLocation;
         }
 
         /// <summary>
@@ -432,8 +413,7 @@ namespace Microsoft.Build.Execution
         public ElementLocation AfterTargetsLocation
         {
             [DebuggerStepThrough]
-            get
-            { return _afterTargetsLocation; }
+            get => _afterTargetsLocation;
         }
 
         /// <summary>
@@ -443,8 +423,7 @@ namespace Microsoft.Build.Execution
         string IKeyed.Key
         {
             [DebuggerStepThrough]
-            get
-            { return Name; }
+            get => Name;
         }
 
         /// <summary>
@@ -456,8 +435,7 @@ namespace Microsoft.Build.Execution
         internal bool ParentProjectSupportsReturnsAttribute
         {
             [DebuggerStepThrough]
-            get
-            { return _parentProjectSupportsReturnsAttribute; }
+            get => _parentProjectSupportsReturnsAttribute;
         }
 
         /// <summary>

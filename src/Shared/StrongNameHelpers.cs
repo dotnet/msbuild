@@ -60,10 +60,7 @@ namespace Microsoft.Runtime.Hosting
         private static IClrStrongNameUsingIntPtr StrongNameUsingIntPtr
         {
             [System.Security.SecurityCritical]
-            get
-            {
-                return (IClrStrongNameUsingIntPtr)StrongName;
-            }
+            get => (IClrStrongNameUsingIntPtr) StrongName;
         }
 
         [System.Security.SecurityCritical]

@@ -82,10 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public bool OnlyLogCriticalEvents
         {
-            get
-            {
-                return false;
-            }
+            get => false;
 
             set
             {
@@ -97,15 +94,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public int MaxCPUCount
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get => throw new NotImplementedException();
 
-            set
-            {
-                throw new NotImplementedException();
-            }
+            set => throw new NotImplementedException();
         }
 
         /// <summary>

@@ -131,8 +131,7 @@ namespace Microsoft.Build.BackEnd
         public TaskCompleteType TaskResult
         {
             [DebuggerStepThrough]
-            get
-            { return _taskResult; }
+            get => _taskResult;
         }
 
         /// <summary>
@@ -142,8 +141,7 @@ namespace Microsoft.Build.BackEnd
         public Exception TaskException
         {
             [DebuggerStepThrough]
-            get
-            { return _taskException; }
+            get => _taskException;
         }
 
         /// <summary>
@@ -153,8 +151,7 @@ namespace Microsoft.Build.BackEnd
         public string TaskExceptionMessage
         {
             [DebuggerStepThrough]
-            get
-            { return _taskExceptionMessage; }
+            get => _taskExceptionMessage;
         }
 
         /// <summary>
@@ -164,8 +161,7 @@ namespace Microsoft.Build.BackEnd
         public string[] TaskExceptionMessageArgs
         {
             [DebuggerStepThrough]
-            get
-            { return _taskExceptionMessageArgs; }
+            get => _taskExceptionMessageArgs;
         }
 
         /// <summary>
@@ -191,8 +187,7 @@ namespace Microsoft.Build.BackEnd
         public Dictionary<string, string> BuildProcessEnvironment
         {
             [DebuggerStepThrough]
-            get
-            { return _buildProcessEnvironment; }
+            get => _buildProcessEnvironment;
         }
 
         /// <summary>

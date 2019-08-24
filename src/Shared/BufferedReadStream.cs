@@ -36,8 +36,8 @@ namespace Microsoft.Build.BackEnd
 
         public override long Position
         {
-            get { throw new NotSupportedException(); }
-            set { throw new NotSupportedException(); }
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
         }
 
         public override void Flush()

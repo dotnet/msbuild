@@ -140,8 +140,7 @@ namespace Microsoft.Build.BackEnd
         public NodePacketType Type
         {
             [DebuggerStepThrough]
-            get
-            { return NodePacketType.BuildRequestBlocker; }
+            get => NodePacketType.BuildRequestBlocker;
         }
 
         /// <summary>
@@ -150,10 +149,7 @@ namespace Microsoft.Build.BackEnd
         public int BlockedRequestId
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _blockedGlobalRequestId;
-            }
+            get => _blockedGlobalRequestId;
         }
 
         /// <summary>
@@ -162,10 +158,7 @@ namespace Microsoft.Build.BackEnd
         public string[] TargetsInProgress
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _targetsInProgress;
-            }
+            get => _targetsInProgress;
         }
 
         /// <summary>
@@ -174,10 +167,7 @@ namespace Microsoft.Build.BackEnd
         public int BlockingRequestId
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _blockingGlobalRequestId;
-            }
+            get => _blockingGlobalRequestId;
         }
 
         /// <summary>
@@ -186,10 +176,7 @@ namespace Microsoft.Build.BackEnd
         public string BlockingTarget
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _blockingTarget;
-            }
+            get => _blockingTarget;
         }
 
         /// <summary>
@@ -198,10 +185,7 @@ namespace Microsoft.Build.BackEnd
         public BuildRequest[] BuildRequests
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _buildRequests;
-            }
+            get => _buildRequests;
         }
 
         /// <summary>
@@ -210,10 +194,7 @@ namespace Microsoft.Build.BackEnd
         public YieldAction YieldAction
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _yieldAction;
-            }
+            get => _yieldAction;
         }
 
         public BuildResult PartialBuildResult => _partialBuildResult;

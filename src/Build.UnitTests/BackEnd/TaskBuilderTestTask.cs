@@ -437,15 +437,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public ITaskHost HostObject
         {
-            get
-            {
-                return _testTaskHost;
-            }
+            get => _testTaskHost;
 
-            set
-            {
-                _testTaskHost = value as ITestTaskHost;
-            }
+            set => _testTaskHost = value as ITestTaskHost;
         }
 
         /// <summary>

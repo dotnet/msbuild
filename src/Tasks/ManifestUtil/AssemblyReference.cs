@@ -64,8 +64,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public AssemblyIdentity AssemblyIdentity
         {
-            get { return _assemblyIdentity; }
-            set { _assemblyIdentity = value; }
+            get => _assemblyIdentity;
+            set => _assemblyIdentity = value;
         }
 
         /// <summary>
@@ -74,8 +74,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool IsPrerequisite
         {
-            get { return _isPrerequisite; }
-            set { _isPrerequisite = value; }
+            get => _isPrerequisite;
+            set => _isPrerequisite = value;
         }
 
         [XmlIgnore]
@@ -98,8 +98,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public AssemblyReferenceType ReferenceType
         {
-            get { return _referenceType; }
-            set { _referenceType = value; }
+            get => _referenceType;
+            set => _referenceType = value;
         }
 
 
@@ -110,8 +110,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         internal bool IsPrimary
         {
-            get { return _isPrimary; }
-            set { _isPrimary = value; }
+            get => _isPrimary;
+            set => _isPrimary = value;
         }
 
         protected internal override string SortName
@@ -148,8 +148,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlElement("AssemblyIdentity")]
         public AssemblyIdentity XmlAssemblyIdentity
         {
-            get { return _assemblyIdentity; }
-            set { _assemblyIdentity = value; }
+            get => _assemblyIdentity;
+            set => _assemblyIdentity = value;
         }
 
         [Browsable(false)]
@@ -157,8 +157,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("IsNative")]
         public string XmlIsNative
         {
-            get { return _referenceType == AssemblyReferenceType.NativeAssembly ? "true" : "false"; }
-            set { _referenceType = ConvertUtil.ToBoolean(value) ? AssemblyReferenceType.NativeAssembly : AssemblyReferenceType.ManagedAssembly; }
+            get => _referenceType == AssemblyReferenceType.NativeAssembly ? "true" : "false";
+            set => _referenceType = ConvertUtil.ToBoolean(value) ? AssemblyReferenceType.NativeAssembly : AssemblyReferenceType.ManagedAssembly;
         }
 
         [Browsable(false)]
@@ -166,8 +166,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("IsPrerequisite")]
         public string XmlIsPrerequisite
         {
-            get { return Convert.ToString(_isPrerequisite, CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture); }
-            set { _isPrerequisite = ConvertUtil.ToBoolean(value); }
+            get => Convert.ToString(_isPrerequisite, CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture);
+            set => _isPrerequisite = ConvertUtil.ToBoolean(value);
         }
 
         #endregion

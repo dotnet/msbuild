@@ -88,12 +88,10 @@ namespace Microsoft.Build.Construction
         public virtual string Condition
         {
             [DebuggerStepThrough]
-            get
-            {
+            get =>
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _condition ??
+                _condition ??
                        (_condition = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.condition));
-            }
 
             [DebuggerStepThrough]
             set
@@ -112,10 +110,7 @@ namespace Microsoft.Build.Construction
         public string Label
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.label);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.label);
 
             [DebuggerStepThrough]
             set
@@ -295,10 +290,7 @@ namespace Microsoft.Build.Construction
         internal XmlDocumentWithLocation XmlDocument
         {
             [DebuggerStepThrough]
-            get
-            {
-                return (XmlDocumentWithLocation) XmlElement?.OwnerDocument;
-            }
+            get => (XmlDocumentWithLocation) XmlElement?.OwnerDocument;
         }
 
         /// <summary>

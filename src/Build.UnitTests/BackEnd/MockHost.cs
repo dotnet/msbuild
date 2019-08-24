@@ -111,8 +111,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public ILoggingService LoggingService
         {
-            get { return _loggingService; }
-            internal set { _loggingService = value; }
+            get => _loggingService;
+            internal set => _loggingService = value;
         }
 
         /// <summary>
@@ -154,8 +154,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         internal IRequestBuilder RequestBuilder
         {
-            get { return _requestBuilder; }
-            set { _requestBuilder = value; }
+            get => _requestBuilder;
+            set => _requestBuilder = value;
         }
 
         /// <summary>

@@ -35,8 +35,8 @@ namespace Microsoft.Build.Logging
         /// <value>Verbosity level.</value>
         public LoggerVerbosity Verbosity
         {
-            get { return _verbosity; }
-            set { _verbosity = value; }
+            get => _verbosity;
+            set => _verbosity = value;
         }
 
         /// <summary>
@@ -46,8 +46,8 @@ namespace Microsoft.Build.Logging
         /// <value>null</value>
         public string Parameters
         {
-            get { return _loggerParameters; }
-            set { _loggerParameters = value; }
+            get => _loggerParameters;
+            set => _loggerParameters = value;
         }
 
         /// <summary>
@@ -56,8 +56,8 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public IEventRedirector BuildEventRedirector
         {
-            get { return _buildEventRedirector; }
-            set { _buildEventRedirector = value; }
+            get => _buildEventRedirector;
+            set => _buildEventRedirector = value;
         }
 
         /// <summary>
@@ -65,8 +65,8 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public int NodeId
         {
-            get { return _nodeId; }
-            set { _nodeId = value; }
+            get => _nodeId;
+            set => _nodeId = value;
         }
         #endregion
 

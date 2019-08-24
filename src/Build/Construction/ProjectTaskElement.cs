@@ -55,10 +55,7 @@ namespace Microsoft.Build.Construction
         public string ContinueOnError
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.continueOnError);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.continueOnError);
 
             [DebuggerStepThrough]
             set
@@ -76,10 +73,7 @@ namespace Microsoft.Build.Construction
         public string MSBuildRuntime
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.msbuildRuntime);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.msbuildRuntime);
 
             [DebuggerStepThrough]
             set
@@ -97,10 +91,7 @@ namespace Microsoft.Build.Construction
         public string MSBuildArchitecture
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.msbuildArchitecture);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.msbuildArchitecture);
 
             [DebuggerStepThrough]
             set

@@ -381,28 +381,16 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal bool ShowProjectFinishedEvent
         {
-            get
-            {
-                return _showProjectFinishedEvent;
-            }
+            get => _showProjectFinishedEvent;
 
-            set
-            {
-                _showProjectFinishedEvent = value;
-            }
+            set => _showProjectFinishedEvent = value;
         }
 
         internal bool ErrorInProject
         {
-            get
-            {
-                return _errorInProject;
-            }
+            get => _errorInProject;
 
-            set
-            {
-                _errorInProject = value;
-            }
+            set => _errorInProject = value;
         }
 
         internal BuildEventContext ProjectBuildEventContext
@@ -494,28 +482,16 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal bool ShowTargetFinishedEvent
         {
-            get
-            {
-                return _showTargetFinishedEvent;
-            }
+            get => _showTargetFinishedEvent;
 
-            set
-            {
-                _showTargetFinishedEvent = value;
-            }
+            set => _showTargetFinishedEvent = value;
         }
 
         internal bool ErrorInTarget
         {
-            get
-            {
-                return _errorInTarget;
-            }
+            get => _errorInTarget;
 
-            set
-            {
-                _errorInTarget = value;
-            }
+            set => _errorInTarget = value;
         }
         internal BuildEventContext ProjectBuildEventContext
         {
@@ -625,14 +601,14 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Properties
         internal int ProjectKey
         {
-            get { return _projectKey; }
-            set { _projectKey = value; }
+            get => _projectKey;
+            set => _projectKey = value;
         }
 
         internal int EntryPointKey
         {
-            get { return _entryPointKey; }
-            set { _entryPointKey = value; }
+            get => _entryPointKey;
+            set => _entryPointKey = value;
         }
         #endregion
 

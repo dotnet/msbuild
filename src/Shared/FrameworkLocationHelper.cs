@@ -342,82 +342,58 @@ namespace Microsoft.Build.Shared
 
         internal static string PathToDotNetFrameworkV11
         {
-            get
-            {
-                return NativeMethodsShared.IsUnixLike
+            get => NativeMethodsShared.IsUnixLike
                            ? Path.Combine(NativeMethodsShared.FrameworkBasePath, dotNetFrameworkVersionFolderPrefixV11)
                            : GetPathToDotNetFrameworkV11(DotNetFrameworkArchitecture.Current);
-            }
         }
 
         internal static string PathToDotNetFrameworkV20
         {
-            get
-            {
-                return NativeMethodsShared.IsUnixLike
+            get => NativeMethodsShared.IsUnixLike
                            ? Path.Combine(NativeMethodsShared.FrameworkBasePath, dotNetFrameworkVersionFolderPrefixV20)
                            : GetPathToDotNetFrameworkV20(DotNetFrameworkArchitecture.Current);
-            }
         }
 
         internal static string PathToDotNetFrameworkV30
         {
-            get
-            {
-                return NativeMethodsShared.IsUnixLike
+            get => NativeMethodsShared.IsUnixLike
                            ? Path.Combine(NativeMethodsShared.FrameworkBasePath, dotNetFrameworkVersionFolderPrefixV30)
                            : GetPathToDotNetFrameworkV30(DotNetFrameworkArchitecture.Current);
-            }
         }
 
         internal static string PathToDotNetFrameworkV35
         {
-            get
-            {
-                return NativeMethodsShared.IsUnixLike
+            get => NativeMethodsShared.IsUnixLike
                            ? Path.Combine(NativeMethodsShared.FrameworkBasePath, dotNetFrameworkVersionFolderPrefixV35)
                            : GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current);
-            }
         }
 
         internal static string PathToDotNetFrameworkV40
         {
-            get
-            {
-                return NativeMethodsShared.IsUnixLike
+            get => NativeMethodsShared.IsUnixLike
                            ? Path.Combine(NativeMethodsShared.FrameworkBasePath, dotNetFrameworkVersionFolderPrefixV40)
                            : GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current);
-            }
         }
 
         internal static string PathToDotNetFrameworkV45
         {
-            get
-            {
-                return NativeMethodsShared.IsUnixLike
+            get => NativeMethodsShared.IsUnixLike
                            ? Path.Combine(NativeMethodsShared.FrameworkBasePath, dotNetFrameworkVersionFolderPrefixV45)
                            : GetPathToDotNetFrameworkV45(DotNetFrameworkArchitecture.Current);
-            }
         }
 
         internal static string PathToDotNetFrameworkSdkV11
         {
-            get
-            {
-                return NativeMethodsShared.IsUnixLike
+            get => NativeMethodsShared.IsUnixLike
                            ? Path.Combine(NativeMethodsShared.FrameworkBasePath, dotNetFrameworkVersionFolderPrefixV11)
                            : GetPathToDotNetFrameworkSdkTools(dotNetFrameworkVersion11, visualStudioVersionLatest);
-            }
         }
 
         internal static string PathToDotNetFrameworkSdkV20
         {
-            get
-            {
-                return NativeMethodsShared.IsUnixLike
+            get => NativeMethodsShared.IsUnixLike
                            ? Path.Combine(NativeMethodsShared.FrameworkBasePath, dotNetFrameworkVersionFolderPrefixV20)
                            : GetPathToDotNetFrameworkSdkTools(dotNetFrameworkVersion20, visualStudioVersionLatest);
-            }
         }
 
         /// <summary>

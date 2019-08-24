@@ -140,8 +140,7 @@ namespace Microsoft.Build.Evaluation
         public ProjectItemElement Xml
         {
             [DebuggerStepThrough]
-            get
-            { return _xml; }
+            get => _xml;
         }
 
         /// <summary>
@@ -150,9 +149,8 @@ namespace Microsoft.Build.Evaluation
         public string ItemType
         {
             [DebuggerStepThrough]
-            get
-            { return _xml.ItemType; }
-            set { ChangeItemType(value); }
+            get => _xml.ItemType;
+            set => ChangeItemType(value);
         }
 
         /// <summary>
@@ -161,9 +159,8 @@ namespace Microsoft.Build.Evaluation
         public string UnevaluatedInclude
         {
             [DebuggerStepThrough]
-            get
-            { return _xml.Include; }
-            set { Rename(value); }
+            get => _xml.Include;
+            set => Rename(value);
         }
 
         /// <summary>
@@ -172,8 +169,7 @@ namespace Microsoft.Build.Evaluation
         public string EvaluatedInclude
         {
             [DebuggerStepThrough]
-            get
-            { return EscapingUtilities.UnescapeAll(_evaluatedIncludeEscaped); }
+            get => EscapingUtilities.UnescapeAll(_evaluatedIncludeEscaped);
         }
 
         /// <summary>
@@ -183,8 +179,7 @@ namespace Microsoft.Build.Evaluation
         string IItem.EvaluatedIncludeEscaped
         {
             [DebuggerStepThrough]
-            get
-            { return _evaluatedIncludeEscaped; }
+            get => _evaluatedIncludeEscaped;
         }
 
         /// <summary>
@@ -204,8 +199,7 @@ namespace Microsoft.Build.Evaluation
         public Project Project
         {
             [DebuggerStepThrough]
-            get
-            { return _project; }
+            get => _project;
         }
 
         /// <summary>
@@ -241,8 +235,7 @@ namespace Microsoft.Build.Evaluation
         public int DirectMetadataCount
         {
             [DebuggerStepThrough]
-            get
-            { return _directMetadata != null ? _directMetadata.Count : 0; }
+            get => _directMetadata != null ? _directMetadata.Count : 0;
         }
 
         /// <summary>
@@ -256,8 +249,7 @@ namespace Microsoft.Build.Evaluation
         public ICollection<ProjectMetadata> Metadata
         {
             [DebuggerStepThrough]
-            get
-            { return MetadataCollection; }
+            get => MetadataCollection;
         }
 
         /// <summary>
@@ -268,8 +260,7 @@ namespace Microsoft.Build.Evaluation
         public int MetadataCount
         {
             [DebuggerStepThrough]
-            get
-            { return MetadataCollection.Count + FileUtilities.ItemSpecModifiers.All.Length; }
+            get => MetadataCollection.Count + FileUtilities.ItemSpecModifiers.All.Length;
         }
 
         /// <summary>
@@ -279,8 +270,7 @@ namespace Microsoft.Build.Evaluation
         string IKeyed.Key
         {
             [DebuggerStepThrough]
-            get
-            { return ItemType; }
+            get => ItemType;
         }
 
         /// <summary>
@@ -340,8 +330,7 @@ namespace Microsoft.Build.Evaluation
         internal string EvaluatedIncludeBeforeWildcardExpansion
         {
             [DebuggerStepThrough]
-            get
-            { return EscapingUtilities.UnescapeAll(_evaluatedIncludeBeforeWildcardExpansionEscaped); }
+            get => EscapingUtilities.UnescapeAll(_evaluatedIncludeBeforeWildcardExpansionEscaped);
         }
 
         /// <summary>
@@ -350,8 +339,7 @@ namespace Microsoft.Build.Evaluation
         internal string EvaluatedIncludeBeforeWildcardExpansionEscaped
         {
             [DebuggerStepThrough]
-            get
-            { return _evaluatedIncludeBeforeWildcardExpansionEscaped; }
+            get => _evaluatedIncludeBeforeWildcardExpansionEscaped;
         }
 
         /// <summary>
@@ -361,8 +349,7 @@ namespace Microsoft.Build.Evaluation
         internal List<ProjectItemDefinition> InheritedItemDefinitions
         {
             [DebuggerStepThrough]
-            get
-            { return _inheritedItemDefinitions; }
+            get => _inheritedItemDefinitions;
         }
 
         /// <summary>
@@ -884,8 +871,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string ItemType
             {
-                get { return _xml.ItemType; }
-                set { ErrorUtilities.ThrowInternalError("Cannot change the item type on ProjectItem.ProjectItemFactory"); }
+                get => _xml.ItemType;
+                set => ErrorUtilities.ThrowInternalError("Cannot change the item type on ProjectItem.ProjectItemFactory");
             }
 
             /// <summary>
@@ -894,7 +881,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public ProjectItemElement ItemElement
             {
-                set { _xml = value; }
+                set => _xml = value;
             }
 
             /// <summary>
